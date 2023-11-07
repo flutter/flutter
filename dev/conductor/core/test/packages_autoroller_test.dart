@@ -209,15 +209,16 @@ void main() {
         'Roll pub packages',
         '--json',
         'number',
-      // Non empty array means there are open PRs by the bot with the tool label
-      // We expect no further commands to be run
+        // Non empty array means there are open PRs by the bot with the tool label
+        // We expect no further commands to be run
       ], stdout: '[{"number": 123}]'),
     ]);
     final Future<void> rollFuture = autoroller.roll();
     await controller.stream.drain<Object?>();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
-    expect(stdio.stdout, contains('flutter-pub-roller-bot already has open tool PRs'));
+    expect(stdio.stdout,
+        contains('flutter-pub-roller-bot already has open tool PRs'));
     expect(stdio.stdout, contains(r'[{number: 123}]'));
   });
 
@@ -249,7 +250,7 @@ void main() {
         'Roll pub packages',
         '--json',
         'number',
-      // Returns empty array, as there are no other open roll PRs from the bot
+        // Returns empty array, as there are no other open roll PRs from the bot
       ], stdout: '[]'),
       const FakeCommand(command: <String>[
         'git',
@@ -345,7 +346,7 @@ void main() {
         'Roll pub packages',
         '--json',
         'number',
-      // Returns empty array, as there are no other open roll PRs from the bot
+        // Returns empty array, as there are no other open roll PRs from the bot
       ], stdout: '[]'),
       const FakeCommand(command: <String>[
         'git',
@@ -506,7 +507,8 @@ void main() {
         throwsA(isA<ArgumentError>().having(
           (ArgumentError err) => err.message,
           'message',
-          contains('Tried to read a GitHub access token from file $tokenPath but it was empty'),
+          contains(
+              'Tried to read a GitHub access token from file $tokenPath but it was empty'),
         )),
       );
       expect(processManager, hasNoRemainingExpectations);
@@ -540,6 +542,7 @@ void main() {
 }
 
 class _NoOpStdin extends Fake implements io.Stdin {}
+
 class _NoOpStdout extends Fake implements io.Stdout {
   @override
   void writeln([Object? object]) {}

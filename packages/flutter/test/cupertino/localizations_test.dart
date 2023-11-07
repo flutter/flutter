@@ -7,8 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('English translations exist for all CupertinoLocalization properties', (WidgetTester tester) async {
-    const CupertinoLocalizations localizations = DefaultCupertinoLocalizations();
+  testWidgetsWithLeakTracking(
+      'English translations exist for all CupertinoLocalization properties',
+      (WidgetTester tester) async {
+    const CupertinoLocalizations localizations =
+        DefaultCupertinoLocalizations();
 
     expect(localizations.datePickerYear(2018), isNotNull);
     expect(localizations.datePickerMonth(1), isNotNull);
@@ -37,7 +40,8 @@ void main() {
     expect(localizations.noSpellCheckReplacementsLabel, isNotNull);
   });
 
-  testWidgetsWithLeakTracking('CupertinoLocalizations.of throws', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoLocalizations.of throws',
+      (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -52,12 +56,16 @@ void main() {
       ),
     );
 
-    expect(() => CupertinoLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No CupertinoLocalizations found'),
-    )));
+    expect(
+        () =>
+            CupertinoLocalizations.of(noLocalizationsAvailable.currentContext!),
+        throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+          'message',
+          contains('No CupertinoLocalizations found'),
+        )));
 
-    expect(CupertinoLocalizations.of(localizationsAvailable.currentContext!), isA<CupertinoLocalizations>());
+    expect(CupertinoLocalizations.of(localizationsAvailable.currentContext!),
+        isA<CupertinoLocalizations>());
   });
 }

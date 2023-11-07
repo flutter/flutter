@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_builder/native_assets_builder.dart' show BuildResult;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    show BuildResult;
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
@@ -28,7 +29,8 @@ Future<Uri?> dryRunNativeAssetsIOS({
   }
 
   final Uri buildUri = nativeAssetsBuildUri(projectUri, OS.iOS);
-  final Iterable<Asset> assetTargetLocations = await dryRunNativeAssetsIOSInternal(
+  final Iterable<Asset> assetTargetLocations =
+      await dryRunNativeAssetsIOSInternal(
     fileSystem,
     projectUri,
     buildRunner,
@@ -57,7 +59,8 @@ Future<Iterable<Asset>> dryRunNativeAssetsIOSInternal(
       .assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
-  final Iterable<Asset> assetTargetLocations = _assetTargetLocations(nativeAssets).values;
+  final Iterable<Asset> assetTargetLocations =
+      _assetTargetLocations(nativeAssets).values;
   return assetTargetLocations;
 }
 
@@ -78,13 +81,15 @@ Future<List<Uri>> buildNativeAssetsIOS({
   }
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
-  final native_assets_cli.BuildMode buildModeCli = nativeAssetsBuildMode(buildMode);
+  final native_assets_cli.BuildMode buildModeCli =
+      nativeAssetsBuildMode(buildMode);
 
   const OS targetOS = OS.iOS;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final IOSSdk iosSdk = _getIOSSdk(environmentType);
 
-  globals.logger.printTrace('Building native assets for $targets $buildModeCli.');
+  globals.logger
+      .printTrace('Building native assets for $targets $buildModeCli.');
   final List<Asset> nativeAssets = <Asset>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
@@ -102,7 +107,8 @@ Future<List<Uri>> buildNativeAssetsIOS({
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  final Map<AssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
+  final Map<AssetPath, List<Asset>> fatAssetTargetLocations =
+      _fatAssetTargetLocations(nativeAssets);
   await copyNativeAssetsMacOSHost(
     buildUri,
     fatAssetTargetLocations,
@@ -111,7 +117,8 @@ Future<List<Uri>> buildNativeAssetsIOS({
     fileSystem,
   );
 
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocations(nativeAssets);
+  final Map<Asset, Asset> assetTargetLocations =
+      _assetTargetLocations(nativeAssets);
   await writeNativeAssetsYaml(
     assetTargetLocations.values,
     yamlParentDirectory,
@@ -151,10 +158,10 @@ Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
   return result;
 }
 
-Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) => <Asset, Asset>{
-  for (final Asset asset in nativeAssets)
-    asset: _targetLocationIOS(asset),
-};
+Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) =>
+    <Asset, Asset>{
+      for (final Asset asset in nativeAssets) asset: _targetLocationIOS(asset),
+    };
 
 Asset _targetLocationIOS(Asset asset) {
   final AssetPath path = asset.path;
@@ -167,5 +174,6 @@ Asset _targetLocationIOS(Asset asset) {
       final String fileName = path.uri.pathSegments.last;
       return asset.copyWith(path: AssetAbsolutePath(Uri(path: fileName)));
   }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
+  throw Exception(
+      'Unsupported asset path type ${path.runtimeType} in asset $asset');
 }

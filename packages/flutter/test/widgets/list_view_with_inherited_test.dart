@@ -41,7 +41,8 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ListView is a build function (smoketest)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView is a build function (smoketest)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
     expect(find.text('one'), findsOneWidget);
     expect(find.text('two'), findsOneWidget);

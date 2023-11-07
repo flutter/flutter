@@ -7,7 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+class TestSliverPersistentHeaderDelegate
+    extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
 
   final double _maxExtent;
@@ -19,7 +20,8 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
   double get minExtent => 16.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Column(
       children: <Widget>[
         Container(height: minExtent),
@@ -36,7 +38,8 @@ class TestBehavior extends ScrollBehavior {
   const TestBehavior();
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: const Color(0xFFFFFFFF),
@@ -46,7 +49,7 @@ class TestBehavior extends ScrollBehavior {
 }
 
 class TestScrollPhysics extends ClampingScrollPhysics {
-  const TestScrollPhysics({ super.parent });
+  const TestScrollPhysics({super.parent});
 
   @override
   TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -54,11 +57,13 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Tolerance toleranceFor(ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
+  Tolerance toleranceFor(ScrollMetrics metrics) =>
+      const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Evil test of sliver features - 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Evil test of sliver features - 1',
+      (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
     await tester.pumpWidget(
       MediaQuery(
@@ -80,38 +85,66 @@ void main() {
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverPadding(
                         padding: const EdgeInsets.all(50.0),
-                        sliver: SliverToBoxAdapter(child: Container(height: 520.0)),
+                        sliver:
+                            SliverToBoxAdapter(child: Container(height: 520.0)),
                       ),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          floating: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverToBoxAdapter(key: centerKey, child: Container(height: 520.0)), // ------------------------ CENTER ------------------------
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), pinned: true),
+                      SliverToBoxAdapter(
+                          key: centerKey,
+                          child: Container(
+                              height:
+                                  520.0)), // ------------------------ CENTER ------------------------
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverPadding(
                         padding: const EdgeInsets.all(50.0),
-                        sliver: SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                        sliver: SliverPersistentHeader(
+                            delegate: TestSliverPersistentHeaderDelegate(250.0),
+                            pinned: true),
                       ),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0), pinned: true),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0),
+                          pinned: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          floating: true),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(150.0), floating: true),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(150.0),
+                          floating: true),
                       SliverToBoxAdapter(child: Container(height: 5.0)),
                       SliverList(
                         delegate: SliverChildListDelegate(<Widget>[
@@ -132,12 +165,16 @@ void main() {
                           Container(height: 50.0),
                         ]),
                       ),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
-                      SliverPersistentHeader(delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
+                      SliverPersistentHeader(
+                          delegate: TestSliverPersistentHeaderDelegate(250.0)),
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                        sliver: SliverToBoxAdapter(child: Container(height: 520.0)),
+                        sliver:
+                            SliverToBoxAdapter(child: Container(height: 520.0)),
                       ),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
                       SliverToBoxAdapter(child: Container(height: 520.0)),
@@ -151,41 +188,48 @@ void main() {
         ),
       ),
     );
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
-    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0,
+        curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(-10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(-10000.0,
+        curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    position.animateTo(10000.0,
+        curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(-10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
+    position.animateTo(-10000.0,
+        curve: Curves.linear, duration: const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
-    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(seconds: 1));
+    position.animateTo(10000.0,
+        curve: Curves.linear, duration: const Duration(seconds: 1));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
-
   });
 
-  testWidgetsWithLeakTracking('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Removing offscreen items above and rescrolling does not crash',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         cacheExtent: 0.0,
@@ -211,7 +255,8 @@ void main() {
 
     // Screen is 600px high. Moved bottom item 500px up. It's now at the top.
     expect(tester.getTopLeft(find.widgetWithText(ColoredBox, '5')).dy, 0.0);
-    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '10')).dy, 600.0);
+    expect(
+        tester.getBottomLeft(find.widgetWithText(ColoredBox, '10')).dy, 600.0);
 
     // Stop returning the first 3 items.
     await tester.pumpWidget(MaterialApp(
@@ -247,6 +292,7 @@ void main() {
 
     // Because the screen is still 600px, item 9 is now visible at the bottom instead
     // of what's supposed to be item 6 had we not re-shifted.
-    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '9')).dy, 600.0);
+    expect(
+        tester.getBottomLeft(find.widgetWithText(ColoredBox, '9')).dy, 600.0);
   });
 }

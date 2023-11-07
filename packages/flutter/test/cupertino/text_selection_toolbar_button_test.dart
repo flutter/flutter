@@ -30,13 +30,14 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgetsWithLeakTracking('background darkens when pressed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('background darkens when pressed',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoTextSelectionToolbarButton(
             child: const Text('Tap me'),
-            onPressed: () { },
+            onPressed: () {},
           ),
         ),
       ),
@@ -51,7 +52,8 @@ void main() {
     expect(boxDecoration.color, const Color(0x00000000));
 
     // Make a "down" gesture on the button.
-    final Offset center = tester.getCenter(find.byType(CupertinoTextSelectionToolbarButton));
+    final Offset center =
+        tester.getCenter(find.byType(CupertinoTextSelectionToolbarButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
@@ -76,7 +78,8 @@ void main() {
     expect(boxDecoration.color, const Color(0x00000000));
   });
 
-  testWidgetsWithLeakTracking('passing null to onPressed disables the button', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('passing null to onPressed disables the button',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

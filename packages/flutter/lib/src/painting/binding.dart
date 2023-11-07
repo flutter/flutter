@@ -138,7 +138,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     ui.ImmutableBuffer buffer, {
     ui.TargetImageSizeCallback? getTargetSize,
   }) {
-    return ui.instantiateImageCodecWithSize(buffer, getTargetSize: getTargetSize);
+    return ui.instantiateImageCodecWithSize(buffer,
+        getTargetSize: getTargetSize);
   }
 
   @override
@@ -182,7 +183,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 class _SystemFontsNotifier extends Listenable {
   final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
 
-  void notifyListeners () {
+  void notifyListeners() {
     for (final VoidCallback callback in _systemFontsCallbacks) {
       callback();
     }
@@ -192,6 +193,7 @@ class _SystemFontsNotifier extends Listenable {
   void addListener(VoidCallback listener) {
     _systemFontsCallbacks.add(listener);
   }
+
   @override
   void removeListener(VoidCallback listener) {
     _systemFontsCallbacks.remove(listener);

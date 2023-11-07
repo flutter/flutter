@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/dropdown/dropdown_button.0.dart' as example;
+import 'package:flutter_api_samples/material/dropdown/dropdown_button.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Select an item from DropdownButton', (WidgetTester tester) async {
+  testWidgets('Select an item from DropdownButton',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

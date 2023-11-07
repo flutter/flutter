@@ -209,37 +209,37 @@ void main() {
 
   test('copyWith overrides given colors', () {
     final ColorScheme scheme = const ColorScheme.light().copyWith(
-        brightness: Brightness.dark,
-        primary: const Color(0x00000001),
-        onPrimary: const Color(0x00000002),
-        primaryContainer: const Color(0x00000003),
-        onPrimaryContainer: const Color(0x00000004),
-        secondary: const Color(0x00000005),
-        onSecondary: const Color(0x00000006),
-        secondaryContainer: const Color(0x00000007),
-        onSecondaryContainer: const Color(0x00000008),
-        tertiary: const Color(0x00000009),
-        onTertiary: const Color(0x0000000A),
-        tertiaryContainer: const Color(0x0000000B),
-        onTertiaryContainer: const Color(0x0000000C),
-        error: const Color(0x0000000D),
-        onError: const Color(0x0000000E),
-        errorContainer: const Color(0x0000000F),
-        onErrorContainer: const Color(0x00000010),
-        background: const Color(0x00000011),
-        onBackground: const Color(0x00000012),
-        surface: const Color(0x00000013),
-        onSurface: const Color(0x00000014),
-        surfaceVariant: const Color(0x00000015),
-        onSurfaceVariant: const Color(0x00000016),
-        outline: const Color(0x00000017),
-        outlineVariant: const Color(0x00000117),
-        shadow: const Color(0x00000018),
-        scrim: const Color(0x00000118),
-        inverseSurface: const Color(0x00000019),
-        onInverseSurface: const Color(0x0000001A),
-        inversePrimary: const Color(0x0000001B),
-        surfaceTint: const Color(0x0000001C),
+      brightness: Brightness.dark,
+      primary: const Color(0x00000001),
+      onPrimary: const Color(0x00000002),
+      primaryContainer: const Color(0x00000003),
+      onPrimaryContainer: const Color(0x00000004),
+      secondary: const Color(0x00000005),
+      onSecondary: const Color(0x00000006),
+      secondaryContainer: const Color(0x00000007),
+      onSecondaryContainer: const Color(0x00000008),
+      tertiary: const Color(0x00000009),
+      onTertiary: const Color(0x0000000A),
+      tertiaryContainer: const Color(0x0000000B),
+      onTertiaryContainer: const Color(0x0000000C),
+      error: const Color(0x0000000D),
+      onError: const Color(0x0000000E),
+      errorContainer: const Color(0x0000000F),
+      onErrorContainer: const Color(0x00000010),
+      background: const Color(0x00000011),
+      onBackground: const Color(0x00000012),
+      surface: const Color(0x00000013),
+      onSurface: const Color(0x00000014),
+      surfaceVariant: const Color(0x00000015),
+      onSurfaceVariant: const Color(0x00000016),
+      outline: const Color(0x00000017),
+      outlineVariant: const Color(0x00000117),
+      shadow: const Color(0x00000018),
+      scrim: const Color(0x00000118),
+      inverseSurface: const Color(0x00000019),
+      onInverseSurface: const Color(0x0000001A),
+      inversePrimary: const Color(0x0000001B),
+      surfaceTint: const Color(0x0000001C),
     );
 
     expect(scheme.brightness, Brightness.dark);
@@ -276,7 +276,8 @@ void main() {
   });
 
   test('can generate a dark scheme from a seed color', () {
-    final ColorScheme scheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);
+    final ColorScheme scheme = ColorScheme.fromSeed(
+        seedColor: Colors.blue, brightness: Brightness.dark);
     expect(scheme.primary, const Color(0xff9ecaff));
     expect(scheme.onPrimary, const Color(0xff003258));
     expect(scheme.primaryContainer, const Color(0xff00497d));
@@ -351,129 +352,143 @@ void main() {
     expect(scheme.brightness, baseScheme.brightness);
   });
 
-   test('can generate a light scheme from an imageProvider', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
-    final ImageProvider image = MemoryImage(blueSquareBytes);
+  test(
+    'can generate a light scheme from an imageProvider',
+    () async {
+      final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+      final ImageProvider image = MemoryImage(blueSquareBytes);
 
-    final ColorScheme scheme =
-        await ColorScheme.fromImageProvider(provider: image);
+      final ColorScheme scheme =
+          await ColorScheme.fromImageProvider(provider: image);
 
-    expect(scheme.brightness, Brightness.light);
-    expect(scheme.primary, const Color(0xff4040f3));
-    expect(scheme.onPrimary, const Color(0xffffffff));
-    expect(scheme.primaryContainer, const Color(0xffe1e0ff));
-    expect(scheme.onPrimaryContainer, const Color(0xff06006c));
-    expect(scheme.secondary, const Color(0xff5d5c72));
-    expect(scheme.onSecondary, const Color(0xffffffff));
-    expect(scheme.secondaryContainer, const Color(0xffe2e0f9));
-    expect(scheme.onSecondaryContainer, const Color(0xff191a2c));
-    expect(scheme.tertiary, const Color(0xff79536a));
-    expect(scheme.onTertiary, const Color(0xffffffff));
-    expect(scheme.tertiaryContainer, const Color(0xffffd8ec));
-    expect(scheme.onTertiaryContainer, const Color(0xff2e1125));
-    expect(scheme.error, const Color(0xffba1a1a));
-    expect(scheme.onError, const Color(0xffffffff));
-    expect(scheme.errorContainer, const Color(0xffffdad6));
-    expect(scheme.onErrorContainer, const Color(0xff410002));
-    expect(scheme.background, const Color(0xfffffbff));
-    expect(scheme.onBackground, const Color(0xff1c1b1f));
-    expect(scheme.surface, const Color(0xfffffbff));
-    expect(scheme.onSurface, const Color(0xff1c1b1f));
-    expect(scheme.surfaceVariant, const Color(0xffe4e1ec));
-    expect(scheme.onSurfaceVariant, const Color(0xff46464f));
-    expect(scheme.outline, const Color(0xff777680));
-    expect(scheme.outlineVariant, const Color(0xffc8c5d0));
-    expect(scheme.shadow, const Color(0xff000000));
-    expect(scheme.scrim, const Color(0xff000000));
-    expect(scheme.inverseSurface, const Color(0xff313034));
-    expect(scheme.onInverseSurface, const Color(0xfff3eff4));
-    expect(scheme.inversePrimary, const Color(0xffc0c1ff));
-    expect(scheme.surfaceTint, const Color(0xff4040f3));
-  }, skip: isBrowser, // [intended] uses dart:typed_data.
-);
-
-  test('can generate a dark scheme from an imageProvider', () async {
-    final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
-    final ImageProvider image = MemoryImage(blueSquareBytes);
-
-    final ColorScheme scheme = await ColorScheme.fromImageProvider(
-        provider: image, brightness: Brightness.dark);
-
-    expect(scheme.primary, const Color(0xffc0c1ff));
-    expect(scheme.onPrimary, const Color(0xff0f00aa));
-    expect(scheme.primaryContainer, const Color(0xff2218dd));
-    expect(scheme.onPrimaryContainer, const Color(0xffe1e0ff));
-    expect(scheme.secondary, const Color(0xffc6c4dd));
-    expect(scheme.onSecondary, const Color(0xff2e2f42));
-    expect(scheme.secondaryContainer, const Color(0xff454559));
-    expect(scheme.onSecondaryContainer, const Color(0xffe2e0f9));
-    expect(scheme.tertiary, const Color(0xffe9b9d3));
-    expect(scheme.onTertiary, const Color(0xff46263a));
-    expect(scheme.tertiaryContainer, const Color(0xff5f3c51));
-    expect(scheme.onTertiaryContainer, const Color(0xffffd8ec));
-    expect(scheme.error, const Color(0xffffb4ab));
-    expect(scheme.onError, const Color(0xff690005));
-    expect(scheme.errorContainer, const Color(0xff93000a));
-    expect(scheme.onErrorContainer, const Color(0xffffb4ab));
-    expect(scheme.background, const Color(0xff1c1b1f));
-    expect(scheme.onBackground, const Color(0xffe5e1e6));
-    expect(scheme.surface, const Color(0xff1c1b1f));
-    expect(scheme.onSurface, const Color(0xffe5e1e6));
-    expect(scheme.surfaceVariant, const Color(0xff46464f));
-    expect(scheme.onSurfaceVariant, const Color(0xffc8c5d0));
-    expect(scheme.outline, const Color(0xff918f9a));
-    expect(scheme.outlineVariant, const Color(0xff46464f));
-    expect(scheme.inverseSurface, const Color(0xffe5e1e6));
-    expect(scheme.onInverseSurface, const Color(0xff313034));
-    expect(scheme.inversePrimary, const Color(0xff4040f3));
-    expect(scheme.surfaceTint, const Color(0xffc0c1ff));
-    }, skip: isBrowser, // [intended] uses dart:isolate and io.
+      expect(scheme.brightness, Brightness.light);
+      expect(scheme.primary, const Color(0xff4040f3));
+      expect(scheme.onPrimary, const Color(0xffffffff));
+      expect(scheme.primaryContainer, const Color(0xffe1e0ff));
+      expect(scheme.onPrimaryContainer, const Color(0xff06006c));
+      expect(scheme.secondary, const Color(0xff5d5c72));
+      expect(scheme.onSecondary, const Color(0xffffffff));
+      expect(scheme.secondaryContainer, const Color(0xffe2e0f9));
+      expect(scheme.onSecondaryContainer, const Color(0xff191a2c));
+      expect(scheme.tertiary, const Color(0xff79536a));
+      expect(scheme.onTertiary, const Color(0xffffffff));
+      expect(scheme.tertiaryContainer, const Color(0xffffd8ec));
+      expect(scheme.onTertiaryContainer, const Color(0xff2e1125));
+      expect(scheme.error, const Color(0xffba1a1a));
+      expect(scheme.onError, const Color(0xffffffff));
+      expect(scheme.errorContainer, const Color(0xffffdad6));
+      expect(scheme.onErrorContainer, const Color(0xff410002));
+      expect(scheme.background, const Color(0xfffffbff));
+      expect(scheme.onBackground, const Color(0xff1c1b1f));
+      expect(scheme.surface, const Color(0xfffffbff));
+      expect(scheme.onSurface, const Color(0xff1c1b1f));
+      expect(scheme.surfaceVariant, const Color(0xffe4e1ec));
+      expect(scheme.onSurfaceVariant, const Color(0xff46464f));
+      expect(scheme.outline, const Color(0xff777680));
+      expect(scheme.outlineVariant, const Color(0xffc8c5d0));
+      expect(scheme.shadow, const Color(0xff000000));
+      expect(scheme.scrim, const Color(0xff000000));
+      expect(scheme.inverseSurface, const Color(0xff313034));
+      expect(scheme.onInverseSurface, const Color(0xfff3eff4));
+      expect(scheme.inversePrimary, const Color(0xffc0c1ff));
+      expect(scheme.surfaceTint, const Color(0xff4040f3));
+    },
+    skip: isBrowser, // [intended] uses dart:typed_data.
   );
 
-  test('fromImageProvider() propogates TimeoutException when image cannot be rendered', () async {
+  test(
+    'can generate a dark scheme from an imageProvider',
+    () async {
+      final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
+      final ImageProvider image = MemoryImage(blueSquareBytes);
+
+      final ColorScheme scheme = await ColorScheme.fromImageProvider(
+          provider: image, brightness: Brightness.dark);
+
+      expect(scheme.primary, const Color(0xffc0c1ff));
+      expect(scheme.onPrimary, const Color(0xff0f00aa));
+      expect(scheme.primaryContainer, const Color(0xff2218dd));
+      expect(scheme.onPrimaryContainer, const Color(0xffe1e0ff));
+      expect(scheme.secondary, const Color(0xffc6c4dd));
+      expect(scheme.onSecondary, const Color(0xff2e2f42));
+      expect(scheme.secondaryContainer, const Color(0xff454559));
+      expect(scheme.onSecondaryContainer, const Color(0xffe2e0f9));
+      expect(scheme.tertiary, const Color(0xffe9b9d3));
+      expect(scheme.onTertiary, const Color(0xff46263a));
+      expect(scheme.tertiaryContainer, const Color(0xff5f3c51));
+      expect(scheme.onTertiaryContainer, const Color(0xffffd8ec));
+      expect(scheme.error, const Color(0xffffb4ab));
+      expect(scheme.onError, const Color(0xff690005));
+      expect(scheme.errorContainer, const Color(0xff93000a));
+      expect(scheme.onErrorContainer, const Color(0xffffb4ab));
+      expect(scheme.background, const Color(0xff1c1b1f));
+      expect(scheme.onBackground, const Color(0xffe5e1e6));
+      expect(scheme.surface, const Color(0xff1c1b1f));
+      expect(scheme.onSurface, const Color(0xffe5e1e6));
+      expect(scheme.surfaceVariant, const Color(0xff46464f));
+      expect(scheme.onSurfaceVariant, const Color(0xffc8c5d0));
+      expect(scheme.outline, const Color(0xff918f9a));
+      expect(scheme.outlineVariant, const Color(0xff46464f));
+      expect(scheme.inverseSurface, const Color(0xffe5e1e6));
+      expect(scheme.onInverseSurface, const Color(0xff313034));
+      expect(scheme.inversePrimary, const Color(0xff4040f3));
+      expect(scheme.surfaceTint, const Color(0xffc0c1ff));
+    },
+    skip: isBrowser, // [intended] uses dart:isolate and io.
+  );
+
+  test(
+      'fromImageProvider() propogates TimeoutException when image cannot be rendered',
+      () async {
     final Uint8List blueSquareBytes = Uint8List.fromList(kBlueSquarePng);
 
     // Corrupt the image's bytelist so it cannot be read.
     final Uint8List corruptImage = blueSquareBytes.sublist(5);
     final ImageProvider image = MemoryImage(corruptImage);
 
-    expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(
-      isA<Exception>().having((Exception e) => e.toString(),
-        'Timeout occurred trying to load image', contains('TimeoutException')),
+    expect(
+      () async => ColorScheme.fromImageProvider(provider: image),
+      throwsA(
+        isA<Exception>().having(
+            (Exception e) => e.toString(),
+            'Timeout occurred trying to load image',
+            contains('TimeoutException')),
       ),
     );
   });
 
-  testWidgetsWithLeakTracking('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
-    final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
+  testWidgetsWithLeakTracking(
+    'generated scheme "on" colors meet a11y contrast guidelines',
+    (WidgetTester tester) async {
+      final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
-    Widget label(String text, Color textColor, Color background) {
-      return Container(
-        color: background,
-        padding: const EdgeInsets.all(8),
-        child: Text(text, style: TextStyle(color: textColor)),
-      );
-    }
+      Widget label(String text, Color textColor, Color background) {
+        return Container(
+          color: background,
+          padding: const EdgeInsets.all(8),
+          child: Text(text, style: TextStyle(color: textColor)),
+        );
+      }
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.from(colorScheme: colors),
-        home: Scaffold(
-          body: Column(
-            children: <Widget>[
-              label('primary', colors.onPrimary, colors.primary),
-              label('secondary', colors.onSecondary, colors.secondary),
-              label('tertiary', colors.onTertiary, colors.tertiary),
-              label('error', colors.onError, colors.error),
-              label('background', colors.onBackground, colors.background),
-              label('surface', colors.onSurface, colors.surface),
-            ],
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.from(colorScheme: colors),
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                label('primary', colors.onPrimary, colors.primary),
+                label('secondary', colors.onSecondary, colors.secondary),
+                label('tertiary', colors.onTertiary, colors.tertiary),
+                label('error', colors.onError, colors.error),
+                label('background', colors.onBackground, colors.background),
+                label('surface', colors.onSurface, colors.surface),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
-  },
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 }

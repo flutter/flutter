@@ -17,17 +17,15 @@ import 'common.dart';
 /// will include the process result's stdio in the failure message.
 void expectExitCode(ProcessResult result, int expectedExitCode) {
   if (result.exitCode != expectedExitCode) {
-    fail(
-      'Process ${result.pid} exited with the wrong exit code.\n'
-      '\n'
-      'EXPECTED: exit code $expectedExitCode\n'
-      'ACTUAL: exit code ${result.exitCode}\n'
-      '\n'
-      'STDOUT:\n'
-      '${result.stdout}\n'
-      'STDERR:\n'
-      '${result.stderr}'
-    );
+    fail('Process ${result.pid} exited with the wrong exit code.\n'
+        '\n'
+        'EXPECTED: exit code $expectedExitCode\n'
+        'ACTUAL: exit code ${result.exitCode}\n'
+        '\n'
+        'STDOUT:\n'
+        '${result.stdout}\n'
+        'STDERR:\n'
+        '${result.stderr}');
   }
 }
 
@@ -84,7 +82,8 @@ void main() {
 
   group('flutter/pacakges version', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-    final fs.File packagesVersionFile = memoryFileSystem.file(path.join('bin','internal','flutter_packages.version'));
+    final fs.File packagesVersionFile = memoryFileSystem
+        .file(path.join('bin', 'internal', 'flutter_packages.version'));
     const String kSampleHash = '592b5b27431689336fa4c721a099eedf787aeb56';
     setUpAll(() {
       packagesVersionFile.createSync(recursive: true);
@@ -92,13 +91,17 @@ void main() {
 
     test('commit hash', () async {
       packagesVersionFile.writeAsStringSync(kSampleHash);
-      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
+      final String actualHash = await getFlutterPackagesVersion(
+          fileSystem: memoryFileSystem,
+          packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
 
     test('commit hash with newlines', () async {
       packagesVersionFile.writeAsStringSync('\n$kSampleHash\n');
-      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
+      final String actualHash = await getFlutterPackagesVersion(
+          fileSystem: memoryFileSystem,
+          packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
   });
@@ -107,8 +110,8 @@ void main() {
     const ProcessManager processManager = LocalProcessManager();
 
     Future<ProcessResult> runScript([
-        Map<String, String>? environment,
-        List<String> otherArgs = const <String>[],
+      Map<String, String>? environment,
+      List<String> otherArgs = const <String>[],
     ]) async {
       final String dart = path.absolute(
         path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
@@ -128,13 +131,15 @@ void main() {
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '1_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 1 of 3 (tests 1-3 of 8)'));
+      expect(result.stdout,
+          contains('Selecting subshard 1 of 3 (tests 1-3 of 8)'));
 
       result = await runScript(
         <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': '3_3'},
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('Selecting subshard 3 of 3 (tests 7-8 of 8)'));
+      expect(result.stdout,
+          contains('Selecting subshard 3 of 3 (tests 7-8 of 8)'));
     });
 
     test('exits with code 1 when SUBSHARD index greater than total', () async {
@@ -147,7 +152,10 @@ void main() {
 
     test('exits with code 255 when invalid SUBSHARD name', () async {
       final ProcessResult result = await runScript(
-        <String, String>{'SHARD': kTestHarnessShardName, 'SUBSHARD': 'invalid_name'},
+        <String, String>{
+          'SHARD': kTestHarnessShardName,
+          'SUBSHARD': 'invalid_name'
+        },
       );
       expectExitCode(result, 255);
       expect(result.stdout, contains('Invalid subshard name'));

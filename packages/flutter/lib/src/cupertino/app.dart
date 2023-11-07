@@ -150,13 +150,15 @@ class CupertinoApp extends StatefulWidget {
     this.navigatorKey,
     this.home,
     this.theme,
-    Map<String, Widget Function(BuildContext)> this.routes = const <String, WidgetBuilder>{},
+    Map<String, Widget Function(BuildContext)> this.routes =
+        const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.onNavigationNotification,
-    List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
+    List<NavigatorObserver> this.navigatorObservers =
+        const <NavigatorObserver>[],
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -175,17 +177,15 @@ class CupertinoApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
-    @Deprecated(
-      'Remove this parameter as it is now ignored. '
-      'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
-    )
+    @Deprecated('Remove this parameter as it is now ignored. '
+        'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
+        'This feature was deprecated after v3.7.0-29.0.pre.')
     this.useInheritedMediaQuery = false,
-  }) : routeInformationProvider = null,
-       routeInformationParser = null,
-       routerDelegate = null,
-       backButtonDispatcher = null,
-       routerConfig = null;
+  })  : routeInformationProvider = null,
+        routeInformationParser = null,
+        routerDelegate = null,
+        backButtonDispatcher = null,
+        routerConfig = null;
 
   /// Creates a [CupertinoApp] that uses the [Router] instead of a [Navigator].
   ///
@@ -217,21 +217,19 @@ class CupertinoApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
-    @Deprecated(
-      'Remove this parameter as it is now ignored. '
-      'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
-    )
+    @Deprecated('Remove this parameter as it is now ignored. '
+        'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
+        'This feature was deprecated after v3.7.0-29.0.pre.')
     this.useInheritedMediaQuery = false,
-  }) : assert(routerDelegate != null || routerConfig != null),
-       navigatorObservers = null,
-       navigatorKey = null,
-       onGenerateRoute = null,
-       home = null,
-       onGenerateInitialRoutes = null,
-       onUnknownRoute = null,
-       routes = null,
-       initialRoute = null;
+  })  : assert(routerDelegate != null || routerConfig != null),
+        navigatorObservers = null,
+        navigatorKey = null,
+        onGenerateRoute = null,
+        home = null,
+        onGenerateInitialRoutes = null,
+        onUnknownRoute = null,
+        routes = null,
+        initialRoute = null;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -269,7 +267,8 @@ class CupertinoApp extends StatefulWidget {
   final RouteFactory? onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onNavigationNotification}
-  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
+  final NotificationListenerCallback<NavigationNotification>?
+      onNavigationNotification;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
@@ -421,11 +420,9 @@ class CupertinoApp extends StatefulWidget {
   final ScrollBehavior? scrollBehavior;
 
   /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  @Deprecated(
-    'This setting is now ignored. '
-    'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.'
-  )
+  @Deprecated('This setting is now ignored. '
+      'CupertinoApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.')
   final bool useInheritedMediaQuery;
 
   @override
@@ -456,7 +453,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   const CupertinoScrollBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(
+      BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
@@ -476,7 +474,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(
+      BuildContext context, Widget child, ScrollableDetails details) {
     // No overscroll indicator.
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
@@ -488,7 +487,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
     if (getPlatform(context) == TargetPlatform.macOS) {
-      return const BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+      return const BouncingScrollPhysics(
+          decelerationRate: ScrollDecelerationRate.fast);
     }
     return const BouncingScrollPhysics();
   }
@@ -496,7 +496,8 @@ class CupertinoScrollBehavior extends ScrollBehavior {
 
 class _CupertinoAppState extends State<CupertinoApp> {
   late HeroController _heroController;
-  bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
+  bool get _usesRouter =>
+      widget.routerDelegate != null || widget.routerConfig != null;
 
   @override
   void initState() {
@@ -523,7 +524,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+  Widget _inspectorSelectButtonBuilder(
+      BuildContext context, VoidCallback onPressed) {
     return CupertinoButton.filled(
       padding: EdgeInsets.zero,
       onPressed: onPressed,
@@ -537,7 +539,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
-    final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
+    final Color color = CupertinoDynamicColor.resolve(
+        widget.color ?? effectiveThemeData.primaryColor, context);
 
     if (_usesRouter) {
       return WidgetsApp.router(
@@ -607,7 +610,8 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
+    final CupertinoThemeData effectiveThemeData =
+        (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const CupertinoScrollBehavior(),

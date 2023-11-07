@@ -4,11 +4,13 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/basic/mouse_region.0.dart' as example;
+import 'package:flutter_api_samples/widgets/basic/mouse_region.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MouseRegion detects mouse entries, exists, and location', (WidgetTester tester) async {
+  testWidgets('MouseRegion detects mouse entries, exists, and location',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.MouseRegionApp()),
     );
@@ -16,7 +18,8 @@ void main() {
     expect(find.text('0 Entries\n0 Exits'), findsOneWidget);
     expect(find.text('The cursor is here: (0.00, 0.00)'), findsOneWidget);
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(ColoredBox)));
     await tester.pump();

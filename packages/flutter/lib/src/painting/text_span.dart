@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Locale, LocaleStringAttribute, ParagraphBuilder, SpellOutStringAttribute, StringAttribute;
+import 'dart:ui' as ui
+    show
+        Locale,
+        LocaleStringAttribute,
+        ParagraphBuilder,
+        SpellOutStringAttribute,
+        StringAttribute;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -63,7 +69,8 @@ import 'text_scaler.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotation {
+class TextSpan extends InlineSpan
+    implements HitTestTarget, MouseTrackerAnnotation {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
@@ -79,9 +86,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     this.semanticsLabel,
     this.locale,
     this.spellOut,
-  }) : mouseCursor = mouseCursor ??
-         (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
-       assert(!(text == null && semanticsLabel != null));
+  })  : mouseCursor = mouseCursor ??
+            (recognizer == null ? MouseCursor.defer : SystemMouseCursors.click),
+        assert(!(text == null && semanticsLabel != null));
 
   /// The text contained in this span.
   ///
@@ -341,7 +348,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   /// Returns the text span that contains the given position in the text.
   @override
-  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+  InlineSpan? getSpanForPositionVisitor(
+      TextPosition position, Accumulator offset) {
     if (text == null) {
       return null;
     }
@@ -371,7 +379,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
     if (children != null) {
       for (final InlineSpan child in children!) {
-        child.computeToPlainText(buffer,
+        child.computeToPlainText(
+          buffer,
           includeSemanticsLabels: includeSemanticsLabels,
           includePlaceholders: includePlaceholders,
         );
@@ -395,9 +404,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         text!,
         stringAttributes: <ui.StringAttribute>[
           if (effectiveSpellOut && textLength > 0)
-            ui.SpellOutStringAttribute(range: TextRange(start: 0, end: textLength)),
+            ui.SpellOutStringAttribute(
+                range: TextRange(start: 0, end: textLength)),
           if (effectiveLocale != null && textLength > 0)
-            ui.LocaleStringAttribute(locale: effectiveLocale, range: TextRange(start: 0, end: textLength)),
+            ui.LocaleStringAttribute(
+                locale: effectiveLocale,
+                range: TextRange(start: 0, end: textLength)),
         ],
         semanticsLabel: semanticsLabel,
         recognizer: recognizer,
@@ -466,9 +478,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         (style == null) != (textSpan.style == null)) {
       return RenderComparison.layout;
     }
-    RenderComparison result = recognizer == textSpan.recognizer ?
-      RenderComparison.identical :
-      RenderComparison.metadata;
+    RenderComparison result = recognizer == textSpan.recognizer
+        ? RenderComparison.identical
+        : RenderComparison.metadata;
     if (style != null) {
       final RenderComparison candidate = style!.compareTo(textSpan.style!);
       if (candidate.index > result.index) {
@@ -480,7 +492,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
     if (children != null) {
       for (int index = 0; index < children!.length; index += 1) {
-        final RenderComparison candidate = children![index].compareTo(textSpan.children![index]);
+        final RenderComparison candidate =
+            children![index].compareTo(textSpan.children![index]);
         if (candidate.index > result.index) {
           result = candidate;
         }
@@ -503,27 +516,27 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (super != other) {
       return false;
     }
-    return other is TextSpan
-        && other.text == text
-        && other.recognizer == recognizer
-        && other.semanticsLabel == semanticsLabel
-        && onEnter == other.onEnter
-        && onExit == other.onExit
-        && mouseCursor == other.mouseCursor
-        && listEquals<InlineSpan>(other.children, children);
+    return other is TextSpan &&
+        other.text == text &&
+        other.recognizer == recognizer &&
+        other.semanticsLabel == semanticsLabel &&
+        onEnter == other.onEnter &&
+        onExit == other.onExit &&
+        mouseCursor == other.mouseCursor &&
+        listEquals<InlineSpan>(other.children, children);
   }
 
   @override
   int get hashCode => Object.hash(
-    super.hashCode,
-    text,
-    recognizer,
-    semanticsLabel,
-    onEnter,
-    onExit,
-    mouseCursor,
-    children == null ? null : Object.hashAll(children!),
-  );
+        super.hashCode,
+        text,
+        recognizer,
+        semanticsLabel,
+        onEnter,
+        onExit,
+        mouseCursor,
+        children == null ? null : Object.hashAll(children!),
+      );
 
   @override
   String toStringShort() => objectRuntimeType(this, 'TextSpan');
@@ -545,19 +558,21 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     }
 
     properties.add(DiagnosticsProperty<GestureRecognizer>(
-      'recognizer', recognizer,
+      'recognizer',
+      recognizer,
       description: recognizer?.runtimeType.toString(),
       defaultValue: null,
     ));
 
     properties.add(FlagsSummary<Function?>(
       'callbacks',
-      <String, Function?> {
+      <String, Function?>{
         'enter': onEnter,
         'exit': onExit,
       },
     ));
-    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', cursor, defaultValue: MouseCursor.defer));
+    properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', cursor,
+        defaultValue: MouseCursor.defer));
 
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
@@ -567,7 +582,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     return children?.map<DiagnosticsNode>((InlineSpan child) {
-      return child.toDiagnosticsNode();
-    }).toList() ?? const <DiagnosticsNode>[];
+          return child.toDiagnosticsNode();
+        }).toList() ??
+        const <DiagnosticsNode>[];
   }
 }

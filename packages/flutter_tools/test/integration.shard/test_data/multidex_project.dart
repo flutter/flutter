@@ -12,22 +12,50 @@ class MultidexProject extends Project {
   MultidexProject(this.includeFlutterMultiDexApplication);
 
   @override
-  Future<void> setUpIn(Directory dir, {
+  Future<void> setUpIn(
+    Directory dir, {
     bool useDeferredLoading = false,
     bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
-    writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'), androidBuild);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'), androidGradleProperties);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'), appBuild);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'), appManifest);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml'), appStrings);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'values', 'styles.xml'), appStyles);
-    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res', 'drawable', 'launch_background.xml'), appLaunchBackground);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'),
+        androidSettings);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'build.gradle'),
+        androidBuild);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'),
+        androidLocalProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'gradle.properties'),
+        androidGradleProperties);
+    writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'build.gradle'),
+        appBuild);
+    writeFile(
+        fileSystem.path.join(
+            dir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
+        appManifest);
+    writeFile(
+        fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res',
+            'values', 'strings.xml'),
+        appStrings);
+    writeFile(
+        fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res',
+            'values', 'styles.xml'),
+        appStyles);
+    writeFile(
+        fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'res',
+            'drawable', 'launch_background.xml'),
+        appLaunchBackground);
     if (includeFlutterMultiDexApplication) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'app', 'src', 'main', 'java', fileSystem.path.join('io', 'flutter', 'app', 'FlutterMultiDexApplication.java')), appMultidexApplication);
+      writeFile(
+          fileSystem.path.join(
+              dir.path,
+              'android',
+              'app',
+              'src',
+              'main',
+              'java',
+              fileSystem.path.join(
+                  'io', 'flutter', 'app', 'FlutterMultiDexApplication.java')),
+          appMultidexApplication);
     }
     return super.setUpIn(dir);
   }

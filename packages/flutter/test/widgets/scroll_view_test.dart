@@ -10,29 +10,33 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'states.dart';
 
-class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+class MaterialLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
   @override
   bool isSupported(Locale locale) => true;
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(Locale locale) =>
+      DefaultMaterialLocalizations.load(locale);
 
   @override
   bool shouldReload(MaterialLocalizationsDelegate old) => false;
 }
 
-class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+class WidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
   @override
   bool isSupported(Locale locale) => true;
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+  Future<WidgetsLocalizations> load(Locale locale) =>
+      DefaultWidgetsLocalizations.load(locale);
 
   @override
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget textFieldBoilerplate({ required Widget child }) {
+Widget textFieldBoilerplate({required Widget child}) {
   return MaterialApp(
     home: Localizations(
       locale: const Locale('en', 'US'),
@@ -55,7 +59,8 @@ Widget textFieldBoilerplate({ required Widget child }) {
   );
 }
 
-Widget primaryScrollControllerBoilerplate({ required Widget child, required ScrollController controller }) {
+Widget primaryScrollControllerBoilerplate(
+    {required Widget child, required ScrollController controller}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(
@@ -69,7 +74,8 @@ Widget primaryScrollControllerBoilerplate({ required Widget child, required Scro
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ListView control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView control test',
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -104,15 +110,18 @@ void main() {
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
-    expect(tester.getCenter(find.text('Massachusetts')), equals(const Offset(400.0, 100.0)));
+    expect(tester.getCenter(find.text('Massachusetts')),
+        equals(const Offset(400.0, 100.0)));
 
     await tester.tap(find.text('Massachusetts'));
     expect(log, equals(<String>['Massachusetts']));
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('ListView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('ListView dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -149,7 +158,8 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('GridView.builder supports null items', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.builder supports null items',
+      (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -169,7 +179,8 @@ void main() {
     expect(find.text('item'), findsNWidgets(5));
   });
 
-  testWidgetsWithLeakTracking('ListView.builder supports null items', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.builder supports null items',
+      (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
         itemCount: 42,
@@ -186,7 +197,8 @@ void main() {
     expect(find.text('item'), findsNWidgets(5));
   });
 
-  testWidgetsWithLeakTracking('PageView supports null items in itemBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageView supports null items in itemBuilder',
+      (WidgetTester tester) async {
     final PageController controller = PageController(viewportFraction: 1 / 5);
     addTearDown(controller.dispose);
 
@@ -207,7 +219,9 @@ void main() {
     expect(find.text('item'), findsNWidgets(2));
   });
 
-  testWidgetsWithLeakTracking('ListView.separated supports null items in itemBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ListView.separated supports null items in itemBuilder',
+      (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
         itemCount: 42,
@@ -228,8 +242,10 @@ void main() {
     expect(find.text('separator'), findsNWidgets(5));
   });
 
-  testWidgetsWithLeakTracking('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('ListView.builder dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -241,7 +257,7 @@ void main() {
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -267,8 +283,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('ListView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('ListView.custom dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -280,7 +298,7 @@ void main() {
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -308,8 +326,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('ListView.separated dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('ListView.separated dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -322,7 +342,7 @@ void main() {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
         separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (BuildContext context, int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -348,8 +368,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('GridView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('GridView dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -359,7 +381,8 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         children: focusNodes.map((FocusNode focusNode) {
           return Container(
@@ -387,8 +410,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('GridView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('GridView.builder dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -398,7 +423,8 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
         itemBuilder: (BuildContext context, int index) {
@@ -427,8 +453,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('GridView.count dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('GridView.count dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -466,8 +494,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('GridView.extent dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('GridView.extent dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -505,8 +535,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('GridView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('GridView.custom dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -516,10 +548,11 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -547,8 +580,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('ListView dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('ListView dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -584,8 +619,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('ListView.builder dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('ListView.builder dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -595,162 +632,6 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
         padding: EdgeInsets.zero,
-        itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context,int index) {
-          return Container(
-            height: 50,
-            color: Colors.green,
-            child: TextField(
-              focusNode: focusNodes[index],
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
-        },
-      ),
-    ));
-
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
-    await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
-
-    await tester.drag(finder, const Offset(0.0, -40.0));
-    await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
-  });
-
-  testWidgetsWithLeakTracking('ListView.custom dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
-    addTearDown(() {
-      for (final FocusNode node in focusNodes) {
-        node.dispose();
-      }
-    });
-
-    await tester.pumpWidget(textFieldBoilerplate(
-      child: ListView.custom(
-        padding: EdgeInsets.zero,
-        childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
-            return Container(
-              height: 50,
-              color: Colors.green,
-              child: TextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            );
-          },
-          childCount: focusNodes.length,
-        ),
-      ),
-    ));
-
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
-    await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
-
-    await tester.drag(finder, const Offset(0.0, -40.0));
-    await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
-  });
-
-  testWidgetsWithLeakTracking('ListView.separated dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
-    addTearDown(() {
-      for (final FocusNode node in focusNodes) {
-        node.dispose();
-      }
-    });
-
-    await tester.pumpWidget(textFieldBoilerplate(
-      child: ListView.separated(
-        padding: EdgeInsets.zero,
-        itemCount: focusNodes.length,
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context,int index) {
-          return Container(
-            height: 50,
-            color: Colors.green,
-            child: TextField(
-              focusNode: focusNodes[index],
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
-        },
-      ),
-    ));
-
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
-    await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
-
-    await tester.drag(finder, const Offset(0.0, -40.0));
-    await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
-  });
-
-  testWidgetsWithLeakTracking('GridView dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
-    addTearDown(() {
-      for (final FocusNode node in focusNodes) {
-        node.dispose();
-      }
-    });
-
-    await tester.pumpWidget(textFieldBoilerplate(
-      child: GridView(
-        padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
-        children: focusNodes.map((FocusNode focusNode) {
-          return Container(
-            height: 50,
-            color: Colors.green,
-            child: TextField(
-              focusNode: focusNode,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    ));
-
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
-    await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
-
-    await tester.drag(finder, const Offset(0.0, -40.0));
-    await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
-  });
-
-  testWidgetsWithLeakTracking('GridView.builder dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
-    addTearDown(() {
-      for (final FocusNode node in focusNodes) {
-        node.dispose();
-      }
-    });
-
-    await tester.pumpWidget(textFieldBoilerplate(
-      child: GridView.builder(
-        padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         itemCount: focusNodes.length,
         itemBuilder: (BuildContext context, int index) {
           return Container(
@@ -778,8 +659,176 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('GridView.count dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('ListView.custom dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView.custom(
+        padding: EdgeInsets.zero,
+        childrenDelegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return Container(
+              height: 50,
+              color: Colors.green,
+              child: TextField(
+                focusNode: focusNodes[index],
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          },
+          childCount: focusNodes.length,
+        ),
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
+  });
+
+  testWidgetsWithLeakTracking('ListView.separated dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: ListView.separated(
+        padding: EdgeInsets.zero,
+        itemCount: focusNodes.length,
+        separatorBuilder: (BuildContext context, int index) => const Divider(),
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
+              focusNode: focusNodes[index],
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        },
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
+  });
+
+  testWidgetsWithLeakTracking('GridView dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: GridView(
+        padding: EdgeInsets.zero,
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        children: focusNodes.map((FocusNode focusNode) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
+              focusNode: focusNode,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
+  });
+
+  testWidgetsWithLeakTracking('GridView.builder dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: GridView.builder(
+        padding: EdgeInsets.zero,
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        itemCount: focusNodes.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            height: 50,
+            color: Colors.green,
+            child: TextField(
+              focusNode: focusNodes[index],
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        },
+      ),
+    ));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode!.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode!.hasFocus, isTrue);
+  });
+
+  testWidgetsWithLeakTracking('GridView.count dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -816,8 +865,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('GridView.extent dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('GridView.extent dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -854,8 +905,10 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('GridView.custom dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('GridView.custom dismiss keyboard manual test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -865,9 +918,10 @@ void main() {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
         padding: EdgeInsets.zero,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -895,7 +949,9 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('ListView restart ballistic activity out of range', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ListView restart ballistic activity out of range',
+      (WidgetTester tester) async {
     Widget buildListView(int n) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -913,7 +969,8 @@ void main() {
     }
 
     await tester.pumpWidget(buildListView(30));
-    await tester.fling(find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
+    await tester.fling(
+        find.byType(ListView), const Offset(0.0, -4000.0), 4000.0);
     await tester.pumpWidget(buildListView(15));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
@@ -925,7 +982,8 @@ void main() {
     expect(viewport.offset.pixels, equals(2400.0));
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CustomScrollView control test',
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -966,15 +1024,18 @@ void main() {
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
-    expect(tester.getCenter(find.text('Massachusetts')), equals(const Offset(400.0, 100.0)));
+    expect(tester.getCenter(find.text('Massachusetts')),
+        equals(const Offset(400.0, 100.0)));
 
     await tester.tap(find.text('Massachusetts'));
     expect(log, equals(<String>['Massachusetts']));
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgetsWithLeakTracking('CustomScrollView dismiss keyboard onDrag test',
+      (WidgetTester tester) async {
+    final List<FocusNode> focusNodes =
+        List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
       for (final FocusNode node in focusNodes) {
         node.dispose();
@@ -1017,7 +1078,8 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Can jumpTo during drag', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can jumpTo during drag',
+      (WidgetTester tester) async {
     final List<Type> log = <Type>[];
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -1045,14 +1107,17 @@ void main() {
 
     expect(log, isEmpty);
 
-    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(100.0, 100.0));
     await gesture.moveBy(const Offset(0.0, -100.0));
 
-    expect(log, equals(<Type>[
-      ScrollStartNotification,
-      UserScrollNotification,
-      ScrollUpdateNotification,
-    ]));
+    expect(
+        log,
+        equals(<Type>[
+          ScrollStartNotification,
+          UserScrollNotification,
+          ScrollUpdateNotification,
+        ]));
     log.clear();
 
     await tester.pump();
@@ -1060,13 +1125,15 @@ void main() {
     controller.jumpTo(550.0);
 
     expect(controller.offset, equals(550.0));
-    expect(log, equals(<Type>[
-      ScrollEndNotification,
-      UserScrollNotification,
-      ScrollStartNotification,
-      ScrollUpdateNotification,
-      ScrollEndNotification,
-    ]));
+    expect(
+        log,
+        equals(<Type>[
+          ScrollEndNotification,
+          UserScrollNotification,
+          ScrollStartNotification,
+          ScrollUpdateNotification,
+          ScrollEndNotification,
+        ]));
     log.clear();
 
     await tester.pump();
@@ -1076,10 +1143,13 @@ void main() {
     expect(log, isEmpty);
   });
 
-  test('PrimaryScrollController.automaticallyInheritOnPlatforms defaults to all mobile platforms', (){
+  test(
+      'PrimaryScrollController.automaticallyInheritOnPlatforms defaults to all mobile platforms',
+      () {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
-    final PrimaryScrollController primaryScrollController = PrimaryScrollController(
+    final PrimaryScrollController primaryScrollController =
+        PrimaryScrollController(
       controller: controller,
       child: const SizedBox(),
     );
@@ -1089,12 +1159,16 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Vertical CustomScrollViews are not primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Vertical CustomScrollViews are not primary by default',
+      (WidgetTester tester) async {
     const CustomScrollView view = CustomScrollView();
     expect(view.primary, isNull);
   });
 
-  testWidgetsWithLeakTracking('Vertical CustomScrollViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Vertical CustomScrollViews use PrimaryScrollController by default on mobile',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
@@ -1104,22 +1178,27 @@ void main() {
     expect(controller.hasClients, isTrue);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgetsWithLeakTracking("Vertical CustomScrollViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Vertical CustomScrollViews don't use PrimaryScrollController by default on desktop",
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
-        child: const CustomScrollView(),
-        controller: controller,
+      child: const CustomScrollView(),
+      controller: controller,
     ));
     expect(controller.hasClients, isFalse);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Vertical ListViews are not primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Vertical ListViews are not primary by default',
+      (WidgetTester tester) async {
     final ListView view = ListView();
     expect(view.primary, isNull);
   });
 
-  testWidgetsWithLeakTracking('Vertical ListViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Vertical ListViews use PrimaryScrollController by default on mobile',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
@@ -1129,7 +1208,9 @@ void main() {
     expect(controller.hasClients, isTrue);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgetsWithLeakTracking("Vertical ListViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Vertical ListViews don't use PrimaryScrollController by default on desktop",
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
@@ -1139,12 +1220,15 @@ void main() {
     expect(controller.hasClients, isFalse);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Vertical GridViews are not primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Vertical GridViews are not primary by default',
+      (WidgetTester tester) async {
     final GridView view = GridView.count(crossAxisCount: 1);
     expect(view.primary, isNull);
   });
 
-  testWidgetsWithLeakTracking('Vertical GridViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Vertical GridViews use PrimaryScrollController by default on mobile',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
@@ -1154,7 +1238,9 @@ void main() {
     expect(controller.hasClients, isTrue);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgetsWithLeakTracking("Vertical GridViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Vertical GridViews don't use PrimaryScrollController by default on desktop",
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
@@ -1164,7 +1250,9 @@ void main() {
     expect(controller.hasClients, isFalse);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Horizontal CustomScrollViews are non-primary by default',
+      (WidgetTester tester) async {
     final ScrollController controller1 = ScrollController();
     addTearDown(controller1.dispose);
     final ScrollController controller2 = ScrollController();
@@ -1179,7 +1267,8 @@ void main() {
     expect(controller1.hasClients, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Horizontal ListViews are non-primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Horizontal ListViews are non-primary by default',
+      (WidgetTester tester) async {
     final ScrollController controller1 = ScrollController();
     addTearDown(controller1.dispose);
     final ScrollController controller2 = ScrollController();
@@ -1194,7 +1283,8 @@ void main() {
     expect(controller1.hasClients, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Horizontal GridViews are non-primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Horizontal GridViews are non-primary by default',
+      (WidgetTester tester) async {
     final ScrollController controller1 = ScrollController();
     addTearDown(controller1.dispose);
     final ScrollController controller2 = ScrollController();
@@ -1210,7 +1300,9 @@ void main() {
     expect(controller1.hasClients, isFalse);
   });
 
-  testWidgetsWithLeakTracking('CustomScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'CustomScrollViews with controllers are non-primary by default',
+      (WidgetTester tester) async {
     final ScrollController controller1 = ScrollController();
     addTearDown(controller1.dispose);
     final ScrollController controller2 = ScrollController();
@@ -1224,7 +1316,9 @@ void main() {
     expect(controller1.hasClients, isFalse);
   });
 
-  testWidgetsWithLeakTracking('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ListViews with controllers are non-primary by default',
+      (WidgetTester tester) async {
     final ScrollController controller1 = ScrollController();
     addTearDown(controller1.dispose);
     final ScrollController controller2 = ScrollController();
@@ -1238,7 +1332,9 @@ void main() {
     expect(controller1.hasClients, isFalse);
   });
 
-  testWidgetsWithLeakTracking('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'GridViews with controllers are non-primary by default',
+      (WidgetTester tester) async {
     final ScrollController controller1 = ScrollController();
     addTearDown(controller1.dispose);
     final ScrollController controller2 = ScrollController();
@@ -1253,7 +1349,9 @@ void main() {
     expect(controller1.hasClients, isFalse);
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'CustomScrollView sets PrimaryScrollController when primary',
+      (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
@@ -1269,7 +1367,9 @@ void main() {
     expect(scrollable.controller, primaryScrollController);
   });
 
-  testWidgetsWithLeakTracking('ListView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ListView sets PrimaryScrollController when primary',
+      (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
@@ -1285,7 +1385,9 @@ void main() {
     expect(scrollable.controller, primaryScrollController);
   });
 
-  testWidgetsWithLeakTracking('GridView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'GridView sets PrimaryScrollController when primary',
+      (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
@@ -1301,7 +1403,9 @@ void main() {
     expect(scrollable.controller, primaryScrollController);
   });
 
-  testWidgetsWithLeakTracking('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Nested scrollables have a null PrimaryScrollController',
+      (WidgetTester tester) async {
     const Key innerKey = Key('inner');
     final ScrollController primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
@@ -1332,27 +1436,34 @@ void main() {
     expect(innerScrollable.controller, isNull);
   });
 
-  testWidgetsWithLeakTracking('Primary ListViews are always scrollable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Primary ListViews are always scrollable',
+      (WidgetTester tester) async {
     final ListView view = ListView(primary: true);
     expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
-  testWidgetsWithLeakTracking('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Non-primary ListViews are not always scrollable',
+      (WidgetTester tester) async {
     final ListView view = ListView(primary: false);
     expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
-  testWidgetsWithLeakTracking('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Defaulting-to-primary ListViews are always scrollable',
+      (WidgetTester tester) async {
     final ListView view = ListView();
     expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
-  testWidgetsWithLeakTracking('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Defaulting-to-not-primary ListViews are not always scrollable',
+      (WidgetTester tester) async {
     final ListView view = ListView(scrollDirection: Axis.horizontal);
     expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
-  testWidgetsWithLeakTracking('primary:true leads to scrolling', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('primary:true leads to scrolling',
+      (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
@@ -1372,7 +1483,8 @@ void main() {
     expect(scrolled, isTrue);
   });
 
-  testWidgetsWithLeakTracking('primary:false leads to no scrolling', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('primary:false leads to no scrolling',
+      (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
@@ -1392,7 +1504,9 @@ void main() {
     expect(scrolled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior',
+      (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
@@ -1413,7 +1527,9 @@ void main() {
     expect(scrolled, isTrue);
   });
 
-  testWidgetsWithLeakTracking('physics:ScrollPhysics actually overrides primary:true default behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'physics:ScrollPhysics actually overrides primary:true default behavior',
+      (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
@@ -1434,8 +1550,14 @@ void main() {
     expect(scrolled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('separatorBuilder must return something', (WidgetTester tester) async {
-    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+  testWidgetsWithLeakTracking('separatorBuilder must return something',
+      (WidgetTester tester) async {
+    const List<String> listOfValues = <String>[
+      'ALPHA',
+      'BETA',
+      'GAMMA',
+      'DELTA'
+    ];
 
     Widget buildFrame(Widget firstSeparator) {
       return MaterialApp(
@@ -1462,8 +1584,14 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('when itemBuilder throws, creates Error Widget', (WidgetTester tester) async {
-    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+  testWidgetsWithLeakTracking('when itemBuilder throws, creates Error Widget',
+      (WidgetTester tester) async {
+    const List<String> listOfValues = <String>[
+      'ALPHA',
+      'BETA',
+      'GAMMA',
+      'DELTA'
+    ];
 
     Widget buildFrame(bool throwOnFirstItem) {
       return MaterialApp(
@@ -1493,8 +1621,15 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('when separatorBuilder throws, creates ErrorWidget', (WidgetTester tester) async {
-    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+  testWidgetsWithLeakTracking(
+      'when separatorBuilder throws, creates ErrorWidget',
+      (WidgetTester tester) async {
+    const List<String> listOfValues = <String>[
+      'ALPHA',
+      'BETA',
+      'GAMMA',
+      'DELTA'
+    ];
     const Key key = Key('list');
 
     Widget buildFrame(bool throwOnFirstSeparator) {
@@ -1529,65 +1664,90 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
-   testWidgetsWithLeakTracking('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
-    expect(() => ListView(
-      itemExtent: 100,
-      prototypeItem: const SizedBox(),
-    ), throwsAssertionError);
+  testWidgetsWithLeakTracking(
+      'ListView asserts on both non-null itemExtent and prototypeItem',
+      (WidgetTester tester) async {
+    expect(
+        () => ListView(
+              itemExtent: 100,
+              prototypeItem: const SizedBox(),
+            ),
+        throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemCount: -1,
-    ), throwsAssertionError);
+  testWidgetsWithLeakTracking('ListView.builder asserts on negative childCount',
+      (WidgetTester tester) async {
+    expect(
+        () => ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return const SizedBox();
+              },
+              itemCount: -1,
+            ),
+        throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('ListView.builder asserts on negative semanticChildCount', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemCount: 1,
-      semanticChildCount: -1,
-    ), throwsAssertionError);
+  testWidgetsWithLeakTracking(
+      'ListView.builder asserts on negative semanticChildCount',
+      (WidgetTester tester) async {
+    expect(
+        () => ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return const SizedBox();
+              },
+              itemCount: 1,
+              semanticChildCount: -1,
+            ),
+        throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('ListView.builder asserts on nonsensical childCount/semanticChildCount', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemCount: 1,
-      semanticChildCount: 4,
-    ), throwsAssertionError);
+  testWidgetsWithLeakTracking(
+      'ListView.builder asserts on nonsensical childCount/semanticChildCount',
+      (WidgetTester tester) async {
+    expect(
+        () => ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return const SizedBox();
+              },
+              itemCount: 1,
+              semanticChildCount: 4,
+            ),
+        throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('ListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
-    expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return const SizedBox();
-      },
-      itemExtent: 100,
-      prototypeItem: const SizedBox(),
-    ), throwsAssertionError);
+  testWidgetsWithLeakTracking(
+      'ListView.builder asserts on both non-null itemExtent and prototypeItem',
+      (WidgetTester tester) async {
+    expect(
+        () => ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return const SizedBox();
+              },
+              itemExtent: 100,
+              prototypeItem: const SizedBox(),
+            ),
+        throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('ListView.custom asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
-    expect(() => ListView.custom(
-      childrenDelegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return const SizedBox();
-        },
-      ),
-      itemExtent: 100,
-      prototypeItem: const SizedBox(),
-    ), throwsAssertionError);
+  testWidgetsWithLeakTracking(
+      'ListView.custom asserts on both non-null itemExtent and prototypeItem',
+      (WidgetTester tester) async {
+    expect(
+        () => ListView.custom(
+              childrenDelegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  return const SizedBox();
+                },
+              ),
+              itemExtent: 100,
+              prototypeItem: const SizedBox(),
+            ),
+        throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('PrimaryScrollController provides fallback ScrollActions', (WidgetTester tester)  async {
+  testWidgetsWithLeakTracking(
+      'PrimaryScrollController provides fallback ScrollActions',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
@@ -1598,7 +1758,8 @@ void main() {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
-                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                  child: SizedBox(
+                      key: ValueKey<String>('Box $index'), height: 50.0),
                 ),
               );
             },
@@ -1612,26 +1773,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(400.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -350.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
   });
 
-  testWidgetsWithLeakTracking('Fallback ScrollActions handle too many positions with error message', (WidgetTester tester)  async {
+  testWidgetsWithLeakTracking(
+      'Fallback ScrollActions handle too many positions with error message',
+      (WidgetTester tester) async {
     Widget getScrollView() {
       return SizedBox(
         width: 400.0,
@@ -1642,7 +1808,8 @@ void main() {
             (int index) {
               return SliverToBoxAdapter(
                 child: Focus(
-                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                  child: SizedBox(
+                      key: ValueKey<String>('Box $index'), height: 50.0),
                 ),
               );
             },
@@ -1663,9 +1830,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(
-        find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false).first
-      ),
+      tester.getRect(find
+          .byKey(const ValueKey<String>('Box 0'), skipOffstage: false)
+          .first),
       equals(const Rect.fromLTRB(0.0, 0.0, 400.0, 50.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
@@ -1674,85 +1841,88 @@ void main() {
     expect(
       exception.message,
       contains(
-        'A ScrollAction was invoked with the PrimaryScrollController, but '
-        'more than one ScrollPosition is attached.'
-      ),
+          'A ScrollAction was invoked with the PrimaryScrollController, but '
+          'more than one ScrollPosition is attached.'),
     );
   });
 
-  testWidgetsWithLeakTracking('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
-    final List<int> numbers = <int>[0,1,2];
+  testWidgetsWithLeakTracking(
+      'if itemExtent is non-null, children have same extent in the scroll direction',
+      (WidgetTester tester) async {
+    final List<int> numbers = <int>[0, 1, 2];
 
-    await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return ListView.builder(
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                        key: ValueKey<int>(numbers[index]),
-                        // children with different heights
-                        height: 20 + numbers[index] * 10,
-                        child: ReorderableDragStartListener(
-                          index: index,
-                          child: Text(numbers[index].toString()),
-                        )
-                    );
-                  },
-                  itemCount: numbers.length,
-                  itemExtent: 30,
-                );
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    // children with different heights
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    ));
               },
-            ),
-          ),
-        )
-    );
+              itemCount: numbers.length,
+              itemExtent: 30,
+            );
+          },
+        ),
+      ),
+    ));
 
-    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
-    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
-    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+    final double item0Height =
+        tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height =
+        tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height =
+        tester.getSize(find.text('2').hitTestable()).height;
 
     expect(item0Height, 30.0);
     expect(item1Height, 30.0);
     expect(item2Height, 30.0);
   });
 
-  testWidgetsWithLeakTracking('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
-    final List<int> numbers = <int>[0,1,2];
+  testWidgetsWithLeakTracking(
+      'if prototypeItem is non-null, children have same extent in the scroll direction',
+      (WidgetTester tester) async {
+    final List<int> numbers = <int>[0, 1, 2];
 
-    await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return ListView.builder(
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                        key: ValueKey<int>(numbers[index]),
-                        // children with different heights
-                        height: 20 + numbers[index] * 10,
-                        child: ReorderableDragStartListener(
-                          index: index,
-                          child: Text(numbers[index].toString()),
-                        )
-                    );
-                  },
-                  itemCount: numbers.length,
-                  prototypeItem: const SizedBox(
-                      height: 30,
-                      child: Text('3'),
-                  ),
-                );
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                    key: ValueKey<int>(numbers[index]),
+                    // children with different heights
+                    height: 20 + numbers[index] * 10,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text(numbers[index].toString()),
+                    ));
               },
-            ),
-          ),
-        )
-    );
+              itemCount: numbers.length,
+              prototypeItem: const SizedBox(
+                height: 30,
+                child: Text('3'),
+              ),
+            );
+          },
+        ),
+      ),
+    ));
 
-    final double item0Height = tester.getSize(find.text('0').hitTestable()).height;
-    final double item1Height = tester.getSize(find.text('1').hitTestable()).height;
-    final double item2Height = tester.getSize(find.text('2').hitTestable()).height;
+    final double item0Height =
+        tester.getSize(find.text('0').hitTestable()).height;
+    final double item1Height =
+        tester.getSize(find.text('1').hitTestable()).height;
+    final double item2Height =
+        tester.getSize(find.text('2').hitTestable()).height;
 
     expect(item0Height, 30.0);
     expect(item1Height, 30.0);

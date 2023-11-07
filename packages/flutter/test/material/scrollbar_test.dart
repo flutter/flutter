@@ -8,6 +8,7 @@
 // Fails with "flutter test --test-randomize-ordering-seed=20230313"
 @Tags(<String>['no-shuffle'])
 library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
@@ -27,14 +28,14 @@ const Color _kDefaultIdleThumbColor = Color(0x1a000000);
 const Offset _kTrackBorderPoint1 = Offset(796.0, 0.0);
 const Offset _kTrackBorderPoint2 = Offset(796.0, 600.0);
 
-Rect getStartingThumbRect({ required bool isAndroid }) {
+Rect getStartingThumbRect({required bool isAndroid}) {
   return isAndroid
-    // On Android the thumb is slightly different. The thumb is only 4 pixels wide,
-    // and has no margin along the side of the viewport.
-    ? const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0)
-    // The Material Design thumb is 8 pixels wide, with a 2
-    // pixel margin to the right edge of the viewport.
-    : const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
+      // On Android the thumb is slightly different. The thumb is only 4 pixels wide,
+      // and has no margin along the side of the viewport.
+      ? const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0)
+      // The Material Design thumb is 8 pixels wide, with a 2
+      // pixel margin to the right edge of the viewport.
+      : const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
 }
 
 class TestCanvas implements Canvas {
@@ -67,11 +68,14 @@ class NoScrollbarBehavior extends MaterialScrollBehavior {
   const NoScrollbarBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
+  Widget buildScrollbar(
+          BuildContext context, Widget child, ScrollableDetails details) =>
+      child;
 }
 
 void main() {
-  testWidgetsWithLeakTracking("Scrollbar doesn't show when tapping list", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Scrollbar doesn't show when tapping list",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildBoilerplate(
         child: Center(
@@ -100,9 +104,11 @@ void main() {
       ),
     );
 
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks(
+        'Building a list with a scrollbar triggered an animation.');
     await tester.tap(find.byType(ListView));
-    SchedulerBinding.instance.debugAssertNoTransientCallbacks('Tapping a block with a scrollbar triggered an animation.');
+    SchedulerBinding.instance.debugAssertNoTransientCallbacks(
+        'Tapping a block with a scrollbar triggered an animation.');
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
@@ -115,9 +121,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
   });
 
-  testWidgetsWithLeakTracking('ScrollbarPainter does not divide by zero', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollbarPainter does not divide by zero',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
-      _buildBoilerplate(child: SizedBox(
+      _buildBoilerplate(
+          child: SizedBox(
         height: 200.0,
         width: 300.0,
         child: Scrollbar(
@@ -130,11 +138,14 @@ void main() {
       )),
     );
 
-    final CustomPaint custom = tester.widget(find.descendant(
-      of: find.byType(Scrollbar),
-      matching: find.byType(CustomPaint),
-    ).first);
-    final ScrollbarPainter? scrollPainter = custom.foregroundPainter as ScrollbarPainter?;
+    final CustomPaint custom = tester.widget(find
+        .descendant(
+          of: find.byType(Scrollbar),
+          matching: find.byType(CustomPaint),
+        )
+        .first);
+    final ScrollbarPainter? scrollPainter =
+        custom.foregroundPainter as ScrollbarPainter?;
     // Dragging makes the scrollbar first appear.
     await tester.drag(find.text('0'), const Offset(0.0, -10.0));
     await tester.pump(const Duration(milliseconds: 200));
@@ -157,7 +168,9 @@ void main() {
     expect(canvas.invocations.isEmpty, isTrue);
   });
 
-  testWidgetsWithLeakTracking('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'When thumbVisibility is true, must pass a controller or find PrimaryScrollController',
+      (WidgetTester tester) async {
     Widget viewWithScroll() {
       return _buildBoilerplate(
         child: Theme(
@@ -180,7 +193,9 @@ void main() {
     expect(exception, isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('When thumbVisibility is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'When thumbVisibility is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
@@ -207,7 +222,9 @@ void main() {
     controller.dispose();
   });
 
-  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'On first render with thumbVisibility: true, the thumb shows',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
@@ -235,7 +252,9 @@ void main() {
     controller.dispose();
   });
 
-  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
@@ -325,7 +344,9 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'On first render with thumbVisibility: true, the thumb shows',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
@@ -353,7 +374,9 @@ void main() {
     controller.dispose();
   });
 
-  testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
@@ -387,7 +410,9 @@ void main() {
     controller.dispose();
   });
 
-  testWidgetsWithLeakTracking('On first render with thumbVisibility: false, the thumb is hidden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'On first render with thumbVisibility: false, the thumb is hidden',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
@@ -575,7 +600,8 @@ void main() {
       expect(find.byType(Scrollbar), paints..rect());
 
       // Wait for the timer delay to expire.
-      await tester.pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
+      await tester
+          .pump(const Duration(milliseconds: 600)); // _kScrollbarTimeToFade
       await tester.pumpAndSettle();
       // Scrollbar thumb is showing after scroll finishes and timer ends.
       expect(find.byType(Scrollbar), paints..rect());
@@ -635,7 +661,8 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Scrollbar respects thickness and radius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar respects thickness and radius',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll({Radius? radius}) {
       return _buildBoilerplate(
@@ -661,7 +688,8 @@ void main() {
     // undo the scroll to put the thumb back at the top.
     await tester.pumpWidget(viewWithScroll());
     const double scrollAmount = 10.0;
-    final TestGesture scrollGesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture scrollGesture = await tester
+        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await scrollGesture.moveBy(const Offset(0.0, -scrollAmount));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -690,16 +718,22 @@ void main() {
         ),
     );
     await tester.pumpWidget(viewWithScroll(radius: const Radius.circular(10)));
-    expect(find.byType(Scrollbar), paints..rrect(
-      rrect: RRect.fromRectAndRadius(const Rect.fromLTRB(780, 0.0, 800.0, 300.0), const Radius.circular(10)),
-    ));
+    expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+                const Rect.fromLTRB(780, 0.0, 800.0, 300.0),
+                const Radius.circular(10)),
+          ));
 
     await tester.pumpAndSettle();
 
     controller.dispose();
   });
 
-  testWidgetsWithLeakTracking('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tapping the track area pages the Scroll View',
+      (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -791,7 +825,8 @@ void main() {
     scrollController.dispose();
   });
 
-  testWidgetsWithLeakTracking('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar never goes away until finger lift',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scrollbar(
@@ -801,7 +836,8 @@ void main() {
         ),
       ),
     );
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture gesture = await tester
+        .startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -20.0));
     await tester.pump();
     // Scrollbar fully showing
@@ -872,7 +908,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar thumb can be dragged',
+      (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -913,7 +950,8 @@ void main() {
 
     // Drag the thumb down to scroll down.
     const double scrollAmount = 10.0;
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    final TestGesture dragScrollbarGesture =
+        await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
 
     expect(
@@ -966,47 +1004,53 @@ void main() {
     scrollController.dispose();
   });
 
-  testWidgetsWithLeakTracking('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: ScrollbarThemeData(thumbVisibility: MaterialStateProperty.all(true)),
+  testWidgetsWithLeakTracking(
+    'Scrollbar thumb color completes a hover animation',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: false,
+            scrollbarTheme: ScrollbarThemeData(
+                thumbVisibility: MaterialStateProperty.all(true)),
+          ),
+          home: const SingleChildScrollView(
+            child: SizedBox(width: 4000.0, height: 4000.0),
+          ),
         ),
-        home: const SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        color: _kDefaultIdleThumbColor,
-      ),
-    );
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              getStartingThumbRect(isAndroid: false),
+              _kDefaultThumbRadius,
+            ),
+            color: _kDefaultIdleThumbColor,
+          ),
+      );
 
-    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(794.0, 5.0));
-    await tester.pumpAndSettle();
+      final TestGesture gesture =
+          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(const Offset(794.0, 5.0));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        // Hover color
-        color: const Color(0x80000000),
-      ),
-    );
-  },
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              getStartingThumbRect(isAndroid: false),
+              _kDefaultThumbRadius,
+            ),
+            // Hover color
+            color: const Color(0x80000000),
+          ),
+      );
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.linux,
       TargetPlatform.macOS,
@@ -1014,146 +1058,159 @@ void main() {
     }),
   );
 
-  testWidgetsWithLeakTracking('Hover animation is not triggered by tap gestures', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: ScrollbarThemeData(
-            thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+  testWidgetsWithLeakTracking(
+    'Hover animation is not triggered by tap gestures',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: false,
+            scrollbarTheme: ScrollbarThemeData(
+              thumbVisibility: MaterialStateProperty.all(true),
+              showTrackOnHover: true,
+            ),
+          ),
+          home: const SingleChildScrollView(
+            child: SizedBox(width: 4000.0, height: 4000.0),
           ),
         ),
-        home: const SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        color: _kDefaultIdleThumbColor,
-      ),
-    );
-    await tester.tapAt(const Offset(794.0, 5.0));
-    await tester.pumpAndSettle();
-
-    // Tapping triggers a hover enter event. In this case, the Scrollbar should
-    // be unchanged since it ignores hover events that aren't from a mouse.
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        color: _kDefaultIdleThumbColor,
-      ),
-    );
-
-    // Now trigger hover with a mouse.
-    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(794.0, 5.0));
-    await tester.pump();
-
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-          color: const Color(0x08000000),
-        )
-        ..line(
-          p1: const Offset(784.0, 0.0),
-          p2: const Offset(784.0, 600.0),
-          strokeWidth: 1.0,
-          color: _kDefaultIdleThumbColor,
-        )
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            // Scrollbar thumb is larger
-            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            _kDefaultThumbRadius,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              getStartingThumbRect(isAndroid: false),
+              _kDefaultThumbRadius,
+            ),
+            color: _kDefaultIdleThumbColor,
           ),
-          // Hover color
-          color: const Color(0x80000000),
-        ),
-    );
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux }),
+      );
+      await tester.tapAt(const Offset(794.0, 5.0));
+      await tester.pumpAndSettle();
+
+      // Tapping triggers a hover enter event. In this case, the Scrollbar should
+      // be unchanged since it ignores hover events that aren't from a mouse.
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              getStartingThumbRect(isAndroid: false),
+              _kDefaultThumbRadius,
+            ),
+            color: _kDefaultIdleThumbColor,
+          ),
+      );
+
+      // Now trigger hover with a mouse.
+      final TestGesture gesture =
+          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(const Offset(794.0, 5.0));
+      await tester.pump();
+
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+            color: const Color(0x08000000),
+          )
+          ..line(
+            p1: const Offset(784.0, 0.0),
+            p2: const Offset(784.0, 600.0),
+            strokeWidth: 1.0,
+            color: _kDefaultIdleThumbColor,
+          )
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              // Scrollbar thumb is larger
+              const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
+              _kDefaultThumbRadius,
+            ),
+            // Hover color
+            color: const Color(0x80000000),
+          ),
+      );
+    },
+    variant:
+        const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.linux}),
   );
 
-  testWidgetsWithLeakTracking('ScrollbarThemeData.thickness replaces hoverThickness', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: ScrollbarThemeData(
-            thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
-            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              return states.contains(MaterialState.hovered);
-            }),
-            thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
-                return 40.0;
-              }
-              // Default thickness
-              return 8.0;
-            }),
+  testWidgetsWithLeakTracking(
+    'ScrollbarThemeData.thickness replaces hoverThickness',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: false,
+            scrollbarTheme: ScrollbarThemeData(
+              thumbVisibility: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) => true),
+              trackVisibility: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                return states.contains(MaterialState.hovered);
+              }),
+              thickness: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered)) {
+                  return 40.0;
+                }
+                // Default thickness
+                return 8.0;
+              }),
+            ),
+          ),
+          home: const SingleChildScrollView(
+            child: SizedBox(width: 4000.0, height: 4000.0),
           ),
         ),
-        home: const SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        color: _kDefaultIdleThumbColor,
-      ),
-    );
-
-    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(794.0, 5.0));
-    await tester.pump();
-
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(756.0, 0.0, 800.0, 600.0),
-          color: const Color(0x08000000),
-        )
-        ..line(
-          p1: const Offset(756.0, 0.0),
-          p2: const Offset(756.0, 600.0),
-          strokeWidth: 1.0,
-          color: _kDefaultIdleThumbColor,
-        )
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            // Scrollbar thumb is larger
-            const Rect.fromLTRB(758.0, 0.0, 798.0, 90.0),
-            _kDefaultThumbRadius,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              getStartingThumbRect(isAndroid: false),
+              _kDefaultThumbRadius,
+            ),
+            color: _kDefaultIdleThumbColor,
           ),
-          // Hover color
-          color: const Color(0x80000000),
-        ),
-    );
-  },
+      );
+
+      final TestGesture gesture =
+          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(const Offset(794.0, 5.0));
+      await tester.pump();
+
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(756.0, 0.0, 800.0, 600.0),
+            color: const Color(0x08000000),
+          )
+          ..line(
+            p1: const Offset(756.0, 0.0),
+            p2: const Offset(756.0, 600.0),
+            strokeWidth: 1.0,
+            color: _kDefaultIdleThumbColor,
+          )
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              // Scrollbar thumb is larger
+              const Rect.fromLTRB(758.0, 0.0, 798.0, 90.0),
+              _kDefaultThumbRadius,
+            ),
+            // Hover color
+            color: const Color(0x80000000),
+          ),
+      );
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.linux,
       TargetPlatform.macOS,
@@ -1161,67 +1218,72 @@ void main() {
     }),
   );
 
-  testWidgetsWithLeakTracking('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: ScrollbarThemeData(
-            thumbVisibility: MaterialStateProperty.all(true),
-            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
-                return true;
-              }
-              return false;
-            }),
+  testWidgetsWithLeakTracking(
+    'ScrollbarThemeData.trackVisibility replaces showTrackOnHover',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: false,
+            scrollbarTheme: ScrollbarThemeData(
+              thumbVisibility: MaterialStateProperty.all(true),
+              trackVisibility: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered)) {
+                  return true;
+                }
+                return false;
+              }),
+            ),
+          ),
+          home: const SingleChildScrollView(
+            child: SizedBox(width: 4000.0, height: 4000.0),
           ),
         ),
-        home: const SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        color: _kDefaultIdleThumbColor,
-      ),
-    );
-
-    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(794.0, 5.0));
-    await tester.pump();
-
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-          color: const Color(0x08000000),
-        )
-        ..line(
-          p1: const Offset(784.0, 0.0),
-          p2: const Offset(784.0, 600.0),
-          strokeWidth: 1.0,
-          color: _kDefaultIdleThumbColor,
-        )
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            // Scrollbar thumb is larger
-            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            _kDefaultThumbRadius,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              getStartingThumbRect(isAndroid: false),
+              _kDefaultThumbRadius,
+            ),
+            color: _kDefaultIdleThumbColor,
           ),
-          // Hover color
-          color: const Color(0x80000000),
-        ),
-    );
-  },
+      );
+
+      final TestGesture gesture =
+          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(const Offset(794.0, 5.0));
+      await tester.pump();
+
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+            color: const Color(0x08000000),
+          )
+          ..line(
+            p1: const Offset(784.0, 0.0),
+            p2: const Offset(784.0, 600.0),
+            strokeWidth: 1.0,
+            color: _kDefaultIdleThumbColor,
+          )
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              // Scrollbar thumb is larger
+              const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
+              _kDefaultThumbRadius,
+            ),
+            // Hover color
+            color: const Color(0x80000000),
+          ),
+      );
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.linux,
       TargetPlatform.macOS,
@@ -1229,62 +1291,66 @@ void main() {
     }),
   );
 
-  testWidgetsWithLeakTracking('Scrollbar showTrackOnHover', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          useMaterial3: false,
-          scrollbarTheme: ScrollbarThemeData(
-            thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+  testWidgetsWithLeakTracking(
+    'Scrollbar showTrackOnHover',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: false,
+            scrollbarTheme: ScrollbarThemeData(
+              thumbVisibility: MaterialStateProperty.all(true),
+              showTrackOnHover: true,
+            ),
+          ),
+          home: const SingleChildScrollView(
+            child: SizedBox(width: 4000.0, height: 4000.0),
           ),
         ),
-        home: const SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byType(Scrollbar),
-      paints..rrect(
-        rrect: RRect.fromRectAndRadius(
-          getStartingThumbRect(isAndroid: false),
-          _kDefaultThumbRadius,
-        ),
-        color: _kDefaultIdleThumbColor,
-      ),
-    );
-
-    final TestGesture gesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(794.0, 5.0));
-    await tester.pump();
-
-    expect(
-      find.byType(Scrollbar),
-      paints
-        ..rect(
-          rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
-          color: const Color(0x08000000),
-        )
-        ..line(
-          p1: const Offset(784.0, 0.0),
-          p2: const Offset(784.0, 600.0),
-          strokeWidth: 1.0,
-          color: _kDefaultIdleThumbColor,
-        )
-        ..rrect(
-          rrect: RRect.fromRectAndRadius(
-            // Scrollbar thumb is larger
-            const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
-            _kDefaultThumbRadius,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              getStartingThumbRect(isAndroid: false),
+              _kDefaultThumbRadius,
+            ),
+            color: _kDefaultIdleThumbColor,
           ),
-          // Hover color
-          color: const Color(0x80000000),
-      ),
-    );
-  },
+      );
+
+      final TestGesture gesture =
+          await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(const Offset(794.0, 5.0));
+      await tester.pump();
+
+      expect(
+        find.byType(Scrollbar),
+        paints
+          ..rect(
+            rect: const Rect.fromLTRB(784.0, 0.0, 800.0, 600.0),
+            color: const Color(0x08000000),
+          )
+          ..line(
+            p1: const Offset(784.0, 0.0),
+            p2: const Offset(784.0, 600.0),
+            strokeWidth: 1.0,
+            color: _kDefaultIdleThumbColor,
+          )
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              // Scrollbar thumb is larger
+              const Rect.fromLTRB(786.0, 0.0, 798.0, 90.0),
+              _kDefaultThumbRadius,
+            ),
+            // Hover color
+            color: const Color(0x80000000),
+          ),
+      );
+    },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.linux,
       TargetPlatform.macOS,
@@ -1292,7 +1358,8 @@ void main() {
     }),
   );
 
-  testWidgetsWithLeakTracking('Adaptive scrollbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adaptive scrollbar',
+      (WidgetTester tester) async {
     Widget viewWithScroll(TargetPlatform platform) {
       return _buildBoilerplate(
         child: Theme(
@@ -1309,7 +1376,8 @@ void main() {
     }
 
     await tester.pumpWidget(viewWithScroll(TargetPlatform.android));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.drag(
+        find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     // Scrollbar fully showing
     await tester.pump(const Duration(milliseconds: 500));
@@ -1320,7 +1388,8 @@ void main() {
       tester.getCenter(find.byType(SingleChildScrollView)),
     );
     await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.drag(
+        find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.byType(Scrollbar), paints..rrect());
@@ -1329,7 +1398,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Scrollbar passes controller to CupertinoScrollbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Scrollbar passes controller to CupertinoScrollbar',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll(TargetPlatform? platform) {
       return _buildBoilerplate(
@@ -1353,17 +1424,23 @@ void main() {
       tester.getCenter(find.byType(SingleChildScrollView)),
     );
     await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.drag(
+        find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.byType(CupertinoScrollbar), paints..rrect());
-    final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
+    final CupertinoScrollbar scrollbar =
+        tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
     expect(scrollbar.controller, isNotNull);
 
     controller.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+  },
+      variant:
+          const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-  testWidgetsWithLeakTracking("Scrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Scrollbar doesn't show when scroll the inner scrollable widget",
+      (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
     final GlobalKey outerKey = GlobalKey();
@@ -1417,7 +1494,8 @@ void main() {
 
     expect(
       tester.renderObject(find.byKey(key2)),
-      paintsExactlyCountTimes(#drawRect, 2), // Each bar will call [drawRect] twice.
+      paintsExactlyCountTimes(
+          #drawRect, 2), // Each bar will call [drawRect] twice.
     );
 
     expect(
@@ -1426,7 +1504,8 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Scrollbar dragging can be disabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar dragging can be disabled',
+      (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -1470,7 +1549,8 @@ void main() {
 
     // Try to drag the thumb down.
     const double scrollAmount = 10.0;
-    final TestGesture dragScrollbarThumbGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    final TestGesture dragScrollbarThumbGesture =
+        await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
     await dragScrollbarThumbGesture.moveBy(const Offset(0.0, scrollAmount));
     await tester.pumpAndSettle();
@@ -1480,7 +1560,8 @@ void main() {
     expect(scrollController.offset, 0.0);
 
     // Drag in the track area to validate pass through to scrollable.
-    final TestGesture dragPassThroughTrack = await tester.startGesture(const Offset(797.0, 250.0));
+    final TestGesture dragPassThroughTrack =
+        await tester.startGesture(const Offset(797.0, 250.0));
     await dragPassThroughTrack.moveBy(const Offset(0.0, -scrollAmount));
     await tester.pumpAndSettle();
     await dragPassThroughTrack.up();
@@ -1495,9 +1576,13 @@ void main() {
     expect(scrollController.offset, scrollAmount);
 
     scrollController.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.fuchsia}));
 
-  testWidgetsWithLeakTracking('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Scrollbar dragging is disabled by default on Android',
+      (WidgetTester tester) async {
     int tapCount = 0;
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1593,7 +1678,9 @@ void main() {
     scrollController.dispose();
   });
 
-  testWidgetsWithLeakTracking('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Simultaneous dragging and pointer scrolling does not cause a crash',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1635,7 +1722,8 @@ void main() {
 
     // Drag the thumb down to scroll down.
     const double scrollAmount = 10.0;
-    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    final TestGesture dragScrollbarGesture =
+        await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
 
     expect(
@@ -1767,8 +1855,10 @@ void main() {
     scrollController.dispose();
   });
 
-  testWidgetsWithLeakTracking('Scrollbar.thumbVisibility triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
-    Widget getTabContent({ ScrollController? scrollController }) {
+  testWidgetsWithLeakTracking(
+      'Scrollbar.thumbVisibility triggers assertion when multiple ScrollPositions are attached.',
+      (WidgetTester tester) async {
+    Widget getTabContent({ScrollController? scrollController}) {
       return Scrollbar(
         thumbVisibility: true,
         controller: scrollController,
@@ -1811,7 +1901,8 @@ void main() {
     FlutterError error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The PrimaryScrollController is currently attached to more than one ScrollPosition.'),
+      contains(
+          'The PrimaryScrollController is currently attached to more than one ScrollPosition.'),
     );
 
     // Asserts when using the ScrollController provided by the user.
@@ -1830,38 +1921,39 @@ void main() {
     error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The provided ScrollController is currently attached to more than one ScrollPosition.'),
+      contains(
+          'The provided ScrollController is currently attached to more than one ScrollPosition.'),
     );
 
     scrollController.dispose();
   });
 
-  testWidgetsWithLeakTracking('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar scrollOrientation works correctly',
+      (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
 
     Widget buildScrollWithOrientation(ScrollbarOrientation orientation) {
       return _buildBoilerplate(
-        child: Theme(
-          data: ThemeData(
-            platform: TargetPlatform.android,
-          ),
-          child: PrimaryScrollController(
+          child: Theme(
+        data: ThemeData(
+          platform: TargetPlatform.android,
+        ),
+        child: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            interactive: true,
+            thumbVisibility: true,
+            scrollbarOrientation: orientation,
             controller: scrollController,
-            child: Scrollbar(
-              interactive: true,
-              thumbVisibility: true,
-              scrollbarOrientation: orientation,
-              controller: scrollController,
-              child: const SingleChildScrollView(
-                child: SizedBox(width: 4000.0, height: 4000.0)
-              ),
-            ),
+            child: const SingleChildScrollView(
+                child: SizedBox(width: 4000.0, height: 4000.0)),
           ),
-        )
-      );
+        ),
+      ));
     }
 
-    await tester.pumpWidget(buildScrollWithOrientation(ScrollbarOrientation.left));
+    await tester
+        .pumpWidget(buildScrollWithOrientation(ScrollbarOrientation.left));
     await tester.pumpAndSettle();
 
     expect(

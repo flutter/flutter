@@ -11,7 +11,6 @@ enum StatusProjectValidator {
 }
 
 class ProjectValidatorResult {
-
   const ProjectValidatorResult({
     required this.name,
     required this.value,
@@ -36,7 +35,6 @@ class ProjectValidatorResult {
     return ProjectValidatorResult(
         name: exception.toString(),
         value: trace.toString(),
-        status: StatusProjectValidator.crash
-    );
+        status: StatusProjectValidator.crash);
   }
 }

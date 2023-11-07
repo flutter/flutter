@@ -85,7 +85,8 @@ class AutofillGroup extends StatefulWidget {
   /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
   static AutofillGroupState? maybeOf(BuildContext context) {
-    final _AutofillScope? scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
+    final _AutofillScope? scope =
+        context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
   }
 
@@ -172,8 +173,8 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
   @override
   Iterable<AutofillClient> get autofillClients {
-    return _clients.values
-      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
+    return _clients.values.where((AutofillClient client) =>
+        client.textInputConfiguration.autofillConfiguration.enabled);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].

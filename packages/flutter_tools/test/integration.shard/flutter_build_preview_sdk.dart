@@ -39,13 +39,18 @@ void main() {
   test(
     'build succeeds targeting string compileSdkVersion',
     () async {
-      final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+      final File buildGradleFile = exampleAppDir
+          .childDirectory('android')
+          .childDirectory('app')
+          .childFile('build.gradle');
       // write a build.gradle with compileSdkVersion as `android-Tiramisu` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion "android-Tiramisu"'),
-        flush: true
-      );
-      expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion "android-Tiramisu"'));
+          buildGradleFile.readAsStringSync().replaceFirst(
+              'compileSdkVersion flutter.compileSdkVersion',
+              'compileSdkVersion "android-Tiramisu"'),
+          flush: true);
+      expect(buildGradleFile.readAsStringSync(),
+          contains('compileSdkVersion "android-Tiramisu"'));
 
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
@@ -54,26 +59,36 @@ void main() {
         'apk',
         '--debug',
       ], workingDirectory: exampleAppDir.path);
-      expect(result.stdout, contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
-      expect(exampleAppDir.childDirectory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('apk')
-        .childDirectory('debug')
-        .childFile('app-debug.apk').existsSync(), true);
+      expect(result.stdout,
+          contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
+      expect(
+          exampleAppDir
+              .childDirectory('build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('apk')
+              .childDirectory('debug')
+              .childFile('app-debug.apk')
+              .existsSync(),
+          true);
     },
   );
 
   test(
     'build succeeds targeting string compileSdkPreview',
     () async {
-      final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
+      final File buildGradleFile = exampleAppDir
+          .childDirectory('android')
+          .childDirectory('app')
+          .childFile('build.gradle');
       // write a build.gradle with compileSdkPreview as `Tiramisu` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst('compileSdkVersion flutter.compileSdkVersion', 'compileSdkPreview "Tiramisu"'),
-        flush: true
-      );
-      expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview "Tiramisu"'));
+          buildGradleFile.readAsStringSync().replaceFirst(
+              'compileSdkVersion flutter.compileSdkVersion',
+              'compileSdkPreview "Tiramisu"'),
+          flush: true);
+      expect(buildGradleFile.readAsStringSync(),
+          contains('compileSdkPreview "Tiramisu"'));
 
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
@@ -82,13 +97,18 @@ void main() {
         'apk',
         '--debug',
       ], workingDirectory: exampleAppDir.path);
-      expect(result.stdout, contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
-      expect(exampleAppDir.childDirectory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('apk')
-        .childDirectory('debug')
-        .childFile('app-debug.apk').existsSync(), true);
+      expect(result.stdout,
+          contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
+      expect(
+          exampleAppDir
+              .childDirectory('build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('apk')
+              .childDirectory('debug')
+              .childFile('app-debug.apk')
+              .existsSync(),
+          true);
     },
   );
 }

@@ -15,7 +15,8 @@ void main() {
       const example.TooltipExampleApp(),
     );
 
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture? gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       if (gesture != null) {
         return gesture.removePointer();

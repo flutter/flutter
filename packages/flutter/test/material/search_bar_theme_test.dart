@@ -10,9 +10,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   test('SearchBarThemeData copyWith, ==, hashCode basics', () {
     expect(const SearchBarThemeData(), const SearchBarThemeData().copyWith());
-    expect(const SearchBarThemeData().hashCode, const SearchBarThemeData()
-        .copyWith()
-        .hashCode);
+    expect(const SearchBarThemeData().hashCode,
+        const SearchBarThemeData().copyWith().hashCode);
   });
 
   test('SearchBarThemeData lerp special cases', () {
@@ -36,7 +35,8 @@ void main() {
     expect(themeData.constraints, null);
     expect(themeData.textCapitalization, null);
 
-    const SearchBarTheme theme = SearchBarTheme(data: SearchBarThemeData(), child: SizedBox());
+    const SearchBarTheme theme =
+        SearchBarTheme(data: SearchBarThemeData(), child: SizedBox());
     expect(theme.data.elevation, null);
     expect(theme.data.backgroundColor, null);
     expect(theme.data.shadowColor, null);
@@ -51,20 +51,22 @@ void main() {
     expect(theme.data.textCapitalization, null);
   });
 
-  testWidgetsWithLeakTracking('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default SearchBarThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('SearchBarThemeData implements debugFillProperties', (
-      WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'SearchBarThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData(
       elevation: MaterialStatePropertyAll<double>(3.0),
@@ -72,7 +74,8 @@ void main() {
       shadowColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2)),
       surfaceTintColor: MaterialStatePropertyAll<Color>(Color(0xfffffff3)),
       overlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffff4)),
-      side: MaterialStatePropertyAll<BorderSide>(BorderSide(width: 2.0, color: Color(0xfffffff5))),
+      side: MaterialStatePropertyAll<BorderSide>(
+          BorderSide(width: 2.0, color: Color(0xfffffff5))),
       shape: MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
       padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(16.0)),
       textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 24.0)),
@@ -82,22 +85,33 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description[0], 'elevation: MaterialStatePropertyAll(3.0)');
-    expect(description[1], 'backgroundColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[2], 'shadowColor: MaterialStatePropertyAll(Color(0xfffffff2))');
-    expect(description[3], 'surfaceTintColor: MaterialStatePropertyAll(Color(0xfffffff3))');
-    expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff4))');
-    expect(description[5], 'side: MaterialStatePropertyAll(BorderSide(color: Color(0xfffffff5), width: 2.0))');
-    expect(description[6], 'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))');
-    expect(description[7], 'padding: MaterialStatePropertyAll(EdgeInsets.all(16.0))');
-    expect(description[8], 'textStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 24.0))');
-    expect(description[9], 'hintStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 16.0))');
-    expect(description[10], 'constraints: BoxConstraints(350.0<=w<=850.0, 0.0<=h<=Infinity)');
-    expect(description[11], 'textCapitalization: TextCapitalization.characters');
+    expect(description[1],
+        'backgroundColor: MaterialStatePropertyAll(Color(0xfffffff1))');
+    expect(description[2],
+        'shadowColor: MaterialStatePropertyAll(Color(0xfffffff2))');
+    expect(description[3],
+        'surfaceTintColor: MaterialStatePropertyAll(Color(0xfffffff3))');
+    expect(description[4],
+        'overlayColor: MaterialStatePropertyAll(Color(0xfffffff4))');
+    expect(description[5],
+        'side: MaterialStatePropertyAll(BorderSide(color: Color(0xfffffff5), width: 2.0))');
+    expect(description[6],
+        'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))');
+    expect(description[7],
+        'padding: MaterialStatePropertyAll(EdgeInsets.all(16.0))');
+    expect(description[8],
+        'textStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 24.0))');
+    expect(description[9],
+        'hintStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 16.0))');
+    expect(description[10],
+        'constraints: BoxConstraints(350.0<=w<=850.0, 0.0<=h<=Infinity)');
+    expect(
+        description[11], 'textCapitalization: TextCapitalization.characters');
   });
 
   group('[Theme, SearchBarTheme, SearchBar properties overrides]', () {
@@ -106,23 +120,38 @@ void main() {
     const Color shadowColorValue = Color(0xff000001);
     const Color surfaceTintColorValue = Color(0xff000001);
     const Color overlayColorValue = Color(0xff000001);
-    const BorderSide sideValue = BorderSide(color: Color(0xff000004), width: 2.0);
-    const OutlinedBorder shapeValue = RoundedRectangleBorder(side: sideValue, borderRadius: BorderRadius.all(Radius.circular(2.0)));
+    const BorderSide sideValue =
+        BorderSide(color: Color(0xff000004), width: 2.0);
+    const OutlinedBorder shapeValue = RoundedRectangleBorder(
+        side: sideValue, borderRadius: BorderRadius.all(Radius.circular(2.0)));
     const EdgeInsets paddingValue = EdgeInsets.symmetric(horizontal: 16.0);
-    const TextStyle textStyleValue = TextStyle(color: Color(0xff000005), fontSize: 20.0);
-    const TextStyle hintStyleValue = TextStyle(color: Color(0xff000006), fontSize: 18.0);
+    const TextStyle textStyleValue =
+        TextStyle(color: Color(0xff000005), fontSize: 20.0);
+    const TextStyle hintStyleValue =
+        TextStyle(color: Color(0xff000006), fontSize: 18.0);
 
-    const MaterialStateProperty<double?> elevation = MaterialStatePropertyAll<double>(elevationValue);
-    const MaterialStateProperty<Color?> backgroundColor = MaterialStatePropertyAll<Color>(backgroundColorValue);
-    const MaterialStateProperty<Color?> shadowColor = MaterialStatePropertyAll<Color>(shadowColorValue);
-    const MaterialStateProperty<Color?> surfaceTintColor = MaterialStatePropertyAll<Color>(surfaceTintColorValue);
-    const MaterialStateProperty<Color?> overlayColor = MaterialStatePropertyAll<Color>(overlayColorValue);
-    const MaterialStateProperty<BorderSide?> side = MaterialStatePropertyAll<BorderSide>(sideValue);
-    const MaterialStateProperty<OutlinedBorder?> shape = MaterialStatePropertyAll<OutlinedBorder>(shapeValue);
-    const MaterialStateProperty<EdgeInsetsGeometry?> padding = MaterialStatePropertyAll<EdgeInsets>(paddingValue);
-    const MaterialStateProperty<TextStyle?> textStyle = MaterialStatePropertyAll<TextStyle>(textStyleValue);
-    const MaterialStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(hintStyleValue);
-    const BoxConstraints constraints = BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 80.0);
+    const MaterialStateProperty<double?> elevation =
+        MaterialStatePropertyAll<double>(elevationValue);
+    const MaterialStateProperty<Color?> backgroundColor =
+        MaterialStatePropertyAll<Color>(backgroundColorValue);
+    const MaterialStateProperty<Color?> shadowColor =
+        MaterialStatePropertyAll<Color>(shadowColorValue);
+    const MaterialStateProperty<Color?> surfaceTintColor =
+        MaterialStatePropertyAll<Color>(surfaceTintColorValue);
+    const MaterialStateProperty<Color?> overlayColor =
+        MaterialStatePropertyAll<Color>(overlayColorValue);
+    const MaterialStateProperty<BorderSide?> side =
+        MaterialStatePropertyAll<BorderSide>(sideValue);
+    const MaterialStateProperty<OutlinedBorder?> shape =
+        MaterialStatePropertyAll<OutlinedBorder>(shapeValue);
+    const MaterialStateProperty<EdgeInsetsGeometry?> padding =
+        MaterialStatePropertyAll<EdgeInsets>(paddingValue);
+    const MaterialStateProperty<TextStyle?> textStyle =
+        MaterialStatePropertyAll<TextStyle>(textStyleValue);
+    const MaterialStateProperty<TextStyle?> hintStyle =
+        MaterialStatePropertyAll<TextStyle>(hintStyleValue);
+    const BoxConstraints constraints =
+        BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 80.0);
     const TextCapitalization textCapitalization = TextCapitalization.words;
 
     const SearchBarThemeData searchBarTheme = SearchBarThemeData(
@@ -140,24 +169,23 @@ void main() {
       textCapitalization: textCapitalization,
     );
 
-    Widget buildFrame({
-      bool useSearchBarProperties = false,
-      SearchBarThemeData? searchBarThemeData,
-      SearchBarThemeData? overallTheme
-    }) {
+    Widget buildFrame(
+        {bool useSearchBarProperties = false,
+        SearchBarThemeData? searchBarThemeData,
+        SearchBarThemeData? overallTheme}) {
       final Widget child = Builder(
         builder: (BuildContext context) {
           if (!useSearchBarProperties) {
             return const SearchBar(
               hintText: 'hint',
               leading: Icon(Icons.search),
-              trailing: <Widget>[ Icon(Icons.menu)],
+              trailing: <Widget>[Icon(Icons.menu)],
             );
           }
           return const SearchBar(
             hintText: 'hint',
             leading: Icon(Icons.search),
-            trailing: <Widget>[ Icon(Icons.menu)],
+            trailing: <Widget>[Icon(Icons.menu)],
             elevation: elevation,
             backgroundColor: backgroundColor,
             shadowColor: shadowColor,
@@ -175,18 +203,20 @@ void main() {
       );
       return MaterialApp(
         theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(), useMaterial3: true)
-          .copyWith(
-            searchBarTheme: overallTheme,
+                colorScheme: const ColorScheme.light(), useMaterial3: true)
+            .copyWith(
+          searchBarTheme: overallTheme,
         ),
         home: Scaffold(
           body: Center(
             // If the SearchBarThemeData widget is present, it's used
             // instead of the Theme's ThemeData.searchBarTheme.
-            child: searchBarThemeData == null ? child : SearchBarTheme(
-              data: searchBarThemeData,
-              child: child,
-            ),
+            child: searchBarThemeData == null
+                ? child
+                : SearchBarTheme(
+                    data: searchBarThemeData,
+                    child: child,
+                  ),
           ),
         ),
       );
@@ -202,9 +232,9 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> hovered = <MaterialState>{ MaterialState.hovered};
-    const Set<MaterialState> focused = <MaterialState>{ MaterialState.focused};
-    const Set<MaterialState> pressed = <MaterialState>{ MaterialState.pressed};
+    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
+    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
 
     Future<void> checkSearchBar(WidgetTester tester) async {
       final Material material = tester.widget<Material>(findMaterial);
@@ -214,9 +244,12 @@ void main() {
       expect(material.shadowColor, shadowColorValue);
       expect(material.surfaceTintColor, surfaceTintColorValue);
       expect(material.shape, shapeValue);
-      expect(inkWell.overlayColor!.resolve(hovered), overlayColor.resolve(hovered));
-      expect(inkWell.overlayColor!.resolve(focused), overlayColor.resolve(focused));
-      expect(inkWell.overlayColor!.resolve(pressed), overlayColor.resolve(pressed));
+      expect(inkWell.overlayColor!.resolve(hovered),
+          overlayColor.resolve(hovered));
+      expect(inkWell.overlayColor!.resolve(focused),
+          overlayColor.resolve(focused));
+      expect(inkWell.overlayColor!.resolve(pressed),
+          overlayColor.resolve(pressed));
       expect(inkWell.customBorder, shapeValue);
 
       expect(tester.getSize(find.byType(SearchBar)), const Size(300.0, 80.0));
@@ -242,19 +275,23 @@ void main() {
       expect(trailingRect.right, barRect.right - 16.0);
     }
 
-    testWidgetsWithLeakTracking('SearchBar properties overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SearchBar properties overrides defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchBarProperties: true));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);
     });
 
-    testWidgetsWithLeakTracking('SearchBar theme data overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SearchBar theme data overrides defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchBarThemeData: searchBarTheme));
       await tester.pumpAndSettle();
       checkSearchBar(tester);
     });
 
-    testWidgetsWithLeakTracking('Overall Theme SearchBar theme overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking(
+        'Overall Theme SearchBar theme overrides defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle();
       checkSearchBar(tester);
@@ -262,22 +299,30 @@ void main() {
 
     // Same as the previous tests with empty SearchBarThemeData's instead of null.
 
-    testWidgetsWithLeakTracking('SearchBar properties overrides defaults, empty theme and overall theme', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(useSearchBarProperties: true,
-        searchBarThemeData: const SearchBarThemeData(),
-        overallTheme: const SearchBarThemeData()));
+    testWidgetsWithLeakTracking(
+        'SearchBar properties overrides defaults, empty theme and overall theme',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+          useSearchBarProperties: true,
+          searchBarThemeData: const SearchBarThemeData(),
+          overallTheme: const SearchBarThemeData()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);
     });
 
-    testWidgetsWithLeakTracking('SearchBar theme overrides defaults and overall theme', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(searchBarThemeData: searchBarTheme,
-        overallTheme: const SearchBarThemeData()));
+    testWidgetsWithLeakTracking(
+        'SearchBar theme overrides defaults and overall theme',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+          searchBarThemeData: searchBarTheme,
+          overallTheme: const SearchBarThemeData()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);
     });
 
-    testWidgetsWithLeakTracking('Overall Theme SearchBar theme overrides defaults and null theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking(
+        'Overall Theme SearchBar theme overrides defaults and null theme',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);

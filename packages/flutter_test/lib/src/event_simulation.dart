@@ -71,7 +71,8 @@ abstract final class KeyEventSimulator {
   }
 
   static int _getScanCode(PhysicalKeyboardKey key, String platform) {
-    assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+    assert(_osIsSupported(platform),
+        'Platform $platform not supported for key simulation');
     late Map<int, PhysicalKeyboardKey> map;
     switch (platform) {
       case 'android':
@@ -97,12 +98,14 @@ abstract final class KeyEventSimulator {
         break;
       }
     }
-    assert(scanCode != null, 'Physical key for $key not found in $platform scanCode map');
+    assert(scanCode != null,
+        'Physical key for $key not found in $platform scanCode map');
     return scanCode!;
   }
 
   static int _getKeyCode(LogicalKeyboardKey key, String platform) {
-    assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+    assert(_osIsSupported(platform),
+        'Platform $platform not supported for key simulation');
     if (kIsWeb) {
       // web doesn't have int type code. This check is used to treeshake
       // keyboard map code.
@@ -115,10 +118,10 @@ abstract final class KeyEventSimulator {
         case 'fuchsia':
           map = kFuchsiaToLogicalKey;
         case 'macos':
-        // macOS doesn't do key codes, just scan codes.
+          // macOS doesn't do key codes, just scan codes.
           return -1;
         case 'ios':
-        // iOS doesn't do key codes, just scan codes.
+          // iOS doesn't do key codes, just scan codes.
           return -1;
         case 'web':
           // web doesn't have int type code.
@@ -142,7 +145,8 @@ abstract final class KeyEventSimulator {
 
   static PhysicalKeyboardKey _inferPhysicalKey(LogicalKeyboardKey key) {
     PhysicalKeyboardKey? result;
-    for (final PhysicalKeyboardKey physicalKey in PhysicalKeyboardKey.knownPhysicalKeys) {
+    for (final PhysicalKeyboardKey physicalKey
+        in PhysicalKeyboardKey.knownPhysicalKeys) {
       if (physicalKey.debugName == key.debugName) {
         result = physicalKey;
         break;
@@ -152,9 +156,11 @@ abstract final class KeyEventSimulator {
     return result!;
   }
 
-  static _WebKeyLocationPair _getWebKeyLocation(LogicalKeyboardKey key, String keyLabel) {
+  static _WebKeyLocationPair _getWebKeyLocation(
+      LogicalKeyboardKey key, String keyLabel) {
     String? result;
-    for (final MapEntry<String, List<LogicalKeyboardKey?>> entry in kWebLocationMap.entries) {
+    for (final MapEntry<String, List<LogicalKeyboardKey?>> entry
+        in kWebLocationMap.entries) {
       final int foundIndex = entry.value.lastIndexOf(key);
       // If foundIndex is -1, then the key is not defined in kWebLocationMap.
       // If foundIndex is 0, then the key is in the standard part of the keyboard,
@@ -178,7 +184,8 @@ abstract final class KeyEventSimulator {
 
   static String _getWebCode(PhysicalKeyboardKey key) {
     String? result;
-    for (final MapEntry<String, PhysicalKeyboardKey> entry in kWebToPhysicalKey.entries) {
+    for (final MapEntry<String, PhysicalKeyboardKey> entry
+        in kWebToPhysicalKey.entries) {
       if (entry.value.usbHidUsage == key.usbHidUsage) {
         result = entry.key;
         break;
@@ -188,8 +195,10 @@ abstract final class KeyEventSimulator {
     return result!;
   }
 
-  static PhysicalKeyboardKey _findPhysicalKeyByPlatform(LogicalKeyboardKey key, String platform) {
-    assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+  static PhysicalKeyboardKey _findPhysicalKeyByPlatform(
+      LogicalKeyboardKey key, String platform) {
+    assert(_osIsSupported(platform),
+        'Platform $platform not supported for key simulation');
     late Map<dynamic, PhysicalKeyboardKey> map;
     if (kIsWeb) {
       // This check is used to treeshake keymap code.
@@ -219,7 +228,8 @@ abstract final class KeyEventSimulator {
         break;
       }
     }
-    assert(result != null, 'Physical key for $key not found in $platform physical key map');
+    assert(result != null,
+        'Physical key for $key not found in $platform physical key map');
     return result!;
   }
 
@@ -231,7 +241,8 @@ abstract final class KeyEventSimulator {
     PhysicalKeyboardKey? physicalKey,
     String? character,
   }) {
-    assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+    assert(_osIsSupported(platform),
+        'Platform $platform not supported for key simulation');
 
     key = _getKeySynonym(key);
 
@@ -247,13 +258,16 @@ abstract final class KeyEventSimulator {
 
     final String resultCharacter = character ?? _keyLabel(key) ?? '';
     void assignWeb() {
-      final _WebKeyLocationPair keyLocation = _getWebKeyLocation(key, resultCharacter);
-      final PhysicalKeyboardKey actualPhysicalKey = physicalKey ?? _inferPhysicalKey(key);
+      final _WebKeyLocationPair keyLocation =
+          _getWebKeyLocation(key, resultCharacter);
+      final PhysicalKeyboardKey actualPhysicalKey =
+          physicalKey ?? _inferPhysicalKey(key);
       result['code'] = _getWebCode(actualPhysicalKey);
       result['key'] = keyLocation.key;
       result['location'] = keyLocation.location;
       result['metaState'] = _getWebModifierFlags(key, isDown);
     }
+
     if (kIsWeb) {
       assignWeb();
       return result;
@@ -281,7 +295,8 @@ abstract final class KeyEventSimulator {
         result['keyCode'] = keyCode;
         result['scanCode'] = scanCode;
         result['modifiers'] = _getGlfwModifierFlags(key, isDown);
-        result['unicodeScalarValues'] = resultCharacter.isNotEmpty ? resultCharacter.codeUnitAt(0) : 0;
+        result['unicodeScalarValues'] =
+            resultCharacter.isNotEmpty ? resultCharacter.codeUnitAt(0) : 0;
       case 'macos':
         result['keyCode'] = scanCode;
         if (resultCharacter.isNotEmpty) {
@@ -316,28 +331,36 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      result |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
+      result |= RawKeyEventDataAndroid.modifierLeftShift |
+          RawKeyEventDataAndroid.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      result |= RawKeyEventDataAndroid.modifierRightShift | RawKeyEventDataAndroid.modifierShift;
+      result |= RawKeyEventDataAndroid.modifierRightShift |
+          RawKeyEventDataAndroid.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      result |= RawKeyEventDataAndroid.modifierLeftMeta | RawKeyEventDataAndroid.modifierMeta;
+      result |= RawKeyEventDataAndroid.modifierLeftMeta |
+          RawKeyEventDataAndroid.modifierMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      result |= RawKeyEventDataAndroid.modifierRightMeta | RawKeyEventDataAndroid.modifierMeta;
+      result |= RawKeyEventDataAndroid.modifierRightMeta |
+          RawKeyEventDataAndroid.modifierMeta;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      result |= RawKeyEventDataAndroid.modifierLeftControl | RawKeyEventDataAndroid.modifierControl;
+      result |= RawKeyEventDataAndroid.modifierLeftControl |
+          RawKeyEventDataAndroid.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      result |= RawKeyEventDataAndroid.modifierRightControl | RawKeyEventDataAndroid.modifierControl;
+      result |= RawKeyEventDataAndroid.modifierRightControl |
+          RawKeyEventDataAndroid.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      result |= RawKeyEventDataAndroid.modifierLeftAlt | RawKeyEventDataAndroid.modifierAlt;
+      result |= RawKeyEventDataAndroid.modifierLeftAlt |
+          RawKeyEventDataAndroid.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      result |= RawKeyEventDataAndroid.modifierRightAlt | RawKeyEventDataAndroid.modifierAlt;
+      result |= RawKeyEventDataAndroid.modifierRightAlt |
+          RawKeyEventDataAndroid.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.fn)) {
       result |= RawKeyEventDataAndroid.modifierFunction;
@@ -362,16 +385,20 @@ abstract final class KeyEventSimulator {
     } else {
       pressed.remove(newKey);
     }
-    if (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)) {
+    if (pressed.contains(LogicalKeyboardKey.shiftLeft) ||
+        pressed.contains(LogicalKeyboardKey.shiftRight)) {
       result |= GLFWKeyHelper.modifierShift;
     }
-    if (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)) {
+    if (pressed.contains(LogicalKeyboardKey.metaLeft) ||
+        pressed.contains(LogicalKeyboardKey.metaRight)) {
       result |= GLFWKeyHelper.modifierMeta;
     }
-    if (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)) {
+    if (pressed.contains(LogicalKeyboardKey.controlLeft) ||
+        pressed.contains(LogicalKeyboardKey.controlRight)) {
       result |= GLFWKeyHelper.modifierControl;
     }
-    if (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)) {
+    if (pressed.contains(LogicalKeyboardKey.altLeft) ||
+        pressed.contains(LogicalKeyboardKey.altRight)) {
       result |= GLFWKeyHelper.modifierAlt;
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
@@ -524,28 +551,36 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      result |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
+      result |= RawKeyEventDataMacOs.modifierLeftShift |
+          RawKeyEventDataMacOs.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      result |= RawKeyEventDataMacOs.modifierRightShift | RawKeyEventDataMacOs.modifierShift;
+      result |= RawKeyEventDataMacOs.modifierRightShift |
+          RawKeyEventDataMacOs.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      result |= RawKeyEventDataMacOs.modifierLeftCommand | RawKeyEventDataMacOs.modifierCommand;
+      result |= RawKeyEventDataMacOs.modifierLeftCommand |
+          RawKeyEventDataMacOs.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      result |= RawKeyEventDataMacOs.modifierRightCommand | RawKeyEventDataMacOs.modifierCommand;
+      result |= RawKeyEventDataMacOs.modifierRightCommand |
+          RawKeyEventDataMacOs.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      result |= RawKeyEventDataMacOs.modifierLeftControl | RawKeyEventDataMacOs.modifierControl;
+      result |= RawKeyEventDataMacOs.modifierLeftControl |
+          RawKeyEventDataMacOs.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      result |= RawKeyEventDataMacOs.modifierRightControl | RawKeyEventDataMacOs.modifierControl;
+      result |= RawKeyEventDataMacOs.modifierRightControl |
+          RawKeyEventDataMacOs.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      result |= RawKeyEventDataMacOs.modifierLeftOption | RawKeyEventDataMacOs.modifierOption;
+      result |= RawKeyEventDataMacOs.modifierLeftOption |
+          RawKeyEventDataMacOs.modifierOption;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      result |= RawKeyEventDataMacOs.modifierRightOption | RawKeyEventDataMacOs.modifierOption;
+      result |= RawKeyEventDataMacOs.modifierRightOption |
+          RawKeyEventDataMacOs.modifierOption;
     }
     final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
       LogicalKeyboardKey.f1,
@@ -591,28 +626,36 @@ abstract final class KeyEventSimulator {
       pressed.remove(newKey);
     }
     if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
-      result |= RawKeyEventDataIos.modifierLeftShift | RawKeyEventDataIos.modifierShift;
+      result |= RawKeyEventDataIos.modifierLeftShift |
+          RawKeyEventDataIos.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
-      result |= RawKeyEventDataIos.modifierRightShift | RawKeyEventDataIos.modifierShift;
+      result |= RawKeyEventDataIos.modifierRightShift |
+          RawKeyEventDataIos.modifierShift;
     }
     if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
-      result |= RawKeyEventDataIos.modifierLeftCommand | RawKeyEventDataIos.modifierCommand;
+      result |= RawKeyEventDataIos.modifierLeftCommand |
+          RawKeyEventDataIos.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.metaRight)) {
-      result |= RawKeyEventDataIos.modifierRightCommand | RawKeyEventDataIos.modifierCommand;
+      result |= RawKeyEventDataIos.modifierRightCommand |
+          RawKeyEventDataIos.modifierCommand;
     }
     if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
-      result |= RawKeyEventDataIos.modifierLeftControl | RawKeyEventDataIos.modifierControl;
+      result |= RawKeyEventDataIos.modifierLeftControl |
+          RawKeyEventDataIos.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.controlRight)) {
-      result |= RawKeyEventDataIos.modifierRightControl | RawKeyEventDataIos.modifierControl;
+      result |= RawKeyEventDataIos.modifierRightControl |
+          RawKeyEventDataIos.modifierControl;
     }
     if (pressed.contains(LogicalKeyboardKey.altLeft)) {
-      result |= RawKeyEventDataIos.modifierLeftOption | RawKeyEventDataIos.modifierOption;
+      result |= RawKeyEventDataIos.modifierLeftOption |
+          RawKeyEventDataIos.modifierOption;
     }
     if (pressed.contains(LogicalKeyboardKey.altRight)) {
-      result |= RawKeyEventDataIos.modifierRightOption | RawKeyEventDataIos.modifierOption;
+      result |= RawKeyEventDataIos.modifierRightOption |
+          RawKeyEventDataIos.modifierOption;
     }
     final Set<LogicalKeyboardKey> functionKeys = <LogicalKeyboardKey>{
       LogicalKeyboardKey.f1,
@@ -649,28 +692,31 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static Future<bool> _simulateKeyEventByRawEvent(ValueGetter<Map<String, dynamic>> buildKeyData) async {
+  static Future<bool> _simulateKeyEventByRawEvent(
+      ValueGetter<Map<String, dynamic>> buildKeyData) async {
     return TestAsyncUtils.guard<bool>(() async {
       final Completer<bool> result = Completer<bool>();
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        SystemChannels.keyEvent.name,
-        SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()),
-        (ByteData? data) {
-          if (data == null) {
-            result.complete(false);
-            return;
-          }
-          final Map<String, Object?> decoded = SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, dynamic>;
-          result.complete(decoded['handled']! as bool);
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(SystemChannels.keyEvent.name,
+              SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()),
+              (ByteData? data) {
+        if (data == null) {
+          result.complete(false);
+          return;
         }
-      );
+        final Map<String, Object?> decoded = SystemChannels.keyEvent.codec
+            .decodeMessage(data)! as Map<String, dynamic>;
+        result.complete(decoded['handled']! as bool);
+      });
       return result.future;
     });
   }
 
   static final Map<String, PhysicalKeyboardKey> _debugNameToPhysicalKey = (() {
-    final Map<String, PhysicalKeyboardKey> result = <String, PhysicalKeyboardKey>{};
-    for (final PhysicalKeyboardKey key in PhysicalKeyboardKey.knownPhysicalKeys) {
+    final Map<String, PhysicalKeyboardKey> result =
+        <String, PhysicalKeyboardKey>{};
+    for (final PhysicalKeyboardKey key
+        in PhysicalKeyboardKey.knownPhysicalKeys) {
       final String? debugName = key.debugName;
       if (debugName != null) {
         result[debugName] = key;
@@ -680,11 +726,13 @@ abstract final class KeyEventSimulator {
   })();
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key) {
     final PhysicalKeyboardKey? result = _debugNameToPhysicalKey[key.debugName];
-    assert(result != null, 'Physical key for $key not found in known physical keys');
+    assert(result != null,
+        'Physical key for $key not found in known physical keys');
     return result!;
   }
 
-  static const KeyDataTransitMode _defaultTransitMode = KeyDataTransitMode.rawKeyData;
+  static const KeyDataTransitMode _defaultTransitMode =
+      KeyDataTransitMode.rawKeyData;
 
   // The simulation transit mode for [simulateKeyDownEvent], [simulateKeyUpEvent],
   // and [simulateKeyRepeatEvent].
@@ -705,7 +753,8 @@ abstract final class KeyEventSimulator {
     return result ?? _defaultTransitMode;
   }
 
-  static String get _defaultPlatform => kIsWeb ? 'web' : Platform.operatingSystem;
+  static String get _defaultPlatform =>
+      kIsWeb ? 'web' : Platform.operatingSystem;
 
   /// Simulates sending a hardware key down event.
   ///
@@ -732,15 +781,20 @@ abstract final class KeyEventSimulator {
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
+        return getKeyData(key,
+            platform: platform!,
+            physicalKey: physicalKey,
+            character: character);
       });
     }
+
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
         return simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
+        final bool resultByKeyEvent =
+            ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.down,
             physical: (physicalKey ?? _findPhysicalKey(logicalKey)).usbHidUsage,
@@ -776,15 +830,18 @@ abstract final class KeyEventSimulator {
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getKeyData(key, platform: platform!, isDown: false, physicalKey: physicalKey);
+        return getKeyData(key,
+            platform: platform!, isDown: false, physicalKey: physicalKey);
       });
     }
+
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
         return simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
+        final bool resultByKeyEvent =
+            ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.up,
             physical: (physicalKey ?? _findPhysicalKey(logicalKey)).usbHidUsage,
@@ -821,15 +878,20 @@ abstract final class KeyEventSimulator {
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
-        return getKeyData(key, platform: platform!, physicalKey: physicalKey, character: character);
+        return getKeyData(key,
+            platform: platform!,
+            physicalKey: physicalKey,
+            character: character);
       });
     }
+
     switch (_transitMode) {
       case KeyDataTransitMode.rawKeyData:
         return simulateByRawEvent();
       case KeyDataTransitMode.keyDataThenRawKeyData:
         final LogicalKeyboardKey logicalKey = _getKeySynonym(key);
-        final bool resultByKeyEvent = ServicesBinding.instance.keyEventManager.handleKeyData(
+        final bool resultByKeyEvent =
+            ServicesBinding.instance.keyEventManager.handleKeyData(
           ui.KeyData(
             type: ui.KeyEventType.repeat,
             physical: (physicalKey ?? _findPhysicalKey(logicalKey)).usbHidUsage,
@@ -870,7 +932,8 @@ Future<bool> simulateKeyDownEvent(
   PhysicalKeyboardKey? physicalKey,
   String? character,
 }) async {
-  final bool handled = await KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+  final bool handled = await KeyEventSimulator.simulateKeyDownEvent(key,
+      platform: platform, physicalKey: physicalKey, character: character);
   final ServicesBinding binding = ServicesBinding.instance;
   if (!handled && binding is TestWidgetsFlutterBinding) {
     await binding.testTextInput.handleKeyDownEvent(key);
@@ -901,7 +964,8 @@ Future<bool> simulateKeyUpEvent(
   String? platform,
   PhysicalKeyboardKey? physicalKey,
 }) async {
-  final bool handled = await KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
+  final bool handled = await KeyEventSimulator.simulateKeyUpEvent(key,
+      platform: platform, physicalKey: physicalKey);
   final ServicesBinding binding = ServicesBinding.instance;
   if (!handled && binding is TestWidgetsFlutterBinding) {
     await binding.testTextInput.handleKeyUpEvent(key);
@@ -930,7 +994,8 @@ Future<bool> simulateKeyRepeatEvent(
   PhysicalKeyboardKey? physicalKey,
   String? character,
 }) {
-  return KeyEventSimulator.simulateKeyRepeatEvent(key, platform: platform, physicalKey: physicalKey, character: character);
+  return KeyEventSimulator.simulateKeyRepeatEvent(key,
+      platform: platform, physicalKey: physicalKey, character: character);
 }
 
 /// A [TestVariant] that runs tests with transit modes set to different values
@@ -942,12 +1007,12 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   /// Creates a [KeySimulatorTransitModeVariant] for each value option of
   /// [KeyDataTransitMode].
   KeySimulatorTransitModeVariant.all()
-    : this(KeyDataTransitMode.values.toSet());
+      : this(KeyDataTransitMode.values.toSet());
 
   /// Creates a [KeySimulatorTransitModeVariant] that only contains
   /// [KeyDataTransitMode.keyDataThenRawKeyData].
   KeySimulatorTransitModeVariant.keyDataThenRawKeyData()
-    : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
+      : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});
 
   @override
   final Set<KeyDataTransitMode> values;
@@ -964,13 +1029,15 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
 
   @override
   Future<KeyDataTransitMode?> setUp(KeyDataTransitMode value) async {
-    final KeyDataTransitMode? previousSetting = debugKeyEventSimulatorTransitModeOverride;
+    final KeyDataTransitMode? previousSetting =
+        debugKeyEventSimulatorTransitModeOverride;
     debugKeyEventSimulatorTransitModeOverride = value;
     return previousSetting;
   }
 
   @override
-  Future<void> tearDown(KeyDataTransitMode value, KeyDataTransitMode? memento) async {
+  Future<void> tearDown(
+      KeyDataTransitMode value, KeyDataTransitMode? memento) async {
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member

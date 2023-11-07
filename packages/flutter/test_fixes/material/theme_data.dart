@@ -105,19 +105,33 @@ void main() {
   ThemeData themeData = ThemeData();
   themeData = ThemeData(accentColor: Colors.red);
   themeData = ThemeData(accentColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light());
-  themeData = ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      ThemeData(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData(
+      accentColor: Colors.red,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData = ThemeData(error: '');
   themeData = ThemeData.raw(accentColor: Colors.red);
-  themeData = ThemeData.raw(accentColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light());
-  themeData = ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      ThemeData.raw(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData =
+      ThemeData.raw(accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(
+      accentColor: Colors.red,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData = ThemeData.raw(error: '');
   themeData = themeData.copyWith(accentColor: Colors.red);
   themeData = themeData.copyWith(error: '');
-  themeData = themeData.copyWith(accentColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light());
-  themeData = themeData.copyWith(accentColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      themeData.copyWith(accentColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(
+      accentColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(
+      accentColor: Colors.red,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData.accentColor;
 
   // Changes made in https://github.com/flutter/flutter/pull/81336
@@ -189,45 +203,75 @@ void main() {
   ThemeData themeData = ThemeData();
   themeData = ThemeData(errorColor: Colors.red);
   themeData = ThemeData(errorColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = ThemeData(errorColor: Colors.red, colorScheme: ColorScheme.light());
-  themeData = ThemeData(errorColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      ThemeData(errorColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData(
+      errorColor: Colors.red,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData = ThemeData(otherParam: '');
   themeData = ThemeData.raw(errorColor: Colors.red);
   themeData = ThemeData.raw(errorColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = ThemeData.raw(errorColor: Colors.red, colorScheme: ColorScheme.light());
-  themeData = ThemeData.raw(errorColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      ThemeData.raw(errorColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(
+      errorColor: Colors.red,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData = ThemeData.raw(otherParam: '');
   themeData = themeData.copyWith(errorColor: Colors.red);
   themeData = themeData.copyWith(otherParam: '');
-  themeData = themeData.copyWith(errorColor: Colors.red, primarySwatch: Colors.blue);
-  themeData = themeData.copyWith(errorColor: Colors.red, colorScheme: ColorScheme.light());
-  themeData = themeData.copyWith(errorColor: Colors.red, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      themeData.copyWith(errorColor: Colors.red, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(
+      errorColor: Colors.red, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(
+      errorColor: Colors.red,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData.errorColor;
 
   // Changes made in https://github.com/flutter/flutter/pull/110162
   ThemeData themeData = ThemeData();
   themeData = ThemeData(backgroundColor: Colors.grey);
-  themeData = ThemeData(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
-  themeData = ThemeData(backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
-  themeData = ThemeData(backgroundColor: Colors.grey, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      ThemeData(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData =
+      ThemeData(backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
+  themeData = ThemeData(
+      backgroundColor: Colors.grey,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData = ThemeData(otherParam: '');
   themeData = ThemeData.raw(backgroundColor: Colors.grey);
-  themeData = ThemeData.raw(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
-  themeData = ThemeData.raw(backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
-  themeData = ThemeData.raw(backgroundColor: Colors.grey, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData =
+      ThemeData.raw(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = ThemeData.raw(
+      backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
+  themeData = ThemeData.raw(
+      backgroundColor: Colors.grey,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData = ThemeData.raw(otherParam: '');
   themeData = themeData.copyWith(backgroundColor: Colors.grey);
   themeData = themeData.copyWith(otherParam: '');
-  themeData = themeData.copyWith(backgroundColor: Colors.grey, primarySwatch: Colors.blue);
-  themeData = themeData.copyWith(backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
-  themeData = themeData.copyWith(backgroundColor: Colors.grey, colorScheme: ColorScheme.light(), primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(
+      backgroundColor: Colors.grey, primarySwatch: Colors.blue);
+  themeData = themeData.copyWith(
+      backgroundColor: Colors.grey, colorScheme: ColorScheme.light());
+  themeData = themeData.copyWith(
+      backgroundColor: Colors.grey,
+      colorScheme: ColorScheme.light(),
+      primarySwatch: Colors.blue);
   themeData.backgroundColor;
 
   // Changes made in https://github.com/flutter/flutter/pull/110162
   ThemeData themeData = ThemeData();
   themeData = ThemeData(backgroundColor: Colors.grey, errorColor: Colors.red);
-  themeData = ThemeData.raw(backgroundColor: Colors.grey, errorColor: Colors.red);
-  themeData = themeData.copyWith(backgroundColor: Colors.grey, errorColor: Colors.red);
+  themeData =
+      ThemeData.raw(backgroundColor: Colors.grey, errorColor: Colors.red);
+  themeData =
+      themeData.copyWith(backgroundColor: Colors.grey, errorColor: Colors.red);
 
   // Changes made in https://github.com/flutter/flutter/pull/111080
   ThemeData themeData = ThemeData();

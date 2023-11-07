@@ -10,7 +10,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   test('DividerThemeData copyWith, ==, hashCode basics', () {
     expect(const DividerThemeData(), const DividerThemeData().copyWith());
-    expect(const DividerThemeData().hashCode, const DividerThemeData().copyWith().hashCode);
+    expect(const DividerThemeData().hashCode,
+        const DividerThemeData().copyWith().hashCode);
   });
 
   test('DividerThemeData null fields by default', () {
@@ -22,19 +23,21 @@ void main() {
     expect(dividerTheme.endIndent, null);
   });
 
-  testWidgetsWithLeakTracking('Default DividerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default DividerThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DividerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('DividerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DividerThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DividerThemeData(
       color: Color(0xFFFFFFFF),
@@ -45,9 +48,9 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
-      .toList();
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'color: Color(0xffffffff)',
@@ -59,7 +62,8 @@ void main() {
   });
 
   group('Material3 - Horizontal Divider', () {
-    testWidgetsWithLeakTracking('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Passing no DividerThemeData returns defaults',
+        (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       await tester.pumpWidget(MaterialApp(
         theme: theme,
@@ -83,7 +87,8 @@ void main() {
       expect(lineRect.right, dividerRect.right);
     });
 
-    testWidgetsWithLeakTracking('Uses values from DividerThemeData', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Uses values from DividerThemeData',
+        (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: true, dividerTheme: dividerTheme),
@@ -106,7 +111,8 @@ void main() {
       expect(lineRect.right, dividerRect.right - dividerTheme.endIndent!);
     });
 
-    testWidgetsWithLeakTracking('DividerTheme overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('DividerTheme overrides defaults',
+        (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -124,7 +130,8 @@ void main() {
       expect(decoration.border!.bottom.color, dividerTheme.color);
     });
 
-    testWidgetsWithLeakTracking('Widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Widget properties take priority over theme',
+        (WidgetTester tester) async {
       const Color color = Colors.purple;
       const double height = 10.0;
       const double thickness = 5.0;
@@ -161,7 +168,8 @@ void main() {
   });
 
   group('Material3 - Vertical Divider', () {
-    testWidgetsWithLeakTracking('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Passing no DividerThemeData returns defaults',
+        (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       await tester.pumpWidget(MaterialApp(
         theme: theme,
@@ -170,7 +178,8 @@ void main() {
         ),
       ));
 
-      final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+      final RenderBox box =
+          tester.firstRenderObject(find.byType(VerticalDivider));
       expect(box.size.width, 16.0);
 
       final Container container = tester.widget(find.byType(Container));
@@ -186,7 +195,8 @@ void main() {
       expect(lineRect.bottom, dividerRect.bottom);
     });
 
-    testWidgetsWithLeakTracking('Uses values from DividerThemeData', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Uses values from DividerThemeData',
+        (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(dividerTheme: dividerTheme),
@@ -195,7 +205,8 @@ void main() {
         ),
       ));
 
-      final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+      final RenderBox box =
+          tester.firstRenderObject(find.byType(VerticalDivider));
       expect(box.size.width, dividerTheme.space);
 
       final Container container = tester.widget(find.byType(Container));
@@ -210,7 +221,8 @@ void main() {
       expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent!);
     });
 
-    testWidgetsWithLeakTracking('DividerTheme overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('DividerTheme overrides defaults',
+        (WidgetTester tester) async {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -229,7 +241,8 @@ void main() {
       expect(border.left.color, dividerTheme.color);
     });
 
-    testWidgetsWithLeakTracking('Widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Widget properties take priority over theme',
+        (WidgetTester tester) async {
       const Color color = Colors.purple;
       const double width = 10.0;
       const double thickness = 5.0;
@@ -250,7 +263,8 @@ void main() {
         ),
       ));
 
-      final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+      final RenderBox box =
+          tester.firstRenderObject(find.byType(VerticalDivider));
       expect(box.size.width, width);
 
       final Container container = tester.widget(find.byType(Container));
@@ -272,7 +286,9 @@ void main() {
     // can be deleted.
 
     group('Material2 - Horizontal Divider', () {
-      testWidgetsWithLeakTracking('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking(
+          'Passing no DividerThemeData returns defaults',
+          (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           theme: ThemeData(useMaterial3: false),
           home: const Scaffold(
@@ -296,7 +312,8 @@ void main() {
         expect(lineRect.right, dividerRect.right);
       });
 
-      testWidgetsWithLeakTracking('DividerTheme overrides defaults', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('DividerTheme overrides defaults',
+          (WidgetTester tester) async {
         final DividerThemeData theme = _dividerTheme();
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
@@ -315,7 +332,9 @@ void main() {
     });
 
     group('Material2 - Vertical Divider', () {
-      testWidgetsWithLeakTracking('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking(
+          'Passing no DividerThemeData returns defaults',
+          (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           theme: ThemeData(useMaterial3: false),
           home: const Scaffold(
@@ -323,7 +342,8 @@ void main() {
           ),
         ));
 
-        final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+        final RenderBox box =
+            tester.firstRenderObject(find.byType(VerticalDivider));
         expect(box.size.width, 16.0);
 
         final Container container = tester.widget(find.byType(Container));

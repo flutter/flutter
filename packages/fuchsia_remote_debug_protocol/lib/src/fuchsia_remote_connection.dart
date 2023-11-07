@@ -84,7 +84,8 @@ enum DartVmEventType {
 /// Specifies the type of the event (whether the VM has started or has stopped),
 /// and contains the service port of the VM as well as a URL to connect to it.
 class DartVmEvent {
-  DartVmEvent._({required this.eventType, required this.servicePort, required this.uri});
+  DartVmEvent._(
+      {required this.eventType, required this.servicePort, required this.uri});
 
   /// The URL used to connect to the Dart VM.
   final Uri uri;
@@ -105,7 +106,7 @@ class DartVmEvent {
 /// Dart VM at any given time.
 class FuchsiaRemoteConnection {
   FuchsiaRemoteConnection._(this._useIpV6, this._sshCommandRunner)
-    : _pollDartVms = false;
+      : _pollDartVms = false;
 
   bool _pollDartVms;
   final List<PortForwarder> _forwardedVmServicePorts = <PortForwarder>[];
@@ -132,7 +133,8 @@ class FuchsiaRemoteConnection {
 
   /// Same as [FuchsiaRemoteConnection.connect] albeit with a provided
   /// [SshCommandRunner] instance.
-  static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(SshCommandRunner commandRunner) async {
+  static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
+      SshCommandRunner commandRunner) async {
     final FuchsiaRemoteConnection connection = FuchsiaRemoteConnection._(
         isIpV6Address(commandRunner.address), commandRunner);
     await connection._forwardOpenPortsToDeviceServicePorts();
@@ -263,7 +265,9 @@ class FuchsiaRemoteConnection {
               'for Isolate: $pattern');
           final DartVm? vmService = await _getDartVm(event.uri);
           // If the VM service is null, set the result to the empty list.
-          final List<IsolateRef> result = await vmService?.getMainIsolatesByPattern(pattern!) ?? <IsolateRef>[];
+          final List<IsolateRef> result =
+              await vmService?.getMainIsolatesByPattern(pattern!) ??
+                  <IsolateRef>[];
           if (result.isNotEmpty) {
             if (!completer.isCompleted) {
               completer.complete(result);
@@ -307,28 +311,28 @@ class FuchsiaRemoteConnection {
         <Future<List<IsolateRef>>>[];
     for (final PortForwarder fp in _dartVmPortMap.values) {
       final DartVm? vmService =
-      await _getDartVm(_getDartVmUri(fp), timeout: vmConnectionTimeout);
+          await _getDartVm(_getDartVmUri(fp), timeout: vmConnectionTimeout);
       if (vmService == null) {
         continue;
       }
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
     final List<IsolateRef> result =
-      await Future.wait<List<IsolateRef>>(isolates)
-        .timeout(timeout)
-        .then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
-          final List<List<IsolateRef>> mutableListOfLists =
-            List<List<IsolateRef>>.from(listOfLists)
-              ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
-          // Folds the list of lists into one flat list.
-          return mutableListOfLists.fold<List<IsolateRef>>(
-            <IsolateRef>[],
-            (List<IsolateRef> accumulator, List<IsolateRef> element) {
-              accumulator.addAll(element);
-              return accumulator;
-            },
-          );
-        });
+        await Future.wait<List<IsolateRef>>(isolates)
+            .timeout(timeout)
+            .then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
+      final List<List<IsolateRef>> mutableListOfLists =
+          List<List<IsolateRef>>.from(listOfLists)
+            ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
+      // Folds the list of lists into one flat list.
+      return mutableListOfLists.fold<List<IsolateRef>>(
+        <IsolateRef>[],
+        (List<IsolateRef> accumulator, List<IsolateRef> element) {
+          accumulator.addAll(element);
+          return accumulator;
+        },
+      );
+    });
 
     // If no VM instance anywhere has this, it's possible it hasn't spun up
     // anywhere.
@@ -408,8 +412,8 @@ class FuchsiaRemoteConnection {
       addr = _useIpV6 ? '[$_ipv6Loopback]' : _ipv4Loopback;
     } else {
       addr = isIpV6Address(pf.openPortAddress!)
-        ? '[${pf.openPortAddress}]'
-        : pf.openPortAddress;
+          ? '[${pf.openPortAddress}]'
+          : pf.openPortAddress;
     }
     final Uri uri = Uri.http('$addr:${pf.port}', '/');
     return uri;
@@ -469,7 +473,7 @@ class FuchsiaRemoteConnection {
   /// Runs a dummy heartbeat command on all Dart VM instances.
   ///
   /// Removes any failing ports from the cache.
-  Future<void> _checkPorts([ bool queueEvents = true ]) async {
+  Future<void> _checkPorts([bool queueEvents = true]) async {
     // Filters out stale ports after connecting. Ignores results.
     await _invokeForAllVms<void>(
       (DartVm vmService) async {
@@ -487,14 +491,14 @@ class FuchsiaRemoteConnection {
     await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
     final List<PortForwarder?> forwardedVmServicePorts =
-      await Future.wait<PortForwarder?>(
-        servicePorts.map<Future<PortForwarder?>>((int deviceServicePort) {
-          return fuchsiaPortForwardingFunction(
-              _sshCommandRunner.address,
-              deviceServicePort,
-              _sshCommandRunner.interface,
-              _sshCommandRunner.sshConfigPath);
-        }));
+        await Future.wait<PortForwarder?>(
+            servicePorts.map<Future<PortForwarder?>>((int deviceServicePort) {
+      return fuchsiaPortForwardingFunction(
+          _sshCommandRunner.address,
+          deviceServicePort,
+          _sshCommandRunner.interface,
+          _sshCommandRunner.sshConfigPath);
+    }));
 
     for (final PortForwarder? pf in forwardedVmServicePorts) {
       // TODO(awdavies): Handle duplicates.
@@ -640,8 +644,7 @@ class _SshPortForwarder implements PortForwarder {
     final List<String> command = <String>[
       'ssh',
       if (isIpV6) '-6',
-      if (sshConfigPath != null)
-        ...<String>['-F', sshConfigPath],
+      if (sshConfigPath != null) ...<String>['-F', sshConfigPath],
       '-nNT',
       '-f',
       '-L',
@@ -680,8 +683,7 @@ class _SshPortForwarder implements PortForwarder {
     final String? sshConfigPath = _sshConfigPath;
     final List<String> command = <String>[
       'ssh',
-      if (sshConfigPath != null)
-        ...<String>['-F', sshConfigPath],
+      if (sshConfigPath != null) ...<String>['-F', sshConfigPath],
       '-O',
       'cancel',
       '-L',

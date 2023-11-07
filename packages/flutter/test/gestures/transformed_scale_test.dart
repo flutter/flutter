@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('gets local coordinates', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('gets local coordinates',
+      (WidgetTester tester) async {
     final List<ScaleStartDetails> startDetails = <ScaleStartDetails>[];
     final List<ScaleUpdateDetails> updateDetails = <ScaleUpdateDetails>[];
 
@@ -31,9 +32,12 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(redContainer)) - const Offset(20, 20));
-    final TestGesture pointer2 = await tester.startGesture(tester.getCenter(find.byKey(redContainer)) + const Offset(30, 30));
-    await pointer2.moveTo(tester.getCenter(find.byKey(redContainer)) + const Offset(20, 20));
+    final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(redContainer)) - const Offset(20, 20));
+    final TestGesture pointer2 = await tester.startGesture(
+        tester.getCenter(find.byKey(redContainer)) + const Offset(30, 30));
+    await pointer2.moveTo(
+        tester.getCenter(find.byKey(redContainer)) + const Offset(20, 20));
 
     expect(updateDetails.single.localFocalPoint, const Offset(50, 50));
     expect(updateDetails.single.focalPoint, const Offset(400, 300));
@@ -48,6 +52,5 @@ void main() {
     await gesture.up();
     await pointer2.up();
     await tester.pumpAndSettle();
-
   });
 }

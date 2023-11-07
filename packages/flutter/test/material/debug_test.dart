@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('debugCheckHasMaterial control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasMaterial control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Chip(label: Text('label'))));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -26,29 +27,30 @@ void main() {
     expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[4], isA<DiagnosticsBlock>());
     expect(
-      error.toStringDeep(), startsWith(
-      'FlutterError\n'
-      '   No Material widget found.\n'
-      '   Chip widgets require a Material widget ancestor within the\n'
-      '   closest LookupBoundary.\n'
-      '   In Material Design, most widgets are conceptually "printed" on a\n'
-      "   sheet of material. In Flutter's material library, that material\n"
-      '   is represented by the Material widget. It is the Material widget\n'
-      '   that renders ink splashes, for instance. Because of this, many\n'
-      '   material library widgets require that there be a Material widget\n'
-      '   in the tree above them.\n'
-      '   To introduce a Material widget, you can either directly include\n'
-      '   one, or use a widget that contains Material itself, such as a\n'
-      '   Card, Dialog, Drawer, or Scaffold.\n'
-      '   The specific widget that could not find a Material ancestor was:\n'
-      '     Chip\n'
-      '   The ancestors of this widget were:\n'
-      '     Center\n'
-      // End of ancestor chain omitted, not relevant for test.
-    ));
+        error.toStringDeep(),
+        startsWith('FlutterError\n'
+            '   No Material widget found.\n'
+            '   Chip widgets require a Material widget ancestor within the\n'
+            '   closest LookupBoundary.\n'
+            '   In Material Design, most widgets are conceptually "printed" on a\n'
+            "   sheet of material. In Flutter's material library, that material\n"
+            '   is represented by the Material widget. It is the Material widget\n'
+            '   that renders ink splashes, for instance. Because of this, many\n'
+            '   material library widgets require that there be a Material widget\n'
+            '   in the tree above them.\n'
+            '   To introduce a Material widget, you can either directly include\n'
+            '   one, or use a widget that contains Material itself, such as a\n'
+            '   Card, Dialog, Drawer, or Scaffold.\n'
+            '   The specific widget that could not find a Material ancestor was:\n'
+            '     Chip\n'
+            '   The ancestors of this widget were:\n'
+            '     Center\n'
+            // End of ancestor chain omitted, not relevant for test.
+            ));
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasMaterialLocalizations control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: BackButton()));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -66,26 +68,27 @@ void main() {
     expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[5], isA<DiagnosticsBlock>());
     expect(
-      error.toStringDeep(), startsWith(
-      'FlutterError\n'
-      '   No MaterialLocalizations found.\n'
-      '   BackButton widgets require MaterialLocalizations to be provided\n'
-      '   by a Localizations widget ancestor.\n'
-      '   The material library uses Localizations to generate messages,\n'
-      '   labels, and abbreviations.\n'
-      '   To introduce a MaterialLocalizations, either use a MaterialApp at\n'
-      '   the root of your application to include them automatically, or\n'
-      '   add a Localization widget with a MaterialLocalizations delegate.\n'
-      '   The specific widget that could not find a MaterialLocalizations\n'
-      '   ancestor was:\n'
-      '     BackButton\n'
-      '   The ancestors of this widget were:\n'
-      '     Center\n'
-      // End of ancestor chain omitted, not relevant for test.
-    ));
+        error.toStringDeep(),
+        startsWith('FlutterError\n'
+            '   No MaterialLocalizations found.\n'
+            '   BackButton widgets require MaterialLocalizations to be provided\n'
+            '   by a Localizations widget ancestor.\n'
+            '   The material library uses Localizations to generate messages,\n'
+            '   labels, and abbreviations.\n'
+            '   To introduce a MaterialLocalizations, either use a MaterialApp at\n'
+            '   the root of your application to include them automatically, or\n'
+            '   add a Localization widget with a MaterialLocalizations delegate.\n'
+            '   The specific widget that could not find a MaterialLocalizations\n'
+            '   ancestor was:\n'
+            '     BackButton\n'
+            '   The ancestors of this widget were:\n'
+            '     Center\n'
+            // End of ancestor chain omitted, not relevant for test.
+            ));
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasScaffold control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasScaffold control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -120,26 +123,28 @@ void main() {
         'or WidgetsApp widget at the top of your application widget tree.\n',
       ),
     );
-    expect(error.toStringDeep(), startsWith(
-      'FlutterError\n'
-      '   No Scaffold widget found.\n'
-      '   Builder widgets require a Scaffold widget ancestor.\n'
-      '   The specific widget that could not find a Scaffold ancestor was:\n'
-      '     Builder\n'
-      '   The ancestors of this widget were:\n'
-      '     Semantics\n'
-      '     Builder\n'
-    ));
-    expect(error.toStringDeep(), endsWith(
-      '     [root]\n'
-      '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
-      '   or WidgetsApp widget at the top of your application widget tree.\n'
-    ));
+    expect(
+        error.toStringDeep(),
+        startsWith('FlutterError\n'
+            '   No Scaffold widget found.\n'
+            '   Builder widgets require a Scaffold widget ancestor.\n'
+            '   The specific widget that could not find a Scaffold ancestor was:\n'
+            '     Builder\n'
+            '   The ancestors of this widget were:\n'
+            '     Semantics\n'
+            '     Builder\n'));
+    expect(
+        error.toStringDeep(),
+        endsWith('     [root]\n'
+            '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
+            '   or WidgetsApp widget at the top of your application widget tree.\n'));
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasScaffoldMessenger control test',
+      (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+    final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+        GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
       content: const Text('Snack'),
       action: SnackBarAction(label: 'Test', onPressed: () {}),
@@ -197,23 +202,23 @@ void main() {
         'MaterialApp at the top of your application widget tree.\n',
       ),
     );
-    expect(error.toStringDeep(), startsWith(
-      'FlutterError\n'
-      '   No ScaffoldMessenger widget found.\n'
-      '   SnackBarAction widgets require a ScaffoldMessenger widget\n'
-      '   ancestor.\n'
-      '   The specific widget that could not find a ScaffoldMessenger\n'
-      '   ancestor was:\n'
-      '     SnackBarAction\n'
-      '   The ancestors of this widget were:\n'
-      '     TextButtonTheme\n'
-      '     Padding\n'
-      '     Row\n'
-    ));
-    expect(error.toStringDeep(), endsWith(
-      '     [root]\n'
-      '   Typically, the ScaffoldMessenger widget is introduced by the\n'
-      '   MaterialApp at the top of your application widget tree.\n'
-    ));
+    expect(
+        error.toStringDeep(),
+        startsWith('FlutterError\n'
+            '   No ScaffoldMessenger widget found.\n'
+            '   SnackBarAction widgets require a ScaffoldMessenger widget\n'
+            '   ancestor.\n'
+            '   The specific widget that could not find a ScaffoldMessenger\n'
+            '   ancestor was:\n'
+            '     SnackBarAction\n'
+            '   The ancestors of this widget were:\n'
+            '     TextButtonTheme\n'
+            '     Padding\n'
+            '     Row\n'));
+    expect(
+        error.toStringDeep(),
+        endsWith('     [root]\n'
+            '   Typically, the ScaffoldMessenger widget is introduced by the\n'
+            '   MaterialApp at the top of your application widget tree.\n'));
   });
 }

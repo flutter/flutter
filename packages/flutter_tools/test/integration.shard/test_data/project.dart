@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/web/file_generators/flutter_js.dart';
 import '../test_utils.dart';
 import 'deferred_components_config.dart';
 
-const String _kDefaultHtml  = '''
+const String _kDefaultHtml = '''
 <html>
     <head>
         <title>Hello, World</title>
@@ -56,7 +56,10 @@ abstract class Project {
     }
     final String? generatedFile = this.generatedFile;
     if (generatedFile != null) {
-      writeFile(fileSystem.path.join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'), generatedFile);
+      writeFile(
+          fileSystem.path
+              .join(dir.path, '.dart_tool', 'flutter_gen', 'flutter_gen.dart'),
+          generatedFile);
     }
     deferredComponents?.setUpIn(dir);
 
@@ -66,14 +69,17 @@ abstract class Project {
 
     // Setup for different flutter web initializations
     writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), flutterJsContents);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
+    writeFile(
+        fileSystem.path.join(dir.path, 'web', 'flutter.js'), flutterJsContents);
+    writeFile(
+        fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
     writePackages(dir.path);
     await getPackages(dir.path);
   }
 
   int lineContaining(String contents, String search) {
-    final int index = contents.split('\n').indexWhere((String l) => l.contains(search));
+    final int index =
+        contents.split('\n').indexWhere((String l) => l.contains(search));
     if (index == -1) {
       throw Exception("Did not find '$search' inside the file");
     }

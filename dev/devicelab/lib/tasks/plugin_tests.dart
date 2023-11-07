@@ -56,7 +56,9 @@ class PluginTest {
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
           tempDir, options, buildTarget,
-          name: 'plugintest', template: template, environment: pluginCreateEnvironment);
+          name: 'plugintest',
+          template: template,
+          environment: pluginCreateEnvironment);
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
       }
@@ -71,15 +73,19 @@ class PluginTest {
         }
       }
       section('Create Flutter app');
-      final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
-          name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
+      final _FlutterProject app = await _FlutterProject.create(
+          tempDir, options, buildTarget,
+          name: 'plugintestapp',
+          template: 'app',
+          environment: appCreateEnvironment);
       try {
         section('Add plugins');
         await app.addPlugin('plugintest',
             pluginPath: path.join('..', 'plugintest'));
         await app.addPlugin('path_provider');
         section('Build app');
-        await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
+        await app.build(buildTarget,
+            validateNativeBuildProject: !dartOnlyPlugin);
         if (runFlutterTest) {
           section('Test app');
           await app.runFlutterTest();
@@ -172,18 +178,15 @@ class $dartPluginClass {
     String pubspecContent = await pubspec.readAsString();
     const String originalIOSKey = '\n      ios:\n';
     const String originalMacOSKey = '\n      macos:\n';
-    if (!pubspecContent.contains(originalIOSKey) || !pubspecContent.contains(originalMacOSKey)) {
+    if (!pubspecContent.contains(originalIOSKey) ||
+        !pubspecContent.contains(originalMacOSKey)) {
       print(pubspecContent);
       throw TaskResult.failure('Missing expected darwin platform plugin keys');
     }
     pubspecContent = pubspecContent.replaceAll(
-        originalIOSKey,
-        '$originalIOSKey        sharedDarwinSource: true\n'
-    );
-    pubspecContent = pubspecContent.replaceAll(
-        originalMacOSKey,
-        '$originalMacOSKey        sharedDarwinSource: true\n'
-    );
+        originalIOSKey, '$originalIOSKey        sharedDarwinSource: true\n');
+    pubspecContent = pubspecContent.replaceAll(originalMacOSKey,
+        '$originalMacOSKey        sharedDarwinSource: true\n');
     await pubspec.writeAsString(pubspecContent, flush: true);
 
     // Copy ios to darwin, and delete macos.
@@ -202,15 +205,19 @@ class $dartPluginClass {
     }
 
     // Remove "s.platform = :ios" to work on all platforms, including macOS.
-    podspecContent = podspecContent.replaceFirst(RegExp(r'.*s\.platform.*'), '');
-    podspecContent = podspecContent.replaceFirst("s.dependency 'Flutter'", "s.ios.dependency 'Flutter'\ns.osx.dependency 'FlutterMacOS'");
+    podspecContent =
+        podspecContent.replaceFirst(RegExp(r'.*s\.platform.*'), '');
+    podspecContent = podspecContent.replaceFirst("s.dependency 'Flutter'",
+        "s.ios.dependency 'Flutter'\ns.osx.dependency 'FlutterMacOS'");
 
     await podspec.writeAsString(podspecContent, flush: true);
 
     // Make PlugintestPlugin.swift compile on iOS and macOS with target conditionals.
-    final String pluginClass = '${name[0].toUpperCase()}${name.substring(1)}Plugin';
+    final String pluginClass =
+        '${name[0].toUpperCase()}${name.substring(1)}Plugin';
     print('pluginClass: $pluginClass');
-    final File pluginRegister = File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
+    final File pluginRegister =
+        File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
     final String pluginRegisterContent = '''
 #if os(macOS)
 import FlutterMacOS
@@ -255,17 +262,19 @@ public class $pluginClass: NSObject, FlutterPlugin {
     switch (buildTarget) {
       case 'apk':
         if (await exec(
-          path.join('.', 'gradlew'),
-          <String>['testDebugUnitTest'],
-          workingDirectory: path.join(rootPath, 'android'),
-          canFail: true,
-        ) != 0) {
+              path.join('.', 'gradlew'),
+              <String>['testDebugUnitTest'],
+              workingDirectory: path.join(rootPath, 'android'),
+              canFail: true,
+            ) !=
+            0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'ios':
         String? simulatorDeviceId;
         try {
-          await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+          await testWithNewIOSSimulator('TestNativeUnitTests',
+              (String deviceId) async {
             simulatorDeviceId = deviceId;
             if (!await runXcodeTests(
               platformDirectory: path.join(rootPath, 'ios'),
@@ -282,10 +291,12 @@ public class $pluginClass: NSObject, FlutterPlugin {
         }
       case 'linux':
         if (await exec(
-          path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_test'),
-          <String>[],
-          canFail: true,
-        ) != 0) {
+              path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins',
+                  'plugintest', 'plugintest_test'),
+              <String>[],
+              canFail: true,
+            ) !=
+            0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'macos':
@@ -300,24 +311,25 @@ public class $pluginClass: NSObject, FlutterPlugin {
         }
       case 'windows':
         if (await exec(
-          path.join(rootPath, 'build', 'windows', 'x64', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
-          <String>[],
-          canFail: true,
-        ) != 0) {
+              path.join(rootPath, 'build', 'windows', 'x64', 'plugins',
+                  'plugintest', 'Release', 'plugintest_test.exe'),
+              <String>[],
+              canFail: true,
+            ) !=
+            0) {
           throw TaskResult.failure('Platform unit tests failed');
         }
     }
   }
 
   static Future<_FlutterProject> create(
-      Directory directory,
-      List<String> options,
-      String target,
-      {
-        required String name,
-        required String template,
-        Map<String, String>? environment,
-      }) async {
+    Directory directory,
+    List<String> options,
+    String target, {
+    required String name,
+    required String template,
+    Map<String, String>? environment,
+  }) async {
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -351,7 +363,8 @@ public class $pluginClass: NSObject, FlutterPlugin {
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
-      throw TaskResult.failure('Update this test to match plugin minimum $target deployment version');
+      throw TaskResult.failure(
+          'Update this test to match plugin minimum $target deployment version');
     }
     // Add transitive dependency on AppAuth 1.6 targeting iOS 8 and macOS 10.9, which no longer builds in Xcode
     // to test the version is forced higher and builds.
@@ -365,17 +378,18 @@ s.platform = :osx, '10.8'
 s.dependency 'AppAuth', '1.6.0'
 ''';
 
-    podspecContent = podspecContent.replaceFirst(versionString, target == 'ios' ? iosContent : macosContent);
+    podspecContent = podspecContent.replaceFirst(
+        versionString, target == 'ios' ? iosContent : macosContent);
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
-  Future<void> build(String target, {bool validateNativeBuildProject = true}) async {
+  Future<void> build(String target,
+      {bool validateNativeBuildProject = true}) async {
     await inDirectory(Directory(rootPath), () async {
-      final String buildOutput =  await evalFlutter('build', options: <String>[
+      final String buildOutput = await evalFlutter('build', options: <String>[
         target,
         '-v',
-        if (target == 'ios')
-          '--no-codesign',
+        if (target == 'ios') '--no-codesign',
       ]);
 
       if (target == 'ios' || target == 'macos') {
@@ -385,15 +399,19 @@ s.dependency 'AppAuth', '1.6.0'
         // but the range of supported deployment target versions is 9.0 to 14.0.99.
         //
         // (or "The macOS deployment target 'MACOSX_DEPLOYMENT_TARGET'"...)
-        if (buildOutput.contains('is set to 10.0, but the range of supported deployment target versions') ||
-            buildOutput.contains('is set to 10.8, but the range of supported deployment target versions')) {
+        if (buildOutput.contains(
+                'is set to 10.0, but the range of supported deployment target versions') ||
+            buildOutput.contains(
+                'is set to 10.8, but the range of supported deployment target versions')) {
           throw TaskResult.failure('Minimum plugin version warning present');
         }
 
         if (validateNativeBuildProject) {
-          final File podsProject = File(path.join(rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
+          final File podsProject = File(path.join(
+              rootPath, target, 'Pods', 'Pods.xcodeproj', 'project.pbxproj'));
           if (!podsProject.existsSync()) {
-            throw TaskResult.failure('Xcode Pods project file missing at ${podsProject.path}');
+            throw TaskResult.failure(
+                'Xcode Pods project file missing at ${podsProject.path}');
           }
 
           final String podsProjectContent = podsProject.readAsStringSync();
@@ -401,25 +419,34 @@ s.dependency 'AppAuth', '1.6.0'
             // Plugins with versions lower than the app version should not have IPHONEOS_DEPLOYMENT_TARGET set.
             // The plugintest plugin target should not have IPHONEOS_DEPLOYMENT_TARGET set since it has been lowered
             // in _reduceDarwinPluginMinimumVersion to 10, which is below the target version of 11.
-            if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 10')) {
-              throw TaskResult.failure('Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
+            if (podsProjectContent
+                .contains('IPHONEOS_DEPLOYMENT_TARGET = 10')) {
+              throw TaskResult.failure(
+                  'Plugin build setting IPHONEOS_DEPLOYMENT_TARGET not removed');
             }
             // Transitive dependency AppAuth targeting too-low 8.0 was not fixed.
             if (podsProjectContent.contains('IPHONEOS_DEPLOYMENT_TARGET = 8')) {
-              throw TaskResult.failure('Transitive dependency build setting IPHONEOS_DEPLOYMENT_TARGET=8 not removed');
+              throw TaskResult.failure(
+                  'Transitive dependency build setting IPHONEOS_DEPLOYMENT_TARGET=8 not removed');
             }
-            if (!podsProjectContent.contains(r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
-              throw TaskResult.failure(r'EXCLUDED_ARCHS is not "$(inherited) i386"');
+            if (!podsProjectContent.contains(
+                r'"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "$(inherited) i386";')) {
+              throw TaskResult.failure(
+                  r'EXCLUDED_ARCHS is not "$(inherited) i386"');
             }
           } else if (target == 'macos') {
             // Same for macOS deployment target, but 10.8.
             // The plugintest target should not have MACOSX_DEPLOYMENT_TARGET set.
-            if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
-              throw TaskResult.failure('Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
+            if (podsProjectContent
+                .contains('MACOSX_DEPLOYMENT_TARGET = 10.8')) {
+              throw TaskResult.failure(
+                  'Plugin build setting MACOSX_DEPLOYMENT_TARGET not removed');
             }
             // Transitive dependency AppAuth targeting too-low 10.9 was not fixed.
-            if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
-              throw TaskResult.failure('Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
+            if (podsProjectContent
+                .contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
+              throw TaskResult.failure(
+                  'Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
             }
           }
         }

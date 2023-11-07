@@ -23,14 +23,11 @@ final Platform linuxPlatform = FakePlatform(
   environment: <String, String>{},
 );
 
-final BuildInfo debugBuild = BuildInfo(
-  BuildMode.debug,
-  '',
-  treeShakeIcons: false,
-  packageConfig: PackageConfig(<Package>[
-    Package('test_api', Uri.parse('file:///test_api/')),
-  ])
-);
+final BuildInfo debugBuild = BuildInfo(BuildMode.debug, '',
+    treeShakeIcons: false,
+    packageConfig: PackageConfig(<Package>[
+      Package('test_api', Uri.parse('file:///test_api/')),
+    ]));
 
 void main() {
   late FakeResidentCompiler residentCompiler;
@@ -46,15 +43,18 @@ void main() {
     logger = LoggingLogger();
   });
 
-  testUsingContext('TestCompiler reports a dill file when compile is successful', () async {
-    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+  testUsingContext(
+      'TestCompiler reports a dill file when compile is successful', () async {
+    residentCompiler.compilerOutput =
+        const CompilerOutput('abc.dill', 0, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
       FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       residentCompiler,
     );
 
-    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
+    expect(await testCompiler.compile(Uri.parse('test/foo.dart')),
+        'test/foo.dart.dill');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Platform: () => linuxPlatform,
@@ -62,8 +62,11 @@ void main() {
     Logger: () => BufferLogger.test(),
   });
 
-  testUsingContext('TestCompiler does not try to cache the dill file when precompiled dill is passed', () async {
-    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+  testUsingContext(
+      'TestCompiler does not try to cache the dill file when precompiled dill is passed',
+      () async {
+    residentCompiler.compilerOutput =
+        const CompilerOutput('abc.dill', 0, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
       FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -80,7 +83,8 @@ void main() {
   });
 
   testUsingContext('TestCompiler reports null when a compile fails', () async {
-    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 1, <Uri>[]);
+    residentCompiler.compilerOutput =
+        const CompilerOutput('abc.dill', 1, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
       FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -96,9 +100,11 @@ void main() {
     Logger: () => BufferLogger.test(),
   });
 
-
-  testUsingContext('TestCompiler records test timings when provided TestTimeRecorder', () async {
-    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+  testUsingContext(
+      'TestCompiler records test timings when provided TestTimeRecorder',
+      () async {
+    residentCompiler.compilerOutput =
+        const CompilerOutput('abc.dill', 0, <Uri>[]);
     final TestTimeRecorder testTimeRecorder = TestTimeRecorder(logger);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
@@ -106,16 +112,21 @@ void main() {
       residentCompiler,
       testTimeRecorder: testTimeRecorder,
     );
-    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
+    expect(await testCompiler.compile(Uri.parse('test/foo.dart')),
+        'test/foo.dart.dill');
     testTimeRecorder.print();
 
     // Expect one message for each phase.
-    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    final List<String> logPhaseMessages = logger.messages
+        .where((String m) => m.startsWith('Runtime for phase '))
+        .toList();
     expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
 
     // As the compile method adds a job to a queue etc we expect at
     // least one phase to take a non-zero amount of time.
-    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+    final List<String> logPhaseMessagesNonZero = logPhaseMessages
+        .where((String m) => !m.contains(Duration.zero.toString()))
+        .toList();
     expect(logPhaseMessagesNonZero, isNotEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -124,7 +135,9 @@ void main() {
     Logger: () => logger,
   });
 
-  testUsingContext('TestCompiler disposing test compiler shuts down backing compiler', () async {
+  testUsingContext(
+      'TestCompiler disposing test compiler shuts down backing compiler',
+      () async {
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
       FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -145,19 +158,20 @@ void main() {
     Logger: () => BufferLogger.test(),
   });
 
-  testUsingContext('TestCompiler updates dart_plugin_registrant.dart', () async {
+  testUsingContext('TestCompiler updates dart_plugin_registrant.dart',
+      () async {
     final Directory fakeDartPlugin = fileSystem.directory('a_plugin');
-      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: foo
 dependencies:
   flutter:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-      fileSystem.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
-      fakeDartPlugin.childFile('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+    fileSystem.file('.packages').writeAsStringSync('a_plugin:/a_plugin/lib/');
+    fakeDartPlugin.childFile('pubspec.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
 name: a_plugin
 flutter:
   plugin:
@@ -170,7 +184,8 @@ environment:
   flutter: ">=2.5.0"
 ''');
 
-    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+    residentCompiler.compilerOutput =
+        const CompilerOutput('abc.dill', 0, <Uri>[]);
     final FakeTestCompiler testCompiler = FakeTestCompiler(
       debugBuild,
       FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -179,15 +194,14 @@ environment:
 
     await testCompiler.compile(Uri.parse('test/foo.dart'));
 
-    final File generatedMain = fileSystem.directory('.dart_tool')
-      .childDirectory('flutter_build')
-      .childFile('dart_plugin_registrant.dart');
+    final File generatedMain = fileSystem
+        .directory('.dart_tool')
+        .childDirectory('flutter_build')
+        .childFile('dart_plugin_registrant.dart');
 
     expect(generatedMain, exists);
     expect(
-      generatedMain.readAsStringSync(),
-      contains('APlugin.registerWith();')
-    );
+        generatedMain.readAsStringSync(), contains('APlugin.registerWith();'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Platform: () => linuxPlatform,
@@ -202,10 +216,9 @@ class FakeTestCompiler extends TestCompiler {
     super.buildInfo,
     super.flutterProject,
     this.residentCompiler, {
-      super.precompiledDillPath,
-      super.testTimeRecorder,
-    }
-  );
+    super.precompiledDillPath,
+    super.testTimeRecorder,
+  });
 
   final FakeResidentCompiler? residentCompiler;
 
@@ -237,16 +250,18 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     Uri? nativeAssetsYaml,
   }) async {
     if (compilerOutput != null) {
-      fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);
+      fileSystem!
+          .file(compilerOutput!.outputFilename)
+          .createSync(recursive: true);
     }
     return compilerOutput;
   }
 
   @override
-  void accept() { }
+  void accept() {}
 
   @override
-  void reset() { }
+  void reset() {}
 
   @override
   Future<Object> shutdown() async {

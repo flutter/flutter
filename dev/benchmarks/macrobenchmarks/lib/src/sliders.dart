@@ -13,8 +13,9 @@ class SlidersPage extends StatefulWidget {
   State<SlidersPage> createState() => _SlidersPageState();
 }
 
-class _SlidersPageState extends State<SlidersPage> with TickerProviderStateMixin {
- late AnimationController _sliderController;
+class _SlidersPageState extends State<SlidersPage>
+    with TickerProviderStateMixin {
+  late AnimationController _sliderController;
   late Animation<double> _sliderAnimation;
   double _sliderValue = 0.0;
   RangeValues _rangeSliderValues = const RangeValues(0.0, 1.0);
@@ -26,16 +27,17 @@ class _SlidersPageState extends State<SlidersPage> with TickerProviderStateMixin
       duration: const Duration(seconds: 1),
       vsync: this,
     )..repeat();
-    _sliderAnimation = Tween<double>(begin: 0, end: 1).animate(_sliderController)
-      ..addListener(() {
-        setState(() {
-          _sliderValue = _sliderAnimation.value;
-          _rangeSliderValues = RangeValues(
-            clampDouble(_sliderAnimation.value, 0, 0.45),
-            1.0 - clampDouble(_sliderAnimation.value, 0, 0.45),
-          );
-        });
-      });
+    _sliderAnimation =
+        Tween<double>(begin: 0, end: 1).animate(_sliderController)
+          ..addListener(() {
+            setState(() {
+              _sliderValue = _sliderAnimation.value;
+              _rangeSliderValues = RangeValues(
+                clampDouble(_sliderAnimation.value, 0, 0.45),
+                1.0 - clampDouble(_sliderAnimation.value, 0, 0.45),
+              );
+            });
+          });
   }
 
   @override
@@ -52,11 +54,11 @@ class _SlidersPageState extends State<SlidersPage> with TickerProviderStateMixin
         children: <Widget>[
           Slider(
             value: _sliderValue,
-            onChanged: (double value) { },
+            onChanged: (double value) {},
           ),
           RangeSlider(
             values: _rangeSliderValues,
-            onChanged: (RangeValues values) { },
+            onChanged: (RangeValues values) {},
           ),
         ],
       ),

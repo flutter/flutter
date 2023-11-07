@@ -35,7 +35,8 @@ abstract class CmakeBasedProject {
 }
 
 /// The Windows sub project.
-class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject {
+class WindowsProject extends FlutterProjectPlatform
+    implements CmakeBasedProject {
   WindowsProject.fromFlutter(this.parent);
 
   @override
@@ -47,7 +48,8 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   String get _childDirectory => 'windows';
 
   @override
-  bool existsSync() => _editableDirectory.existsSync() && cmakeFile.existsSync();
+  bool existsSync() =>
+      _editableDirectory.existsSync() && cmakeFile.existsSync();
 
   @override
   File get cmakeFile => _editableDirectory.childFile('CMakeLists.txt');
@@ -56,35 +58,42 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   File get managedCmakeFile => managedDirectory.childFile('CMakeLists.txt');
 
   @override
-  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
+  File get generatedCmakeConfigFile =>
+      ephemeralDirectory.childFile('generated_config.cmake');
 
   @override
-  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
+  File get generatedPluginCmakeFile =>
+      managedDirectory.childFile('generated_plugins.cmake');
 
   /// The native entrypoint's CMake specification.
   File get runnerCmakeFile => runnerDirectory.childFile('CMakeLists.txt');
 
   /// The native entrypoint's file that adds Flutter to the window.
-  File get runnerFlutterWindowFile => runnerDirectory.childFile('flutter_window.cpp');
+  File get runnerFlutterWindowFile =>
+      runnerDirectory.childFile('flutter_window.cpp');
 
   /// The native entrypoint's resource file. Used to configure things
   /// like the application icon, name, and version.
   File get runnerResourceFile => runnerDirectory.childFile('Runner.rc');
 
   @override
-  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+  Directory get pluginSymlinkDirectory =>
+      ephemeralDirectory.childDirectory('.plugin_symlinks');
 
-  Directory get _editableDirectory => parent.directory.childDirectory(_childDirectory);
+  Directory get _editableDirectory =>
+      parent.directory.childDirectory(_childDirectory);
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
   /// creation should live here.
-  Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
+  Directory get managedDirectory =>
+      _editableDirectory.childDirectory('flutter');
 
   /// The subdirectory of [managedDirectory] that contains files that are
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
-  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+  Directory get ephemeralDirectory =>
+      managedDirectory.childDirectory('ephemeral');
 
   /// The directory in the project that is owned by the app. As much as
   /// possible, Flutter tooling should not edit files in this directory after
@@ -104,19 +113,22 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
 
-  static final RegExp _applicationIdPattern = RegExp(r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''');
+  static final RegExp _applicationIdPattern =
+      RegExp(r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''');
 
   Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
   /// creation should live here.
-  Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
+  Directory get managedDirectory =>
+      _editableDirectory.childDirectory('flutter');
 
   /// The subdirectory of [managedDirectory] that contains files that are
   /// generated on the fly. All generated files that are not intended to be
   /// checked in should live here.
-  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+  Directory get ephemeralDirectory =>
+      managedDirectory.childDirectory('ephemeral');
 
   @override
   bool existsSync() => _editableDirectory.existsSync();
@@ -128,13 +140,16 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
   File get managedCmakeFile => managedDirectory.childFile('CMakeLists.txt');
 
   @override
-  File get generatedCmakeConfigFile => ephemeralDirectory.childFile('generated_config.cmake');
+  File get generatedCmakeConfigFile =>
+      ephemeralDirectory.childFile('generated_config.cmake');
 
   @override
-  File get generatedPluginCmakeFile => managedDirectory.childFile('generated_plugins.cmake');
+  File get generatedPluginCmakeFile =>
+      managedDirectory.childFile('generated_plugins.cmake');
 
   @override
-  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
+  Directory get pluginSymlinkDirectory =>
+      ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 

@@ -294,7 +294,8 @@ abstract class Repository {
       <String>['merge-base', firstRef, secondRef],
       'determine the merge base between $firstRef and $secondRef',
       workingDirectory: (await checkoutDirectory).path,
-    )).trim();
+    ))
+        .trim();
   }
 
   /// Fetch all branches and associated commits and tags from [remoteName].
@@ -392,7 +393,8 @@ abstract class Repository {
   }
 
   /// Determines if one ref is an ancestor for another.
-  Future<bool> isAncestor(String possibleAncestor, String possibleDescendant) async {
+  Future<bool> isAncestor(
+      String possibleAncestor, String possibleDescendant) async {
     final int exitcode = await git.run(
       <String>[
         'merge-base',
@@ -466,7 +468,9 @@ abstract class Repository {
       <String>['status', '--porcelain'],
       'check for uncommitted changes',
       workingDirectory: (await checkoutDirectory).path,
-    )).trim().isNotEmpty;
+    ))
+        .trim()
+        .isNotEmpty;
     if (!hasChanges) {
       throw ConductorException(
           'Tried to commit with message $message but no changes were present');
@@ -645,13 +649,11 @@ class FrameworkRepository extends Repository {
       fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
       ...args,
     ]);
-    process
-        .stdout
+    process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(stdoutCallback ?? stdio.printTrace);
-    process
-        .stderr
+    process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(stderrCallback ?? stdio.printError);
@@ -827,7 +829,8 @@ class EngineRepository extends Repository {
           platform: checkouts.platform,
           processManager: checkouts.processManager,
           stdio: checkouts.stdio,
-          requiredLocalBranches: additionalRequiredLocalBranches ?? const <String>[],
+          requiredLocalBranches:
+              additionalRequiredLocalBranches ?? const <String>[],
         );
 
   final Checkouts checkouts;

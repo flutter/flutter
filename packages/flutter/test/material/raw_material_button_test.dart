@@ -12,7 +12,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('RawMaterialButton responds when tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawMaterialButton responds when tapped',
+      (WidgetTester tester) async {
     bool pressed = false;
     const Color splashColor = Color(0xff00ff00);
     await tester.pumpWidget(
@@ -23,7 +24,9 @@ void main() {
           child: Center(
             child: RawMaterialButton(
               splashColor: splashColor,
-              onPressed: () { pressed = true; },
+              onPressed: () {
+                pressed = true;
+              },
               child: const Text('BUTTON'),
             ),
           ),
@@ -34,7 +37,8 @@ void main() {
     await tester.tap(find.text('BUTTON'));
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox splash =
+        Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -42,7 +46,9 @@ void main() {
     expect(pressed, isTrue);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton responds to shortcut when activated', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'RawMaterialButton responds to shortcut when activated',
+      (WidgetTester tester) async {
     bool pressed = false;
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
     const Color splashColor = Color(0xff00ff00);
@@ -60,7 +66,9 @@ void main() {
               child: RawMaterialButton(
                 splashColor: splashColor,
                 focusNode: focusNode,
-                onPressed: () { pressed = true; },
+                onPressed: () {
+                  pressed = true;
+                },
                 child: const Text('BUTTON'),
               ),
             ),
@@ -77,7 +85,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
 
     if (!kIsWeb) {
-      final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+      final RenderBox splash =
+          Material.of(tester.element(find.byType(InkWell))) as RenderBox;
       expect(splash, paints..circle(color: splashColor));
     }
 
@@ -95,7 +104,8 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump(const Duration(milliseconds: 10));
 
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox splash =
+        Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(splash, paints..circle(color: splashColor));
 
     await tester.pumpAndSettle();
@@ -110,7 +120,9 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'materialTapTargetSize.padded expands hit test area',
+      (WidgetTester tester) async {
     int pressed = 0;
 
     await tester.pumpWidget(
@@ -132,14 +144,16 @@ void main() {
     expect(pressed, 1);
   });
 
-  testWidgetsWithLeakTracking('materialTapTargetSize.padded expands semantics area', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'materialTapTargetSize.padded expands semantics area',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: RawMaterialButton(
-            onPressed: () { },
+            onPressed: () {},
             constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
             materialTapTargetSize: MaterialTapTargetSize.padded,
             child: const Text('+'),
@@ -148,34 +162,38 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            flags: <SemanticsFlag>[
-              SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isButton,
-              SemanticsFlag.isEnabled,
-              SemanticsFlag.isFocusable,
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
+                actions: <SemanticsAction>[
+                  SemanticsAction.tap,
+                ],
+                label: '+',
+                textDirection: TextDirection.ltr,
+                rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+                children: <TestSemantics>[],
+              ),
             ],
-            actions: <SemanticsAction>[
-              SemanticsAction.tap,
-            ],
-            label: '+',
-            textDirection: TextDirection.ltr,
-            rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-            children: <TestSemantics>[],
           ),
-        ],
-      ),
-      ignoreTransform: true,
-    ));
+          ignoreTransform: true,
+        ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Ink splash from center tap originates in correct location',
+      (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const Color fillColor = Color(0xFFEF5350);
@@ -188,7 +206,7 @@ void main() {
           child: Center(
             child: RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               fillColor: fillColor,
               highlightColor: highlightColor,
               splashColor: splashColor,
@@ -202,15 +220,19 @@ void main() {
     final Offset center = tester.getCenter(find.byType(InkWell));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
-    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+    await tester.pump(const Duration(
+        milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box =
+        Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     // centered in material button.
     expect(box, paints..circle(x: 44.0, y: 18.0, color: splashColor));
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Ink splash from tap above material originates in correct location',
+      (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const Color fillColor = Color(0xFFEF5350);
@@ -223,7 +245,7 @@ void main() {
           child: Center(
             child: RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               fillColor: fillColor,
               highlightColor: highlightColor,
               splashColor: splashColor,
@@ -237,21 +259,24 @@ void main() {
     final Offset top = tester.getRect(find.byType(InkWell)).topCenter;
     final TestGesture gesture = await tester.startGesture(top);
     await tester.pump(); // start gesture
-    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    await tester.pump(const Duration(
+        milliseconds: 200)); // wait for splash to be well under way
+    final RenderBox box =
+        Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     // paints above material
     expect(box, paints..circle(x: 44.0, y: 0.0, color: splashColor));
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('off-center child is hit testable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('off-center child is hit testable',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               child: const SizedBox(
                 width: 400.0,
                 height: 400.0,
@@ -274,7 +299,8 @@ void main() {
     expect(find.text('Material').hitTestable(), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('smaller child is hit testable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('smaller child is hit testable',
+      (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -282,7 +308,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () { },
+              onPressed: () {},
               child: SizedBox(
                 key: key,
                 width: 8.0,
@@ -299,7 +325,9 @@ void main() {
     expect(find.byKey(key).hitTestable(), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'RawMaterialButton can be expanded by parent constraints',
+      (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -308,7 +336,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               key: key,
-              onPressed: () { },
+              onPressed: () {},
               child: const SizedBox(),
             ),
           ],
@@ -319,12 +347,14 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(800.0, 48.0));
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton handles focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawMaterialButton handles focus',
+      (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button Focus');
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
 
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -333,12 +363,14 @@ void main() {
             focusNode: focusNode,
             focusColor: focusColor,
             onPressed: () {},
-            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+            child: Container(
+                width: 100, height: 100, color: const Color(0xffff0000)),
           ),
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final RenderBox box =
+        Material.of(tester.element(find.byType(InkWell))) as RenderBox;
     expect(box, isNot(paints..rect(color: focusColor)));
 
     focusNode.requestFocus();
@@ -348,7 +380,8 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawMaterialButton loses focus when disabled.',
+      (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawMaterialButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -357,7 +390,8 @@ void main() {
             autofocus: true,
             focusNode: focusNode,
             onPressed: () {},
-            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+            child: Container(
+                width: 100, height: 100, color: const Color(0xffff0000)),
           ),
         ),
       ),
@@ -372,7 +406,8 @@ void main() {
           child: RawMaterialButton(
             focusNode: focusNode,
             onPressed: null,
-            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+            child: Container(
+                width: 100, height: 100, color: const Color(0xffff0000)),
           ),
         ),
       ),
@@ -383,7 +418,9 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgetsWithLeakTracking("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Disabled RawMaterialButton can't be traversed to.",
+      (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: '$RawMaterialButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: '$RawMaterialButton 2');
 
@@ -397,13 +434,15 @@ void main() {
                   autofocus: true,
                   focusNode: focusNode1,
                   onPressed: () {},
-                  child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+                  child: Container(
+                      width: 100, height: 100, color: const Color(0xffff0000)),
                 ),
                 RawMaterialButton(
                   autofocus: true,
                   focusNode: focusNode2,
                   onPressed: null,
-                  child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+                  child: Container(
+                      width: 100, height: 100, color: const Color(0xffff0000)),
                 ),
               ],
             ),
@@ -426,11 +465,13 @@ void main() {
     focusNode2.dispose();
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton handles hover', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawMaterialButton handles hover',
+      (WidgetTester tester) async {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
-    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    FocusManager.instance.highlightStrategy =
+        FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -439,13 +480,16 @@ void main() {
             hoverColor: hoverColor,
             hoverElevation: 10.5,
             onPressed: () {},
-            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+            child: Container(
+                width: 100, height: 100, color: const Color(0xffff0000)),
           ),
         ),
       ),
     );
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final RenderBox box =
+        Material.of(tester.element(find.byType(InkWell))) as RenderBox;
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     expect(box, isNot(paints..rect(color: hoverColor)));
 
@@ -455,12 +499,13 @@ void main() {
     expect(box, paints..rect(color: hoverColor));
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
-
+  testWidgetsWithLeakTracking(
+      'RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null',
+      (WidgetTester tester) async {
     bool wasPressed;
     Finder rawMaterialButton;
 
-    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
+    Widget buildFrame({VoidCallback? onPressed, VoidCallback? onLongPress}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(
@@ -474,7 +519,9 @@ void main() {
     // onPressed not null, onLongPress null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onPressed: () { wasPressed = true; }),
+      buildFrame(onPressed: () {
+        wasPressed = true;
+      }),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -484,7 +531,9 @@ void main() {
     // onPressed null, onLongPress not null.
     wasPressed = false;
     await tester.pumpWidget(
-      buildFrame(onLongPress: () { wasPressed = true; }),
+      buildFrame(onLongPress: () {
+        wasPressed = true;
+      }),
     );
     rawMaterialButton = find.byType(RawMaterialButton);
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, true);
@@ -499,7 +548,9 @@ void main() {
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized',
+      (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -530,11 +581,13 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton responds to density changes.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawMaterialButton responds to density changes.',
+      (WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
-    Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
+    Future<void> buildTest(VisualDensity visualDensity,
+        {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -545,7 +598,13 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+                child: useText
+                    ? const Text('Text', key: childKey)
+                    : Container(
+                        key: childKey,
+                        width: 100,
+                        height: 100,
+                        color: const Color(0xffff0000)),
               ),
             ),
           ),
@@ -578,20 +637,24 @@ void main() {
     expect(box.size, equals(const Size(88, 48)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
-    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0),
+        useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(100, 60)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
-    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0),
+        useText: true);
     await tester.pumpAndSettle();
     childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  testWidgetsWithLeakTracking('RawMaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'RawMaterialButton changes mouse cursor when hovered',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -605,12 +668,14 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: Offset.zero);
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.text);
 
     // Test default cursor
     await tester.pumpWidget(
@@ -625,7 +690,8 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click);
 
     // Test default cursor when disabled
     await tester.pumpWidget(
@@ -640,6 +706,7 @@ void main() {
       ),
     );
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
   });
 }

@@ -25,7 +25,8 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
   @override
   void migrate() {
     if (!_cmakeFile.existsSync()) {
-      logger.printTrace('CMake project not found, skipping install() NATIVE_ASSETS_DIR migration.');
+      logger.printTrace(
+          'CMake project not found, skipping install() NATIVE_ASSETS_DIR migration.');
       return;
     }
 
@@ -58,7 +59,8 @@ endforeach(bundled_library)
     );
 
     if (originalProjectContents != newProjectContents) {
-      logger.printStatus('CMake missing install() NATIVE_ASSETS_DIR command, updating.');
+      logger.printStatus(
+          'CMake missing install() NATIVE_ASSETS_DIR command, updating.');
       _cmakeFile.writeAsStringSync(newProjectContents);
     }
   }

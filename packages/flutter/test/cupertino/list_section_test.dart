@@ -41,7 +41,9 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'shows long dividers in edge-to-edge section part 1',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -60,7 +62,9 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'shows long dividers in edge-to-edge section part 2',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -81,7 +85,9 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgetsWithLeakTracking('does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'does not show long dividers in insetGrouped section part 1',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -101,7 +107,9 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgetsWithLeakTracking('does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'does not show long dividers in insetGrouped section part 2',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -122,7 +130,8 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('sets background color for section', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('sets background color for section',
+      (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
 
     await tester.pumpWidget(
@@ -140,12 +149,15 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox).first);
-    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+    final DecoratedBox decoratedBox =
+        tester.widget(find.byType(DecoratedBox).first);
+    final BoxDecoration boxDecoration =
+        decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgetsWithLeakTracking('setting clipBehavior clips children section', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('setting clipBehavior clips children section',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -162,7 +174,9 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('not setting clipBehavior does not clip children section', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'not setting clipBehavior does not clip children section',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -178,7 +192,8 @@ void main() {
     expect(find.byType(ClipRRect), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('CupertinoListSection respects separatorColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoListSection respects separatorColor',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -201,7 +216,9 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('CupertinoListSection.separatorColor defaults CupertinoColors.separator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'CupertinoListSection.separatorColor defaults CupertinoColors.separator',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -215,7 +232,8 @@ void main() {
       ),
     );
 
-    final BuildContext context = tester.element(find.byType(CupertinoListSection));
+    final BuildContext context =
+        tester.element(find.byType(CupertinoListSection));
     final Column childrenColumn = tester.widget(find.byType(Column).at(1));
     for (final Widget e in childrenColumn.children) {
       if (e is Container) {

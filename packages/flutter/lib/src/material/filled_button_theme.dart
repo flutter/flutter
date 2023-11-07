@@ -36,7 +36,7 @@ class FilledButtonThemeData with Diagnosticable {
   /// Creates an [FilledButtonThemeData].
   ///
   /// The [style] may be null.
-  const FilledButtonThemeData({ this.style });
+  const FilledButtonThemeData({this.style});
 
   /// Overrides for [FilledButton]'s default style.
   ///
@@ -48,7 +48,8 @@ class FilledButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two filled button themes.
-  static FilledButtonThemeData? lerp(FilledButtonThemeData? a, FilledButtonThemeData? b, double t) {
+  static FilledButtonThemeData? lerp(
+      FilledButtonThemeData? a, FilledButtonThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -74,7 +75,8 @@ class FilledButtonThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
   }
 }
 
@@ -111,7 +113,8 @@ class FilledButtonTheme extends InheritedTheme {
   /// FilledButtonThemeData theme = FilledButtonTheme.of(context);
   /// ```
   static FilledButtonThemeData of(BuildContext context) {
-    final FilledButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<FilledButtonTheme>();
+    final FilledButtonTheme? buttonTheme =
+        context.dependOnInheritedWidgetOfExactType<FilledButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).filledButtonTheme;
   }
 
@@ -121,5 +124,6 @@ class FilledButtonTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(FilledButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(FilledButtonTheme oldWidget) =>
+      data != oldWidget.data;
 }

@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Comparing coordinates', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Comparing coordinates',
+      (WidgetTester tester) async {
     final Key keyA = GlobalKey();
     final Key keyB = GlobalKey();
 
@@ -42,6 +43,7 @@ void main() {
 
     final RenderBox boxB = tester.renderObject(find.byKey(keyB));
     expect(boxB.localToGlobal(Offset.zero), equals(const Offset(100.0, 200.0)));
-    expect(boxB.globalToLocal(const Offset(110.0, 205.0)), equals(const Offset(10.0, 5.0)));
+    expect(boxB.globalToLocal(const Offset(110.0, 205.0)),
+        equals(const Offset(10.0, 5.0)));
   });
 }

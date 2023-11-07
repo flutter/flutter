@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 void main() {
-  testWidgets('ShrinkWrappingViewport respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ShrinkWrappingViewport respects clipBehavior',
+      (WidgetTester tester) async {
     Widget build(ShrinkWrappingViewport child) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -25,7 +26,8 @@ void main() {
     ));
 
     // 1st, check that the render object has received the default clip behavior.
-    final RenderShrinkWrappingViewport renderObject = tester.allRenderObjects.whereType<RenderShrinkWrappingViewport>().first;
+    final RenderShrinkWrappingViewport renderObject =
+        tester.allRenderObjects.whereType<RenderShrinkWrappingViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.

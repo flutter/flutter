@@ -41,16 +41,20 @@ abstract class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the material and widget libraries.
-  static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate =
+      _WidgetsLocalizationsDelegate();
 }
 
-class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+class _WidgetsLocalizationsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
   const _WidgetsLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => kWidgetsSupportedLanguages.contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      kWidgetsSupportedLanguages.contains(locale.languageCode);
 
-  static final Map<Locale, Future<WidgetsLocalizations>> _loadedTranslations = <Locale, Future<WidgetsLocalizations>>{};
+  static final Map<Locale, Future<WidgetsLocalizations>> _loadedTranslations =
+      <Locale, Future<WidgetsLocalizations>>{};
 
   @override
   Future<WidgetsLocalizations> load(Locale locale) {
@@ -66,5 +70,6 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'GlobalWidgetsLocalizations.delegate(${kWidgetsSupportedLanguages.length} locales)';
+  String toString() =>
+      'GlobalWidgetsLocalizations.delegate(${kWidgetsSupportedLanguages.length} locales)';
 }

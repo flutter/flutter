@@ -54,12 +54,13 @@ void main() {
       );
       final FakeCodesignCommand command = FakeCodesignCommand(
         checkouts: checkouts,
-        binariesWithEntitlements: Future<List<String>>.value(binariesWithEntitlements),
-        binariesWithoutEntitlements: Future<List<String>>.value(binariesWithoutEntitlements),
+        binariesWithEntitlements:
+            Future<List<String>>.value(binariesWithEntitlements),
+        binariesWithoutEntitlements:
+            Future<List<String>>.value(binariesWithoutEntitlements),
         flutterRoot: fileSystem.directory(flutterRoot),
       );
-      runner = CommandRunner<void>('codesign-test', '')
-        ..addCommand(command);
+      runner = CommandRunner<void>('codesign-test', '')..addCommand(command);
     }
 
     test('throws exception if not run from macos', () async {
@@ -89,7 +90,13 @@ void main() {
         );
         codesignCheckCommands.add(
           FakeCommand(
-            command: <String>['codesign', '--display', '--entitlements', ':-', bin],
+            command: <String>[
+              'codesign',
+              '--display',
+              '--entitlements',
+              ':-',
+              bin
+            ],
             stdout: expectedEntitlements.join('\n'),
           ),
         );
@@ -164,7 +171,10 @@ void main() {
       ]);
       await runner.run(<String>['codesign', '--$kVerify']);
       expect(processManager.hasRemainingExpectations, false);
-      expect(stdio.stdout, contains('Verified that binaries are codesigned and have expected entitlements'));
+      expect(
+          stdio.stdout,
+          contains(
+              'Verified that binaries are codesigned and have expected entitlements'));
     });
 
     test('framework cloned from repo provided by --$kUpstream', () async {
@@ -178,7 +188,13 @@ void main() {
         );
         codesignCheckCommands.add(
           FakeCommand(
-            command: <String>['codesign', '--display', '--entitlements', ':-', bin],
+            command: <String>[
+              'codesign',
+              '--display',
+              '--entitlements',
+              ':-',
+              bin
+            ],
             stdout: expectedEntitlements.join('\n'),
           ),
         );
@@ -255,10 +271,14 @@ void main() {
         upstreamRepo,
       ]);
       expect(processManager, hasNoRemainingExpectations);
-      expect(stdio.stdout, contains('Verified that binaries for commit $revision are codesigned and have expected entitlements'));
+      expect(
+          stdio.stdout,
+          contains(
+              'Verified that binaries for commit $revision are codesigned and have expected entitlements'));
     });
 
-    test('succeeds if every binary is codesigned and has correct entitlements', () async {
+    test('succeeds if every binary is codesigned and has correct entitlements',
+        () async {
       final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];
       for (final String bin in binariesWithEntitlements) {
         codesignCheckCommands.add(
@@ -268,7 +288,13 @@ void main() {
         );
         codesignCheckCommands.add(
           FakeCommand(
-            command: <String>['codesign', '--display', '--entitlements', ':-', bin],
+            command: <String>[
+              'codesign',
+              '--display',
+              '--entitlements',
+              ':-',
+              bin
+            ],
             stdout: expectedEntitlements.join('\n'),
           ),
         );
@@ -336,40 +362,54 @@ void main() {
           ),
         ...codesignCheckCommands,
       ]);
-      await runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
+      await runner
+          .run(<String>['codesign', '--$kVerify', '--$kRevision', revision]);
       expect(processManager.hasRemainingExpectations, false);
-      expect(stdio.stdout, contains('Verified that binaries for commit $revision are codesigned and have expected entitlements'));
+      expect(
+          stdio.stdout,
+          contains(
+              'Verified that binaries for commit $revision are codesigned and have expected entitlements'));
     });
 
     test('fails if a single binary is not codesigned', () async {
       final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dart'],
+          command: <String>[
+            'codesign',
+            '-vvv',
+            '$flutterCache/dart-sdk/bin/dart'
+          ],
         ),
       );
-      codesignCheckCommands.add(
-        FakeCommand(
-          command: const <String>[
-            'codesign',
-            '--display',
-            '--entitlements',
-            ':-',
-            '$flutterCache/dart-sdk/bin/dart',
-          ],
-          stdout: expectedEntitlements.join('\n'),
-        )
-      );
+      codesignCheckCommands.add(FakeCommand(
+        command: const <String>[
+          'codesign',
+          '--display',
+          '--entitlements',
+          ':-',
+          '$flutterCache/dart-sdk/bin/dart',
+        ],
+        stdout: expectedEntitlements.join('\n'),
+      ));
       // Not signed
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dartaotruntime'],
+          command: <String>[
+            'codesign',
+            '-vvv',
+            '$flutterCache/dart-sdk/bin/dartaotruntime'
+          ],
           exitCode: 1,
         ),
       );
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/engine/darwin-x64/font-subset'],
+          command: <String>[
+            'codesign',
+            '-vvv',
+            '$flutterCache/engine/darwin-x64/font-subset'
+          ],
         ),
       );
 
@@ -430,7 +470,8 @@ void main() {
         ...codesignCheckCommands,
       ]);
       await expectLater(
-        () => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+        () => runner
+            .run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
         throwsExceptionWith('Test failed because unsigned binaries detected.'),
       );
       expect(processManager.hasRemainingExpectations, false);
@@ -440,29 +481,49 @@ void main() {
       final List<FakeCommand> codesignCheckCommands = <FakeCommand>[];
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dart'],
+          command: <String>[
+            'codesign',
+            '-vvv',
+            '$flutterCache/dart-sdk/bin/dart'
+          ],
         ),
       );
-      codesignCheckCommands.add(
-        FakeCommand(
-          command: const <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dart-sdk/bin/dart'],
-          stdout: expectedEntitlements.join('\n'),
-        )
-      );
+      codesignCheckCommands.add(FakeCommand(
+        command: const <String>[
+          'codesign',
+          '--display',
+          '--entitlements',
+          ':-',
+          '$flutterCache/dart-sdk/bin/dart'
+        ],
+        stdout: expectedEntitlements.join('\n'),
+      ));
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/dart-sdk/bin/dartaotruntime'],
+          command: <String>[
+            'codesign',
+            '-vvv',
+            '$flutterCache/dart-sdk/bin/dartaotruntime'
+          ],
         ),
       );
       // No entitlements
+      codesignCheckCommands.add(const FakeCommand(
+        command: <String>[
+          'codesign',
+          '--display',
+          '--entitlements',
+          ':-',
+          '$flutterCache/dart-sdk/bin/dartaotruntime'
+        ],
+      ));
       codesignCheckCommands.add(
         const FakeCommand(
-          command: <String>['codesign', '--display', '--entitlements', ':-', '$flutterCache/dart-sdk/bin/dartaotruntime'],
-        )
-      );
-      codesignCheckCommands.add(
-        const FakeCommand(
-          command: <String>['codesign', '-vvv', '$flutterCache/engine/darwin-x64/font-subset'],
+          command: <String>[
+            'codesign',
+            '-vvv',
+            '$flutterCache/engine/darwin-x64/font-subset'
+          ],
         ),
       );
       createRunner(commands: <FakeCommand>[
@@ -522,13 +583,17 @@ void main() {
         ...codesignCheckCommands,
       ]);
       await expectLater(
-        () => runner.run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
-        throwsExceptionWith('Test failed because files found with the wrong entitlements'),
+        () => runner
+            .run(<String>['codesign', '--$kVerify', '--$kRevision', revision]),
+        throwsExceptionWith(
+            'Test failed because files found with the wrong entitlements'),
       );
       expect(processManager.hasRemainingExpectations, false);
     });
 
-    test('does not check signatures or entitlements if --no-$kSignatures specified', () async {
+    test(
+        'does not check signatures or entitlements if --no-$kSignatures specified',
+        () async {
       createRunner(commands: <FakeCommand>[
         const FakeCommand(command: <String>[
           'git',

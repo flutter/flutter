@@ -9,7 +9,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('SafeArea', () {
-    testWidgetsWithLeakTracking('SafeArea - basic', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SafeArea - basic',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -19,11 +20,14 @@ void main() {
           ),
         ),
       );
-      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(0.0, 20.0));
-      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 580.0));
+      expect(
+          tester.getTopLeft(find.byType(Placeholder)), const Offset(0.0, 20.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)),
+          const Offset(780.0, 580.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - with minimums', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SafeArea - with minimums',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -34,11 +38,14 @@ void main() {
           ),
         ),
       );
-      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(20.0, 10.0));
-      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 570.0));
+      expect(tester.getTopLeft(find.byType(Placeholder)),
+          const Offset(20.0, 10.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)),
+          const Offset(780.0, 570.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - nested', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SafeArea - nested',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -51,11 +58,14 @@ void main() {
           ),
         ),
       );
-      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(20.0, 20.0));
-      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 580.0));
+      expect(tester.getTopLeft(find.byType(Placeholder)),
+          const Offset(20.0, 20.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)),
+          const Offset(780.0, 580.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - changing', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SafeArea - changing',
+        (WidgetTester tester) async {
       const Widget child = SafeArea(
         bottom: false,
         child: SafeArea(
@@ -70,11 +80,14 @@ void main() {
           child: child,
         ),
       );
-      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(20.0, 20.0));
-      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 600.0));
+      expect(tester.getTopLeft(find.byType(Placeholder)),
+          const Offset(20.0, 20.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)),
+          const Offset(780.0, 600.0));
       await tester.pumpWidget(
         const MediaQuery(
-          data: MediaQueryData(padding: EdgeInsets.only(
+          data: MediaQueryData(
+              padding: EdgeInsets.only(
             left: 100.0,
             top: 30.0,
             bottom: 40.0,
@@ -82,26 +95,44 @@ void main() {
           child: child,
         ),
       );
-      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(100.0, 30.0));
-      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+      expect(tester.getTopLeft(find.byType(Placeholder)),
+          const Offset(100.0, 30.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)),
+          const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - properties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SafeArea - properties',
+        (WidgetTester tester) async {
       final SafeArea child = SafeArea(
         right: false,
         bottom: false,
         child: Container(),
       );
-      final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+      final DiagnosticPropertiesBuilder properties =
+          DiagnosticPropertiesBuilder();
       child.debugFillProperties(properties);
 
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+      expect(
+          properties.properties.any((DiagnosticsNode n) =>
+              n is FlagProperty && n.toString() == 'avoid left padding'),
+          true);
+      expect(
+          properties.properties.any((DiagnosticsNode n) =>
+              n is FlagProperty && n.toString() == 'avoid right padding'),
+          false);
+      expect(
+          properties.properties.any((DiagnosticsNode n) =>
+              n is FlagProperty && n.toString() == 'avoid top padding'),
+          true);
+      expect(
+          properties.properties.any((DiagnosticsNode n) =>
+              n is FlagProperty && n.toString() == 'avoid bottom padding'),
+          false);
     });
 
-    group('SafeArea maintains bottom viewPadding when specified for consumed bottom padding', () {
+    group(
+        'SafeArea maintains bottom viewPadding when specified for consumed bottom padding',
+        () {
       Widget boilerplate(Widget child) {
         return Localizations(
           locale: const Locale('en', 'us'),
@@ -113,7 +144,8 @@ void main() {
         );
       }
 
-      testWidgetsWithLeakTracking('SafeArea alone.', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('SafeArea alone.',
+          (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
@@ -148,7 +180,9 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgetsWithLeakTracking('SafeArea alone - partial ViewInsets consume Padding', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking(
+          'SafeArea alone - partial ViewInsets consume Padding',
+          (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
@@ -181,7 +215,8 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgetsWithLeakTracking('SafeArea with nested Scaffold', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('SafeArea with nested Scaffold',
+          (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
@@ -219,7 +254,9 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgetsWithLeakTracking('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking(
+          'SafeArea with nested Scaffold  - partial ViewInsets consume Padding',
+          (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
@@ -269,9 +306,13 @@ void main() {
           child: Viewport(
             offset: offset = ViewportOffset.fixed(0.0),
             slivers: <Widget>[
-              const SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('before'))),
+              const SliverToBoxAdapter(
+                  child: SizedBox(
+                      width: 800.0, height: 100.0, child: Text('before'))),
               sliver,
-              const SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('after'))),
+              const SliverToBoxAdapter(
+                  child: SizedBox(
+                      width: 800.0, height: 100.0, child: Text('after'))),
             ],
           ),
         ),
@@ -279,23 +320,28 @@ void main() {
     }
 
     void verify(WidgetTester tester, List<Rect> expectedRects) {
-      final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>(
+      final List<Rect> testAnswers =
+          tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>(
         (RenderBox target) {
           final Offset topLeft = target.localToGlobal(Offset.zero);
-          final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
+          final Offset bottomRight =
+              target.localToGlobal(target.size.bottomRight(Offset.zero));
           return Rect.fromPoints(topLeft, bottomRight);
         },
       ).toList();
       expect(testAnswers, equals(expectedRects));
     }
 
-    testWidgetsWithLeakTracking('SliverSafeArea - basic', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverSafeArea - basic',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
           const SliverSafeArea(
             left: false,
-            sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+            sliver: SliverToBoxAdapter(
+                child: SizedBox(
+                    width: 800.0, height: 100.0, child: Text('padded'))),
           ),
         ),
       );
@@ -306,14 +352,17 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('SliverSafeArea - basic', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverSafeArea - basic',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
           const SliverSafeArea(
             top: false,
             minimum: EdgeInsets.fromLTRB(0.0, 10.0, 20.0, 30.0),
-            sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+            sliver: SliverToBoxAdapter(
+                child: SizedBox(
+                    width: 800.0, height: 100.0, child: Text('padded'))),
           ),
         ),
       );
@@ -324,7 +373,8 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('SliverSafeArea - nested', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverSafeArea - nested',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
@@ -332,7 +382,9 @@ void main() {
             top: false,
             sliver: SliverSafeArea(
               right: false,
-              sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+              sliver: SliverToBoxAdapter(
+                  child: SizedBox(
+                      width: 800.0, height: 100.0, child: Text('padded'))),
             ),
           ),
         ),
@@ -344,13 +396,16 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('SliverSafeArea - changing', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverSafeArea - changing',
+        (WidgetTester tester) async {
       const Widget sliver = SliverSafeArea(
         bottom: false,
         sliver: SliverSafeArea(
           left: false,
           bottom: false,
-          sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+          sliver: SliverToBoxAdapter(
+              child:
+                  SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
         ),
       );
       await tester.pumpWidget(
@@ -383,18 +438,33 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('SliverSafeArea - properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverSafeArea - properties',
+      (WidgetTester tester) async {
     const SliverSafeArea child = SliverSafeArea(
       right: false,
       bottom: false,
-      sliver: SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
+      sliver: SliverToBoxAdapter(
+          child: SizedBox(width: 800.0, height: 100.0, child: Text('padded'))),
     );
-    final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder properties =
+        DiagnosticPropertiesBuilder();
     child.debugFillProperties(properties);
 
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+    expect(
+        properties.properties.any((DiagnosticsNode n) =>
+            n is FlagProperty && n.toString() == 'avoid left padding'),
+        true);
+    expect(
+        properties.properties.any((DiagnosticsNode n) =>
+            n is FlagProperty && n.toString() == 'avoid right padding'),
+        false);
+    expect(
+        properties.properties.any((DiagnosticsNode n) =>
+            n is FlagProperty && n.toString() == 'avoid top padding'),
+        true);
+    expect(
+        properties.properties.any((DiagnosticsNode n) =>
+            n is FlagProperty && n.toString() == 'avoid bottom padding'),
+        false);
   });
 }

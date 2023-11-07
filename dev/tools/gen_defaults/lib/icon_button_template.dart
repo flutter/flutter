@@ -5,7 +5,11 @@
 import 'template.dart';
 
 class IconButtonTemplate extends TokenTemplate {
-  const IconButtonTemplate(this.tokenGroup, super.blockName, super.fileName, super.tokens, {
+  const IconButtonTemplate(
+    this.tokenGroup,
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -313,5 +317,4 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
 }
 ''';
-
 }

@@ -39,7 +39,8 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   /// breakpoints, and resume.
   @override
   Future<void> launchImpl() async {
-    final FlutterLaunchRequestArguments args = this.args as FlutterLaunchRequestArguments;
+    final FlutterLaunchRequestArguments args =
+        this.args as FlutterLaunchRequestArguments;
 
     final bool debug = enableDebugger;
     final String? program = args.program;
@@ -52,7 +53,9 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     ];
 
     // Handle customTool and deletion of any arguments for it.
-    final String executable = args.customTool ?? fileSystem.path.join(Cache.flutterRoot!, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+    final String executable = args.customTool ??
+        fileSystem.path.join(Cache.flutterRoot!, 'bin',
+            platform.isWindows ? 'flutter.bat' : 'flutter');
     final int? removeArgs = args.customToolReplacesArgs;
     if (args.customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));

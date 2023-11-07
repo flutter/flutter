@@ -22,7 +22,8 @@ class AutocompleteExampleApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text('Type below to autocomplete the following possible results: ${AutocompleteBasicUserExample._userOptions}.'),
+              Text(
+                  'Type below to autocomplete the following possible results: ${AutocompleteBasicUserExample._userOptions}.'),
               const AutocompleteBasicUserExample(),
             ],
           ),
@@ -79,7 +80,9 @@ class AutocompleteBasicUserExample extends StatelessWidget {
           return const Iterable<User>.empty();
         }
         return _userOptions.where((User option) {
-          return option.toString().contains(textEditingValue.text.toLowerCase());
+          return option
+              .toString()
+              .contains(textEditingValue.text.toLowerCase());
         });
       },
       onSelected: (User selection) {

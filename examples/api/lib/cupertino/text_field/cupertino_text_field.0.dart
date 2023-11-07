@@ -24,7 +24,8 @@ class CupertinoTextFieldExample extends StatefulWidget {
   const CupertinoTextFieldExample({super.key});
 
   @override
-  State<CupertinoTextFieldExample> createState() => _CupertinoTextFieldExampleState();
+  State<CupertinoTextFieldExample> createState() =>
+      _CupertinoTextFieldExampleState();
 }
 
 class _CupertinoTextFieldExampleState extends State<CupertinoTextFieldExample> {

@@ -23,21 +23,25 @@ void main() {
 }
 
 void _defineTests() {
-  testWidgetsWithLeakTracking('builds no semantics by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('builds no semantics by default',
+      (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithoutSemantics(),
     ));
 
-    expect(semanticsTester, hasSemantics(
-      TestSemantics.root(),
-    ));
+    expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(),
+        ));
 
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('provides foreground semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('provides foreground semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -52,28 +56,31 @@ void _defineTests() {
       ),
     ));
 
-    expect(semanticsTester, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            rect: TestSemantics.fullScreen,
+    expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
-              TestSemantics(
-                id: 2,
-                label: 'foreground',
-                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+              TestSemantics.rootChild(
+                id: 1,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    label: 'foreground',
+                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ));
+        ));
 
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('provides background semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('provides background semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -88,28 +95,32 @@ void _defineTests() {
       ),
     ));
 
-    expect(semanticsTester, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            rect: TestSemantics.fullScreen,
+    expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
-              TestSemantics(
-                id: 2,
-                label: 'background',
-                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+              TestSemantics.rootChild(
+                id: 1,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 2,
+                    label: 'background',
+                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ));
+        ));
 
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('combines background, child and foreground semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'combines background, child and foreground semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -137,38 +148,41 @@ void _defineTests() {
       ),
     ));
 
-    expect(semanticsTester, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            rect: TestSemantics.fullScreen,
+    expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
-              TestSemantics(
-                id: 3,
-                label: 'background',
-                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-              ),
-              TestSemantics(
-                id: 2,
-                label: 'Hello',
-                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-              ),
-              TestSemantics(
-                id: 4,
-                label: 'foreground',
-                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+              TestSemantics.rootChild(
+                id: 1,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    id: 3,
+                    label: 'background',
+                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                  ),
+                  TestSemantics(
+                    id: 2,
+                    label: 'Hello',
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                  ),
+                  TestSemantics(
+                    id: 4,
+                    label: 'foreground',
+                    rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ));
+        ));
 
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('applies $SemanticsProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('applies $SemanticsProperties',
+      (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -191,29 +205,31 @@ void _defineTests() {
       ),
     ));
 
-    expect(semanticsTester, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            rect: TestSemantics.fullScreen,
+    expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
-              TestSemantics(
-                rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
-                id: 2,
-                flags: 1,
-                label: 'label-before',
-                value: 'value-before',
-                increasedValue: 'increase-before',
-                decreasedValue: 'decrease-before',
-                hint: 'hint-before',
-                textDirection: TextDirection.rtl,
+              TestSemantics.rootChild(
+                id: 1,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+                    id: 2,
+                    flags: 1,
+                    label: 'label-before',
+                    value: 'value-before',
+                    increasedValue: 'increase-before',
+                    decreasedValue: 'decrease-before',
+                    hint: 'hint-before',
+                    textDirection: TextDirection.rtl,
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ));
+        ));
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
@@ -230,48 +246,51 @@ void _defineTests() {
             decreasedValue: 'decrease-after',
             hint: 'hint-after',
             textDirection: TextDirection.ltr,
-            onScrollDown: () { },
-            onLongPress: () { },
-            onDecrease: () { },
-            onIncrease: () { },
-            onScrollLeft: () { },
-            onScrollRight: () { },
-            onScrollUp: () { },
-            onTap: () { },
+            onScrollDown: () {},
+            onLongPress: () {},
+            onDecrease: () {},
+            onIncrease: () {},
+            onScrollLeft: () {},
+            onScrollRight: () {},
+            onScrollUp: () {},
+            onTap: () {},
           ),
         ),
       ),
     ));
 
-    expect(semanticsTester, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            rect: TestSemantics.fullScreen,
+    expect(
+        semanticsTester,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
-              TestSemantics(
-                rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
-                actions: 255,
-                id: 2,
-                flags: 15,
-                label: 'label-after',
-                value: 'value-after',
-                increasedValue: 'increase-after',
-                decreasedValue: 'decrease-after',
-                hint: 'hint-after',
-                textDirection: TextDirection.ltr,
+              TestSemantics.rootChild(
+                id: 1,
+                rect: TestSemantics.fullScreen,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
+                    actions: 255,
+                    id: 2,
+                    flags: 15,
+                    label: 'label-after',
+                    value: 'value-after',
+                    increasedValue: 'increase-after',
+                    decreasedValue: 'decrease-after',
+                    hint: 'hint-after',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ));
+        ));
 
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can toggle semantics on, off, on without crash',
+      (WidgetTester tester) async {
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
         semantics: const CustomPainterSemantics(
@@ -313,7 +332,8 @@ void _defineTests() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
-  testWidgetsWithLeakTracking('Supports all actions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Supports all actions',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<SemanticsAction> performedActions = <SemanticsAction>[];
 
@@ -326,30 +346,43 @@ void _defineTests() {
             onDismiss: () => performedActions.add(SemanticsAction.dismiss),
             onTap: () => performedActions.add(SemanticsAction.tap),
             onLongPress: () => performedActions.add(SemanticsAction.longPress),
-            onScrollLeft: () => performedActions.add(SemanticsAction.scrollLeft),
-            onScrollRight: () => performedActions.add(SemanticsAction.scrollRight),
+            onScrollLeft: () =>
+                performedActions.add(SemanticsAction.scrollLeft),
+            onScrollRight: () =>
+                performedActions.add(SemanticsAction.scrollRight),
             onScrollUp: () => performedActions.add(SemanticsAction.scrollUp),
-            onScrollDown: () => performedActions.add(SemanticsAction.scrollDown),
+            onScrollDown: () =>
+                performedActions.add(SemanticsAction.scrollDown),
             onIncrease: () => performedActions.add(SemanticsAction.increase),
             onDecrease: () => performedActions.add(SemanticsAction.decrease),
             onCopy: () => performedActions.add(SemanticsAction.copy),
             onCut: () => performedActions.add(SemanticsAction.cut),
             onPaste: () => performedActions.add(SemanticsAction.paste),
-            onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-            onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
-            onMoveCursorForwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
-            onMoveCursorBackwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
-            onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
-            onSetText: (String text) => performedActions.add(SemanticsAction.setText),
-            onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
-            onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+            onMoveCursorForwardByCharacter: (bool _) => performedActions
+                .add(SemanticsAction.moveCursorForwardByCharacter),
+            onMoveCursorBackwardByCharacter: (bool _) => performedActions
+                .add(SemanticsAction.moveCursorBackwardByCharacter),
+            onMoveCursorForwardByWord: (bool _) =>
+                performedActions.add(SemanticsAction.moveCursorForwardByWord),
+            onMoveCursorBackwardByWord: (bool _) =>
+                performedActions.add(SemanticsAction.moveCursorBackwardByWord),
+            onSetSelection: (TextSelection _) =>
+                performedActions.add(SemanticsAction.setSelection),
+            onSetText: (String text) =>
+                performedActions.add(SemanticsAction.setText),
+            onDidGainAccessibilityFocus: () =>
+                performedActions.add(SemanticsAction.didGainAccessibilityFocus),
+            onDidLoseAccessibilityFocus: () =>
+                performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
           ),
         ),
       ),
     ));
     final Set<SemanticsAction> allActions = SemanticsAction.values.toSet()
-      ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
-      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
+      ..remove(
+          SemanticsAction.customAction) // customAction is not user-exposed.
+      ..remove(
+          SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -360,16 +393,23 @@ void _defineTests() {
             TestSemantics.rootChild(
               id: expectedId,
               rect: TestSemantics.fullScreen,
-              actions: allActions.fold<int>(0, (int previous, SemanticsAction action) => previous | action.index),
+              actions: allActions.fold<int>(
+                  0,
+                  (int previous, SemanticsAction action) =>
+                      previous | action.index),
             ),
           ],
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+    expect(
+        semantics,
+        hasSemantics(expectedSemantics,
+            ignoreRect: true, ignoreTransform: true));
 
     // Do the actions work?
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final SemanticsOwner semanticsOwner =
+        tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
       switch (action) {
@@ -411,7 +451,8 @@ void _defineTests() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Supports all flags', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Supports all flags',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(CustomPaint(
@@ -455,18 +496,21 @@ void _defineTests() {
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-            id: 1,
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 2,
-                rect: TestSemantics.fullScreen,
-                flags: flags,
-              ),
-            ],
+          id: 1,
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 2,
+              rect: TestSemantics.fullScreen,
+              flags: flags,
+            ),
+          ],
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+    expect(
+        semantics,
+        hasSemantics(expectedSemantics,
+            ignoreRect: true, ignoreTransform: true));
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
@@ -510,23 +554,27 @@ void _defineTests() {
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-            id: 1,
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 2,
-                rect: TestSemantics.fullScreen,
-                flags: flags,
-              ),
-            ],
+          id: 1,
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 2,
+              rect: TestSemantics.fullScreen,
+              flags: flags,
+            ),
+          ],
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+    expect(
+        semantics,
+        hasSemantics(expectedSemantics,
+            ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });
 
   group('diffing', () {
-    testWidgetsWithLeakTracking('complains about duplicate keys', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('complains about duplicate keys',
+        (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       await tester.pumpWidget(CustomPaint(
         painter: _SemanticsDiffTest(<String>[
@@ -545,28 +593,32 @@ void _defineTests() {
       );
     });
 
-    _testDiff('removes the last item from the list', (_DiffTester tester) async {
+    _testDiff('removes the last item from the list',
+        (_DiffTester tester) async {
       await tester.diff(
         from: <String>['a'],
         to: <String>[],
       );
     });
 
-    _testDiff('appends one item at the end of a non-empty list', (_DiffTester tester) async {
+    _testDiff('appends one item at the end of a non-empty list',
+        (_DiffTester tester) async {
       await tester.diff(
         from: <String>['a'],
         to: <String>['a', 'b'],
       );
     });
 
-    _testDiff('prepends one item at the beginning of a non-empty list', (_DiffTester tester) async {
+    _testDiff('prepends one item at the beginning of a non-empty list',
+        (_DiffTester tester) async {
       await tester.diff(
         from: <String>['b'],
         to: <String>['a', 'b'],
       );
     });
 
-    _testDiff('inserts one item in the middle of a list', (_DiffTester tester) async {
+    _testDiff('inserts one item in the middle of a list',
+        (_DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -580,7 +632,8 @@ void _defineTests() {
       );
     });
 
-    _testDiff('removes one item from the middle of a list', (_DiffTester tester) async {
+    _testDiff('removes one item from the middle of a list',
+        (_DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -623,7 +676,8 @@ void _defineTests() {
     });
   });
 
-  testWidgetsWithLeakTracking('rebuilds semantics upon resize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('rebuilds semantics upon resize',
+      (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     final _PainterWithSemantics painter = _PainterWithSemantics(
@@ -668,7 +722,9 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('does not rebuild when shouldRebuildSemantics is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'does not rebuild when shouldRebuildSemantics is false',
+      (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     const CustomPainterSemantics testSemantics = CustomPainterSemantics(
@@ -679,14 +735,16 @@ void _defineTests() {
       ),
     );
 
-    await tester.pumpWidget(CustomPaint(painter: _PainterWithSemantics(
+    await tester.pumpWidget(CustomPaint(
+        painter: _PainterWithSemantics(
       semantics: testSemantics,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
     expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
-    await tester.pumpWidget(CustomPaint(painter: _PainterWithSemantics(
+    await tester.pumpWidget(CustomPaint(
+        painter: _PainterWithSemantics(
       semantics: testSemantics,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 1);
@@ -701,7 +759,8 @@ void _defineTests() {
       ),
     );
 
-    await tester.pumpWidget(CustomPaint(painter: _PainterWithSemantics(
+    await tester.pumpWidget(CustomPaint(
+        painter: _PainterWithSemantics(
       semantics: testSemantics2,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 2);
@@ -712,7 +771,8 @@ void _defineTests() {
   });
 }
 
-void _testDiff(String description, Future<void> Function(_DiffTester tester) testFunction) {
+void _testDiff(String description,
+    Future<void> Function(_DiffTester tester) testFunction) {
   testWidgetsWithLeakTracking(description, (WidgetTester tester) async {
     await testFunction(_DiffTester(tester));
   });
@@ -730,7 +790,8 @@ class _DiffTester {
   ///
   /// - checks that initial and final configurations are in the desired states.
   /// - checks that keyed nodes have stable IDs.
-  Future<void> diff({ required List<String> from, required List<String> to }) async {
+  Future<void> diff(
+      {required List<String> from, required List<String> to}) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     TestSemantics createExpectations(List<String> labels) {
@@ -753,7 +814,8 @@ class _DiffTester {
     await tester.pumpWidget(CustomPaint(
       painter: _SemanticsDiffTest(from),
     ));
-    expect(semanticsTester, hasSemantics(createExpectations(from), ignoreId: true));
+    expect(semanticsTester,
+        hasSemantics(createExpectations(from), ignoreId: true));
 
     SemanticsNode root = RendererBinding.instance.renderView.debugSemantics!;
     final Map<Key, int> idAssignments = <Key, int>{};
@@ -771,15 +833,19 @@ class _DiffTester {
       painter: _SemanticsDiffTest(to),
     ));
     await tester.pumpAndSettle();
-    expect(semanticsTester, hasSemantics(createExpectations(to), ignoreId: true));
+    expect(
+        semanticsTester, hasSemantics(createExpectations(to), ignoreId: true));
 
     root = RendererBinding.instance.renderView.debugSemantics!;
     root.visitChildren((SemanticsNode firstChild) {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {
-          expect(idAssignments[node.key], node.id, reason:
-            'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
-            'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.',
+          expect(
+            idAssignments[node.key],
+            node.id,
+            reason:
+                'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
+                'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.',
           );
         }
         return true;
@@ -830,7 +896,7 @@ class _SemanticsDiffTest extends CustomPainter {
 }
 
 class _PainterWithSemantics extends CustomPainter {
-  _PainterWithSemantics({ required this.semantics });
+  _PainterWithSemantics({required this.semantics});
 
   final CustomPainterSemantics semantics;
 

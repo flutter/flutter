@@ -11,18 +11,20 @@ import '../../xcode_project.dart';
 // the Flutter build settings do not stomp on non-Flutter targets.
 class ProjectBaseConfigurationMigration extends ProjectMigrator {
   ProjectBaseConfigurationMigration(IosProject project, super.logger)
-    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
+      : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;
 
   @override
   void migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace('Xcode project not found, skipping Runner project build settings and configuration migration');
+      logger.printTrace(
+          'Xcode project not found, skipping Runner project build settings and configuration migration');
       return;
     }
 
-    final String originalProjectContents = _xcodeProjectInfoFile.readAsStringSync();
+    final String originalProjectContents =
+        _xcodeProjectInfoFile.readAsStringSync();
     // Example:
     //
     // 		97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */ = {
@@ -37,12 +39,16 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
       multiLine: true,
     );
 
-    final RegExpMatch? match = projectBuildConfigurationList.firstMatch(originalProjectContents);
+    final RegExpMatch? match =
+        projectBuildConfigurationList.firstMatch(originalProjectContents);
 
     // If the PBXProject "Runner" build configuration identifiers can't be parsed, default to the generated template identifiers.
-    final String debugIdentifier = match?.group(1) ?? '97C147031CF9000F007C117D';
-    final String releaseIdentifier = match?.group(2) ?? '97C147041CF9000F007C117D';
-    final String profileIdentifier = match?.group(3) ?? '249021D3217E4FDB00AE95B9';
+    final String debugIdentifier =
+        match?.group(1) ?? '97C147031CF9000F007C117D';
+    final String releaseIdentifier =
+        match?.group(2) ?? '97C147041CF9000F007C117D';
+    final String profileIdentifier =
+        match?.group(3) ?? '249021D3217E4FDB00AE95B9';
 
     // Debug
     final String debugBaseConfigurationOriginal = '''
@@ -54,7 +60,8 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
 		$debugIdentifier /* Debug */ = {
 			isa = XCBuildConfiguration;
 ''';
-    String newProjectContents = originalProjectContents.replaceAll(debugBaseConfigurationOriginal, debugBaseConfigurationReplacement);
+    String newProjectContents = originalProjectContents.replaceAll(
+        debugBaseConfigurationOriginal, debugBaseConfigurationReplacement);
 
     // Profile
     final String profileBaseConfigurationOriginal = '''
@@ -66,7 +73,8 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
 		$profileIdentifier /* Profile */ = {
 			isa = XCBuildConfiguration;
 ''';
-    newProjectContents = newProjectContents.replaceAll(profileBaseConfigurationOriginal, profileBaseConfigurationReplacement);
+    newProjectContents = newProjectContents.replaceAll(
+        profileBaseConfigurationOriginal, profileBaseConfigurationReplacement);
 
     // Release
     final String releaseBaseConfigurationOriginal = '''
@@ -79,7 +87,8 @@ class ProjectBaseConfigurationMigration extends ProjectMigrator {
 			isa = XCBuildConfiguration;
 ''';
 
-    newProjectContents = newProjectContents.replaceAll(releaseBaseConfigurationOriginal, releaseBaseConfigurationReplacement);
+    newProjectContents = newProjectContents.replaceAll(
+        releaseBaseConfigurationOriginal, releaseBaseConfigurationReplacement);
     if (originalProjectContents != newProjectContents) {
       logger.printStatus('Project base configurations detected, removing.');
       _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);

@@ -24,7 +24,7 @@ class TestWidget extends StatelessWidget {
 }
 
 class TestOrientedBox extends SingleChildRenderObjectWidget {
-  const TestOrientedBox({ super.key, super.child });
+  const TestOrientedBox({super.key, super.child});
 
   Decoration _getDecoration(BuildContext context) {
     final Orientation orientation = MediaQuery.orientationOf(context);
@@ -37,22 +37,26 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  RenderDecoratedBox createRenderObject(BuildContext context) => RenderDecoratedBox(decoration: _getDecoration(context));
+  RenderDecoratedBox createRenderObject(BuildContext context) =>
+      RenderDecoratedBox(decoration: _getDecoration(context));
 
   @override
-  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderDecoratedBox renderObject) {
     renderObject.decoration = _getDecoration(context);
   }
 }
 
 class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
-  const TestNonVisitingWidget({ super.key, required Widget super.child });
+  const TestNonVisitingWidget({super.key, required Widget super.child});
 
   @override
-  RenderObject createRenderObject(BuildContext context) => TestNonVisitingRenderObject();
+  RenderObject createRenderObject(BuildContext context) =>
+      TestNonVisitingRenderObject();
 }
 
-class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+class TestNonVisitingRenderObject extends RenderBox
+    with RenderObjectWithChildMixin<RenderBox> {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     return child!.getDryLayout(constraints);
@@ -76,18 +80,21 @@ class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMi
 }
 
 void main() {
-  testWidgetsWithLeakTracking('RenderObjectWidget smoke test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderObjectWidget smoke test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationA));
     SingleChildRenderObjectElement element =
         tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element, isNotNull);
     expect(element.renderObject, isA<RenderDecoratedBox>());
-    RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
+    RenderDecoratedBox renderObject =
+        element.renderObject as RenderDecoratedBox;
     expect(renderObject.decoration, equals(kBoxDecorationA));
     expect(renderObject.position, equals(DecorationPosition.background));
 
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationB));
-    element = tester.element(find.byElementType(SingleChildRenderObjectElement));
+    element =
+        tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element, isNotNull);
     expect(element.renderObject, isA<RenderDecoratedBox>());
     renderObject = element.renderObject as RenderDecoratedBox;
@@ -95,19 +102,21 @@ void main() {
     expect(renderObject.position, equals(DecorationPosition.background));
   });
 
-  testWidgetsWithLeakTracking('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
-
+  testWidgetsWithLeakTracking('RenderObjectWidget can add and remove children',
+      (WidgetTester tester) async {
     void checkFullTree() {
-      final SingleChildRenderObjectElement element =
-          tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
+      final SingleChildRenderObjectElement element = tester
+          .firstElement(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
       expect(element.renderObject, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
+      final RenderDecoratedBox renderObject =
+          element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(kBoxDecorationA));
       expect(renderObject.position, equals(DecorationPosition.background));
       expect(renderObject.child, isNotNull);
       expect(renderObject.child, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox child = renderObject.child! as RenderDecoratedBox;
+      final RenderDecoratedBox child =
+          renderObject.child! as RenderDecoratedBox;
       expect(child.decoration, equals(kBoxDecorationB));
       expect(child.position, equals(DecorationPosition.background));
       expect(child.child, isNull);
@@ -118,7 +127,8 @@ void main() {
           tester.element(find.byElementType(SingleChildRenderObjectElement));
       expect(element, isNotNull);
       expect(element.renderObject, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox renderObject = element.renderObject as RenderDecoratedBox;
+      final RenderDecoratedBox renderObject =
+          element.renderObject as RenderDecoratedBox;
       expect(renderObject.decoration, equals(kBoxDecorationA));
       expect(renderObject.position, equals(DecorationPosition.background));
       expect(renderObject.child, isNull);
@@ -179,8 +189,8 @@ void main() {
     childBareTree();
   });
 
-  testWidgetsWithLeakTracking('Detached render tree is intact', (WidgetTester tester) async {
-
+  testWidgetsWithLeakTracking('Detached render tree is intact',
+      (WidgetTester tester) async {
     await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
       child: DecoratedBox(
@@ -194,7 +204,8 @@ void main() {
     SingleChildRenderObjectElement element =
         tester.firstElement(find.byElementType(SingleChildRenderObjectElement));
     expect(element.renderObject, isA<RenderDecoratedBox>());
-    final RenderDecoratedBox parent = element.renderObject as RenderDecoratedBox;
+    final RenderDecoratedBox parent =
+        element.renderObject as RenderDecoratedBox;
     expect(parent.child, isA<RenderDecoratedBox>());
     final RenderDecoratedBox child = parent.child! as RenderDecoratedBox;
     expect(child.decoration, equals(kBoxDecorationB));
@@ -221,7 +232,8 @@ void main() {
     expect(grandChild.child, isNull);
   });
 
-  testWidgetsWithLeakTracking('Can watch inherited widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can watch inherited widgets',
+      (WidgetTester tester) async {
     final Key boxKey = UniqueKey();
     final TestOrientedBox box = TestOrientedBox(key: boxKey);
 
@@ -230,7 +242,8 @@ void main() {
       child: box,
     ));
 
-    final RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
+    final RenderDecoratedBox renderBox =
+        tester.renderObject(find.byKey(boxKey));
     BoxDecoration decoration = renderBox.decoration as BoxDecoration;
     expect(decoration.color, equals(const Color(0xFF00FF00)));
 
@@ -243,24 +256,32 @@ void main() {
     expect(decoration.color, equals(const Color(0xFF0000FF)));
   });
 
-  testWidgetsWithLeakTracking('RenderObject not visiting children provides helpful error message', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'RenderObject not visiting children provides helpful error message',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestNonVisitingWidget(
         child: Container(color: const Color(0xFFED1D7F)),
       ),
     );
 
-    final RenderObject renderObject = tester.renderObject(find.byType(TestNonVisitingWidget));
+    final RenderObject renderObject =
+        tester.renderObject(find.byType(TestNonVisitingWidget));
     final Canvas testCanvas = TestRecordingCanvas();
-    final PaintingContext testContext = TestRecordingPaintingContext(testCanvas);
+    final PaintingContext testContext =
+        TestRecordingPaintingContext(testCanvas);
 
     // When a parent fails to visit a child in visitChildren, the child's compositing
     // bits won't be cleared properly, leading to an exception during paint.
     renderObject.paint(testContext, Offset.zero);
 
     final dynamic error = tester.takeException();
-    expect(error, isNotNull, reason: 'RenderObject did not throw when painting');
+    expect(error, isNotNull,
+        reason: 'RenderObject did not throw when painting');
     expect(error, isFlutterError);
-    expect(error.toString(), contains("A RenderObject was not visited by the parent's visitChildren"));
+    expect(
+        error.toString(),
+        contains(
+            "A RenderObject was not visited by the parent's visitChildren"));
   });
 }

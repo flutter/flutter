@@ -360,7 +360,8 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow van $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow van ongeveer $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow van ongeveer $rowCount';
 
   @override
   String get pasteButtonLabel => 'Plak';
@@ -390,7 +391,8 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 karakter oor';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakters oor';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount karakters oor';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -850,7 +852,8 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ከ$rowCount ውስጥ';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ከ$rowCount ያህል ውስጥ';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow ከ$rowCount ያህል ውስጥ';
 
   @override
   String get pasteButtonLabel => 'ለጥፍ';
@@ -880,7 +883,8 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 ቁምፊ ይቀራል';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount ቁምፊዎች ይቀራሉ';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount ቁምፊዎች ይቀራሉ';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -1115,7 +1119,8 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'انقر مرّتين للتوسيع';
 
   @override
-  String get expansionTileCollapsedTapHint => 'وسِّع المربّع لعرض مزيد من التفاصيل.';
+  String get expansionTileCollapsedTapHint =>
+      'وسِّع المربّع لعرض مزيد من التفاصيل.';
 
   @override
   String get expansionTileExpandedHint => 'يُرجى النقر مرّتين للتصغير.';
@@ -1337,10 +1342,12 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'فتح قائمة التنقل';
 
   @override
-  String get pageRowsInfoTitleRaw => r'من $firstRow إلى $lastRow من إجمالي $rowCount';
+  String get pageRowsInfoTitleRaw =>
+      r'من $firstRow إلى $lastRow من إجمالي $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'من $firstRow إلى $lastRow من إجمالي $rowCount تقريبًا';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'من $firstRow إلى $lastRow من إجمالي $rowCount تقريبًا';
 
   @override
   String get pasteButtonLabel => 'لصق';
@@ -1361,19 +1368,23 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'إعادة تحميل';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'$remainingCount أحرف متبقية';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'$remainingCount أحرف متبقية';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'$remainingCount حرفًا متبقيًا';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'$remainingCount حرفًا متبقيًا';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'حرف واحد متبقٍ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount حرف متبقٍ';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount حرف متبقٍ';
 
   @override
-  String? get remainingTextFieldCharacterCountTwo => r'حرفان ($remainingCount) متبقيان';
+  String? get remainingTextFieldCharacterCountTwo =>
+      r'حرفان ($remainingCount) متبقيان';
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'لا أحرف متبقية';
@@ -1430,7 +1441,8 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => r'تم اختيار $selectedRowCount عنصر';
 
   @override
-  String? get selectedRowCountTitleMany => r'تم اختيار $selectedRowCount عنصرًا';
+  String? get selectedRowCountTitleMany =>
+      r'تم اختيار $selectedRowCount عنصرًا';
 
   @override
   String? get selectedRowCountTitleOne => 'تم اختيار عنصر واحد';
@@ -1439,7 +1451,8 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleOther => r'تم اختيار $selectedRowCount عنصر';
 
   @override
-  String? get selectedRowCountTitleTwo => r'تم اختيار عنصرين ($selectedRowCount)';
+  String? get selectedRowCountTitleTwo =>
+      r'تم اختيار عنصرين ($selectedRowCount)';
 
   @override
   String? get selectedRowCountTitleZero => 'لم يتم اختيار أي عنصر';
@@ -1830,7 +1843,8 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCountৰ $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCountৰ $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$rowCountৰ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => "পে'ষ্ট কৰক";
@@ -1860,7 +1874,8 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '১টা বর্ণ বাকী আছে';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCountটা বর্ণ বাকী আছে';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCountটা বর্ণ বাকী আছে';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -1926,7 +1941,8 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => "১টা বস্তু বাছনি কৰা হ'ল";
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCountটা বস্তু বাছনি কৰা হ’ল';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCountটা বস্তু বাছনি কৰা হ’ল';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -2092,13 +2108,16 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Yığcamlaşdırın';
 
   @override
-  String get expansionTileCollapsedHint => 'genişləndirmək üçün iki dəfə toxunun';
+  String get expansionTileCollapsedHint =>
+      'genişləndirmək üçün iki dəfə toxunun';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Daha çox detallar üçün genişləndirin';
+  String get expansionTileCollapsedTapHint =>
+      'Daha çox detallar üçün genişləndirin';
 
   @override
-  String get expansionTileExpandedHint => 'yığcamlaşdırmaq üçün iki dəfə toxunun';
+  String get expansionTileExpandedHint =>
+      'yığcamlaşdırmaq üçün iki dəfə toxunun';
 
   @override
   String get expansionTileExpandedTapHint => 'Yığcamlaşdırın';
@@ -2320,7 +2339,8 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow/$rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow/ təxminən $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow/ təxminən $rowCount';
 
   @override
   String get pasteButtonLabel => 'Yerləşdirin';
@@ -2350,7 +2370,8 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 simvol qalır';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount simvol qalır';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount simvol qalır';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -2489,7 +2510,8 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   });
 
   @override
-  String get aboutListTileTitleRaw => r'Інфармацыя пра праграму "$applicationName"';
+  String get aboutListTileTitleRaw =>
+      r'Інфармацыя пра праграму "$applicationName"';
 
   @override
   String get alertDialogLabel => 'Абвестка';
@@ -2810,7 +2832,8 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow з $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow з прыблізна $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow з прыблізна $rowCount';
 
   @override
   String get pasteButtonLabel => 'Уставіць';
@@ -2831,16 +2854,19 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Абнавіць';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Засталося $remainingCount сімвалы';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Засталося $remainingCount сімвалы';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'Засталося $remainingCount сімвалаў';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'Засталося $remainingCount сімвалаў';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Застаўся 1 сімвал';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Засталося $remainingCount сімвала';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Засталося $remainingCount сімвала';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -2900,13 +2926,15 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => r'Выбрана $selectedRowCount элементы';
 
   @override
-  String? get selectedRowCountTitleMany => r'Выбрана $selectedRowCount элементаў';
+  String? get selectedRowCountTitleMany =>
+      r'Выбрана $selectedRowCount элементаў';
 
   @override
   String? get selectedRowCountTitleOne => 'Выбраны 1 элемент';
 
   @override
-  String get selectedRowCountTitleOther => r'Выбрана $selectedRowCount элемента';
+  String get selectedRowCountTitleOther =>
+      r'Выбрана $selectedRowCount элемента';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -3057,7 +3085,8 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Изтриване';
 
   @override
-  String get dialModeButtonLabel => 'Превключване към режим за избор на циферблат';
+  String get dialModeButtonLabel =>
+      'Превключване към режим за избор на циферблат';
 
   @override
   String get dialogLabel => 'Диалогов прозорец';
@@ -3093,7 +3122,8 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Превключване към въвеждане';
 
   @override
-  String get inputTimeModeButtonLabel => 'Превключване към режим за въвеждане на текст';
+  String get inputTimeModeButtonLabel =>
+      'Превключване към режим за въвеждане на текст';
 
   @override
   String get invalidDateFormatLabel => 'Невалиден формат.';
@@ -3300,7 +3330,8 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow от $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow от около $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow от около $rowCount';
 
   @override
   String get pasteButtonLabel => 'Поставяне';
@@ -3330,7 +3361,8 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Остава 1 знак';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Остават $remainingCount знака';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Остават $remainingCount знака';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -3396,7 +3428,8 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Избран е 1 елемент';
 
   @override
-  String get selectedRowCountTitleOther => r'Избрани са $selectedRowCount елемента';
+  String get selectedRowCountTitleOther =>
+      r'Избрани са $selectedRowCount елемента';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -3790,7 +3823,8 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCountটির মধ্যে $firstRow-$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'প্রায় $rowCountটির মধ্যে $firstRow-$lastRow নম্বর';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'প্রায় $rowCountটির মধ্যে $firstRow-$lastRow নম্বর';
 
   @override
   String get pasteButtonLabel => 'পেস্ট করুন';
@@ -3820,7 +3854,8 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'আর ১টি অক্ষর লেখা যাবে';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'আর $remainingCountটি অক্ষর লেখা যাবে';
+  String get remainingTextFieldCharacterCountOther =>
+      r'আর $remainingCountটি অক্ষর লেখা যাবে';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -3886,7 +3921,8 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '১টি আইটেম বেছে নেওয়া হয়েছে';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCountটি আইটেম বেছে নেওয়া হয়েছে';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCountটি আইটেম বেছে নেওয়া হয়েছে';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -4037,7 +4073,8 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Brisanje';
 
   @override
-  String get dialModeButtonLabel => 'Prebacivanje na način rada alata za biranje';
+  String get dialModeButtonLabel =>
+      'Prebacivanje na način rada alata za biranje';
 
   @override
   String get dialogLabel => 'Dijaloški okvir';
@@ -4073,7 +4110,8 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Prebacite na unos teksta';
 
   @override
-  String get inputTimeModeButtonLabel => 'Prebacivanje na način rada unosa teksta';
+  String get inputTimeModeButtonLabel =>
+      'Prebacivanje na način rada unosa teksta';
 
   @override
   String get invalidDateFormatLabel => 'Nevažeći format.';
@@ -4280,7 +4318,8 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow od oko $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow od oko $rowCount';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
@@ -4301,7 +4340,8 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Osvježi';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Još $remainingCount znaka';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Još $remainingCount znaka';
 
   @override
   String? get remainingTextFieldCharacterCountMany => null;
@@ -4310,7 +4350,8 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Još jedan znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Još $remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Još $remainingCount znakova';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -4367,7 +4408,8 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Odaberite godinu';
 
   @override
-  String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
+  String? get selectedRowCountTitleFew =>
+      r'Odabrane su $selectedRowCount stavke';
 
   @override
   String? get selectedRowCountTitleMany => null;
@@ -4376,7 +4418,8 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Odabrana je jedna stavka';
 
   @override
-  String get selectedRowCountTitleOther => r'Odabrano je $selectedRowCount stavki';
+  String get selectedRowCountTitleOther =>
+      r'Odabrano je $selectedRowCount stavki';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -4506,7 +4549,8 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Selecciona la data';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Data de finalització $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Data de finalització $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de finalització';
@@ -4545,7 +4589,8 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'fes doble toc per desplegar';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Desplega per obtenir més informació';
+  String get expansionTileCollapsedTapHint =>
+      'Desplega per obtenir més informació';
 
   @override
   String get expansionTileExpandedHint => 'fes doble toc per replegar';
@@ -4770,7 +4815,8 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r"$firstRow-$lastRow d'aproximadament $rowCount";
+  String get pageRowsInfoTitleApproximateRaw =>
+      r"$firstRow-$lastRow d'aproximadament $rowCount";
 
   @override
   String get pasteButtonLabel => 'Enganxa';
@@ -4800,7 +4846,8 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Queda 1 caràcter';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Queden $remainingCount caràcters';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Queden $remainingCount caràcters';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -4866,7 +4913,8 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => "S'ha seleccionat 1 element";
 
   @override
-  String get selectedRowCountTitleOther => r"S'han seleccionat $selectedRowCount elements";
+  String get selectedRowCountTitleOther =>
+      r"S'han seleccionat $selectedRowCount elements";
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -5260,7 +5308,8 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow z $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow z asi $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow z asi $rowCount';
 
   @override
   String get pasteButtonLabel => 'Vložit';
@@ -5281,16 +5330,19 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Obnovit';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Zbývají $remainingCount znaky';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Zbývají $remainingCount znaky';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'Zbývá $remainingCount znaku';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'Zbývá $remainingCount znaku';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Zbývá 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Zbývá $remainingCount znaků';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Zbývá $remainingCount znaků';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -5347,16 +5399,19 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vyberte rok';
 
   @override
-  String? get selectedRowCountTitleFew => r'Jsou vybrány $selectedRowCount položky';
+  String? get selectedRowCountTitleFew =>
+      r'Jsou vybrány $selectedRowCount položky';
 
   @override
-  String? get selectedRowCountTitleMany => r'Je vybráno $selectedRowCount položky';
+  String? get selectedRowCountTitleMany =>
+      r'Je vybráno $selectedRowCount položky';
 
   @override
   String? get selectedRowCountTitleOne => 'Je vybrána 1 položka';
 
   @override
-  String get selectedRowCountTitleOther => r'Je vybráno $selectedRowCount položek';
+  String get selectedRowCountTitleOther =>
+      r'Je vybráno $selectedRowCount položek';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -5750,7 +5805,8 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow o $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow o tua $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow o tua $rowCount';
 
   @override
   String get pasteButtonLabel => 'Gludo';
@@ -5771,19 +5827,23 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Ail-lwytho';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'$remainingCount nod ar ôl';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'$remainingCount nod ar ôl';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'$remainingCount nod ar ôl';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'$remainingCount nod ar ôl';
 
   @override
   String? get remainingTextFieldCharacterCountOne => '1 nod ar ôl';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount nod ar ôl';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount nod ar ôl';
 
   @override
-  String? get remainingTextFieldCharacterCountTwo => r'$remainingCount nod ar ôl';
+  String? get remainingTextFieldCharacterCountTwo =>
+      r'$remainingCount nod ar ôl';
 
   @override
   String? get remainingTextFieldCharacterCountZero => 'Dim nodau ar ôl';
@@ -5837,22 +5897,27 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Dewiswch flwyddyn';
 
   @override
-  String? get selectedRowCountTitleFew => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String? get selectedRowCountTitleFew =>
+      r"Mae $selectedRowCount eitem wedi'u dewis";
 
   @override
-  String? get selectedRowCountTitleMany => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String? get selectedRowCountTitleMany =>
+      r"Mae $selectedRowCount eitem wedi'u dewis";
 
   @override
   String? get selectedRowCountTitleOne => "Mae 1 eitem wedi'i dewis";
 
   @override
-  String get selectedRowCountTitleOther => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String get selectedRowCountTitleOther =>
+      r"Mae $selectedRowCount eitem wedi'u dewis";
 
   @override
-  String? get selectedRowCountTitleTwo => r"Mae $selectedRowCount eitem wedi'u dewis";
+  String? get selectedRowCountTitleTwo =>
+      r"Mae $selectedRowCount eitem wedi'u dewis";
 
   @override
-  String? get selectedRowCountTitleZero => "Nid oes unrhyw eitemau wedi'u dewis";
+  String? get selectedRowCountTitleZero =>
+      "Nid oes unrhyw eitemau wedi'u dewis";
 
   @override
   String get shareButtonLabel => 'Rhannu...';
@@ -6015,7 +6080,8 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'tryk to gange for at udvide';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Udvid for at få flere oplysninger';
+  String get expansionTileCollapsedTapHint =>
+      'Udvid for at få flere oplysninger';
 
   @override
   String get expansionTileExpandedHint => 'tryk to gange for at skjule';
@@ -6240,7 +6306,8 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow af $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow af ca. $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow-$lastRow af ca. $rowCount';
 
   @override
   String get pasteButtonLabel => 'Indsæt';
@@ -6270,7 +6337,8 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Ét tegn tilbage';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn tilbage';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount tegn tilbage';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -6336,7 +6404,8 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 element er valgt';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount elementer er valgt';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -6730,7 +6799,8 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow von $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow von etwa $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow von etwa $rowCount';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
@@ -6760,7 +6830,8 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Noch 1 Zeichen';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Noch $remainingCount Zeichen';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Noch $remainingCount Zeichen';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -6826,7 +6897,8 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 Element ausgewählt';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount Elemente ausgewählt';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount Elemente ausgewählt';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -6963,7 +7035,8 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   });
 
   @override
-  String get aboutListTileTitleRaw => r'Σχετικά με την εφαρμογή $applicationName';
+  String get aboutListTileTitleRaw =>
+      r'Σχετικά με την εφαρμογή $applicationName';
 
   @override
   String get alertDialogLabel => 'Ειδοποίηση';
@@ -7029,7 +7102,8 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Επιλογή εύρους';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Ημερομηνία έναρξης $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Ημερομηνία έναρξης $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Ημερομηνία έναρξης';
@@ -7059,7 +7133,8 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'πατήστε δύο φορές για ανάπτυξη';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Ανάπτυξη για περισσότερες λεπτομέρειες';
+  String get expansionTileCollapsedTapHint =>
+      'Ανάπτυξη για περισσότερες λεπτομέρειες';
 
   @override
   String get expansionTileExpandedHint => 'πατήστε δύο φορές για σύμπτυξη';
@@ -7077,7 +7152,8 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Εναλλαγή σε καταχώριση';
 
   @override
-  String get inputTimeModeButtonLabel => 'Εναλλαγή στη λειτουργία εισαγωγής κειμένου';
+  String get inputTimeModeButtonLabel =>
+      'Εναλλαγή στη λειτουργία εισαγωγής κειμένου';
 
   @override
   String get invalidDateFormatLabel => 'Μη έγκυρη μορφή.';
@@ -7284,7 +7360,8 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow από $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow από περίπου $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow-$lastRow από περίπου $rowCount';
 
   @override
   String get pasteButtonLabel => 'Επικόλληση';
@@ -7314,7 +7391,8 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'απομένει 1 χαρακτήρας';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'απομένουν $remainingCount χαρακτήρες';
+  String get remainingTextFieldCharacterCountOther =>
+      r'απομένουν $remainingCount χαρακτήρες';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -7380,7 +7458,8 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Επιλέχθηκε 1 στοιχείο';
 
   @override
-  String get selectedRowCountTitleOther => r'Επιλέχθηκαν $selectedRowCount στοιχεία';
+  String get selectedRowCountTitleOther =>
+      r'Επιλέχθηκαν $selectedRowCount στοιχεία';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -7774,7 +7853,8 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow of $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow of about $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow of about $rowCount';
 
   @override
   String get pasteButtonLabel => 'Paste';
@@ -7804,7 +7884,8 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 character remaining';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount characters remaining';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -8797,7 +8878,8 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Seleccionar fecha';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Fecha de finalización';
@@ -8854,7 +8936,8 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Cambiar a cuadro de texto';
 
   @override
-  String get inputTimeModeButtonLabel => 'Cambiar al modo de introducción de texto';
+  String get inputTimeModeButtonLabel =>
+      'Cambiar al modo de introducción de texto';
 
   @override
   String get invalidDateFormatLabel => 'Formato no válido.';
@@ -9061,7 +9144,8 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow‑$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow‑$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow‑$lastRow de aproximadamente $rowCount';
 
   @override
   String get pasteButtonLabel => 'Pegar';
@@ -9091,7 +9175,8 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Queda 1 carácter.';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Quedan $remainingCount caracteres';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Quedan $remainingCount caracteres';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -9157,7 +9242,8 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 elemento seleccionado';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elementos seleccionados';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount elementos seleccionados';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -9341,10 +9427,12 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -9377,13 +9465,15 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -9534,10 +9624,12 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -9570,13 +9662,15 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -9727,10 +9821,12 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -9766,13 +9862,15 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -9920,10 +10018,12 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -9959,13 +10059,15 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -10113,10 +10215,12 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -10152,13 +10256,15 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -10306,10 +10412,12 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -10345,13 +10453,15 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -10499,10 +10609,12 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -10538,13 +10650,15 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -10692,10 +10806,12 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -10731,13 +10847,15 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -10885,10 +11003,12 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -10924,13 +11044,15 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -11078,10 +11200,12 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -11117,13 +11241,15 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -11271,10 +11397,12 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -11310,13 +11438,15 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -11464,10 +11594,12 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -11503,13 +11635,15 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -11657,10 +11791,12 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -11696,13 +11832,15 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -11850,10 +11988,12 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -11889,13 +12029,15 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -12043,10 +12185,12 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -12082,13 +12226,15 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -12236,10 +12382,12 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -12275,13 +12423,15 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -12429,10 +12579,12 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -12468,13 +12620,15 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -12622,10 +12776,12 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -12649,7 +12805,8 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String get nextMonthTooltip => 'Próximo mes';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String get aboutListTileTitleRaw => r'Acerca de $applicationName';
@@ -12667,7 +12824,8 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
@@ -12818,10 +12976,12 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -12857,13 +13017,15 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -13011,10 +13173,12 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   String get invalidDateFormatLabel => 'El formato no es válido.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Fecha de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Fecha de finalización: $fullDate';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Fecha de inicio: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Fecha de inicio: $fullDate';
 
   @override
   String get inputDateModeButtonLabel => 'Cambiar a modo de entrada';
@@ -13050,13 +13214,15 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow de aproximadamente $rowCount';
 
   @override
   String? get selectedRowCountTitleOne => 'Se seleccionó 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Se seleccionaron $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Se seleccionaron $selectedRowCount elementos';
 
   @override
   String get anteMeridiemAbbreviation => 'a.m.';
@@ -13414,7 +13580,8 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount-st';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow umbes $rowCount-st';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow umbes $rowCount-st';
 
   @override
   String get pasteButtonLabel => 'Kleebi';
@@ -13444,7 +13611,8 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Jäänud on 1 tähemärk';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Jäänud on $remainingCount tähemärki';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Jäänud on $remainingCount tähemärki';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -13510,7 +13678,8 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Valitud on 1 üksus';
 
   @override
-  String get selectedRowCountTitleOther => r'Valitud on $selectedRowCount üksust';
+  String get selectedRowCountTitleOther =>
+      r'Valitud on $selectedRowCount üksust';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -13679,7 +13848,8 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'zabaltzeko, sakatu birritan';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Zabaldu hau xehetasun gehiago lortzeko';
+  String get expansionTileCollapsedTapHint =>
+      'Zabaldu hau xehetasun gehiago lortzeko';
 
   @override
   String get expansionTileExpandedHint => 'tolesteko, sakatu birritan';
@@ -13904,7 +14074,8 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow / $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow - $lastRow / $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow - $lastRow / $rowCount';
 
   @override
   String get pasteButtonLabel => 'Itsatsi';
@@ -13934,7 +14105,8 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 karaktere geratzen da';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount karaktere geratzen dira';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount karaktere geratzen dira';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -14000,7 +14172,8 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 elementu hautatu da';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elementu hautatu dira';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount elementu hautatu dira';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -14394,7 +14567,8 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow از $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow از حدود $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow از حدود $rowCount';
 
   @override
   String get pasteButtonLabel => 'جای‌گذاری';
@@ -14424,7 +14598,8 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '۱ نویسه باقی مانده است';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount نویسه باقی مانده است';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount نویسه باقی مانده است';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -14490,7 +14665,8 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '۱ مورد انتخاب شد';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount مورد انتخاب شدند';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount مورد انتخاب شدند';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -14884,7 +15060,8 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow/$rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow/~$rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow/~$rowCount';
 
   @override
   String get pasteButtonLabel => 'Liitä';
@@ -14914,7 +15091,8 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 merkki jäljellä';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount merkkiä jäljellä';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount merkkiä jäljellä';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -14980,7 +15158,8 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 kohde valittu';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount kohdetta valittu';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount kohdetta valittu';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -15110,7 +15289,8 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Pumili ng petsa';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Petsa ng pagtatapos $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Petsa ng pagtatapos $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Petsa ng Pagtatapos';
@@ -15119,7 +15299,8 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Pumili ng hanay';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Petsa ng pagsisimula $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Petsa ng pagsisimula $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Petsa ng Pagsisimula';
@@ -15149,7 +15330,8 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'i-double tap para i-expand';
 
   @override
-  String get expansionTileCollapsedTapHint => 'I-expand para sa higit pang detalye';
+  String get expansionTileCollapsedTapHint =>
+      'I-expand para sa higit pang detalye';
 
   @override
   String get expansionTileExpandedHint => 'i-double tap para i-collapse';
@@ -15374,7 +15556,8 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ng $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ng humigit kumulang $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow ng humigit kumulang $rowCount';
 
   @override
   String get pasteButtonLabel => 'I-paste';
@@ -15404,7 +15587,8 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 character ang natitira';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount na character ang natitira';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount na character ang natitira';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -15470,7 +15654,8 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 item ang napili';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount na item ang napili';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount na item ang napili';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -15657,7 +15842,8 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Passer à la saisie';
 
   @override
-  String get inputTimeModeButtonLabel => 'Passer au mode de saisie au format texte';
+  String get inputTimeModeButtonLabel =>
+      'Passer au mode de saisie au format texte';
 
   @override
   String get invalidDateFormatLabel => 'Format non valide.';
@@ -15864,7 +16050,8 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow sur $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow sur environ $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow sur environ $rowCount';
 
   @override
   String get pasteButtonLabel => 'Coller';
@@ -15894,7 +16081,8 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 caractère restant';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount caractères restants';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount caractères restants';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -15960,7 +16148,8 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 élément sélectionné';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount éléments sélectionnés';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount éléments sélectionnés';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -16048,7 +16237,8 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get expansionTileCollapsedHint => 'toucher deux fois pour développer';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Développer le panneau pour plus de détails';
+  String get expansionTileCollapsedTapHint =>
+      'Développer le panneau pour plus de détails';
 
   @override
   String get scrimLabel => 'Grille';
@@ -16147,7 +16337,8 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   String get pageRowsInfoTitleRaw => r'$firstRow à $lastRow sur $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow à $lastRow sur environ $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow à $lastRow sur environ $rowCount';
 
   @override
   String get tabLabelRaw => r'Onglet $tabIndex sur $tabCount';
@@ -16250,7 +16441,8 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Seleccionar data';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Data de finalización: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Data de finalización: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de finalización';
@@ -16289,7 +16481,8 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'tocar dúas veces para despregar';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Despregar para obter máis detalles';
+  String get expansionTileCollapsedTapHint =>
+      'Despregar para obter máis detalles';
 
   @override
   String get expansionTileExpandedHint => 'toca dúas veces para contraer';
@@ -16304,10 +16497,12 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get hideAccountsLabel => 'Ocultar contas';
 
   @override
-  String get inputDateModeButtonLabel => 'Cambiar ao modo de introdución de texto';
+  String get inputDateModeButtonLabel =>
+      'Cambiar ao modo de introdución de texto';
 
   @override
-  String get inputTimeModeButtonLabel => 'Cambiar ao modo de escritura dos números';
+  String get inputTimeModeButtonLabel =>
+      'Cambiar ao modo de escritura dos números';
 
   @override
   String get invalidDateFormatLabel => 'O formato non é válido.';
@@ -16514,7 +16709,8 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow-$lastRow de aproximadamente $rowCount';
 
   @override
   String get pasteButtonLabel => 'Pegar';
@@ -16544,7 +16740,8 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 carácter restante';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount caracteres restantes';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount caracteres restantes';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -16610,7 +16807,8 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Seleccionouse 1 elemento';
 
   @override
-  String get selectedRowCountTitleOther => r'Seleccionáronse $selectedRowCount elementos';
+  String get selectedRowCountTitleOther =>
+      r'Seleccionáronse $selectedRowCount elementos';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -17004,7 +17202,8 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow von $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow von etwa $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow von etwa $rowCount';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
@@ -17034,7 +17233,8 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Noch 1 Zeichen';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Noch $remainingCount Zeichen';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Noch $remainingCount Zeichen';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -17100,7 +17300,8 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 Element ausgewählt';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount Elemente ausgewählt';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount Elemente ausgewählt';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -17239,7 +17440,8 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'રેંજ પસંદ કરો';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'શરૂ કરવાની તારીખ $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'શરૂ કરવાની તારીખ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'શરૂ કરવાની તારીખ';
@@ -17494,7 +17696,8 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCountમાંથી $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'આશરે $rowCountમાંથી $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'આશરે $rowCountમાંથી $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'પેસ્ટ કરો';
@@ -17524,7 +17727,8 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 અક્ષર બાકી';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount અક્ષર બાકી';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount અક્ષર બાકી';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -17984,7 +18188,8 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$lastRow–$firstRow מתוך $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$lastRow–$firstRow מתוך כ-$rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$lastRow–$firstRow מתוך כ-$rowCount';
 
   @override
   String get pasteButtonLabel => 'הדבקה';
@@ -18008,16 +18213,19 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountFew => null;
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'נותרו $remainingCount תווים';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'נותרו $remainingCount תווים';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'נותר תו אחד';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'נותרו $remainingCount תווים';
+  String get remainingTextFieldCharacterCountOther =>
+      r'נותרו $remainingCount תווים';
 
   @override
-  String? get remainingTextFieldCharacterCountTwo => r'נותרו $remainingCount תווים';
+  String? get remainingTextFieldCharacterCountTwo =>
+      r'נותרו $remainingCount תווים';
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
@@ -18210,7 +18418,8 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'तारीख चुनें';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'खत्म होने की तारीख $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'खत्म होने की तारीख $fullDate';
 
   @override
   String get dateRangeEndLabel => 'खत्म होने की तारीख';
@@ -18219,7 +18428,8 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'रेंज चुनें';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'शुरू होने की तारीख $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'शुरू होने की तारीख $fullDate';
 
   @override
   String get dateRangeStartLabel => 'पेमेंट करने की तारीख';
@@ -18249,7 +18459,8 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'बड़ा करने के लिए दो बार टैप करें';
 
   @override
-  String get expansionTileCollapsedTapHint => 'ज़्यादा जानकारी के लिए बड़ा करें';
+  String get expansionTileCollapsedTapHint =>
+      'ज़्यादा जानकारी के लिए बड़ा करें';
 
   @override
   String get expansionTileExpandedHint => 'छोटा करने के लिए दो बार टैप करें';
@@ -18474,7 +18685,8 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount का $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCount में से करीब $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$rowCount में से करीब $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'चिपकाएं';
@@ -18501,10 +18713,12 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String? get remainingTextFieldCharacterCountOne => 'एक वर्ण आैर डाला जा सकता है';
+  String? get remainingTextFieldCharacterCountOne =>
+      'एक वर्ण आैर डाला जा सकता है';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्ण आैर डाले जा सकते हैं';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount वर्ण आैर डाले जा सकते हैं';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -18964,7 +19178,8 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od otprilike $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow od otprilike $rowCount';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
@@ -18985,7 +19200,8 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Osvježi';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Preostala su $remainingCount znaka';
 
   @override
   String? get remainingTextFieldCharacterCountMany => null;
@@ -18994,7 +19210,8 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Preostao je 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Preostalo je $remainingCount znakova';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -19051,7 +19268,8 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Odaberite godinu';
 
   @override
-  String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
+  String? get selectedRowCountTitleFew =>
+      r'Odabrane su $selectedRowCount stavke';
 
   @override
   String? get selectedRowCountTitleMany => null;
@@ -19060,7 +19278,8 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Odabrana je jedna stavka';
 
   @override
-  String get selectedRowCountTitleOther => r'Odabrano je $selectedRowCount stavki';
+  String get selectedRowCountTitleOther =>
+      r'Odabrano je $selectedRowCount stavki';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -19229,7 +19448,8 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'duplán koppintva kibonthatja';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Bontsa ki a további részletek megtekintéséhez';
+  String get expansionTileCollapsedTapHint =>
+      'Bontsa ki a további részletek megtekintéséhez';
 
   @override
   String get expansionTileExpandedHint => 'duplán koppintva összecsukhatja';
@@ -19454,7 +19674,8 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount/$firstRow–$lastRow.';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'Körülbelül $rowCount/$firstRow–$lastRow.';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'Körülbelül $rowCount/$firstRow–$lastRow.';
 
   @override
   String get pasteButtonLabel => 'Beillesztés';
@@ -19484,7 +19705,8 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 karakter maradt';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakter maradt';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount karakter maradt';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -19550,7 +19772,8 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 elem kiválasztva';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elem kiválasztva';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount elem kiválasztva';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -19689,7 +19912,8 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Ընտրեք ժամանակահատվածը';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Մեկնարկի ամսաթիվը՝ $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Մեկնարկի ամսաթիվը՝ $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Մեկնարկի ամսաթիվը';
@@ -19719,7 +19943,8 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'կրկնակի հպեք ծավալելու համար';
 
   @override
-  String get expansionTileCollapsedTapHint => 'ծավալեք՝ մանրամասները տեսնելու համար';
+  String get expansionTileCollapsedTapHint =>
+      'ծավալեք՝ մանրամասները տեսնելու համար';
 
   @override
   String get expansionTileExpandedHint => 'կրկնակի հպեք ծալելու համար';
@@ -19944,7 +20169,8 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount-ից';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow մոտավորապես $rowCount-ից';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow մոտավորապես $rowCount-ից';
 
   @override
   String get pasteButtonLabel => 'Տեղադրել';
@@ -19965,22 +20191,26 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Թարմացնել';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Մնաց $remainingCount նիշ';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Մնաց $remainingCount նիշ';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'Մնաց $remainingCount նիշ';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'Մնաց $remainingCount նիշ';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Մնացել է 1 նիշ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Մնացել է $remainingCount նիշ';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Մնացել է $remainingCount նիշ';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'Նիշի հնարավորություն չկա';
+  String? get remainingTextFieldCharacterCountZero =>
+      'Նիշի հնարավորություն չկա';
 
   @override
   String get reorderItemDown => 'Տեղափոխել ներքև';
@@ -20034,7 +20264,8 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => r'Ընտրված է $selectedRowCount օբյեկտ';
 
   @override
-  String? get selectedRowCountTitleMany => r'Ընտրված է $selectedRowCount օբյեկտ';
+  String? get selectedRowCountTitleMany =>
+      r'Ընտրված է $selectedRowCount օբյեկտ';
 
   @override
   String? get selectedRowCountTitleOne => 'Ընտրվել է 1 տարր';
@@ -20209,7 +20440,8 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'ketuk dua kali untuk meluaskan';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Luaskan untuk mengetahui detail selengkapnya';
+  String get expansionTileCollapsedTapHint =>
+      'Luaskan untuk mengetahui detail selengkapnya';
 
   @override
   String get expansionTileExpandedHint => 'ketuk dua kali untuk menciutkan';
@@ -20434,7 +20666,8 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow dari $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow dari kira-kira $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow dari kira-kira $rowCount';
 
   @override
   String get pasteButtonLabel => 'Tempel';
@@ -20464,7 +20697,8 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Sisa 1 karakter';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Sisa $remainingCount karakter';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Sisa $remainingCount karakter';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -20699,7 +20933,8 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'ýttu tvisvar til að stækka';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Stækka til að sjá frekari upplýsingar';
+  String get expansionTileCollapsedTapHint =>
+      'Stækka til að sjá frekari upplýsingar';
 
   @override
   String get expansionTileExpandedHint => 'ýttu tvisvar til að minnka';
@@ -20924,7 +21159,8 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow af $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow af um það bil $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow af um það bil $rowCount';
 
   @override
   String get pasteButtonLabel => 'Líma';
@@ -20954,7 +21190,8 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 stafur eftir';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount stafir eftir';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount stafir eftir';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -21171,7 +21408,8 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Elimina';
 
   @override
-  String get dialModeButtonLabel => 'Passa alla modalità selettore del quadrante';
+  String get dialModeButtonLabel =>
+      'Passa alla modalità selettore del quadrante';
 
   @override
   String get dialogLabel => 'Finestra di dialogo';
@@ -21189,7 +21427,8 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'Tocca due volte per espandere';
 
   @override
-  String get expansionTileCollapsedTapHint => 'espandere e visualizzare altri dettagli';
+  String get expansionTileCollapsedTapHint =>
+      'espandere e visualizzare altri dettagli';
 
   @override
   String get expansionTileExpandedHint => 'tocca due volte per comprimere';
@@ -21414,7 +21653,8 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow di $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow di circa $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow-$lastRow di circa $rowCount';
 
   @override
   String get pasteButtonLabel => 'Incolla';
@@ -21444,7 +21684,8 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 carattere rimanente';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount caratteri rimanenti';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount caratteri rimanenti';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -21510,7 +21751,8 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 elemento selezionato';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elementi selezionati';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount elementi selezionati';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -21904,7 +22146,8 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow 行（合計 $rowCount 行）';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow 行（合計約 $rowCount 行）';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow 行（合計約 $rowCount 行）';
 
   @override
   String get pasteButtonLabel => '貼り付け';
@@ -21934,7 +22177,8 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '残り 1 文字（半角相当）';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'残り $remainingCount 文字（半角相当）';
+  String get remainingTextFieldCharacterCountOther =>
+      r'残り $remainingCount 文字（半角相当）';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -22130,7 +22374,8 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'თარიღის არჩევა';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'დასრულების თარიღია $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'დასრულების თარიღია $fullDate';
 
   @override
   String get dateRangeEndLabel => 'დასრულების თარიღი';
@@ -22139,7 +22384,8 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'დიაპაზონის არჩევა';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'დაწყების თარიღია $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'დაწყების თარიღია $fullDate';
 
   @override
   String get dateRangeStartLabel => 'დაწყების თარიღი';
@@ -22394,7 +22640,8 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow / $rowCount-დან';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow / დაახლოებით $rowCount-დან';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow-$lastRow / დაახლოებით $rowCount-დან';
 
   @override
   String get pasteButtonLabel => 'ჩასმა';
@@ -22424,7 +22671,8 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'დარჩა 1 სიმბოლო';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'დარჩა $remainingCount სიმბოლო';
+  String get remainingTextFieldCharacterCountOther =>
+      r'დარჩა $remainingCount სიმბოლო';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -22490,7 +22738,8 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'არჩეულია 1 ერთეული';
 
   @override
-  String get selectedRowCountTitleOther => r'არჩეულია $selectedRowCount ერთეული';
+  String get selectedRowCountTitleOther =>
+      r'არჩეულია $selectedRowCount ერთეული';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -22884,7 +23133,8 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount ішінен $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'Шамамен $rowCount ішінен $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'Шамамен $rowCount ішінен $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'Қою';
@@ -22914,7 +23164,8 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 таңба қалды.';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount таңба қалды.';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount таңба қалды.';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -22980,7 +23231,8 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 элемент таңдалды.';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount элемент таңдалды.';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount элемент таңдалды.';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -23110,7 +23362,8 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'ជ្រើសរើស​កាល​បរិច្ឆេទ';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'កាលបរិច្ឆេទ​បញ្ចប់ $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'កាលបរិច្ឆេទ​បញ្ចប់ $fullDate';
 
   @override
   String get dateRangeEndLabel => 'កាលបរិច្ឆេទ​បញ្ចប់';
@@ -23119,7 +23372,8 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ជ្រើសរើសចន្លោះ';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'កាលបរិច្ឆេទ​ចាប់ផ្ដើម $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'កាលបរិច្ឆេទ​ចាប់ផ្ដើម $fullDate';
 
   @override
   String get dateRangeStartLabel => 'កាលបរិច្ឆេទ​ចាប់ផ្ដើម';
@@ -23149,7 +23403,8 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'ចុចពីរដង ដើម្បីពង្រីក';
 
   @override
-  String get expansionTileCollapsedTapHint => 'ពង្រីក​ដើម្បីទទួលបាន​ព័ត៌មានលម្អិត​បន្ថែម';
+  String get expansionTileCollapsedTapHint =>
+      'ពង្រីក​ដើម្បីទទួលបាន​ព័ត៌មានលម្អិត​បន្ថែម';
 
   @override
   String get expansionTileExpandedHint => 'ចុចពីរដង ដើម្បីបង្រួម';
@@ -23371,10 +23626,12 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'បើក​ម៉ឺនុយរុករក';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ក្នុង​ចំណោម​ $rowCount';
+  String get pageRowsInfoTitleRaw =>
+      r'$firstRow–$lastRow ក្នុង​ចំណោម​ $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ក្នុង​ចំណោម​ប្រហែល $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow ក្នុង​ចំណោម​ប្រហែល $rowCount';
 
   @override
   String get pasteButtonLabel => 'ដាក់​ចូល';
@@ -23404,7 +23661,8 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'នៅសល់​ 1 តួ​ទៀត';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'នៅសល់ $remainingCount តួ​ទៀត';
+  String get remainingTextFieldCharacterCountOther =>
+      r'នៅសល់ $remainingCount តួ​ទៀត';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -23470,7 +23728,8 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'បាន​ជ្រើស​រើស​ធាតុ 1';
 
   @override
-  String get selectedRowCountTitleOther => r'បាន​ជ្រើស​រើស​ធាតុ $selectedRowCount';
+  String get selectedRowCountTitleOther =>
+      r'បាន​ជ្រើស​រើស​ធាតុ $selectedRowCount';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -23543,40 +23802,52 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   });
 
   @override
-  String get aboutListTileTitleRaw => '\u{24}\u{61}\u{70}\u{70}\u{6c}\u{69}\u{63}\u{61}\u{74}\u{69}\u{6f}\u{6e}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{cac}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+  String get aboutListTileTitleRaw =>
+      '\u{24}\u{61}\u{70}\u{70}\u{6c}\u{69}\u{63}\u{61}\u{74}\u{69}\u{6f}\u{6e}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{cac}\u{c97}\u{ccd}\u{c97}\u{cc6}';
 
   @override
-  String get alertDialogLabel => '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
+  String get alertDialogLabel =>
+      '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
 
   @override
-  String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+  String get anteMeridiemAbbreviation =>
+      '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
 
   @override
-  String get backButtonTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca4}\u{cbf}\u{cb0}\u{cc1}\u{c97}\u{cbf}';
+  String get backButtonTooltip =>
+      '\u{cb9}\u{cbf}\u{c82}\u{ca4}\u{cbf}\u{cb0}\u{cc1}\u{c97}\u{cbf}';
 
   @override
-  String get bottomSheetLabel => '\u{c95}\u{cc6}\u{cb3}\u{cad}\u{cbe}\u{c97}\u{ca6}\u{20}\u{cb6}\u{cc0}\u{c9f}\u{ccd}';
+  String get bottomSheetLabel =>
+      '\u{c95}\u{cc6}\u{cb3}\u{cad}\u{cbe}\u{c97}\u{ca6}\u{20}\u{cb6}\u{cc0}\u{c9f}\u{ccd}';
 
   @override
-  String get calendarModeButtonLabel => '\u{c95}\u{ccd}\u{caf}\u{cbe}\u{cb2}\u{cc6}\u{c82}\u{ca1}\u{cb0}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get calendarModeButtonLabel =>
+      '\u{c95}\u{ccd}\u{caf}\u{cbe}\u{cb2}\u{cc6}\u{c82}\u{ca1}\u{cb0}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get cancelButtonLabel => '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get cancelButtonLabel =>
+      '\u{cb0}\u{ca6}\u{ccd}\u{ca6}\u{cc1}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get closeButtonLabel => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
+  String get closeButtonLabel =>
+      '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
 
   @override
-  String get closeButtonTooltip => '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
+  String get closeButtonTooltip =>
+      '\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
 
   @override
-  String get collapsedHint => '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get collapsedHint =>
+      '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get collapsedIconTapHint => '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get collapsedIconTapHint =>
+      '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get continueButtonLabel => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cc1}\u{cb5}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get continueButtonLabel =>
+      '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cc1}\u{cb5}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
@@ -23585,34 +23856,43 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get currentDateLabel => '\u{c87}\u{c82}\u{ca6}\u{cc1}';
 
   @override
-  String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get cutButtonLabel =>
+      '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get dateHelpText => 'mm/dd/yyyy';
 
   @override
-  String get dateInputLabel => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
+  String get dateInputLabel =>
+      '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get dateOutOfRangeLabel => '\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}\u{caf}\u{20}\u{cb9}\u{cca}\u{cb0}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get dateOutOfRangeLabel =>
+      '\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}\u{caf}\u{20}\u{cb9}\u{cca}\u{cb0}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get datePickerHelpText => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get datePickerHelpText =>
+      '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => '\u{cae}\u{cc1}\u{c95}\u{ccd}\u{ca4}\u{cbe}\u{caf}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      '\u{cae}\u{cc1}\u{c95}\u{ccd}\u{ca4}\u{cbe}\u{caf}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
 
   @override
-  String get dateRangeEndLabel => '\u{c85}\u{c82}\u{ca4}\u{cbf}\u{cae}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
+  String get dateRangeEndLabel =>
+      '\u{c85}\u{c82}\u{ca4}\u{cbf}\u{cae}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
-  String get dateRangePickerHelpText => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{ca6}\u{20}\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}\u{caf}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get dateRangePickerHelpText =>
+      '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{ca6}\u{20}\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}\u{caf}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{24}\u{66}\u{75}\u{6c}\u{6c}\u{44}\u{61}\u{74}\u{65}';
 
   @override
-  String get dateRangeStartLabel => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
+  String get dateRangeStartLabel =>
+      '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{20}\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
   String get dateSeparator => '/';
@@ -23621,52 +23901,67 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => '\u{c85}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get dialModeButtonLabel => '\u{ca1}\u{caf}\u{cb2}\u{ccd}\u{20}\u{caa}\u{cbf}\u{c95}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
+  String get dialModeButtonLabel =>
+      '\u{ca1}\u{caf}\u{cb2}\u{ccd}\u{20}\u{caa}\u{cbf}\u{c95}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get dialogLabel => '\u{ca1}\u{cc8}\u{cb2}\u{cbe}\u{c97}\u{ccd}';
 
   @override
-  String get drawerLabel => '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
+  String get drawerLabel =>
+      '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
 
   @override
-  String get expandedHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get expandedHint =>
+      '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get expandedIconTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
+  String get expandedIconTapHint =>
+      '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get expansionTileCollapsedHint => '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cb2}\u{cc1}\u{20}\u{ca1}\u{cac}\u{cb2}\u{ccd}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get expansionTileCollapsedHint =>
+      '\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cb2}\u{cc1}\u{20}\u{ca1}\u{cac}\u{cb2}\u{ccd}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get expansionTileCollapsedTapHint => '\u{c87}\u{ca8}\u{ccd}\u{ca8}\u{cb7}\u{ccd}\u{c9f}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cb5}\u{cb0}\u{c97}\u{cb3}\u{cbf}\u{c97}\u{cbe}\u{c97}\u{cbf}\u{20}\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get expansionTileCollapsedTapHint =>
+      '\u{c87}\u{ca8}\u{ccd}\u{ca8}\u{cb7}\u{ccd}\u{c9f}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cb5}\u{cb0}\u{c97}\u{cb3}\u{cbf}\u{c97}\u{cbe}\u{c97}\u{cbf}\u{20}\u{cb5}\u{cbf}\u{cb8}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get expansionTileExpandedHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cb2}\u{cc1}\u{20}\u{ca1}\u{cac}\u{cb2}\u{ccd}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get expansionTileExpandedHint =>
+      '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cb2}\u{cc1}\u{20}\u{ca1}\u{cac}\u{cb2}\u{ccd}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get expansionTileExpandedTapHint => '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
+  String get expansionTileExpandedTapHint =>
+      '\u{c95}\u{cc1}\u{c97}\u{ccd}\u{c97}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get firstPageTooltip => '\u{cae}\u{cca}\u{ca6}\u{cb2}\u{20}\u{caa}\u{cc1}\u{c9f}';
+  String get firstPageTooltip =>
+      '\u{cae}\u{cca}\u{ca6}\u{cb2}\u{20}\u{caa}\u{cc1}\u{c9f}';
 
   @override
-  String get hideAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cb0}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get hideAccountsLabel =>
+      '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cb0}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get inputDateModeButtonLabel => '\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get inputDateModeButtonLabel =>
+      '\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get inputTimeModeButtonLabel => '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{20}\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
+  String get inputTimeModeButtonLabel =>
+      '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{20}\u{c87}\u{ca8}\u{ccd}\u{200c}\u{caa}\u{cc1}\u{c9f}\u{ccd}\u{20}\u{cae}\u{ccb}\u{ca1}\u{ccd}\u{200c}\u{c97}\u{cc6}\u{20}\u{cac}\u{ca6}\u{cb2}\u{cbe}\u{caf}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get invalidDateFormatLabel => '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cab}\u{cbe}\u{cb0}\u{ccd}\u{cae}\u{ccd}\u{caf}\u{cbe}\u{c9f}\u{ccd}\u{2e}';
+  String get invalidDateFormatLabel =>
+      '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cab}\u{cbe}\u{cb0}\u{ccd}\u{cae}\u{ccd}\u{caf}\u{cbe}\u{c9f}\u{ccd}\u{2e}';
 
   @override
-  String get invalidDateRangeLabel => '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{20}\u{cb6}\u{ccd}\u{cb0}\u{cc7}\u{ca3}\u{cbf}\u{2e}';
+  String get invalidDateRangeLabel =>
+      '\u{c85}\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{20}\u{cb6}\u{ccd}\u{cb0}\u{cc7}\u{ca3}\u{cbf}\u{2e}';
 
   @override
-  String get invalidTimeLabel => '\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
+  String get invalidTimeLabel =>
+      '\u{cae}\u{cbe}\u{ca8}\u{ccd}\u{caf}\u{cb5}\u{cbe}\u{ca6}\u{20}\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get keyboardKeyAlt => 'Alt';
@@ -23810,7 +24105,8 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get keyboardKeySpace => 'Space';
 
   @override
-  String get lastPageTooltip => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{caf}\u{20}\u{caa}\u{cc1}\u{c9f}';
+  String get lastPageTooltip =>
+      '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{caf}\u{20}\u{caa}\u{cc1}\u{c9f}';
 
   @override
   String? get licensesPackageDetailTextFew => null;
@@ -23819,10 +24115,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextMany => null;
 
   @override
-  String? get licensesPackageDetailTextOne => '\u{31}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}';
+  String? get licensesPackageDetailTextOne =>
+      '\u{31}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}';
 
   @override
-  String get licensesPackageDetailTextOther => '\u{24}\u{6c}\u{69}\u{63}\u{65}\u{6e}\u{73}\u{65}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
+  String get licensesPackageDetailTextOther =>
+      '\u{24}\u{6c}\u{69}\u{63}\u{65}\u{6e}\u{73}\u{65}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
 
   @override
   String? get licensesPackageDetailTextTwo => null;
@@ -23831,58 +24129,73 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
-  String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
+  String get licensesPageTitle =>
+      '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
 
   @override
-  String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
+  String get lookUpButtonLabel =>
+      '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
 
   @override
-  String get menuBarMenuLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{cac}\u{cbe}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
+  String get menuBarMenuLabel =>
+      '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{cac}\u{cbe}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
 
   @override
-  String get menuDismissLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cc6}\u{cc2}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+  String get menuDismissLabel =>
+      '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cc6}\u{cc2}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+  String get modalBarrierDismissLabel =>
+      '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get moreButtonTooltip => '\u{c87}\u{ca8}\u{ccd}\u{ca8}\u{cb7}\u{ccd}\u{c9f}\u{cc1}';
+  String get moreButtonTooltip =>
+      '\u{c87}\u{ca8}\u{ccd}\u{ca8}\u{cb7}\u{ccd}\u{c9f}\u{cc1}';
 
   @override
-  String get nextMonthTooltip => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
+  String get nextMonthTooltip =>
+      '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
 
   @override
-  String get nextPageTooltip => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
+  String get nextPageTooltip =>
+      '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
 
   @override
   String get okButtonLabel => '\u{cb8}\u{cb0}\u{cbf}';
 
   @override
-  String get openAppDrawerTooltip => '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{cc6}\u{cb0}\u{cc6}\u{caf}\u{cbf}\u{cb0}\u{cbf}';
+  String get openAppDrawerTooltip =>
+      '\u{ca8}\u{ccd}\u{caf}\u{cbe}\u{cb5}\u{cbf}\u{c97}\u{cc7}\u{cb6}\u{ca8}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{cc6}\u{cb0}\u{cc6}\u{caf}\u{cbf}\u{cb0}\u{cbf}';
 
   @override
-  String get pageRowsInfoTitleRaw => '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
+  String get pageRowsInfoTitleRaw =>
+      '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
+  String get pageRowsInfoTitleApproximateRaw =>
+      '\u{24}\u{72}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{24}\u{66}\u{69}\u{72}\u{73}\u{74}\u{52}\u{6f}\u{77}\u{2013}\u{24}\u{6c}\u{61}\u{73}\u{74}\u{52}\u{6f}\u{77}';
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get popupMenuLabel => '\u{caa}\u{cbe}\u{caa}\u{ccd}\u{c85}\u{caa}\u{ccd}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
+  String get popupMenuLabel =>
+      '\u{caa}\u{cbe}\u{caa}\u{ccd}\u{c85}\u{caa}\u{ccd}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
 
   @override
   String get postMeridiemAbbreviation => '\u{cb8}\u{c82}\u{c9c}\u{cc6}';
 
   @override
-  String get previousMonthTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
+  String get previousMonthTooltip =>
+      '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
 
   @override
-  String get previousPageTooltip => '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
+  String get previousPageTooltip =>
+      '\u{cb9}\u{cbf}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{caa}\u{cc1}\u{c9f}';
 
   @override
-  String get refreshIndicatorSemanticLabel => '\u{cb0}\u{cbf}\u{cab}\u{ccd}\u{cb0}\u{cc6}\u{cb6}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get refreshIndicatorSemanticLabel =>
+      '\u{cb0}\u{cbf}\u{cab}\u{ccd}\u{cb0}\u{cc6}\u{cb6}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String? get remainingTextFieldCharacterCountFew => null;
@@ -23891,10 +24204,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String? get remainingTextFieldCharacterCountOne => '\u{31}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{ca6}\u{cc6}';
+  String? get remainingTextFieldCharacterCountOne =>
+      '\u{31}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get remainingTextFieldCharacterCountOther => '\u{24}\u{72}\u{65}\u{6d}\u{61}\u{69}\u{6e}\u{69}\u{6e}\u{67}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
+  String get remainingTextFieldCharacterCountOther =>
+      '\u{24}\u{72}\u{65}\u{6d}\u{61}\u{69}\u{6e}\u{69}\u{6e}\u{67}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c85}\u{c95}\u{ccd}\u{cb7}\u{cb0}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c89}\u{cb3}\u{cbf}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -23903,37 +24218,48 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountZero => null;
 
   @override
-  String get reorderItemDown => '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get reorderItemDown =>
+      '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get reorderItemLeft => '\u{c8e}\u{ca1}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get reorderItemLeft =>
+      '\u{c8e}\u{ca1}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get reorderItemRight => '\u{cac}\u{cb2}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get reorderItemRight =>
+      '\u{cac}\u{cb2}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get reorderItemToEnd => '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get reorderItemToEnd =>
+      '\u{c95}\u{cca}\u{ca8}\u{cc6}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get reorderItemToStart => '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get reorderItemToStart =>
+      '\u{caa}\u{ccd}\u{cb0}\u{cbe}\u{cb0}\u{c82}\u{cad}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get reorderItemUp => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get reorderItemUp =>
+      '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get rowsPerPageTitle => '\u{caa}\u{ccd}\u{cb0}\u{ca4}\u{cbf}\u{20}\u{caa}\u{cc1}\u{c9f}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cbe}\u{cb2}\u{cc1}\u{c97}\u{cb3}\u{cc1}\u{3a}';
+  String get rowsPerPageTitle =>
+      '\u{caa}\u{ccd}\u{cb0}\u{ca4}\u{cbf}\u{20}\u{caa}\u{cc1}\u{c9f}\u{c95}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cb8}\u{cbe}\u{cb2}\u{cc1}\u{c97}\u{cb3}\u{cc1}\u{3a}';
 
   @override
-  String get saveButtonLabel => '\u{cb8}\u{cc7}\u{cb5}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get saveButtonLabel =>
+      '\u{cb8}\u{cc7}\u{cb5}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get scanTextButtonLabel => '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{caf}\u{cbe}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get scanTextButtonLabel =>
+      '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{caf}\u{cbe}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get scrimLabel => '\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{cae}\u{ccd}';
+  String get scrimLabel =>
+      '\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{cae}\u{ccd}';
 
   @override
-  String get scrimOnTapHintRaw => '\u{24}\u{6d}\u{6f}\u{64}\u{61}\u{6c}\u{52}\u{6f}\u{75}\u{74}\u{65}\u{43}\u{6f}\u{6e}\u{74}\u{65}\u{6e}\u{74}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{c85}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
+  String get scrimOnTapHintRaw =>
+      '\u{24}\u{6d}\u{6f}\u{64}\u{61}\u{6c}\u{52}\u{6f}\u{75}\u{74}\u{65}\u{43}\u{6f}\u{6e}\u{74}\u{65}\u{6e}\u{74}\u{4e}\u{61}\u{6d}\u{65}\u{20}\u{c85}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cae}\u{cc1}\u{c9a}\u{ccd}\u{c9a}\u{cbf}\u{cb0}\u{cbf}';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
@@ -23942,13 +24268,16 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get searchWebButtonLabel => '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
+  String get searchWebButtonLabel =>
+      '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
 
   @override
-  String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get selectAllButtonLabel =>
+      '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get selectYearSemanticsLabel => '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get selectYearSemanticsLabel =>
+      '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -23957,10 +24286,12 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleMany => null;
 
   @override
-  String? get selectedRowCountTitleOne => '\u{31}\u{20}\u{c90}\u{c9f}\u{c82}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String? get selectedRowCountTitleOne =>
+      '\u{31}\u{20}\u{c90}\u{c9f}\u{c82}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get selectedRowCountTitleOther => '\u{24}\u{73}\u{65}\u{6c}\u{65}\u{63}\u{74}\u{65}\u{64}\u{52}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c90}\u{c9f}\u{c82}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get selectedRowCountTitleOther =>
+      '\u{24}\u{73}\u{65}\u{6c}\u{65}\u{63}\u{74}\u{65}\u{64}\u{52}\u{6f}\u{77}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{c90}\u{c9f}\u{c82}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -23969,49 +24300,60 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}\u{2e}\u{2e}\u{2e}';
+  String get shareButtonLabel =>
+      '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}\u{2e}\u{2e}\u{2e}';
 
   @override
-  String get showAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get showAccountsLabel =>
+      '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get showMenuTooltip => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+  String get showMenuTooltip =>
+      '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get signedInLabel => '\u{cb8}\u{cc8}\u{ca8}\u{ccd}\u{20}\u{c87}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
+  String get signedInLabel =>
+      '\u{cb8}\u{cc8}\u{ca8}\u{ccd}\u{20}\u{c87}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{ca6}\u{cc6}';
 
   @override
-  String get tabLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
+  String get tabLabelRaw =>
+      '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerDialHelpText => '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get timePickerDialHelpText =>
+      '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get timePickerHourLabel => '\u{c97}\u{c82}\u{c9f}\u{cc6}';
 
   @override
-  String get timePickerHourModeAnnouncement => '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get timePickerHourModeAnnouncement =>
+      '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
-  String get timePickerInputHelpText => '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
+  String get timePickerInputHelpText =>
+      '\u{cb8}\u{cae}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca8}\u{cae}\u{cc2}\u{ca6}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
   String get timePickerMinuteLabel => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}';
 
   @override
-  String get timePickerMinuteModeAnnouncement => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+  String get timePickerMinuteModeAnnouncement =>
+      '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get unspecifiedDate => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
-  String get unspecifiedDateRange => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}';
+  String get unspecifiedDateRange =>
+      '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}\u{20}\u{cb5}\u{ccd}\u{caf}\u{cbe}\u{caa}\u{ccd}\u{ca4}\u{cbf}';
 
   @override
-  String get viewLicensesButtonLabel => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cd5}\u{c95}\u{ccd}\u{cb7}\u{cbf}\u{cb8}\u{cbf}';
+  String get viewLicensesButtonLabel =>
+      '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb5}\u{cbf}\u{cd5}\u{c95}\u{ccd}\u{cb7}\u{cbf}\u{cb8}\u{cbf}';
 }
 
 /// The translations for Korean (`ko`).
@@ -24354,7 +24696,8 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount행 중 $firstRow~$lastRow행';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'약 $rowCount행 중 $firstRow~$lastRow행';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'약 $rowCount행 중 $firstRow~$lastRow행';
 
   @override
   String get pasteButtonLabel => '붙여넣기';
@@ -24616,10 +24959,12 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Жыйыштыруу';
 
   @override
-  String get expansionTileCollapsedHint => 'жайып көрсөтүү үчүн эки жолу таптаңыз';
+  String get expansionTileCollapsedHint =>
+      'жайып көрсөтүү үчүн эки жолу таптаңыз';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Толук маалымат алуу үчүн жайып көрүңүз';
+  String get expansionTileCollapsedTapHint =>
+      'Толук маалымат алуу үчүн жайып көрүңүз';
 
   @override
   String get expansionTileExpandedHint => 'жыйыштыруу үчүн эки жолу таптаңыз';
@@ -24844,7 +25189,8 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount ичинен $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'Болжол менен $rowCount ичинен $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'Болжол менен $rowCount ичинен $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'Чаптоо';
@@ -24874,7 +25220,8 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 белги калды';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount белги калды';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount белги калды';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -25334,7 +25681,8 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ຈາກທັງໝົດ $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ຈາກປະມານ $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow ຈາກປະມານ $rowCount';
 
   @override
   String get pasteButtonLabel => 'ວາງ';
@@ -25364,7 +25712,8 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'ຍັງອີກ 1 ຕົວອັກສອນ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'ຍັງອີກ $remainingCount ຕົວອັກສອນ';
+  String get remainingTextFieldCharacterCountOther =>
+      r'ຍັງອີກ $remainingCount ຕົວອັກສອນ';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -25430,7 +25779,8 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'ເລືອກ 1 ລາຍການແລ້ວ';
 
   @override
-  String get selectedRowCountTitleOther => r'ເລືອກ $selectedRowCount ລາຍການແລ້ວ';
+  String get selectedRowCountTitleOther =>
+      r'ເລືອກ $selectedRowCount ລາຍການແລ້ວ';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -25596,13 +25946,16 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Sutraukti';
 
   @override
-  String get expansionTileCollapsedHint => 'dukart palieskite, kad išskleistumėte';
+  String get expansionTileCollapsedHint =>
+      'dukart palieskite, kad išskleistumėte';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Išskleiskite, jei reikia daugiau išsamios informacijos';
+  String get expansionTileCollapsedTapHint =>
+      'Išskleiskite, jei reikia daugiau išsamios informacijos';
 
   @override
-  String get expansionTileExpandedHint => 'dukart palieskite, kad sutrauktumėte';
+  String get expansionTileExpandedHint =>
+      'dukart palieskite, kad sutrauktumėte';
 
   @override
   String get expansionTileExpandedTapHint => 'Sutraukti';
@@ -25824,7 +26177,8 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow iš $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow iš maždaug $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow iš maždaug $rowCount';
 
   @override
   String get pasteButtonLabel => 'Įklijuoti';
@@ -25845,16 +26199,19 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Atnaujinti';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Liko $remainingCount simboliai';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Liko $remainingCount simboliai';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'Liko $remainingCount simbolio';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'Liko $remainingCount simbolio';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Liko 1 simbolis';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Liko $remainingCount simbolių';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Liko $remainingCount simbolių';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -25911,16 +26268,19 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pasirinkite metus';
 
   @override
-  String? get selectedRowCountTitleFew => r'Pasirinkti $selectedRowCount elementai';
+  String? get selectedRowCountTitleFew =>
+      r'Pasirinkti $selectedRowCount elementai';
 
   @override
-  String? get selectedRowCountTitleMany => r'Pasirinkta $selectedRowCount elemento';
+  String? get selectedRowCountTitleMany =>
+      r'Pasirinkta $selectedRowCount elemento';
 
   @override
   String? get selectedRowCountTitleOne => 'Pasirinktas 1 elementas';
 
   @override
-  String get selectedRowCountTitleOther => r'Pasirinkta $selectedRowCount elementų';
+  String get selectedRowCountTitleOther =>
+      r'Pasirinkta $selectedRowCount elementų';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -26071,7 +26431,8 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Dzēst';
 
   @override
-  String get dialModeButtonLabel => 'Pārslēgties uz ciparnīcas atlasītāja režīmu';
+  String get dialModeButtonLabel =>
+      'Pārslēgties uz ciparnīcas atlasītāja režīmu';
 
   @override
   String get dialogLabel => 'Dialoglodziņš';
@@ -26089,7 +26450,8 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'dubultskāriens, lai izvērstu';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Izvērst, lai iegūtu plašāku informāciju';
+  String get expansionTileCollapsedTapHint =>
+      'Izvērst, lai iegūtu plašāku informāciju';
 
   @override
   String get expansionTileExpandedHint => 'dubultskāriens, lai sakļautu';
@@ -26314,7 +26676,8 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow.–$lastRow. no $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow.–$lastRow. no aptuveni $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow.–$lastRow. no aptuveni $rowCount';
 
   @override
   String get pasteButtonLabel => 'Ielīmēt';
@@ -26344,13 +26707,15 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Atlikusi 1 rakstzīme.';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Atlikušas $remainingCount rakstzīmes.';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Atlikušas $remainingCount rakstzīmes.';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'Nav atlikusi neviena rakstzīme.';
+  String? get remainingTextFieldCharacterCountZero =>
+      'Nav atlikusi neviena rakstzīme.';
 
   @override
   String get reorderItemDown => 'Pārvietot uz leju';
@@ -26410,7 +26775,8 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Atlasīts 1 vienums';
 
   @override
-  String get selectedRowCountTitleOther => r'Atlasīti $selectedRowCount vienumi';
+  String get selectedRowCountTitleOther =>
+      r'Atlasīti $selectedRowCount vienumi';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -26549,7 +26915,8 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Изберете опсег';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Датум на започнување $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Датум на започнување $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Датум на започнување';
@@ -26597,7 +26964,8 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Префрли на внесување';
 
   @override
-  String get inputTimeModeButtonLabel => 'Префрлете се на режим за внесување текст';
+  String get inputTimeModeButtonLabel =>
+      'Префрлете се на режим за внесување текст';
 
   @override
   String get invalidDateFormatLabel => 'Неважечки формат.';
@@ -26804,7 +27172,8 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow - $lastRow од $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow - $lastRow од приближно $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow - $lastRow од приближно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Залепи';
@@ -26834,7 +27203,8 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Преостанува уште 1 знак';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Преостануваат уште $remainingCount знаци';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Преостануваат уште $remainingCount знаци';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -26900,7 +27270,8 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Избрана е 1 ставка';
 
   @override
-  String get selectedRowCountTitleOther => r'Избрани се $selectedRowCount ставки';
+  String get selectedRowCountTitleOther =>
+      r'Избрани се $selectedRowCount ставки';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -27030,7 +27401,8 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'തീയതി തിരഞ്ഞെടുക്കുക';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'അവസാനിക്കുന്ന തീയതി $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'അവസാനിക്കുന്ന തീയതി $fullDate';
 
   @override
   String get dateRangeEndLabel => 'അവസാനിക്കുന്ന തീയതി';
@@ -27039,7 +27411,8 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'ശ്രേണി തിരഞ്ഞെടുക്കുക';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'ആരംഭിക്കുന്ന തീയതി $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'ആരംഭിക്കുന്ന തീയതി $fullDate';
 
   @override
   String get dateRangeStartLabel => 'ആരംഭിക്കുന്ന തീയതി';
@@ -27069,7 +27442,8 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'വികസിപ്പിക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക';
 
   @override
-  String get expansionTileCollapsedTapHint => 'കൂടുതൽ വിശദാംശങ്ങൾക്ക് വികസിപ്പിക്കുക';
+  String get expansionTileCollapsedTapHint =>
+      'കൂടുതൽ വിശദാംശങ്ങൾക്ക് വികസിപ്പിക്കുക';
 
   @override
   String get expansionTileExpandedHint => 'ചുരുക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക';
@@ -27087,7 +27461,8 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'ഇൻപുട്ടിലേക്ക് മാറുക';
 
   @override
-  String get inputTimeModeButtonLabel => 'ടെക്‌സ്‌റ്റ് ഇൻപുട്ട് മോഡിലേക്ക് മാറുക';
+  String get inputTimeModeButtonLabel =>
+      'ടെക്‌സ്‌റ്റ് ഇൻപുട്ട് മോഡിലേക്ക് മാറുക';
 
   @override
   String get invalidDateFormatLabel => 'തെറ്റായ ഫോർമാറ്റ്.';
@@ -27294,7 +27669,8 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount-ൽ $firstRow –$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'ഏകദേശം $rowCount-ൽ $firstRow –$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'ഏകദേശം $rowCount-ൽ $firstRow –$lastRow';
 
   @override
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
@@ -27324,7 +27700,8 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'ഒരു പ്രതീകം ശേഷിക്കുന്നു';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount പ്രതീകങ്ങൾ ശേഷിക്കുന്നു';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount പ്രതീകങ്ങൾ ശേഷിക്കുന്നു';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -27390,7 +27767,8 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'ഒരു ഇനം തിരഞ്ഞെടുത്തു';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount ഇനങ്ങൾ തിരഞ്ഞെടുത്തു';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount ഇനങ്ങൾ തിരഞ്ഞെടുത്തു';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -27559,7 +27937,8 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'дэлгэхийн тулд хоёр товшино уу';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Илүү дэлгэрэнгүй авах бол дэлгэнэ үү';
+  String get expansionTileCollapsedTapHint =>
+      'Илүү дэлгэрэнгүй авах бол дэлгэнэ үү';
 
   @override
   String get expansionTileExpandedHint => 'хураахын тулд хоёр товшино уу';
@@ -27784,7 +28163,8 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount-н $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'Ойролцоогоор $rowCount-н $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'Ойролцоогоор $rowCount-н $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'Буулгах';
@@ -27814,7 +28194,8 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 тэмдэгт үлдсэн';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount тэмдэгт үлдсэн';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount тэмдэгт үлдсэн';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -28019,7 +28400,8 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'रेंज निवडा';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'सुरू होण्याची तारीख $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'सुरू होण्याची तारीख $fullDate';
 
   @override
   String get dateRangeStartLabel => 'सुरू होण्याची तारीख';
@@ -28274,7 +28656,8 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount पैकी $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCount च्या बद्दल $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$rowCount च्या बद्दल $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'पेस्ट करा';
@@ -28304,13 +28687,15 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'एक वर्ण शिल्लक';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्ण शिल्लक';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount वर्ण शिल्लक';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'कोणतेही वर्ण शिल्लक नाहीत';
+  String? get remainingTextFieldCharacterCountZero =>
+      'कोणतेही वर्ण शिल्लक नाहीत';
 
   @override
   String get reorderItemDown => 'खाली हलवा';
@@ -28500,7 +28885,8 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Pilih tarikh';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Tarikh tamat ialah $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Tarikh tamat ialah $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Tarikh Tamat';
@@ -28509,7 +28895,8 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Pilih julat';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Tarikh mula ialah $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Tarikh mula ialah $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Tarikh Mula';
@@ -28539,7 +28926,8 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'ketik dua kali untuk kembangkan';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Kembangkan untuk mendapatkan butiran lanjut';
+  String get expansionTileCollapsedTapHint =>
+      'Kembangkan untuk mendapatkan butiran lanjut';
 
   @override
   String get expansionTileExpandedHint => 'ketik dua kali untuk kuncupkan';
@@ -28764,7 +29152,8 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow dari $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow dari kira-kira $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow dari kira-kira $rowCount';
 
   @override
   String get pasteButtonLabel => 'Tampal';
@@ -28794,7 +29183,8 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 aksara lagi';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount aksara lagi';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount aksara lagi';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -29047,7 +29437,8 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'ထည့်သွင်းမှုသို့ ပြောင်းရန်';
 
   @override
-  String get inputTimeModeButtonLabel => 'စာသား ထည့်သွင်းမှုမုဒ်သို့ ပြောင်းရန်';
+  String get inputTimeModeButtonLabel =>
+      'စာသား ထည့်သွင်းမှုမုဒ်သို့ ပြောင်းရန်';
 
   @override
   String get invalidDateFormatLabel => 'ဖော်မက် မမှန်ကန်ပါ။';
@@ -29254,7 +29645,8 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount အနက် $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCount ခန့်မှ $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$rowCount ခန့်မှ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'ကူးထည့်ရန်';
@@ -29284,7 +29676,8 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'အက္ခရာ ၁ လုံးကျန်သည်';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'အက္ခရာ $remainingCount လုံးကျန်သည်';
+  String get remainingTextFieldCharacterCountOther =>
+      r'အက္ခရာ $remainingCount လုံးကျန်သည်';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -29744,7 +30137,8 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow av $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow av omtrent $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow av omtrent $rowCount';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
@@ -29774,7 +30168,8 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn gjenstår';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount tegn gjenstår';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -29840,7 +30235,8 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 element er valgt';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount elementer er valgt';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -30006,10 +30402,12 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'संक्षिप्त गर्नुहोस्';
 
   @override
-  String get expansionTileCollapsedHint => 'एक्स्पान्ड गर्न डबल ट्याप गर्नुहोस्';
+  String get expansionTileCollapsedHint =>
+      'एक्स्पान्ड गर्न डबल ट्याप गर्नुहोस्';
 
   @override
-  String get expansionTileCollapsedTapHint => 'थप विवरण हेर्न एक्स्पान्ड गर्नुहोस्';
+  String get expansionTileCollapsedTapHint =>
+      'थप विवरण हेर्न एक्स्पान्ड गर्नुहोस्';
 
   @override
   String get expansionTileExpandedHint => 'कोल्याप्स गर्न डबल ट्याप गर्नुहोस्';
@@ -30234,7 +30632,8 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount मध्ये $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'लगभग $rowCount को $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'लगभग $rowCount को $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'टाँस्नुहोस्';
@@ -30264,7 +30663,8 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '१ वर्ण बाँकी';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount वर्णहरू बाँकी';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount वर्णहरू बाँकी';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -30330,7 +30730,8 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '१ वस्तु चयन गरियो';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount वस्तुहरू चयन गरिए';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount वस्तुहरू चयन गरिए';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -30724,7 +31125,8 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow van $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow van ongeveer $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow-$lastRow van ongeveer $rowCount';
 
   @override
   String get pasteButtonLabel => 'Plakken';
@@ -30754,7 +31156,8 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 teken resterend';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount tekens resterend';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount tekens resterend';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -30820,7 +31223,8 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 item geselecteerd';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount items geselecteerd';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount items geselecteerd';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -31214,7 +31618,8 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow av $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow av omtrent $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow av omtrent $rowCount';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
@@ -31244,7 +31649,8 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount tegn gjenstår';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount tegn gjenstår';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -31310,7 +31716,8 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 element er valgt';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount elementer er valgt';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -31476,13 +31883,15 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'ସଙ୍କୁଚିତ କରନ୍ତୁ';
 
   @override
-  String get expansionTileCollapsedHint => 'ବିସ୍ତାର କରିବା ପାଇଁ ଦୁଇଥର ଟାପ କରନ୍ତୁ';
+  String get expansionTileCollapsedHint =>
+      'ବିସ୍ତାର କରିବା ପାଇଁ ଦୁଇଥର ଟାପ କରନ୍ତୁ';
 
   @override
   String get expansionTileCollapsedTapHint => 'ଅଧିକ ବିବରଣୀ ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ';
 
   @override
-  String get expansionTileExpandedHint => 'ସଙ୍କୁଚିତ କରିବା ପାଇଁ ଦୁଇଥର ଟାପ କରନ୍ତୁ';
+  String get expansionTileExpandedHint =>
+      'ସଙ୍କୁଚିତ କରିବା ପାଇଁ ଦୁଇଥର ଟାପ କରନ୍ତୁ';
 
   @override
   String get expansionTileExpandedTapHint => 'ସଙ୍କୁଚିତ କରନ୍ତୁ';
@@ -31704,7 +32113,8 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCountର $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'ପାଖାପାଖି $rowCountର $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'ପାଖାପାଖି $rowCountର $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
@@ -31734,7 +32144,8 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1ଟି ଅକ୍ଷର ବାକି ଅଛି';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -31800,7 +32211,8 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1ଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCountଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCountଟି ଆଇଟମ୍ ଚୟନ କରାଯାଇଛି';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -32194,7 +32606,8 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCount ਵਿੱਚੋਂ $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'ਲਗਭਗ $rowCount ਵਿੱਚੋਂ $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'ਲਗਭਗ $rowCount ਵਿੱਚੋਂ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
@@ -32224,7 +32637,8 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount ਅੱਖਰ-ਚਿੰਨ੍ਹ ਬਾਕੀ';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -32290,7 +32704,8 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 ਆਈਟਮ ਚੁਣੀ ਗਈ';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount ਆਈਟਮਾਂ ਚੁਣੀਆਂ ਗਈਆਂ';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount ਆਈਟਮਾਂ ਚੁਣੀਆਂ ਗਈਆਂ';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -32429,7 +32844,8 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Wybierz zakres';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Data rozpoczęcia: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Data rozpoczęcia: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data rozpoczęcia';
@@ -32459,7 +32875,8 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'kliknij dwukrotnie, aby rozwinąć';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Rozwiń, aby wyświetlić więcej informacji';
+  String get expansionTileCollapsedTapHint =>
+      'Rozwiń, aby wyświetlić więcej informacji';
 
   @override
   String get expansionTileExpandedHint => 'kliknij dwukrotnie, aby zwinąć';
@@ -32684,7 +33101,8 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow z $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow z około $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow z około $rowCount';
 
   @override
   String get pasteButtonLabel => 'Wklej';
@@ -32705,16 +33123,19 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Odśwież';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Pozostały $remainingCount znaki';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Pozostały $remainingCount znaki';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'Pozostało $remainingCount znaków';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'Pozostało $remainingCount znaków';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Jeszcze 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Pozostało $remainingCount znaków';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Pozostało $remainingCount znaków';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -32774,13 +33195,15 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => r'$selectedRowCount wybrane elementy';
 
   @override
-  String? get selectedRowCountTitleMany => r'$selectedRowCount wybranych elementów';
+  String? get selectedRowCountTitleMany =>
+      r'$selectedRowCount wybranych elementów';
 
   @override
   String? get selectedRowCountTitleOne => '1 wybrany element';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount wybranych elementów';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount wybranych elementów';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -33174,7 +33597,8 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow د $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow څخه $rowCount د';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow څخه $rowCount د';
 
   @override
   String get pasteButtonLabel => 'پیټ کړئ';
@@ -33204,7 +33628,8 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 character remaining';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount characters remaining';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -33457,7 +33882,8 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Mudar para modo de entrada';
 
   @override
-  String get inputTimeModeButtonLabel => 'Mudar para o modo de entrada de texto';
+  String get inputTimeModeButtonLabel =>
+      'Mudar para o modo de entrada de texto';
 
   @override
   String get invalidDateFormatLabel => 'Formato inválido.';
@@ -33664,7 +34090,8 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow de aproximadamente $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow de aproximadamente $rowCount';
 
   @override
   String get pasteButtonLabel => 'Colar';
@@ -33694,7 +34121,8 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 caractere restante';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount caracteres restantes';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount caracteres restantes';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -33760,7 +34188,8 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 item selecionado';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount itens selecionados';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount itens selecionados';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -33851,7 +34280,8 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get expansionTileExpandedTapHint => 'Reduzir';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Expandir para obter mais detalhes';
+  String get expansionTileCollapsedTapHint =>
+      'Expandir para obter mais detalhes';
 
   @override
   String get expandedHint => 'Reduzido';
@@ -33899,7 +34329,8 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get invalidTimeLabel => 'Introduza uma hora válida.';
 
   @override
-  String get inputTimeModeButtonLabel => 'Mude para o método de introdução de texto';
+  String get inputTimeModeButtonLabel =>
+      'Mude para o método de introdução de texto';
 
   @override
   String get dateInputLabel => 'Introduzir data';
@@ -33920,7 +34351,8 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get dateOutOfRangeLabel => 'Fora do intervalo.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Data de conclusão: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Data de conclusão: $fullDate';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data de início: $fullDate';
@@ -33965,7 +34397,8 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get pageRowsInfoTitleRaw => r'$firstRow a $lastRow de $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow a $lastRow de cerca de $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow a $lastRow de cerca de $rowCount';
 
   @override
   String get viewLicensesButtonLabel => 'Ver licenças';
@@ -33989,7 +34422,8 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String? get remainingTextFieldCharacterCountOne => 'Resta 1 caráter';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Restam $remainingCount carateres';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Restam $remainingCount carateres';
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
@@ -34068,7 +34502,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Selectați data';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Data de încheiere: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Data de încheiere: $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Data de încheiere';
@@ -34077,7 +34512,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Selectați intervalul';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Data de începere: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Data de începere: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data de începere';
@@ -34104,13 +34540,16 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Restrângeți';
 
   @override
-  String get expansionTileCollapsedHint => 'atingeți de două ori pentru a extinde';
+  String get expansionTileCollapsedHint =>
+      'atingeți de două ori pentru a extinde';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Extindeți pentru mai multe detalii';
+  String get expansionTileCollapsedTapHint =>
+      'Extindeți pentru mai multe detalii';
 
   @override
-  String get expansionTileExpandedHint => 'atingeți de două ori pentru a restrânge';
+  String get expansionTileExpandedHint =>
+      'atingeți de două ori pentru a restrânge';
 
   @override
   String get expansionTileExpandedTapHint => 'Restrângeți';
@@ -34125,7 +34564,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Comutați la introducerea textului';
 
   @override
-  String get inputTimeModeButtonLabel => 'Comutați la modul de introducere a textului';
+  String get inputTimeModeButtonLabel =>
+      'Comutați la modul de introducere a textului';
 
   @override
   String get invalidDateFormatLabel => 'Format nevalid.';
@@ -34332,7 +34772,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow din $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow din aproximativ $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow din aproximativ $rowCount';
 
   @override
   String get pasteButtonLabel => 'Inserați';
@@ -34353,7 +34794,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Actualizați';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'$remainingCount caractere rămase';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'$remainingCount caractere rămase';
 
   @override
   String? get remainingTextFieldCharacterCountMany => null;
@@ -34362,7 +34804,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'un caracter rămas';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount de caractere rămase';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount de caractere rămase';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -34419,7 +34862,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selectați anul';
 
   @override
-  String? get selectedRowCountTitleFew => r'$selectedRowCount articole selectate';
+  String? get selectedRowCountTitleFew =>
+      r'$selectedRowCount articole selectate';
 
   @override
   String? get selectedRowCountTitleMany => null;
@@ -34428,7 +34872,8 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Un articol selectat';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount de articole selectate';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount de articole selectate';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -34597,7 +35042,8 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'нажмите дважды, чтобы развернуть';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Развернуть дополнительные сведения';
+  String get expansionTileCollapsedTapHint =>
+      'Развернуть дополнительные сведения';
 
   @override
   String get expansionTileExpandedHint => 'нажмите дважды, чтобы свернуть';
@@ -34822,7 +35268,8 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow из $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow из примерно $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow из примерно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Вставить';
@@ -34843,16 +35290,19 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Обновление';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Осталось $remainingCount символа';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Осталось $remainingCount символа';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'Осталось $remainingCount символов';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'Осталось $remainingCount символов';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Остался 1 символ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Осталось $remainingCount символа';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Осталось $remainingCount символа';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -34912,7 +35362,8 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => r'Выбрано $selectedRowCount объекта';
 
   @override
-  String? get selectedRowCountTitleMany => r'Выбрано $selectedRowCount объектов';
+  String? get selectedRowCountTitleMany =>
+      r'Выбрано $selectedRowCount объектов';
 
   @override
   String? get selectedRowCountTitleOne => 'Выбран 1 объект';
@@ -35312,7 +35763,8 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCountන් $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCountකින් පමණ $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$rowCountකින් පමණ $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'අලවන්න';
@@ -35342,7 +35794,8 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'අනුලකුණු 1ක් ඉතිරිය';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'අනුලකුණු $remainingCountක් ඉතිරිය';
+  String get remainingTextFieldCharacterCountOther =>
+      r'අනුලකුණු $remainingCountක් ඉතිරිය';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -35408,7 +35861,8 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'අයිතම 1ක් තෝරන ලදී';
 
   @override
-  String get selectedRowCountTitleOther => r'අයිතම $selectedRowCountක් තෝරන ලදී';
+  String get selectedRowCountTitleOther =>
+      r'අයිතම $selectedRowCountක් තෝරන ලදී';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -35577,7 +36031,8 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'rozbalíte dvojitým klepnutím';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Rozbaliť a zobraziť ďalšie podrobnosti';
+  String get expansionTileCollapsedTapHint =>
+      'Rozbaliť a zobraziť ďalšie podrobnosti';
 
   @override
   String get expansionTileExpandedHint => 'zbalíte dvojitým klepnutím';
@@ -35802,7 +36257,8 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow z $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow z približne $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow z približne $rowCount';
 
   @override
   String get pasteButtonLabel => 'Prilepiť';
@@ -35823,16 +36279,19 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Obnoviť';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Zostávajú $remainingCount znaky';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Zostávajú $remainingCount znaky';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'$remainingCount characters remaining';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'$remainingCount characters remaining';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Zostáva 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Zostáva $remainingCount znakov';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Zostáva $remainingCount znakov';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -35898,7 +36357,8 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 vybratá položka';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount vybratých položiek';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount vybratých položiek';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -36292,7 +36752,8 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow od približno $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow od približno $rowCount';
 
   @override
   String get pasteButtonLabel => 'Prilepi';
@@ -36313,7 +36774,8 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Osveži';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Še $remainingCount znaki';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Še $remainingCount znaki';
 
   @override
   String? get remainingTextFieldCharacterCountMany => null;
@@ -36322,10 +36784,12 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Še 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Še $remainingCount znakov';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Še $remainingCount znakov';
 
   @override
-  String? get remainingTextFieldCharacterCountTwo => r'Še $remainingCount znaka';
+  String? get remainingTextFieldCharacterCountTwo =>
+      r'Še $remainingCount znaka';
 
   @override
   String? get remainingTextFieldCharacterCountZero => null;
@@ -36379,7 +36843,8 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Izberite leto';
 
   @override
-  String? get selectedRowCountTitleFew => r'Izbrani so $selectedRowCount elementi';
+  String? get selectedRowCountTitleFew =>
+      r'Izbrani so $selectedRowCount elementi';
 
   @override
   String? get selectedRowCountTitleMany => null;
@@ -36388,10 +36853,12 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Izbran je 1 element';
 
   @override
-  String get selectedRowCountTitleOther => r'Izbranih je $selectedRowCount elementov';
+  String get selectedRowCountTitleOther =>
+      r'Izbranih je $selectedRowCount elementov';
 
   @override
-  String? get selectedRowCountTitleTwo => r'Izbrana sta $selectedRowCount elementa';
+  String? get selectedRowCountTitleTwo =>
+      r'Izbrana sta $selectedRowCount elementa';
 
   @override
   String? get selectedRowCountTitleZero => null;
@@ -36527,7 +36994,8 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Zgjidh gamën';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Data e fillimit: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Data e fillimit: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Data e fillimit';
@@ -36575,7 +37043,8 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'Kalo te hyrja';
 
   @override
-  String get inputTimeModeButtonLabel => 'Kalo te modaliteti i hyrjes së tekstit';
+  String get inputTimeModeButtonLabel =>
+      'Kalo te modaliteti i hyrjes së tekstit';
 
   @override
   String get invalidDateFormatLabel => 'Format i pavlefshëm.';
@@ -36782,7 +37251,8 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow nga $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow nga rreth $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow nga rreth $rowCount';
 
   @override
   String get pasteButtonLabel => 'Ngjit';
@@ -36812,7 +37282,8 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 karakter i mbetur';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount karaktere të mbetura';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount karaktere të mbetura';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -36878,7 +37349,8 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'U zgjodh 1 artikull';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount artikuj u zgjodhën';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount artikuj u zgjodhën';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -37044,7 +37516,8 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Скупи';
 
   @override
-  String get expansionTileCollapsedHint => 'двапут додирните да бисте проширили';
+  String get expansionTileCollapsedHint =>
+      'двапут додирните да бисте проширили';
 
   @override
   String get expansionTileCollapsedTapHint => 'Проширите за још детаља';
@@ -37272,7 +37745,8 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow oд $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow oд приближно $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow oд приближно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Налепи';
@@ -37293,7 +37767,8 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Освежи';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Преостала су $remainingCount знака';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Преостала су $remainingCount знака';
 
   @override
   String? get remainingTextFieldCharacterCountMany => null;
@@ -37302,7 +37777,8 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Преостао је 1 знак';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Преостало је $remainingCount знакова';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Преостало је $remainingCount знакова';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -37359,7 +37835,8 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Изаберите годину';
 
   @override
-  String? get selectedRowCountTitleFew => r'Изабране су $selectedRowCount ставке';
+  String? get selectedRowCountTitleFew =>
+      r'Изабране су $selectedRowCount ставке';
 
   @override
   String? get selectedRowCountTitleMany => null;
@@ -37368,7 +37845,8 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Изабрана је 1 ставка';
 
   @override
-  String get selectedRowCountTitleOther => r'Изабрано је $selectedRowCount ставки';
+  String get selectedRowCountTitleOther =>
+      r'Изабрано је $selectedRowCount ставки';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -37550,7 +38028,8 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get expandedIconTapHint => 'Skupi';
 
   @override
-  String get expansionTileCollapsedHint => 'dvaput dodirnite da biste proširili';
+  String get expansionTileCollapsedHint =>
+      'dvaput dodirnite da biste proširili';
 
   @override
   String get expansionTileCollapsedTapHint => 'Proširite za još detalja';
@@ -37643,7 +38122,8 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get pageRowsInfoTitleRaw => r'$firstRow – $lastRow od $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow – $lastRow od približno $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow – $lastRow od približno $rowCount';
 
   @override
   String get pasteButtonLabel => 'Nalepi';
@@ -37664,13 +38144,15 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get refreshIndicatorSemanticLabel => 'Osveži';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Preostala su $remainingCount znaka';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Preostala su $remainingCount znaka';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Preostao je 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Preostalo je $remainingCount znakova';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Preostalo je $remainingCount znakova';
 
   @override
   String get reorderItemDown => 'Pomerite nadole';
@@ -37718,13 +38200,15 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   String get selectYearSemanticsLabel => 'Izaberite godinu';
 
   @override
-  String? get selectedRowCountTitleFew => r'Izabrane su $selectedRowCount stavke';
+  String? get selectedRowCountTitleFew =>
+      r'Izabrane su $selectedRowCount stavke';
 
   @override
   String? get selectedRowCountTitleOne => 'Izabrana je 1 stavka';
 
   @override
-  String get selectedRowCountTitleOther => r'Izabrano je $selectedRowCount stavki';
+  String get selectedRowCountTitleOther =>
+      r'Izabrano je $selectedRowCount stavki';
 
   @override
   String get shareButtonLabel => 'Deli…';
@@ -37881,13 +38365,15 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'Dölj';
 
   @override
-  String get expansionTileCollapsedHint => 'tryck snabbt två gånger för att utöka';
+  String get expansionTileCollapsedHint =>
+      'tryck snabbt två gånger för att utöka';
 
   @override
   String get expansionTileCollapsedTapHint => 'Utöka för mer information';
 
   @override
-  String get expansionTileExpandedHint => 'tryck snabbt två gånger för att komprimera';
+  String get expansionTileExpandedHint =>
+      'tryck snabbt två gånger för att komprimera';
 
   @override
   String get expansionTileExpandedTapHint => 'Komprimera';
@@ -38109,7 +38595,8 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow av $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow av ungefär $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow av ungefär $rowCount';
 
   @override
   String get pasteButtonLabel => 'Klistra in';
@@ -38139,7 +38626,8 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 tecken kvar';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount tecken kvar';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount tecken kvar';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -38205,7 +38693,8 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 objekt har markerats';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount objekt har markerats';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount objekt har markerats';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -38335,7 +38824,8 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Chagua tarehe';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Tarehe ya kumalizika $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Tarehe ya kumalizika $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Tarehe ya Kumalizika';
@@ -38344,7 +38834,8 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Chagua kipindi';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Tarehe ya kuanza $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Tarehe ya kuanza $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Tarehe ya Kuanza';
@@ -38356,7 +38847,8 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'Futa';
 
   @override
-  String get dialModeButtonLabel => 'Badilisha ili utumie hali ya kiteuzi cha kupiga simu';
+  String get dialModeButtonLabel =>
+      'Badilisha ili utumie hali ya kiteuzi cha kupiga simu';
 
   @override
   String get dialogLabel => 'Kidirisha';
@@ -38389,10 +38881,12 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get hideAccountsLabel => 'Ficha akaunti';
 
   @override
-  String get inputDateModeButtonLabel => 'Badili utumie hali ya kuweka maandishi';
+  String get inputDateModeButtonLabel =>
+      'Badili utumie hali ya kuweka maandishi';
 
   @override
-  String get inputTimeModeButtonLabel => 'Tumia programu ya kuingiza data ya maandishi';
+  String get inputTimeModeButtonLabel =>
+      'Tumia programu ya kuingiza data ya maandishi';
 
   @override
   String get invalidDateFormatLabel => 'Muundo si sahihi.';
@@ -38596,10 +39090,12 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Fungua menyu ya kusogeza';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow hadi $lastRow kati ya $rowCount';
+  String get pageRowsInfoTitleRaw =>
+      r'$firstRow hadi $lastRow kati ya $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow hadi $lastRow kati ya takriban $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow hadi $lastRow kati ya takriban $rowCount';
 
   @override
   String get pasteButtonLabel => 'Bandika';
@@ -38629,13 +39125,15 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Imesalia herufi 1';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Zimesalia herufi $remainingCount';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Zimesalia herufi $remainingCount';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'Hapana herufi zilizo baki';
+  String? get remainingTextFieldCharacterCountZero =>
+      'Hapana herufi zilizo baki';
 
   @override
   String get reorderItemDown => 'Sogeza chini';
@@ -38695,7 +39193,8 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'Umechagua kipengee 1';
 
   @override
-  String get selectedRowCountTitleOther => r'Umechagua vipengee $selectedRowCount';
+  String get selectedRowCountTitleOther =>
+      r'Umechagua vipengee $selectedRowCount';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -38864,7 +39363,8 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'விரிவாக்க இருமுறை தட்டுங்கள்';
 
   @override
-  String get expansionTileCollapsedTapHint => 'கூடுதல் விவரங்களுக்கு விரிவாக்கலாம்';
+  String get expansionTileCollapsedTapHint =>
+      'கூடுதல் விவரங்களுக்கு விரிவாக்கலாம்';
 
   @override
   String get expansionTileExpandedHint => 'சுருக்க இருமுறை தட்டவும்';
@@ -39089,7 +39589,8 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow / $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow / $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow / $rowCount';
 
   @override
   String get pasteButtonLabel => 'ஒட்டு';
@@ -39119,13 +39620,15 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 எழுத்து மீதமுள்ளது';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount எழுத்துகள் மீதமுள்ளன';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount எழுத்துகள் மீதமுள்ளன';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String? get remainingTextFieldCharacterCountZero => 'எழுத்துக்கள் எதுவும் இல்லை';
+  String? get remainingTextFieldCharacterCountZero =>
+      'எழுத்துக்கள் எதுவும் இல்லை';
 
   @override
   String get reorderItemDown => 'கீழே நகர்த்தவும்';
@@ -39185,7 +39688,8 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 வரிசை தேர்ந்தெடுக்கப்பட்டது';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount வரிசைகள் தேர்ந்தெடுக்கப்பட்டன';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount வரிசைகள் தேர்ந்தெடுக்கப்பட்டன';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -39227,7 +39731,8 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get timePickerMinuteLabel => 'நிமிடம்';
 
   @override
-  String get timePickerMinuteModeAnnouncement => 'நிமிடங்களைத் தேர்ந்தெடுக்கவும்';
+  String get timePickerMinuteModeAnnouncement =>
+      'நிமிடங்களைத் தேர்ந்தெடுக்கவும்';
 
   @override
   String get unspecifiedDate => 'தேதி';
@@ -39351,10 +39856,12 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'కుదించు';
 
   @override
-  String get expansionTileCollapsedHint => 'విస్తరించడానికి డబుల్ ట్యాప్ చేయండి';
+  String get expansionTileCollapsedHint =>
+      'విస్తరించడానికి డబుల్ ట్యాప్ చేయండి';
 
   @override
-  String get expansionTileCollapsedTapHint => 'మరిన్ని వివరాల కోసం విస్తరించండి';
+  String get expansionTileCollapsedTapHint =>
+      'మరిన్ని వివరాల కోసం విస్తరించండి';
 
   @override
   String get expansionTileExpandedHint => 'కుదించడానికి డబుల్ ట్యాప్ చేయండి';
@@ -39372,7 +39879,8 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get inputDateModeButtonLabel => 'ఇన్‌పుట్‌కు మారండి';
 
   @override
-  String get inputTimeModeButtonLabel => 'టెక్స్ట్ ఇన్‌పుట్ మోడ్‌కు మారుస్తుంది';
+  String get inputTimeModeButtonLabel =>
+      'టెక్స్ట్ ఇన్‌పుట్ మోడ్‌కు మారుస్తుంది';
 
   @override
   String get invalidDateFormatLabel => 'ఫార్మాట్ చెల్లదు.';
@@ -39579,7 +40087,8 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$rowCountలో $firstRow - $lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCountలో $firstRow–$lastRow';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$rowCountలో $firstRow–$lastRow';
 
   @override
   String get pasteButtonLabel => 'పేస్ట్ చేయండి';
@@ -39609,7 +40118,8 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 అక్షరం మిగిలి ఉంది';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount అక్షరాలు మిగిలి ఉన్నాయి';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount అక్షరాలు మిగిలి ఉన్నాయి';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -39675,7 +40185,8 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 అంశం ఎంచుకోబడింది';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount అంశాలు ఎంచుకోబడ్డాయి';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount అంశాలు ఎంచుకోబడ్డాయి';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -40069,7 +40580,8 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow จาก $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow จากประมาณ $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow จากประมาณ $rowCount';
 
   @override
   String get pasteButtonLabel => 'วาง';
@@ -40099,7 +40611,8 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'เหลือ 1 อักขระ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'เหลือ $remainingCount อักขระ';
+  String get remainingTextFieldCharacterCountOther =>
+      r'เหลือ $remainingCount อักขระ';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -40165,7 +40678,8 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => 'เลือกแล้ว 1 รายการ';
 
   @override
-  String get selectedRowCountTitleOther => r'เลือกแล้ว $selectedRowCount รายการ';
+  String get selectedRowCountTitleOther =>
+      r'เลือกแล้ว $selectedRowCount รายการ';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -40295,7 +40809,8 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Pumili ng petsa';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Petsa ng pagtatapos $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Petsa ng pagtatapos $fullDate';
 
   @override
   String get dateRangeEndLabel => 'Petsa ng Pagtatapos';
@@ -40304,7 +40819,8 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Pumili ng hanay';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Petsa ng pagsisimula $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Petsa ng pagsisimula $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Petsa ng Pagsisimula';
@@ -40334,7 +40850,8 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'i-double tap para i-expand';
 
   @override
-  String get expansionTileCollapsedTapHint => 'I-expand para sa higit pang detalye';
+  String get expansionTileCollapsedTapHint =>
+      'I-expand para sa higit pang detalye';
 
   @override
   String get expansionTileExpandedHint => 'i-double tap para i-collapse';
@@ -40559,7 +41076,8 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ng $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ng humigit kumulang $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow ng humigit kumulang $rowCount';
 
   @override
   String get pasteButtonLabel => 'I-paste';
@@ -40589,7 +41107,8 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 character ang natitira';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount na character ang natitira';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount na character ang natitira';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -40655,7 +41174,8 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 item ang napili';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount na item ang napili';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount na item ang napili';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -40794,7 +41314,8 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Aralık seçin';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Başlangıç tarihi $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Başlangıç tarihi $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Başlangıç Tarihi';
@@ -40824,7 +41345,8 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'genişletmek için iki kez dokunun';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Daha fazla ayrıntı için genişletin';
+  String get expansionTileCollapsedTapHint =>
+      'Daha fazla ayrıntı için genişletin';
 
   @override
   String get expansionTileExpandedHint => 'daraltmak için iki kez dokunun';
@@ -41049,7 +41571,8 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow / $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow-$lastRow / $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow-$lastRow / $rowCount';
 
   @override
   String get pasteButtonLabel => 'Yapıştır';
@@ -41079,7 +41602,8 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 karakter kaldı';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount karakter kaldı';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount karakter kaldı';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -41539,7 +42063,8 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow з $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow з приблизно $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow з приблизно $rowCount';
 
   @override
   String get pasteButtonLabel => 'Вставити';
@@ -41560,16 +42085,19 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => 'Оновити';
 
   @override
-  String? get remainingTextFieldCharacterCountFew => r'Залишилося $remainingCount символи';
+  String? get remainingTextFieldCharacterCountFew =>
+      r'Залишилося $remainingCount символи';
 
   @override
-  String? get remainingTextFieldCharacterCountMany => r'Залишилося $remainingCount символів';
+  String? get remainingTextFieldCharacterCountMany =>
+      r'Залишилося $remainingCount символів';
 
   @override
   String? get remainingTextFieldCharacterCountOne => 'Залишився 1 символ';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Залишилося $remainingCount символу';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Залишилося $remainingCount символу';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -41629,13 +42157,15 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleFew => r'Вибрано $selectedRowCount елементи';
 
   @override
-  String? get selectedRowCountTitleMany => r'Вибрано $selectedRowCount елементів';
+  String? get selectedRowCountTitleMany =>
+      r'Вибрано $selectedRowCount елементів';
 
   @override
   String? get selectedRowCountTitleOne => 'Вибрано 1 елемент';
 
   @override
-  String get selectedRowCountTitleOther => r'Вибрано $selectedRowCount елемента';
+  String get selectedRowCountTitleOther =>
+      r'Вибрано $selectedRowCount елемента';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -42029,7 +42559,8 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow از $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow $rowCount میں سے تقریباً';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow $rowCount میں سے تقریباً';
 
   @override
   String get pasteButtonLabel => 'پیسٹ کریں';
@@ -42059,7 +42590,8 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 حرف باقی ہے';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount حروف باقی ہیں';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount حروف باقی ہیں';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -42125,7 +42657,8 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 آئٹم منتخب کیا گیا';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount آئٹمز منتخب کیے گئے';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount آئٹمز منتخب کیے گئے';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -42264,7 +42797,8 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Oraliqni tanlang';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Boshlanish sanasi: $fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Boshlanish sanasi: $fullDate';
 
   @override
   String get dateRangeStartLabel => 'Boshlanish sanasi';
@@ -42519,7 +43053,8 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow, jami: $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow, jami: $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow, jami: $rowCount';
 
   @override
   String get pasteButtonLabel => 'Joylash';
@@ -42549,7 +43084,8 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 ta belgi qoldi';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount ta belgi qoldi';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount ta belgi qoldi';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -42615,7 +43151,8 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 ta element tanlandi';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount ta element tanlandi';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount ta element tanlandi';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -43006,10 +43543,12 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => 'Mở menu di chuyển';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow trong tổng số $rowCount';
+  String get pageRowsInfoTitleRaw =>
+      r'$firstRow–$lastRow trong tổng số $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow trong tổng số khoảng $rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow trong tổng số khoảng $rowCount';
 
   @override
   String get pasteButtonLabel => 'Dán';
@@ -43039,7 +43578,8 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => 'Còn lại 1 ký tự';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Còn lại $remainingCount ký tự';
+  String get remainingTextFieldCharacterCountOther =>
+      r'Còn lại $remainingCount ký tự';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -43499,7 +44039,8 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'第 $firstRow-$lastRow 行（共 $rowCount 行）';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow-$lastRow 行（共约 $rowCount 行）';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'第 $firstRow-$lastRow 行（共约 $rowCount 行）';
 
   @override
   String get pasteButtonLabel => '粘贴';
@@ -43529,7 +44070,8 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '还可输入 1 个字符';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'还可输入 $remainingCount 个字符';
+  String get remainingTextFieldCharacterCountOther =>
+      r'还可输入 $remainingCount 个字符';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -43927,7 +44469,8 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
 
   @override
   String get pasteButtonLabel => '貼上';
@@ -44160,10 +44703,12 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String get aboutListTileTitleRaw => r'關於「$applicationName」';
 
   @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
+  String get pageRowsInfoTitleRaw =>
+      r'第 $firstRow - $lastRow 列 (總共 $rowCount 列)';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
 
   @override
   String get selectAllButtonLabel => '全選';
@@ -44187,7 +44732,8 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   String? get remainingTextFieldCharacterCountOne => '還可輸入 1 個字元';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'還可輸入 $remainingCount 個字元';
+  String get remainingTextFieldCharacterCountOther =>
+      r'還可輸入 $remainingCount 個字元';
 }
 
 /// The translations for Zulu (`zu`).
@@ -44266,7 +44812,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get datePickerHelpText => 'Khetha usuku';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Idethi yokuphela umhla ka-$fullDate';
+  String get dateRangeEndDateSemanticLabelRaw =>
+      r'Idethi yokuphela umhla ka-$fullDate';
 
   @override
   String get dateRangeEndLabel => 'Idethi yokugcina';
@@ -44275,7 +44822,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get dateRangePickerHelpText => 'Khetha Ibanga';
 
   @override
-  String get dateRangeStartDateSemanticLabelRaw => r'Idethi yokuqala umhla ka-$fullDate';
+  String get dateRangeStartDateSemanticLabelRaw =>
+      r'Idethi yokuqala umhla ka-$fullDate';
 
   @override
   String get dateRangeStartLabel => 'Idethi yokuqala';
@@ -44305,7 +44853,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'Thepha kabili ukuze unwebe';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Nweba ukuze uthole imininingwane eyengeziwe';
+  String get expansionTileCollapsedTapHint =>
+      'Nweba ukuze uthole imininingwane eyengeziwe';
 
   @override
   String get expansionTileExpandedHint => 'thepha kabili ukuze ugoqe';
@@ -44488,7 +45037,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextOne => 'ilayisense e-1';
 
   @override
-  String get licensesPackageDetailTextOther => r'amalayisense angu-$licenseCount';
+  String get licensesPackageDetailTextOther =>
+      r'amalayisense angu-$licenseCount';
 
   @override
   String? get licensesPackageDetailTextTwo => null;
@@ -44530,7 +45080,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow kokungu-$rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow cishe kokungu-$rowCount';
+  String get pageRowsInfoTitleApproximateRaw =>
+      r'$firstRow–$lastRow cishe kokungu-$rowCount';
 
   @override
   String get pasteButtonLabel => 'Namathisela';
@@ -44560,7 +45111,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String? get remainingTextFieldCharacterCountOne => '1 uhlamvu olusele';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount izinhlamvu ezisele';
+  String get remainingTextFieldCharacterCountOther =>
+      r'$remainingCount izinhlamvu ezisele';
 
   @override
   String? get remainingTextFieldCharacterCountTwo => null;
@@ -44626,7 +45178,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleOne => '1 into ekhethiwe';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount izinto ezikhethiwe';
+  String get selectedRowCountTitleOther =>
+      r'$selectedRowCount izinto ezikhethiwe';
 
   @override
   String? get selectedRowCountTitleTwo => null;
@@ -44691,7 +45244,8 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 /// See also:
 ///
 ///  * [getMaterialTranslation], whose documentation describes these values.
-final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <String>[
+final Set<String> kMaterialSupportedLanguages =
+    HashSet<String>.from(const <String>[
   'af', // Afrikaans
   'am', // Amharic
   'ar', // Arabic
@@ -44880,271 +45434,1345 @@ GlobalMaterialLocalizations? getMaterialTranslation(
 ) {
   switch (locale.languageCode) {
     case 'af':
-      return MaterialLocalizationAf(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAf(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'am':
-      return MaterialLocalizationAm(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAm(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ar':
-      return MaterialLocalizationAr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'as':
-      return MaterialLocalizationAs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'az':
-      return MaterialLocalizationAz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAz(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'be':
-      return MaterialLocalizationBe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bg':
-      return MaterialLocalizationBg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBg(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bn':
-      return MaterialLocalizationBn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBn(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bs':
-      return MaterialLocalizationBs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ca':
-      return MaterialLocalizationCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationCa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'cs':
-      return MaterialLocalizationCs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationCs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'cy':
-      return MaterialLocalizationCy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationCy(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'da':
-      return MaterialLocalizationDa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'de': {
-      switch (locale.countryCode) {
-        case 'CH':
-          return MaterialLocalizationDeCh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationDa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'de':
+      {
+        switch (locale.countryCode) {
+          case 'CH':
+            return MaterialLocalizationDeCh(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationDe(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationDe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'el':
-      return MaterialLocalizationEl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'en': {
-      switch (locale.countryCode) {
-        case 'AU':
-          return MaterialLocalizationEnAu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CA':
-          return MaterialLocalizationEnCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'GB':
-          return MaterialLocalizationEnGb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'IE':
-          return MaterialLocalizationEnIe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'IN':
-          return MaterialLocalizationEnIn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'NZ':
-          return MaterialLocalizationEnNz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'SG':
-          return MaterialLocalizationEnSg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'ZA':
-          return MaterialLocalizationEnZa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'en':
+      {
+        switch (locale.countryCode) {
+          case 'AU':
+            return MaterialLocalizationEnAu(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CA':
+            return MaterialLocalizationEnCa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'GB':
+            return MaterialLocalizationEnGb(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'IE':
+            return MaterialLocalizationEnIe(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'IN':
+            return MaterialLocalizationEnIn(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'NZ':
+            return MaterialLocalizationEnNz(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'SG':
+            return MaterialLocalizationEnSg(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'ZA':
+            return MaterialLocalizationEnZa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationEn(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationEn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
-    case 'es': {
-      switch (locale.countryCode) {
-        case '419':
-          return MaterialLocalizationEs419(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'AR':
-          return MaterialLocalizationEsAr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'BO':
-          return MaterialLocalizationEsBo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CL':
-          return MaterialLocalizationEsCl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CO':
-          return MaterialLocalizationEsCo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'CR':
-          return MaterialLocalizationEsCr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'DO':
-          return MaterialLocalizationEsDo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'EC':
-          return MaterialLocalizationEsEc(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'GT':
-          return MaterialLocalizationEsGt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'HN':
-          return MaterialLocalizationEsHn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'MX':
-          return MaterialLocalizationEsMx(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'NI':
-          return MaterialLocalizationEsNi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PA':
-          return MaterialLocalizationEsPa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PE':
-          return MaterialLocalizationEsPe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PR':
-          return MaterialLocalizationEsPr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'PY':
-          return MaterialLocalizationEsPy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'SV':
-          return MaterialLocalizationEsSv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'US':
-          return MaterialLocalizationEsUs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'UY':
-          return MaterialLocalizationEsUy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'VE':
-          return MaterialLocalizationEsVe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'es':
+      {
+        switch (locale.countryCode) {
+          case '419':
+            return MaterialLocalizationEs419(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'AR':
+            return MaterialLocalizationEsAr(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'BO':
+            return MaterialLocalizationEsBo(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CL':
+            return MaterialLocalizationEsCl(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CO':
+            return MaterialLocalizationEsCo(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'CR':
+            return MaterialLocalizationEsCr(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'DO':
+            return MaterialLocalizationEsDo(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'EC':
+            return MaterialLocalizationEsEc(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'GT':
+            return MaterialLocalizationEsGt(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'HN':
+            return MaterialLocalizationEsHn(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'MX':
+            return MaterialLocalizationEsMx(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'NI':
+            return MaterialLocalizationEsNi(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PA':
+            return MaterialLocalizationEsPa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PE':
+            return MaterialLocalizationEsPe(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PR':
+            return MaterialLocalizationEsPr(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'PY':
+            return MaterialLocalizationEsPy(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'SV':
+            return MaterialLocalizationEsSv(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'US':
+            return MaterialLocalizationEsUs(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'UY':
+            return MaterialLocalizationEsUy(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'VE':
+            return MaterialLocalizationEsVe(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationEs(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationEs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'et':
-      return MaterialLocalizationEt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEt(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'eu':
-      return MaterialLocalizationEu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fa':
-      return MaterialLocalizationFa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fi':
-      return MaterialLocalizationFi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fil':
-      return MaterialLocalizationFil(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'fr': {
-      switch (locale.countryCode) {
-        case 'CA':
-          return MaterialLocalizationFrCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFil(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'fr':
+      {
+        switch (locale.countryCode) {
+          case 'CA':
+            return MaterialLocalizationFrCa(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationFr(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationFr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'gl':
-      return MaterialLocalizationGl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gsw':
-      return MaterialLocalizationGsw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGsw(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gu':
-      return MaterialLocalizationGu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'he':
-      return MaterialLocalizationHe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hi':
-      return MaterialLocalizationHi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hr':
-      return MaterialLocalizationHr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hu':
-      return MaterialLocalizationHu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hy':
-      return MaterialLocalizationHy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHy(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'id':
-      return MaterialLocalizationId(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationId(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'is':
-      return MaterialLocalizationIs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationIs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'it':
-      return MaterialLocalizationIt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationIt(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ja':
-      return MaterialLocalizationJa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationJa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ka':
-      return MaterialLocalizationKa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'kk':
-      return MaterialLocalizationKk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'km':
-      return MaterialLocalizationKm(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKm(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'kn':
-      return MaterialLocalizationKn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKn(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
-      return MaterialLocalizationKo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ky':
-      return MaterialLocalizationKy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKy(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lo':
-      return MaterialLocalizationLo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lt':
-      return MaterialLocalizationLt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLt(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lv':
-      return MaterialLocalizationLv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLv(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mk':
-      return MaterialLocalizationMk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ml':
-      return MaterialLocalizationMl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mn':
-      return MaterialLocalizationMn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMn(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mr':
-      return MaterialLocalizationMr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ms':
-      return MaterialLocalizationMs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'my':
-      return MaterialLocalizationMy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMy(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nb':
-      return MaterialLocalizationNb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNb(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ne':
-      return MaterialLocalizationNe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nl':
-      return MaterialLocalizationNl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'no':
-      return MaterialLocalizationNo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'or':
-      return MaterialLocalizationOr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationOr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pa':
-      return MaterialLocalizationPa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pl':
-      return MaterialLocalizationPl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ps':
-      return MaterialLocalizationPs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'pt': {
-      switch (locale.countryCode) {
-        case 'PT':
-          return MaterialLocalizationPtPt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPs(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'pt':
+      {
+        switch (locale.countryCode) {
+          case 'PT':
+            return MaterialLocalizationPtPt(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        }
+        return MaterialLocalizationPt(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationPt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'ro':
-      return MaterialLocalizationRo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationRo(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ru':
-      return MaterialLocalizationRu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationRu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'si':
-      return MaterialLocalizationSi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sk':
-      return MaterialLocalizationSk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sl':
-      return MaterialLocalizationSl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sq':
-      return MaterialLocalizationSq(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'sr': {
-      switch (locale.scriptCode) {
-        case 'Cyrl': {
-          return MaterialLocalizationSrCyrl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSq(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'sr':
+      {
+        switch (locale.scriptCode) {
+          case 'Cyrl':
+            {
+              return MaterialLocalizationSrCyrl(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
+          case 'Latn':
+            {
+              return MaterialLocalizationSrLatn(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
         }
-        case 'Latn': {
-          return MaterialLocalizationSrLatn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        }
+        return MaterialLocalizationSr(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationSr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'sv':
-      return MaterialLocalizationSv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSv(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sw':
-      return MaterialLocalizationSw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSw(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ta':
-      return MaterialLocalizationTa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTa(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'te':
-      return MaterialLocalizationTe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTe(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'th':
-      return MaterialLocalizationTh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTh(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tl':
-      return MaterialLocalizationTl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTl(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tr':
-      return MaterialLocalizationTr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'uk':
-      return MaterialLocalizationUk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUk(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ur':
-      return MaterialLocalizationUr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUr(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'uz':
-      return MaterialLocalizationUz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUz(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'vi':
-      return MaterialLocalizationVi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'zh': {
-      switch (locale.scriptCode) {
-        case 'Hans': {
-          return MaterialLocalizationZhHans(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationVi(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'zh':
+      {
+        switch (locale.scriptCode) {
+          case 'Hans':
+            {
+              return MaterialLocalizationZhHans(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
+          case 'Hant':
+            {
+              switch (locale.countryCode) {
+                case 'HK':
+                  return MaterialLocalizationZhHantHk(
+                      fullYearFormat: fullYearFormat,
+                      compactDateFormat: compactDateFormat,
+                      shortDateFormat: shortDateFormat,
+                      mediumDateFormat: mediumDateFormat,
+                      longDateFormat: longDateFormat,
+                      yearMonthFormat: yearMonthFormat,
+                      shortMonthDayFormat: shortMonthDayFormat,
+                      decimalFormat: decimalFormat,
+                      twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+                case 'TW':
+                  return MaterialLocalizationZhHantTw(
+                      fullYearFormat: fullYearFormat,
+                      compactDateFormat: compactDateFormat,
+                      shortDateFormat: shortDateFormat,
+                      mediumDateFormat: mediumDateFormat,
+                      longDateFormat: longDateFormat,
+                      yearMonthFormat: yearMonthFormat,
+                      shortMonthDayFormat: shortMonthDayFormat,
+                      decimalFormat: decimalFormat,
+                      twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+              }
+              return MaterialLocalizationZhHant(
+                  fullYearFormat: fullYearFormat,
+                  compactDateFormat: compactDateFormat,
+                  shortDateFormat: shortDateFormat,
+                  mediumDateFormat: mediumDateFormat,
+                  longDateFormat: longDateFormat,
+                  yearMonthFormat: yearMonthFormat,
+                  shortMonthDayFormat: shortMonthDayFormat,
+                  decimalFormat: decimalFormat,
+                  twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+            }
         }
-        case 'Hant': {
-          switch (locale.countryCode) {
-            case 'HK':
-              return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-            case 'TW':
-              return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-          }
-          return MaterialLocalizationZhHant(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+        switch (locale.countryCode) {
+          case 'HK':
+            return MaterialLocalizationZhHantHk(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          case 'TW':
+            return MaterialLocalizationZhHantTw(
+                fullYearFormat: fullYearFormat,
+                compactDateFormat: compactDateFormat,
+                shortDateFormat: shortDateFormat,
+                mediumDateFormat: mediumDateFormat,
+                longDateFormat: longDateFormat,
+                yearMonthFormat: yearMonthFormat,
+                shortMonthDayFormat: shortMonthDayFormat,
+                decimalFormat: decimalFormat,
+                twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }
+        return MaterialLocalizationZh(
+            fullYearFormat: fullYearFormat,
+            compactDateFormat: compactDateFormat,
+            shortDateFormat: shortDateFormat,
+            mediumDateFormat: mediumDateFormat,
+            longDateFormat: longDateFormat,
+            yearMonthFormat: yearMonthFormat,
+            shortMonthDayFormat: shortMonthDayFormat,
+            decimalFormat: decimalFormat,
+            twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      switch (locale.countryCode) {
-        case 'HK':
-          return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-        case 'TW':
-          return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-      }
-      return MaterialLocalizationZh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    }
     case 'zu':
-      return MaterialLocalizationZu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationZu(
+          fullYearFormat: fullYearFormat,
+          compactDateFormat: compactDateFormat,
+          shortDateFormat: shortDateFormat,
+          mediumDateFormat: mediumDateFormat,
+          longDateFormat: longDateFormat,
+          yearMonthFormat: yearMonthFormat,
+          shortMonthDayFormat: shortMonthDayFormat,
+          decimalFormat: decimalFormat,
+          twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
   }
-  assert(false, 'getMaterialTranslation() called for unsupported locale "$locale"');
+  assert(false,
+      'getMaterialTranslation() called for unsupported locale "$locale"');
   return null;
 }

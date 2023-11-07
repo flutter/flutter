@@ -80,7 +80,9 @@ void main() {
       expect(strategy.getPath(), '/bar');
     });
 
-    test('gets path correctly in the presence of query params and omits fragment if no flag specified', () {
+    test(
+        'gets path correctly in the presence of query params and omits fragment if no flag specified',
+        () {
       location.baseHref = 'https://example.com/foo/';
       location.pathname = '/foo/bar';
       final PathUrlStrategy strategy = PathUrlStrategy(location);
@@ -95,7 +97,8 @@ void main() {
       expect(strategy.getPath(), '/bar?q=1&t=r');
     });
 
-    test('gets path correctly in the presence of query params and fragment', () {
+    test('gets path correctly in the presence of query params and fragment',
+        () {
       location.baseHref = 'https://example.com/foo/';
       location.pathname = '/foo/bar';
       final PathUrlStrategy strategy = PathUrlStrategy(location, true);
@@ -122,15 +125,20 @@ void main() {
 
       expect(() => strategy.prepareExternalUrl('foo'), throwsAssertionError);
       expect(() => strategy.prepareExternalUrl('foo/'), throwsAssertionError);
-      expect(() => strategy.prepareExternalUrl('foo/bar'), throwsAssertionError);
+      expect(
+          () => strategy.prepareExternalUrl('foo/bar'), throwsAssertionError);
 
       expect(() => strategy.pushState(null, '', 'foo'), throwsAssertionError);
       expect(() => strategy.pushState(null, '', 'foo/'), throwsAssertionError);
-      expect(() => strategy.pushState(null, '', 'foo/bar'), throwsAssertionError);
+      expect(
+          () => strategy.pushState(null, '', 'foo/bar'), throwsAssertionError);
 
-      expect(() => strategy.replaceState(null, '', 'foo'), throwsAssertionError);
-      expect(() => strategy.replaceState(null, '', 'foo/'), throwsAssertionError);
-      expect(() => strategy.replaceState(null, '', 'foo/bar'), throwsAssertionError);
+      expect(
+          () => strategy.replaceState(null, '', 'foo'), throwsAssertionError);
+      expect(
+          () => strategy.replaceState(null, '', 'foo/'), throwsAssertionError);
+      expect(() => strategy.replaceState(null, '', 'foo/bar'),
+          throwsAssertionError);
     });
 
     test('generates external path correctly in the presence of basePath', () {

@@ -41,7 +41,8 @@ class NewGalleryChromeRunTest {
 
     await getNewGallery(galleryVersion, galleryDir);
 
-    final TaskResult result = await inDirectory<TaskResult>(galleryDir, () async {
+    final TaskResult result =
+        await inDirectory<TaskResult>(galleryDir, () async {
       await flutter('doctor');
       await flutter('packages', options: <String>['get']);
 
@@ -52,7 +53,12 @@ class NewGalleryChromeRunTest {
         '--no-pub',
       ]);
 
-      final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
+      final List<String> options = <String>[
+        '-d',
+        'chrome',
+        '--verbose',
+        '--resident'
+      ];
       final Process process = await startFlutter(
         'run',
         options: options,
@@ -69,10 +75,9 @@ class NewGalleryChromeRunTest {
           .listen((String line) {
         if (line.contains(successfullyLoadedString)) {
           // Successfully started.
-          Future<void>.delayed(
-            durationToWaitForError,
-            () {process.stdin.write('q');}
-          );
+          Future<void>.delayed(durationToWaitForError, () {
+            process.stdin.write('q');
+          });
         }
         if (line.contains(exceptionString)) {
           success = false;

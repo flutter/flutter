@@ -7,8 +7,8 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import '_timeline_io.dart'
-  if (dart.library.js_util) '_timeline_web.dart' as impl;
+import '_timeline_io.dart' if (dart.library.js_util) '_timeline_web.dart'
+    as impl;
 import 'constants.dart';
 
 /// Measures how long blocks of code take to run.
@@ -52,7 +52,8 @@ abstract final class FlutterTimeline {
   }
 
   static StateError _createReleaseModeNotSupportedError() {
-    return StateError('FlutterTimeline metric collection not supported in release mode.');
+    return StateError(
+        'FlutterTimeline metric collection not supported in release mode.');
   }
 
   static bool _collectionEnabled = false;
@@ -64,7 +65,8 @@ abstract final class FlutterTimeline {
   /// [finishSync] before returning to the event queue.
   ///
   /// This is a drop-in replacement for [Timeline.startSync].
-  static void startSync(String name, { Map<String, Object?>? arguments, Flow? flow }) {
+  static void startSync(String name,
+      {Map<String, Object?>? arguments, Flow? flow}) {
     Timeline.startSync(name, arguments: arguments, flow: flow);
     if (!kReleaseMode && _collectionEnabled) {
       _buffer.startSync(name, arguments: arguments, flow: flow);
@@ -84,7 +86,7 @@ abstract final class FlutterTimeline {
   /// Emit an instant event.
   ///
   /// This is a drop-in replacement for [Timeline.instantSync].
-  static void instantSync(String name, { Map<String, Object?>? arguments }) {
+  static void instantSync(String name, {Map<String, Object?>? arguments}) {
     Timeline.instantSync(name, arguments: arguments);
   }
 
@@ -93,7 +95,7 @@ abstract final class FlutterTimeline {
   ///
   /// This is a drop-in replacement for [Timeline.timeSync].
   static T timeSync<T>(String name, TimelineSyncFunction<T> function,
-      { Map<String, Object?>? arguments, Flow? flow }) {
+      {Map<String, Object?>? arguments, Flow? flow}) {
     startSync(name, arguments: arguments, flow: flow);
     try {
       return function();
@@ -128,7 +130,8 @@ abstract final class FlutterTimeline {
     if (!_collectionEnabled) {
       throw StateError('Timeline metric collection not enabled.');
     }
-    final AggregatedTimings result = AggregatedTimings(_buffer.computeTimings());
+    final AggregatedTimings result =
+        AggregatedTimings(_buffer.computeTimings());
     debugReset();
     return result;
   }
@@ -160,7 +163,8 @@ final class TimedBlock {
     required this.name,
     required this.start,
     required this.end,
-  }) : assert(end >= start, 'The start timestamp must not be greater than the end timestamp.');
+  }) : assert(end >= start,
+            'The start timestamp must not be greater than the end timestamp.');
 
   /// A readable label for a block of code that was measured.
   ///
@@ -199,19 +203,22 @@ final class AggregatedTimings {
   /// Does not guarantee that all code blocks will be reported. Only those that
   /// executed since the last reset are listed here. Use [getAggregated] for
   /// graceful handling of missing code blocks.
-  late final List<AggregatedTimedBlock> aggregatedBlocks = _computeAggregatedBlocks();
+  late final List<AggregatedTimedBlock> aggregatedBlocks =
+      _computeAggregatedBlocks();
 
   List<AggregatedTimedBlock> _computeAggregatedBlocks() {
     final Map<String, (double, int)> aggregate = <String, (double, int)>{};
     for (final TimedBlock block in timedBlocks) {
-      final (double, int) previousValue = aggregate.putIfAbsent(block.name, () => (0, 0));
-      aggregate[block.name] = (previousValue.$1 + block.duration, previousValue.$2 + 1);
+      final (double, int) previousValue =
+          aggregate.putIfAbsent(block.name, () => (0, 0));
+      aggregate[block.name] =
+          (previousValue.$1 + block.duration, previousValue.$2 + 1);
     }
-    return aggregate.entries.map<AggregatedTimedBlock>(
-      (MapEntry<String, (double, int)> entry) {
-        return AggregatedTimedBlock(name: entry.key, duration: entry.value.$1, count: entry.value.$2);
-      }
-    ).toList();
+    return aggregate.entries
+        .map<AggregatedTimedBlock>((MapEntry<String, (double, int)> entry) {
+      return AggregatedTimedBlock(
+          name: entry.key, duration: entry.value.$1, count: entry.value.$2);
+    }).toList();
   }
 
   /// Returns aggregated numbers for a named block of code.
@@ -369,7 +376,8 @@ final class _BlockBuffer {
   // add the (start, finish) tuple to the _block.
   static const int _stackDepth = 1000;
   static final Float64List _startStack = Float64List(_stackDepth);
-  static final List<String?> _nameStack = List<String?>.filled(_stackDepth, null);
+  static final List<String?> _nameStack =
+      List<String?>.filled(_stackDepth, null);
   static int _stackPointer = 0;
 
   final _Float64ListChain _starts = _Float64ListChain();
@@ -378,12 +386,11 @@ final class _BlockBuffer {
 
   List<TimedBlock> computeTimings() {
     assert(
-      _stackPointer == 0,
-      'Invalid sequence of `startSync` and `finishSync`.\n'
-      'The operation stack was not empty. The following operations are still '
-      'waiting to be finished via the `finishSync` method:\n'
-      '${List<String>.generate(_stackPointer, (int i) => _nameStack[i]!).join(', ')}'
-    );
+        _stackPointer == 0,
+        'Invalid sequence of `startSync` and `finishSync`.\n'
+        'The operation stack was not empty. The following operations are still '
+        'waiting to be finished via the `finishSync` method:\n'
+        '${List<String>.generate(_stackPointer, (int i) => _nameStack[i]!).join(', ')}');
 
     final List<TimedBlock> result = <TimedBlock>[];
     final int length = _finishes.length;
@@ -406,7 +413,7 @@ final class _BlockBuffer {
     return result;
   }
 
-  void startSync(String name, { Map<String, Object?>? arguments, Flow? flow }) {
+  void startSync(String name, {Map<String, Object?>? arguments, Flow? flow}) {
     _startStack[_stackPointer] = impl.performanceTimestamp;
     _nameStack[_stackPointer] = name;
     _stackPointer += 1;
@@ -414,11 +421,10 @@ final class _BlockBuffer {
 
   void finishSync() {
     assert(
-      _stackPointer > 0,
-      'Invalid sequence of `startSync` and `finishSync`.\n'
-      'Attempted to finish timing a block of code, but there are no pending '
-      '`startSync` calls.'
-    );
+        _stackPointer > 0,
+        'Invalid sequence of `startSync` and `finishSync`.\n'
+        'Attempted to finish timing a block of code, but there are no pending '
+        '`startSync` calls.');
 
     final double finishTime = impl.performanceTimestamp;
     final double startTime = _startStack[_stackPointer - 1];

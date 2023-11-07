@@ -113,8 +113,10 @@ void main() {
           ),
         ],
       );
-      apidocs.FlutterInformation.instance =
-          apidocs.FlutterInformation(platform: platform, processManager: processManager, filesystem: memoryFileSystem);
+      apidocs.FlutterInformation.instance = apidocs.FlutterInformation(
+          platform: platform,
+          processManager: processManager,
+          filesystem: memoryFileSystem);
 
       apidocs.runPubProcess(
         arguments: <String>['--one', '--two'],
@@ -137,7 +139,8 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
-      final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
+      final Map<String, dynamic> info =
+          flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
     });
@@ -152,11 +155,13 @@ void main() {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['git', 'rev-parse', 'HEAD'],
       ));
-      final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
+      final Map<String, dynamic> info =
+          flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
     });
-    test('getFlutterRoot calls out to flutter if FLUTTER_ROOT is not set', () async {
+    test('getFlutterRoot calls out to flutter if FLUTTER_ROOT is not set',
+        () async {
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['flutter', '--version', '--machine'],
         stdout: testVersionInfo,
@@ -172,8 +177,10 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(root.path, equals('/home/user/flutter'));
     });
-    test("getFlutterRoot doesn't call out to flutter if FLUTTER_ROOT is set", () async {
-      setUpWithEnvironment(<String, String>{'FLUTTER_ROOT': '/home/user/flutter'});
+    test("getFlutterRoot doesn't call out to flutter if FLUTTER_ROOT is set",
+        () async {
+      setUpWithEnvironment(
+          <String, String>{'FLUTTER_ROOT': '/home/user/flutter'});
       final Directory root = flutterInformation.getFlutterRoot();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(root.path, equals('/home/user/flutter'));
@@ -189,7 +196,8 @@ void main() {
           command: <String>['git', 'rev-parse', 'HEAD'],
         ),
       ]);
-      final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
+      final Map<String, dynamic> info =
+          flutterInformation.getFlutterInformation();
       expect(info['frameworkVersion'], isNotNull);
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
       expect(info['dartSdkVersion'], isNotNull);
@@ -205,10 +213,15 @@ void main() {
       flutterHome.childFile('engine.realm')
         ..createSync(recursive: true)
         ..writeAsStringSync('realm');
-      setUpWithEnvironment(<String, String>{'FLUTTER_ROOT': '/home/user/flutter'});
+      setUpWithEnvironment(
+          <String, String>{'FLUTTER_ROOT': '/home/user/flutter'});
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
-          command: <Pattern>['/home/user/flutter/bin/flutter', '--version', '--machine'],
+          command: <Pattern>[
+            '/home/user/flutter/bin/flutter',
+            '--version',
+            '--machine'
+          ],
           stdout: testVersionInfo,
         ),
         const FakeCommand(
@@ -219,7 +232,8 @@ void main() {
           command: <String>['git', 'rev-parse', 'HEAD'],
         ),
       ]);
-      final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
+      final Map<String, dynamic> info =
+          flutterInformation.getFlutterInformation();
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(info['engineRealm'], equals('realm'));
     });
@@ -253,9 +267,12 @@ void main() {
       );
     });
 
-    test('.generateDartDoc() invokes dartdoc with the correct command line arguments', () async {
+    test(
+        '.generateDartDoc() invokes dartdoc with the correct command line arguments',
+        () async {
       processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'get']),
+        const FakeCommand(
+            command: <String>['/flutter/bin/flutter', 'pub', 'get']),
         const FakeCommand(
           command: <String>['/flutter/bin/flutter', '--version', '--machine'],
           stdout: testVersionInfo,
@@ -329,7 +346,8 @@ void main() {
           isA<Exception>().having(
             (Exception e) => e.toString(),
             'message',
-            contains(RegExp(r'Missing .* which probably means the documentation failed to build correctly.')),
+            contains(RegExp(
+                r'Missing .* which probably means the documentation failed to build correctly.')),
           ),
         ),
       );
@@ -339,7 +357,8 @@ void main() {
 
     test('sanity checks spot check generated files', () async {
       processManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'get']),
+        const FakeCommand(
+            command: <String>['/flutter/bin/flutter', 'pub', 'get']),
         const FakeCommand(
           command: <String>['/flutter/bin/flutter', '--version', '--machine'],
           stdout: testVersionInfo,
@@ -355,84 +374,94 @@ void main() {
           command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list'],
         ),
         FakeCommand(
-          command: <Pattern>[
-            '/flutter/bin/flutter',
-            'pub',
-            'global',
-            'run',
-            '--enable-asserts',
-            'dartdoc',
-            '--output',
-            '/path/to/publish/flutter',
-            '--allow-tools',
-            '--json',
-            '--validate-links',
-            '--link-to-source-excludes',
-            '/flutter/bin/cache',
-            '--link-to-source-root',
-            '/flutter',
-            '--link-to-source-uri-template',
-            'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
-            '--inject-html',
-            '--use-base-href',
-            '--header',
-            '/path/to/docs/styles.html',
-            '--header',
-            '/path/to/docs/analytics-header.html',
-            '--header',
-            '/path/to/docs/survey.html',
-            '--header',
-            '/path/to/docs/snippets.html',
-            '--header',
-            '/path/to/docs/opensearch.html',
-            '--footer',
-            '/path/to/docs/analytics-footer.html',
-            '--footer-text',
-            '/path/to/package/footer.html',
-            '--allow-warnings-in-packages',
-            // match package names
-            RegExp(r'^(\w+,)+(\w+)$'),
-            '--exclude-packages',
-            RegExp(r'^(\w+,)+(\w+)$'),
-            '--exclude',
-            // match dart package URIs
-            RegExp(r'^([\w\/:.]+,)+([\w\/:.]+)$'),
-            '--favicon',
-            '/path/to/docs/favicon.ico',
-            '--package-order',
-            'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
-            '--auto-include-dependencies',
-          ],
-          onRun: () {
-            for (final File canary in generator.canaries) {
-              canary.createSync(recursive: true);
-            }
-            for (final String path in dartdocDirectiveCanaryFiles) {
-              publishRoot.childDirectory('flutter').childFile(path).createSync(recursive: true);
-            }
-            for (final String path in dartdocDirectiveCanaryLibraries) {
-              publishRoot.childDirectory('flutter').childDirectory(path).createSync(recursive: true);
-            }
-            publishRoot.childDirectory('flutter').childFile('index.html').createSync();
+            command: <Pattern>[
+              '/flutter/bin/flutter',
+              'pub',
+              'global',
+              'run',
+              '--enable-asserts',
+              'dartdoc',
+              '--output',
+              '/path/to/publish/flutter',
+              '--allow-tools',
+              '--json',
+              '--validate-links',
+              '--link-to-source-excludes',
+              '/flutter/bin/cache',
+              '--link-to-source-root',
+              '/flutter',
+              '--link-to-source-uri-template',
+              'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
+              '--inject-html',
+              '--use-base-href',
+              '--header',
+              '/path/to/docs/styles.html',
+              '--header',
+              '/path/to/docs/analytics-header.html',
+              '--header',
+              '/path/to/docs/survey.html',
+              '--header',
+              '/path/to/docs/snippets.html',
+              '--header',
+              '/path/to/docs/opensearch.html',
+              '--footer',
+              '/path/to/docs/analytics-footer.html',
+              '--footer-text',
+              '/path/to/package/footer.html',
+              '--allow-warnings-in-packages',
+              // match package names
+              RegExp(r'^(\w+,)+(\w+)$'),
+              '--exclude-packages',
+              RegExp(r'^(\w+,)+(\w+)$'),
+              '--exclude',
+              // match dart package URIs
+              RegExp(r'^([\w\/:.]+,)+([\w\/:.]+)$'),
+              '--favicon',
+              '/path/to/docs/favicon.ico',
+              '--package-order',
+              'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
+              '--auto-include-dependencies',
+            ],
+            onRun: () {
+              for (final File canary in generator.canaries) {
+                canary.createSync(recursive: true);
+              }
+              for (final String path in dartdocDirectiveCanaryFiles) {
+                publishRoot
+                    .childDirectory('flutter')
+                    .childFile(path)
+                    .createSync(recursive: true);
+              }
+              for (final String path in dartdocDirectiveCanaryLibraries) {
+                publishRoot
+                    .childDirectory('flutter')
+                    .childDirectory(path)
+                    .createSync(recursive: true);
+              }
+              publishRoot
+                  .childDirectory('flutter')
+                  .childFile('index.html')
+                  .createSync();
 
-            final Directory widgetsDir = publishRoot
-                .childDirectory('flutter')
-                .childDirectory('widgets')
+              final Directory widgetsDir = publishRoot
+                  .childDirectory('flutter')
+                  .childDirectory('widgets')
                 ..createSync(recursive: true);
-            widgetsDir.childFile('showGeneralDialog.html').writeAsStringSync('''
+              widgetsDir.childFile('showGeneralDialog.html').writeAsStringSync(
+                '''
 <pre id="longSnippet1">
   <code class="language-dart">
     import &#39;package:flutter&#47;material.dart&#39;;
   </code>
 </pre>
 ''',
-            );
-            expect(publishRoot.childDirectory('flutter').existsSync(), isTrue);
-            (widgetsDir
-              .childDirectory('ModalRoute')
-              ..createSync(recursive: true))
-              .childFile('barrierColor.html')
-              .writeAsStringSync('''
+              );
+              expect(
+                  publishRoot.childDirectory('flutter').existsSync(), isTrue);
+              (widgetsDir.childDirectory('ModalRoute')
+                    ..createSync(recursive: true))
+                  .childFile('barrierColor.html')
+                  .writeAsStringSync('''
 <pre id="sample-code">
   <code class="language-dart">
     class FooClass {
@@ -441,13 +470,13 @@ void main() {
   </code>
 </pre>
 ''');
-            const String queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&sample_channel=master&channel=master';
-            widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
+              const String queryParams =
+                  'split=1&run=true&sample_id=widgets.Listener.123&sample_channel=master&channel=master';
+              widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?$queryParams">
 </iframe>
 ''');
-          }
-        ),
+            }),
       ]);
 
       await generator.generateDartdoc();

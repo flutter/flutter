@@ -18,7 +18,8 @@ List<TextSelectionPoint> _globalize(
   }).toList();
 }
 
-RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester tester) {
+RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(
+    WidgetTester tester) {
   return (tester.state(find.byType(TextField))
           as TextSelectionGestureDetectorBuilderDelegate)
       .editableTextKey
@@ -26,7 +27,8 @@ RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester
       .renderEditable;
 }
 
-Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester tester, int offset) {
+Offset _textOffsetToPosition<T extends State<StatefulWidget>>(
+    WidgetTester tester, int offset) {
   final RenderEditable renderEditable = _findRenderEditable(tester);
 
   final List<TextSelectionPoint> endpoints = renderEditable
@@ -46,8 +48,10 @@ void main() {
   const Duration durationBetweenActions = Duration(milliseconds: 20);
   const String defaultText = 'I am a magnifier, fear me!';
 
-  Future<void> showMagnifier(WidgetTester tester, String characterToTapOn) async {
-    final Offset tapOffset = _textOffsetToPosition(tester, defaultText.indexOf(characterToTapOn));
+  Future<void> showMagnifier(
+      WidgetTester tester, String characterToTapOn) async {
+    final Offset tapOffset =
+        _textOffsetToPosition(tester, defaultText.indexOf(characterToTapOn));
 
     // Double tap 'Magnifier' word to show the selection handles.
     final TestGesture testGesture = await tester.startGesture(tapOffset);
@@ -83,8 +87,10 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('should show custom magnifier on drag', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.TextMagnifierExampleApp(text: defaultText));
+  testWidgets('should show custom magnifier on drag',
+      (WidgetTester tester) async {
+    await tester
+        .pumpWidget(const example.TextMagnifierExampleApp(text: defaultText));
 
     await showMagnifier(tester, 'e');
     expect(find.byType(example.CustomMagnifier), findsOneWidget);
@@ -93,15 +99,19 @@ void main() {
       find.byType(example.TextMagnifierExampleApp),
       matchesGoldenFile('text_magnifier.0_test.png'),
     );
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
-
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}));
 
   for (final TextDirection textDirection in TextDirection.values) {
-    testWidgets('should show custom magnifier in $textDirection', (WidgetTester tester) async {
-      final String text = textDirection == TextDirection.rtl ? 'أثارت زر' : defaultText;
+    testWidgets('should show custom magnifier in $textDirection',
+        (WidgetTester tester) async {
+      final String text =
+          textDirection == TextDirection.rtl ? 'أثارت زر' : defaultText;
       final String textToTapOn = textDirection == TextDirection.rtl ? 'ت' : 'e';
 
-      await tester.pumpWidget(example.TextMagnifierExampleApp(textDirection: textDirection, text: text));
+      await tester.pumpWidget(example.TextMagnifierExampleApp(
+          textDirection: textDirection, text: text));
 
       await showMagnifier(tester, textToTapOn);
 

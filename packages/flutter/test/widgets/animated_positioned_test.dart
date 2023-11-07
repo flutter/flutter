@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('AnimatedPositioned.fromRect control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedPositioned.fromRect control test',
+      (WidgetTester tester) async {
     final AnimatedPositioned positioned = AnimatedPositioned.fromRect(
       rect: const Rect.fromLTWH(7.0, 5.0, 12.0, 16.0),
       duration: const Duration(milliseconds: 200),
@@ -21,7 +22,8 @@ void main() {
     expect(positioned, hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositioned - basics (VISUAL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedPositioned - basics (VISUAL)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -43,12 +45,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
       Stack(
@@ -75,7 +79,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(Offset.lerp(first, last, 0.5)));
 
     await tester.pump(const Duration(seconds: 1));
 
@@ -103,7 +108,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - basics (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - basics (LTR)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -127,12 +133,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -161,7 +169,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(Offset.lerp(first, last, 0.5)));
 
     await tester.pump(const Duration(seconds: 1));
 
@@ -189,7 +198,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - basics (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - basics (RTL)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -213,12 +223,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -247,7 +259,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(Offset.lerp(first, last, 0.5)));
 
     await tester.pump(const Duration(seconds: 1));
 
@@ -275,7 +288,9 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositioned - interrupted animation (VISUAL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPositioned - interrupted animation (VISUAL)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -297,12 +312,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
       Stack(
@@ -321,12 +338,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(100.0, 100.0)));
 
     await tester.pumpWidget(
       Stack(
@@ -345,20 +364,25 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(100.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(150.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(150.0, 150.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(200.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositioned - switching variables (VISUAL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPositioned - switching variables (VISUAL)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -380,12 +404,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
       Stack(
@@ -404,20 +430,25 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(350.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(350.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(350.0, 150.0)));
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - interrupted animation (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPositionedDirectional - interrupted animation (LTR)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -441,12 +472,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -467,12 +500,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(100.0, 100.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -493,20 +528,25 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(100.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(150.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(150.0, 150.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(200.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - switching variables (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPositionedDirectional - switching variables (LTR)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -530,12 +570,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -556,20 +598,25 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(350.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(350.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(350.0, 150.0)));
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - interrupted animation (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPositionedDirectional - interrupted animation (RTL)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -593,12 +640,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(750.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(750.0, 50.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -619,12 +668,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(750.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(700.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(700.0, 100.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -645,20 +696,25 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(700.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(700.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(650.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(650.0, 150.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(600.0, 200.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(600.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking('AnimatedPositionedDirectional - switching variables (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPositionedDirectional - switching variables (RTL)',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -682,12 +738,14 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(750.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(750.0, 50.0)));
 
     await tester.pumpWidget(
       Directionality(
@@ -708,17 +766,19 @@ void main() {
     );
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(450.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(450.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext!.findRenderObject()! as RenderBox;
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)),
+        equals(const Offset(450.0, 150.0)));
   });
-
 }

@@ -40,23 +40,31 @@ void main() {
   }
 
   void buildTestFiles({bool missingLinks = false, bool missingTests = false}) {
-    final Directory examplesLib = examples.childDirectory('lib').childDirectory('layer')..createSync(recursive: true);
+    final Directory examplesLib = examples
+        .childDirectory('lib')
+        .childDirectory('layer')
+      ..createSync(recursive: true);
     final File fooExample = examplesLib.childFile('foo_example.0.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// Example for foo');
     final File barExample = examplesLib.childFile('bar_example.0.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// Example for bar');
-    final File curvesExample =
-        examples.childDirectory('lib').childDirectory('animation').childDirectory('curves').childFile('curve2_d.0.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('// Missing a test, but OK');
+    final File curvesExample = examples
+        .childDirectory('lib')
+        .childDirectory('animation')
+        .childDirectory('curves')
+        .childFile('curve2_d.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('// Missing a test, but OK');
     if (missingLinks) {
       examplesLib.childFile('missing_example.0.dart')
         ..createSync(recursive: true)
         ..writeAsStringSync('// Example that is not linked');
     }
-    final Directory examplesTests = examples.childDirectory('test').childDirectory('layer')
+    final Directory examplesTests = examples
+        .childDirectory('test')
+        .childDirectory('layer')
       ..createSync(recursive: true);
     examplesTests.childFile('foo_example.0_test.dart')
       ..createSync(recursive: true)
@@ -71,21 +79,38 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('// test for foo example');
     }
-    final Directory flutterPackage = packages.childDirectory('flutter').childDirectory('lib').childDirectory('src')
+    final Directory flutterPackage = packages
+        .childDirectory('flutter')
+        .childDirectory('lib')
+        .childDirectory('src')
       ..createSync(recursive: true);
-    writeLink(source: flutterPackage.childDirectory('layer').childFile('foo.dart'), example: fooExample);
-    writeLink(source: flutterPackage.childDirectory('layer').childFile('bar.dart'), example: barExample);
-    writeLink(source: flutterPackage.childDirectory('animation').childFile('curves.dart'), example: curvesExample);
+    writeLink(
+        source: flutterPackage.childDirectory('layer').childFile('foo.dart'),
+        example: fooExample);
+    writeLink(
+        source: flutterPackage.childDirectory('layer').childFile('bar.dart'),
+        example: barExample);
+    writeLink(
+        source:
+            flutterPackage.childDirectory('animation').childFile('curves.dart'),
+        example: curvesExample);
   }
 
   setUp(() {
-    fs = MemoryFileSystem(style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
+    fs = MemoryFileSystem(
+        style: Platform.isWindows
+            ? FileSystemStyle.windows
+            : FileSystemStyle.posix);
     // Get the root prefix of the current directory so that on Windows we get a
     // correct root prefix.
-    flutterRoot = fs.directory(path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter sdk'))..createSync(recursive: true);
+    flutterRoot = fs.directory(path.join(
+        path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter sdk'))
+      ..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
-    examples = flutterRoot.childDirectory('examples').childDirectory('api')..createSync(recursive: true);
-    packages = flutterRoot.childDirectory('packages')..createSync(recursive: true);
+    examples = flutterRoot.childDirectory('examples').childDirectory('api')
+      ..createSync(recursive: true);
+    packages = flutterRoot.childDirectory('packages')
+      ..createSync(recursive: true);
     dartUIPath = flutterRoot
         .childDirectory('bin')
         .childDirectory('cache')
@@ -102,7 +127,8 @@ void main() {
     );
   });
 
-  test('check_code_samples.dart - checkCodeSamples catches missing links', () async {
+  test('check_code_samples.dart - checkCodeSamples catches missing links',
+      () async {
     buildTestFiles(missingLinks: true);
     bool? success;
     final String result = await capture(
@@ -124,7 +150,8 @@ void main() {
     expect(success, equals(false));
   });
 
-  test('check_code_samples.dart - checkCodeSamples catches missing tests', () async {
+  test('check_code_samples.dart - checkCodeSamples catches missing tests',
+      () async {
     buildTestFiles(missingTests: true);
     bool? success;
     final String result = await capture(
@@ -160,7 +187,8 @@ void main() {
 
 typedef AsyncVoidCallback = Future<void> Function();
 
-Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = false}) async {
+Future<String> capture(AsyncVoidCallback callback,
+    {bool shouldHaveErrors = false}) async {
   final StringBuffer buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
@@ -183,7 +211,9 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
   }
   if (stdout.supportsAnsiEscapes) {
     // Remove ANSI escapes when this test is running on a terminal.
-    return buffer.toString().replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
+    return buffer
+        .toString()
+        .replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
   } else {
     return buffer.toString();
   }

@@ -40,31 +40,32 @@ class TextMagnifier extends StatefulWidget {
   /// A [TextMagnifierConfiguration] that returns a [CupertinoTextMagnifier] on iOS,
   /// [TextMagnifier] on Android, and null on all other platforms, and shows the editing handles
   /// only on iOS.
-  static TextMagnifierConfiguration adaptiveMagnifierConfiguration = TextMagnifierConfiguration(
-    shouldDisplayHandlesInMagnifier: defaultTargetPlatform == TargetPlatform.iOS,
-    magnifierBuilder: (
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
-    ) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-          return CupertinoTextMagnifier(
-            controller: controller,
-            magnifierInfo: magnifierInfo,
-          );
-        case TargetPlatform.android:
-          return TextMagnifier(
-              magnifierInfo: magnifierInfo,
-          );
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          return null;
-      }
-    }
-  );
+  static TextMagnifierConfiguration adaptiveMagnifierConfiguration =
+      TextMagnifierConfiguration(
+          shouldDisplayHandlesInMagnifier:
+              defaultTargetPlatform == TargetPlatform.iOS,
+          magnifierBuilder: (
+            BuildContext context,
+            MagnifierController controller,
+            ValueNotifier<MagnifierInfo> magnifierInfo,
+          ) {
+            switch (defaultTargetPlatform) {
+              case TargetPlatform.iOS:
+                return CupertinoTextMagnifier(
+                  controller: controller,
+                  magnifierInfo: magnifierInfo,
+                );
+              case TargetPlatform.android:
+                return TextMagnifier(
+                  magnifierInfo: magnifierInfo,
+                );
+              case TargetPlatform.fuchsia:
+              case TargetPlatform.linux:
+              case TargetPlatform.macOS:
+              case TargetPlatform.windows:
+                return null;
+            }
+          });
 
   /// The duration that the position is animated if [TextMagnifier] just switched
   /// between lines.
@@ -75,8 +76,7 @@ class TextMagnifier extends StatefulWidget {
   /// [TextMagnifier] positions itself based on [magnifierInfo].
   ///
   /// {@macro widgets.material.magnifier.positionRules}
-  final ValueNotifier<MagnifierInfo>
-      magnifierInfo;
+  final ValueNotifier<MagnifierInfo> magnifierInfo;
 
   @override
   State<TextMagnifier> createState() => _TextMagnifierState();
@@ -103,8 +103,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   @override
   void initState() {
     super.initState();
-    widget.magnifierInfo
-        .addListener(_determineMagnifierPositionAndFocalPoint);
+    widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
   }
 
   @override
@@ -124,16 +123,17 @@ class _TextMagnifierState extends State<TextMagnifier> {
   @override
   void didUpdateWidget(TextMagnifier oldWidget) {
     if (oldWidget.magnifierInfo != widget.magnifierInfo) {
-      oldWidget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
-      widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
+      oldWidget.magnifierInfo
+          .removeListener(_determineMagnifierPositionAndFocalPoint);
+      widget.magnifierInfo
+          .addListener(_determineMagnifierPositionAndFocalPoint);
     }
     super.didUpdateWidget(oldWidget);
   }
 
   /// {@macro widgets.material.magnifier.positionRules}
   void _determineMagnifierPositionAndFocalPoint() {
-    final MagnifierInfo selectionInfo =
-        widget.magnifierInfo.value;
+    final MagnifierInfo selectionInfo = widget.magnifierInfo.value;
     final Rect screenRect = Offset.zero & MediaQuery.sizeOf(context);
 
     // Since by default we draw at the top left corner, this offset
@@ -155,7 +155,8 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // Place the magnifier at the previously calculated X, and the Y should be
     // exactly at the center of the handle.
     final Rect unadjustedMagnifierRect =
-        Offset(magnifierX, selectionInfo.caretRect.center.dy) - basicMagnifierOffset &
+        Offset(magnifierX, selectionInfo.caretRect.center.dy) -
+                basicMagnifierOffset &
             Magnifier.kDefaultMagnifierSize;
 
     // Shift the magnifier so that, if we are ever out of the screen, we become in bounds.
@@ -166,7 +167,8 @@ class _TextMagnifierState extends State<TextMagnifier> {
             bounds: screenRect, rect: unadjustedMagnifierRect);
 
     // Done with the magnifier position!
-    final Offset finalMagnifierPosition = screenBoundsAdjustedMagnifierRect.topLeft;
+    final Offset finalMagnifierPosition =
+        screenBoundsAdjustedMagnifierRect.topLeft;
 
     // The insets, from either edge, that the focal point should not point
     // past lest the magnifier displays something out of bounds.
@@ -202,13 +204,14 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // but when pressed up against the top of the screen, we adjust the focal point by
     // the amount that we shifted from our "natural" position.
     final Offset focalPointAdjustmentForScreenBoundsAdjustment = Offset(
-        newRelativeFocalPointX,
-        unadjustedMagnifierRect.top - screenBoundsAdjustedMagnifierRect.top,
+      newRelativeFocalPointX,
+      unadjustedMagnifierRect.top - screenBoundsAdjustedMagnifierRect.top,
     );
 
     Timer? positionShouldBeAnimated = _positionShouldBeAnimatedTimer;
 
-    if (_magnifierPosition != null && finalMagnifierPosition.dy != _magnifierPosition!.dy) {
+    if (_magnifierPosition != null &&
+        finalMagnifierPosition.dy != _magnifierPosition!.dy) {
       if (_positionShouldBeAnimatedTimer != null &&
           _positionShouldBeAnimatedTimer!.isActive) {
         _positionShouldBeAnimatedTimer!.cancel();
@@ -327,7 +330,10 @@ class Magnifier extends StatelessWidget {
       ),
       magnificationScale: _magnification,
       focalPointOffset: additionalFocalPointOffset +
-          Offset(0, kStandardVerticalFocalPointShift + kDefaultMagnifierSize.height / 2),
+          Offset(
+              0,
+              kStandardVerticalFocalPointShift +
+                  kDefaultMagnifierSize.height / 2),
       size: size,
       child: ColoredBox(
         color: filmColor,

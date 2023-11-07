@@ -13,10 +13,14 @@ void main() {
   group('TextStyle', () {
     test('getTextSyle is backward compatible', () {
       expect(
-        const TextStyle(fontSize: 14).getTextStyle(textScaleFactor: 2.0).toString(),
+        const TextStyle(fontSize: 14)
+            .getTextStyle(textScaleFactor: 2.0)
+            .toString(),
         contains('fontSize: 28'),
       );
-    }, skip: kIsWeb); // [intended] CkTextStyle doesn't have a custom toString implementation.
+    },
+        skip:
+            kIsWeb); // [intended] CkTextStyle doesn't have a custom toString implementation.
   });
   group('TextPainter', () {
     test('textScaleFactor translates to textScaler', () {
@@ -40,32 +44,39 @@ void main() {
   group('MediaQuery', () {
     test('specifying both textScaler and textScalingFactor asserts', () {
       expect(
-        () => MediaQueryData(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
+        () => MediaQueryData(
+            textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
         throwsAssertionError,
       );
     });
 
     test('copyWith is backward compatible', () {
-      const MediaQueryData data = MediaQueryData(textScaler: TextScaler.linear(2.0));
+      const MediaQueryData data =
+          MediaQueryData(textScaler: TextScaler.linear(2.0));
 
       final MediaQueryData data1 = data.copyWith(textScaleFactor: 42);
       expect(data1.textScaler, const TextScaler.linear(42));
       expect(data1.textScaleFactor, 42);
 
-      final MediaQueryData data2 = data.copyWith(textScaler: TextScaler.noScaling);
+      final MediaQueryData data2 =
+          data.copyWith(textScaler: TextScaler.noScaling);
       expect(data2.textScaler, TextScaler.noScaling);
       expect(data2.textScaleFactor, 1.0);
     });
 
-    test('copyWith specifying both textScaler and textScalingFactor asserts', () {
+    test('copyWith specifying both textScaler and textScalingFactor asserts',
+        () {
       const MediaQueryData data = MediaQueryData();
-       expect(
-        () => data.copyWith(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
+      expect(
+        () => data.copyWith(
+            textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
         throwsAssertionError,
       );
     });
 
-    testWidgetsWithLeakTracking('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking(
+        'MediaQuery.textScaleFactorOf overriding compatibility',
+        (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -104,7 +115,9 @@ void main() {
       expect(insideTextScaler, const TextScaler.linear(4.0));
     });
 
-    testWidgetsWithLeakTracking('textScaleFactor overriding backward compatibility', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking(
+        'textScaleFactor overriding backward compatibility',
+        (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -197,7 +210,11 @@ void main() {
         tester.renderObject<RenderParagraph>(find.byType(RichText)).textScaler,
         const TextScaler.linear(2.0),
       );
-      expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).textScaleFactor, 2.0);
+      expect(
+          tester
+              .renderObject<RenderParagraph>(find.byType(RichText))
+              .textScaleFactor,
+          2.0);
     });
 
     testWidgetsWithLeakTracking('Text', (WidgetTester tester) async {
@@ -239,7 +256,8 @@ void main() {
         ),
       );
 
-      final RenderEditable renderEditable = tester.allRenderObjects.whereType<RenderEditable>().first;
+      final RenderEditable renderEditable =
+          tester.allRenderObjects.whereType<RenderEditable>().first;
       expect(
         renderEditable.textScaler,
         const TextScaler.linear(2.0),
@@ -255,18 +273,19 @@ class _FakeEditableTextState with TextSelectionDelegate {
   TextSelection? selection;
 
   @override
-  void hideToolbar([bool hideHandles = true]) { }
+  void hideToolbar([bool hideHandles = true]) {}
 
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
+  void userUpdateTextEditingValue(
+      TextEditingValue value, SelectionChangedCause cause) {
     selection = value.selection;
   }
 
   @override
-  void bringIntoView(TextPosition position) { }
+  void bringIntoView(TextPosition position) {}
 
   @override
-  void cutSelection(SelectionChangedCause cause) { }
+  void cutSelection(SelectionChangedCause cause) {}
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) {
@@ -274,8 +293,8 @@ class _FakeEditableTextState with TextSelectionDelegate {
   }
 
   @override
-  void selectAll(SelectionChangedCause cause) { }
+  void selectAll(SelectionChangedCause cause) {}
 
   @override
-  void copySelection(SelectionChangedCause cause) { }
+  void copySelection(SelectionChangedCause cause) {}
 }

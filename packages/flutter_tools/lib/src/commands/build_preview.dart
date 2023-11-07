@@ -33,9 +33,10 @@ class BuildPreviewCommand extends BuildSubCommand {
   final bool hidden = true;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.windows,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      <DevelopmentArtifact>{
+        DevelopmentArtifact.windows,
+      };
 
   @override
   final String description = 'Build Flutter preview (desktop) app.';
@@ -60,9 +61,11 @@ class BuildPreviewCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!globals.platform.isWindows) {
-      throwToolExit('"build _preview" is currently only supported on Windows hosts.');
+      throwToolExit(
+          '"build _preview" is currently only supported on Windows hosts.');
     }
-    final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
+    final Directory targetDir =
+        fs.systemTempDirectory.createTempSync('flutter-build-preview');
     try {
       final FlutterProject flutterProject = await _createProject(targetDir);
       await buildWindows(
@@ -76,9 +79,11 @@ class BuildPreviewCommand extends BuildSubCommand {
           .childDirectory('Debug')
           .childFile('$appName.exe');
       if (!previewDevice.existsSync()) {
-        throw StateError('Preview device not found at ${previewDevice.absolute.path}');
+        throw StateError(
+            'Preview device not found at ${previewDevice.absolute.path}');
       }
-      final String newPath = artifacts.getArtifactPath(Artifact.flutterPreviewDevice);
+      final String newPath =
+          artifacts.getArtifactPath(Artifact.flutterPreviewDevice);
       fs.file(newPath).parent.createSync(recursive: true);
       previewDevice.copySync(newPath);
       return FlutterCommandResult.success();
@@ -105,10 +110,12 @@ class BuildPreviewCommand extends BuildSubCommand {
       allowReentrantFlutter: true,
     );
     if (result.exitCode != 0) {
-      final StringBuffer buffer = StringBuffer('${cmd.join(' ')} exited with code ${result.exitCode}\n');
+      final StringBuffer buffer = StringBuffer(
+          '${cmd.join(' ')} exited with code ${result.exitCode}\n');
       buffer.writeln('stdout:\n${result.stdout}\n');
       buffer.writeln('stderr:\n${result.stderr}');
-      throw ProcessException(cmd.first, cmd.sublist(1), buffer.toString(), result.exitCode);
+      throw ProcessException(
+          cmd.first, cmd.sublist(1), buffer.toString(), result.exitCode);
     }
     return FlutterProject.fromDirectory(targetDir);
   }

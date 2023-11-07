@@ -62,13 +62,15 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChangeNotifier can not dispose in callback',
+      (WidgetTester tester) async {
     final TestNotifier test = TestNotifier();
     bool callbackDidFinish = false;
     void foo() {
       test.dispose();
       callbackDidFinish = true;
     }
+
     test.addListener(foo);
 
     test.notify();
@@ -204,7 +206,8 @@ void main() {
     log.clear();
   });
 
-  test('During notifyListeners, a listener was added and removed immediately', () {
+  test('During notifyListeners, a listener was added and removed immediately',
+      () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -256,7 +259,9 @@ void main() {
     },
   );
 
-  test('If the first listener removes itself, notifyListeners still notify all listeners', () {
+  test(
+      'If the first listener removes itself, notifyListeners still notify all listeners',
+      () {
     final TestNotifier source = TestNotifier();
     final List<String> log = <String>[];
 
@@ -383,7 +388,7 @@ void main() {
 
   test('Can check hasListener on a disposed ChangeNotifier', () {
     final HasListenersTester<int> source = HasListenersTester<int>(0);
-    source.addListener(() { });
+    source.addListener(() {});
     expect(source.testHasListeners, isTrue);
     FlutterError? error;
     try {

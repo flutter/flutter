@@ -39,12 +39,18 @@ void main() {
 
     fileSystem.file('.packages').writeAsStringSync('\n');
     fileSystem.file('pubspec.yaml').createSync();
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('web', 'index.html'))
+        .createSync(recursive: true);
   });
 
-  testUsingContext('Can successfully run and connect without vmservice', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+  testUsingContext('Can successfully run and connect without vmservice',
+      () async {
+    final FlutterProject project =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -56,11 +62,13 @@ void main() {
       usage: TestUsage(),
     );
 
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter =
+        Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
-    final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
+    final DebugConnectionInfo debugConnectionInfo =
+        await connectionInfoCompleter.future;
 
     expect(debugConnectionInfo.wsUri, null);
   }, overrides: <Type, Generator>{
@@ -70,8 +78,11 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
-  testUsingContext('ResidentWebRunner calls appFailedToStart if initial compilation fails', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+  testUsingContext(
+      'ResidentWebRunner calls appFailedToStart if initial compilation fails',
+      () async {
+    final FlutterProject project =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -92,8 +103,11 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
-  testUsingContext('ResidentWebRunner calls appFailedToStart if error is thrown during startup', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+  testUsingContext(
+      'ResidentWebRunner calls appFailedToStart if error is thrown during startup',
+      () async {
+    final FlutterProject project =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -114,7 +128,8 @@ void main() {
   });
 
   testUsingContext('Can full restart after attaching', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -125,12 +140,14 @@ void main() {
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
       usage: TestUsage(),
     );
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter =
+        Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+    final OperationResult result =
+        await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 0);
   }, overrides: <Type, Generator>{
@@ -140,7 +157,8 @@ void main() {
   });
 
   testUsingContext('Fails on compilation errors in hot restart', () async {
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project =
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     final ResidentWebRunner residentWebRunner = ResidentWebRunner(
       mockFlutterDevice,
       flutterProject: project,
@@ -151,20 +169,22 @@ void main() {
       systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
       usage: TestUsage(),
     );
-    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter =
+        Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+    final OperationResult result =
+        await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
   }, overrides: <Type, Generator>{
     BuildSystem: () => TestBuildSystem.list(<BuildResult>[
-      BuildResult(success: true),
-      BuildResult(success: false),
-    ]),
+          BuildResult(success: true),
+          BuildResult(success: false),
+        ]),
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
   });
@@ -216,14 +236,13 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   final FakeWebDevice device;
 
-
   DevFS? _devFS;
 
   @override
   DevFS? get devFS => _devFS;
 
   @override
-  set devFS(DevFS? value) { }
+  set devFS(DevFS? value) {}
 
   @override
   FlutterVmService? vmService;

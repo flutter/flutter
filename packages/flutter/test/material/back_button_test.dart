@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('BackButton control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BackButton control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const Material(child: Text('Home')),
@@ -35,7 +36,9 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('BackButton onPressed overrides default pop behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BackButton onPressed overrides default pop behavior',
+      (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -44,7 +47,8 @@ void main() {
           '/next': (BuildContext context) {
             return Material(
               child: Center(
-                child: BackButton(onPressed: () => customCallbackWasCalled = true),
+                child:
+                    BackButton(onPressed: () => customCallbackWasCalled = true),
               ),
             );
           },
@@ -57,7 +61,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Home'), findsNothing); // Start off on the second page.
-    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
+    expect(customCallbackWasCalled,
+        false); // customCallbackWasCalled should still be false.
     await tester.tap(find.byType(BackButton));
 
     await tester.pumpAndSettle();
@@ -104,11 +109,16 @@ void main() {
       ),
     );
 
-    final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
-    final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
-    final Icon linuxIcon = tester.widget(find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
-    final Icon macOSIcon = tester.widget(find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
-    final Icon windowsIcon = tester.widget(find.descendant(of: find.byKey(windowsKey), matching: find.byType(Icon)));
+    final Icon androidIcon = tester.widget(find.descendant(
+        of: find.byKey(androidKey), matching: find.byType(Icon)));
+    final Icon iOSIcon = tester.widget(
+        find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
+    final Icon linuxIcon = tester.widget(
+        find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
+    final Icon macOSIcon = tester.widget(
+        find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
+    final Icon windowsIcon = tester.widget(find.descendant(
+        of: find.byKey(windowsKey), matching: find.byType(Icon)));
     expect(iOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
     expect(linuxIcon.icon == androidIcon.icon, isTrue);
     expect(macOSIcon.icon == androidIcon.icon, kIsWeb ? isTrue : isFalse);
@@ -134,7 +144,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('BackButton color with ButtonStyle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BackButton color with ButtonStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -155,7 +166,9 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('BackButton.style.iconColor parameter overrides BackButton.color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BackButton.style.iconColor parameter overrides BackButton.color',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -178,7 +191,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('BackButton semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BackButton semantics',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       MaterialApp(
@@ -209,19 +223,22 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(BackButton)), matchesSemantics(
-      tooltip: 'Back',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      isFocusable: true,
-    ));
+    expect(
+        tester.getSemantics(find.byType(BackButton)),
+        matchesSemantics(
+          tooltip: 'Back',
+          label: expectedLabel,
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+          isFocusable: true,
+        ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('CloseButton semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CloseButton semantics',
+      (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       MaterialApp(
@@ -252,15 +269,17 @@ void main() {
       case TargetPlatform.windows:
         expectedLabel = null;
     }
-    expect(tester.getSemantics(find.byType(CloseButton)), matchesSemantics(
-      tooltip: 'Close',
-      label: expectedLabel,
-      isButton: true,
-      hasEnabledState: true,
-      isEnabled: true,
-      hasTapAction: true,
-      isFocusable: true,
-    ));
+    expect(
+        tester.getSemantics(find.byType(CloseButton)),
+        matchesSemantics(
+          tooltip: 'Close',
+          label: expectedLabel,
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+          isFocusable: true,
+        ));
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
@@ -282,7 +301,8 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('CloseButton color with ButtonStyle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CloseButton color with ButtonStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -303,7 +323,9 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('CloseButton.style.iconColor parameter overrides CloseButton.color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'CloseButton.style.iconColor parameter overrides CloseButton.color',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -326,7 +348,9 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('CloseButton onPressed overrides default pop behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'CloseButton onPressed overrides default pop behavior',
+      (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -335,7 +359,8 @@ void main() {
           '/next': (BuildContext context) {
             return Material(
               child: Center(
-                child: CloseButton(onPressed: () => customCallbackWasCalled = true),
+                child: CloseButton(
+                    onPressed: () => customCallbackWasCalled = true),
               ),
             );
           },
@@ -347,7 +372,8 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('Home'), findsNothing); // Start off on the second page.
-    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
+    expect(customCallbackWasCalled,
+        false); // customCallbackWasCalled should still be false.
     await tester.tap(find.byType(CloseButton));
 
     await tester.pumpAndSettle();

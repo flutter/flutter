@@ -14,15 +14,18 @@ void main() {
     });
 
     test('throws ToolExit with exitCode', () {
-      expect(() => throwToolExit('message', exitCode: 42), throwsToolExit(exitCode: 42));
+      expect(() => throwToolExit('message', exitCode: 42),
+          throwsToolExit(exitCode: 42));
     });
 
     test('throws ToolExit with message', () {
-      expect(() => throwToolExit('message'), throwsToolExit(message: 'message'));
+      expect(
+          () => throwToolExit('message'), throwsToolExit(message: 'message'));
     });
 
     test('throws ToolExit with message and exit code', () {
-      expect(() => throwToolExit('message', exitCode: 42), throwsToolExit(exitCode: 42, message: 'message'));
+      expect(() => throwToolExit('message', exitCode: 42),
+          throwsToolExit(exitCode: 42, message: 'message'));
     });
 
     testWithoutContext('Throws if accessing the Zone', () {

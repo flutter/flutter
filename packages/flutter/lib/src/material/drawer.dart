@@ -247,25 +247,36 @@ class Drawer extends StatelessWidget {
         label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
-    final DrawerThemeData defaults= useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
-    final ShapeBorder? effectiveShape = shape ?? (isDrawerStart
-      ? (drawerTheme.shape ?? defaults.shape)
-      : (drawerTheme.endShape ?? defaults.endShape));
+    final bool isDrawerStart =
+        DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
+    final DrawerThemeData defaults =
+        useMaterial3 ? _DrawerDefaultsM3(context) : _DrawerDefaultsM2(context);
+    final ShapeBorder? effectiveShape = shape ??
+        (isDrawerStart
+            ? (drawerTheme.shape ?? defaults.shape)
+            : (drawerTheme.endShape ?? defaults.endShape));
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
       explicitChildNodes: true,
       label: label,
       child: ConstrainedBox(
-        constraints: BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
+        constraints:
+            BoxConstraints.expand(width: width ?? drawerTheme.width ?? _kWidth),
         child: Material(
-          color: backgroundColor ?? drawerTheme.backgroundColor ?? defaults.backgroundColor,
+          color: backgroundColor ??
+              drawerTheme.backgroundColor ??
+              defaults.backgroundColor,
           elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
-          shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
-          surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+          shadowColor:
+              shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
+          surfaceTintColor: surfaceTintColor ??
+              drawerTheme.surfaceTintColor ??
+              defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior: effectiveShape != null ? (clipBehavior ?? Clip.hardEdge) : Clip.none,
+          clipBehavior: effectiveShape != null
+              ? (clipBehavior ?? Clip.hardEdge)
+              : Clip.none,
           child: child,
         ),
       ),
@@ -408,7 +419,9 @@ class DrawerController extends StatefulWidget {
   /// * [DrawerController.of], which is similar to this method, but asserts
   ///   if no [DrawerController] ancestor is found.
   static DrawerController? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_DrawerControllerScope>()?.controller;
+    return context
+        .dependOnInheritedWidgetOfExactType<_DrawerControllerScope>()
+        ?.controller;
   }
 
   /// The closest instance of [DrawerController] that encloses the given
@@ -453,7 +466,8 @@ class DrawerController extends StatefulWidget {
 /// State for a [DrawerController].
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
-class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin {
+class DrawerControllerState extends State<DrawerController>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -512,7 +526,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_historyEntry == null) {
       final ModalRoute<dynamic>? route = ModalRoute.of(context);
       if (route != null) {
-        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved, impliesAppBarDismissal: false);
+        _historyEntry = LocalHistoryEntry(
+            onRemove: _handleHistoryEntryRemoved,
+            impliesAppBarDismissal: false);
         route.addLocalHistoryEntry(_historyEntry!);
         FocusScope.of(context).setFirstFocus(_focusScopeNode);
       }
@@ -559,7 +575,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? box =
+        _drawerKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null) {
       return box.size.width;
     }
@@ -637,9 +654,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   ColorTween _buildScrimColorTween() {
     return ColorTween(
       begin: Colors.transparent,
-      end: widget.scrimColor
-          ?? DrawerTheme.of(context).scrimColor
-          ?? Colors.black54,
+      end: widget.scrimColor ??
+          DrawerTheme.of(context).scrimColor ??
+          Colors.black54,
     );
   }
 
@@ -681,11 +698,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       final EdgeInsets padding = MediaQuery.paddingOf(context);
       switch (textDirection) {
         case TextDirection.ltr:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.left : padding.right);
+          dragAreaWidth =
+              _kEdgeDragWidth + (drawerIsStart ? padding.left : padding.right);
         case TextDirection.rtl:
-          dragAreaWidth = _kEdgeDragWidth +
-            (drawerIsStart ? padding.right : padding.left);
+          dragAreaWidth =
+              _kEdgeDragWidth + (drawerIsStart ? padding.right : padding.left);
       }
     }
 
@@ -731,8 +748,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   child: GestureDetector(
                     onTap: close,
                     child: Semantics(
-                      label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: Container( // The drawer's "scrim"
+                      label: MaterialLocalizations.of(context)
+                          .modalBarrierDismissLabel,
+                      child: Container(
+                        // The drawer's "scrim"
                         color: _scrimColorTween.evaluate(_controller),
                       ),
                     ),
@@ -786,14 +805,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 }
 
 class _DrawerDefaultsM2 extends DrawerThemeData {
-  const _DrawerDefaultsM2(this.context)
-      : super(elevation: 16.0);
+  const _DrawerDefaultsM2(this.context) : super(elevation: 16.0);
 
   final BuildContext context;
 
   @override
   Color? get shadowColor => Theme.of(context).shadowColor;
-
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Drawer
@@ -804,8 +821,7 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
-  _DrawerDefaultsM3(this.context)
-      : super(elevation: 1.0);
+  _DrawerDefaultsM3(this.context) : super(elevation: 1.0);
 
   final BuildContext context;
   late final TextDirection direction = Directionality.of(context);
@@ -823,19 +839,19 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   // so hard coding here for now.
   @override
   ShapeBorder? get shape => RoundedRectangleBorder(
-    borderRadius: const BorderRadiusDirectional.horizontal(
-      end: Radius.circular(16.0),
-    ).resolve(direction),
-  );
+        borderRadius: const BorderRadiusDirectional.horizontal(
+          end: Radius.circular(16.0),
+        ).resolve(direction),
+      );
 
   // There isn't currently a token for this value, but it is shown in the spec,
   // so hard coding here for now.
   @override
   ShapeBorder? get endShape => RoundedRectangleBorder(
-    borderRadius: const BorderRadiusDirectional.horizontal(
-      start: Radius.circular(16.0),
-    ).resolve(direction),
-  );
+        borderRadius: const BorderRadiusDirectional.horizontal(
+          start: Radius.circular(16.0),
+        ).resolve(direction),
+      );
 }
 
 // END GENERATED TOKEN PROPERTIES - Drawer

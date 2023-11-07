@@ -8,12 +8,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
-  ? LogicalKeyboardKey.metaLeft
-  : LogicalKeyboardKey.controlLeft;
+final LogicalKeyboardKey modifierKey =
+    defaultTargetPlatform == TargetPlatform.macOS
+        ? LogicalKeyboardKey.metaLeft
+        : LogicalKeyboardKey.controlLeft;
 
 void main() {
-  group('ScrollableDetails', (){
+  group('ScrollableDetails', () {
     test('copyWith / == / hashCode', () {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
@@ -43,7 +44,7 @@ void main() {
       );
     });
 
-    test('toString', (){
+    test('toString', () {
       final ScrollController controller = ScrollController();
       addTearDown(controller.dispose);
       const ScrollableDetails bareDetails = ScrollableDetails(
@@ -52,8 +53,7 @@ void main() {
       expect(
         bareDetails.toString(),
         equalsIgnoringHashCodes(
-          'ScrollableDetails#00000(axisDirection: AxisDirection.right)'
-        ),
+            'ScrollableDetails#00000(axisDirection: AxisDirection.right)'),
       );
       final ScrollableDetails fullDetails = ScrollableDetails(
         direction: AxisDirection.down,
@@ -63,17 +63,15 @@ void main() {
       );
       expect(
         fullDetails.toString(),
-        equalsIgnoringHashCodes(
-          'ScrollableDetails#00000('
-          'axisDirection: AxisDirection.down, '
-          'scroll controller: ScrollController#00000(no clients), '
-          'scroll physics: AlwaysScrollableScrollPhysics, '
-          'decorationClipBehavior: Clip.hardEdge)'
-        ),
+        equalsIgnoringHashCodes('ScrollableDetails#00000('
+            'axisDirection: AxisDirection.down, '
+            'scroll controller: ScrollController#00000(no clients), '
+            'scroll physics: AlwaysScrollableScrollPhysics, '
+            'decorationClipBehavior: Clip.hardEdge)'),
       );
     });
 
-    test('deprecated clipBehavior is backwards compatible', (){
+    test('deprecated clipBehavior is backwards compatible', () {
       const ScrollableDetails deprecatedClip = ScrollableDetails(
         direction: AxisDirection.right,
         clipBehavior: Clip.hardEdge,
@@ -90,7 +88,9 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics",
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -120,7 +120,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
     await tester.sendKeyDownEvent(modifierKey);
@@ -129,7 +130,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
     await tester.sendKeyDownEvent(modifierKey);
@@ -138,26 +140,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Vertical scrollables are scrolled when activated via keyboard.',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -186,7 +193,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
     // We exclude the modifier keys here for web testing since default web shortcuts
@@ -200,7 +208,8 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, -50.0, 800.0, 0.0)),
     );
     if (!kIsWeb) {
@@ -212,24 +221,29 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -350.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Horizontal scrollables are scrolled when activated via keyboard.',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -259,7 +273,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)),
     );
     // We exclude the modifier keys here for web testing since default web shortcuts
@@ -273,7 +288,8 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(-50.0, 0.0, 0.0, 600.0)),
     );
     if (!kIsWeb) {
@@ -285,12 +301,15 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)),
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Horizontal scrollables are scrolled the correct direction in RTL locales.',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -303,7 +322,7 @@ void main() {
             scrollDirection: Axis.horizontal,
             slivers: List<Widget>.generate(
               20,
-                  (int index) {
+              (int index) {
                 return SliverToBoxAdapter(
                   child: Focus(
                     autofocus: index == 0,
@@ -323,7 +342,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)),
     );
     // We exclude the modifier keys here for web testing since default web shortcuts
@@ -337,7 +357,8 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)),
     );
     if (!kIsWeb) {
@@ -349,12 +370,15 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)),
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Reversed vertical scrollables are scrolled when activated via keyboard.',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
@@ -387,7 +411,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)),
     );
     // We exclude the modifier keys here for web testing since default web shortcuts
@@ -401,7 +426,8 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 600.0, 800.0, 650.0)),
     );
     if (!kIsWeb) {
@@ -413,24 +439,29 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 950.0, 800.0, 1000.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)),
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Reversed horizontal scrollables are scrolled when activated via keyboard.',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
@@ -464,7 +495,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.00)),
     );
     // We exclude the modifier keys here for web testing since default web shortcuts
@@ -478,7 +510,8 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)),
     );
     if (!kIsWeb) {
@@ -491,10 +524,13 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Custom scrollables with a center sliver are scrolled when activated via keyboard.',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
-    final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
+    final List<String> items =
+        List<String>.generate(20, (int index) => 'Item $index');
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -504,7 +540,8 @@ void main() {
           slivers: items.map<Widget>(
             (String item) {
               return SliverToBoxAdapter(
-                key: item == 'Item 10' ? const ValueKey<String>('Center') : null,
+                key:
+                    item == 'Item 10' ? const ValueKey<String>('Center') : null,
                 child: Focus(
                   autofocus: item == 'Item 10',
                   child: Container(
@@ -524,7 +561,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)),
     );
     for (int i = 0; i < 10; ++i) {
@@ -542,7 +580,8 @@ void main() {
     // Starts at #10 already, so doesn't work out to 500.0 because it hits bottom.
     expect(controller.position.pixels, equals(400.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)),
     );
     for (int i = 0; i < 10; ++i) {
@@ -558,12 +597,14 @@ void main() {
     // Goes up two past "center" where it started, so negative.
     expect(controller.position.pixels, equals(-100.0));
     expect(
-      tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
+      tester.getRect(
+          find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)),
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('Can scroll using intents only', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can scroll using intents only',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
@@ -578,13 +619,19 @@ void main() {
     expect(find.text('The cow as white as milk'), findsOneWidget);
     expect(find.text('The cape as red as blood'), findsNothing);
     expect(find.text('The hair as yellow as corn'), findsNothing);
-    Actions.invoke(tester.element(find.byType(SliverList)), const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page));
+    Actions.invoke(
+        tester.element(find.byType(SliverList)),
+        const ScrollIntent(
+            direction: AxisDirection.down, type: ScrollIncrementType.page));
     await tester.pump(); // start scroll
     await tester.pump(const Duration(milliseconds: 1000)); // end scroll
     expect(find.text('The cow as white as milk'), findsOneWidget);
     expect(find.text('The cape as red as blood'), findsOneWidget);
     expect(find.text('The hair as yellow as corn'), findsNothing);
-    Actions.invoke(tester.element(find.byType(SliverList)), const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page));
+    Actions.invoke(
+        tester.element(find.byType(SliverList)),
+        const ScrollIntent(
+            direction: AxisDirection.down, type: ScrollIncrementType.page));
     await tester.pump(); // start scroll
     await tester.pump(const Duration(milliseconds: 1000)); // end scroll
     expect(find.text('The cow as white as milk'), findsNothing);

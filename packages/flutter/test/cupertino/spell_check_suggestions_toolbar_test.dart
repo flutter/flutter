@@ -12,31 +12,34 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('more than three suggestions throws an error', (WidgetTester tester) async {
-    Future<void> pumpToolbar(List<String> suggestions) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: CupertinoSpellCheckSuggestionsToolbar(
-              anchors: const TextSelectionToolbarAnchors(
-                primaryAnchor: Offset.zero,
+  testWidgetsWithLeakTracking(
+    'more than three suggestions throws an error',
+    (WidgetTester tester) async {
+      Future<void> pumpToolbar(List<String> suggestions) async {
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: CupertinoSpellCheckSuggestionsToolbar(
+                anchors: const TextSelectionToolbarAnchors(
+                  primaryAnchor: Offset.zero,
+                ),
+                buttonItems: suggestions.map((String string) {
+                  return ContextMenuButtonItem(
+                    onPressed: () {},
+                    label: string,
+                  );
+                }).toList(),
               ),
-              buttonItems: suggestions.map((String string) {
-                return ContextMenuButtonItem(
-                  onPressed: () {},
-                  label: string,
-                );
-              }).toList(),
             ),
           ),
-        ),
-      );
-    }
-    await pumpToolbar(<String>['hello', 'yellow', 'yell']);
-    expect(() async {
-      await pumpToolbar(<String>['hello', 'yellow', 'yell', 'yeller']);
-    }, throwsAssertionError);
-  },
+        );
+      }
+
+      await pumpToolbar(<String>['hello', 'yellow', 'yell']);
+      expect(() async {
+        await pumpToolbar(<String>['hello', 'yellow', 'yell', 'yeller']);
+      }, throwsAssertionError);
+    },
     skip: kIsWeb, // [intended]
   );
 
@@ -50,9 +53,11 @@ void main() {
       ],
     );
     final List<ContextMenuButtonItem>? buttonItems =
-        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
+        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(
+            editableTextState);
     expect(buttonItems, isNotNull);
-    final Iterable<String?> labels = buttonItems!.map((ContextMenuButtonItem buttonItem) {
+    final Iterable<String?> labels =
+        buttonItems!.map((ContextMenuButtonItem buttonItem) {
       return buttonItem.label;
     });
     expect(labels, hasLength(3));
@@ -62,7 +67,9 @@ void main() {
     expect(labels, isNot(contains('yeller')));
   });
 
-  testWidgetsWithLeakTracking('buildButtonItems builds a disabled "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'buildButtonItems builds a disabled "No Replacements Found" button when no suggestions',
+      (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
     final FocusNode focusNode = FocusNode();
@@ -75,7 +82,8 @@ void main() {
     final _FakeEditableTextState editableTextState =
         tester.state(find.byType(_FakeEditableText));
     final List<ContextMenuButtonItem>? buttonItems =
-        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
+        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(
+            editableTextState);
 
     expect(buttonItems, isNotNull);
     expect(buttonItems, hasLength(1));
@@ -87,13 +95,14 @@ void main() {
 class _FakeEditableText extends EditableText {
   /// The parameters focusNode and controller are needed here so the can be
   /// safely disposed after the test is completed.
-  _FakeEditableText(FocusNode focusNode, TextEditingController controller) : super(
-    controller: controller,
-    focusNode: focusNode,
-    backgroundCursorColor: CupertinoColors.white,
-    cursorColor: CupertinoColors.white,
-    style: const TextStyle(),
-  );
+  _FakeEditableText(FocusNode focusNode, TextEditingController controller)
+      : super(
+          controller: controller,
+          focusNode: focusNode,
+          backgroundCursorColor: CupertinoColors.white,
+          cursorColor: CupertinoColors.white,
+          style: const TextStyle(),
+        );
 
   @override
   _FakeEditableTextState createState() => _FakeEditableTextState();

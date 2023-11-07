@@ -24,7 +24,8 @@ class CubicBezierPage extends StatelessWidget {
 }
 
 class Bezier extends StatelessWidget {
-  const Bezier(this.color, this.scale, {super.key, this.blur = 0.0, this.delay = 0.0});
+  const Bezier(this.color, this.scale,
+      {super.key, this.blur = 0.0, this.delay = 0.0});
 
   final Color color;
   final double scale;
@@ -76,7 +77,7 @@ class Bezier extends StatelessWidget {
     return Stack(children: <Widget>[
       CustomPaint(
         foregroundPainter:
-        BezierPainter(Colors.grey, 0.0, _getLogoPath(), false),
+            BezierPainter(Colors.grey, 0.0, _getLogoPath(), false),
         size: const Size(100.0, 100.0),
       ),
       AnimatedBezier(color, scale, blur: blur),
@@ -259,10 +260,12 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
     return <PathDetail>[
       PathDetail(path),
-      PathDetail(bezier2Path, translate: <double>[29.45, 151.0], rotation: -1.5708),
+      PathDetail(bezier2Path,
+          translate: <double>[29.45, 151.0], rotation: -1.5708),
       PathDetail(bezier3Path,
           translate: <double>[53.0, 200.48], rotation: -3.14159),
-      PathDetail(bezier4Path, translate: <double>[122.48, 77.0], rotation: -4.71239),
+      PathDetail(bezier4Path,
+          translate: <double>[122.48, 77.0], rotation: -4.71239),
     ];
   }
 
@@ -338,8 +341,8 @@ class AnimatedBezierState extends State<AnimatedBezier>
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-        foregroundPainter: BezierPainter(widget.color,
-            curve.value * widget.blur, _getLogoPath(), isPlaying),
+        foregroundPainter: BezierPainter(
+            widget.color, curve.value * widget.blur, _getLogoPath(), isPlaying),
         size: const Size(100.0, 100.0));
   }
 }

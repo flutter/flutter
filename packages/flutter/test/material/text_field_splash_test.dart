@@ -77,14 +77,16 @@ void main() {
     cancelCalled = false;
   });
 
-  testWidgetsWithLeakTracking('Tapping should never cause a splash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tapping should never cause a splash',
+      (WidgetTester tester) async {
     final Key textField1 = UniqueKey();
     final Key textField2 = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          data: ThemeData.light()
+              .copyWith(splashFactory: const TestInkSplashFactory()),
           child: Material(
             child: Container(
               alignment: Alignment.topLeft,
@@ -136,11 +138,13 @@ void main() {
     expect(cancelCalled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Splash should never be created or canceled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Splash should never be created or canceled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
-          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          data: ThemeData.light()
+              .copyWith(splashFactory: const TestInkSplashFactory()),
           child: Material(
             child: ListView(
               children: <Widget>[
@@ -166,7 +170,8 @@ void main() {
     );
 
     // If there were a splash, this would cancel the splash.
-    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('label1')));
+    final TestGesture gesture1 =
+        await tester.startGesture(tester.getCenter(find.text('label1')));
 
     await tester.pump(kPressTimeout);
 
@@ -176,7 +181,8 @@ void main() {
     expect(cancelCalled, isFalse);
 
     // Pointer is dragged upwards causing a scroll, splash would be canceled.
-    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('label2')));
+    final TestGesture gesture2 =
+        await tester.startGesture(tester.getCenter(find.text('label2')));
     await tester.pump(kPressTimeout);
     await gesture2.moveBy(const Offset(0.0, -200.0));
     await gesture2.up();

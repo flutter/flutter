@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer.debugFillProperties',
+      (WidgetTester tester) async {
     final AnimatedContainer container = AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
       decoration: const BoxDecoration(color: Color(0xFF00FF00)),
@@ -25,7 +26,8 @@ void main() {
     expect(container, hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('AnimatedContainer control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer control test',
+      (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     const BoxDecoration decorationA = BoxDecoration(
@@ -46,7 +48,8 @@ void main() {
       ),
     );
 
-    final RenderDecoratedBox box = key.currentContext!.findRenderObject()! as RenderDecoratedBox;
+    final RenderDecoratedBox box =
+        key.currentContext!.findRenderObject()! as RenderDecoratedBox;
     actualDecoration = box.decoration as BoxDecoration;
     expect(actualDecoration.color, equals(decorationA.color));
 
@@ -103,7 +106,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('AnimatedContainer overanimate test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer overanimate test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -128,7 +132,8 @@ void main() {
         color: const Color(0xFF0000FF),
       ),
     );
-    expect(tester.binding.transientCallbackCount, 1); // this is the only time an animation should have started!
+    expect(tester.binding.transientCallbackCount,
+        1); // this is the only time an animation should have started!
     await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
@@ -140,7 +145,9 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgetsWithLeakTracking('AnimatedContainer padding visual-to-directional animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedContainer padding visual-to-directional animation',
+      (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -182,7 +189,9 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(700.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedContainer alignment visual-to-directional animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedContainer alignment visual-to-directional animation',
+      (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -292,7 +301,8 @@ void main() {
     expect(text.size.height, equals(100.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedContainer sets transformAlignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer sets transformAlignment',
+      (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -340,7 +350,8 @@ void main() {
     expect(tester.getTopLeft(find.byKey(target)), const Offset(400.0, 300.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedContainer sets clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer sets clipBehavior',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedContainer(
         decoration: const BoxDecoration(
@@ -349,7 +360,8 @@ void main() {
         duration: const Duration(milliseconds: 200),
       ),
     );
-    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.none);
+    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior,
+        Clip.none);
     await tester.pumpWidget(
       AnimatedContainer(
         decoration: const BoxDecoration(
@@ -359,6 +371,7 @@ void main() {
         clipBehavior: Clip.antiAlias,
       ),
     );
-    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.antiAlias);
+    expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior,
+        Clip.antiAlias);
   });
 }

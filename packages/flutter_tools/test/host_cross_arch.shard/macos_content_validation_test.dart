@@ -41,15 +41,20 @@ void main() {
         'clean',
       ], workingDirectory: workingDirectory);
 
-      final File podfile = fileSystem.file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile'));
-      final File podfileLock = fileSystem.file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile.lock'));
+      final File podfile = fileSystem
+          .file(fileSystem.path.join(workingDirectory, 'macos', 'Podfile'));
+      final File podfileLock = fileSystem.file(
+          fileSystem.path.join(workingDirectory, 'macos', 'Podfile.lock'));
       expect(podfile, exists);
       expect(podfileLock, exists);
 
       // Simulate a newer Podfile than Podfile.lock.
       podfile.setLastModifiedSync(DateTime.now());
-      podfileLock.setLastModifiedSync(DateTime.now().subtract(const Duration(days: 1)));
-      expect(podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()), isTrue);
+      podfileLock.setLastModifiedSync(
+          DateTime.now().subtract(const Duration(days: 1)));
+      expect(
+          podfileLock.lastModifiedSync().isBefore(podfile.lastModifiedSync()),
+          isTrue);
 
       final List<String> buildCommand = <String>[
         flutterBin,
@@ -58,7 +63,8 @@ void main() {
         'macos',
         '--$buildModeLower',
       ];
-      final ProcessResult result = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
+      final ProcessResult result = processManager.runSync(buildCommand,
+          workingDirectory: workingDirectory);
 
       printOnFailure('Output of flutter build macos:');
       printOnFailure(result.stdout.toString());
@@ -66,7 +72,9 @@ void main() {
       expect(result.exitCode, 0);
 
       expect(result.stdout, contains('Running pod install'));
-      expect(podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()), isTrue);
+      expect(
+          podfile.lastModifiedSync().isBefore(podfileLock.lastModifiedSync()),
+          isTrue);
 
       final Directory buildPath = fileSystem.directory(fileSystem.path.join(
         workingDirectory,
@@ -77,7 +85,8 @@ void main() {
         buildMode,
       ));
 
-      final Directory outputApp = buildPath.childDirectory('Flutter Gallery.app');
+      final Directory outputApp =
+          buildPath.childDirectory('Flutter Gallery.app');
       final Directory outputAppFramework =
           fileSystem.directory(fileSystem.path.join(
         outputApp.path,
@@ -87,12 +96,14 @@ void main() {
       ));
 
       final File libBinary = outputAppFramework.childFile('App');
-      final File libDsymBinary =
-        buildPath.childFile('App.framework.dSYM/Contents/Resources/DWARF/App');
+      final File libDsymBinary = buildPath
+          .childFile('App.framework.dSYM/Contents/Resources/DWARF/App');
 
-      _checkFatBinary(libBinary, buildModeLower, 'dynamically linked shared library');
+      _checkFatBinary(
+          libBinary, buildModeLower, 'dynamically linked shared library');
 
-      final List<String> libSymbols = AppleTestUtils.getExportedSymbols(libBinary.path);
+      final List<String> libSymbols =
+          AppleTestUtils.getExportedSymbols(libBinary.path);
 
       if (buildMode == 'Debug') {
         // dSYM is not created for a debug build.
@@ -133,7 +144,9 @@ void main() {
       );
 
       // Check complicated macOS framework symlink structure.
-      final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');
+      final Link current = outputFlutterFramework
+          .childDirectory('Versions')
+          .childLink('Current');
 
       expect(current.targetSync(), 'A');
 
@@ -150,7 +163,8 @@ void main() {
       expect(outputFlutterFramework.childDirectory('Modules'), isNot(exists));
 
       // Build again without cleaning.
-      final ProcessResult secondBuild = processManager.runSync(buildCommand, workingDirectory: workingDirectory);
+      final ProcessResult secondBuild = processManager.runSync(buildCommand,
+          workingDirectory: workingDirectory);
 
       printOnFailure('Output of second build:');
       printOnFailure(secondBuild.stdout.toString());
@@ -164,7 +178,9 @@ void main() {
         ...getLocalEngineArguments(),
         'clean',
       ], workingDirectory: workingDirectory);
-    }, skip: !platform.isMacOS); // [intended] only makes sense for macos platform.
+    },
+        skip: !platform
+            .isMacOS); // [intended] only makes sense for macos platform.
   }
 }
 
@@ -177,7 +193,8 @@ void _checkFatBinary(File file, String buildModeLower, String expectedType) {
   final bool containsArm = archs.contains('Mach-O 64-bit $expectedType arm64');
   if (buildModeLower == 'debug') {
     // Only build the architecture matching the machine running this test, not both.
-    expect(containsX64 ^ containsArm, isTrue, reason: 'Unexpected architecture $archs');
+    expect(containsX64 ^ containsArm, isTrue,
+        reason: 'Unexpected architecture $archs');
   } else {
     expect(containsX64, isTrue, reason: 'Unexpected architecture $archs');
     expect(containsArm, isTrue, reason: 'Unexpected architecture $archs');

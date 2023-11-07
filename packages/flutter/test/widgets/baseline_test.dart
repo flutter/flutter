@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Baseline - control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Baseline - control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: DefaultTextStyle(
@@ -18,10 +19,12 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size,
+        const Size(100.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('Baseline - position test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Baseline - position test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Baseline(
@@ -37,14 +40,16 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size,
+        const Size(100.0, 100.0));
     expect(
       tester.renderObject<RenderBox>(find.byType(Baseline)).size,
       const Size(100.0, 200),
     );
   });
 
-  testWidgetsWithLeakTracking('Chip caches baseline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip caches baseline',
+      (WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -64,12 +69,15 @@ void main() {
     expect(calls, 1);
     await tester.pump();
     expect(calls, 1);
-    tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
+    tester
+        .renderObject<RenderBaselineDetector>(find.byType(BaselineDetector))
+        .dirty();
     await tester.pump();
     expect(calls, 2);
   });
 
-  testWidgetsWithLeakTracking('ListTile caches baseline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTile caches baseline',
+      (WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -89,12 +97,15 @@ void main() {
     expect(calls, 1);
     await tester.pump();
     expect(calls, 1);
-    tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
+    tester
+        .renderObject<RenderBaselineDetector>(find.byType(BaselineDetector))
+        .dirty();
     await tester.pump();
     expect(calls, 2);
   });
 
-  testWidgetsWithLeakTracking("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("LayoutBuilder returns child's baseline",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -116,15 +127,17 @@ void main() {
 }
 
 class BaselineDetector extends LeafRenderObjectWidget {
-  const BaselineDetector(this.callback, { super.key });
+  const BaselineDetector(this.callback, {super.key});
 
   final VoidCallback callback;
 
   @override
-  RenderBaselineDetector createRenderObject(BuildContext context) => RenderBaselineDetector(callback);
+  RenderBaselineDetector createRenderObject(BuildContext context) =>
+      RenderBaselineDetector(callback);
 
   @override
-  void updateRenderObject(BuildContext context, RenderBaselineDetector renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderBaselineDetector renderObject) {
     renderObject.callback = callback;
   }
 }
@@ -165,5 +178,5 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) { }
+  void paint(PaintingContext context, Offset offset) {}
 }

@@ -113,8 +113,8 @@ class CupertinoFormRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
     final TextStyle textStyle = theme.textTheme.textStyle.copyWith(
-      color: CupertinoDynamicColor.maybeResolve(theme.textTheme.textStyle.color, context)
-    );
+        color: CupertinoDynamicColor.maybeResolve(
+            theme.textTheme.textStyle.color, context));
 
     return Padding(
       padding: padding ?? _kDefaultPadding,

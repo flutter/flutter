@@ -9,7 +9,11 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0, BorderStyle? borderStyle }) {
+Widget buildFrame(TabController tabController,
+    {Color? color,
+    Color? selectedColor,
+    double indicatorSize = 12.0,
+    BorderStyle? borderStyle}) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -19,7 +23,9 @@ Widget buildFrame(TabController tabController, { Color? color, Color? selectedCo
     child: Directionality(
       textDirection: TextDirection.ltr,
       child: Theme(
-        data: ThemeData(colorScheme: const ColorScheme.light().copyWith(secondary: kSelectedColor)),
+        data: ThemeData(
+            colorScheme:
+                const ColorScheme.light().copyWith(secondary: kSelectedColor)),
         child: SizedBox.expand(
           child: Center(
             child: SizedBox(
@@ -61,11 +67,16 @@ List<Color> indicatorColors(WidgetTester tester) {
       matching: find.byType(TabPageSelectorIndicator),
     ),
   );
-  return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
+  return indicators
+      .map<Color>(
+          (TabPageSelectorIndicator indicator) => indicator.backgroundColor)
+      .toList();
 }
 
 void main() {
-  testWidgetsWithLeakTracking('PageSelector responds correctly to setting the TabController index', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'PageSelector responds correctly to setting the TabController index',
+      (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
@@ -74,20 +85,25 @@ void main() {
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 0);
-    expect(indicatorColors(tester), const <Color>[kSelectedColor, kUnselectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kSelectedColor, kUnselectedColor, kUnselectedColor]);
 
     tabController.index = 1;
     await tester.pump();
     expect(tabController.index, 1);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     tabController.index = 2;
     await tester.pump();
     expect(tabController.index, 2);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
   });
 
-  testWidgetsWithLeakTracking('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'PageSelector responds correctly to TabController.animateTo()',
+      (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
@@ -96,7 +112,8 @@ void main() {
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 0);
-    expect(indicatorColors(tester), const <Color>[kSelectedColor, kUnselectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kSelectedColor, kUnselectedColor, kUnselectedColor]);
 
     tabController.animateTo(1, duration: const Duration(milliseconds: 200));
     await tester.pump();
@@ -113,7 +130,8 @@ void main() {
     expect(colors[2], kUnselectedColor);
     await tester.pumpAndSettle();
     expect(tabController.index, 1);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     tabController.animateTo(2, duration: const Duration(milliseconds: 200));
     await tester.pump();
@@ -128,10 +146,13 @@ void main() {
     expect(colors[0], kUnselectedColor);
     await tester.pumpAndSettle();
     expect(tabController.index, 2);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
   });
 
-  testWidgetsWithLeakTracking('PageSelector responds correctly to TabBarView drags', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'PageSelector responds correctly to TabBarView drags',
+      (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -141,9 +162,11 @@ void main() {
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 1);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
-    final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(200.0, 200.0));
 
     // Drag to the left moving the selection towards indicator 2. Indicator 2's
     // opacity should increase and Indicator 1's opacity should decrease.
@@ -157,7 +180,8 @@ void main() {
     await gesture.moveBy(const Offset(100.0, 0.0));
     await tester.pumpAndSettle();
     colors = indicatorColors(tester);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     // Drag to the left moving the selection towards indicator 0. Indicator 0's
     // opacity should increase and Indicator 1's opacity should decrease.
@@ -171,26 +195,33 @@ void main() {
     await gesture.moveBy(const Offset(-100.0, 0.0));
     await tester.pumpAndSettle();
     colors = indicatorColors(tester);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     // Completing the gesture doesn't change anything
     await gesture.up();
     await tester.pumpAndSettle();
     colors = indicatorColors(tester);
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     // Fling to the left, selects indicator 2
-    await tester.fling(find.byType(TabBarView), const Offset(-100.0, 0.0), 1000.0);
+    await tester.fling(
+        find.byType(TabBarView), const Offset(-100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
 
     // Fling to the right, selects indicator 1
-    await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 1000.0);
+    await tester.fling(
+        find.byType(TabBarView), const Offset(100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
-    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
+    expect(indicatorColors(tester),
+        const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
   });
 
-  testWidgetsWithLeakTracking('PageSelector indicatorColors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector indicatorColors',
+      (WidgetTester tester) async {
     const Color kRed = Color(0xFFFF0000);
     const Color kBlue = Color(0xFF0000FF);
 
@@ -200,7 +231,8 @@ void main() {
       length: 3,
     );
     addTearDown(tabController.dispose);
-    await tester.pumpWidget(buildFrame(tabController, color: kRed, selectedColor: kBlue));
+    await tester.pumpWidget(
+        buildFrame(tabController, color: kRed, selectedColor: kBlue));
 
     expect(tabController.index, 1);
     expect(indicatorColors(tester), const <Color>[kRed, kBlue, kRed]);
@@ -210,7 +242,8 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
   });
 
-  testWidgetsWithLeakTracking('PageSelector indicatorSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector indicatorSize',
+      (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -219,10 +252,12 @@ void main() {
     addTearDown(tabController.dispose);
     await tester.pumpWidget(buildFrame(tabController, indicatorSize: 16.0));
 
-    final Iterable<Element> indicatorElements = find.descendant(
-      of: find.byType(TabPageSelector),
-      matching: find.byType(TabPageSelectorIndicator),
-    ).evaluate();
+    final Iterable<Element> indicatorElements = find
+        .descendant(
+          of: find.byType(TabPageSelector),
+          matching: find.byType(TabPageSelectorIndicator),
+        )
+        .evaluate();
 
     // Indicators get an 8 pixel margin, 16 + 8 = 24.
     for (final Element indicatorElement in indicatorElements) {
@@ -232,7 +267,8 @@ void main() {
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
 
-  testWidgetsWithLeakTracking('PageSelector circle border', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector circle border',
+      (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -255,7 +291,8 @@ void main() {
     }
 
     // No border
-    await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.none));
+    await tester
+        .pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.none));
     indicators = tester.widgetList(
       find.descendant(
         of: find.byType(TabPageSelector),
@@ -267,7 +304,8 @@ void main() {
     }
 
     // Solid border
-    await tester.pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.solid));
+    await tester
+        .pumpWidget(buildFrame(tabController, borderStyle: BorderStyle.solid));
     indicators = tester.widgetList(
       find.descendant(
         of: find.byType(TabPageSelector),

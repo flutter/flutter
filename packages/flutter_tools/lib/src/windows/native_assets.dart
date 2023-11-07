@@ -65,7 +65,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   );
 }
 
-
 Future<CCompilerConfig> cCompilerConfigWindows() async {
   final VisualStudio visualStudio = VisualStudio(
     fileSystem: globals.fs,

@@ -25,14 +25,14 @@ class WindowsDevice extends DesktopDevice {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
   }) : super(
-      'windows',
-      platformType: PlatformType.windows,
-      ephemeral: false,
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-  );
+          'windows',
+          platformType: PlatformType.windows,
+          ephemeral: false,
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          operatingSystemUtils: operatingSystemUtils,
+        );
 
   @override
   bool isSupported() => true;
@@ -61,7 +61,8 @@ class WindowsDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(covariant WindowsApp package, BuildInfo buildInfo) {
+  String executablePathForDevice(
+      covariant WindowsApp package, BuildInfo buildInfo) {
     return package.executable(buildInfo.mode);
   }
 }
@@ -73,12 +74,12 @@ class WindowsDevices extends PollingDeviceDiscovery {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
-  }) : _fileSystem = fileSystem,
-      _logger = logger,
-      _processManager = processManager,
-      _operatingSystemUtils = operatingSystemUtils,
-      _windowsWorkflow = windowsWorkflow,
-      super('windows devices');
+  })  : _fileSystem = fileSystem,
+        _logger = logger,
+        _processManager = processManager,
+        _operatingSystemUtils = operatingSystemUtils,
+        _windowsWorkflow = windowsWorkflow,
+        super('windows devices');
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -93,7 +94,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _windowsWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
     if (!canListAnything) {
       return const <Device>[];
     }

@@ -33,13 +33,15 @@ abstract class UnpackMacOS extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-  ];
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
-  ];
+        Source.pattern(
+            '{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+      ];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -51,7 +53,8 @@ abstract class UnpackMacOS extends Target {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
+    final String basePath = environment.artifacts
+        .getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
 
     final ProcessResult result = environment.processManager.runSync(<String>[
       'rsync',
@@ -67,23 +70,27 @@ abstract class UnpackMacOS extends Target {
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'
-            '${result.stdout}\n---\n${result.stderr}',
+        '${result.stdout}\n---\n${result.stderr}',
       );
     }
 
     final File frameworkBinary = environment.outputDir
-      .childDirectory('FlutterMacOS.framework')
-      .childDirectory('Versions')
-      .childDirectory('A')
-      .childFile('FlutterMacOS');
+        .childDirectory('FlutterMacOS.framework')
+        .childDirectory('Versions')
+        .childDirectory('A')
+        .childFile('FlutterMacOS');
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
-      throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
+      throw Exception(
+          'Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await _thinFramework(environment, frameworkBinaryPath);
   }
 
-  static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
+  static const List<String> _copyDenylist = <String>[
+    'entitlements.txt',
+    'without_entitlements.txt'
+  ];
 
   void _removeDenylistedFiles(Directory directory) {
     for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
@@ -110,7 +117,8 @@ abstract class UnpackMacOS extends Target {
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = await environment.processManager.run(<String>[
+    final ProcessResult verifyResult =
+        await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
@@ -118,30 +126,33 @@ abstract class UnpackMacOS extends Target {
     ]);
 
     if (verifyResult.exitCode != 0) {
-      throw Exception('Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
+      throw Exception(
+          'Binary $frameworkBinaryPath does not contain $archs. Running lipo -info:\n$lipoInfo');
     }
 
     // Skip thinning for non-fat executables.
     if (lipoInfo.startsWith('Non-fat file:')) {
-      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
+      environment.logger
+          .printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
       return;
     }
 
     // Thin in-place.
-    final ProcessResult extractResult = environment.processManager.runSync(<String>[
+    final ProcessResult extractResult =
+        environment.processManager.runSync(<String>[
       'lipo',
       '-output',
       frameworkBinaryPath,
-      for (final String arch in archList)
-        ...<String>[
-          '-extract',
-          arch,
-        ],
+      for (final String arch in archList) ...<String>[
+        '-extract',
+        arch,
+      ],
       ...<String>[frameworkBinaryPath],
     ]);
 
     if (extractResult.exitCode != 0) {
-      throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
+      throw Exception(
+          'Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
     }
   }
 }
@@ -155,9 +166,10 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
-  ];
+        ...super.inputs,
+        const Source.artifact(Artifact.flutterMacOSFramework,
+            mode: BuildMode.release),
+      ];
 }
 
 /// Unpack the profile prebuilt engine framework.
@@ -169,9 +181,10 @@ class ProfileUnpackMacOS extends UnpackMacOS {
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
-  ];
+        ...super.inputs,
+        const Source.artifact(Artifact.flutterMacOSFramework,
+            mode: BuildMode.profile),
+      ];
 }
 
 /// Unpack the debug prebuilt engine framework.
@@ -183,9 +196,10 @@ class DebugUnpackMacOS extends UnpackMacOS {
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
-  ];
+        ...super.inputs,
+        const Source.artifact(Artifact.flutterMacOSFramework,
+            mode: BuildMode.debug),
+      ];
 }
 
 /// Create an App.framework for debug macOS targets.
@@ -201,20 +215,21 @@ class DebugMacOSFramework extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final File outputFile = environment.fileSystem.file(environment.fileSystem.path.join(
-        environment.buildDir.path, 'App.framework', 'App'));
+    final File outputFile = environment.fileSystem.file(environment
+        .fileSystem.path
+        .join(environment.buildDir.path, 'App.framework', 'App'));
 
     final Iterable<DarwinArch> darwinArchs = environment.defines[kDarwinArchs]
-      ?.split(' ')
-      .map(getDarwinArchForName)
-      ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+            ?.split(' ')
+            .map(getDarwinArchForName) ??
+        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 
     final Iterable<String> darwinArchArguments =
         darwinArchs.expand((DarwinArch arch) => <String>['-arch', arch.name]);
 
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
-        ..writeAsStringSync(r'''
+      ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
     final RunResult result = await globals.xcode!.clang(<String>[
@@ -223,11 +238,19 @@ static const int Moo = 88;
       debugApp.path,
       ...darwinArchArguments,
       '-dynamiclib',
-      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-Xlinker',
+      '-rpath',
+      '-Xlinker',
+      '@executable_path/Frameworks',
+      '-Xlinker',
+      '-rpath',
+      '-Xlinker',
+      '@loader_path/Frameworks',
       '-fapplication-extension',
-      '-install_name', '@rpath/App.framework/App',
-      '-o', outputFile.path,
+      '-install_name',
+      '@rpath/App.framework/App',
+      '-o',
+      outputFile.path,
     ]);
     if (result.exitCode != 0) {
       throw Exception('Failed to compile debug App.framework');
@@ -239,13 +262,14 @@ static const int Moo = 88;
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-  ];
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
-  ];
+        Source.pattern('{BUILD_DIR}/App.framework/App'),
+      ];
 }
 
 class CompileMacOSFramework extends Target {
@@ -260,54 +284,62 @@ class CompileMacOSFramework extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
-    final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
+    final String? targetPlatformEnvironment =
+        environment.defines[kTargetPlatform];
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     if (buildMode == BuildMode.debug) {
-      throw Exception('precompiled macOS framework only supported in release/profile builds.');
+      throw Exception(
+          'precompiled macOS framework only supported in release/profile builds.');
     }
     final String buildOutputPath = environment.buildDir.path;
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
-    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+    final bool dartObfuscation =
+        environment.defines[kDartObfuscation] == 'true';
+    final List<String> extraGenSnapshotOptions =
+        decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
+    final TargetPlatform targetPlatform =
+        getTargetPlatformForName(targetPlatformEnvironment);
     final List<DarwinArch> darwinArchs = environment.defines[kDarwinArchs]
-      ?.split(' ')
-      .map(getDarwinArchForName)
-      .toList()
-      ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+            ?.split(' ')
+            .map(getDarwinArchForName)
+            .toList() ??
+        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.darwin) {
-      throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
+      throw Exception(
+          'compile_macos_framework is only supported for darwin TargetPlatform.');
     }
 
     final AOTSnapshotter snapshotter = AOTSnapshotter(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-      xcode: globals.xcode!,
-      artifacts: environment.artifacts,
-      processManager: environment.processManager
-    );
+        fileSystem: environment.fileSystem,
+        logger: environment.logger,
+        xcode: globals.xcode!,
+        artifacts: environment.artifacts,
+        processManager: environment.processManager);
 
     final List<Future<int>> pending = <Future<int>>[];
     for (final DarwinArch darwinArch in darwinArchs) {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
-          .directory(codeSizeDirectory)
-          .childFile('snapshot.${darwinArch.name}.json');
+            .directory(codeSizeDirectory)
+            .childFile('snapshot.${darwinArch.name}.json');
         final File precompilerTraceFile = environment.fileSystem
-          .directory(codeSizeDirectory)
-          .childFile('trace.${darwinArch.name}.json');
-        extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
-        extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
+            .directory(codeSizeDirectory)
+            .childFile('trace.${darwinArch.name}.json');
+        extraGenSnapshotOptions
+            .add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
+        extraGenSnapshotOptions
+            .add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
 
       pending.add(snapshotter.build(
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
-        outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
+        outputPath:
+            environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
         platform: TargetPlatform.darwin,
         darwinArch: darwinArch,
         splitDebugInfo: splitDebugInfo,
@@ -342,21 +374,24 @@ class CompileMacOSFramework extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
+        KernelSnapshot(),
+      ];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin),
-  ];
+        Source.pattern('{BUILD_DIR}/app.dill'),
+        Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+        Source.artifact(Artifact.genSnapshot,
+            mode: BuildMode.release, platform: TargetPlatform.darwin),
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
-    Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-  ];
+        Source.pattern('{BUILD_DIR}/App.framework/App'),
+        Source.pattern(
+            '{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+      ];
 }
 
 /// Bundle the flutter assets into the App.framework.
@@ -370,20 +405,21 @@ abstract class MacOSBundleFlutterAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/App.framework/App'),
-    ...IconTreeShaker.inputs,
-  ];
+        Source.pattern('{BUILD_DIR}/App.framework/App'),
+        ...IconTreeShaker.inputs,
+      ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/App'),
-    Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/Info.plist'),
-  ];
+        Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/App'),
+        Source.pattern(
+            '{OUTPUT_DIR}/App.framework/Versions/A/Resources/Info.plist'),
+      ];
 
   @override
   List<String> get depfiles => const <String>[
-    'flutter_assets.d',
-  ];
+        'flutter_assets.d',
+      ];
 
   @override
   Future<void> build(Environment environment) async {
@@ -392,44 +428,43 @@ abstract class MacOSBundleFlutterAssets extends Target {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final Directory frameworkRootDirectory = environment
-        .outputDir
-        .childDirectory('App.framework');
+    final Directory frameworkRootDirectory =
+        environment.outputDir.childDirectory('App.framework');
     final Directory outputDirectory = frameworkRootDirectory
         .childDirectory('Versions')
         .childDirectory('A')
-        ..createSync(recursive: true);
+      ..createSync(recursive: true);
 
     // Copy App into framework directory.
     environment.buildDir
-      .childDirectory('App.framework')
-      .childFile('App')
-      .copySync(outputDirectory.childFile('App').path);
+        .childDirectory('App.framework')
+        .childFile('App')
+        .copySync(outputDirectory.childFile('App').path);
 
     // Copy the dSYM
-    if (environment.buildDir.childDirectory('App.framework.dSYM').existsSync()) {
-      final File dsymOutputBinary = environment
-        .outputDir
+    if (environment.buildDir
         .childDirectory('App.framework.dSYM')
-        .childDirectory('Contents')
-        .childDirectory('Resources')
-        .childDirectory('DWARF')
-        .childFile('App');
+        .existsSync()) {
+      final File dsymOutputBinary = environment.outputDir
+          .childDirectory('App.framework.dSYM')
+          .childDirectory('Contents')
+          .childDirectory('Resources')
+          .childDirectory('DWARF')
+          .childFile('App');
       dsymOutputBinary.parent.createSync(recursive: true);
-      environment
-        .buildDir
-        .childDirectory('App.framework.dSYM')
-        .childDirectory('Contents')
-        .childDirectory('Resources')
-        .childDirectory('DWARF')
-        .childFile('App')
-        .copySync(dsymOutputBinary.path);
+      environment.buildDir
+          .childDirectory('App.framework.dSYM')
+          .childDirectory('Contents')
+          .childDirectory('Resources')
+          .childDirectory('DWARF')
+          .childFile('App')
+          .copySync(dsymOutputBinary.path);
     }
 
     // Copy assets into asset directory.
     final Directory assetDirectory = outputDirectory
-      .childDirectory('Resources')
-      .childDirectory('flutter_assets');
+        .childDirectory('Resources')
+        .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
     final Depfile assetDepfile = await copyAssets(
@@ -481,14 +516,19 @@ abstract class MacOSBundleFlutterAssets extends Target {
       }
       // Copy precompiled runtimes.
       try {
-        final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData,
-            platform: TargetPlatform.darwin, mode: BuildMode.debug);
-        final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData,
-            platform: TargetPlatform.darwin, mode: BuildMode.debug);
-        environment.fileSystem.file(vmSnapshotData).copySync(
-            assetDirectory.childFile('vm_snapshot_data').path);
-        environment.fileSystem.file(isolateSnapshotData).copySync(
-            assetDirectory.childFile('isolate_snapshot_data').path);
+        final String vmSnapshotData = environment.artifacts.getArtifactPath(
+            Artifact.vmSnapshotData,
+            platform: TargetPlatform.darwin,
+            mode: BuildMode.debug);
+        final String isolateSnapshotData = environment.artifacts
+            .getArtifactPath(Artifact.isolateSnapshotData,
+                platform: TargetPlatform.darwin, mode: BuildMode.debug);
+        environment.fileSystem
+            .file(vmSnapshotData)
+            .copySync(assetDirectory.childFile('vm_snapshot_data').path);
+        environment.fileSystem
+            .file(isolateSnapshotData)
+            .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
       } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
@@ -497,32 +537,32 @@ abstract class MacOSBundleFlutterAssets extends Target {
     // framework root for Resources/App and from the versions root for
     // Current.
     try {
-      final Link currentVersion = outputDirectory.parent
-          .childLink('Current');
+      final Link currentVersion = outputDirectory.parent.childLink('Current');
       if (!currentVersion.existsSync()) {
-        final String linkPath = environment.fileSystem.path.relative(outputDirectory.path,
-            from: outputDirectory.parent.path);
+        final String linkPath = environment.fileSystem.path
+            .relative(outputDirectory.path, from: outputDirectory.parent.path);
         currentVersion.createSync(linkPath);
       }
       // Create symlink to current resources.
-      final Link currentResources = frameworkRootDirectory
-          .childLink('Resources');
+      final Link currentResources =
+          frameworkRootDirectory.childLink('Resources');
       if (!currentResources.existsSync()) {
-        final String linkPath = environment.fileSystem.path.relative(environment.fileSystem.path.join(currentVersion.path, 'Resources'),
+        final String linkPath = environment.fileSystem.path.relative(
+            environment.fileSystem.path.join(currentVersion.path, 'Resources'),
             from: frameworkRootDirectory.path);
         currentResources.createSync(linkPath);
       }
       // Create symlink to current binary.
-      final Link currentFramework = frameworkRootDirectory
-          .childLink('App');
+      final Link currentFramework = frameworkRootDirectory.childLink('App');
       if (!currentFramework.existsSync()) {
-        final String linkPath = environment.fileSystem.path.relative(environment.fileSystem.path.join(currentVersion.path, 'App'),
+        final String linkPath = environment.fileSystem.path.relative(
+            environment.fileSystem.path.join(currentVersion.path, 'App'),
             from: frameworkRootDirectory.path);
         currentFramework.createSync(linkPath);
       }
     } on FileSystemException {
       throw Exception('Failed to create symlinks for framework. try removing '
-        'the "${environment.outputDir.path}" directory and rerunning');
+          'the "${environment.outputDir.path}" directory and rerunning');
     }
   }
 }
@@ -536,26 +576,31 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-    DebugMacOSFramework(),
-    DebugUnpackMacOS(),
-  ];
+        KernelSnapshot(),
+        DebugMacOSFramework(),
+        DebugUnpackMacOS(),
+      ];
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin, mode: BuildMode.debug),
-    const Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin, mode: BuildMode.debug),
-  ];
+        ...super.inputs,
+        const Source.pattern('{BUILD_DIR}/app.dill'),
+        const Source.artifact(Artifact.isolateSnapshotData,
+            platform: TargetPlatform.darwin, mode: BuildMode.debug),
+        const Source.artifact(Artifact.vmSnapshotData,
+            platform: TargetPlatform.darwin, mode: BuildMode.debug),
+      ];
 
   @override
   List<Source> get outputs => <Source>[
-    ...super.outputs,
-    const Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
-    const Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-    const Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
-  ];
+        ...super.outputs,
+        const Source.pattern(
+            '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
+        const Source.pattern(
+            '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+        const Source.pattern(
+            '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+      ];
 }
 
 /// Bundle the profile flutter assets into the App.framework.
@@ -567,23 +612,24 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => const <Target>[
-    CompileMacOSFramework(),
-    ProfileUnpackMacOS(),
-  ];
+        CompileMacOSFramework(),
+        ProfileUnpackMacOS(),
+      ];
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-  ];
+        ...super.inputs,
+        const Source.pattern(
+            '{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+      ];
 
   @override
   List<Source> get outputs => <Source>[
-    ...super.outputs,
-    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-  ];
+        ...super.outputs,
+        const Source.pattern(
+            '{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+      ];
 }
-
 
 /// Bundle the release flutter assets into the App.framework.
 class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
@@ -594,34 +640,38 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => const <Target>[
-    CompileMacOSFramework(),
-    ReleaseUnpackMacOS(),
-  ];
+        CompileMacOSFramework(),
+        ReleaseUnpackMacOS(),
+      ];
 
   @override
   List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-  ];
+        ...super.inputs,
+        const Source.pattern(
+            '{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+      ];
 
   @override
   List<Source> get outputs => <Source>[
-    ...super.outputs,
-    const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
-  ];
+        ...super.outputs,
+        const Source.pattern(
+            '{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+      ];
 
   @override
   Future<void> build(Environment environment) async {
     bool buildSuccess = true;
     try {
       await super.build(environment);
-    } catch (_) {  // ignore: avoid_catches_without_on_clauses
+    } catch (_) {
+      // ignore: avoid_catches_without_on_clauses
       buildSuccess = false;
       rethrow;
     } finally {
       // Send a usage event when the app is being archived from Xcode.
       if (environment.defines[kXcodeAction]?.toLowerCase() == 'install') {
-        environment.logger.printTrace('Sending archive event if usage enabled.');
+        environment.logger
+            .printTrace('Sending archive event if usage enabled.');
         UsageEvent(
           'assemble',
           'macos-archive',
@@ -631,5 +681,4 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
       }
     }
   }
-
 }

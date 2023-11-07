@@ -128,7 +128,8 @@ abstract class BorderRadiusGeometry {
   /// into a concrete [BorderRadius] using [resolve].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BorderRadiusGeometry? lerp(BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
+  static BorderRadiusGeometry? lerp(
+      BorderRadiusGeometry? a, BorderRadiusGeometry? b, double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -198,7 +199,8 @@ abstract class BorderRadiusGeometry {
         _bottomEnd == _bottomStart) {
       if (_topStart != Radius.zero) {
         if (_topStart.x == _topStart.y) {
-          logical = 'BorderRadiusDirectional.circular(${_topStart.x.toStringAsFixed(1)})';
+          logical =
+              'BorderRadiusDirectional.circular(${_topStart.x.toStringAsFixed(1)})';
         } else {
           logical = 'BorderRadiusDirectional.all($_topStart)';
         }
@@ -255,28 +257,28 @@ abstract class BorderRadiusGeometry {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is BorderRadiusGeometry
-        && other._topLeft == _topLeft
-        && other._topRight == _topRight
-        && other._bottomLeft == _bottomLeft
-        && other._bottomRight == _bottomRight
-        && other._topStart == _topStart
-        && other._topEnd == _topEnd
-        && other._bottomStart == _bottomStart
-        && other._bottomEnd == _bottomEnd;
+    return other is BorderRadiusGeometry &&
+        other._topLeft == _topLeft &&
+        other._topRight == _topRight &&
+        other._bottomLeft == _bottomLeft &&
+        other._bottomRight == _bottomRight &&
+        other._topStart == _topStart &&
+        other._topEnd == _topEnd &&
+        other._bottomStart == _bottomStart &&
+        other._bottomEnd == _bottomEnd;
   }
 
   @override
   int get hashCode => Object.hash(
-    _topLeft,
-    _topRight,
-    _bottomLeft,
-    _bottomRight,
-    _topStart,
-    _topEnd,
-    _bottomStart,
-    _bottomEnd,
-  );
+        _topLeft,
+        _topRight,
+        _bottomLeft,
+        _bottomRight,
+        _topStart,
+        _topEnd,
+        _bottomStart,
+        _bottomEnd,
+      );
 }
 
 /// An immutable set of radii for each corner of a rectangle.
@@ -290,17 +292,19 @@ abstract class BorderRadiusGeometry {
 /// a [TextDirection] (typically obtained from the ambient [Directionality]).
 class BorderRadius extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [radius].
-  const BorderRadius.all(Radius radius) : this.only(
-    topLeft: radius,
-    topRight: radius,
-    bottomLeft: radius,
-    bottomRight: radius,
-  );
+  const BorderRadius.all(Radius radius)
+      : this.only(
+          topLeft: radius,
+          topRight: radius,
+          bottomLeft: radius,
+          bottomRight: radius,
+        );
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
-  BorderRadius.circular(double radius) : this.all(
-    Radius.circular(radius),
-  );
+  BorderRadius.circular(double radius)
+      : this.all(
+          Radius.circular(radius),
+        );
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
@@ -308,11 +312,11 @@ class BorderRadius extends BorderRadiusGeometry {
     Radius top = Radius.zero,
     Radius bottom = Radius.zero,
   }) : this.only(
-    topLeft: top,
-    topRight: top,
-    bottomLeft: bottom,
-    bottomRight: bottom,
-  );
+          topLeft: top,
+          topRight: top,
+          bottomLeft: bottom,
+          bottomRight: bottom,
+        );
 
   /// Creates a horizontally symmetrical border radius where the left and right
   /// sides of the rectangle have the same radii.
@@ -320,11 +324,11 @@ class BorderRadius extends BorderRadiusGeometry {
     Radius left = Radius.zero,
     Radius right = Radius.zero,
   }) : this.only(
-    topLeft: left,
-    topRight: right,
-    bottomLeft: left,
-    bottomRight: right,
-  );
+          topLeft: left,
+          topRight: right,
+          bottomLeft: left,
+          bottomRight: right,
+        );
 
   /// Creates a border radius with only the given non-zero values. The other
   /// corners will be right angles.
@@ -401,9 +405,12 @@ class BorderRadius extends BorderRadiusGeometry {
     return RRect.fromRectAndCorners(
       rect,
       topLeft: topLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: topRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft: bottomLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: bottomRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      topRight:
+          topRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomLeft:
+          bottomLeft.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
+      bottomRight:
+          bottomRight.clamp(minimum: Radius.zero), // ignore_clamp_double_lint
     );
   }
 
@@ -541,17 +548,19 @@ class BorderRadius extends BorderRadiusGeometry {
 ///    `topRight` instead of `topStart` and `topEnd`).
 class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [radius].
-  const BorderRadiusDirectional.all(Radius radius) : this.only(
-    topStart: radius,
-    topEnd: radius,
-    bottomStart: radius,
-    bottomEnd: radius,
-  );
+  const BorderRadiusDirectional.all(Radius radius)
+      : this.only(
+          topStart: radius,
+          topEnd: radius,
+          bottomStart: radius,
+          bottomEnd: radius,
+        );
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
-  BorderRadiusDirectional.circular(double radius) : this.all(
-    Radius.circular(radius),
-  );
+  BorderRadiusDirectional.circular(double radius)
+      : this.all(
+          Radius.circular(radius),
+        );
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
@@ -559,11 +568,11 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     Radius top = Radius.zero,
     Radius bottom = Radius.zero,
   }) : this.only(
-    topStart: top,
-    topEnd: top,
-    bottomStart: bottom,
-    bottomEnd: bottom,
-  );
+          topStart: top,
+          topEnd: top,
+          bottomStart: bottom,
+          bottomEnd: bottom,
+        );
 
   /// Creates a horizontally symmetrical border radius where the start and end
   /// sides of the rectangle have the same radii.
@@ -571,11 +580,11 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     Radius start = Radius.zero,
     Radius end = Radius.zero,
   }) : this.only(
-    topStart: start,
-    topEnd: end,
-    bottomStart: start,
-    bottomEnd: end,
-  );
+          topStart: start,
+          topEnd: end,
+          bottomStart: start,
+          bottomEnd: end,
+        );
 
   /// Creates a border radius with only the given non-zero values. The other
   /// corners will be right angles.
@@ -590,7 +599,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// Consider using [BorderRadius.zero] instead, since that object has the same
   /// effect, but will be cheaper to [resolve].
-  static const BorderRadiusDirectional zero = BorderRadiusDirectional.all(Radius.zero);
+  static const BorderRadiusDirectional zero =
+      BorderRadiusDirectional.all(Radius.zero);
 
   /// The top-start [Radius].
   final Radius topStart;
@@ -726,7 +736,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// If either is null, this function interpolates from [BorderRadiusDirectional.zero].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BorderRadiusDirectional? lerp(BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
+  static BorderRadiusDirectional? lerp(
+      BorderRadiusDirectional? a, BorderRadiusDirectional? b, double t) {
     if (identical(a, b)) {
       return a;
     }

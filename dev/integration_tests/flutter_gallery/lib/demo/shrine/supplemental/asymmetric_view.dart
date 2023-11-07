@@ -25,7 +25,8 @@ class AsymmetricView extends StatelessWidget {
     // some kinda awkward math so we use _evenCasesIndex and _oddCasesIndex as
     // helpers for creating the index of the product list that will correspond
     // to the index of the list of columns.
-    return List<SizedBox>.generate(_listItemCount(products!.length), (int index) {
+    return List<SizedBox>.generate(_listItemCount(products!.length),
+        (int index) {
       double width = .59 * MediaQuery.of(context).size.width;
       Widget column;
       if (index.isEven) {
@@ -33,9 +34,8 @@ class AsymmetricView extends StatelessWidget {
         final int bottom = _evenCasesIndex(index);
         column = TwoProductCardColumn(
           bottom: products![bottom],
-          top: products!.length - 1 >= bottom + 1
-            ? products![bottom + 1]
-            : null,
+          top:
+              products!.length - 1 >= bottom + 1 ? products![bottom + 1] : null,
         );
         width += 32.0;
       } else {
@@ -69,8 +69,8 @@ class AsymmetricView extends StatelessWidget {
 
   int _listItemCount(int totalItems) {
     return (totalItems % 3 == 0)
-      ? totalItems ~/ 3 * 2
-      : (totalItems / 3).ceil() * 2 - 1;
+        ? totalItems ~/ 3 * 2
+        : (totalItems / 3).ceil() * 2 - 1;
   }
 
   @override

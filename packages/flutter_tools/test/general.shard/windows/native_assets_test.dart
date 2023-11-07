@@ -16,7 +16,8 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/windows/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli.dart'
+    hide BuildMode, Target;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import 'package:package_config/package_config_types.dart';
 
@@ -50,9 +51,10 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  testUsingContext('dry run with no package config', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
+  testUsingContext('dry run with no package config',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+      }, () async {
     expect(
       await dryRunNativeAssetsWindows(
         projectUri: projectUri,
@@ -86,9 +88,10 @@ void main() {
     );
   });
 
-  testUsingContext('dry run for multiple OSes with no package config', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
+  testUsingContext('dry run for multiple OSes with no package config',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+      }, () async {
     await dryRunNativeAssetsMultipeOSes(
       projectUri: projectUri,
       fileSystem: fileSystem,
@@ -105,10 +108,12 @@ void main() {
     );
   });
 
-  testUsingContext('dry run with assets but not enabled', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+  testUsingContext('dry run with assets but not enabled',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+      }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -122,7 +127,8 @@ void main() {
         ),
       ),
       throwsToolExit(
-        message: 'Package(s) bar require the native assets feature to be enabled. '
+        message:
+            'Package(s) bar require the native assets feature to be enabled. '
             'Enable using `flutter config --enable-native-assets`.',
       ),
     );
@@ -132,7 +138,8 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     final Uri? nativeAssetsYaml = await dryRunNativeAssetsWindows(
@@ -171,10 +178,12 @@ void main() {
     );
   });
 
-  testUsingContext('build with assets but not enabled', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.empty(),
-  }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+  testUsingContext('build with assets but not enabled',
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+      }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -189,7 +198,8 @@ void main() {
         ),
       ),
       throwsToolExit(
-        message: 'Package(s) bar require the native assets feature to be enabled. '
+        message:
+            'Package(s) bar require the native assets feature to be enabled. '
             'Enable using `flutter config --enable-native-assets`.',
       ),
     );
@@ -199,7 +209,8 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     final (Uri? nativeAssetsYaml, _) = await buildNativeAssetsWindows(
@@ -222,7 +233,10 @@ void main() {
       isNot(contains('package:bar/bar.dart')),
     );
     expect(
-      environment.projectDir.childDirectory('build').childDirectory('native_assets').childDirectory('windows'),
+      environment.projectDir
+          .childDirectory('build')
+          .childDirectory('native_assets')
+          .childDirectory('windows'),
       exists,
     );
   });
@@ -236,7 +250,9 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager: () => FakeProcessManager.empty(),
     }, () async {
-      final File packageConfig = environment.projectDir.childDirectory('.dart_tool').childFile('package_config.json');
+      final File packageConfig = environment.projectDir
+          .childDirectory('.dart_tool')
+          .childFile('package_config.json');
       await packageConfig.parent.create();
       await packageConfig.create();
       final File dylibAfterCompiling = fileSystem.file('bar.dll');
@@ -294,7 +310,8 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
@@ -311,14 +328,16 @@ void main() {
                 id: 'package:bar/bar.dart',
                 linkMode: LinkMode.static,
                 target: native_assets_cli.Target.windowsX64,
-                path: AssetAbsolutePath(Uri.file(OS.windows.staticlibFileName('bar'))),
+                path: AssetAbsolutePath(
+                    Uri.file(OS.windows.staticlibFileName('bar'))),
               ),
             ],
           ),
         ),
       ),
       throwsToolExit(
-        message: 'Native asset(s) package:bar/bar.dart have their link mode set to '
+        message:
+            'Native asset(s) package:bar/bar.dart have their link mode set to '
             'static, but this is not yet supported. '
             'For more info see https://github.com/dart-lang/sdk/issues/49418.',
       ),
@@ -328,27 +347,28 @@ void main() {
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testUsingContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.list(
-          <FakeCommand>[
-            FakeCommand(
-              command: <Pattern>[
-                RegExp(r'(.*)vswhere.exe'),
-                '-format',
-                'json',
-                '-products',
-                '*',
-                '-utf8',
-                '-latest',
-                '-version',
-                '16',
-                '-requires',
-                'Microsoft.VisualStudio.Workload.NativeDesktop',
-                'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-                'Microsoft.VisualStudio.Component.VC.CMake.Project',
-              ],
-              stdout: r'''
+  testUsingContext('NativeAssetsBuildRunnerImpl.cCompilerConfig',
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+        ProcessManager: () => FakeProcessManager.list(
+              <FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>[
+                    RegExp(r'(.*)vswhere.exe'),
+                    '-format',
+                    'json',
+                    '-products',
+                    '*',
+                    '-utf8',
+                    '-latest',
+                    '-version',
+                    '16',
+                    '-requires',
+                    'Microsoft.VisualStudio.Workload.NativeDesktop',
+                    'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+                    'Microsoft.VisualStudio.Component.VC.CMake.Project',
+                  ],
+                  stdout: r'''
 [
   {
     "instanceId": "491ec752",
@@ -400,17 +420,17 @@ void main() {
   }
 ]
 ''', // Newline at the end of the string.
-            )
-          ],
-        ),
-    FileSystem: () => fileSystem,
-  }, () async {
+                )
+              ],
+            ),
+        FileSystem: () => fileSystem,
+      }, () async {
     if (!const LocalPlatform().isWindows) {
       return;
     }
 
-    final Directory msvcBinDir =
-        fileSystem.directory(r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64');
+    final Directory msvcBinDir = fileSystem.directory(
+        r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64');
     await msvcBinDir.create(recursive: true);
 
     final File packagesFile = fileSystem
@@ -430,9 +450,12 @@ void main() {
       logger,
     );
     final CCompilerConfig result = await runner.cCompilerConfig;
-    expect(result.cc?.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
-    expect(result.ar?.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
-    expect(result.ld?.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
+    expect(result.cc?.toFilePath(),
+        msvcBinDir.childFile('cl.exe').uri.toFilePath());
+    expect(result.ar?.toFilePath(),
+        msvcBinDir.childFile('lib.exe').uri.toFilePath());
+    expect(result.ld?.toFilePath(),
+        msvcBinDir.childFile('link.exe').uri.toFilePath());
     expect(result.envScript, isNotNull);
     expect(result.envScriptArgs, isNotNull);
   });

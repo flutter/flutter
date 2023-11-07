@@ -543,26 +543,25 @@ void main() {
       await null;
     }
 
-    expect(testLogger.statusText,
-      'Launching lib/main.dart on FakeDevice in debug mode...\n'
-      'Waiting for connection from debug service on FakeDevice...\n'
-      'Debug service listening on ws://127.0.0.1/abcd/\n'
-      '\n'
-      'first\n'
-      '\n'
-      'second\n'
-      'third\n'
-      '\n'
-      '\n' // the empty message
-      '\n'
-      '\n'
-      'error text\n'
-      '\n'
-    );
+    expect(
+        testLogger.statusText,
+        'Launching lib/main.dart on FakeDevice in debug mode...\n'
+        'Waiting for connection from debug service on FakeDevice...\n'
+        'Debug service listening on ws://127.0.0.1/abcd/\n'
+        '\n'
+        'first\n'
+        '\n'
+        'second\n'
+        'third\n'
+        '\n'
+        '\n' // the empty message
+        '\n'
+        '\n'
+        'error text\n'
+        '\n');
 
     expect(testLogger.errorText,
-      'Received an invalid Flutter.Error message from app: {other: bad stuff}\n'
-    );
+        'Received an invalid Flutter.Error message from app: {other: bad stuff}\n');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -622,8 +621,8 @@ void main() {
     setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final FakeProcess process = FakeProcess();
-    final Chromium chrome =
-        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+    final Chromium chrome = Chromium(1, chromeConnection,
+        chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
@@ -690,8 +689,8 @@ void main() {
     setupMocks();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final FakeProcess process = FakeProcess();
-    final Chromium chrome =
-        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+    final Chromium chrome = Chromium(1, chromeConnection,
+        chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
@@ -1029,8 +1028,8 @@ void main() {
     final FakeChromeConnection chromeConnection = FakeChromeConnection();
     final TestChromiumLauncher chromiumLauncher = TestChromiumLauncher();
     final FakeProcess process = FakeProcess();
-    final Chromium chrome =
-        Chromium(1, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+    final Chromium chrome = Chromium(1, chromeConnection,
+        chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     chromiumLauncher.setInstance(chrome);
 
     flutterDevice.device = GoogleChromeDevice(
@@ -1130,7 +1129,8 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('ResidentWebRunner generates files when l10n.yaml exists', () async {
+  testUsingContext('ResidentWebRunner generates files when l10n.yaml exists',
+      () async {
     fakeVmServiceHost =
         FakeVmServiceHost(requests: kAttachExpectations.toList());
     setupMocks();
@@ -1148,8 +1148,9 @@ void main() {
     );
 
     // Create necessary files.
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
-      .createSync(recursive: true);
+    globals.fs
+        .file(globals.fs.path.join('lib', 'main.dart'))
+        .createSync(recursive: true);
     globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -1164,8 +1165,7 @@ void main() {
 flutter:
   generate: true
 ''');
-    globals.fs.directory('.dart_tool')
-      .childFile('package_config.json')
+    globals.fs.directory('.dart_tool').childFile('package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 {
@@ -1181,10 +1181,11 @@ flutter:
 }
 ''');
     expect(await residentWebRunner.run(), 0);
-    final File generatedLocalizationsFile = globals.fs.directory('.dart_tool')
-      .childDirectory('flutter_gen')
-      .childDirectory('gen_l10n')
-      .childFile('app_localizations.dart');
+    final File generatedLocalizationsFile = globals.fs
+        .directory('.dart_tool')
+        .childDirectory('flutter_gen')
+        .childDirectory('gen_l10n')
+        .childFile('app_localizations.dart');
     expect(generatedLocalizationsFile.existsSync(), isTrue);
     // Completing this future ensures that the daemon can exit correctly.
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
@@ -1312,18 +1313,22 @@ flutter:
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('throws when port is an integer outside the valid TCP range', () async {
+  testUsingContext('throws when port is an integer outside the valid TCP range',
+      () async {
     final BufferLogger logger = BufferLogger.test();
 
-    DebuggingOptions debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '65536');
-    ResidentRunner residentWebRunner =
-        setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
-    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: 65536.*'));
+    DebuggingOptions debuggingOptions =
+        DebuggingOptions.enabled(BuildInfo.debug, port: '65536');
+    ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice,
+        logger: logger, debuggingOptions: debuggingOptions);
+    await expectToolExitLater(
+        residentWebRunner.run(), matches('Invalid port: 65536.*'));
 
     debuggingOptions = DebuggingOptions.enabled(BuildInfo.debug, port: '-1');
-    residentWebRunner =
-      setUpResidentRunner(flutterDevice, logger: logger, debuggingOptions: debuggingOptions);
-    await expectToolExitLater(residentWebRunner.run(), matches('Invalid port: -1.*'));
+    residentWebRunner = setUpResidentRunner(flutterDevice,
+        logger: logger, debuggingOptions: debuggingOptions);
+    await expectToolExitLater(
+        residentWebRunner.run(), matches('Invalid port: -1.*'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
@@ -1517,7 +1522,8 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   }
 
   @override
-  Future<ConnectionResult?> connect(bool useDebugExtension, {VmServiceFactory vmServiceFactory = createVmServiceDelegate}) async {
+  Future<ConnectionResult?> connect(bool useDebugExtension,
+      {VmServiceFactory vmServiceFactory = createVmServiceDelegate}) async {
     if (exception != null) {
       assert(exception is Exception || exception is Error);
       // ignore: only_throw_errors, exception is either Error or Exception here.
@@ -1622,7 +1628,8 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
 
   @override
-  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
+  DevelopmentShaderCompiler get developmentShaderCompiler =>
+      const FakeShaderCompiler();
 
   @override
   FlutterVmService? vmService;
@@ -1703,7 +1710,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   void configureCompiler(
     TargetPlatform? platform, {
     required ImpellerStatus impellerStatus,
-  }) { }
+  }) {}
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

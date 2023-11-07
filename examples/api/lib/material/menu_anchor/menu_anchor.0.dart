@@ -15,12 +15,17 @@ void main() => runApp(const MenuApp());
 /// they could be used for simple menu systems.
 enum MenuEntry {
   about('About'),
-  showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  hideMessage('Hide Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
+  showMessage(
+      'Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
+  hideMessage(
+      'Hide Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
   colorMenu('Color Menu'),
-  colorRed('Red Background', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
-  colorGreen('Green Background', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
-  colorBlue('Blue Background', SingleActivator(LogicalKeyboardKey.keyB, control: true));
+  colorRed('Red Background',
+      SingleActivator(LogicalKeyboardKey.keyR, control: true)),
+  colorGreen('Green Background',
+      SingleActivator(LogicalKeyboardKey.keyG, control: true)),
+  colorBlue('Blue Background',
+      SingleActivator(LogicalKeyboardKey.keyB, control: true));
 
   const MenuEntry(this.label, [this.shortcut]);
   final String label;
@@ -70,9 +75,11 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     // Collect the shortcuts from the different menu selections so that they can
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
-    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+    final Map<ShortcutActivator, Intent> shortcuts =
+        <ShortcutActivator, Intent>{
       for (final MenuEntry item in MenuEntry.values)
-        if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
+        if (item.shortcut != null)
+          item.shortcut!: VoidCallbackIntent(() => _activate(item)),
     };
     // Register the shortcuts with the ShortcutRegistry so that they are
     // available to the entire application.
@@ -131,7 +138,8 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
               child: const Text('Background Color'),
             ),
           ],
-          builder: (BuildContext context, MenuController controller, Widget? child) {
+          builder:
+              (BuildContext context, MenuController controller, Widget? child) {
             return TextButton(
               focusNode: _buttonFocusNode,
               onPressed: () {
@@ -159,7 +167,9 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
-                Text(_lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : ''),
+                Text(_lastSelection != null
+                    ? 'Last Selected: ${_lastSelection!.label}'
+                    : ''),
               ],
             ),
           ),
@@ -204,7 +214,8 @@ class MenuApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(body: SafeArea(child: MyCascadingMenu(message: kMessage))),
+      home: const Scaffold(
+          body: SafeArea(child: MyCascadingMenu(message: kMessage))),
     );
   }
 }

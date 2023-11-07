@@ -66,7 +66,8 @@ class MenuThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MenuStyle>('style', style, defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<MenuStyle>('style', style, defaultValue: null));
   }
 }
 
@@ -119,7 +120,8 @@ class MenuTheme extends InheritedTheme {
   /// }
   /// ```
   static MenuThemeData of(BuildContext context) {
-    final MenuTheme? menuTheme = context.dependOnInheritedWidgetOfExactType<MenuTheme>();
+    final MenuTheme? menuTheme =
+        context.dependOnInheritedWidgetOfExactType<MenuTheme>();
     return menuTheme?.data ?? Theme.of(context).menuTheme;
   }
 

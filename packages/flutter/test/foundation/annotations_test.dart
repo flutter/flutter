@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('test Category constructor', () {
     const List<String> sections = <String>[
-       'First section',
-       'Second section',
-       'Third section'
-      ];
+      'First section',
+      'Second section',
+      'Third section'
+    ];
     const Category category = Category(sections);
     expect(category.sections, sections);
   });

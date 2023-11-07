@@ -38,7 +38,9 @@ void main() {
     expect(find.text('Footer'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Shows long dividers in edge-to-edge section part 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Shows long dividers in edge-to-edge section part 1',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -55,7 +57,9 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('Shows long dividers in edge-to-edge section part 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Shows long dividers in edge-to-edge section part 2',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -76,7 +80,9 @@ void main() {
     expect(childrenColumn.children.length, 5);
   });
 
-  testWidgetsWithLeakTracking('Does not show long dividers in insetGrouped section part 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Does not show long dividers in insetGrouped section part 1',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -94,7 +100,9 @@ void main() {
     expect(childrenColumn.children.length, 1);
   });
 
-  testWidgetsWithLeakTracking('Does not show long dividers in insetGrouped section part 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Does not show long dividers in insetGrouped section part 2',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'App',
@@ -116,7 +124,8 @@ void main() {
     expect(childrenColumn.children.length, 3);
   });
 
-  testWidgetsWithLeakTracking('Sets background color for section', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sets background color for section',
+      (WidgetTester tester) async {
     const Color backgroundColor = CupertinoColors.systemBlue;
 
     await tester.pumpWidget(
@@ -139,7 +148,8 @@ void main() {
     expect(boxDecoration.color, backgroundColor);
   });
 
-  testWidgetsWithLeakTracking('Setting clipBehavior clips children section', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Setting clipBehavior clips children section',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -154,7 +164,9 @@ void main() {
     expect(find.byType(ClipRRect), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Not setting clipBehavior does not produce a RenderClipRRect object', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Not setting clipBehavior does not produce a RenderClipRRect object',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -165,7 +177,8 @@ void main() {
       ),
     );
 
-    final Iterable<RenderClipRRect> renderClips = tester.allRenderObjects.whereType<RenderClipRRect>();
+    final Iterable<RenderClipRRect> renderClips =
+        tester.allRenderObjects.whereType<RenderClipRRect>();
     expect(renderClips, isEmpty);
   });
 }

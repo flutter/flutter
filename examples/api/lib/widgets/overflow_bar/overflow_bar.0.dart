@@ -36,7 +36,8 @@ class OverflowBarExample extends StatelessWidget {
       child: Material(
         color: Colors.white,
         elevation: 24,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4))),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: SingleChildScrollView(
@@ -52,7 +53,9 @@ class OverflowBarExample extends StatelessWidget {
                     overflowAlignment: OverflowBarAlignment.end,
                     children: <Widget>[
                       TextButton(child: const Text('Cancel'), onPressed: () {}),
-                      TextButton(child: const Text('Really Really Cancel'), onPressed: () {}),
+                      TextButton(
+                          child: const Text('Really Really Cancel'),
+                          onPressed: () {}),
                       OutlinedButton(child: const Text('OK'), onPressed: () {}),
                     ],
                   ),

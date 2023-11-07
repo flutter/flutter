@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({ required this.child, super.settings });
+  TestRoute({required this.child, super.settings});
 
   final Widget child;
 
@@ -24,7 +24,8 @@ class TestRoute<T> extends PageRoute<T> {
   bool get maintainState => false;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
     return child;
   }
 }
@@ -41,7 +42,8 @@ Future<void> pumpApp(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('WidgetsApp control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('WidgetsApp control test',
+      (WidgetTester tester) async {
     await pumpApp(tester);
     expect(find.byType(WidgetsApp), findsOneWidget);
     expect(find.byType(Navigator), findsOneWidget);
@@ -49,7 +51,8 @@ void main() {
     expect(find.byType(CheckedModeBanner), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('showPerformanceOverlayOverride true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showPerformanceOverlayOverride true',
+      (WidgetTester tester) async {
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     WidgetsApp.showPerformanceOverlayOverride = true;
     await pumpApp(tester);
@@ -60,7 +63,8 @@ void main() {
     WidgetsApp.showPerformanceOverlayOverride = false;
   });
 
-  testWidgetsWithLeakTracking('showPerformanceOverlayOverride false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showPerformanceOverlayOverride false',
+      (WidgetTester tester) async {
     WidgetsApp.showPerformanceOverlayOverride = true;
     expect(WidgetsApp.showPerformanceOverlayOverride, true);
     WidgetsApp.showPerformanceOverlayOverride = false;
@@ -71,7 +75,8 @@ void main() {
     expect(find.byType(CheckedModeBanner), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('debugAllowBannerOverride false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugAllowBannerOverride false',
+      (WidgetTester tester) async {
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     expect(WidgetsApp.debugAllowBannerOverride, true);
     WidgetsApp.debugAllowBannerOverride = false;
@@ -83,7 +88,8 @@ void main() {
     WidgetsApp.debugAllowBannerOverride = true; // restore to default value
   });
 
-  testWidgetsWithLeakTracking('debugAllowBannerOverride true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugAllowBannerOverride true',
+      (WidgetTester tester) async {
     WidgetsApp.debugAllowBannerOverride = false;
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     expect(WidgetsApp.debugAllowBannerOverride, false);

@@ -40,7 +40,7 @@ class RenderDots extends RenderConstrainedBox {
 }
 
 class Dots extends SingleChildRenderObjectWidget {
-  const Dots({ super.key, super.child });
+  const Dots({super.key, super.child});
 
   @override
   RenderDots createRenderObject(BuildContext context) => RenderDots();

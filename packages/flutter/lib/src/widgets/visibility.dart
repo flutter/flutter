@@ -59,22 +59,22 @@ class Visibility extends StatelessWidget {
     this.maintainSize = false,
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
-  }) : assert(
-         maintainState || !maintainAnimation,
-         'Cannot maintain animations if the state is not also maintained.',
-       ),
-       assert(
-         maintainAnimation || !maintainSize,
-         'Cannot maintain size if animations are not maintained.',
-       ),
-       assert(
-         maintainSize || !maintainSemantics,
-         'Cannot maintain semantics if size is not maintained.',
-       ),
-       assert(
-         maintainSize || !maintainInteractivity,
-         'Cannot maintain interactivity if size is not maintained.',
-       );
+  })  : assert(
+          maintainState || !maintainAnimation,
+          'Cannot maintain animations if the state is not also maintained.',
+        ),
+        assert(
+          maintainAnimation || !maintainSize,
+          'Cannot maintain size if animations are not maintained.',
+        ),
+        assert(
+          maintainSize || !maintainSemantics,
+          'Cannot maintain semantics if size is not maintained.',
+        ),
+        assert(
+          maintainSize || !maintainInteractivity,
+          'Cannot maintain interactivity if size is not maintained.',
+        );
 
   /// Control whether the given [child] is [visible].
   ///
@@ -86,12 +86,13 @@ class Visibility extends StatelessWidget {
     super.key,
     required this.child,
     this.visible = true,
-  }) :  maintainState = true,
+  })  : maintainState = true,
         maintainAnimation = true,
         maintainSize = true,
         maintainSemantics = true,
         maintainInteractivity = true,
-        replacement = const SizedBox.shrink(); // Unused since maintainState is always true.
+        replacement = const SizedBox
+            .shrink(); // Unused since maintainState is always true.
 
   /// The widget to show or hide, as controlled by [visible].
   ///
@@ -225,15 +226,18 @@ class Visibility extends StatelessWidget {
   static bool of(BuildContext context) {
     bool isVisible = true;
     BuildContext ancestorContext = context;
-    InheritedElement? ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+    InheritedElement? ancestor = ancestorContext
+        .getElementForInheritedWidgetOfExactType<_VisibilityScope>();
     while (isVisible && ancestor != null) {
-      final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
+      final _VisibilityScope scope =
+          context.dependOnInheritedElement(ancestor) as _VisibilityScope;
       isVisible = scope.isVisible;
       ancestor.visitAncestorElements((Element parent) {
         ancestorContext = parent;
         return false;
       });
-      ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+      ancestor = ancestorContext
+          .getElementForInheritedWidgetOfExactType<_VisibilityScope>();
     }
     return isVisible;
   }
@@ -274,12 +278,18 @@ class Visibility extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
-    properties.add(FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
-    properties.add(FlagProperty('maintainAnimation', value: maintainAnimation, ifFalse: 'maintainAnimation'));
-    properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
-    properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
-    properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+    properties.add(FlagProperty('visible',
+        value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
+    properties.add(FlagProperty('maintainState',
+        value: maintainState, ifFalse: 'maintainState'));
+    properties.add(FlagProperty('maintainAnimation',
+        value: maintainAnimation, ifFalse: 'maintainAnimation'));
+    properties.add(FlagProperty('maintainSize',
+        value: maintainSize, ifFalse: 'maintainSize'));
+    properties.add(FlagProperty('maintainSemantics',
+        value: maintainSemantics, ifFalse: 'maintainSemantics'));
+    properties.add(FlagProperty('maintainInteractivity',
+        value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
   }
 }
 
@@ -345,22 +355,22 @@ class SliverVisibility extends StatelessWidget {
     this.maintainSize = false,
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
-  }) : assert(
-         maintainState || !maintainAnimation,
-         'Cannot maintain animations if the state is not also maintained.',
-       ),
-       assert(
-         maintainAnimation || !maintainSize,
-         'Cannot maintain size if animations are not maintained.',
-       ),
-       assert(
-         maintainSize || !maintainSemantics,
-         'Cannot maintain semantics if size is not maintained.',
-       ),
-       assert(
-         maintainSize || !maintainInteractivity,
-         'Cannot maintain interactivity if size is not maintained.',
-       );
+  })  : assert(
+          maintainState || !maintainAnimation,
+          'Cannot maintain animations if the state is not also maintained.',
+        ),
+        assert(
+          maintainAnimation || !maintainSize,
+          'Cannot maintain size if animations are not maintained.',
+        ),
+        assert(
+          maintainSize || !maintainSemantics,
+          'Cannot maintain semantics if size is not maintained.',
+        ),
+        assert(
+          maintainSize || !maintainInteractivity,
+          'Cannot maintain interactivity if size is not maintained.',
+        );
 
   /// Control whether the given [sliver] is [visible].
   ///
@@ -373,7 +383,7 @@ class SliverVisibility extends StatelessWidget {
     required this.sliver,
     this.replacementSliver = const SliverToBoxAdapter(),
     this.visible = true,
-  }) :  maintainState = true,
+  })  : maintainState = true,
         maintainAnimation = true,
         maintainSize = true,
         maintainSemantics = true,
@@ -522,12 +532,18 @@ class SliverVisibility extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
-    properties.add(FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
-    properties.add(FlagProperty('maintainAnimation', value: maintainAnimation, ifFalse: 'maintainAnimation'));
-    properties.add(FlagProperty('maintainSize', value: maintainSize, ifFalse: 'maintainSize'));
-    properties.add(FlagProperty('maintainSemantics', value: maintainSemantics, ifFalse: 'maintainSemantics'));
-    properties.add(FlagProperty('maintainInteractivity', value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
+    properties.add(FlagProperty('visible',
+        value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
+    properties.add(FlagProperty('maintainState',
+        value: maintainState, ifFalse: 'maintainState'));
+    properties.add(FlagProperty('maintainAnimation',
+        value: maintainAnimation, ifFalse: 'maintainAnimation'));
+    properties.add(FlagProperty('maintainSize',
+        value: maintainSize, ifFalse: 'maintainSize'));
+    properties.add(FlagProperty('maintainSemantics',
+        value: maintainSemantics, ifFalse: 'maintainSemantics'));
+    properties.add(FlagProperty('maintainInteractivity',
+        value: maintainInteractivity, ifFalse: 'maintainInteractivity'));
   }
 }
 
@@ -538,7 +554,8 @@ class SliverVisibility extends StatelessWidget {
 // different layers. This can be significantly more expensive, so the issue is avoided by a
 // specialized render object that does not ever force compositing.
 class _Visibility extends SingleChildRenderObjectWidget {
-  const _Visibility({ required this.visible, required this.maintainSemantics, super.child });
+  const _Visibility(
+      {required this.visible, required this.maintainSemantics, super.child});
 
   final bool visible;
   final bool maintainSemantics;
@@ -549,7 +566,8 @@ class _Visibility extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderVisibility renderObject) {
+  void updateRenderObject(
+      BuildContext context, _RenderVisibility renderObject) {
     renderObject
       ..visible = visible
       ..maintainSemantics = maintainSemantics;
@@ -602,8 +620,9 @@ class _RenderVisibility extends RenderProxyBox {
 // different layers. This can be significantly more expensive, so the issue is avoided by a
 // specialized render object that does not ever force compositing.
 class _SliverVisibility extends SingleChildRenderObjectWidget {
-  const _SliverVisibility({ required this.visible, required this.maintainSemantics, Widget? sliver })
-    : super(child: sliver);
+  const _SliverVisibility(
+      {required this.visible, required this.maintainSemantics, Widget? sliver})
+      : super(child: sliver);
 
   final bool visible;
   final bool maintainSemantics;
@@ -614,7 +633,8 @@ class _SliverVisibility extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSliverVisibility renderObject) {
+  void updateRenderObject(
+      BuildContext context, _RenderSliverVisibility renderObject) {
     renderObject
       ..visible = visible
       ..maintainSemantics = maintainSemantics;

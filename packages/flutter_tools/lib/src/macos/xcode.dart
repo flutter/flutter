@@ -82,7 +82,8 @@ class Xcode {
       userMessages: UserMessages(),
       flutterRoot: flutterRoot,
       logger: logger,
-      xcodeProjectInterpreter: xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
+      xcodeProjectInterpreter: xcodeProjectInterpreter ??
+          XcodeProjectInterpreter.test(processManager: processManager),
     );
   }
 
@@ -94,15 +95,19 @@ class Xcode {
   final String? _flutterRoot;
   final Logger _logger;
 
-  bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck =>
+      _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
   String? _xcodeSelectPath;
   String? get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = _processUtils.runSync(
-          <String>['/usr/bin/xcode-select', '--print-path'],
-        ).stdout.trim();
+        _xcodeSelectPath = _processUtils
+            .runSync(
+              <String>['/usr/bin/xcode-select', '--print-path'],
+            )
+            .stdout
+            .trim();
       } on ProcessException {
         // Ignored, return null below.
       } on ArgumentError {
@@ -153,6 +158,7 @@ class Xcode {
   String? get versionText => _xcodeProjectInterpreter.versionText;
 
   bool? _eulaSigned;
+
   /// Has the EULA been signed?
   bool get eulaSigned {
     if (_eulaSigned == null) {
@@ -251,7 +257,12 @@ class Xcode {
 
   Future<String> sdkLocation(EnvironmentType environmentType) async {
     final RunResult runResult = await _processUtils.run(
-      <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
+      <String>[
+        ...xcrunCommand(),
+        '--sdk',
+        getSDKNameForIOSEnvironmentType(environmentType),
+        '--show-sdk-path'
+      ],
     );
     if (runResult.exitCode != 0) {
       throwToolExit('Could not find SDK location: ${runResult.stderr}');
@@ -264,17 +275,24 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
+    final String appPath =
+        _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
     return _fileSystem.directory(appPath).existsSync() ? appPath : null;
   }
 
   /// Gets the version number of the platform for the selected SDK.
   Future<Version?> sdkPlatformVersion(EnvironmentType environmentType) async {
     final RunResult runResult = await _processUtils.run(
-      <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-platform-version'],
+      <String>[
+        ...xcrunCommand(),
+        '--sdk',
+        getSDKNameForIOSEnvironmentType(environmentType),
+        '--show-sdk-platform-version'
+      ],
     );
     if (runResult.exitCode != 0) {
-      _logger.printError('Could not find SDK Platform Version: ${runResult.stderr}');
+      _logger.printError(
+          'Could not find SDK Platform Version: ${runResult.stderr}');
       return null;
     }
     final String versionString = runResult.stdout.trim();
@@ -282,11 +300,14 @@ class Xcode {
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+EnvironmentType? environmentTypeFromSdkroot(
+    String sdkroot, FileSystem fileSystem) {
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {
-    return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
+    return sdkName.contains('simulator')
+        ? EnvironmentType.simulator
+        : EnvironmentType.physical;
   }
   assert(false);
   return null;

@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('AnimatedPadding.debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedPadding.debugFillProperties',
+      (WidgetTester tester) async {
     final AnimatedPadding padding = AnimatedPadding(
       padding: const EdgeInsets.all(7.0),
       curve: Curves.ease,
@@ -17,7 +18,9 @@ void main() {
     expect(padding, hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('AnimatedPadding padding visual-to-directional animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPadding padding visual-to-directional animation',
+      (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -59,14 +62,17 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(700.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedPadding animated padding clamped to positive values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedPadding animated padding clamped to positive values',
+      (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: AnimatedPadding(
-          curve: Curves.easeInOutBack, // will cause negative padding during overshoot
+          curve: Curves
+              .easeInOutBack, // will cause negative padding during overshoot
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.only(right: 50.0),
           child: SizedBox.expand(key: target),
@@ -97,5 +103,4 @@ void main() {
     expect(tester.getSize(find.byKey(target)), const Size(800.0, 600.0));
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 0.0));
   });
-
 }

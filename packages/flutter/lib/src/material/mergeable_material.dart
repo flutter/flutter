@@ -164,9 +164,11 @@ class _AnimationTuple {
   }
 }
 
-class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {
+class _MergeableMaterialState extends State<MergeableMaterial>
+    with TickerProviderStateMixin {
   late List<MergeableMaterialItem> _children;
-  final Map<LocalKey, _AnimationTuple?> _animationTuples = <LocalKey, _AnimationTuple?>{};
+  final Map<LocalKey, _AnimationTuple?> _animationTuples =
+      <LocalKey, _AnimationTuple?>{};
 
   @override
   void initState() {
@@ -177,7 +179,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       final MergeableMaterialItem child = _children[i];
       if (child is MaterialGap) {
         _initGap(child);
-        _animationTuples[child.key]!.controller.value = 1.0; // Gaps are initially full-sized.
+        _animationTuples[child.key]!.controller.value =
+            1.0; // Gaps are initially full-sized.
       }
     }
     assert(_debugGapsAreValid(_children));
@@ -284,10 +287,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     int j = 0;
 
     while (j < _children.length) {
-      if (
-        _children[j] is MaterialGap &&
-        _animationTuples[_children[j].key]!.controller.status == AnimationStatus.dismissed
-      ) {
+      if (_children[j] is MaterialGap &&
+          _animationTuples[_children[j].key]!.controller.status ==
+              AnimationStatus.dismissed) {
         _removeChild(j);
       } else {
         j += 1;
@@ -299,12 +301,16 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void didUpdateWidget(MergeableMaterial oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final Set<LocalKey> oldKeys = oldWidget.children.map<LocalKey>(
-      (MergeableMaterialItem child) => child.key,
-    ).toSet();
-    final Set<LocalKey> newKeys = widget.children.map<LocalKey>(
-      (MergeableMaterialItem child) => child.key,
-    ).toSet();
+    final Set<LocalKey> oldKeys = oldWidget.children
+        .map<LocalKey>(
+          (MergeableMaterialItem child) => child.key,
+        )
+        .toSet();
+    final Set<LocalKey> newKeys = widget.children
+        .map<LocalKey>(
+          (MergeableMaterialItem child) => child.key,
+        )
+        .toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);
     final Set<LocalKey> oldOnly = oldKeys.difference(newKeys);
 
@@ -371,7 +377,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               j += newLength - oldLength;
             }
           } else if (oldLength == 1) {
-            if (newLength == 1 && newChildren[startNew] is MaterialGap &&
+            if (newLength == 1 &&
+                newChildren[startNew] is MaterialGap &&
                 _children[startOld].key == newChildren[startNew].key) {
               /// Special case: gap added back.
               _animationTuples[newChildren[startNew].key]!.controller.forward();
@@ -399,7 +406,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               for (int k = startNew; k < i; k += 1) {
                 final MergeableMaterialItem newChild = newChildren[k];
                 if (newChild is MaterialGap) {
-                  _animationTuples[newChild.key]!.gapStart = gapSize * newChild.size / gapSizeSum;
+                  _animationTuples[newChild.key]!.gapStart =
+                      gapSize * newChild.size / gapSizeSum;
                   _animationTuples[newChild.key]!.controller
                     ..value = 0.0
                     ..forward();
@@ -490,9 +498,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   BorderRadius _borderRadius(int index, bool start, bool end) {
-    assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.topRight);
-    assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.bottomLeft);
-    assert(kMaterialEdges[MaterialType.card]!.topLeft == kMaterialEdges[MaterialType.card]!.bottomRight);
+    assert(kMaterialEdges[MaterialType.card]!.topLeft ==
+        kMaterialEdges[MaterialType.card]!.topRight);
+    assert(kMaterialEdges[MaterialType.card]!.topLeft ==
+        kMaterialEdges[MaterialType.card]!.bottomLeft);
+    assert(kMaterialEdges[MaterialType.card]!.topLeft ==
+        kMaterialEdges[MaterialType.card]!.bottomRight);
     final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
 
     Radius startRadius = Radius.zero;
@@ -581,7 +592,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
           final BorderSide divider = Divider.createBorderSide(
             context,
-            width: 0.5, // TODO(ianh): This probably looks terrible when the dpr isn't a power of two.
+            width:
+                0.5, // TODO(ianh): This probably looks terrible when the dpr isn't a power of two.
             color: widget.dividerColor,
           );
 
@@ -613,7 +625,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         slices.add(
           Container(
             decoration: BoxDecoration(
-              color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
+              color: (_children[i] as MaterialSlice).color ??
+                  Theme.of(context).cardColor,
               borderRadius: _borderRadius(i, i == 0, i == _children.length - 1),
             ),
             child: Material(
@@ -653,8 +666,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 
   @override
   bool operator ==(Object other) {
-    return other is _MergeableMaterialSliceKey
-        && other.value == value;
+    return other is _MergeableMaterialSliceKey && other.value == value;
   }
 
   @override
@@ -678,7 +690,8 @@ class _MergeableMaterialListBody extends ListBody {
   final double elevation;
 
   AxisDirection _getDirection(BuildContext context) {
-    return getAxisDirectionFromAxisReverseAndDirectionality(context, mainAxis, false);
+    return getAxisDirectionFromAxisReverseAndDirectionality(
+        context, mainAxis, false);
   }
 
   @override
@@ -691,7 +704,8 @@ class _MergeableMaterialListBody extends ListBody {
 
   @override
   void updateRenderObject(BuildContext context, RenderListBody renderObject) {
-    final _RenderMergeableMaterialListBody materialRenderListBody = renderObject as _RenderMergeableMaterialListBody;
+    final _RenderMergeableMaterialListBody materialRenderListBody =
+        renderObject as _RenderMergeableMaterialListBody;
     materialRenderListBody
       ..axisDirection = _getDirection(context)
       ..elevation = elevation;
@@ -731,7 +745,8 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
     RenderBox? child = firstChild;
     int index = 0;
     while (child != null) {
-      final ListBodyParentData childParentData = child.parentData! as ListBodyParentData;
+      final ListBodyParentData childParentData =
+          child.parentData! as ListBodyParentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
       if (index.isEven) {
         _paintShadows(context.canvas, rect);

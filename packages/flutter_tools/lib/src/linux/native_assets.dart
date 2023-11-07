@@ -74,7 +74,8 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
   const String kArBinary = 'llvm-ar';
   const String kLdBinary = 'ld.lld';
 
-  final ProcessResult whichResult = await globals.processManager.run(<String>['which', kClangPlusPlusBinary]);
+  final ProcessResult whichResult =
+      await globals.processManager.run(<String>['which', kClangPlusPlusBinary]);
   if (whichResult.exitCode != 0) {
     throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
   }
@@ -86,7 +87,8 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
   for (final String binary in <String>[kClangBinary, kArBinary, kLdBinary]) {
     final File binaryFile = clangDir.childFile(binary);
     if (!await binaryFile.exists()) {
-      throwToolExit("Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");
+      throwToolExit(
+          "Failed to find $binary relative to $clangPpFile: $binaryFile doesn't exist.");
     }
     binaryPaths[binary] = binaryFile.uri;
   }

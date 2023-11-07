@@ -37,9 +37,9 @@ class DevelopmentShaderCompiler {
     required ShaderCompiler shaderCompiler,
     required FileSystem fileSystem,
     @visibleForTesting math.Random? random,
-  }) : _shaderCompiler = shaderCompiler,
-       _fileSystem = fileSystem,
-       _random = random ?? math.Random();
+  })  : _shaderCompiler = shaderCompiler,
+        _fileSystem = fileSystem,
+        _random = random ?? math.Random();
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
@@ -52,7 +52,8 @@ class DevelopmentShaderCompiler {
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform? platform, { required ImpellerStatus impellerStatus }) {
+  void configureCompiler(TargetPlatform? platform,
+      {required ImpellerStatus impellerStatus}) {
     switch (platform) {
       case TargetPlatform.ios:
         _shaderTarget = ShaderTarget.impelleriOS;
@@ -62,8 +63,8 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.android_arm:
       case TargetPlatform.android:
         _shaderTarget = impellerStatus == ImpellerStatus.enabled
-          ? ShaderTarget.impellerAndroid
-          : ShaderTarget.sksl;
+            ? ShaderTarget.impellerAndroid
+            : ShaderTarget.sksl;
       case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
@@ -87,7 +88,8 @@ class DevelopmentShaderCompiler {
   /// to the attached device in its place.
   Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
     assert(_debugConfigured);
-    final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
+    final File output = _fileSystem.systemTempDirectory
+        .childFile('${_random.nextDouble()}.temp');
     late File inputFile;
     bool cleanupInput = false;
     Uint8List result;
@@ -97,7 +99,8 @@ class DevelopmentShaderCompiler {
       if (inputShader is DevFSFileContent) {
         inputFile = inputShader.file as File;
       } else {
-        inputFile = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
+        inputFile = _fileSystem.systemTempDirectory
+            .childFile('${_random.nextDouble()}.temp');
         inputFile.writeAsBytesSync(await inputShader.contentsAsBytes());
         cleanupInput = true;
       }
@@ -131,10 +134,10 @@ class ShaderCompiler {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _fs = fileSystem,
-       _artifacts = artifacts;
+  })  : _processManager = processManager,
+        _logger = logger,
+        _fs = fileSystem,
+        _artifacts = artifacts;
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -145,7 +148,8 @@ class ShaderCompiler {
   ///
   /// See [Target.inputs].
   static const List<Source> inputs = <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/shader_compiler.dart'),
+    Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/shader_compiler.dart'),
     Source.hostArtifact(HostArtifact.impellerc),
   ];
 
@@ -174,13 +178,13 @@ class ShaderCompiler {
       );
     }
 
-    final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
+    final String shaderLibPath =
+        _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
     final List<String> cmd = <String>[
       impellerc.path,
       target.target,
       '--iplr',
-      if (json)
-        '--json',
+      if (json) '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',

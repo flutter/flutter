@@ -10,7 +10,8 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 
 void main() {
-  testWithoutContext('dispose does not throw exception if no process is present', () {
+  testWithoutContext(
+      'dispose does not throw exception if no process is present', () {
     final ForwardedPort forwardedPort = ForwardedPort(123, 456);
     expect(forwardedPort.context, isNull);
     forwardedPort.dispose();
@@ -18,7 +19,8 @@ void main() {
 
   testWithoutContext('dispose kills process if process was available', () {
     final FakeProcess process = FakeProcess();
-    final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, process);
+    final ForwardedPort forwardedPort =
+        ForwardedPort.withContext(123, 456, process);
     forwardedPort.dispose();
 
     expect(forwardedPort.context, isNotNull);
@@ -30,7 +32,7 @@ class FakeProcess extends Fake implements Process {
   bool killed = false;
 
   @override
-  bool kill([io.ProcessSignal signal =  io.ProcessSignal.sigterm])  {
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     return killed = true;
   }
 }

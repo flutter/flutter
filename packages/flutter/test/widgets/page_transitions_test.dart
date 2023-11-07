@@ -7,19 +7,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
-  TestOverlayRoute({ super.settings });
+  TestOverlayRoute({super.settings});
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield OverlayEntry(builder: _build);
   }
+
   Widget _build(BuildContext context) => const Text('Overlay');
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
-  const PersistentBottomSheetTest({ super.key });
+  const PersistentBottomSheetTest({super.key});
 
   @override
-  PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
+  PersistentBottomSheetTestState createState() =>
+      PersistentBottomSheetTestState();
 }
 
 class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
@@ -28,14 +30,16 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   bool setStateCalled = false;
 
   void showBottomSheet() {
-    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return const Text('bottomSheet');
-    })
-    .closed.whenComplete(() {
-      setState(() {
-        setStateCalled = true;
-      });
-    });
+    _scaffoldKey.currentState!
+        .showBottomSheet<void>((BuildContext context) {
+          return const Text('bottomSheet');
+        })
+        .closed
+        .whenComplete(() {
+          setState(() {
+            setStateCalled = true;
+          });
+        });
   }
 
   @override
@@ -48,12 +52,15 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Check onstage/offstage handling around transitions',
+      (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => Container(key: containerKey1, child: const Text('Home')),
-      '/settings': (_) => Container(key: containerKey2, child: const Text('Settings')),
+      '/settings': (_) =>
+          Container(key: containerKey2, child: const Text('Settings')),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -130,32 +137,33 @@ void main() {
     expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
   });
 
-  testWidgetsWithLeakTracking('Check back gesture disables Heroes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Check back gesture disables Heroes',
+      (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     const String kHeroTag = 'hero';
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => Scaffold(
-        key: containerKey1,
-        body: const ColoredBox(
-          color: Color(0xff00ffff),
-          child: Hero(
-            tag: kHeroTag,
-            child: Text('Home'),
+            key: containerKey1,
+            body: const ColoredBox(
+              color: Color(0xff00ffff),
+              child: Hero(
+                tag: kHeroTag,
+                child: Text('Home'),
+              ),
+            ),
           ),
-        ),
-      ),
       '/settings': (_) => Scaffold(
-        key: containerKey2,
-        body: Container(
-          padding: const EdgeInsets.all(100.0),
-          color: const Color(0xffff00ff),
-          child: const Hero(
-            tag: kHeroTag,
-            child: Text('Settings'),
+            key: containerKey2,
+            body: Container(
+              padding: const EdgeInsets.all(100.0),
+              color: const Color(0xffff00ff),
+              child: const Hero(
+                tag: kHeroTag,
+                child: Text('Settings'),
+              ),
+            ),
           ),
-        ),
-      ),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -180,7 +188,8 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
@@ -197,14 +206,19 @@ void main() {
     settingsOffset = tester.getTopLeft(find.text('Settings'));
     expect(settingsOffset.dx, greaterThan(100.0));
     expect(settingsOffset.dy, 100.0);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgetsWithLeakTracking("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Check back gesture doesn't start during transitions",
+      (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
-      '/settings': (_) => Scaffold(key: containerKey2, body: const Text('Settings')),
+      '/settings': (_) =>
+          Scaffold(key: containerKey2, body: const Text('Settings')),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -240,10 +254,14 @@ void main() {
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
-  testWidgetsWithLeakTracking('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Check back gesture with a persistent bottom sheet showing',
+      (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -277,7 +295,8 @@ void main() {
     expect(find.text('Sheet'), isOnstage);
 
     // Show the bottom sheet.
-    final PersistentBottomSheetTestState sheet = containerKey2.currentState! as PersistentBottomSheetTestState;
+    final PersistentBottomSheetTestState sheet =
+        containerKey2.currentState! as PersistentBottomSheetTestState;
     sheet.showBottomSheet();
 
     await tester.pump(const Duration(seconds: 1));
@@ -294,9 +313,12 @@ void main() {
 
     // Sheet did not call setState (since the gesture did nothing).
     expect(sheet.setStateCalled, isFalse);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgetsWithLeakTracking('Test completed future', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Test completed future',
+      (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => const Center(child: Text('home')),
       '/next': (_) => const Center(child: Text('next')),

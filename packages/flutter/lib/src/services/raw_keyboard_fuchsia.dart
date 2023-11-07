@@ -67,12 +67,16 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
     // If the key has a printable representation, then make a logical key based
     // on that.
     if (codePoint != 0) {
-      final int flutterId = LogicalKeyboardKey.unicodePlane | codePoint & LogicalKeyboardKey.valueMask;
-      return kFuchsiaToLogicalKey[flutterId] ?? LogicalKeyboardKey(LogicalKeyboardKey.unicodePlane | codePoint & LogicalKeyboardKey.valueMask);
+      final int flutterId = LogicalKeyboardKey.unicodePlane |
+          codePoint & LogicalKeyboardKey.valueMask;
+      return kFuchsiaToLogicalKey[flutterId] ??
+          LogicalKeyboardKey(LogicalKeyboardKey.unicodePlane |
+              codePoint & LogicalKeyboardKey.valueMask);
     }
 
     // Look to see if the hidUsage is one we know about and have a mapping for.
-    final LogicalKeyboardKey? newKey = kFuchsiaToLogicalKey[hidUsage | LogicalKeyboardKey.fuchsiaPlane];
+    final LogicalKeyboardKey? newKey =
+        kFuchsiaToLogicalKey[hidUsage | LogicalKeyboardKey.fuchsiaPlane];
     if (newKey != null) {
       return newKey;
     }
@@ -83,9 +87,12 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  PhysicalKeyboardKey get physicalKey => kFuchsiaToPhysicalKey[hidUsage] ?? PhysicalKeyboardKey(LogicalKeyboardKey.fuchsiaPlane + hidUsage);
+  PhysicalKeyboardKey get physicalKey =>
+      kFuchsiaToPhysicalKey[hidUsage] ??
+      PhysicalKeyboardKey(LogicalKeyboardKey.fuchsiaPlane + hidUsage);
 
-  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+  bool _isLeftRightModifierPressed(
+      KeyboardSide side, int anyMask, int leftMask, int rightMask) {
     if (modifiers & anyMask == 0) {
       return false;
     }
@@ -102,16 +109,21 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
+  bool isModifierPressed(ModifierKey key,
+      {KeyboardSide side = KeyboardSide.any}) {
     switch (key) {
       case ModifierKey.controlModifier:
-        return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
+        return _isLeftRightModifierPressed(
+            side, modifierControl, modifierLeftControl, modifierRightControl);
       case ModifierKey.shiftModifier:
-        return _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
+        return _isLeftRightModifierPressed(
+            side, modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
+        return _isLeftRightModifierPressed(
+            side, modifierAlt, modifierLeftAlt, modifierRightAlt);
       case ModifierKey.metaModifier:
-        return _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta);
+        return _isLeftRightModifierPressed(
+            side, modifierMeta, modifierLeftMeta, modifierRightMeta);
       case ModifierKey.capsLockModifier:
         return modifiers & modifierCapsLock != 0;
       case ModifierKey.numLockModifier:
@@ -139,7 +151,11 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierControl, modifierLeftControl, modifierRightControl, );
+        return findSide(
+          modifierControl,
+          modifierLeftControl,
+          modifierRightControl,
+        );
       case ModifierKey.shiftModifier:
         return findSide(modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
@@ -166,25 +182,25 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is RawKeyEventDataFuchsia
-        && other.hidUsage == hidUsage
-        && other.codePoint == codePoint
-        && other.modifiers == modifiers;
+    return other is RawKeyEventDataFuchsia &&
+        other.hidUsage == hidUsage &&
+        other.codePoint == codePoint &&
+        other.modifiers == modifiers;
   }
 
   @override
   int get hashCode => Object.hash(
-    hidUsage,
-    codePoint,
-    modifiers,
-  );
+        hidUsage,
+        codePoint,
+        modifiers,
+      );
 
   // Keyboard modifier masks for Fuchsia modifiers.
 

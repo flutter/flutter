@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu_entry_label_widget.0.dart' as example;
+import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu_entry_label_widget.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,13 +13,16 @@ void main() {
       const example.DropdownMenuEntryLabelWidgetExampleApp(),
     );
 
-    const String longText = 'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
+    const String longText =
+        'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
     Finder findMenuItemText(String label) {
       final String labelText = '$label $longText\n';
-      return find.descendant(
-        of: find.widgetWithText(MenuItemButton, labelText),
-        matching: find.byType(Text),
-      ).last;
+      return find
+          .descendant(
+            of: find.widgetWithText(MenuItemButton, labelText),
+            matching: find.byType(Text),
+          )
+          .last;
     }
 
     // Open the menu

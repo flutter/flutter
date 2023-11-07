@@ -10,16 +10,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
-  if (dart.library.js_util) '_network_image_web.dart' as network_image;
+    if (dart.library.js_util) '_network_image_web.dart' as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
 /// Signature for the callback taken by [_createErrorHandlerAndKey].
-typedef _KeyAndErrorHandlerCallback<T> = void Function(T key, ImageErrorListener handleError);
+typedef _KeyAndErrorHandlerCallback<T> = void Function(
+    T key, ImageErrorListener handleError);
 
 /// Signature used for error handling by [_createErrorHandlerAndKey].
-typedef _AsyncKeyErrorHandler<T> = Future<void> Function(T key, Object exception, StackTrace? stack);
+typedef _AsyncKeyErrorHandler<T> = Future<void> Function(
+    T key, Object exception, StackTrace? stack);
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
@@ -99,17 +101,18 @@ class ImageConfiguration {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageConfiguration
-        && other.bundle == bundle
-        && other.devicePixelRatio == devicePixelRatio
-        && other.locale == locale
-        && other.textDirection == textDirection
-        && other.size == size
-        && other.platform == platform;
+    return other is ImageConfiguration &&
+        other.bundle == bundle &&
+        other.devicePixelRatio == devicePixelRatio &&
+        other.locale == locale &&
+        other.textDirection == textDirection &&
+        other.size == size &&
+        other.platform == platform;
   }
 
   @override
-  int get hashCode => Object.hash(bundle, devicePixelRatio, locale, size, platform);
+  int get hashCode =>
+      Object.hash(bundle, devicePixelRatio, locale, size, platform);
 
   @override
   String toString() {
@@ -174,10 +177,15 @@ class ImageConfiguration {
   'Use ImageDecoderCallback with ImageProvider.loadImage instead. '
   'This feature was deprecated after v3.7.0-1.4.pre.',
 )
-typedef DecoderBufferCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling});
+typedef DecoderBufferCallback = Future<ui.Codec> Function(
+    ui.ImmutableBuffer buffer,
+    {int? cacheWidth,
+    int? cacheHeight,
+    bool allowUpscaling});
 
 // Method signature for _loadAsync decode callbacks.
-typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
+typedef _SimpleDecoderCallback = Future<ui.Codec> Function(
+    ui.ImmutableBuffer buffer);
 
 /// Performs the decode process for use in [ImageProvider.loadImage].
 ///
@@ -370,10 +378,11 @@ abstract class ImageProvider<T extends Object> {
         InformationCollector? collector;
         assert(() {
           collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
-            DiagnosticsProperty<T>('Image key', key, defaultValue: null),
-          ];
+                DiagnosticsProperty<ImageProvider>('Image provider', this),
+                DiagnosticsProperty<ImageConfiguration>(
+                    'Image configuration', configuration),
+                DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+              ];
           return true;
         }());
         if (stream.completer == null) {
@@ -414,11 +423,13 @@ abstract class ImageProvider<T extends Object> {
     required ImageConfiguration configuration,
     ImageErrorListener? handleError,
   }) {
-    final Completer<ImageCacheStatus?> completer = Completer<ImageCacheStatus?>();
+    final Completer<ImageCacheStatus?> completer =
+        Completer<ImageCacheStatus?>();
     _createErrorHandlerAndKey(
       configuration,
       (T key, ImageErrorListener innerHandleError) {
-        completer.complete(PaintingBinding.instance.imageCache.statusForKey(key));
+        completer
+            .complete(PaintingBinding.instance.imageCache.statusForKey(key));
       },
       (T? key, Object exception, StackTrace? stack) async {
         if (handleError != null) {
@@ -427,14 +438,16 @@ abstract class ImageProvider<T extends Object> {
           InformationCollector? collector;
           assert(() {
             collector = () => <DiagnosticsNode>[
-              DiagnosticsProperty<ImageProvider>('Image provider', this),
-              DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration),
-              DiagnosticsProperty<T>('Image key', key, defaultValue: null),
-            ];
+                  DiagnosticsProperty<ImageProvider>('Image provider', this),
+                  DiagnosticsProperty<ImageConfiguration>(
+                      'Image configuration', configuration),
+                  DiagnosticsProperty<T>('Image key', key, defaultValue: null),
+                ];
             return true;
           }());
           FlutterError.reportError(FlutterErrorDetails(
-            context: ErrorDescription('while checking the cache location of an image'),
+            context: ErrorDescription(
+                'while checking the cache location of an image'),
             informationCollector: collector,
             exception: exception,
             stack: stack,
@@ -501,12 +514,14 @@ abstract class ImageProvider<T extends Object> {
   /// Implementers that do not call super are expected to correctly use the
   /// [ImageCache].
   @protected
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, T key, ImageErrorListener handleError) {
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream,
+      T key, ImageErrorListener handleError) {
     // This is an unusual edge case where someone has told us that they found
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
-      final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
+      final ImageStreamCompleter? completer =
+          PaintingBinding.instance.imageCache.putIfAbsent(
         key,
         () => stream.completer!,
         onError: handleError,
@@ -514,17 +529,20 @@ abstract class ImageProvider<T extends Object> {
       assert(identical(completer, stream.completer));
       return;
     }
-    final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
+    final ImageStreamCompleter? completer =
+        PaintingBinding.instance.imageCache.putIfAbsent(
       key,
       () {
-        ImageStreamCompleter result = loadImage(key, PaintingBinding.instance.instantiateImageCodecWithSize);
+        ImageStreamCompleter result = loadImage(
+            key, PaintingBinding.instance.instantiateImageCodecWithSize);
         // This check exists as a fallback for backwards compatibility until the
         // deprecated `loadBuffer()` method is removed. Until then, ImageProvider
         // subclasses may have only overridden `loadBuffer()`, in which case the
         // base implementation of `loadWithSize()` will return a sentinel value
         // of type `_AbstractImageStreamCompleter`.
         if (result is _AbstractImageStreamCompleter) {
-          result = loadBuffer(key, PaintingBinding.instance.instantiateImageCodecFromBuffer);
+          result = loadBuffer(
+              key, PaintingBinding.instance.instantiateImageCodecFromBuffer);
         }
         return result;
       },
@@ -579,7 +597,9 @@ abstract class ImageProvider<T extends Object> {
   /// }
   /// ```
   /// {@end-tool}
-  Future<bool> evict({ ImageCache? cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
+  Future<bool> evict(
+      {ImageCache? cache,
+      ImageConfiguration configuration = ImageConfiguration.empty}) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
     return cache.evict(key);
@@ -678,30 +698,33 @@ class AssetBundleImageKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is AssetBundleImageKey
-        && other.bundle == bundle
-        && other.name == name
-        && other.scale == scale;
+    return other is AssetBundleImageKey &&
+        other.bundle == bundle &&
+        other.name == name &&
+        other.scale == scale;
   }
 
   @override
   int get hashCode => Object.hash(bundle, name, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'AssetBundleImageKey')}(bundle: $bundle, name: "$name", scale: $scale)';
+  String toString() =>
+      '${objectRuntimeType(this, 'AssetBundleImageKey')}(bundle: $bundle, name: "$name", scale: $scale)';
 }
 
 /// A subclass of [ImageProvider] that knows about [AssetBundle]s.
 ///
 /// This factors out the common logic of [AssetBundle]-based [ImageProvider]
 /// classes, simplifying what subclasses must implement to just [obtainKey].
-abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKey> {
+abstract class AssetBundleImageProvider
+    extends ImageProvider<AssetBundleImageKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const AssetBundleImageProvider();
 
   @override
-  ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      AssetBundleImageKey key, ImageDecoderCallback decode) {
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
@@ -721,13 +744,14 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   @override
-  ImageStreamCompleter loadBuffer(AssetBundleImageKey key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(
+      AssetBundleImageKey key, DecoderBufferCallback decode) {
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
-        DiagnosticsProperty<ImageProvider>('Image provider', this),
-        DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
-      ];
+            DiagnosticsProperty<ImageProvider>('Image provider', this),
+            DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+          ];
       return true;
     }());
     return MultiFrameImageStreamCompleter(
@@ -767,7 +791,8 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 class ResizeImageKey {
   // Private constructor so nobody from the outside can poison the image cache
   // with this key. It's only accessible to [ResizeImage] internally.
-  const ResizeImageKey._(this._providerCacheKey, this._policy, this._width, this._height, this._allowUpscaling);
+  const ResizeImageKey._(this._providerCacheKey, this._policy, this._width,
+      this._height, this._allowUpscaling);
 
   final Object _providerCacheKey;
   final ResizeImagePolicy _policy;
@@ -780,16 +805,17 @@ class ResizeImageKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ResizeImageKey
-        && other._providerCacheKey == _providerCacheKey
-        && other._policy == _policy
-        && other._width == _width
-        && other._height == _height
-        && other._allowUpscaling == _allowUpscaling;
+    return other is ResizeImageKey &&
+        other._providerCacheKey == _providerCacheKey &&
+        other._policy == _policy &&
+        other._width == _width &&
+        other._height == _height &&
+        other._allowUpscaling == _allowUpscaling;
   }
 
   @override
-  int get hashCode => Object.hash(_providerCacheKey, _policy, _width, _height, _allowUpscaling);
+  int get hashCode =>
+      Object.hash(_providerCacheKey, _policy, _width, _height, _allowUpscaling);
 }
 
 /// Configures the behavior for [ResizeImage].
@@ -1241,7 +1267,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   ///
   /// When `cacheWidth` and `cacheHeight` are both null, this will return the
   /// `provider` directly.
-  static ImageProvider<Object> resizeIfNeeded(int? cacheWidth, int? cacheHeight, ImageProvider<Object> provider) {
+  static ImageProvider<Object> resizeIfNeeded(
+      int? cacheWidth, int? cacheHeight, ImageProvider<Object> provider) {
     if (cacheWidth != null || cacheHeight != null) {
       return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
     }
@@ -1253,33 +1280,43 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     'Implement loadImage for image loading. '
     'This feature was deprecated after v3.7.0-1.4.pre.',
   )
-  ImageStreamCompleter loadBuffer(ResizeImageKey key, DecoderBufferCallback decode) {
-    Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+  ImageStreamCompleter loadBuffer(
+      ResizeImageKey key, DecoderBufferCallback decode) {
+    Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer,
+        {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
         cacheWidth == null && cacheHeight == null && allowUpscaling == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
         'cacheWidth, cacheHeight, or allowUpscaling.',
       );
-      return decode(buffer, cacheWidth: width, cacheHeight: height, allowUpscaling: this.allowUpscaling);
+      return decode(buffer,
+          cacheWidth: width,
+          cacheHeight: height,
+          allowUpscaling: this.allowUpscaling);
     }
 
-    final ImageStreamCompleter completer = imageProvider.loadBuffer(key._providerCacheKey, decodeResize);
+    final ImageStreamCompleter completer =
+        imageProvider.loadBuffer(key._providerCacheKey, decodeResize);
     if (!kReleaseMode) {
-      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
+      completer.debugLabel =
+          '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     _configureErrorListener(completer, key);
     return completer;
   }
 
   @override
-  ImageStreamCompleter loadImage(ResizeImageKey key, ImageDecoderCallback decode) {
-    Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer, {ui.TargetImageSizeCallback? getTargetSize}) {
+  ImageStreamCompleter loadImage(
+      ResizeImageKey key, ImageDecoderCallback decode) {
+    Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer,
+        {ui.TargetImageSizeCallback? getTargetSize}) {
       assert(
         getTargetSize == null,
         'ResizeImage cannot be composed with another ImageProvider that applies '
         'getTargetSize.',
       );
-      return decode(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+      return decode(buffer,
+          getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
         switch (policy) {
           case ResizeImagePolicy.exact:
             int? targetWidth = width;
@@ -1333,16 +1370,20 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       });
     }
 
-    final ImageStreamCompleter completer = imageProvider.loadImage(key._providerCacheKey, decodeResize);
+    final ImageStreamCompleter completer =
+        imageProvider.loadImage(key._providerCacheKey, decodeResize);
     if (!kReleaseMode) {
-      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
+      completer.debugLabel =
+          '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     _configureErrorListener(completer, key);
     return completer;
   }
 
-  void _configureErrorListener(ImageStreamCompleter completer, ResizeImageKey key) {
-    completer.addEphemeralErrorListener((Object exception, StackTrace? stackTrace) {
+  void _configureErrorListener(
+      ImageStreamCompleter completer, ResizeImageKey key) {
+    completer
+        .addEphemeralErrorListener((Object exception, StackTrace? stackTrace) {
       // The microtask is scheduled because of the same reason as NetworkImage:
       // Depending on where the exception was thrown, the image cache may not
       // have had a chance to track the key in the cache at all.
@@ -1363,10 +1404,12 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       if (completer == null) {
         // This future has completed synchronously (completer was never assigned),
         // so we can directly create the synchronous result to return.
-        result = SynchronousFuture<ResizeImageKey>(ResizeImageKey._(key, policy, width, height, allowUpscaling));
+        result = SynchronousFuture<ResizeImageKey>(
+            ResizeImageKey._(key, policy, width, height, allowUpscaling));
       } else {
         // This future did not synchronously complete.
-        completer.complete(ResizeImageKey._(key, policy, width, height, allowUpscaling));
+        completer.complete(
+            ResizeImageKey._(key, policy, width, height, allowUpscaling));
       }
     });
     if (result != null) {
@@ -1399,7 +1442,9 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 // our cache if the headers describe the image as having expired at that point.
 abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
-  const factory NetworkImage(String url, { double scale, Map<String, String>? headers }) = network_image.NetworkImage;
+  const factory NetworkImage(String url,
+      {double scale,
+      Map<String, String>? headers}) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
   String get url;
@@ -1413,7 +1458,8 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   Map<String, String>? get headers;
 
   @override
-  ImageStreamCompleter loadBuffer(NetworkImage key, DecoderBufferCallback decode);
+  ImageStreamCompleter loadBuffer(
+      NetworkImage key, DecoderBufferCallback decode);
 
   @override
   ImageStreamCompleter loadImage(NetworkImage key, ImageDecoderCallback decode);
@@ -1431,7 +1477,7 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 @immutable
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
-  const FileImage(this.file, { this.scale = 1.0 });
+  const FileImage(this.file, {this.scale = 1.0});
 
   /// The file to decode into an image.
   final File file;
@@ -1485,8 +1531,9 @@ class FileImage extends ImageProvider<FileImage> {
       throw StateError('$file is empty and cannot be loaded as an image.');
     }
     return (file.runtimeType == File)
-      ? decode(await ui.ImmutableBuffer.fromFilePath(file.path))
-      : decode(await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
+        ? decode(await ui.ImmutableBuffer.fromFilePath(file.path))
+        : decode(
+            await ui.ImmutableBuffer.fromUint8List(await file.readAsBytes()));
   }
 
   @override
@@ -1494,16 +1541,17 @@ class FileImage extends ImageProvider<FileImage> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FileImage
-        && other.file.path == file.path
-        && other.scale == scale;
+    return other is FileImage &&
+        other.file.path == file.path &&
+        other.scale == scale;
   }
 
   @override
   int get hashCode => Object.hash(file.path, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'FileImage')}("${file.path}", scale: ${scale.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'FileImage')}("${file.path}", scale: ${scale.toStringAsFixed(1)})';
 }
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the
@@ -1521,7 +1569,7 @@ class FileImage extends ImageProvider<FileImage> {
 @immutable
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
-  const MemoryImage(this.bytes, { this.scale = 1.0 });
+  const MemoryImage(this.bytes, {this.scale = 1.0});
 
   /// The bytes to decode into an image.
   ///
@@ -1547,7 +1595,8 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(MemoryImage key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(
+      MemoryImage key, DecoderBufferCallback decode) {
     assert(key == this);
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode: decode),
@@ -1578,16 +1627,15 @@ class MemoryImage extends ImageProvider<MemoryImage> {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MemoryImage
-        && other.bytes == bytes
-        && other.scale == scale;
+    return other is MemoryImage && other.bytes == bytes && other.scale == scale;
   }
 
   @override
   int get hashCode => Object.hash(bytes.hashCode, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'MemoryImage')}(${describeIdentity(bytes)}, scale: ${scale.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'MemoryImage')}(${describeIdentity(bytes)}, scale: ${scale.toStringAsFixed(1)})';
 }
 
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
@@ -1684,7 +1732,8 @@ class ExactAssetImage extends AssetBundleImageProvider {
 
   /// The key to use to obtain the resource from the [bundle]. This is the
   /// argument passed to [AssetBundle.load].
-  String get keyName => package == null ? assetName : 'packages/$package/$assetName';
+  String get keyName =>
+      package == null ? assetName : 'packages/$package/$assetName';
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
@@ -1717,21 +1766,22 @@ class ExactAssetImage extends AssetBundleImageProvider {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ExactAssetImage
-        && other.keyName == keyName
-        && other.scale == scale
-        && other.bundle == bundle;
+    return other is ExactAssetImage &&
+        other.keyName == keyName &&
+        other.scale == scale &&
+        other.bundle == bundle;
   }
 
   @override
   int get hashCode => Object.hash(keyName, scale, bundle);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ExactAssetImage')}(name: "$keyName", scale: ${scale.toStringAsFixed(1)}, bundle: $bundle)';
+  String toString() =>
+      '${objectRuntimeType(this, 'ExactAssetImage')}(name: "$keyName", scale: ${scale.toStringAsFixed(1)}, bundle: $bundle)';
 }
 
 // A completer used when resolving an image fails sync.
-class _ErrorImageCompleter extends ImageStreamCompleter { }
+class _ErrorImageCompleter extends ImageStreamCompleter {}
 
 /// The exception thrown when the HTTP request to load a network image fails.
 class NetworkImageLoadException implements Exception {

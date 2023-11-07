@@ -18,7 +18,9 @@ const String kEventsFileName = 'touchEvents';
 
 class MotionEventsPage extends PageWidget {
   const MotionEventsPage({Key? key})
-      : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'), key: key);
+      : super('Motion Event Tests',
+            const ValueKey<String>('MotionEventsListTile'),
+            key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +89,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
                 onPressed: () {
                   const StandardMessageCodec codec = StandardMessageCodec();
                   saveRecordedEvents(
-                    codec.encodeMessage(flutterViewEvents)!, context);
+                      codec.encodeMessage(flutterViewEvents)!, context);
                 },
               ),
             ),
@@ -95,14 +97,18 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
               child: ElevatedButton(
                 key: const ValueKey<String>('play'),
                 child: const Text('PLAY FILE'),
-                onPressed: () { playEventsFile(); },
+                onPressed: () {
+                  playEventsFile();
+                },
               ),
             ),
             Expanded(
               child: ElevatedButton(
                 key: const ValueKey<String>('back'),
                 child: const Text('BACK'),
-                onPressed: () { Navigator.pop(context); },
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
             ),
           ],
@@ -114,11 +120,14 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<String> playEventsFile() async {
     const StandardMessageCodec codec = StandardMessageCodec();
     try {
-      final ByteData data = await rootBundle.load('packages/assets_for_android_views/assets/touchEvents');
-      final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
+      final ByteData data = await rootBundle
+          .load('packages/assets_for_android_views/assets/touchEvents');
+      final List<dynamic> unTypedRecordedEvents =
+          codec.decodeMessage(data) as List<dynamic>;
       final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
           .cast<Map<dynamic, dynamic>>()
-          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
+          .map<Map<String, dynamic>>(
+              (Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
           .toList();
       await viewChannel!.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
@@ -134,7 +143,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
       final StringBuffer diff = StringBuffer();
       for (int i = 0; i < flutterViewEvents.length; ++i) {
-        final String currentDiff = diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
+        final String currentDiff =
+            diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
         if (currentDiff.isEmpty) {
           continue;
         }
@@ -158,7 +168,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<void> saveRecordedEvents(ByteData data, BuildContext context) async {
     if (await channel.invokeMethod<bool>('getStoragePermission') != true) {
       if (mounted) {
-        showMessage(context, 'External storage permissions are required to save events');
+        showMessage(context,
+            'External storage permissions are required to save events');
       }
       return;
     }
@@ -166,7 +177,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       final Directory outDir = (await getExternalStorageDirectory())!;
       // This test only runs on Android so we can assume path separator is '/'.
       final File file = File('${outDir.path}/$kEventsFileName');
-      await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes), flush: true);
+      await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes),
+          flush: true);
       if (!mounted) {
         return;
       }
@@ -188,7 +200,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
   void onPlatformViewCreated(int id) {
     viewChannel = MethodChannel('simple_view/$id')
-        ..setMethodCallHandler(onViewMethodChannelCall);
+      ..setMethodCallHandler(onViewMethodChannelCall);
     driverDataHandler.registerHandler('run test').complete(playEventsFile);
   }
 
@@ -202,7 +214,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<dynamic> onMethodChannelCall(MethodCall call) {
     switch (call.method) {
       case 'onTouch':
-        final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
+        final Map<dynamic, dynamic> map =
+            call.arguments as Map<dynamic, dynamic>;
         flutterViewEvents.insert(0, map.cast<String, dynamic>());
         if (flutterViewEvents.length > kEventsBufferSize) {
           flutterViewEvents.removeLast();
@@ -215,7 +228,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
     switch (call.method) {
       case 'onTouch':
-        final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
+        final Map<dynamic, dynamic> map =
+            call.arguments as Map<dynamic, dynamic>;
         embeddedViewEvents.insert(0, map.cast<String, dynamic>());
         if (embeddedViewEvents.length > kEventsBufferSize) {
           embeddedViewEvents.removeLast();
@@ -243,7 +257,6 @@ class TouchEventDiff extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     Color color;
     final String diff = diffMotionEvents(originalEvent, synthesizedEvent);
     String msg;
@@ -279,12 +292,14 @@ class TouchEventDiff extends StatelessWidget {
 
     buffer.write('$actionName ');
     if (maskedAction == 5 || maskedAction == 6) {
-     buffer.write('pointer: ${getPointerIdx(action)} ');
+      buffer.write('pointer: ${getPointerIdx(action)} ');
     }
 
-    final List<Map<dynamic, dynamic>> coords = (event['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+    final List<Map<dynamic, dynamic>> coords =
+        (event['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
     for (int i = 0; i < coords.length; i++) {
-      buffer.write('p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
+      buffer.write(
+          'p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
     }
     print(buffer);
   }

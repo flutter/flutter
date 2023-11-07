@@ -6,7 +6,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Initializing the RendererBinding does not crash when semantics is enabled', () {
+  test(
+      'Initializing the RendererBinding does not crash when semantics is enabled',
+      () {
     try {
       MyRenderingFlutterBinding();
     } catch (e) {

@@ -93,7 +93,8 @@ class SafeArea extends StatelessWidget {
     EdgeInsets padding = MediaQuery.paddingOf(context);
     // Bottom padding has been consumed - i.e. by the keyboard
     if (maintainBottomViewPadding) {
-      padding = padding.copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom);
+      padding =
+          padding.copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom);
     }
 
     return Padding(
@@ -117,10 +118,14 @@ class SafeArea extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
-    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
-    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
+    properties
+        .add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    properties
+        .add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(
+        FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(
+        FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }
 
@@ -205,9 +210,13 @@ class SliverSafeArea extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
-    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
-    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
+    properties
+        .add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    properties
+        .add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(
+        FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(
+        FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }

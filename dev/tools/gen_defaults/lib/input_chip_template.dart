@@ -5,10 +5,9 @@
 import 'template.dart';
 
 class InputChipTemplate extends TokenTemplate {
-  const InputChipTemplate(super.blockName, super.fileName, super.tokens, {
-    super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
-  });
+  const InputChipTemplate(super.blockName, super.fileName, super.tokens,
+      {super.colorSchemePrefix = '_colors.',
+      super.textThemePrefix = '_textTheme.'});
 
   static const String tokenGroup = 'md.comp.input-chip';
   static const String variant = '';

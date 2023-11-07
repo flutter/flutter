@@ -18,7 +18,8 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  testWidgetsWithLeakTracking('Last tab gets focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Last tab gets focus',
+      (WidgetTester tester) async {
     // 2 nodes for 2 tabs
     final List<FocusNode> focusNodes = <FocusNode>[];
     for (int i = 0; i < 2; i++) {
@@ -58,7 +59,8 @@ void main() {
     expect(focusNodes[1].hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Do not affect focus order in the route', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not affect focus order in the route',
+      (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[];
     for (int i = 0; i < 4; i++) {
       final FocusNode focusNode = FocusNode();
@@ -102,7 +104,8 @@ void main() {
     await tester.tap(find.widgetWithText(TextField, 'TextField 2'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes
+          .indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
       1,
     );
 
@@ -112,7 +115,8 @@ void main() {
     await tester.tap(find.widgetWithText(TextField, 'TextField 1'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes
+          .indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
       2,
     );
 
@@ -122,12 +126,14 @@ void main() {
     // Upon going back to tab 1, the item it tab 1 that previously had the focus
     // (TextField 2) gets it back.
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes
+          .indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
       1,
     );
   });
 
-  testWidgetsWithLeakTracking('Tab bar respects themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab bar respects themes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -139,12 +145,15 @@ void main() {
       ),
     );
 
-    BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
-      of: find.byType(CupertinoTabBar),
-      matching: find.byType(DecoratedBox),
-    )).decoration as BoxDecoration;
+    BoxDecoration tabDecoration = tester
+        .widget<DecoratedBox>(find.descendant(
+          of: find.byType(CupertinoTabBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .decoration as BoxDecoration;
 
-    expect(tabDecoration.color, isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
+    expect(tabDecoration.color,
+        isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
@@ -165,10 +174,12 @@ void main() {
       ),
     );
 
-    tabDecoration = tester.widget<DecoratedBox>(find.descendant(
-      of: find.byType(CupertinoTabBar),
-      matching: find.byType(DecoratedBox),
-    )).decoration as BoxDecoration;
+    tabDecoration = tester
+        .widget<DecoratedBox>(find.descendant(
+          of: find.byType(CupertinoTabBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF01D1D1D)));
 
@@ -182,11 +193,14 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style!.color!.value, CupertinoColors.systemRed.darkColor.value);
+    expect(tab2.text.style!.color!.value,
+        CupertinoColors.systemRed.darkColor.value);
   });
 
-  testWidgetsWithLeakTracking('dark mode background color', (WidgetTester tester) async {
-    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
+  testWidgetsWithLeakTracking('dark mode background color',
+      (WidgetTester tester) async {
+    const CupertinoDynamicColor backgroundColor =
+        CupertinoDynamicColor.withBrightness(
       color: Color(0xFF123456),
       darkColor: Color(0xFF654321),
     );
@@ -205,12 +219,14 @@ void main() {
 
     // The DecoratedBox with the smallest depth is the DecoratedBox of the
     // CupertinoTabScaffold.
-    BoxDecoration tabDecoration = tester.firstWidget<DecoratedBox>(
-      find.descendant(
-        of: find.byType(CupertinoTabScaffold),
-        matching: find.byType(DecoratedBox),
-      ),
-    ).decoration as BoxDecoration;
+    BoxDecoration tabDecoration = tester
+        .firstWidget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTabScaffold),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.color.value);
 
@@ -228,17 +244,20 @@ void main() {
       ),
     );
 
-    tabDecoration = tester.firstWidget<DecoratedBox>(
-      find.descendant(
-        of: find.byType(CupertinoTabScaffold),
-        matching: find.byType(DecoratedBox),
-      ),
-    ).decoration as BoxDecoration;
+    tabDecoration = tester
+        .firstWidget<DecoratedBox>(
+          find.descendant(
+            of: find.byType(CupertinoTabScaffold),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
   });
 
-  testWidgetsWithLeakTracking('Does not lose state when focusing on text input', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not lose state when focusing on text input',
+      (WidgetTester tester) async {
     // Regression testing for https://github.com/flutter/flutter/issues/28457.
 
     await tester.pumpWidget(
@@ -257,14 +276,15 @@ void main() {
       ),
     );
 
-    final EditableTextState editableState = tester.state<EditableTextState>(find.byType(EditableText));
+    final EditableTextState editableState =
+        tester.state<EditableTextState>(find.byType(EditableText));
 
     await tester.enterText(find.byType(TextField), "don't lose me");
 
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(
-          viewInsets:  EdgeInsets.only(bottom: 100),
+          viewInsets: EdgeInsets.only(bottom: 100),
         ),
         child: MaterialApp(
           home: Material(
@@ -280,11 +300,13 @@ void main() {
     );
 
     // The exact same state instance is still there.
-    expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
+    expect(tester.state<EditableTextState>(find.byType(EditableText)),
+        editableState);
     expect(find.text("don't lose me"), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(builder: (BuildContext context) {
@@ -294,10 +316,14 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
+                  (int i) => BottomNavigationBarItem(
+                      icon: ImageIcon(
+                          MemoryImage(Uint8List.fromList(kTransparentImage))),
+                      label: '$i'),
                 ),
               ),
-              tabBuilder: (BuildContext context, int index) => const Text('content'),
+              tabBuilder: (BuildContext context, int index) =>
+                  const Text('content'),
             ),
           );
         }),
@@ -320,14 +346,20 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems, isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
+    expect(
+        barItems,
+        isNot(contains(
+            predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
 
     expect(contents.length, greaterThan(0));
-    expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
+    expect(
+        contents,
+        isNot(contains(predicate(
+            (RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
   });
 }
 
-CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
+CupertinoTabBar _buildTabBar({int selectedTab = 0}) {
   return CupertinoTabBar(
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(

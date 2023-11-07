@@ -35,13 +35,16 @@ class TextSelectionToolbarAnchors {
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
     );
 
-    if (editingRegion.left.isNaN || editingRegion.top.isNaN
-      || editingRegion.right.isNaN || editingRegion.bottom.isNaN) {
+    if (editingRegion.left.isNaN ||
+        editingRegion.top.isNaN ||
+        editingRegion.right.isNaN ||
+        editingRegion.bottom.isNaN) {
       return const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero);
     }
 
-    final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
-        endGlyphHeight / 2;
+    final bool isMultiline =
+        selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
+            endGlyphHeight / 2;
 
     final Rect selectionRect = Rect.fromLTRB(
       isMultiline
@@ -61,7 +64,8 @@ class TextSelectionToolbarAnchors {
       ),
       secondaryAnchor: Offset(
         selectionRect.left + selectionRect.width / 2,
-        clampDouble(selectionRect.bottom, editingRegion.top, editingRegion.bottom),
+        clampDouble(
+            selectionRect.bottom, editingRegion.top, editingRegion.bottom),
       ),
     );
   }

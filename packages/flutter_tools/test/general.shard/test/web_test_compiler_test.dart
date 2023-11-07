@@ -26,15 +26,16 @@ void main() {
     fileSystem.file('build/build/out.map').createSync();
     fileSystem.file('build/build/out.metadata').createSync();
     final FakePlatform platform = FakePlatform(
-        environment: <String, String>{},
+      environment: <String, String>{},
     );
     final Config config = Config(
-        Config.kFlutterSettings,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
+      Config.kFlutterSettings,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
     );
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final FakeProcessManager processManager =
+        FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <Pattern>[
         'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
         '--disable-dart-dev',

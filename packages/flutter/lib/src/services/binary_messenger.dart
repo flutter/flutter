@@ -46,12 +46,12 @@ abstract class BinaryMessenger {
   ///
   /// To send a message _to_ a plugin on the platform thread, see [send].
   @Deprecated(
-    'Instead of calling this method, use ServicesBinding.instance.channelBuffers.push. '
-    'In tests, consider using tester.binding.defaultBinaryMessenger.handlePlatformMessage '
-    'or TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage. '
-    'This feature was deprecated after v3.9.0-19.0.pre.'
-  )
-  Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
+      'Instead of calling this method, use ServicesBinding.instance.channelBuffers.push. '
+      'In tests, consider using tester.binding.defaultBinaryMessenger.handlePlatformMessage '
+      'or TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage. '
+      'This feature was deprecated after v3.9.0-19.0.pre.')
+  Future<void> handlePlatformMessage(String channel, ByteData? data,
+      ui.PlatformMessageResponseCallback? callback);
 
   /// Send a binary message to the platform plugins on the given channel.
   ///

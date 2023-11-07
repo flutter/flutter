@@ -17,22 +17,175 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('ImageDecoration.lerp', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ImageDecoration.lerp',
+      (WidgetTester tester) async {
     final MemoryImage green = MemoryImage(Uint8List.fromList(<int>[
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,  0x01, 0x03, 0x00, 0x00, 0x00, 0x25, 0xdb, 0x56,
-      0xca, 0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54,  0x45, 0x00, 0xff, 0x00, 0x34, 0x5e, 0xc0, 0xa8,
-      0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54,  0x08, 0xd7, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02,
-      0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00,  0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
-      0x60, 0x82,
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a,
+      0x00,
+      0x00,
+      0x00,
+      0x0d,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x01,
+      0x03,
+      0x00,
+      0x00,
+      0x00,
+      0x25,
+      0xdb,
+      0x56,
+      0xca,
+      0x00,
+      0x00,
+      0x00,
+      0x03,
+      0x50,
+      0x4c,
+      0x54,
+      0x45,
+      0x00,
+      0xff,
+      0x00,
+      0x34,
+      0x5e,
+      0xc0,
+      0xa8,
+      0x00,
+      0x00,
+      0x00,
+      0x0a,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x08,
+      0xd7,
+      0x63,
+      0x60,
+      0x00,
+      0x00,
+      0x00,
+      0x02,
+      0x00,
+      0x01,
+      0xe2,
+      0x21,
+      0xbc,
+      0x33,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82,
     ]));
     final MemoryImage red = MemoryImage(Uint8List.fromList(<int>[
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,  0x01, 0x03, 0x00, 0x00, 0x00, 0x25, 0xdb, 0x56,
-      0xca, 0x00, 0x00, 0x00, 0x03, 0x50, 0x4c, 0x54,  0x45, 0xff, 0x00, 0x00, 0x19, 0xe2, 0x09, 0x37,
-      0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54,  0x08, 0xd7, 0x63, 0x60, 0x00, 0x00, 0x00, 0x02,
-      0x00, 0x01, 0xe2, 0x21, 0xbc, 0x33, 0x00, 0x00,  0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
-      0x60, 0x82,
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a,
+      0x00,
+      0x00,
+      0x00,
+      0x0d,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x01,
+      0x03,
+      0x00,
+      0x00,
+      0x00,
+      0x25,
+      0xdb,
+      0x56,
+      0xca,
+      0x00,
+      0x00,
+      0x00,
+      0x03,
+      0x50,
+      0x4c,
+      0x54,
+      0x45,
+      0xff,
+      0x00,
+      0x00,
+      0x19,
+      0xe2,
+      0x09,
+      0x37,
+      0x00,
+      0x00,
+      0x00,
+      0x0a,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x08,
+      0xd7,
+      0x63,
+      0x60,
+      0x00,
+      0x00,
+      0x00,
+      0x02,
+      0x00,
+      0x01,
+      0xe2,
+      0x21,
+      0xbc,
+      0x33,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82,
     ]));
 
     await tester.runAsync(() async {
@@ -50,8 +203,7 @@ void main() {
               textDirection: TextDirection.ltr,
               children: <Widget>[
                 TestImage(
-                  DecorationImage(image: green, repeat: ImageRepeat.repeat)
-                ),
+                    DecorationImage(image: green, repeat: ImageRepeat.repeat)),
                 TestImage(DecorationImage.lerp(
                   DecorationImage(image: green, repeat: ImageRepeat.repeat),
                   DecorationImage(image: red, repeat: ImageRepeat.repeat),
@@ -158,23 +310,31 @@ void main() {
       matchesGoldenFile('decoration_image.lerp.0.png'),
     );
 
-    if (!kIsWeb) { // TODO(ianh): https://github.com/flutter/flutter/issues/130610
-      final ui.Image image = (await tester.binding.runAsync<ui.Image>(() => captureImage(find.byType(Wrap).evaluate().single)))!;
+    if (!kIsWeb) {
+      // TODO(ianh): https://github.com/flutter/flutter/issues/130610
+      final ui.Image image = (await tester.binding.runAsync<ui.Image>(
+          () => captureImage(find.byType(Wrap).evaluate().single)))!;
       addTearDown(() => image.dispose());
-      final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!.buffer.asUint8List();
+      final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(() =>
+              image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!
+          .buffer
+          .asUint8List();
       expect(image.width, 792);
       expect(image.height, 48);
       expect(bytes, hasLength(image.width * image.height * 4));
       Color getPixel(int x, int y) {
         final int offset = (x + y * image.width) * 4;
-        return Color.fromARGB(0xFF, bytes[offset], bytes[offset + 1], bytes[offset + 2]);
+        return Color.fromARGB(
+            0xFF, bytes[offset], bytes[offset + 1], bytes[offset + 2]);
       }
+
       Color getBlockPixel(int index) {
         int x = 12 + index * 24;
         final int y = 12 + (x ~/ image.width) * 24;
         x %= image.width;
         return getPixel(x, y);
       }
+
       const Color lime = Color(0xFF00FF00);
       expect(getBlockPixel(0), lime); // pure green
       expect(getBlockPixel(1), lime); // 100% green 0% red
@@ -189,24 +349,205 @@ void main() {
         expect(getBlockPixel(index), lime);
       }
     }
-  }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+  },
+      skip:
+          kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
-  testWidgetsWithLeakTracking('ImageDecoration.lerp', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ImageDecoration.lerp',
+      (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,
-      0xed, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54,  0x45, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff,
-      0xff, 0x00, 0x00, 0x00, 0x00, 0x3b, 0x4c, 0x59,  0x13, 0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41,
-      0x54, 0x08, 0xd7, 0x63, 0x60, 0x05, 0xc2, 0xf5,  0x0c, 0xeb, 0x01, 0x03, 0x00, 0x01, 0x69, 0x19,
-      0xea, 0x34, 0x7b, 0x00, 0x00, 0x00, 0x00, 0x49,  0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a,
+      0x00,
+      0x00,
+      0x00,
+      0x0d,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x02,
+      0x03,
+      0x00,
+      0x00,
+      0x00,
+      0xd4,
+      0x9f,
+      0x76,
+      0xed,
+      0x00,
+      0x00,
+      0x00,
+      0x0c,
+      0x50,
+      0x4c,
+      0x54,
+      0x45,
+      0x00,
+      0xff,
+      0xff,
+      0xff,
+      0x00,
+      0xff,
+      0xff,
+      0xff,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x3b,
+      0x4c,
+      0x59,
+      0x13,
+      0x00,
+      0x00,
+      0x00,
+      0x0e,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x08,
+      0xd7,
+      0x63,
+      0x60,
+      0x05,
+      0xc2,
+      0xf5,
+      0x0c,
+      0xeb,
+      0x01,
+      0x03,
+      0x00,
+      0x01,
+      0x69,
+      0x19,
+      0xea,
+      0x34,
+      0x7b,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82,
     ]));
     final MemoryImage wrgb = MemoryImage(Uint8List.fromList(<int>[
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,
-      0xed, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54,  0x45, 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0x00,
-      0xff, 0x00, 0xff, 0x00, 0x00, 0x1e, 0x46, 0xbb,  0x1c, 0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41,
-      0x54, 0x08, 0xd7, 0x63, 0xe0, 0x07, 0xc2, 0xa5,  0x0c, 0x4b, 0x01, 0x03, 0x50, 0x01, 0x69, 0x4a,
-      0x78, 0x1d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x49,  0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a,
+      0x00,
+      0x00,
+      0x00,
+      0x0d,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x02,
+      0x03,
+      0x00,
+      0x00,
+      0x00,
+      0xd4,
+      0x9f,
+      0x76,
+      0xed,
+      0x00,
+      0x00,
+      0x00,
+      0x0c,
+      0x50,
+      0x4c,
+      0x54,
+      0x45,
+      0xff,
+      0xff,
+      0xff,
+      0x00,
+      0x00,
+      0xff,
+      0x00,
+      0xff,
+      0x00,
+      0xff,
+      0x00,
+      0x00,
+      0x1e,
+      0x46,
+      0xbb,
+      0x1c,
+      0x00,
+      0x00,
+      0x00,
+      0x0e,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x08,
+      0xd7,
+      0x63,
+      0xe0,
+      0x07,
+      0xc2,
+      0xa5,
+      0x0c,
+      0x4b,
+      0x01,
+      0x03,
+      0x50,
+      0x01,
+      0x69,
+      0x4a,
+      0x78,
+      0x1d,
+      0x41,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82,
     ]));
 
     await tester.runAsync(() async {
@@ -274,73 +615,121 @@ void main() {
                   0.5,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
-                  DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
+                  DecorationImage(
+                      image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
+                  DecorationImage(
+                      image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                   0.25,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
-                  DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
+                  DecorationImage(
+                      image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
+                  DecorationImage(
+                      image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                   0.5,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
-                  DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
+                  DecorationImage(
+                      image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
+                  DecorationImage(
+                      image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                   0.75,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: wrgb, scale: 0.5, repeat: ImageRepeat.repeatX),
-                  DecorationImage(image: cmyk, scale: 0.25, repeat: ImageRepeat.repeatY),
+                  DecorationImage(
+                      image: wrgb, scale: 0.5, repeat: ImageRepeat.repeatX),
+                  DecorationImage(
+                      image: cmyk, scale: 0.25, repeat: ImageRepeat.repeatY),
                   0.5,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.0,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.25,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.5,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.75,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   1.0,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.0,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.25,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.5,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   0.75,
                 )),
                 TestImage(DecorationImage.lerp(
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                  DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                  DecorationImage(
+                      image: cmyk,
+                      centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                   1.0,
                 )),
               ],
@@ -355,17 +744,24 @@ void main() {
       matchesGoldenFile('decoration_image.lerp.1.png'),
     );
 
-    if (!kIsWeb) { // TODO(ianh): https://github.com/flutter/flutter/issues/130610
-      final ui.Image image = (await tester.binding.runAsync<ui.Image>(() => captureImage(find.byType(Wrap).evaluate().single)))!;
+    if (!kIsWeb) {
+      // TODO(ianh): https://github.com/flutter/flutter/issues/130610
+      final ui.Image image = (await tester.binding.runAsync<ui.Image>(
+          () => captureImage(find.byType(Wrap).evaluate().single)))!;
       addTearDown(() => image.dispose());
-      final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!.buffer.asUint8List();
+      final Uint8List bytes = (await tester.binding.runAsync<ByteData?>(() =>
+              image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!
+          .buffer
+          .asUint8List();
       expect(image.width, 24 * 24);
       expect(image.height, 1 * 24);
       expect(bytes, hasLength(image.width * image.height * 4));
       Color getPixel(int x, int y) {
         final int offset = (x + y * image.width) * 4;
-        return Color.fromARGB(0xFF, bytes[offset], bytes[offset + 1], bytes[offset + 2]);
+        return Color.fromARGB(
+            0xFF, bytes[offset], bytes[offset + 1], bytes[offset + 2]);
       }
+
       Color getPixelFromBlock(int index, int dx, int dy) {
         const int padding = 2;
         int x = index * 24 + dx + padding;
@@ -373,6 +769,7 @@ void main() {
         x %= image.width;
         return getPixel(x, y);
       }
+
       // wrgb image
       expect(getPixelFromBlock(0, 5, 5), const Color(0xFFFFFFFF));
       expect(getPixelFromBlock(0, 15, 5), const Color(0xFFFF0000));
@@ -407,24 +804,205 @@ void main() {
       expect(getPixelFromBlock(19, 18, 18), const Color(0xFF000000));
       expect(getPixelFromBlock(19, 19, 19), const Color(0xFF000000));
     }
-  }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+  },
+      skip:
+          kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 
-  testWidgetsWithLeakTracking('ImageDecoration.lerp with colored background', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ImageDecoration.lerp with colored background',
+      (WidgetTester tester) async {
     final MemoryImage cmyk = MemoryImage(Uint8List.fromList(<int>[
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,
-      0xed, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54,  0x45, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff,
-      0xff, 0x00, 0x00, 0x00, 0x00, 0x3b, 0x4c, 0x59,  0x13, 0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41,
-      0x54, 0x08, 0xd7, 0x63, 0x60, 0x05, 0xc2, 0xf5,  0x0c, 0xeb, 0x01, 0x03, 0x00, 0x01, 0x69, 0x19,
-      0xea, 0x34, 0x7b, 0x00, 0x00, 0x00, 0x00, 0x49,  0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a,
+      0x00,
+      0x00,
+      0x00,
+      0x0d,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x02,
+      0x03,
+      0x00,
+      0x00,
+      0x00,
+      0xd4,
+      0x9f,
+      0x76,
+      0xed,
+      0x00,
+      0x00,
+      0x00,
+      0x0c,
+      0x50,
+      0x4c,
+      0x54,
+      0x45,
+      0x00,
+      0xff,
+      0xff,
+      0xff,
+      0x00,
+      0xff,
+      0xff,
+      0xff,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x3b,
+      0x4c,
+      0x59,
+      0x13,
+      0x00,
+      0x00,
+      0x00,
+      0x0e,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x08,
+      0xd7,
+      0x63,
+      0x60,
+      0x05,
+      0xc2,
+      0xf5,
+      0x0c,
+      0xeb,
+      0x01,
+      0x03,
+      0x00,
+      0x01,
+      0x69,
+      0x19,
+      0xea,
+      0x34,
+      0x7b,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82,
     ]));
     final MemoryImage wrgb = MemoryImage(Uint8List.fromList(<int>[
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,  0x02, 0x03, 0x00, 0x00, 0x00, 0xd4, 0x9f, 0x76,
-      0xed, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54,  0x45, 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0x00,
-      0xff, 0x00, 0xff, 0x00, 0x00, 0x1e, 0x46, 0xbb,  0x1c, 0x00, 0x00, 0x00, 0x0e, 0x49, 0x44, 0x41,
-      0x54, 0x08, 0xd7, 0x63, 0xe0, 0x07, 0xc2, 0xa5,  0x0c, 0x4b, 0x01, 0x03, 0x50, 0x01, 0x69, 0x4a,
-      0x78, 0x1d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x49,  0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+      0x89,
+      0x50,
+      0x4e,
+      0x47,
+      0x0d,
+      0x0a,
+      0x1a,
+      0x0a,
+      0x00,
+      0x00,
+      0x00,
+      0x0d,
+      0x49,
+      0x48,
+      0x44,
+      0x52,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x00,
+      0x00,
+      0x00,
+      0x04,
+      0x02,
+      0x03,
+      0x00,
+      0x00,
+      0x00,
+      0xd4,
+      0x9f,
+      0x76,
+      0xed,
+      0x00,
+      0x00,
+      0x00,
+      0x0c,
+      0x50,
+      0x4c,
+      0x54,
+      0x45,
+      0xff,
+      0xff,
+      0xff,
+      0x00,
+      0x00,
+      0xff,
+      0x00,
+      0xff,
+      0x00,
+      0xff,
+      0x00,
+      0x00,
+      0x1e,
+      0x46,
+      0xbb,
+      0x1c,
+      0x00,
+      0x00,
+      0x00,
+      0x0e,
+      0x49,
+      0x44,
+      0x41,
+      0x54,
+      0x08,
+      0xd7,
+      0x63,
+      0xe0,
+      0x07,
+      0xc2,
+      0xa5,
+      0x0c,
+      0x4b,
+      0x01,
+      0x03,
+      0x50,
+      0x01,
+      0x69,
+      0x4a,
+      0x78,
+      0x1d,
+      0x41,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4e,
+      0x44,
+      0xae,
+      0x42,
+      0x60,
+      0x82,
     ]));
 
     await tester.runAsync(() async {
@@ -491,73 +1069,121 @@ void main() {
                 0.5,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
-                DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
+                DecorationImage(
+                    image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
+                DecorationImage(
+                    image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                 0.25,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
-                DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
+                DecorationImage(
+                    image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
+                DecorationImage(
+                    image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                 0.5,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
-                DecorationImage(image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
+                DecorationImage(
+                    image: wrgb, repeat: ImageRepeat.repeat, opacity: 0.2),
+                DecorationImage(
+                    image: cmyk, repeat: ImageRepeat.repeat, opacity: 0.2),
                 0.75,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: wrgb, scale: 0.5, repeat: ImageRepeat.repeatX),
-                DecorationImage(image: cmyk, scale: 0.25, repeat: ImageRepeat.repeatY),
+                DecorationImage(
+                    image: wrgb, scale: 0.5, repeat: ImageRepeat.repeatX),
+                DecorationImage(
+                    image: cmyk, scale: 0.25, repeat: ImageRepeat.repeatY),
                 0.5,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.0,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.25,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.5,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.75,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 1.0,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.0,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.25,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.5,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 0.75,
               )),
               TestImage(DecorationImage.lerp(
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
-                DecorationImage(image: cmyk, centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(0.0, 0.0, 1.0, 1.0)),
+                DecorationImage(
+                    image: cmyk,
+                    centerSlice: const Rect.fromLTWH(2.0, 2.0, 1.0, 1.0)),
                 1.0,
               )),
             ],
@@ -570,7 +1196,9 @@ void main() {
       find.byType(Wrap),
       matchesGoldenFile('decoration_image.lerp.2.png'),
     );
-  }, skip: kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
+  },
+      skip:
+          kIsWeb); // TODO(ianh): https://github.com/flutter/flutter/issues/130612, https://github.com/flutter/flutter/issues/130609
 }
 
 Future<void> load(MemoryImage image) {
@@ -579,12 +1207,14 @@ Future<void> load(MemoryImage image) {
   void listener(ImageInfo image, bool syncCall) {
     completer.complete(image);
   }
+
   stream.addListener(ImageStreamListener(listener));
   return completer.future;
 }
 
 class TestImage extends StatelessWidget {
-  TestImage(this.image); // ignore: use_key_in_widget_constructors, prefer_const_constructors_in_immutables
+  TestImage(
+      this.image); // ignore: use_key_in_widget_constructors, prefer_const_constructors_in_immutables
 
   final DecorationImage? image;
 

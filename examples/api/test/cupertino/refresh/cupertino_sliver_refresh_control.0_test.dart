@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/refresh/cupertino_sliver_refresh_control.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/refresh/cupertino_sliver_refresh_control.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can pull down to reveal CupertinoSliverRefreshControl', (WidgetTester tester) async {
+  testWidgets('Can pull down to reveal CupertinoSliverRefreshControl',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RefreshControlApp(),
     );

@@ -12,7 +12,8 @@ void _validate(List<String> args) {
   }
   if (!File('../engine/src/flutter/DEPS').existsSync()) {
     errors = true;
-    print('This program assumes the engine directory is a sibling to the flutter repository directory.');
+    print(
+        'This program assumes the engine directory is a sibling to the flutter repository directory.');
   }
   if (args.length != 1) {
     errors = true;
@@ -46,7 +47,8 @@ Future<void> main(List<String> args) async {
 }
 
 Future<void> _fetchUpstream([String workingDirectory = '.']) async {
-  print('Fetching remotes for "$workingDirectory" - you may be prompted for SSH credentials by git.');
+  print(
+      'Fetching remotes for "$workingDirectory" - you may be prompted for SSH credentials by git.');
   final ProcessResult fetchResult = await Process.run(
     'git',
     <String>[

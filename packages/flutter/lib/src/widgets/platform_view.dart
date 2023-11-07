@@ -8,7 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '_html_element_view_io.dart' if (dart.library.js_util) '_html_element_view_web.dart';
+import '_html_element_view_io.dart'
+    if (dart.library.js_util) '_html_element_view_web.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -481,7 +482,7 @@ class _AndroidViewState extends State<AndroidView> {
   FocusNode? _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    <Factory<OneSequenceGestureRecognizer>>{};
+      <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -510,7 +511,8 @@ class _AndroidViewState extends State<AndroidView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final bool didChangeLayoutDirection =
+        _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     _initializeOnce();
@@ -526,7 +528,8 @@ class _AndroidViewState extends State<AndroidView> {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final bool didChangeLayoutDirection =
+        _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
@@ -541,7 +544,8 @@ class _AndroidViewState extends State<AndroidView> {
   }
 
   TextDirection _findLayoutDirection() {
-    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    assert(
+        widget.layoutDirection != null || debugCheckHasDirectionality(context));
     return widget.layoutDirection ?? Directionality.of(context);
   }
 
@@ -566,7 +570,8 @@ class _AndroidViewState extends State<AndroidView> {
       },
     );
     if (widget.onPlatformViewCreated != null) {
-      _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated!);
+      _controller
+          .addOnPlatformViewCreatedListener(widget.onPlatformViewCreated!);
     }
   }
 
@@ -605,7 +610,12 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
-abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT extends DarwinPlatformViewController, RenderT extends RenderDarwinPlatformView<ControllerT>, ViewT extends _DarwinPlatformView<ControllerT, RenderT>> extends State<PlatformViewT> {
+abstract class _DarwinViewState<
+        PlatformViewT extends _DarwinView,
+        ControllerT extends DarwinPlatformViewController,
+        RenderT extends RenderDarwinPlatformView<ControllerT>,
+        ViewT extends _DarwinPlatformView<ControllerT, RenderT>>
+    extends State<PlatformViewT> {
   ControllerT? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
@@ -614,7 +624,7 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
   FocusNode? focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    <Factory<OneSequenceGestureRecognizer>>{};
+      <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -623,10 +633,10 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
       return const SizedBox.expand();
     }
     return Focus(
-      focusNode: focusNode,
-      onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
-      child: childPlatformView()
-    );
+        focusNode: focusNode,
+        onFocusChange: (bool isFocused) =>
+            _onFocusChange(isFocused, controller),
+        child: childPlatformView());
   }
 
   ViewT childPlatformView();
@@ -643,7 +653,8 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
   void didChangeDependencies() {
     super.didChangeDependencies();
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final bool didChangeLayoutDirection =
+        _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     _initializeOnce();
@@ -659,7 +670,8 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final bool didChangeLayoutDirection =
+        _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
@@ -677,7 +689,8 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
   }
 
   TextDirection _findLayoutDirection() {
-    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    assert(
+        widget.layoutDirection != null || debugCheckHasDirectionality(context));
     return widget.layoutDirection ?? Directionality.of(context);
   }
 
@@ -692,9 +705,7 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
 
   Future<void> _createNewUiKitView() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
-    final ControllerT controller = await createNewViewController(
-      id
-    );
+    final ControllerT controller = await createNewViewController(id);
     if (!mounted) {
       controller.dispose();
       return;
@@ -722,53 +733,55 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
   }
 }
 
-class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
+class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController,
+    RenderUiKitView, _UiKitPlatformView> {
   @override
   Future<UiKitViewController> createNewViewController(int id) async {
     return PlatformViewsService.initUiKitView(
-      id: id,
-      viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
-      creationParams: widget.creationParams,
-      creationParamsCodec: widget.creationParamsCodec,
-      onFocus: () {
-        focusNode?.requestFocus();
-      }
-    );
+        id: id,
+        viewType: widget.viewType,
+        layoutDirection: _layoutDirection!,
+        creationParams: widget.creationParams,
+        creationParamsCodec: widget.creationParamsCodec,
+        onFocus: () {
+          focusNode?.requestFocus();
+        });
   }
 
   @override
   _UiKitPlatformView childPlatformView() {
     return _UiKitPlatformView(
-        controller: _controller!,
-        hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
-      );
+      controller: _controller!,
+      hitTestBehavior: widget.hitTestBehavior,
+      gestureRecognizers:
+          widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
+    );
   }
 }
 
-class _AppKitViewState extends _DarwinViewState<AppKitView, AppKitViewController, RenderAppKitView, _AppKitPlatformView> {
+class _AppKitViewState extends _DarwinViewState<AppKitView,
+    AppKitViewController, RenderAppKitView, _AppKitPlatformView> {
   @override
   Future<AppKitViewController> createNewViewController(int id) async {
     return PlatformViewsService.initAppKitView(
-      id: id,
-      viewType: widget.viewType,
-      layoutDirection: _layoutDirection!,
-      creationParams: widget.creationParams,
-      creationParamsCodec: widget.creationParamsCodec,
-      onFocus: () {
-        focusNode?.requestFocus();
-      }
-    );
+        id: id,
+        viewType: widget.viewType,
+        layoutDirection: _layoutDirection!,
+        creationParams: widget.creationParams,
+        creationParamsCodec: widget.creationParamsCodec,
+        onFocus: () {
+          focusNode?.requestFocus();
+        });
   }
 
   @override
   _AppKitPlatformView childPlatformView() {
     return _AppKitPlatformView(
-        controller: _controller!,
-        hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
-      );
+      controller: _controller!,
+      hitTestBehavior: widget.hitTestBehavior,
+      gestureRecognizers:
+          widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
+    );
   }
 }
 
@@ -786,8 +799,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      RenderAndroidView(
+  RenderObject createRenderObject(BuildContext context) => RenderAndroidView(
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,
@@ -795,7 +807,8 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
       );
 
   @override
-  void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderAndroidView renderObject) {
     renderObject.controller = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
@@ -803,7 +816,10 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   }
 }
 
-abstract class _DarwinPlatformView<TController extends DarwinPlatformViewController, TRender extends RenderDarwinPlatformView<TController>> extends LeafRenderObjectWidget {
+abstract class _DarwinPlatformView<
+        TController extends DarwinPlatformViewController,
+        TRender extends RenderDarwinPlatformView<TController>>
+    extends LeafRenderObjectWidget {
   const _DarwinPlatformView({
     required this.controller,
     required this.hitTestBehavior,
@@ -824,8 +840,12 @@ abstract class _DarwinPlatformView<TController extends DarwinPlatformViewControl
   }
 }
 
-class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, RenderUiKitView> {
-  const _UiKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
+class _UiKitPlatformView
+    extends _DarwinPlatformView<UiKitViewController, RenderUiKitView> {
+  const _UiKitPlatformView(
+      {required super.controller,
+      required super.hitTestBehavior,
+      required super.gestureRecognizers});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -837,8 +857,12 @@ class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, Render
   }
 }
 
-class _AppKitPlatformView extends _DarwinPlatformView<AppKitViewController, RenderAppKitView> {
-  const _AppKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
+class _AppKitPlatformView
+    extends _DarwinPlatformView<AppKitViewController, RenderAppKitView> {
+  const _AppKitPlatformView(
+      {required super.controller,
+      required super.hitTestBehavior,
+      required super.gestureRecognizers});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -856,7 +880,6 @@ class _AppKitPlatformView extends _DarwinPlatformView<AppKitViewController, Rend
 ///
 ///  * [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
-
   const PlatformViewCreationParams._({
     required this.id,
     required this.viewType,
@@ -891,7 +914,8 @@ class PlatformViewCreationParams {
 /// See also:
 ///
 ///  * [PlatformViewSurface], a common widget for presenting platform views.
-typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, PlatformViewController controller);
+typedef PlatformViewSurfaceFactory = Widget Function(
+    BuildContext context, PlatformViewController controller);
 
 /// Constructs a [PlatformViewController].
 ///
@@ -901,7 +925,8 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 /// See also:
 ///
 ///  * [PlatformViewLink], which links a platform view with the Flutter framework.
-typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformViewCreationParams params);
+typedef CreatePlatformViewCallback = PlatformViewController Function(
+    PlatformViewCreationParams params);
 
 /// Links a platform view with the Flutter framework.
 ///
@@ -947,9 +972,8 @@ class PlatformViewLink extends StatefulWidget {
     required PlatformViewSurfaceFactory surfaceFactory,
     required CreatePlatformViewCallback onCreatePlatformView,
     required this.viewType,
-    }) : _surfaceFactory = surfaceFactory,
-         _onCreatePlatformView = onCreatePlatformView;
-
+  })  : _surfaceFactory = surfaceFactory,
+        _onCreatePlatformView = onCreatePlatformView;
 
   final PlatformViewSurfaceFactory _surfaceFactory;
   final CreatePlatformViewCallback _onCreatePlatformView;
@@ -1077,7 +1101,6 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 ///  * [UiKitView] which embeds an iOS platform view in the widget hierarchy.
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
-
   /// Construct a [PlatformViewSurface].
   const PlatformViewSurface({
     super.key,
@@ -1143,11 +1166,15 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return PlatformViewRenderBox(controller: controller, gestureRecognizers: gestureRecognizers, hitTestBehavior: hitTestBehavior);
+    return PlatformViewRenderBox(
+        controller: controller,
+        gestureRecognizers: gestureRecognizers,
+        hitTestBehavior: hitTestBehavior);
   }
 
   @override
-  void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
+  void updateRenderObject(
+      BuildContext context, PlatformViewRenderBox renderObject) {
     renderObject
       ..controller = controller
       ..hitTestBehavior = hitTestBehavior
@@ -1205,13 +1232,15 @@ class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
     if (!widget.controller.isCreated) {
       // Schedule a rebuild once creation is complete and the final display
       // type is known.
-      widget.controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+      widget.controller
+          .addOnPlatformViewCreatedListener(_onPlatformViewCreated);
     }
   }
 
   @override
   void dispose() {
-    widget.controller.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
+    widget.controller
+        .removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     super.dispose();
   }
 
@@ -1248,7 +1277,8 @@ class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    final AndroidViewController viewController = controller as AndroidViewController;
+    final AndroidViewController viewController =
+        controller as AndroidViewController;
     // Use GL texture based composition.
     // App should use GL texture unless they require to embed a SurfaceView.
     final RenderAndroidView renderBox = RenderAndroidView(
@@ -1271,7 +1301,8 @@ class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    final AndroidViewController viewController = controller as AndroidViewController;
+    final AndroidViewController viewController =
+        controller as AndroidViewController;
     final PlatformViewRenderBox renderBox =
         super.createRenderObject(context) as PlatformViewRenderBox;
     viewController.pointTransformer =
@@ -1288,10 +1319,11 @@ typedef _OnLayoutCallback = void Function(Size size, Offset position);
 class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
   _PlatformViewPlaceholderBox({
     required this.onLayout,
-  }) : super(additionalConstraints: const BoxConstraints.tightFor(
-      width: double.infinity,
-      height: double.infinity,
-    ));
+  }) : super(
+            additionalConstraints: const BoxConstraints.tightFor(
+          width: double.infinity,
+          height: double.infinity,
+        ));
 
   _OnLayoutCallback onLayout;
 
@@ -1322,7 +1354,8 @@ class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _PlatformViewPlaceholderBox renderObject) {
+  void updateRenderObject(
+      BuildContext context, _PlatformViewPlaceholderBox renderObject) {
     renderObject.onLayout = onLayout;
   }
 }

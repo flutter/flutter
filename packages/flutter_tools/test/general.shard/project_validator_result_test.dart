@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/project_validator_result.dart';
 import '../src/common.dart';
 
 class ProjectValidatorTaskImpl extends ProjectValidator {
-
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     const ProjectValidatorResult error = ProjectValidatorResult(
@@ -26,11 +25,10 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
     );
 
     const ProjectValidatorResult warning = ProjectValidatorResult(
-      name: 'result_3',
-      value: 'this passed',
-      status: StatusProjectValidator.success,
-      warning: 'with a warning'
-    );
+        name: 'result_3',
+        value: 'this passed',
+        status: StatusProjectValidator.success,
+        warning: 'with a warning');
 
     return <ProjectValidatorResult>[error, success, warning];
   }
@@ -46,7 +44,6 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
 
 void main() {
   group('ProjectValidatorResult', () {
-
     testWithoutContext('success status', () {
       const ProjectValidatorResult result = ProjectValidatorResult(
         name: 'name',
@@ -59,11 +56,10 @@ void main() {
 
     testWithoutContext('success status with warning', () {
       const ProjectValidatorResult result = ProjectValidatorResult(
-        name: 'name',
-        value: 'value',
-        status: StatusProjectValidator.success,
-        warning: 'my warning'
-      );
+          name: 'name',
+          value: 'value',
+          status: StatusProjectValidator.success,
+          warning: 'my warning');
       expect(result.toString(), 'name: value (warning: my warning)');
       expect(result.status, StatusProjectValidator.success);
     });
@@ -88,12 +84,14 @@ void main() {
 
     testWithoutContext('error status', () async {
       final MemoryFileSystem fs = MemoryFileSystem.test();
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      final FlutterProject project =
+          FlutterProject.fromDirectoryTest(fs.currentDirectory);
       final List<ProjectValidatorResult> results = await task.start(project);
       expect(results.length, 3);
       expect(results[0].toString(), 'result_1: this is an error');
       expect(results[1].toString(), 'result_2: correct');
-      expect(results[2].toString(), 'result_3: this passed (warning: with a warning)');
+      expect(results[2].toString(),
+          'result_3: this passed (warning: with a warning)');
     });
   });
 }

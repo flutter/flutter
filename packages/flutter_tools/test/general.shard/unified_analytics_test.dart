@@ -28,7 +28,8 @@ void main() {
   });
 
   group('Unit testing getAnalytics', () {
-    testWithoutContext('Successfully creates the instance for standard branch', () {
+    testWithoutContext('Successfully creates the instance for standard branch',
+        () {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
         flutterVersion: FakeFlutterVersion(),
@@ -98,7 +99,9 @@ void main() {
       final Analytics analytics = getAnalytics(
         runningOnBot: true,
         flutterVersion: FakeFlutterVersion(),
-        environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
+        environment: const <String, String>{
+          'FLUTTER_SUPPRESS_ANALYTICS': 'true'
+        },
         analyticsOverride: analyticsOverride,
       );
 

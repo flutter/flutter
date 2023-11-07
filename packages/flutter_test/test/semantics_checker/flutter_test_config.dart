@@ -21,40 +21,51 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 }
 
 void pipelineOwnerTestRun() {
-  testWidgets('open SemanticsHandle from PipelineOwner fails test', (WidgetTester tester) async {
-    final int outstandingHandles = tester.binding.debugOutstandingSemanticsHandles;
+  testWidgets('open SemanticsHandle from PipelineOwner fails test',
+      (WidgetTester tester) async {
+    final int outstandingHandles =
+        tester.binding.debugOutstandingSemanticsHandles;
     tester.binding.ensureSemantics();
-    expect(tester.binding.debugOutstandingSemanticsHandles, outstandingHandles + 1);
+    expect(tester.binding.debugOutstandingSemanticsHandles,
+        outstandingHandles + 1);
     // SemanticsHandle is not disposed on purpose to verify in tearDown that
     // the test failed due to an active SemanticsHandle.
   });
 
   tearDown(() {
     expect(errors, hasLength(1));
-    expect(errors.single.toString(), contains('SemanticsHandle was active at the end of the test'));
+    expect(errors.single.toString(),
+        contains('SemanticsHandle was active at the end of the test'));
   });
 }
 
 void semanticsBindingTestRun() {
-  testWidgets('open SemanticsHandle from SemanticsBinding fails test', (WidgetTester tester) async {
-    final int outstandingHandles = tester.binding.debugOutstandingSemanticsHandles;
+  testWidgets('open SemanticsHandle from SemanticsBinding fails test',
+      (WidgetTester tester) async {
+    final int outstandingHandles =
+        tester.binding.debugOutstandingSemanticsHandles;
     tester.binding.ensureSemantics();
-    expect(tester.binding.debugOutstandingSemanticsHandles, outstandingHandles + 1);
+    expect(tester.binding.debugOutstandingSemanticsHandles,
+        outstandingHandles + 1);
     // SemanticsHandle is not disposed on purpose to verify in tearDown that
     // the test failed due to an active SemanticsHandle.
   });
 
   tearDown(() {
     expect(errors, hasLength(1));
-    expect(errors.single.toString(), contains('SemanticsHandle was active at the end of the test'));
+    expect(errors.single.toString(),
+        contains('SemanticsHandle was active at the end of the test'));
   });
 }
 
 void failingTestTestRun() {
-  testWidgets('open SemanticsHandle from SemanticsBinding fails test', (WidgetTester tester) async {
-    final int outstandingHandles = tester.binding.debugOutstandingSemanticsHandles;
+  testWidgets('open SemanticsHandle from SemanticsBinding fails test',
+      (WidgetTester tester) async {
+    final int outstandingHandles =
+        tester.binding.debugOutstandingSemanticsHandles;
     tester.binding.ensureSemantics();
-    expect(tester.binding.debugOutstandingSemanticsHandles, outstandingHandles + 1);
+    expect(tester.binding.debugOutstandingSemanticsHandles,
+        outstandingHandles + 1);
 
     // Failing expectation to verify that an open semantics handle doesn't
     // cause any cascading failures and only the failing expectation is

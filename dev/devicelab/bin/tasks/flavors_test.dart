@@ -36,7 +36,8 @@ Future<void> main() async {
         );
 
         final String stderrString = stderr.toString();
-        final String expectedApkPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-bogus-release.apk');
+        final String expectedApkPath = path.join(
+            'build', 'app', 'outputs', 'flutter-apk', 'app-bogus-release.apk');
         if (!stderrString.contains('"$expectedApkPath" does not exist.')) {
           print(stderrString);
           return TaskResult.failure('Should not succeed with bogus flavor');

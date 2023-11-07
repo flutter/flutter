@@ -153,13 +153,15 @@ class Ink extends StatefulWidget {
     this.width,
     this.height,
     this.child,
-  }) : assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
-       ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null);
+  })  : assert(padding == null || padding.isNonNegative),
+        assert(decoration == null || decoration.debugAssertIsValid()),
+        assert(
+          color == null || decoration == null,
+          'Cannot provide both a color and a decoration\n'
+          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
+        ),
+        decoration =
+            decoration ?? (color != null ? BoxDecoration(color: color) : null);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
   /// a [Material].
@@ -191,19 +193,19 @@ class Ink extends StatefulWidget {
     this.width,
     this.height,
     this.child,
-  }) : assert(padding == null || padding.isNonNegative),
-       decoration = BoxDecoration(
-         image: DecorationImage(
-           image: image,
-           onError: onImageError,
-           colorFilter: colorFilter,
-           fit: fit,
-           alignment: alignment,
-           centerSlice: centerSlice,
-           repeat: repeat,
-           matchTextDirection: matchTextDirection,
-         ),
-       );
+  })  : assert(padding == null || padding.isNonNegative),
+        decoration = BoxDecoration(
+          image: DecorationImage(
+            image: image,
+            onError: onImageError,
+            colorFilter: colorFilter,
+            fit: fit,
+            alignment: alignment,
+            centerSlice: centerSlice,
+            repeat: repeat,
+            matchTextDirection: matchTextDirection,
+          ),
+        );
 
   /// The [child] contained by the container.
   ///
@@ -249,8 +251,10 @@ class Ink extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding,
+        defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
   }
 
   @override
@@ -289,7 +293,8 @@ class _InkState extends State<Ink> {
       _ink!.isVisible = Visibility.of(context);
       _ink!.configuration = createLocalImageConfiguration(context);
     }
-    return widget.child ?? ConstrainedBox(constraints: const BoxConstraints.expand());
+    return widget.child ??
+        ConstrainedBox(constraints: const BoxConstraints.expand());
   }
 
   @override

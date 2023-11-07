@@ -53,7 +53,8 @@ void main() {
     expect(parent.size, equals(const Size(100.0, 110.0)));
   });
 
-  test('RenderFlex and RenderIgnoreBaseline (control test -- with baseline)', () {
+  test('RenderFlex and RenderIgnoreBaseline (control test -- with baseline)',
+      () {
     final RenderBox a, b;
     final RenderBox root = RenderFlex(
       crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -61,11 +62,20 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <RenderBox>[
         a = RenderParagraph(
-          const TextSpan(text: 'a', style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest')), // places baseline at y=96
+          const TextSpan(
+              text: 'a',
+              style: TextStyle(
+                  fontSize: 128.0,
+                  fontFamily: 'FlutterTest')), // places baseline at y=96
           textDirection: TextDirection.ltr,
         ),
         b = RenderParagraph(
-          const TextSpan(text: 'b', style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest')), // 24 above baseline, 8 below baseline
+          const TextSpan(
+              text: 'b',
+              style: TextStyle(
+                  fontSize: 32.0,
+                  fontFamily:
+                      'FlutterTest')), // 24 above baseline, 8 below baseline
           textDirection: TextDirection.ltr,
         ),
       ],
@@ -87,12 +97,16 @@ void main() {
       children: <RenderBox>[
         RenderIgnoreBaseline(
           child: a = RenderParagraph(
-            const TextSpan(text: 'a', style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest')),
+            const TextSpan(
+                text: 'a',
+                style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest')),
             textDirection: TextDirection.ltr,
           ),
         ),
         b = RenderParagraph(
-          const TextSpan(text: 'b', style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest')),
+          const TextSpan(
+              text: 'b',
+              style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest')),
           textDirection: TextDirection.ltr,
         ),
       ],

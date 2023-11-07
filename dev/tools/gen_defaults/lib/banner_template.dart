@@ -5,10 +5,9 @@
 import 'template.dart';
 
 class BannerTemplate extends TokenTemplate {
-  const BannerTemplate(super.blockName, super.fileName, super.tokens, {
-    super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
-  });
+  const BannerTemplate(super.blockName, super.fileName, super.tokens,
+      {super.colorSchemePrefix = '_colors.',
+      super.textThemePrefix = '_textTheme.'});
 
   @override
   String generate() => '''

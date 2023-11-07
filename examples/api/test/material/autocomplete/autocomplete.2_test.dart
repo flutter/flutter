@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/autocomplete/autocomplete.2.dart' as example;
+import 'package:flutter_api_samples/material/autocomplete/autocomplete.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('can search and find options after waiting for fake network delay', (WidgetTester tester) async {
+  testWidgets(
+      'can search and find options after waiting for fake network delay',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
 
     expect(find.text('aardvark'), findsNothing);

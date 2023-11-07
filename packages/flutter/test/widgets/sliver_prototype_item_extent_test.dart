@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestItem extends StatelessWidget {
-  const TestItem({ super.key, required this.item, this.width, this.height });
+  const TestItem({super.key, required this.item, this.width, this.height});
   final int item;
   final double? width;
   final double? height;
@@ -22,14 +22,20 @@ class TestItem extends StatelessWidget {
   }
 }
 
-Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection, Key? prototypeKey }) {
+Widget buildFrame(
+    {int? count,
+    double? width,
+    double? height,
+    Axis? scrollDirection,
+    Key? prototypeKey}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CustomScrollView(
       scrollDirection: scrollDirection ?? Axis.vertical,
       slivers: <Widget>[
         SliverPrototypeExtentList(
-          prototypeItem: TestItem(item: -1, width: width, height: height, key: prototypeKey),
+          prototypeItem: TestItem(
+              item: -1, width: width, height: height, key: prototypeKey),
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) => TestItem(item: index),
             childCount: count,
@@ -41,14 +47,16 @@ Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirec
 }
 
 void main() {
-  testWidgetsWithLeakTracking('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList.builder test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
               SliverPrototypeExtentList.builder(
-                itemBuilder: (BuildContext context, int index) => TestItem(item: index),
+                itemBuilder: (BuildContext context, int index) =>
+                    TestItem(item: index),
                 prototypeItem: const TestItem(item: -1, height: 100.0),
                 itemCount: 20,
               ),
@@ -70,7 +78,8 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList.builder test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -78,7 +87,9 @@ void main() {
             slivers: <Widget>[
               SliverPrototypeExtentList.list(
                 prototypeItem: const TestItem(item: -1, height: 100.0),
-                children: <int>[0, 1, 2, 3, 4, 5, 6, 7].map((int index) => TestItem(item: index)).toList(),
+                children: <int>[0, 1, 2, 3, 4, 5, 6, 7]
+                    .map((int index) => TestItem(item: index))
+                    .toList(),
               ),
             ],
           ),
@@ -96,7 +107,9 @@ void main() {
     expect(find.text('Item 7'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SliverPrototypeExtentList vertical scrolling basics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'SliverPrototypeExtentList vertical scrolling basics',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(count: 20, height: 100.0));
 
     // The viewport is 600 pixels high, lazily created items are 100 pixels high.
@@ -122,8 +135,11 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('SliverPrototypeExtentList horizontal scrolling basics', (WidgetTester tester) async {
-    await tester.pumpWidget(buildFrame(count: 20, width: 100.0, scrollDirection: Axis.horizontal));
+  testWidgetsWithLeakTracking(
+      'SliverPrototypeExtentList horizontal scrolling basics',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+        buildFrame(count: 20, width: 100.0, scrollDirection: Axis.horizontal));
 
     // The viewport is 800 pixels wide, lazily created items are 100 pixels wide.
     for (int i = 0; i < 8; i += 1) {
@@ -148,7 +164,9 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('SliverPrototypeExtentList change the prototype item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'SliverPrototypeExtentList change the prototype item',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(count: 10, height: 60.0));
 
     // The viewport is 600 pixels high, each of the 10 items is 60 pixels high
@@ -174,9 +192,14 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('SliverPrototypeExtentList first item is also the prototype', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'SliverPrototypeExtentList first item is also the prototype',
+      (WidgetTester tester) async {
     final List<Widget> items = List<Widget>.generate(10, (int index) {
-      return TestItem(key: ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
+      return TestItem(
+          key: ValueKey<int>(index),
+          item: index,
+          height: index == 0 ? 60.0 : null);
     }).toList();
 
     await tester.pumpWidget(
@@ -197,23 +220,29 @@ void main() {
     );
 
     // Item 0 exists in the list and as the prototype item.
-    expect(tester.widgetList(find.text('Item 0', skipOffstage: false)).length, 2);
+    expect(
+        tester.widgetList(find.text('Item 0', skipOffstage: false)).length, 2);
 
     for (int i = 1; i < 10; i += 1) {
       expect(find.text('Item $i'), findsOneWidget);
     }
   });
 
-  testWidgetsWithLeakTracking('SliverPrototypeExtentList prototypeItem paint transform is zero.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'SliverPrototypeExtentList prototypeItem paint transform is zero.',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67117
     // This test ensures that the SliverPrototypeExtentList does not cause an
     // assertion error when calculating the paint transform of its prototypeItem.
     // The paint transform of the prototypeItem should be zero, since it is not visible.
     final GlobalKey prototypeKey = GlobalKey();
-    await tester.pumpWidget(buildFrame(count: 20, height: 100.0, prototypeKey: prototypeKey));
+    await tester.pumpWidget(
+        buildFrame(count: 20, height: 100.0, prototypeKey: prototypeKey));
 
-    final RenderObject scrollView = tester.renderObject(find.byType(CustomScrollView));
-    final RenderObject prototype = prototypeKey.currentContext!.findRenderObject()!;
+    final RenderObject scrollView =
+        tester.renderObject(find.byType(CustomScrollView));
+    final RenderObject prototype =
+        prototypeKey.currentContext!.findRenderObject()!;
 
     expect(prototype.getTransformTo(scrollView), Matrix4.zero());
   });

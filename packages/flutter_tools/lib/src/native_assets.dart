@@ -5,8 +5,10 @@
 // Logic for native assets shared between all host OSes.
 
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
-import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder show NativeAssetsBuildRunner;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    hide NativeAssetsBuildRunner;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    as native_assets_builder show NativeAssetsBuildRunner;
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -92,17 +94,21 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       }
     });
 
-  late final Uri _dartExecutable = fileSystem.directory(Cache.flutterRoot).uri.resolve('bin/dart');
+  late final Uri _dartExecutable =
+      fileSystem.directory(Cache.flutterRoot).uri.resolve('bin/dart');
 
-  late final native_assets_builder.NativeAssetsBuildRunner _buildRunner = native_assets_builder.NativeAssetsBuildRunner(
+  late final native_assets_builder.NativeAssetsBuildRunner _buildRunner =
+      native_assets_builder.NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
   );
 
   @override
   Future<bool> hasPackageConfig() {
-    final File packageConfigJson =
-        fileSystem.directory(projectUri.toFilePath()).childDirectory('.dart_tool').childFile('package_config.json');
+    final File packageConfigJson = fileSystem
+        .directory(projectUri.toFilePath())
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
     return packageConfigJson.exists();
   }
 
@@ -219,7 +225,8 @@ BuildMode nativeAssetsBuildMode(build_info.BuildMode buildMode) {
 Future<bool> _hasNoPackageConfig(NativeAssetsBuildRunner buildRunner) async {
   final bool packageConfigExists = await buildRunner.hasPackageConfig();
   if (!packageConfigExists) {
-    globals.logger.printTrace('No package config found. Skipping native assets compilation.');
+    globals.logger.printTrace(
+        'No package config found. Skipping native assets compilation.');
   }
   return !packageConfigExists;
 }
@@ -228,13 +235,15 @@ Future<bool> nativeBuildRequired(NativeAssetsBuildRunner buildRunner) async {
   if (await _hasNoPackageConfig(buildRunner)) {
     return false;
   }
-  final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
+  final List<Package> packagesWithNativeAssets =
+      await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     return false;
   }
 
   if (!featureFlags.isNativeAssetsEnabled) {
-    final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
+    final String packageNames =
+        packagesWithNativeAssets.map((Package p) => p.name).join(' ');
     throwToolExit(
       'Package(s) $packageNames require the native assets feature to be enabled. '
       'Enable using `flutter config --enable-native-assets`.',
@@ -256,11 +265,13 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   if (await _hasNoPackageConfig(buildRunner)) {
     return;
   }
-  final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
+  final List<Package> packagesWithNativeAssets =
+      await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
     return;
   }
-  final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
+  final String packageNames =
+      packagesWithNativeAssets.map((Package p) => p.name).join(' ');
   throwToolExit(
     'Package(s) $packageNames require the native assets feature. '
     'This feature has not yet been implemented for `$os`. '
@@ -276,9 +287,11 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
 ///
 /// Therefore, ensure all `build.dart` scripts return only dynamic libraries.
 void ensureNoLinkModeStatic(List<Asset> nativeAssets) {
-  final Iterable<Asset> staticAssets = nativeAssets.whereLinkMode(LinkMode.static);
+  final Iterable<Asset> staticAssets =
+      nativeAssets.whereLinkMode(LinkMode.static);
   if (staticAssets.isNotEmpty) {
-    final String assetIds = staticAssets.map((Asset a) => a.id).toSet().join(', ');
+    final String assetIds =
+        staticAssets.map((Asset a) => a.id).toSet().join(', ');
     throwToolExit(
       'Native asset(s) $assetIds have their link mode set to static, '
       'but this is not yet supported. '
@@ -309,12 +322,14 @@ Future<Uri?> dryRunNativeAssets({
     return dryRunNativeAssetsMultipeOSes(
       projectUri: projectUri,
       fileSystem: fileSystem,
-      targetPlatforms: flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
+      targetPlatforms:
+          flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
       buildRunner: buildRunner,
     );
   }
   final FlutterDevice flutterDevice = flutterDevices.single;
-  final build_info.TargetPlatform targetPlatform = flutterDevice.targetPlatform!;
+  final build_info.TargetPlatform targetPlatform =
+      flutterDevice.targetPlatform!;
 
   final Uri? nativeAssetsYaml;
   switch (targetPlatform) {
@@ -404,7 +419,8 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
   final Uri buildUri = buildUriMultiple(projectUri);
   final Iterable<Asset> nativeAssetPaths = <Asset>[
     if (targetPlatforms.contains(build_info.TargetPlatform.darwin) ||
-        (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.macOS))
+        (targetPlatforms.contains(build_info.TargetPlatform.tester) &&
+            OS.current == OS.macOS))
       ...await dryRunNativeAssetsMacOSInternal(
         fileSystem,
         projectUri,
@@ -413,7 +429,8 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
       ),
     if (targetPlatforms.contains(build_info.TargetPlatform.linux_arm64) ||
         targetPlatforms.contains(build_info.TargetPlatform.linux_x64) ||
-        (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.linux))
+        (targetPlatforms.contains(build_info.TargetPlatform.tester) &&
+            OS.current == OS.linux))
       ...await dryRunNativeAssetsLinuxInternal(
         fileSystem,
         projectUri,
@@ -421,7 +438,8 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
         buildRunner,
       ),
     if (targetPlatforms.contains(build_info.TargetPlatform.windows_x64) ||
-        (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.windows))
+        (targetPlatforms.contains(build_info.TargetPlatform.tester) &&
+            OS.current == OS.windows))
       ...await dryRunNativeAssetsWindowsInternal(
         fileSystem,
         projectUri,
@@ -435,7 +453,8 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
         buildRunner,
       )
   ];
-  final Uri nativeAssetsUri = await writeNativeAssetsYaml(nativeAssetPaths, buildUri, fileSystem);
+  final Uri nativeAssetsUri =
+      await writeNativeAssetsYaml(nativeAssetPaths, buildUri, fileSystem);
   return nativeAssetsUri;
 }
 
@@ -462,7 +481,8 @@ Future<Uri?> dryRunNativeAssetsSingleArchitecture({
   }
 
   final Uri buildUri = nativeAssetsBuildUri(projectUri, os);
-  final Iterable<Asset> nativeAssetPaths = await dryRunNativeAssetsSingleArchitectureInternal(
+  final Iterable<Asset> nativeAssetPaths =
+      await dryRunNativeAssetsSingleArchitectureInternal(
     fileSystem,
     projectUri,
     flutterTester,
@@ -497,7 +517,8 @@ Future<Iterable<Asset>> dryRunNativeAssetsSingleArchitectureInternal(
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocationsSingleArchitecture(
+  final Map<Asset, Asset> assetTargetLocations =
+      _assetTargetLocationsSingleArchitecture(
     nativeAssets,
     absolutePath,
   );
@@ -512,7 +533,8 @@ Future<Iterable<Asset>> dryRunNativeAssetsSingleArchitectureInternal(
 /// If [flutterTester] is true, absolute paths are emitted in the native
 /// assets mapping. This can be used for JIT mode without sandbox on the host.
 /// This is used in `flutter test` and `flutter run -d flutter-tester`.
-Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleArchitecture({
+Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
+    buildNativeAssetsSingleArchitecture({
   required NativeAssetsBuildRunner buildRunner,
   build_info.TargetPlatform? targetPlatform,
   required Uri projectUri,
@@ -521,7 +543,9 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
   Uri? yamlParentDirectory,
   required FileSystem fileSystem,
 }) async {
-  final Target target = targetPlatform != null ? _getNativeTarget(targetPlatform) : Target.current;
+  final Target target = targetPlatform != null
+      ? _getNativeTarget(targetPlatform)
+      : Target.current;
   final OS targetOS = target.os;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final Directory buildDir = fileSystem.directory(buildUri);
@@ -540,7 +564,8 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
 
   final BuildMode buildModeCli = nativeAssetsBuildMode(buildMode);
 
-  globals.logger.printTrace('Building native assets for $target $buildModeCli.');
+  globals.logger
+      .printTrace('Building native assets for $target $buildModeCli.');
   final BuildResult result = await buildRunner.build(
     linkModePreference: LinkModePreference.dynamic,
     target: target,
@@ -554,7 +579,8 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $target done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
-  final Map<Asset, Asset> assetTargetLocations = _assetTargetLocationsSingleArchitecture(nativeAssets, absolutePath);
+  final Map<Asset, Asset> assetTargetLocations =
+      _assetTargetLocationsSingleArchitecture(nativeAssets, absolutePath);
   await _copyNativeAssetsSingleArchitecture(
     buildUri,
     assetTargetLocations,
@@ -603,7 +629,8 @@ Asset _targetLocationSingleArchitecture(Asset asset, Uri? absolutePath) {
       }
       return asset.copyWith(path: AssetAbsolutePath(uri));
   }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
+  throw Exception(
+      'Unsupported asset path type ${path.runtimeType} in asset $asset');
 }
 
 /// Extract the [Target] from a [TargetPlatform].
@@ -640,12 +667,14 @@ Future<void> _copyNativeAssetsSingleArchitecture(
   FileSystem fileSystem,
 ) async {
   if (assetTargetLocations.isNotEmpty) {
-    globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+    globals.logger
+        .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
     final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
     if (!buildDir.existsSync()) {
       buildDir.createSync(recursive: true);
     }
-    for (final MapEntry<Asset, Asset> assetMapping in assetTargetLocations.entries) {
+    for (final MapEntry<Asset, Asset> assetMapping
+        in assetTargetLocations.entries) {
       final Uri source = (assetMapping.key.path as AssetAbsolutePath).uri;
       final Uri target = (assetMapping.value.path as AssetAbsolutePath).uri;
       final Uri targetUri = buildUri.resolveUri(target);

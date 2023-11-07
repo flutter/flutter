@@ -29,4 +29,5 @@ void restoreFileSystem() {
 /// Tests should write any output files to this directory. Defaults to the path
 /// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
 /// unset.
-String get testOutputsDirectory => Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
+String get testOutputsDirectory =>
+    Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';

@@ -71,12 +71,13 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('pressedOpacity defaults to 0.1',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoDesktopTextSelectionToolbarButton(
-            onPressed: () { },
+            onPressed: () {},
             child: const Text('Tap me'),
           ),
         ),
@@ -115,7 +116,8 @@ void main() {
     expect(opacity.opacity.value, 1.0);
   });
 
-  testWidgetsWithLeakTracking('passing null to onPressed disables the button', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('passing null to onPressed disables the button',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

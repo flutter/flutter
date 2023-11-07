@@ -10,18 +10,23 @@ import 'data/velocity_tracker_data.dart';
 const int _kNumIters = 10000;
 
 class TrackerBenchmark {
-  TrackerBenchmark({required this.name, required this.tracker });
+  TrackerBenchmark({required this.name, required this.tracker});
 
   final VelocityTracker tracker;
   final String name;
 }
 
 void main() {
-  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+  assert(false,
+      "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   final List<TrackerBenchmark> benchmarks = <TrackerBenchmark>[
-    TrackerBenchmark(name: 'velocity_tracker_iteration', tracker: VelocityTracker.withKind(PointerDeviceKind.touch)),
-    TrackerBenchmark(name: 'velocity_tracker_iteration_ios_fling', tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch)),
+    TrackerBenchmark(
+        name: 'velocity_tracker_iteration',
+        tracker: VelocityTracker.withKind(PointerDeviceKind.touch)),
+    TrackerBenchmark(
+        name: 'velocity_tracker_iteration_ios_fling',
+        tracker: IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch)),
   ];
   final Stopwatch watch = Stopwatch();
 

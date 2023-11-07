@@ -4,47 +4,48 @@
 
 import 'dart:ui' show TextDirection;
 
-export 'dart:ui' show
-  BlendMode,
-  BlurStyle,
-  Canvas,
-  Clip,
-  Color,
-  ColorFilter,
-  FilterQuality,
-  FontStyle,
-  FontWeight,
-  ImageShader,
-  Locale,
-  MaskFilter,
-  Offset,
-  Paint,
-  PaintingStyle,
-  Path,
-  PathFillType,
-  PathOperation,
-  RRect,
-  RSTransform,
-  Radius,
-  Rect,
-  Shader,
-  Size,
-  StrokeCap,
-  StrokeJoin,
-  TextAffinity,
-  TextAlign,
-  TextBaseline,
-  TextBox,
-  TextDecoration,
-  TextDecorationStyle,
-  TextDirection,
-  TextPosition,
-  TileMode,
-  VertexMode,
-  // TODO(werainkhatri): remove these after their deprecation period in engine
-  // https://github.com/flutter/flutter/pull/99505
-  hashList, // ignore: deprecated_member_use
-  hashValues; // ignore: deprecated_member_use
+export 'dart:ui'
+    show
+        BlendMode,
+        BlurStyle,
+        Canvas,
+        Clip,
+        Color,
+        ColorFilter,
+        FilterQuality,
+        FontStyle,
+        FontWeight,
+        ImageShader,
+        Locale,
+        MaskFilter,
+        Offset,
+        Paint,
+        PaintingStyle,
+        Path,
+        PathFillType,
+        PathOperation,
+        RRect,
+        RSTransform,
+        Radius,
+        Rect,
+        Shader,
+        Size,
+        StrokeCap,
+        StrokeJoin,
+        TextAffinity,
+        TextAlign,
+        TextBaseline,
+        TextBox,
+        TextDecoration,
+        TextDecorationStyle,
+        TextDirection,
+        TextPosition,
+        TileMode,
+        VertexMode,
+        // TODO(werainkhatri): remove these after their deprecation period in engine
+        // https://github.com/flutter/flutter/pull/99505
+        hashList, // ignore: deprecated_member_use
+        hashValues; // ignore: deprecated_member_use
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 

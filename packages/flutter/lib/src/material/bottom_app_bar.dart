@@ -181,31 +181,42 @@ class _BottomAppBarState extends State<BottomAppBar> {
     final ThemeData theme = Theme.of(context);
     final bool isMaterial3 = theme.useMaterial3;
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
-    final BottomAppBarTheme defaults = isMaterial3 ? _BottomAppBarDefaultsM3(context) : _BottomAppBarDefaultsM2(context);
+    final BottomAppBarTheme defaults = isMaterial3
+        ? _BottomAppBarDefaultsM3(context)
+        : _BottomAppBarDefaultsM2(context);
 
     final bool hasFab = Scaffold.of(context).hasFloatingActionButton;
-    final NotchedShape? notchedShape = widget.shape ?? babTheme.shape ?? defaults.shape;
+    final NotchedShape? notchedShape =
+        widget.shape ?? babTheme.shape ?? defaults.shape;
     final CustomClipper<Path> clipper = notchedShape != null && hasFab
-      ? _BottomAppBarClipper(
-          geometry: geometryListenable,
-          shape: notchedShape,
-          materialKey: materialKey,
-          notchMargin: widget.notchMargin,
-        )
-      : const ShapeBorderClipper(shape: RoundedRectangleBorder());
-    final double elevation = widget.elevation ?? babTheme.elevation ?? defaults.elevation!;
+        ? _BottomAppBarClipper(
+            geometry: geometryListenable,
+            shape: notchedShape,
+            materialKey: materialKey,
+            notchMargin: widget.notchMargin,
+          )
+        : const ShapeBorderClipper(shape: RoundedRectangleBorder());
+    final double elevation =
+        widget.elevation ?? babTheme.elevation ?? defaults.elevation!;
     final double? height = widget.height ?? babTheme.height ?? defaults.height;
     final Color color = widget.color ?? babTheme.color ?? defaults.color!;
-    final Color surfaceTintColor = widget.surfaceTintColor ?? babTheme.surfaceTintColor ?? defaults.surfaceTintColor!;
+    final Color surfaceTintColor = widget.surfaceTintColor ??
+        babTheme.surfaceTintColor ??
+        defaults.surfaceTintColor!;
     final Color effectiveColor = isMaterial3
-      ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
-      : ElevationOverlay.applyOverlay(context, color, elevation);
-    final Color shadowColor = widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
+        ? ElevationOverlay.applySurfaceTint(color, surfaceTintColor, elevation)
+        : ElevationOverlay.applyOverlay(context, color, elevation);
+    final Color shadowColor =
+        widget.shadowColor ?? babTheme.shadowColor ?? defaults.shadowColor!;
 
     final Widget child = SizedBox(
       height: height,
       child: Padding(
-        padding: widget.padding ?? babTheme.padding ?? (isMaterial3 ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0) : EdgeInsets.zero),
+        padding: widget.padding ??
+            babTheme.padding ??
+            (isMaterial3
+                ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)
+                : EdgeInsets.zero),
         child: widget.child,
       ),
     );
@@ -246,11 +257,13 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   // geometry value, otherwise we compute the location based on the AppBar's
   // Material widget.
   double get bottomNavigationBarTop {
-    final double? bottomNavigationBarTop = geometry.value.bottomNavigationBarTop;
+    final double? bottomNavigationBarTop =
+        geometry.value.bottomNavigationBarTop;
     if (bottomNavigationBarTop != null) {
       return bottomNavigationBarTop;
     }
-    final RenderBox? box = materialKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? box =
+        materialKey.currentContext?.findRenderObject() as RenderBox?;
     return box?.localToGlobal(Offset.zero).dy ?? 0;
   }
 
@@ -259,23 +272,24 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     // button is the floating action button's bounding rectangle in the
     // coordinate system whose origin is at the appBar's top left corner,
     // or null if there is no floating action button.
-    final Rect? button = geometry.value.floatingActionButtonArea?.translate(0.0, bottomNavigationBarTop * -1.0);
+    final Rect? button = geometry.value.floatingActionButtonArea
+        ?.translate(0.0, bottomNavigationBarTop * -1.0);
     return shape.getOuterPath(Offset.zero & size, button?.inflate(notchMargin));
   }
 
   @override
   bool shouldReclip(_BottomAppBarClipper oldClipper) {
-    return oldClipper.geometry != geometry
-        || oldClipper.shape != shape
-        || oldClipper.notchMargin != notchMargin;
+    return oldClipper.geometry != geometry ||
+        oldClipper.shape != shape ||
+        oldClipper.notchMargin != notchMargin;
   }
 }
 
 class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
   const _BottomAppBarDefaultsM2(this.context)
-    : super(
-      elevation: 8.0,
-    );
+      : super(
+          elevation: 8.0,
+        );
 
   final BuildContext context;
 
@@ -298,11 +312,11 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   _BottomAppBarDefaultsM3(this.context)
-    : super(
-      elevation: 3.0,
-      height: 80.0,
-      shape: const AutomaticNotchedShape(RoundedRectangleBorder()),
-    );
+      : super(
+          elevation: 3.0,
+          height: 80.0,
+          shape: const AutomaticNotchedShape(RoundedRectangleBorder()),
+        );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;

@@ -150,8 +150,12 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
-       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
+  })  : placeholder = ResizeImage.resizeIfNeeded(
+            placeholderCacheWidth,
+            placeholderCacheHeight,
+            MemoryImage(placeholder, scale: placeholderScale)),
+        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight,
+            NetworkImage(image, scale: imageScale));
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
   /// while loading the final image from the network.
@@ -208,10 +212,18 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : placeholder = placeholderScale != null
-         ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
-         : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
-       image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
+  })  : placeholder = placeholderScale != null
+            ? ResizeImage.resizeIfNeeded(
+                placeholderCacheWidth,
+                placeholderCacheHeight,
+                ExactAssetImage(placeholder,
+                    bundle: bundle, scale: placeholderScale))
+            : ResizeImage.resizeIfNeeded(
+                placeholderCacheWidth,
+                placeholderCacheHeight,
+                AssetImage(placeholder, bundle: bundle)),
+        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight,
+            NetworkImage(image, scale: imageScale));
 
   /// Image displayed while the target [image] is loading.
   final ImageProvider placeholder;
@@ -347,14 +359,16 @@ class FadeInImage extends StatefulWidget {
 }
 
 class _FadeInImageState extends State<FadeInImage> {
-  static const Animation<double> _kOpaqueAnimation = AlwaysStoppedAnimation<double>(1.0);
+  static const Animation<double> _kOpaqueAnimation =
+      AlwaysStoppedAnimation<double>(1.0);
   bool targetLoaded = false;
 
   // These ProxyAnimations are changed to the fade in animation by
   // [_AnimatedFadeOutFadeInState]. Otherwise these animations are reset to
   // their defaults by [_resetAnimations].
   final ProxyAnimation _imageAnimation = ProxyAnimation(_kOpaqueAnimation);
-  final ProxyAnimation _placeholderAnimation = ProxyAnimation(_kOpaqueAnimation);
+  final ProxyAnimation _placeholderAnimation =
+      ProxyAnimation(_kOpaqueAnimation);
 
   Image _image({
     required ImageProvider image,
@@ -389,7 +403,8 @@ class _FadeInImageState extends State<FadeInImage> {
       opacity: _imageAnimation,
       fit: widget.fit,
       filterQuality: widget.filterQuality,
-      frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+      frameBuilder: (BuildContext context, Widget child, int? frame,
+          bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
           targetLoaded = true;
         }
@@ -401,7 +416,8 @@ class _FadeInImageState extends State<FadeInImage> {
             errorBuilder: widget.placeholderErrorBuilder,
             opacity: _placeholderAnimation,
             fit: widget.placeholderFit ?? widget.fit,
-            filterQuality: widget.placeholderFilterQuality ?? widget.filterQuality,
+            filterQuality:
+                widget.placeholderFilterQuality ?? widget.filterQuality,
           ),
           placeholderProxyAnimation: _placeholderAnimation,
           isTargetLoaded: targetLoaded,
@@ -439,8 +455,8 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
     required this.fadeInDuration,
     required this.fadeInCurve,
     required this.wasSynchronouslyLoaded,
-  }) : assert(!wasSynchronouslyLoaded || isTargetLoaded),
-       super(duration: fadeInDuration + fadeOutDuration);
+  })  : assert(!wasSynchronouslyLoaded || isTargetLoaded),
+        super(duration: fadeInDuration + fadeOutDuration);
 
   final Widget target;
   final ProxyAnimation targetProxyAnimation;
@@ -457,7 +473,8 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
   _AnimatedFadeOutFadeInState createState() => _AnimatedFadeOutFadeInState();
 }
 
-class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_AnimatedFadeOutFadeIn> {
+class _AnimatedFadeOutFadeInState
+    extends ImplicitlyAnimatedWidgetState<_AnimatedFadeOutFadeIn> {
   Tween<double>? _targetOpacity;
   Tween<double>? _placeholderOpacity;
   Animation<double>? _targetOpacityAnimation;
@@ -484,23 +501,27 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       return;
     }
 
-    _placeholderOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+    _placeholderOpacityAnimation =
+        animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-        tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
+        tween:
+            _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
       ),
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
         weight: widget.fadeInDuration.inMilliseconds.toDouble(),
       ),
-    ]))..addStatusListener((AnimationStatus status) {
-      if (_placeholderOpacityAnimation!.isCompleted) {
-        // Need to rebuild to remove placeholder now that it is invisible.
-        setState(() {});
-      }
-    });
+    ]))
+          ..addStatusListener((AnimationStatus status) {
+            if (_placeholderOpacityAnimation!.isCompleted) {
+              // Need to rebuild to remove placeholder now that it is invisible.
+              setState(() {});
+            }
+          });
 
-    _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
+    _targetOpacityAnimation =
+        animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
         weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
@@ -538,7 +559,9 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Animation<double>>('targetOpacity', _targetOpacityAnimation));
-    properties.add(DiagnosticsProperty<Animation<double>>('placeholderOpacity', _placeholderOpacityAnimation));
+    properties.add(DiagnosticsProperty<Animation<double>>(
+        'targetOpacity', _targetOpacityAnimation));
+    properties.add(DiagnosticsProperty<Animation<double>>(
+        'placeholderOpacity', _placeholderOpacityAnimation));
   }
 }

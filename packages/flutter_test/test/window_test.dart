@@ -25,7 +25,8 @@ void main() {
     expect(testWindow.someNewProperty, null);
   });
 
-  testWidgets('TestWindow can fake device pixel ratio', (WidgetTester tester) async {
+  testWidgets('TestWindow can fake device pixel ratio',
+      (WidgetTester tester) async {
     verifyPropertyFaked<double>(
       tester: tester,
       realValue: ui.window.devicePixelRatio,
@@ -61,7 +62,8 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.window.viewInsets;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, ViewPadding fakeValue) {
+      propertyFaker:
+          (TestWidgetsFlutterBinding binding, ViewPadding fakeValue) {
         binding.window.viewInsetsTestValue = fakeValue;
       },
       matcher: matchesViewPadding,
@@ -70,20 +72,21 @@ void main() {
 
   testWidgets('TestWindow can fake padding', (WidgetTester tester) async {
     verifyPropertyFaked<ViewPadding>(
-      tester: tester,
-      realValue: ui.window.padding,
-      fakeValue: FakeViewPadding.zero,
-      propertyRetriever: () {
-        return WidgetsBinding.instance.window.padding;
-      },
-      propertyFaker: (TestWidgetsFlutterBinding binding, ViewPadding fakeValue) {
-        binding.window.paddingTestValue = fakeValue;
-      },
-      matcher: matchesViewPadding
-    );
+        tester: tester,
+        realValue: ui.window.padding,
+        fakeValue: FakeViewPadding.zero,
+        propertyRetriever: () {
+          return WidgetsBinding.instance.window.padding;
+        },
+        propertyFaker:
+            (TestWidgetsFlutterBinding binding, ViewPadding fakeValue) {
+          binding.window.paddingTestValue = fakeValue;
+        },
+        matcher: matchesViewPadding);
   });
 
-  testWidgets('TestWindow can fake text scale factor', (WidgetTester tester) async {
+  testWidgets('TestWindow can fake text scale factor',
+      (WidgetTester tester) async {
     verifyPropertyFaked<double>(
       tester: tester,
       realValue: ui.window.textScaleFactor,
@@ -97,7 +100,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake platform brightness', (WidgetTester tester) async {
+  testWidgets('TestWindow can fake platform brightness',
+      (WidgetTester tester) async {
     verifyPropertyFaked<Brightness>(
       tester: tester,
       realValue: Brightness.light,
@@ -111,7 +115,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) async {
+  testWidgets('TestWindow can clear out fake properties all at once',
+      (WidgetTester tester) async {
     final double originalDevicePixelRatio = ui.window.devicePixelRatio;
     final double originalTextScaleFactor = ui.window.textScaleFactor;
     final TestWindow testWindow = retrieveTestBinding(tester).window;
@@ -124,25 +129,36 @@ void main() {
     testWindow.clearAllTestValues();
 
     // Verify that the window once again reports real property values.
-    expect(WidgetsBinding.instance.window.devicePixelRatio, originalDevicePixelRatio);
-    expect(WidgetsBinding.instance.window.textScaleFactor, originalTextScaleFactor);
+    expect(WidgetsBinding.instance.window.devicePixelRatio,
+        originalDevicePixelRatio);
+    expect(WidgetsBinding.instance.window.textScaleFactor,
+        originalTextScaleFactor);
   });
 
-  testWidgets('Updates to window also update tester.view', (WidgetTester tester) async {
+  testWidgets('Updates to window also update tester.view',
+      (WidgetTester tester) async {
     tester.binding.window.devicePixelRatioTestValue = 7;
-    tester.binding.window.displayFeaturesTestValue = <DisplayFeature>[const DisplayFeature(bounds: Rect.fromLTWH(0, 0, 20, 300), type: DisplayFeatureType.unknown, state: DisplayFeatureState.unknown)];
+    tester.binding.window.displayFeaturesTestValue = <DisplayFeature>[
+      const DisplayFeature(
+          bounds: Rect.fromLTWH(0, 0, 20, 300),
+          type: DisplayFeatureType.unknown,
+          state: DisplayFeatureState.unknown)
+    ];
     tester.binding.window.paddingTestValue = FakeViewPadding.zero;
     tester.binding.window.physicalSizeTestValue = const Size(505, 805);
     tester.binding.window.systemGestureInsetsTestValue = FakeViewPadding.zero;
     tester.binding.window.viewInsetsTestValue = FakeViewPadding.zero;
     tester.binding.window.viewPaddingTestValue = FakeViewPadding.zero;
-    tester.binding.window.gestureSettingsTestValue = const GestureSettings(physicalTouchSlop: 4, physicalDoubleTapSlop: 5);
+    tester.binding.window.gestureSettingsTestValue =
+        const GestureSettings(physicalTouchSlop: 4, physicalDoubleTapSlop: 5);
 
-    expect(tester.binding.window.devicePixelRatio, tester.view.devicePixelRatio);
+    expect(
+        tester.binding.window.devicePixelRatio, tester.view.devicePixelRatio);
     expect(tester.binding.window.displayFeatures, tester.view.displayFeatures);
     expect(tester.binding.window.padding, tester.view.padding);
     expect(tester.binding.window.physicalSize, tester.view.physicalSize);
-    expect(tester.binding.window.systemGestureInsets, tester.view.systemGestureInsets);
+    expect(tester.binding.window.systemGestureInsets,
+        tester.view.systemGestureInsets);
     expect(tester.binding.window.viewInsets, tester.view.viewInsets);
     expect(tester.binding.window.viewPadding, tester.view.viewPadding);
     expect(tester.binding.window.gestureSettings, tester.view.gestureSettings);

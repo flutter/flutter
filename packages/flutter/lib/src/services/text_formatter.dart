@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
@@ -140,14 +139,14 @@ class _MutableTextRange {
 
   static _MutableTextRange? fromComposingRange(TextRange range) {
     return range.isValid && !range.isCollapsed
-      ? _MutableTextRange(range.start, range.end)
-      : null;
+        ? _MutableTextRange(range.start, range.end)
+        : null;
   }
 
   static _MutableTextRange? fromTextSelection(TextSelection selection) {
     return selection.isValid
-      ? _MutableTextRange(selection.baseOffset, selection.extentOffset)
-      : null;
+        ? _MutableTextRange(selection.baseOffset, selection.extentOffset)
+        : null;
   }
 
   /// The start index of the range, inclusive.
@@ -167,8 +166,9 @@ class _MutableTextRange {
 // formatting a new user input.
 class _TextEditingValueAccumulator {
   _TextEditingValueAccumulator(this.inputValue)
-    : selection = _MutableTextRange.fromTextSelection(inputValue.selection),
-      composingRegion = _MutableTextRange.fromComposingRange(inputValue.composing);
+      : selection = _MutableTextRange.fromTextSelection(inputValue.selection),
+        composingRegion =
+            _MutableTextRange.fromComposingRange(inputValue.composing);
 
   // The original string that was sent to the [FilteringTextInputFormatter] as
   // input.
@@ -205,7 +205,8 @@ class _TextEditingValueAccumulator {
     final _MutableTextRange? composingRegion = this.composingRegion;
     return TextEditingValue(
       text: stringBuffer.toString(),
-      composing: composingRegion == null || composingRegion.base == composingRegion.extent
+      composing: composingRegion == null ||
+              composingRegion.base == composingRegion.extent
           ? TextRange.empty
           : TextRange(start: composingRegion.base, end: composingRegion.extent),
       selection: selection == null
@@ -374,7 +375,8 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    final _TextEditingValueAccumulator formatState = _TextEditingValueAccumulator(newValue);
+    final _TextEditingValueAccumulator formatState =
+        _TextEditingValueAccumulator(newValue);
     assert(!formatState.debugFinalized);
 
     final Iterable<Match> matches = filterPattern.allMatches(newValue.text);
@@ -397,15 +399,17 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
     // Handle the last non-matching region between the last match region and the
     // end of the text.
-    _processRegion(allow, previousMatch?.end ?? 0, newValue.text.length, formatState);
+    _processRegion(
+        allow, previousMatch?.end ?? 0, newValue.text.length, formatState);
     assert(!formatState.debugFinalized);
     return formatState.finalize();
   }
 
-  void _processRegion(bool isBannedRegion, int regionStart, int regionEnd, _TextEditingValueAccumulator state) {
+  void _processRegion(bool isBannedRegion, int regionStart, int regionEnd,
+      _TextEditingValueAccumulator state) {
     final String replacementString = isBannedRegion
-      ? (regionStart == regionEnd ? '' : this.replacementString)
-      : state.inputValue.text.substring(regionStart, regionEnd);
+        ? (regionStart == regionEnd ? '' : this.replacementString)
+        : state.inputValue.text.substring(regionStart, regionEnd);
 
     state.stringBuffer.write(replacementString);
 
@@ -417,23 +421,32 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
     int adjustIndex(int originalIndex) {
       // The length added by adding the replacementString.
-      final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
+      final int replacedLength =
+          originalIndex <= regionStart && originalIndex < regionEnd
+              ? 0
+              : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) -
+          regionStart; // ignore_clamp_double_lint
       return replacedLength - removedLength;
     }
 
     state.selection?.base += adjustIndex(state.inputValue.selection.baseOffset);
-    state.selection?.extent += adjustIndex(state.inputValue.selection.extentOffset);
-    state.composingRegion?.base += adjustIndex(state.inputValue.composing.start);
-    state.composingRegion?.extent += adjustIndex(state.inputValue.composing.end);
+    state.selection?.extent +=
+        adjustIndex(state.inputValue.selection.extentOffset);
+    state.composingRegion?.base +=
+        adjustIndex(state.inputValue.composing.start);
+    state.composingRegion?.extent +=
+        adjustIndex(state.inputValue.composing.end);
   }
 
   /// A [TextInputFormatter] that forces input to be a single line.
-  static final TextInputFormatter singleLineFormatter = FilteringTextInputFormatter.deny('\n');
+  static final TextInputFormatter singleLineFormatter =
+      FilteringTextInputFormatter.deny('\n');
 
   /// A [TextInputFormatter] that takes in digits `[0-9]` only.
-  static final TextInputFormatter digitsOnly = FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
+  static final TextInputFormatter digitsOnly =
+      FilteringTextInputFormatter.allow(RegExp(r'[0-9]'));
 }
 
 /// A [TextInputFormatter] that prevents the insertion of more characters
@@ -563,12 +576,13 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         baseOffset: math.min(value.selection.start, truncated.length),
         extentOffset: math.min(value.selection.end, truncated.length),
       ),
-      composing: !value.composing.isCollapsed && truncated.length > value.composing.start
-        ? TextRange(
-            start: value.composing.start,
-            end: math.min(value.composing.end, truncated.length),
-          )
-        : TextRange.empty,
+      composing: !value.composing.isCollapsed &&
+              truncated.length > value.composing.start
+          ? TextRange(
+              start: value.composing.start,
+              end: math.min(value.composing.end, truncated.length),
+            )
+          : TextRange.empty,
     );
   }
 
@@ -580,8 +594,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     final int? maxLength = this.maxLength;
 
     if (maxLength == null ||
-      maxLength == -1 ||
-      newValue.text.characters.length <= maxLength) {
+        maxLength == -1 ||
+        newValue.text.characters.length <= maxLength) {
       return newValue;
     }
 
@@ -593,7 +607,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       case MaxLengthEnforcement.enforced:
         // If already at the maximum and tried to enter even more, and has no
         // selection, keep the old value.
-        if (oldValue.text.characters.length == maxLength && oldValue.selection.isCollapsed) {
+        if (oldValue.text.characters.length == maxLength &&
+            oldValue.selection.isCollapsed) {
           return oldValue;
         }
 
@@ -603,7 +618,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
         // If already at the maximum and tried to enter even more, and the old
         // value is not composing, keep the old value.
         if (oldValue.text.characters.length == maxLength &&
-          !oldValue.composing.isValid) {
+            !oldValue.composing.isValid) {
           return oldValue;
         }
 

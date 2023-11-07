@@ -22,7 +22,8 @@ import 'code_signing.dart';
 const String noProvisioningProfileErrorOne = 'Error 0xe8008015';
 const String noProvisioningProfileErrorTwo = 'Error 0xe8000067';
 const String deviceLockedError = 'e80000e2';
-const String deviceLockedErrorMessage = 'the device was not, or could not be, unlocked';
+const String deviceLockedErrorMessage =
+    'the device was not, or could not be, unlocked';
 const String unknownAppLaunchError = 'Error 0xe8000022';
 
 class IOSDeploy {
@@ -32,11 +33,12 @@ class IOSDeploy {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-  }) : _platform = platform,
-       _cache = cache,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger,
-       _binaryPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
+  })  : _platform = platform,
+        _cache = cache,
+        _processUtils =
+            ProcessUtils(processManager: processManager, logger: logger),
+        _logger = logger,
+        _binaryPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
 
   final Cache _cache;
   final String _binaryPath;
@@ -51,7 +53,8 @@ class IOSDeploy {
     // Python script that uses package 'six'. LLDB.framework relies on the
     // python at the front of the path, which may not include package 'six'.
     // Ensure that we pick up the system install of python, which includes it.
-    final Map<String, String> environment = Map<String, String>.of(_platform.environment);
+    final Map<String, String> environment =
+        Map<String, String>.of(_platform.environment);
     environment['PATH'] = '/usr/bin:${environment['PATH']}';
     environment.addEntries(<MapEntry<String, String>>[_cache.dyLdLibEntry]);
     return environment;
@@ -87,7 +90,7 @@ class IOSDeploy {
   Future<int> installApp({
     required String deviceId,
     required String bundlePath,
-    required List<String>launchArguments,
+    required List<String> launchArguments,
     required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
   }) async {
@@ -102,8 +105,7 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != DeviceConnectionInterface.wireless)
-        '--no-wifi',
+      if (interfaceType != DeviceConnectionInterface.wireless) '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
         launchArguments.join(' '),
@@ -147,13 +149,10 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (uninstallFirst)
-        '--uninstall',
-      if (skipInstall)
-        '--noinstall',
+      if (uninstallFirst) '--uninstall',
+      if (skipInstall) '--noinstall',
       '--debug',
-      if (interfaceType != DeviceConnectionInterface.wireless)
-        '--no-wifi',
+      if (interfaceType != DeviceConnectionInterface.wireless) '--no-wifi',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
         launchArguments.join(' '),
@@ -189,10 +188,8 @@ class IOSDeploy {
         '--app_deltas',
         appDeltaDirectory.path,
       ],
-      if (interfaceType != DeviceConnectionInterface.wireless)
-        '--no-wifi',
-      if (uninstallFirst)
-        '--uninstall',
+      if (interfaceType != DeviceConnectionInterface.wireless) '--no-wifi',
+      if (uninstallFirst) '--uninstall',
       '--justlaunch',
       if (launchArguments.isNotEmpty) ...<String>[
         '--args',
@@ -238,7 +235,8 @@ class IOSDeploy {
     return true;
   }
 
-  String _monitorFailure(String stdout) => _monitorIOSDeployFailure(stdout, _logger);
+  String _monitorFailure(String stdout) =>
+      _monitorIOSDeployFailure(stdout, _logger);
 }
 
 /// lldb attach state flow.
@@ -255,7 +253,7 @@ class IOSDeployDebugger {
     required ProcessUtils processUtils,
     required List<String> launchCommand,
     required Map<String, String> iosDeployEnv,
-  }) : _processUtils = processUtils,
+  })  : _processUtils = processUtils,
         _logger = logger,
         _launchCommand = launchCommand,
         _iosDeployEnv = iosDeployEnv,
@@ -272,7 +270,8 @@ class IOSDeployDebugger {
     final Logger debugLogger = logger ?? BufferLogger.test();
     return IOSDeployDebugger(
       logger: debugLogger,
-      processUtils: ProcessUtils(logger: debugLogger, processManager: processManager),
+      processUtils:
+          ProcessUtils(logger: debugLogger, processManager: processManager),
       launchCommand: <String>['ios-deploy'],
       iosDeployEnv: <String, String>{},
     );
@@ -286,9 +285,11 @@ class IOSDeployDebugger {
   Process? _iosDeployProcess;
 
   Stream<String> get logLines => _debuggerOutput.stream;
-  final StreamController<String> _debuggerOutput = StreamController<String>.broadcast();
+  final StreamController<String> _debuggerOutput =
+      StreamController<String>.broadcast();
 
-  bool get debuggerAttached => _debuggerState == _IOSDeployDebuggerState.attached;
+  bool get debuggerAttached =>
+      _debuggerState == _IOSDeployDebuggerState.attached;
   _IOSDeployDebuggerState _debuggerState;
 
   @visibleForTesting
@@ -297,11 +298,13 @@ class IOSDeployDebugger {
   // (lldb)    platform select remote-'ios' --sysroot
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L33
   // This regex is to get the configurable lldb prompt. By default this prompt will be "lldb".
-  static final RegExp _lldbPlatformSelect = RegExp(r"\s*platform select remote-'ios' --sysroot");
+  static final RegExp _lldbPlatformSelect =
+      RegExp(r"\s*platform select remote-'ios' --sysroot");
 
   // (lldb)     run
   // https://github.com/ios-control/ios-deploy/blob/1.11.2-beta.1/src/ios-deploy/ios-deploy.m#L51
-  static final RegExp _lldbProcessExit = RegExp(r'Process \d* exited with status =');
+  static final RegExp _lldbProcessExit =
+      RegExp(r'Process \d* exited with status =');
 
   // (lldb) Process 6152 stopped
   static final RegExp _lldbProcessStopped = RegExp(r'Process \d* stopped');
@@ -331,7 +334,8 @@ class IOSDeployDebugger {
   Completer<void>? _processResumeCompleter;
 
   // Process 525 exited with status = -1 (0xffffffff) lost connection
-  static final RegExp _lostConnectionPattern = RegExp(r'exited with status = -1 \(0xffffffff\) lost connection');
+  static final RegExp _lostConnectionPattern =
+      RegExp(r'exited with status = -1 \(0xffffffff\) lost connection');
 
   /// Whether ios-deploy received a message matching [_lostConnectionPattern],
   /// indicating that it lost connection to the device.
@@ -357,7 +361,8 @@ class IOSDeployDebugger {
         environment: _iosDeployEnv,
       );
       String? lastLineFromDebugger;
-      final StreamSubscription<String> stdoutSubscription = _iosDeployProcess!.stdout
+      final StreamSubscription<String> stdoutSubscription = _iosDeployProcess!
+          .stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
@@ -368,7 +373,8 @@ class IOSDeployDebugger {
         // For example `settings set prompt "(mylldb)"` in ~/.lldbinit results in:
         // "(mylldb)    platform select remote-'ios' --sysroot"
         if (_lldbPlatformSelect.hasMatch(line)) {
-          final String platformSelect = _lldbPlatformSelect.stringMatch(line) ?? '';
+          final String platformSelect =
+              _lldbPlatformSelect.stringMatch(line) ?? '';
           if (platformSelect.isEmpty) {
             return;
           }
@@ -406,7 +412,9 @@ class IOSDeployDebugger {
         if (_debuggerState == _IOSDeployDebuggerState.launching) {
           _logger.printTrace(line);
           final bool attachSuccess = line == 'success';
-          _debuggerState = attachSuccess ? _IOSDeployDebuggerState.attached : _IOSDeployDebuggerState.detached;
+          _debuggerState = attachSuccess
+              ? _IOSDeployDebuggerState.attached
+              : _IOSDeployDebuggerState.detached;
           if (!debuggerCompleter.isCompleted) {
             debuggerCompleter.complete(attachSuccess);
           }
@@ -437,7 +445,8 @@ class IOSDeployDebugger {
           _debuggerState = _IOSDeployDebuggerState.detached;
 
           // If we paused the app and are waiting to resume it, complete the completer
-          final Completer<void>? processResumeCompleter = _processResumeCompleter;
+          final Completer<void>? processResumeCompleter =
+              _processResumeCompleter;
           if (processResumeCompleter != null) {
             _processResumeCompleter = null;
             processResumeCompleter.complete();
@@ -445,7 +454,8 @@ class IOSDeployDebugger {
           return;
         }
 
-        if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
+        if (line.contains('PROCESS_STOPPED') ||
+            _lldbProcessStopped.hasMatch(line)) {
           // The app has been stopped. Dump the backtrace, and detach.
           _logger.printTrace(line);
           _iosDeployProcess?.stdin.writeln(_backTraceAll);
@@ -455,7 +465,8 @@ class IOSDeployDebugger {
           return;
         }
 
-        if (line.contains('PROCESS_EXITED') || _lldbProcessExit.hasMatch(line)) {
+        if (line.contains('PROCESS_EXITED') ||
+            _lldbProcessExit.hasMatch(line)) {
           // The app exited or crashed, so exit. Continue passing debugging
           // messages to the log reader until it exits to capture crash dumps.
           _logger.printTrace(line);
@@ -484,7 +495,9 @@ class IOSDeployDebugger {
           _logger.printTrace(line);
           return;
         }
-        if (lastLineFromDebugger != null && lastLineFromDebugger!.isNotEmpty && line.isEmpty) {
+        if (lastLineFromDebugger != null &&
+            lastLineFromDebugger!.isNotEmpty &&
+            line.isEmpty) {
           // The lldb console stream from ios-deploy is separated lines by an extra \r\n.
           // To avoid all lines being double spaced, if the last line from the
           // debugger was not an empty line, skip this empty line.
@@ -504,7 +517,8 @@ class IOSDeployDebugger {
         }
         lastLineFromDebugger = line;
       });
-      final StreamSubscription<String> stderrSubscription = _iosDeployProcess!.stderr
+      final StreamSubscription<String> stderrSubscription = _iosDeployProcess!
+          .stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
@@ -544,7 +558,8 @@ class IOSDeployDebugger {
   }
 
   bool exit() {
-    final bool success = (_iosDeployProcess == null) || _iosDeployProcess!.kill();
+    final bool success =
+        (_iosDeployProcess == null) || _iosDeployProcess!.kill();
     _iosDeployProcess = null;
     return success;
   }
@@ -581,13 +596,16 @@ class IOSDeployDebugger {
       _logger.printTrace('No path provided for Symbols directory.');
       return;
     }
-    final Directory symbolsDirectory = fileSystem.directory(symbolsDirectoryPath);
+    final Directory symbolsDirectory =
+        fileSystem.directory(symbolsDirectoryPath);
     if (!symbolsDirectory.existsSync()) {
-      _logger.printTrace('Unable to find Symbols directory at $symbolsDirectoryPath');
+      _logger.printTrace(
+          'Unable to find Symbols directory at $symbolsDirectoryPath');
       return;
     }
     final Directory currentDeviceSupportDir = symbolsDirectory.parent;
-    final List<FileSystemEntity> symbolStatusFiles = currentDeviceSupportDir.listSync();
+    final List<FileSystemEntity> symbolStatusFiles =
+        currentDeviceSupportDir.listSync();
     _logger.printTrace('Symbol files:');
     for (final FileSystemEntity file in symbolStatusFiles) {
       _logger.printTrace('  ${file.basename}');
@@ -627,11 +645,13 @@ class IOSDeployDebugger {
 // Maps stdout line stream. Must return original line.
 String _monitorIOSDeployFailure(String stdout, Logger logger) {
   // Installation issues.
-  if (stdout.contains(noProvisioningProfileErrorOne) || stdout.contains(noProvisioningProfileErrorTwo)) {
+  if (stdout.contains(noProvisioningProfileErrorOne) ||
+      stdout.contains(noProvisioningProfileErrorTwo)) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
 
     // Launch issues.
-  } else if (stdout.contains(deviceLockedError) || stdout.contains(deviceLockedErrorMessage)) {
+  } else if (stdout.contains(deviceLockedError) ||
+      stdout.contains(deviceLockedErrorMessage)) {
     logger.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Your device is locked. Unlock your device first before running.

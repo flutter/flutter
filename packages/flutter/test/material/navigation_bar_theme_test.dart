@@ -15,8 +15,10 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
-    expect(const NavigationBarThemeData(), const NavigationBarThemeData().copyWith());
-    expect(const NavigationBarThemeData().hashCode, const NavigationBarThemeData().copyWith().hashCode);
+    expect(const NavigationBarThemeData(),
+        const NavigationBarThemeData().copyWith());
+    expect(const NavigationBarThemeData().hashCode,
+        const NavigationBarThemeData().copyWith().hashCode);
   });
 
   test('NavigationBarThemeData lerp special cases', () {
@@ -25,7 +27,8 @@ void main() {
     expect(identical(NavigationBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
@@ -37,7 +40,8 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData(
       height: 200.0,
@@ -45,8 +49,10 @@ void main() {
       elevation: 20.0,
       indicatorColor: Color(0x00000098),
       indicatorShape: CircleBorder(),
-      labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
-      iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000097))),
+      labelTextStyle:
+          MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
+      iconTheme: MaterialStatePropertyAll<IconThemeData>(
+          IconThemeData(color: Color(0x00000097))),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
     ).debugFillProperties(builder);
 
@@ -59,17 +65,25 @@ void main() {
     expect(description[1], 'backgroundColor: Color(0x00000099)');
     expect(description[2], 'elevation: 20.0');
     expect(description[3], 'indicatorColor: Color(0x00000098)');
-    expect(description[4], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
-    expect(description[5], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
+    expect(description[4],
+        'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
+    expect(description[5],
+        'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
 
     // Ignore instance address for IconThemeData.
-    expect(description[6].contains('iconTheme: MaterialStatePropertyAll(IconThemeData'), isTrue);
+    expect(
+        description[6]
+            .contains('iconTheme: MaterialStatePropertyAll(IconThemeData'),
+        isTrue);
     expect(description[6].contains('(color: Color(0x00000097))'), isTrue);
 
-    expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
+    expect(description[7],
+        'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
   });
 
-  testWidgetsWithLeakTracking('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'NavigationBarThemeData values are used when no NavigationBar properties are specified',
+      (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -83,7 +97,8 @@ void main() {
     const double unselectedIconOpacity = 0.98;
     const double selectedLabelFontSize = 13.0;
     const double unselectedLabelFontSize = 11.0;
-    const NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+    const NavigationDestinationLabelBehavior labelBehavior =
+        NavigationDestinationLabelBehavior.alwaysShow;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -95,7 +110,8 @@ void main() {
               elevation: elevation,
               indicatorColor: indicatorColor,
               indicatorShape: indicatorShape,
-              iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              iconTheme: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return const IconThemeData(
                     size: selectedIconSize,
@@ -109,7 +125,8 @@ void main() {
                   opacity: unselectedIconOpacity,
                 );
               }),
-              labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              labelTextStyle: MaterialStateProperty.resolveWith(
+                  (Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return const TextStyle(fontSize: selectedLabelFontSize);
                 }
@@ -141,11 +158,14 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgetsWithLeakTracking('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'NavigationBar values take priority over NavigationBarThemeData values when both properties are specified',
+      (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
-    const NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+    const NavigationDestinationLabelBehavior labelBehavior =
+        NavigationDestinationLabelBehavior.alwaysShow;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -175,8 +195,9 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgetsWithLeakTracking('Custom label style renders ink ripple properly', (WidgetTester tester) async {
-    Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
+  testWidgetsWithLeakTracking('Custom label style renders ink ripple properly',
+      (WidgetTester tester) async {
+    Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
       return MaterialApp(
         theme: ThemeData(
           navigationBarTheme: const NavigationBarThemeData(
@@ -200,7 +221,7 @@ void main() {
                   label: 'Alarm',
                 ),
               ],
-              onDestinationSelected: (int i) { },
+              onDestinationSelected: (int i) {},
             ),
           ),
         ),
@@ -209,12 +230,15 @@ void main() {
 
     await tester.pumpWidget(buildWidget());
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(NavigationDestination).last));
+    await gesture
+        .moveTo(tester.getCenter(find.byType(NavigationDestination).last));
     await tester.pumpAndSettle();
 
-    await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_custom_label_style.png'));
+    await expectLater(find.byType(NavigationBar),
+        matchesGoldenFile('indicator_custom_label_style.png'));
   });
 }
 
@@ -234,9 +258,11 @@ List<NavigationDestination> _destinations() {
 }
 
 double _barHeight(WidgetTester tester) {
-  return tester.getRect(
-    find.byType(NavigationBar),
-  ).height;
+  return tester
+      .getRect(
+        find.byType(NavigationBar),
+      )
+      .height;
 }
 
 Material _barMaterial(WidgetTester tester) {
@@ -249,12 +275,14 @@ Material _barMaterial(WidgetTester tester) {
 }
 
 ShapeDecoration? _indicator(WidgetTester tester) {
-  return tester.firstWidget<Container>(
-    find.descendant(
-      of: find.byType(FadeTransition),
-      matching: find.byType(Container),
-    ),
-  ).decoration as ShapeDecoration?;
+  return tester
+      .firstWidget<Container>(
+        find.descendant(
+          of: find.byType(FadeTransition),
+          matching: find.byType(Container),
+        ),
+      )
+      .decoration as ShapeDecoration?;
 }
 
 IconThemeData _selectedIconTheme(WidgetTester tester) {
@@ -266,34 +294,43 @@ IconThemeData _unselectedIconTheme(WidgetTester tester) {
 }
 
 IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
-  return tester.firstWidget<IconTheme>(
-    find.ancestor(
-      of: find.byIcon(icon),
-      matching: find.byType(IconTheme),
-    ),
-  ).data;
+  return tester
+      .firstWidget<IconTheme>(
+        find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byType(IconTheme),
+        ),
+      )
+      .data;
 }
 
 TextStyle _selectedLabelStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(
-      of: find.text('Abc'),
-      matching: find.byType(RichText),
-    ),
-  ).text.style!;
+  return tester
+      .widget<RichText>(
+        find.descendant(
+          of: find.text('Abc'),
+          matching: find.byType(RichText),
+        ),
+      )
+      .text
+      .style!;
 }
 
 TextStyle _unselectedLabelStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(
-      of: find.text('Def'),
-      matching: find.byType(RichText),
-    ),
-  ).text.style!;
+  return tester
+      .widget<RichText>(
+        find.descendant(
+          of: find.text('Def'),
+          matching: find.byType(RichText),
+        ),
+      )
+      .text
+      .style!;
 }
 
 NavigationDestinationLabelBehavior _labelBehavior(WidgetTester tester) {
-  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty && _opacityAboveLabel('Def').evaluate().isNotEmpty) {
+  if (_opacityAboveLabel('Abc').evaluate().isNotEmpty &&
+      _opacityAboveLabel('Def').evaluate().isNotEmpty) {
     return _labelOpacity(tester, 'Abc') == 1
         ? NavigationDestinationLabelBehavior.onlyShowSelected
         : NavigationDestinationLabelBehavior.alwaysHide;

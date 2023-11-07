@@ -18,7 +18,8 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
-final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+final Platform macPlatform =
+    FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
@@ -72,10 +73,14 @@ void main() {
     expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
-  testUsingContext('DebugUniversalFramework creates simulator binary', () async {
+  testUsingContext('DebugUniversalFramework creates simulator binary',
+      () async {
     environment.defines[kIosArchs] = 'x86_64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
-    final String appFrameworkPath = environment.buildDir.childDirectory('App.framework').childFile('App').path;
+    final String appFrameworkPath = environment.buildDir
+        .childDirectory('App.framework')
+        .childFile('App')
+        .path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         'xcrun',
@@ -129,10 +134,15 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('DebugUniversalFramework creates expected binary with arm64 only arch', () async {
+  testUsingContext(
+      'DebugUniversalFramework creates expected binary with arm64 only arch',
+      () async {
     environment.defines[kIosArchs] = 'arm64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
-    final String appFrameworkPath = environment.buildDir.childDirectory('App.framework').childFile('App').path;
+    final String appFrameworkPath = environment.buildDir
+        .childDirectory('App.framework')
+        .childFile('App')
+        .path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
         'xcrun',
@@ -179,35 +189,41 @@ void main() {
     environment.defines[kCodesignIdentity] = 'ABC123';
     // Precompiled dart data
 
-    fileSystem.file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
-      .createSync();
-    fileSystem.file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
-      .createSync();
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.vmSnapshotData,
+            mode: BuildMode.debug))
+        .createSync();
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData,
+            mode: BuildMode.debug))
+        .createSync();
     // Project info
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
     fileSystem.file('.packages').writeAsStringSync('\n');
     // Plist file
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+        .createSync(recursive: true);
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // Stub framework
     environment.buildDir
         .childDirectory('App.framework')
-      .childFile('App')
-      .createSync(recursive: true);
+        .childFile('App')
+        .createSync(recursive: true);
     // sksl bundle
     fileSystem.file('bundle.sksl').writeAsStringSync(json.encode(
-      <String, Object>{
-        'engineRevision': '2',
-        'platform': 'ios',
-        'data': <String, Object>{
-          'A': 'B',
-        },
-      },
-    ));
+          <String, Object>{
+            'engineRevision': '2',
+            'platform': 'ios',
+            'data': <String, Object>{
+              'A': 'B',
+            },
+          },
+        ));
 
-    final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final Directory frameworkDirectory =
+        environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -233,37 +249,50 @@ void main() {
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
 
-    final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
+    final Directory assetDirectory =
+        frameworkDirectory.childDirectory('flutter_assets');
     expect(assetDirectory.childFile('kernel_blob.bin'), exists);
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), exists);
     expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
     expect(assetDirectory.childFile('io.flutter.shaders.json'), exists);
-    expect(assetDirectory.childFile('io.flutter.shaders.json').readAsStringSync(), '{"data":{"A":"B"}}');
+    expect(
+        assetDirectory.childFile('io.flutter.shaders.json').readAsStringSync(),
+        '{"data":{"A":"B"}}');
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
   });
 
-  testUsingContext('DebugIosApplicationBundle with impeller and shader compilation', () async {
+  testUsingContext(
+      'DebugIosApplicationBundle with impeller and shader compilation',
+      () async {
     // Create impellerc to work around fallback detection logic.
-    fileSystem.file(artifacts.getHostArtifact(HostArtifact.impellerc)).createSync(recursive: true);
+    fileSystem
+        .file(artifacts.getHostArtifact(HostArtifact.impellerc))
+        .createSync(recursive: true);
 
     environment.defines[kBuildMode] = 'debug';
     environment.defines[kCodesignIdentity] = 'ABC123';
     // Precompiled dart data
 
-    fileSystem.file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
-      .createSync();
-    fileSystem.file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
-      .createSync();
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.vmSnapshotData,
+            mode: BuildMode.debug))
+        .createSync();
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData,
+            mode: BuildMode.debug))
+        .createSync();
     // Project info
-    fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
+    fileSystem.file('pubspec.yaml').writeAsStringSync(
+        'name: hello\nflutter:\n  shaders:\n    - shader.glsl');
     fileSystem.file('.packages').writeAsStringSync('\n');
     // Plist file
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+        .createSync(recursive: true);
     // Shader file
     fileSystem.file('shader.glsl').writeAsStringSync('test');
     // App kernel
@@ -271,10 +300,11 @@ void main() {
     // Stub framework
     environment.buildDir
         .childDirectory('App.framework')
-      .childFile('App')
-      .createSync(recursive: true);
+        .childFile('App')
+        .createSync(recursive: true);
 
-    final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final Directory frameworkDirectory =
+        environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(command: <String>[
@@ -311,7 +341,8 @@ void main() {
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
 
-    final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
+    final Directory assetDirectory =
+        frameworkDirectory.childDirectory('flutter_assets');
     expect(assetDirectory.childFile('kernel_blob.bin'), exists);
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), exists);
@@ -331,25 +362,27 @@ void main() {
     fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
     fileSystem.file('.packages').writeAsStringSync('\n');
     // Plist file
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+        .createSync(recursive: true);
 
     // Real framework
     environment.buildDir
-      .childDirectory('App.framework')
-      .childFile('App')
-      .createSync(recursive: true);
+        .childDirectory('App.framework')
+        .childFile('App')
+        .createSync(recursive: true);
 
     // Input dSYM
     environment.buildDir
-      .childDirectory('App.framework.dSYM')
-      .childDirectory('Contents')
-      .childDirectory('Resources')
-      .childDirectory('DWARF')
-      .childFile('App')
-      .createSync(recursive: true);
+        .childDirectory('App.framework.dSYM')
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF')
+        .childFile('App')
+        .createSync(recursive: true);
 
-    final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final Directory frameworkDirectory =
+        environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -373,14 +406,17 @@ void main() {
 
     expect(frameworkDirectoryBinary, exists);
     expect(frameworkDirectory.childFile('Info.plist'), exists);
-    expect(environment.outputDir
-      .childDirectory('App.framework.dSYM')
-      .childDirectory('Contents')
-      .childDirectory('Resources')
-      .childDirectory('DWARF')
-      .childFile('App'), exists);
+    expect(
+        environment.outputDir
+            .childDirectory('App.framework.dSYM')
+            .childDirectory('Contents')
+            .childDirectory('Resources')
+            .childDirectory('DWARF')
+            .childFile('App'),
+        exists);
 
-    final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
+    final Directory assetDirectory =
+        frameworkDirectory.childDirectory('flutter_assets');
     expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
     expect(assetDirectory.childFile('AssetManifest.json'), exists);
     expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
@@ -392,11 +428,13 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('ReleaseIosApplicationBundle sends archive success event', () async {
+  testUsingContext('ReleaseIosApplicationBundle sends archive success event',
+      () async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kXcodeAction] = 'install';
 
-    fileSystem.file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+    fileSystem
+        .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
         .createSync(recursive: true);
 
     environment.buildDir
@@ -404,7 +442,8 @@ void main() {
         .childFile('App')
         .createSync(recursive: true);
 
-    final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+    final Directory frameworkDirectory =
+        environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -424,28 +463,38 @@ void main() {
     ]);
 
     await const ReleaseIosApplicationBundle().build(environment);
-    expect(usage.events, contains(const TestUsageEvent('assemble', 'ios-archive', label: 'success')));
+    expect(
+        usage.events,
+        contains(
+            const TestUsageEvent('assemble', 'ios-archive', label: 'success')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
   });
 
-  testUsingContext('ReleaseIosApplicationBundle sends archive fail event', () async {
+  testUsingContext('ReleaseIosApplicationBundle sends archive fail event',
+      () async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kXcodeAction] = 'install';
 
     // Throws because the project files are not set up.
-    await expectLater(() => const ReleaseIosApplicationBundle().build(environment),
+    await expectLater(
+        () => const ReleaseIosApplicationBundle().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()));
-    expect(usage.events, contains(const TestUsageEvent('assemble', 'ios-archive', label: 'fail')));
+    expect(
+        usage.events,
+        contains(
+            const TestUsageEvent('assemble', 'ios-archive', label: 'fail')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
     Platform: () => macPlatform,
   });
 
-  testUsingContext('AotAssemblyRelease throws exception if asked to build for simulator', () async {
+  testUsingContext(
+      'AotAssemblyRelease throws exception if asked to build for simulator',
+      () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -461,13 +510,14 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    expect(const AotAssemblyRelease().build(environment), throwsA(isException
-      .having(
-        (Exception exception) => exception.toString(),
-        'description',
-        contains('release/profile builds are only supported for physical devices.'),
-      )
-    ));
+    expect(
+        const AotAssemblyRelease().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains(
+              'release/profile builds are only supported for physical devices.'),
+        )));
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -475,7 +525,8 @@ void main() {
     Platform: () => macPlatform,
   });
 
-  testUsingContext('AotAssemblyRelease throws exception if sdk root is missing', () async {
+  testUsingContext('AotAssemblyRelease throws exception if sdk root is missing',
+      () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
@@ -490,11 +541,13 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kIosArchs] = 'x86_64';
 
-    expect(const AotAssemblyRelease().build(environment), throwsA(isException.having(
-      (Exception exception) => exception.toString(),
-      'description',
-      contains('required define SdkRoot but it was not provided'),
-    )));
+    expect(
+        const AotAssemblyRelease().build(environment),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'description',
+          contains('required define SdkRoot but it was not provided'),
+        )));
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -514,7 +567,8 @@ void main() {
     setUp(() {
       final FileSystem fileSystem = MemoryFileSystem.test();
       outputDir = fileSystem.directory('output');
-      binary = outputDir.childDirectory('Flutter.framework').childFile('Flutter');
+      binary =
+          outputDir.childDirectory('Flutter.framework').childFile('Flutter');
       copyPhysicalFrameworkCommand = FakeCommand(command: <String>[
         'rsync',
         '-av',
@@ -571,14 +625,15 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'rsync',
-          '-av',
-          '--delete',
-          '--filter',
-          '- .DS_Store/',
-          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
-          outputDir.path,
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+            outputDir.path,
           ],
           onRun: () => binary.createSync(recursive: true),
         ),
@@ -594,7 +649,10 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
+      expect(
+          logger.traceText,
+          contains(
+              'Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
       expect(processManager, hasNoRemainingExpectations);
     });
 
@@ -613,15 +671,16 @@ void main() {
       );
       processManager.addCommand(copyPhysicalFrameworkCommand);
       await expectLater(
-        const DebugUnpackIOS().build(environment),
-        throwsA(isException.having(
-          (Exception exception) => exception.toString(),
-          'description',
-          contains('Flutter.framework/Flutter does not exist, cannot thin'),
-        )));
+          const DebugUnpackIOS().build(environment),
+          throwsA(isException.having(
+            (Exception exception) => exception.toString(),
+            'description',
+            contains('Flutter.framework/Flutter does not exist, cannot thin'),
+          )));
     });
 
-    testWithoutContext('fails when requested archs missing from framework', () async {
+    testWithoutContext('fails when requested archs missing from framework',
+        () async {
       binary.createSync(recursive: true);
 
       final Environment environment = Environment.test(
@@ -658,7 +717,8 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
+          contains(
+              'does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
         )),
       );
     });
@@ -702,8 +762,7 @@ void main() {
           '-extract',
           'armv7',
           binary.path,
-        ], exitCode: 1,
-        stderr: 'lipo error'),
+        ], exitCode: 1, stderr: 'lipo error'),
       ]);
 
       await expectLater(
@@ -711,7 +770,8 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
+          contains(
+              'Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
         )),
       );
     });
@@ -741,7 +801,10 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
-      expect(logger.traceText, contains('Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
+      expect(
+          logger.traceText,
+          contains(
+              'Skipping lipo for non-fat file output/Flutter.framework/Flutter'));
 
       expect(processManager, hasNoRemainingExpectations);
     });
@@ -837,7 +900,8 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to strip bitcode for output/Flutter.framework/Flutter.\nbitcode_strip error'),
+          contains(
+              'Failed to strip bitcode for output/Flutter.framework/Flutter.\nbitcode_strip error'),
         )),
       );
 
@@ -894,7 +958,8 @@ void main() {
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
-        FakeCommand(command: <String>[
+        FakeCommand(
+          command: <String>[
             'codesign',
             '--force',
             '--sign',
@@ -913,7 +978,8 @@ void main() {
         throwsA(isException.having(
           (Exception exception) => exception.toString(),
           'description',
-          contains('Failed to codesign output/Flutter.framework/Flutter with identity ABC123.\ncodesign info\ncodesign error'),
+          contains(
+              'Failed to codesign output/Flutter.framework/Flutter with identity ABC123.\ncodesign info\ncodesign error'),
         )),
       );
 

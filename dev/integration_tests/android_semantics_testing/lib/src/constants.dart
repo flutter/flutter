@@ -29,7 +29,6 @@ class AndroidClassName {
 
 /// Action constants which correspond to `AccessibilityAction` in Android.
 enum AndroidSemanticsAction {
-
   /// Matches `AccessibilityAction.ACTION_FOCUS`.
   focus(_kFocusIndex),
 
@@ -121,7 +120,8 @@ enum AndroidSemanticsAction {
   static const int _kCollapseIndex = 1 << 19;
   static const int _kSetText = 1 << 21;
 
-  static const Map<int, AndroidSemanticsAction> _kActionById = <int, AndroidSemanticsAction>{
+  static const Map<int, AndroidSemanticsAction> _kActionById =
+      <int, AndroidSemanticsAction>{
     _kFocusIndex: focus,
     _kClearFocusIndex: clearFocus,
     _kSelectIndex: select,

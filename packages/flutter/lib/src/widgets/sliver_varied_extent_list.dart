@@ -62,14 +62,15 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(delegate: SliverChildBuilderDelegate(
-    itemBuilder,
-    findChildIndexCallback: findChildIndexCallback,
-    childCount: itemCount,
-    addAutomaticKeepAlives: addAutomaticKeepAlives,
-    addRepaintBoundaries: addRepaintBoundaries,
-    addSemanticIndexes: addSemanticIndexes,
-  ));
+  }) : super(
+            delegate: SliverChildBuilderDelegate(
+          itemBuilder,
+          findChildIndexCallback: findChildIndexCallback,
+          childCount: itemCount,
+          addAutomaticKeepAlives: addAutomaticKeepAlives,
+          addRepaintBoundaries: addRepaintBoundaries,
+          addSemanticIndexes: addSemanticIndexes,
+        ));
 
   /// A sliver that places multiple box children in a linear array along the main
   /// axis.
@@ -87,24 +88,28 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
-  }) : super(delegate: SliverChildListDelegate(
-    children,
-    addAutomaticKeepAlives: addAutomaticKeepAlives,
-    addRepaintBoundaries: addRepaintBoundaries,
-    addSemanticIndexes: addSemanticIndexes,
-  ));
+  }) : super(
+            delegate: SliverChildListDelegate(
+          children,
+          addAutomaticKeepAlives: addAutomaticKeepAlives,
+          addRepaintBoundaries: addRepaintBoundaries,
+          addSemanticIndexes: addSemanticIndexes,
+        ));
 
   /// The children extent builder.
   final ItemExtentBuilder itemExtentBuilder;
 
   @override
   RenderSliverVariedExtentList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverVariedExtentList(childManager: element, itemExtentBuilder: itemExtentBuilder);
+    final SliverMultiBoxAdaptorElement element =
+        context as SliverMultiBoxAdaptorElement;
+    return RenderSliverVariedExtentList(
+        childManager: element, itemExtentBuilder: itemExtentBuilder);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverVariedExtentList renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderSliverVariedExtentList renderObject) {
     renderObject.itemExtentBuilder = itemExtentBuilder;
   }
 }

@@ -12,7 +12,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../image_data.dart';
 import '../widgets/semantics_tester.dart';
 
-Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
+Future<void> pumpWidgetWithBoilerplate(
+    WidgetTester tester, Widget widget) async {
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
@@ -29,17 +30,20 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 }
 
 Future<void> main() async {
-
-  testWidgetsWithLeakTracking('Need at least 2 tabs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Need at least 2 tabs',
+      (WidgetTester tester) async {
     await expectLater(
-      () => pumpWidgetWithBoilerplate(tester, CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
-          ),
-        ],
-      )),
+      () => pumpWidgetWithBoilerplate(
+          tester,
+          CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+            ],
+          )),
       throwsA(isAssertionError.having(
         (AssertionError error) => error.toString(),
         '.toString()',
@@ -48,25 +52,30 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('Active and inactive colors', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+  testWidgetsWithLeakTracking('Active and inactive colors',
+      (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
+            currentIndex: 1,
+            activeColor: const Color(0xFF123456),
+            inactiveColor: const Color(0xFF654321),
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
-        currentIndex: 1,
-        activeColor: const Color(0xFF123456),
-        inactiveColor: const Color(0xFF654321),
-      ),
-    ));
+        ));
 
     final RichText actualInactive = tester.widget(find.descendant(
       of: find.text('Tab 1'),
@@ -81,58 +90,70 @@ Future<void> main() async {
     expect(actualActive.text.style!.color, const Color(0xFF123456));
   });
 
-
-  testWidgetsWithLeakTracking('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+  testWidgetsWithLeakTracking(
+      'BottomNavigationBar.label will create a text widget',
+      (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
+            currentIndex: 1,
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
-        currentIndex: 1,
-      ),
-    ));
+        ));
 
     expect(find.text('Tab 1'), findsOneWidget);
     expect(find.text('Tab 2'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Active and inactive colors dark mode', (WidgetTester tester) async {
-    const CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
+  testWidgetsWithLeakTracking('Active and inactive colors dark mode',
+      (WidgetTester tester) async {
+    const CupertinoDynamicColor dynamicActiveColor =
+        CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
     );
 
-    const CupertinoDynamicColor dynamicInactiveColor = CupertinoDynamicColor.withBrightness(
+    const CupertinoDynamicColor dynamicInactiveColor =
+        CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000002),
       darkColor: Color(0xFF000003),
     );
 
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
+            currentIndex: 1,
+            activeColor: dynamicActiveColor,
+            inactiveColor: dynamicInactiveColor,
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
-        currentIndex: 1,
-        activeColor: dynamicActiveColor,
-        inactiveColor: dynamicInactiveColor,
-      ),
-    ));
+        ));
 
     RichText actualInactive = tester.widget(find.descendant(
       of: find.text('Tab 1'),
@@ -146,63 +167,73 @@ Future<void> main() async {
     ));
     expect(actualActive.text.style!.color!.value, 0xFF000000);
 
-    final RenderDecoratedBox renderDecoratedBox = tester.renderObject(find.descendant(
+    final RenderDecoratedBox renderDecoratedBox =
+        tester.renderObject(find.descendant(
       of: find.byType(BackdropFilter),
       matching: find.byType(DecoratedBox),
     ));
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration1 = renderDecoratedBox.decoration as BoxDecoration;
+    final BoxDecoration decoration1 =
+        renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration1.border!.top.color.value, 0x4D000000);
 
     // Switch to dark mode.
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.dark),
-        child: CupertinoTabBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              label: 'Tab 1',
-            ),
-            BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-              label: 'Tab 2',
-            ),
-          ],
-          currentIndex: 1,
-          activeColor: dynamicActiveColor,
-          inactiveColor: dynamicInactiveColor,
-        ),
-    ));
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
+            currentIndex: 1,
+            activeColor: dynamicActiveColor,
+            inactiveColor: dynamicInactiveColor,
+          ),
+        ));
 
     actualInactive = tester.widget(find.descendant(
-        of: find.text('Tab 1'),
-        matching: find.byType(RichText),
+      of: find.text('Tab 1'),
+      matching: find.byType(RichText),
     ));
     expect(actualInactive.text.style!.color!.value, 0xFF000003);
 
     actualActive = tester.widget(find.descendant(
-        of: find.text('Tab 2'),
-        matching: find.byType(RichText),
+      of: find.text('Tab 2'),
+      matching: find.byType(RichText),
     ));
     expect(actualActive.text.style!.color!.value, 0xFF000001);
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration2 = renderDecoratedBox.decoration as BoxDecoration;
+    final BoxDecoration decoration2 =
+        renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration2.border!.top.color.value, 0x29000000);
   });
 
-  testWidgetsWithLeakTracking('Tabs respects themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tabs respects themes',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              icon:
+                  ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
               label: 'Tab 1',
             ),
             BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              icon:
+                  ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
               label: 'Tab 2',
             ),
           ],
@@ -229,11 +260,13 @@ Future<void> main() async {
         home: CupertinoTabBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              icon:
+                  ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
               label: 'Tab 1',
             ),
             BottomNavigationBarItem(
-              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              icon:
+                  ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
               label: 'Tab 2',
             ),
           ],
@@ -253,32 +286,38 @@ Future<void> main() async {
       matching: find.byType(RichText),
     ));
 
-    expect(actualActive.text.style!.color, isSameColorAs(CupertinoColors.activeBlue.darkColor));
+    expect(actualActive.text.style!.color,
+        isSameColorAs(CupertinoColors.activeBlue.darkColor));
   });
 
   testWidgetsWithLeakTracking('Use active icon', (WidgetTester tester) async {
-    final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquarePng));
-    final MemoryImage inactiveIcon = MemoryImage(Uint8List.fromList(kTransparentImage));
+    final MemoryImage activeIcon =
+        MemoryImage(Uint8List.fromList(kBlueSquarePng));
+    final MemoryImage inactiveIcon =
+        MemoryImage(Uint8List.fromList(kTransparentImage));
 
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(inactiveIcon),
+                activeIcon: ImageIcon(activeIcon),
+                label: 'Tab 2',
+              ),
+            ],
+            currentIndex: 1,
+            activeColor: const Color(0xFF123456),
+            inactiveColor: const Color(0xFF654321),
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(inactiveIcon),
-            activeIcon: ImageIcon(activeIcon),
-            label: 'Tab 2',
-          ),
-        ],
-        currentIndex: 1,
-        activeColor: const Color(0xFF123456),
-        inactiveColor: const Color(0xFF654321),
-      ),
-    ));
+        ));
 
     final Image image = tester.widget(find.descendant(
       of: find.widgetWithText(GestureDetector, 'Tab 2'),
@@ -289,7 +328,8 @@ Future<void> main() async {
     expect(image.image, activeIcon);
   });
 
-  testWidgetsWithLeakTracking('Adjusts height to account for bottom padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adjusts height to account for bottom padding',
+      (WidgetTester tester) async {
     final CupertinoTabBar tabBar = CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
@@ -304,27 +344,32 @@ Future<void> main() async {
     );
 
     // Verify height with no bottom padding.
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabScaffold(
-        tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
-      ),
-    ));
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabScaffold(
+            tabBar: tabBar,
+            tabBuilder: (BuildContext context, int index) {
+              return const Placeholder();
+            },
+          ),
+        ));
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0);
 
     // Verify height with bottom padding.
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
-      child: CupertinoTabScaffold(
-        tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
-      ),
-    ));
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data:
+              const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
+          child: CupertinoTabScaffold(
+            tabBar: tabBar,
+            tabBuilder: (BuildContext context, int index) {
+              return const Placeholder();
+            },
+          ),
+        ));
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
   });
 
@@ -346,32 +391,40 @@ Future<void> main() async {
     );
 
     // Verify height with no bottom padding.
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabScaffold(
-        tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
-      ),
-    ));
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabScaffold(
+            tabBar: tabBar,
+            tabBuilder: (BuildContext context, int index) {
+              return const Placeholder();
+            },
+          ),
+        ));
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight);
 
     // Verify height with bottom padding.
     const double bottomPadding = 40.0;
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: bottomPadding)),
-      child: CupertinoTabScaffold(
-        tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
-      ),
-    ));
-    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(
+              viewPadding: EdgeInsets.only(bottom: bottomPadding)),
+          child: CupertinoTabScaffold(
+            tabBar: tabBar,
+            tabBuilder: (BuildContext context, int index) {
+              return const Placeholder();
+            },
+          ),
+        ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height,
+        tabBarHeight + bottomPadding);
   });
 
-  testWidgetsWithLeakTracking('Ensure bar height will not change when toggle keyboard', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Ensure bar height will not change when toggle keyboard',
+      (WidgetTester tester) async {
     const double tabBarHeight = 56.0;
     final CupertinoTabBar tabBar = CupertinoTabBar(
       height: tabBarHeight,
@@ -391,28 +444,32 @@ Future<void> main() async {
 
     // Test the height is correct when keyboard not showing.
     // So viewInset should be 0.0.
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(
-        padding: EdgeInsets.only(bottom: bottomPadding),
-        viewPadding: EdgeInsets.only(bottom: bottomPadding),
-      ),
-      child: CupertinoTabScaffold(
-        tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
-      ),
-    ));
-    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            viewPadding: EdgeInsets.only(bottom: bottomPadding),
+          ),
+          child: CupertinoTabScaffold(
+            tabBar: tabBar,
+            tabBuilder: (BuildContext context, int index) {
+              return const Placeholder();
+            },
+          ),
+        ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height,
+        tabBarHeight + bottomPadding);
 
     // Now show keyboard, and test the bar height will not change.
-    await pumpWidgetWithBoilerplate(tester,
+    await pumpWidgetWithBoilerplate(
+      tester,
       MediaQuery(
         data: const MediaQueryData(
           viewPadding: EdgeInsets.only(bottom: bottomPadding),
           viewInsets: EdgeInsets.only(bottom: 336.0),
         ),
-        child:  CupertinoTabScaffold(
+        child: CupertinoTabScaffold(
           tabBar: tabBar,
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
@@ -422,44 +479,54 @@ Future<void> main() async {
     );
 
     // Expect the bar height should not change.
-    expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height,
+        tabBarHeight + bottomPadding);
   });
 
-  testWidgetsWithLeakTracking('Opaque background does not add blur effects', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+  testWidgetsWithLeakTracking('Opaque background does not add blur effects',
+      (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
-      ),
-    ));
+        ));
 
     expect(find.byType(BackdropFilter), findsOneWidget);
 
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
+            backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
-        backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
-      ),
-    ));
+        ));
 
     expect(find.byType(BackdropFilter), findsNothing);
   });
@@ -467,23 +534,29 @@ Future<void> main() async {
   testWidgetsWithLeakTracking('Tap callback', (WidgetTester tester) async {
     late int callbackTab;
 
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
+            currentIndex: 1,
+            onTap: (int tab) {
+              callbackTab = tab;
+            },
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
-        currentIndex: 1,
-        onTap: (int tab) { callbackTab = tab; },
-      ),
-    ));
+        ));
 
     await tester.tap(find.text('Tab 1'));
     expect(callbackTab, 0);
@@ -492,43 +565,54 @@ Future<void> main() async {
     expect(callbackTab, 1);
   });
 
-  testWidgetsWithLeakTracking('tabs announce semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('tabs announce semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 1',
+    await pumpWidgetWithBoilerplate(
+        tester,
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: CupertinoTabBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 1',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                    MemoryImage(Uint8List.fromList(kTransparentImage))),
+                label: 'Tab 2',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
-            label: 'Tab 2',
-          ),
-        ],
-      ),
-    ));
+        ));
 
-    expect(semantics, includesNodeWith(
-      label: 'Tab 1',
-      hint: 'Tab 1 of 2',
-      flags: <SemanticsFlag>[SemanticsFlag.isSelected],
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          label: 'Tab 1',
+          hint: 'Tab 1 of 2',
+          flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+          textDirection: TextDirection.ltr,
+        ));
 
-    expect(semantics, includesNodeWith(
-      label: 'Tab 2',
-      hint: 'Tab 2 of 2',
-      textDirection: TextDirection.ltr,
-    ));
+    expect(
+        semantics,
+        includesNodeWith(
+          label: 'Tab 2',
+          hint: 'Tab 2 of 2',
+          textDirection: TextDirection.ltr,
+        ));
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Label of items should be nullable', (WidgetTester tester) async {
-    final MemoryImage iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
+  testWidgetsWithLeakTracking('Label of items should be nullable',
+      (WidgetTester tester) async {
+    final MemoryImage iconProvider =
+        MemoryImage(Uint8List.fromList(kTransparentImage));
     final List<int> itemsTapped = <int>[];
 
     await pumpWidgetWithBoilerplate(
@@ -564,7 +648,8 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1]);
   });
 
-  testWidgetsWithLeakTracking('Hide border hides the top border of the tabBar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hide border hides the top border of the tabBar',
+      (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
@@ -589,7 +674,8 @@ Future<void> main() async {
     );
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
-    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
+    final BoxDecoration boxDecoration =
+        decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.border, isNotNull);
 
     await pumpWidgetWithBoilerplate(
@@ -624,7 +710,9 @@ Future<void> main() async {
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 
-  testWidgetsWithLeakTracking('Hovering over tab bar item updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Hovering over tab bar item updates cursor to clickable on Web',
+      (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
@@ -646,10 +734,12 @@ Future<void> main() async {
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: const Offset(10, 10));
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.basic);
 
     final Offset tabItem = tester.getCenter(find.text('Tab 1'));
     await gesture.moveTo(tabItem);

@@ -29,7 +29,8 @@ void main() {
   const ui.Color transparentRed = ui.Color.fromARGB(128, 255, 0, 0);
 
   group('succeeds', () {
-    testWidgetsWithLeakTracking('when images have the same content', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when images have the same content',
+        (WidgetTester tester) async {
       final ui.Image image1 = await createTestImage(100, 100, red);
       addTearDown(image1.dispose);
       final ui.Image referenceImage1 = await createTestImage(100, 100, red);
@@ -46,19 +47,22 @@ void main() {
 
       final ui.Image image3 = await createTestImage(100, 100, transparentRed);
       addTearDown(image3.dispose);
-      final ui.Image referenceImage3 = await createTestImage(100, 100, transparentRed);
+      final ui.Image referenceImage3 =
+          await createTestImage(100, 100, transparentRed);
       addTearDown(referenceImage3.dispose);
 
       await expectLater(image3, matchesReferenceImage(referenceImage3));
     });
 
-    testWidgetsWithLeakTracking('when images are identical', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when images are identical',
+        (WidgetTester tester) async {
       final ui.Image image = await createTestImage(100, 100, red);
       addTearDown(image.dispose);
       await expectLater(image, matchesReferenceImage(image));
     });
 
-    testWidgetsWithLeakTracking('when widget looks the same', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when widget looks the same',
+        (WidgetTester tester) async {
       addTearDown(tester.view.reset);
       tester.view
         ..physicalSize = const Size(10, 10)
@@ -73,15 +77,20 @@ void main() {
         ),
       );
 
-      final ui.Image referenceImage = (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary).toImageSync();
+      final ui.Image referenceImage =
+          (tester.renderObject(find.byKey(repaintBoundaryKey))
+                  as RenderRepaintBoundary)
+              .toImageSync();
       addTearDown(referenceImage.dispose);
 
-      await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(referenceImage));
+      await expectLater(find.byKey(repaintBoundaryKey),
+          matchesReferenceImage(referenceImage));
     });
   });
 
   group('fails', () {
-    testWidgetsWithLeakTracking('when image sizes do not match', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when image sizes do not match',
+        (WidgetTester tester) async {
       final ui.Image red50 = await createTestImage(50, 50, red);
       addTearDown(red50.dispose);
       final ui.Image red100 = await createTestImage(100, 100, red);
@@ -89,14 +98,17 @@ void main() {
 
       expect(
         await matchesReferenceImage(red50).matchAsync(red100),
-        equals('does not match as width or height do not match. [100×100] != [50×50]'),
+        equals(
+            'does not match as width or height do not match. [100×100] != [50×50]'),
       );
     });
 
-    testWidgetsWithLeakTracking('when image pixels do not match', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when image pixels do not match',
+        (WidgetTester tester) async {
       final ui.Image red100 = await createTestImage(100, 100, red);
       addTearDown(red100.dispose);
-      final ui.Image transparentRed100 = await createTestImage(100, 100, transparentRed);
+      final ui.Image transparentRed100 =
+          await createTestImage(100, 100, transparentRed);
       addTearDown(transparentRed100.dispose);
 
       expect(
@@ -113,7 +125,8 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('when widget does not look the same', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when widget does not look the same',
+        (WidgetTester tester) async {
       addTearDown(tester.view.reset);
       tester.view
         ..physicalSize = const Size(10, 10)
@@ -128,7 +141,10 @@ void main() {
         ),
       );
 
-      final ui.Image referenceImage = (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary).toImageSync();
+      final ui.Image referenceImage =
+          (tester.renderObject(find.byKey(repaintBoundaryKey))
+                  as RenderRepaintBoundary)
+              .toImageSync();
       addTearDown(referenceImage.dispose);
 
       await tester.pumpWidget(

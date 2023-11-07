@@ -11,7 +11,8 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 Future<void> main() async {
   // We use AutomatedTestWidgetsFlutterBinding to allow the test binding to set
   // FlutterError.demangleStackTrace and FlutterError.onError without testWidgets.
-  final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
+  final AutomatedTestWidgetsFlutterBinding binding =
+      AutomatedTestWidgetsFlutterBinding();
 
   test('FlutterErrorDetails demangles', () async {
     await binding.runTest(() async {

@@ -36,7 +36,8 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
           currentImage = ResizeImage(
             const ExactAssetImage('assets/999x1000.png'),
             width: (MediaQuery.of(context).size.width * 2).toInt() + imageIndex,
-            height: (MediaQuery.of(context).size.height * 2).toInt() + imageIndex,
+            height:
+                (MediaQuery.of(context).size.height * 2).toInt() + imageIndex,
             allowUpscaling: true,
           );
         });

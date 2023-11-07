@@ -39,7 +39,8 @@ const List<String> expectedUiErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (unused_field)',
 ];
 
-final RegExp errorPrefixRE = RegExp(r'^([-a-z0-9/_.:]+): .*(\([-a-z_ ]+\) \([-a-z_ ]+\))$');
+final RegExp errorPrefixRE =
+    RegExp(r'^([-a-z0-9/_.:]+): .*(\([-a-z_ ]+\) \([-a-z_ ]+\))$');
 String removeLintDescriptions(String error) {
   final RegExpMatch? match = errorPrefixRE.firstMatch(error);
   if (match != null) {
@@ -68,8 +69,10 @@ void main() {
     );
     expect(process.stdout, isEmpty);
     final List<String> stderrLines = process.stderr.toString().split('\n');
-    expect(stderrLines.length, stderrLines.toSet().length, reason: 'found duplicates in $stderrLines');
-    final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
+    expect(stderrLines.length, stderrLines.toSet().length,
+        reason: 'found duplicates in $stderrLines');
+    final List<String> stderrNoDescriptions =
+        stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
       'Found 18 snippet code errors.',
@@ -91,8 +94,10 @@ void main() {
     );
     expect(process.stdout, isEmpty);
     final List<String> stderrLines = process.stderr.toString().split('\n');
-    expect(stderrLines.length, stderrLines.toSet().length, reason: 'found duplicates in $stderrLines');
-    final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
+    expect(stderrLines.length, stderrLines.toSet().length,
+        reason: 'found duplicates in $stderrLines');
+    final List<String> stderrNoDescriptions =
+        stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedUiErrors,
       ...expectedMainErrors,

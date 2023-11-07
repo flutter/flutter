@@ -14,7 +14,8 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Text respects media query', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text respects media query',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MediaQuery(
       data: MediaQueryData(textScaleFactor: 1.3),
       child: Center(
@@ -35,7 +36,9 @@ void main() {
     expect(text.textScaler, TextScaler.noScaling);
   });
 
-  testWidgetsWithLeakTracking('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Text respects textScaleFactor with default font size',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(child: Text('Hello', textDirection: TextDirection.ltr)),
     );
@@ -63,7 +66,9 @@ void main() {
     expect(largeSize.height, equals(21.0));
   });
 
-  testWidgetsWithLeakTracking('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Text respects textScaleFactor with explicit font size',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
       child: Text(
         'Hello',
@@ -96,14 +101,17 @@ void main() {
     expect(largeSize.height, equals(26.0));
   });
 
-  testWidgets("Text throws a nice error message if there's no Directionality", (WidgetTester tester) async {
+  testWidgets("Text throws a nice error message if there's no Directionality",
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
     final String message = tester.takeException().toString();
     expect(message, contains('Directionality'));
     expect(message, contains(' Text '));
   });
 
-  testWidgetsWithLeakTracking('Text can be created from TextSpans and uses defaultTextStyle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Text can be created from TextSpans and uses defaultTextStyle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const DefaultTextStyle(
         style: TextStyle(
@@ -133,7 +141,8 @@ void main() {
     expect(text.text.style!.fontSize, 20.0);
   });
 
-  testWidgetsWithLeakTracking('inline widgets works with ellipsis', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('inline widgets works with ellipsis',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35869
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -141,7 +150,8 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(
-              text: 'a very very very very very very very very very very long line',
+              text:
+                  'a very very very very very very very very very very long line',
             ),
             WidgetSpan(
               child: SizedBox(
@@ -166,7 +176,8 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('inline widgets hitTest works with ellipsis',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -174,7 +185,8 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(
-              text: 'a very very very very very very very very very very long line',
+              text:
+                  'a very very very very very very very very very very long line',
             ),
             WidgetSpan(
               child: SizedBox(
@@ -202,7 +214,8 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('inline widgets works with textScaleFactor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('inline widgets works with textScaleFactor',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
     final UniqueKey key = UniqueKey();
     double textScaleFactor = 1.0;
@@ -266,7 +279,8 @@ void main() {
     expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
   });
 
-  testWidgetsWithLeakTracking("Inline widgets' scaled sizes are constrained", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Inline widgets' scaled sizes are constrained",
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/130588
     await tester.pumpWidget(
       const Directionality(
@@ -283,7 +297,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('semanticsLabel can override text label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('semanticsLabel can override text label',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text(
@@ -329,7 +344,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('semantics label is in order when uses widget span', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'semantics label is in order when uses widget span',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -354,7 +371,8 @@ void main() {
     );
 
     // If the Paragraph is not dirty it should use the cache correctly.
-    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    final RenderObject parent =
+        tester.renderObject<RenderObject>(find.byType(Directionality));
     parent.markNeedsSemanticsUpdate();
     await tester.pumpAndSettle();
 
@@ -364,7 +382,9 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('semantics can handle some widget spans without semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'semantics can handle some widget spans without semantics',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -398,7 +418,8 @@ void main() {
         matchesSemantics(label: 'before \n mid\nfoo\n after'));
 
     // If the Paragraph is not dirty it should use the cache correctly.
-    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    final RenderObject parent =
+        tester.renderObject<RenderObject>(find.byType(Directionality));
     parent.markNeedsSemanticsUpdate();
     await tester.pumpAndSettle();
 
@@ -406,7 +427,9 @@ void main() {
         matchesSemantics(label: 'before \n mid\nfoo\n after'));
   });
 
-  testWidgetsWithLeakTracking('semantics can handle all widget spans without semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'semantics can handle all widget spans without semantics',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -440,7 +463,8 @@ void main() {
         matchesSemantics(label: 'before \n mid\n after'));
 
     // If the Paragraph is not dirty it should use the cache correctly.
-    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    final RenderObject parent =
+        tester.renderObject<RenderObject>(find.byType(Directionality));
     parent.markNeedsSemanticsUpdate();
     await tester.pumpAndSettle();
 
@@ -448,7 +472,9 @@ void main() {
         matchesSemantics(label: 'before \n mid\n after'));
   });
 
-  testWidgetsWithLeakTracking('semantics can handle widget spans with explicit semantics node', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'semantics can handle widget spans with explicit semantics node',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -469,21 +495,27 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byType(Text)),
-      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+      matchesSemantics(
+          label: 'before \n after',
+          children: <Matcher>[matchesSemantics(label: 'inner')]),
     );
 
     // If the Paragraph is not dirty it should use the cache correctly.
-    final RenderObject parent = tester.renderObject<RenderObject>(find.byType(Directionality));
+    final RenderObject parent =
+        tester.renderObject<RenderObject>(find.byType(Directionality));
     parent.markNeedsSemanticsUpdate();
     await tester.pumpAndSettle();
 
     expect(
       tester.getSemantics(find.byType(Text)),
-      matchesSemantics(label: 'before \n after', children: <Matcher>[matchesSemantics(label: 'inner')]),
+      matchesSemantics(
+          label: 'before \n after',
+          children: <Matcher>[matchesSemantics(label: 'inner')]),
     );
   });
 
-  testWidgetsWithLeakTracking('semanticsLabel can be shorter than text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('semanticsLabel can be shorter than text',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -496,7 +528,7 @@ void main() {
             ),
             TextSpan(
               text: 'Clickable',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
           ],
         ),
@@ -531,7 +563,8 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('recognizers split semantic node', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('recognizers split semantic node',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -541,7 +574,7 @@ void main() {
             const TextSpan(text: 'hello '),
             TextSpan(
               text: 'world',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
@@ -585,7 +618,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'semantic nodes of offscreen recognizers are marked hidden',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontSize: 200);
@@ -602,7 +637,7 @@ void main() {
               const TextSpan(text: onScreenText),
               TextSpan(
                 text: offScreenText,
-                recognizer: TapGestureRecognizer()..onTap = () { },
+                recognizer: TapGestureRecognizer()..onTap = () {},
               ),
             ],
             style: textStyle,
@@ -628,7 +663,10 @@ void main() {
                   label: offScreenText,
                   textDirection: TextDirection.ltr,
                   actions: <SemanticsAction>[SemanticsAction.tap],
-                  flags: <SemanticsFlag>[SemanticsFlag.isLink, SemanticsFlag.isHidden],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                    SemanticsFlag.isHidden
+                  ],
                 ),
               ],
             ),
@@ -648,14 +686,17 @@ void main() {
 
     // Test show on screen.
     expect(controller.offset, 0.0);
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(4, SemanticsAction.showOnScreen);
+    tester.binding.pipelineOwner.semanticsOwner!
+        .performAction(4, SemanticsAction.showOnScreen);
     await tester.pumpAndSettle();
     expect(controller.offset != 0.0, isTrue);
 
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'recognizers split semantic node when TextSpan overflows',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -667,7 +708,7 @@ void main() {
               const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
               TextSpan(
                 text: 'world',
-                recognizer: TapGestureRecognizer()..onTap = () { },
+                recognizer: TapGestureRecognizer()..onTap = () {},
               ),
             ],
             style: textStyle,
@@ -706,7 +747,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'recognizers split semantic nodes with text span labels',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -716,7 +759,7 @@ void main() {
             const TextSpan(text: 'hello '),
             TextSpan(
               text: 'world',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' this is a '),
             const TextSpan(
@@ -763,8 +806,8 @@ void main() {
     semantics.dispose();
   });
 
-
-  testWidgetsWithLeakTracking('recognizers split semantic node - bidi', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('recognizers split semantic node - bidi',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -775,12 +818,13 @@ void main() {
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
             TextSpan(
               text: 'BOY',
-              recognizer: LongPressGestureRecognizer()..onLongPress = () { },
+              recognizer: LongPressGestureRecognizer()..onLongPress = () {},
             ),
-            const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
+            const TextSpan(
+                text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
             TextSpan(
               text: 'SIR',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
           ],
@@ -845,7 +889,9 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
-  testWidgetsWithLeakTracking('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'TapGesture recognizers contribute link semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -854,7 +900,7 @@ void main() {
           children: <TextSpan>[
             TextSpan(
               text: 'click me',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
           ],
           style: textStyle,
@@ -876,16 +922,19 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(
-      expectedSemantics,
-      ignoreTransform: true,
-      ignoreId: true,
-      ignoreRect: true,
-    ));
+    expect(
+        semantics,
+        hasSemantics(
+          expectedSemantics,
+          ignoreTransform: true,
+          ignoreId: true,
+          ignoreRect: true,
+        ));
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('inline widgets generate semantic nodes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('inline widgets generate semantic nodes',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -895,7 +944,7 @@ void main() {
             const TextSpan(text: 'a '),
             TextSpan(
               text: 'pebble',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
@@ -959,7 +1008,8 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
-  testWidgetsWithLeakTracking('inline widgets semantic nodes scale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('inline widgets semantic nodes scale',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
@@ -969,7 +1019,7 @@ void main() {
             const TextSpan(text: 'a '),
             TextSpan(
               text: 'pebble',
-              recognizer: TapGestureRecognizer()..onTap = () { },
+              recognizer: TapGestureRecognizer()..onTap = () {},
             ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
@@ -1039,10 +1089,16 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
-  testWidgetsWithLeakTracking('receives fontFamilyFallback and package from root ThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'receives fontFamilyFallback and package from root ThemeData',
+      (WidgetTester tester) async {
     const String fontFamily = 'fontFamily';
     const String package = 'package_name';
-    final List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
+    final List<String> fontFamilyFallback = <String>[
+      'font',
+      'family',
+      'fallback'
+    ];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1068,11 +1124,14 @@ void main() {
     expect(style?.fontFamily, equals('packages/$package/$fontFamily'));
     for (int i = 0; i < fontFamilyFallback.length; i++) {
       final String fallback = fontFamilyFallback[i];
-      expect(style?.fontFamilyFallback?[i], equals('packages/$package/$fallback'));
+      expect(
+          style?.fontFamilyFallback?[i], equals('packages/$package/$fallback'));
     }
   });
 
-  testWidgetsWithLeakTracking('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Overflow is clipping correctly - short text with overflow: clip',
+      (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.clip,
@@ -1082,7 +1141,9 @@ void main() {
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
 
-  testWidgetsWithLeakTracking('Overflow is clipping correctly - long text with overflow: ellipsis', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Overflow is clipping correctly - long text with overflow: ellipsis',
+      (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.ellipsis,
@@ -1095,7 +1156,9 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87878
 
-  testWidgetsWithLeakTracking('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Overflow is clipping correctly - short text with overflow: ellipsis',
+      (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.ellipsis,
@@ -1105,7 +1168,9 @@ void main() {
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
 
-  testWidgetsWithLeakTracking('Overflow is clipping correctly - long text with overflow: fade', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Overflow is clipping correctly - long text with overflow: fade',
+      (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.fade,
@@ -1118,7 +1183,9 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Overflow is clipping correctly - short text with overflow: fade', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Overflow is clipping correctly - short text with overflow: fade',
+      (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.fade,
@@ -1128,7 +1195,9 @@ void main() {
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
 
-  testWidgetsWithLeakTracking('Overflow is clipping correctly - long text with overflow: visible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Overflow is clipping correctly - long text with overflow: visible',
+      (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.visible,
@@ -1138,7 +1207,9 @@ void main() {
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
 
-  testWidgetsWithLeakTracking('Overflow is clipping correctly - short text with overflow: visible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Overflow is clipping correctly - short text with overflow: visible',
+      (WidgetTester tester) async {
     await _pumpTextWidget(
       tester: tester,
       overflow: TextOverflow.visible,
@@ -1148,7 +1219,9 @@ void main() {
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
 
-  testWidgetsWithLeakTracking('textWidthBasis affects the width of a Text widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'textWidthBasis affects the width of a Text widget',
+      (WidgetTester tester) async {
     Future<void> createText(TextWidthBasis textWidthBasis) {
       return tester.pumpWidget(
         MaterialApp(
@@ -1185,7 +1258,9 @@ void main() {
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
 
-  testWidgetsWithLeakTracking('textWidthBasis with textAlign still obeys parent alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'textWidthBasis with textAlign still obeys parent alignment',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1222,17 +1297,25 @@ void main() {
     );
 
     // All Texts have the same horizontal alignment.
-    final double offsetX = tester.getTopLeft(find.text('LEFT ALIGNED, PARENT')).dx;
-    expect(tester.getTopLeft(find.text('RIGHT ALIGNED, PARENT')).dx, equals(offsetX));
-    expect(tester.getTopLeft(find.text('LEFT ALIGNED, LONGEST LINE')).dx, equals(offsetX));
-    expect(tester.getTopLeft(find.text('RIGHT ALIGNED, LONGEST LINE')).dx, equals(offsetX));
+    final double offsetX =
+        tester.getTopLeft(find.text('LEFT ALIGNED, PARENT')).dx;
+    expect(tester.getTopLeft(find.text('RIGHT ALIGNED, PARENT')).dx,
+        equals(offsetX));
+    expect(tester.getTopLeft(find.text('LEFT ALIGNED, LONGEST LINE')).dx,
+        equals(offsetX));
+    expect(tester.getTopLeft(find.text('RIGHT ALIGNED, LONGEST LINE')).dx,
+        equals(offsetX));
 
     // All Texts are less than or equal to the width of the Column.
     final double width = tester.getSize(find.byType(Column)).width;
-    expect(tester.getSize(find.text('LEFT ALIGNED, PARENT')).width, lessThan(width));
-    expect(tester.getSize(find.text('RIGHT ALIGNED, PARENT')).width, lessThan(width));
-    expect(tester.getSize(find.text('LEFT ALIGNED, LONGEST LINE')).width, lessThan(width));
-    expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width, equals(width));
+    expect(tester.getSize(find.text('LEFT ALIGNED, PARENT')).width,
+        lessThan(width));
+    expect(tester.getSize(find.text('RIGHT ALIGNED, PARENT')).width,
+        lessThan(width));
+    expect(tester.getSize(find.text('LEFT ALIGNED, LONGEST LINE')).width,
+        lessThan(width));
+    expect(tester.getSize(find.text('RIGHT ALIGNED, LONGEST LINE')).width,
+        equals(width));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44020
 
   testWidgetsWithLeakTracking(
@@ -1241,42 +1324,50 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/62550.
       await tester.pumpWidget(
-          Center(
-            child: SizedBox(
-              width: 400,
-              child: Center(
-                child: RichText(
-                  // 400 is not wide enough for this string. The part after the
-                  // whitespace is going to be broken into a 2nd line.
-                  text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
-                  textWidthBasis: TextWidthBasis.longestLine,
-                  textDirection: TextDirection.rtl,
-                ),
+        Center(
+          child: SizedBox(
+            width: 400,
+            child: Center(
+              child: RichText(
+                // 400 is not wide enough for this string. The part after the
+                // whitespace is going to be broken into a 2nd line.
+                text: const TextSpan(
+                    text:
+                        'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
+                textWidthBasis: TextWidthBasis.longestLine,
+                textDirection: TextDirection.rtl,
               ),
             ),
           ),
-        );
+        ),
+      );
 
-      expect(find.byType(RichText), paints..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawParagraph) {
-          return false;
-        }
-        final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        final Offset offset = arguments[1] as Offset;
-        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
-        for (final ui.LineMetrics line in lines) {
-          if (line.left + offset.dx + line.width >= 400) {
-            throw 'line $line is greater than the max width constraints';
-          }
-        }
-        return true;
-      }));
+      expect(
+          find.byType(RichText),
+          paints
+            ..something((Symbol method, List<dynamic> arguments) {
+              if (method != #drawParagraph) {
+                return false;
+              }
+              final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
+              final Offset offset = arguments[1] as Offset;
+              final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+              for (final ui.LineMetrics line in lines) {
+                if (line.left + offset.dx + line.width >= 400) {
+                  throw 'line $line is greater than the max width constraints';
+                }
+              }
+              return true;
+            }));
     },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44020
   );
 
-  testWidgetsWithLeakTracking('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (WidgetTester tester) async {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+  testWidgetsWithLeakTracking(
+      'Paragraph.getBoxesForRange returns nothing when selection range is zero length',
+      (WidgetTester tester) async {
+    final ui.ParagraphBuilder builder =
+        ui.ParagraphBuilder(ui.ParagraphStyle());
     builder.addText('hello');
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
@@ -1285,7 +1376,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/65818
-  testWidgetsWithLeakTracking('WidgetSpans with no semantic information are elided from semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'WidgetSpans with no semantic information are elided from semantics',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // Without the fix for this bug the pump widget will throw a RangeError.
     await tester.pumpWidget(
@@ -1302,38 +1395,54 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          id: 1,
-          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
-          transform: Matrix4(
-            3.0,0.0,0.0,0.0,
-            0.0,3.0,0.0,0.0,
-            0.0,0.0,1.0,0.0,
-            0.0,0.0,0.0,1.0,
-          ),
+    expect(
+        semantics,
+        hasSemantics(TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
-              rect: const Rect.fromLTRB(-4.0, -4.0, 74.0, 18.0),
-              id: 2,
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              id: 1,
+              rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+              transform: Matrix4(
+                3.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                3.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+              ),
+              children: <TestSemantics>[
+                TestSemantics(
+                  rect: const Rect.fromLTRB(-4.0, -4.0, 74.0, 18.0),
+                  id: 2,
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
               ],
             ),
           ],
-        ),
-      ],
-    )));
+        )));
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
-  testWidgetsWithLeakTracking('WidgetSpans with no semantic information are elided from semantics - case 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'WidgetSpans with no semantic information are elided from semantics - case 2',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -1384,7 +1493,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
-  testWidgetsWithLeakTracking('WidgetSpans with no semantic information are elided from semantics - case 3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'WidgetSpans with no semantic information are elided from semantics - case 3',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -1447,7 +1558,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
-  testWidgetsWithLeakTracking('WidgetSpans with no semantic information are elided from semantics - case 4', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'WidgetSpans with no semantic information are elided from semantics - case 4',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -1473,7 +1586,7 @@ void main() {
                       ),
                       TextSpan(
                         text: 'next WS is clipped',
-                        recognizer: TapGestureRecognizer()..onTap = () { },
+                        recognizer: TapGestureRecognizer()..onTap = () {},
                       ),
                       const WidgetSpan(
                         child: Icon(
@@ -1517,7 +1630,8 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
-  testWidgetsWithLeakTracking('RenderParagraph intrinsic width', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderParagraph intrinsic width',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1551,17 +1665,21 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(RichText)).width, 200 + 4 * 16.0);
-    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    final RenderParagraph paragraph =
+        tester.renderObject<RenderParagraph>(find.byType(RichText));
     // The inline spans are rendered on one (horizontal) line, the sum of the widths is the max intrinsic width.
     expect(paragraph.getMaxIntrinsicWidth(0.0), 200 + 4 * 16.0);
     // The inline spans are rendered in one vertical run, the widest one determines the min intrinsic width.
     expect(paragraph.getMinIntrinsicWidth(0.0), 200);
   });
 
-  testWidgetsWithLeakTracking('can compute intrinsic width and height for widget span with text scaling', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'can compute intrinsic width and height for widget span with text scaling',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
     const Key textKey = Key('RichText');
-    Widget textWithNestedInlineSpans({ required double textScaleFactor, required double screenWidth }) {
+    Widget textWithNestedInlineSpans(
+        {required double textScaleFactor, required double screenWidth}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -1579,39 +1697,48 @@ void main() {
         ),
       );
     }
-    // The render object is going to be reused across widget tree rebuilds.
-    late final RenderParagraph outerParagraph = tester.renderObject(find.byKey(textKey));
 
-    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 100.0));
+    // The render object is going to be reused across widget tree rebuilds.
+    late final RenderParagraph outerParagraph =
+        tester.renderObject(find.byKey(textKey));
+
+    await tester.pumpWidget(
+        textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 100.0));
     expect(
       outerParagraph.getMaxIntrinsicHeight(100.0),
       14.0,
       reason: 'singleLineHeight = 14.0',
     );
 
-    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 100.0));
+    await tester.pumpWidget(
+        textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 100.0));
     expect(
       outerParagraph.getMinIntrinsicHeight(100.0),
       14.0 * 2.0 * 2,
-      reason: 'intrinsicHeight = singleLineHeight * textScaleFactor * two lines.',
+      reason:
+          'intrinsicHeight = singleLineHeight * textScaleFactor * two lines.',
     );
 
-    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 1000.0));
+    await tester.pumpWidget(
+        textWithNestedInlineSpans(textScaleFactor: 1.0, screenWidth: 1000.0));
     expect(
       outerParagraph.getMaxIntrinsicWidth(1000.0),
       14.0 * 7,
       reason: 'intrinsic width = 14.0 * 7',
     );
 
-    await tester.pumpWidget(textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 1000.0));
+    await tester.pumpWidget(
+        textWithNestedInlineSpans(textScaleFactor: 2.0, screenWidth: 1000.0));
     expect(
       outerParagraph.getMaxIntrinsicWidth(1000.0),
       14.0 * 2.0 * 7,
-      reason: 'intrinsic width = glyph advance * textScaleFactor * num of glyphs',
+      reason:
+          'intrinsic width = glyph advance * textScaleFactor * num of glyphs',
     );
   });
 
-  testWidgetsWithLeakTracking('Text uses TextStyle.overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text uses TextStyle.overflow',
+      (WidgetTester tester) async {
     const TextOverflow overflow = TextOverflow.fade;
 
     await tester.pumpWidget(const Text(
@@ -1627,57 +1754,63 @@ void main() {
   });
 
   testWidgetsWithLeakTracking(
-    'Text can be hit-tested without layout or paint being called in a frame',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/85108.
-      await tester.pumpWidget(
-        const Opacity(
-          opacity: 1.0,
-          child: Text(
-            'Hello World',
-            textDirection: TextDirection.ltr,
-            style: TextStyle(color: Color(0xFF123456)),
-          ),
+      'Text can be hit-tested without layout or paint being called in a frame',
+      (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/85108.
+    await tester.pumpWidget(
+      const Opacity(
+        opacity: 1.0,
+        child: Text(
+          'Hello World',
+          textDirection: TextDirection.ltr,
+          style: TextStyle(color: Color(0xFF123456)),
         ),
-      );
+      ),
+    );
 
-      // The color changed and the opacity is set to 0:
-      //  * 0 opacity will prevent RenderParagraph.paint from being called.
-      //  * Only changing the color will prevent RenderParagraph.performLayout
-      //    from being called.
-      //  The underlying TextPainter should not evict its layout cache in this
-      //  case, for hit-testing.
-      await tester.pumpWidget(
-        const Opacity(
-          opacity: 0.0,
-          child: Text(
-            'Hello World',
-            textDirection: TextDirection.ltr,
-            style: TextStyle(color: Color(0x87654321)),
-          ),
+    // The color changed and the opacity is set to 0:
+    //  * 0 opacity will prevent RenderParagraph.paint from being called.
+    //  * Only changing the color will prevent RenderParagraph.performLayout
+    //    from being called.
+    //  The underlying TextPainter should not evict its layout cache in this
+    //  case, for hit-testing.
+    await tester.pumpWidget(
+      const Opacity(
+        opacity: 0.0,
+        child: Text(
+          'Hello World',
+          textDirection: TextDirection.ltr,
+          style: TextStyle(color: Color(0x87654321)),
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Hello World'));
-      expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Hello World'));
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('Mouse hovering over selectable Text uses SystemMouseCursor.text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Mouse hovering over selectable Text uses SystemMouseCursor.text',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SelectionArea(
         child: Text('Flutter'),
       ),
     ));
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.text);
   });
 
-  testWidgetsWithLeakTracking('Mouse hovering over selectable Text uses default selection style mouse cursor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Mouse hovering over selectable Text uses default selection style mouse cursor',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         child: DefaultSelectionStyle.merge(
@@ -1687,12 +1820,14 @@ void main() {
       ),
     ));
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
 
     await tester.pump();
 
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.click);
   });
 }
 

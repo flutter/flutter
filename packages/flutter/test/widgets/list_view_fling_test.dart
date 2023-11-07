@@ -10,7 +10,8 @@ const double kHeight = 10.0;
 const double kFlingOffset = kHeight * 20.0;
 
 void main() {
-  testWidgetsWithLeakTracking("Flings don't stutter", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Flings don't stutter",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -23,10 +24,14 @@ void main() {
     );
 
     double getCurrentOffset() {
-      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+      return tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position
+          .pixels;
     }
 
-    await tester.fling(find.byType(ListView), const Offset(0.0, -kFlingOffset), 1000.0);
+    await tester.fling(
+        find.byType(ListView), const Offset(0.0, -kFlingOffset), 1000.0);
     expect(getCurrentOffset(), kFlingOffset);
     await tester.pump(); // process the up event
     while (tester.binding.transientCallbackCount > 0) {

@@ -21,9 +21,9 @@ class PathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     log.add('getClip');
-    return Path()
-      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    return Path()..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
+
   @override
   bool shouldReclip(PathClipper oldClipper) => false;
 }
@@ -59,8 +59,11 @@ class NotifyClipper<T> extends CustomClipper<T> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
-    await tester.pumpWidget(Directionality(
+  testWidgetsWithLeakTracking(
+      'ClipRect with a FittedBox child sized to zero works with semantics',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: ClipRect(
           child: FittedBox(
@@ -78,10 +81,13 @@ void main() {
     expect(find.byType(FittedBox), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ClipRect updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRect());
 
-    final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+    final RenderClipRect renderClip =
+        tester.allRenderObjects.whereType<RenderClipRect>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.hardEdge));
 
@@ -100,10 +106,13 @@ void main() {
     expect(clipRRect.borderRadius, equals(BorderRadius.zero));
   });
 
-  testWidgetsWithLeakTracking('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ClipRRect updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRRect());
 
-    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+    final RenderClipRRect renderClip =
+        tester.allRenderObjects.whereType<RenderClipRRect>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
@@ -116,10 +125,13 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgetsWithLeakTracking('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ClipOval updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipOval());
 
-    final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
+    final RenderClipOval renderClip =
+        tester.allRenderObjects.whereType<RenderClipOval>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
@@ -132,10 +144,13 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgetsWithLeakTracking('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ClipPath updates clipBehavior in updateRenderObject',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const ClipPath());
 
-    final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+    final RenderClipPath renderClip =
+        tester.allRenderObjects.whereType<RenderClipPath>().first;
 
     expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
@@ -154,7 +169,9 @@ void main() {
         clipper: PathClipper(),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () { log.add('tap'); },
+          onTap: () {
+            log.add('tap');
+          },
         ),
       ),
     );
@@ -174,7 +191,9 @@ void main() {
       ClipOval(
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () { log.add('tap'); },
+          onTap: () {
+            log.add('tap');
+          },
         ),
       ),
     );
@@ -189,14 +208,17 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('Transparent ClipOval hit test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transparent ClipOval hit test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Opacity(
         opacity: 0.0,
         child: ClipOval(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () { log.add('tap'); },
+            onTap: () {
+              log.add('tap');
+            },
           ),
         ),
       ),
@@ -220,10 +242,13 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -244,10 +269,13 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -262,10 +290,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -280,10 +311,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -298,10 +332,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -316,10 +353,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>(
+                'c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () { log.add('tap'); },
+              onTap: () {
+                log.add('tap');
+              },
             ),
           ),
         ),
@@ -335,24 +375,29 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('debugPaintSizeEnabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugPaintSizeEnabled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const ClipRect(
         child: Placeholder(),
       ),
     );
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
     debugPaintSizeEnabled = true;
-    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
-      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..paragraph(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).debugPaint,
+      paints
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+        ..paragraph(),
     );
     debugPaintSizeEnabled = false;
   });
@@ -400,7 +445,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRect save, overlay, and antialiasing',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: Stack(
@@ -439,7 +485,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ClipRRect painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRRect painting',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -616,7 +663,8 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.antiAlias',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -624,7 +672,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.hardEdge',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -634,7 +683,9 @@ void main() {
 
   // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
   // round corners.
-  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'PhysicalModel painting with Clip.antiAliasWithSaveLayer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -642,7 +693,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Default PhysicalModel painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default PhysicalModel painting',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -725,7 +777,8 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.antiAlias',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -733,7 +786,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.hardEdge',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -741,7 +795,9 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'PhysicalShape painting with Clip.antiAliasWithSaveLayer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -749,7 +805,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PhysicalShape painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape painting',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -797,13 +854,16 @@ void main() {
 
   testWidgetsWithLeakTracking('ClipPath.shape', (WidgetTester tester) async {
     final List<String> logs = <String>[];
-    final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+    final ShapeBorder shape = TestBorder((String message) {
+      logs.add(message);
+    });
     Widget buildClipPath() {
       return ClipPath.shape(
         shape: shape,
         child: const SizedBox(width: 100.0, height: 100.0),
       );
     }
+
     final Widget clipPath = buildClipPath();
     // verify that a regular clip works as one would expect
     logs.add('--0');
@@ -852,8 +912,10 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('CustomClipper reclips when notified', (WidgetTester tester) async {
-    final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+  testWidgetsWithLeakTracking('CustomClipper reclips when notified',
+      (WidgetTester tester) async {
+    final ValueNotifier<Rect> clip =
+        ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
     addTearDown(clip.dispose);
 
     await tester.pumpWidget(
@@ -863,30 +925,35 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
 
     expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isFalse);
     clip.value = const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0);
     expect(tester.renderObject(find.byType(ClipRect)).debugNeedsPaint, isTrue);
 
-    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
-      ..save()
-      ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
-      ..save()
-      ..path() // Placeholder
-      ..restore()
-      ..restore(),
+    expect(
+      tester.renderObject(find.byType(ClipRect)).paint,
+      paints
+        ..save()
+        ..clipRect(rect: const Rect.fromLTWH(50.0, 50.0, 150.0, 100.0))
+        ..save()
+        ..path() // Placeholder
+        ..restore()
+        ..restore(),
     );
   });
 
-  testWidgetsWithLeakTracking('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRRect supports BorderRadiusDirectional',
+      (WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
 
@@ -904,16 +971,22 @@ void main() {
 
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
-      final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+      final RenderClipRRect renderClip =
+          tester.allRenderObjects.whereType<RenderClipRRect>().first;
       final bool isRtl = textDirection == TextDirection.rtl;
-      expect(renderClip.borderRadius.resolve(textDirection).topLeft, isRtl ? endRadius : startRadius);
-      expect(renderClip.borderRadius.resolve(textDirection).topRight, isRtl ? startRadius : endRadius);
-      expect(renderClip.borderRadius.resolve(textDirection).bottomLeft, isRtl ? endRadius : startRadius);
-      expect(renderClip.borderRadius.resolve(textDirection).bottomRight, isRtl ? startRadius : endRadius);
+      expect(renderClip.borderRadius.resolve(textDirection).topLeft,
+          isRtl ? endRadius : startRadius);
+      expect(renderClip.borderRadius.resolve(textDirection).topRight,
+          isRtl ? startRadius : endRadius);
+      expect(renderClip.borderRadius.resolve(textDirection).bottomLeft,
+          isRtl ? endRadius : startRadius);
+      expect(renderClip.borderRadius.resolve(textDirection).bottomRight,
+          isRtl ? startRadius : endRadius);
     }
   });
 
-  testWidgetsWithLeakTracking('ClipRRect is direction-aware', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRRect is direction-aware',
+      (WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
     TextDirection textDirection = TextDirection.ltr;
@@ -959,13 +1032,16 @@ void main() {
 
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
-      final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+      final RenderClipRRect renderClip =
+          tester.allRenderObjects.whereType<RenderClipRRect>().first;
       final bool isRtl = textDirection == TextDirection.rtl;
-      expect(renderClip.textDirection, isRtl ? TextDirection.rtl : TextDirection.ltr);
+      expect(renderClip.textDirection,
+          isRtl ? TextDirection.rtl : TextDirection.ltr);
     }
 
     await tester.pumpWidget(buildStatefulClipRRect());
-    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+    final RenderClipRRect renderClip =
+        tester.allRenderObjects.whereType<RenderClipRRect>().first;
     expect(renderClip.textDirection, TextDirection.ltr);
     await tester.tapAt(Offset.zero);
     await tester.pump();

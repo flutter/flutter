@@ -8,7 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('awaiting animation controllers - using direct future', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'awaiting animation controllers - using direct future',
+      (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -34,6 +36,7 @@ void main() {
       await controller3.forward(); // starts at t=799
       log.add('d'); // wants to end at t=1099 but missed frames until t=1200
     }
+
     log.add('start');
     runTest().then((void value) {
       log.add('end');
@@ -60,7 +63,8 @@ void main() {
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });
 
-  testWidgetsWithLeakTracking('awaiting animation controllers - using orCancel', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('awaiting animation controllers - using orCancel',
+      (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -86,6 +90,7 @@ void main() {
       await controller3.forward().orCancel; // starts at t=799
       log.add('d'); // wants to end at t=1099 but missed frames until t=1200
     }
+
     log.add('start');
     runTest().then((void value) {
       log.add('end');
@@ -112,7 +117,8 @@ void main() {
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });
 
-  testWidgetsWithLeakTracking('awaiting animation controllers and failing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('awaiting animation controllers and failing',
+      (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -127,6 +133,7 @@ void main() {
         log.add('caught');
       }
     }
+
     runTest().then((void value) {
       log.add('end');
     });
@@ -140,7 +147,8 @@ void main() {
     expect(log, <String>['start', 'caught', 'end']);
   });
 
-  testWidgetsWithLeakTracking('creating orCancel future later', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('creating orCancel future later',
+      (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -154,7 +162,8 @@ void main() {
     expect(true, isTrue); // should reach here
   });
 
-  testWidgetsWithLeakTracking('creating orCancel future later', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('creating orCancel future later',
+      (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -172,7 +181,8 @@ void main() {
     expect(ok, isTrue); // should reach here
   });
 
-  testWidgetsWithLeakTracking('TickerFuture is a Future', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TickerFuture is a Future',
+      (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -182,7 +192,9 @@ void main() {
     await tester.pump(); // start ticker
     await tester.pump(const Duration(milliseconds: 200)); // end ticker
     expect(f.asStream().single, isA<Future<void>>());
-    await f.catchError((dynamic e) { throw 'do not reach'; });
+    await f.catchError((dynamic e) {
+      throw 'do not reach';
+    });
     expect(await f.then<bool>((_) => true), isTrue);
     expect(f.whenComplete(() => false), isA<Future<void>>());
     expect(f.timeout(const Duration(seconds: 5)), isA<Future<void>>());

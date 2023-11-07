@@ -14,7 +14,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/112403
     // and b/249091367
     final DragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
-    const PointerDownEvent event = PointerDownEvent(timeStamp: Duration(days: 10));
+    const PointerDownEvent event =
+        PointerDownEvent(timeStamp: Duration(days: 10));
 
     expect(recognizer.debugLastPendingEventTimestamp, null);
 
@@ -35,13 +36,15 @@ void main() {
     expect(recognizer.debugLastPendingEventTimestamp, null);
   });
 
-  testGesture('do not crash on up event for a pending pointer after winning arena for another pointer', (GestureTester tester) {
+  testGesture(
+      'do not crash on up event for a pending pointer after winning arena for another pointer',
+      (GestureTester tester) {
     // Regression test for https://github.com/flutter/flutter/issues/75061.
 
     final VerticalDragGestureRecognizer v = VerticalDragGestureRecognizer()
-      ..onStart = (_) { };
+      ..onStart = (_) {};
     final HorizontalDragGestureRecognizer h = HorizontalDragGestureRecognizer()
-      ..onStart = (_) { };
+      ..onStart = (_) {};
 
     const PointerDownEvent down90 = PointerDownEvent(
       pointer: 90,
@@ -70,12 +73,17 @@ void main() {
     GestureBinding.instance.gestureArena.close(91);
     tester.async.flushMicrotasks();
 
-    GestureBinding.instance.handleEvent(up90, HitTestEntry(MockHitTestTarget()));
-    GestureBinding.instance.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
+    GestureBinding.instance
+        .handleEvent(up90, HitTestEntry(MockHitTestTarget()));
+    GestureBinding.instance
+        .handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
-  testGesture('DragGestureRecognizer should not dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is true and the threshold has not been met', (GestureTester tester) {
-    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
+  testGesture(
+      'DragGestureRecognizer should not dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is true and the threshold has not been met',
+      (GestureTester tester) {
+    final VerticalDragGestureRecognizer verticalDrag =
+        VerticalDragGestureRecognizer();
     final List<String> dragCallbacks = <String>[];
     verticalDrag
       ..onlyAcceptDragOnThreshold = true
@@ -108,8 +116,11 @@ void main() {
     dragCallbacks.clear();
   });
 
-  testGesture('DragGestureRecognizer should dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is false and the threshold has not been met', (GestureTester tester) {
-    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
+  testGesture(
+      'DragGestureRecognizer should dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is false and the threshold has not been met',
+      (GestureTester tester) {
+    final VerticalDragGestureRecognizer verticalDrag =
+        VerticalDragGestureRecognizer();
     final List<String> dragCallbacks = <String>[];
     verticalDrag
       ..onlyAcceptDragOnThreshold = false
@@ -197,5 +208,5 @@ void main() {
 
 class MockHitTestTarget implements HitTestTarget {
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) { }
+  void handleEvent(PointerEvent event, HitTestEntry entry) {}
 }

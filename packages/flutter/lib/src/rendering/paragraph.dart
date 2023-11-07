@@ -2282,22 +2282,19 @@ class _SelectableFragment
 
   @override
   TextSelection? getLocalTextSelection() {
-    if(_textSelectionStart != null && _textSelectionEnd != null) {
+    if (_textSelectionStart != null && _textSelectionEnd != null) {
+      final int start =
+          math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+      final int end =
+          math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
 
-          final int start =
-        math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
-    final int end =
-        math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
-
-  return TextSelection( baseOffset: start,
-        extentOffset: end);
+      return TextSelection(baseOffset: start, extentOffset: end);
     }
     return null;
-
   }
-   @override
+
+  @override
   int? getContentLength() {
     return fullText.length;
   }
-
 }

@@ -71,14 +71,18 @@ void main() {
 
     MaterialPointArcTween tween = MaterialPointArcTween(begin: begin, end: end);
     expect(tween.lerp(0.0), begin);
-    expect(tween.lerp(0.25), within<Offset>(distance: 2.0, from: const Offset(126.0, 120.0)));
-    expect(tween.lerp(0.75), within<Offset>(distance: 2.0, from: const Offset(48.0, 196.0)));
+    expect(tween.lerp(0.25),
+        within<Offset>(distance: 2.0, from: const Offset(126.0, 120.0)));
+    expect(tween.lerp(0.75),
+        within<Offset>(distance: 2.0, from: const Offset(48.0, 196.0)));
     expect(tween.lerp(1.0), end);
 
     tween = MaterialPointArcTween(begin: end, end: begin);
     expect(tween.lerp(0.0), end);
-    expect(tween.lerp(0.25), within<Offset>(distance: 2.0, from: const Offset(91.0, 239.0)));
-    expect(tween.lerp(0.75), within<Offset>(distance: 2.0, from: const Offset(168.3, 163.8)));
+    expect(tween.lerp(0.25),
+        within<Offset>(distance: 2.0, from: const Offset(91.0, 239.0)));
+    expect(tween.lerp(0.75),
+        within<Offset>(distance: 2.0, from: const Offset(168.3, 163.8)));
     expect(tween.lerp(1.0), begin);
   });
 
@@ -87,23 +91,34 @@ void main() {
     const Rect end = Rect.fromLTRB(32.0, 275.0, 132.0, 425.0);
 
     bool sameRect(Rect a, Rect b) {
-      return (a.left - b.left).abs() < 2.0
-        && (a.top - b.top).abs() < 2.0
-        && (a.right - b.right).abs() < 2.0
-        && (a.bottom - b.bottom).abs() < 2.0;
+      return (a.left - b.left).abs() < 2.0 &&
+          (a.top - b.top).abs() < 2.0 &&
+          (a.right - b.right).abs() < 2.0 &&
+          (a.bottom - b.bottom).abs() < 2.0;
     }
 
     MaterialRectArcTween tween = MaterialRectArcTween(begin: begin, end: end);
     expect(tween.lerp(0.0), begin);
-    expect(sameRect(tween.lerp(0.25), const Rect.fromLTRB(120.0, 113.0, 259.0, 237.0)), isTrue);
-    expect(sameRect(tween.lerp(0.75), const Rect.fromLTRB(42.3, 206.5, 153.5, 354.7)), isTrue);
+    expect(
+        sameRect(
+            tween.lerp(0.25), const Rect.fromLTRB(120.0, 113.0, 259.0, 237.0)),
+        isTrue);
+    expect(
+        sameRect(
+            tween.lerp(0.75), const Rect.fromLTRB(42.3, 206.5, 153.5, 354.7)),
+        isTrue);
     expect(tween.lerp(1.0), end);
 
     tween = MaterialRectArcTween(begin: end, end: begin);
     expect(tween.lerp(0.0), end);
-    expect(sameRect(tween.lerp(0.25), const Rect.fromLTRB(92.0, 262.0, 203.0, 388.0)), isTrue);
-    expect(sameRect(tween.lerp(0.75), const Rect.fromLTRB(169.7, 168.5, 308.5, 270.3)), isTrue);
+    expect(
+        sameRect(
+            tween.lerp(0.25), const Rect.fromLTRB(92.0, 262.0, 203.0, 388.0)),
+        isTrue);
+    expect(
+        sameRect(
+            tween.lerp(0.75), const Rect.fromLTRB(169.7, 168.5, 308.5, 270.3)),
+        isTrue);
     expect(tween.lerp(1.0), begin);
   });
-
 }

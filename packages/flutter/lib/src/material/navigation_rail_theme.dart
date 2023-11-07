@@ -123,8 +123,10 @@ class NavigationRailThemeData with Diagnosticable {
     return NavigationRailThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
-      unselectedLabelTextStyle: unselectedLabelTextStyle ?? this.unselectedLabelTextStyle,
-      selectedLabelTextStyle: selectedLabelTextStyle ?? this.selectedLabelTextStyle,
+      unselectedLabelTextStyle:
+          unselectedLabelTextStyle ?? this.unselectedLabelTextStyle,
+      selectedLabelTextStyle:
+          selectedLabelTextStyle ?? this.selectedLabelTextStyle,
       unselectedIconTheme: unselectedIconTheme ?? this.unselectedIconTheme,
       selectedIconTheme: selectedIconTheme ?? this.selectedIconTheme,
       groupAlignment: groupAlignment ?? this.groupAlignment,
@@ -142,19 +144,27 @@ class NavigationRailThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationRailThemeData? lerp(NavigationRailThemeData? a, NavigationRailThemeData? b, double t) {
+  static NavigationRailThemeData? lerp(
+      NavigationRailThemeData? a, NavigationRailThemeData? b, double t) {
     if (identical(a, b)) {
       return a;
     }
     return NavigationRailThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      unselectedLabelTextStyle: TextStyle.lerp(a?.unselectedLabelTextStyle, b?.unselectedLabelTextStyle, t),
-      selectedLabelTextStyle: TextStyle.lerp(a?.selectedLabelTextStyle, b?.selectedLabelTextStyle, t),
-      unselectedIconTheme: a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
-        ? null : IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
-      selectedIconTheme: a?.selectedIconTheme == null && b?.selectedIconTheme == null
-        ? null : IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
+      unselectedLabelTextStyle: TextStyle.lerp(
+          a?.unselectedLabelTextStyle, b?.unselectedLabelTextStyle, t),
+      selectedLabelTextStyle: TextStyle.lerp(
+          a?.selectedLabelTextStyle, b?.selectedLabelTextStyle, t),
+      unselectedIconTheme:
+          a?.unselectedIconTheme == null && b?.unselectedIconTheme == null
+              ? null
+              : IconThemeData.lerp(
+                  a?.unselectedIconTheme, b?.unselectedIconTheme, t),
+      selectedIconTheme: a?.selectedIconTheme == null &&
+              b?.selectedIconTheme == null
+          ? null
+          : IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
       groupAlignment: lerpDouble(a?.groupAlignment, b?.groupAlignment, t),
       labelType: t < 0.5 ? a?.labelType : b?.labelType,
       useIndicator: t < 0.5 ? a?.useIndicator : b?.useIndicator,
@@ -162,26 +172,25 @@ class NavigationRailThemeData with Diagnosticable {
       indicatorShape: ShapeBorder.lerp(a?.indicatorShape, b?.indicatorShape, t),
       minWidth: lerpDouble(a?.minWidth, b?.minWidth, t),
       minExtendedWidth: lerpDouble(a?.minExtendedWidth, b?.minExtendedWidth, t),
-
     );
   }
 
   @override
   int get hashCode => Object.hash(
-    backgroundColor,
-    elevation,
-    unselectedLabelTextStyle,
-    selectedLabelTextStyle,
-    unselectedIconTheme,
-    selectedIconTheme,
-    groupAlignment,
-    labelType,
-    useIndicator,
-    indicatorColor,
-    indicatorShape,
-    minWidth,
-    minExtendedWidth,
-  );
+        backgroundColor,
+        elevation,
+        unselectedLabelTextStyle,
+        selectedLabelTextStyle,
+        unselectedIconTheme,
+        selectedIconTheme,
+        groupAlignment,
+        labelType,
+        useIndicator,
+        indicatorColor,
+        indicatorShape,
+        minWidth,
+        minExtendedWidth,
+      );
 
   @override
   bool operator ==(Object other) {
@@ -191,20 +200,20 @@ class NavigationRailThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NavigationRailThemeData
-        && other.backgroundColor == backgroundColor
-        && other.elevation == elevation
-        && other.unselectedLabelTextStyle == unselectedLabelTextStyle
-        && other.selectedLabelTextStyle == selectedLabelTextStyle
-        && other.unselectedIconTheme == unselectedIconTheme
-        && other.selectedIconTheme == selectedIconTheme
-        && other.groupAlignment == groupAlignment
-        && other.labelType == labelType
-        && other.useIndicator == useIndicator
-        && other.indicatorColor == indicatorColor
-        && other.indicatorShape == indicatorShape
-        && other.minWidth == minWidth
-        && other.minExtendedWidth == minExtendedWidth;
+    return other is NavigationRailThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.elevation == elevation &&
+        other.unselectedLabelTextStyle == unselectedLabelTextStyle &&
+        other.selectedLabelTextStyle == selectedLabelTextStyle &&
+        other.unselectedIconTheme == unselectedIconTheme &&
+        other.selectedIconTheme == selectedIconTheme &&
+        other.groupAlignment == groupAlignment &&
+        other.labelType == labelType &&
+        other.useIndicator == useIndicator &&
+        other.indicatorColor == indicatorColor &&
+        other.indicatorShape == indicatorShape &&
+        other.minWidth == minWidth &&
+        other.minExtendedWidth == minExtendedWidth;
   }
 
   @override
@@ -212,19 +221,38 @@ class NavigationRailThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     const NavigationRailThemeData defaultData = NavigationRailThemeData();
 
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(DoubleProperty('elevation', elevation, defaultValue: defaultData.elevation));
-    properties.add(DiagnosticsProperty<TextStyle>('unselectedLabelTextStyle', unselectedLabelTextStyle, defaultValue: defaultData.unselectedLabelTextStyle));
-    properties.add(DiagnosticsProperty<TextStyle>('selectedLabelTextStyle', selectedLabelTextStyle, defaultValue: defaultData.selectedLabelTextStyle));
-    properties.add(DiagnosticsProperty<IconThemeData>('unselectedIconTheme', unselectedIconTheme, defaultValue: defaultData.unselectedIconTheme));
-    properties.add(DiagnosticsProperty<IconThemeData>('selectedIconTheme', selectedIconTheme, defaultValue: defaultData.selectedIconTheme));
-    properties.add(DoubleProperty('groupAlignment', groupAlignment, defaultValue: defaultData.groupAlignment));
-    properties.add(DiagnosticsProperty<NavigationRailLabelType>('labelType', labelType, defaultValue: defaultData.labelType));
-    properties.add(DiagnosticsProperty<bool>('useIndicator', useIndicator, defaultValue: defaultData.useIndicator));
-    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
-    properties.add(DiagnosticsProperty<ShapeBorder>('indicatorShape', indicatorShape, defaultValue: null));
-    properties.add(DoubleProperty('minWidth', minWidth, defaultValue: defaultData.minWidth));
-    properties.add(DoubleProperty('minExtendedWidth', minExtendedWidth, defaultValue: defaultData.minExtendedWidth));
+    properties.add(ColorProperty('backgroundColor', backgroundColor,
+        defaultValue: defaultData.backgroundColor));
+    properties.add(DoubleProperty('elevation', elevation,
+        defaultValue: defaultData.elevation));
+    properties.add(DiagnosticsProperty<TextStyle>(
+        'unselectedLabelTextStyle', unselectedLabelTextStyle,
+        defaultValue: defaultData.unselectedLabelTextStyle));
+    properties.add(DiagnosticsProperty<TextStyle>(
+        'selectedLabelTextStyle', selectedLabelTextStyle,
+        defaultValue: defaultData.selectedLabelTextStyle));
+    properties.add(DiagnosticsProperty<IconThemeData>(
+        'unselectedIconTheme', unselectedIconTheme,
+        defaultValue: defaultData.unselectedIconTheme));
+    properties.add(DiagnosticsProperty<IconThemeData>(
+        'selectedIconTheme', selectedIconTheme,
+        defaultValue: defaultData.selectedIconTheme));
+    properties.add(DoubleProperty('groupAlignment', groupAlignment,
+        defaultValue: defaultData.groupAlignment));
+    properties.add(DiagnosticsProperty<NavigationRailLabelType>(
+        'labelType', labelType,
+        defaultValue: defaultData.labelType));
+    properties.add(DiagnosticsProperty<bool>('useIndicator', useIndicator,
+        defaultValue: defaultData.useIndicator));
+    properties.add(ColorProperty('indicatorColor', indicatorColor,
+        defaultValue: defaultData.indicatorColor));
+    properties.add(DiagnosticsProperty<ShapeBorder>(
+        'indicatorShape', indicatorShape,
+        defaultValue: null));
+    properties.add(DoubleProperty('minWidth', minWidth,
+        defaultValue: defaultData.minWidth));
+    properties.add(DoubleProperty('minExtendedWidth', minExtendedWidth,
+        defaultValue: defaultData.minExtendedWidth));
   }
 }
 
@@ -258,7 +286,8 @@ class NavigationRailTheme extends InheritedTheme {
   /// NavigationRailThemeData theme = NavigationRailTheme.of(context);
   /// ```
   static NavigationRailThemeData of(BuildContext context) {
-    final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
+    final NavigationRailTheme? navigationRailTheme =
+        context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
     return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 
@@ -268,5 +297,6 @@ class NavigationRailTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(NavigationRailTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(NavigationRailTheme oldWidget) =>
+      data != oldWidget.data;
 }

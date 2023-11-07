@@ -23,16 +23,15 @@ Future<void> main() async {
           'install',
           canFail: true,
           stderr: stderr,
-          options: <String>[
-            '--d', 'macos',
-            '--flavor', 'free'
-          ],
+          options: <String>['--d', 'macos', '--flavor', 'free'],
         );
 
         final String stderrString = stderr.toString();
-        if (!stderrString.contains('Host and target are the same. Nothing to install.')) {
+        if (!stderrString
+            .contains('Host and target are the same. Nothing to install.')) {
           print(stderrString);
-          return TaskResult.failure('Installing a macOS app on macOS should no-op');
+          return TaskResult.failure(
+              'Installing a macOS app on macOS should no-op');
         }
 
         return TaskResult.success(null);

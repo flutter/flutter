@@ -23,7 +23,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello',
+            child: const Text(
+              'Hello',
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xffff0000)),
@@ -47,7 +48,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello world how are you today',
+            child: const Text(
+              'Hello world how are you today',
               textDirection: TextDirection.ltr,
               textAlign: TextAlign.center,
               style: TextStyle(color: Color(0xffff0000)),
@@ -63,7 +65,6 @@ void main() {
     );
   });
 
-
   testWidgetsWithLeakTracking('Text Foreground', (WidgetTester tester) async {
     const Color black = Color(0xFF000000);
     const Color red = Color(0xFFFF0000);
@@ -76,7 +77,8 @@ void main() {
       Align(
         alignment: Alignment.topLeft,
         child: RepaintBoundary(
-          child: Text('Hello',
+          child: Text(
+            'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               foreground: Paint()
@@ -97,7 +99,8 @@ void main() {
       Align(
         alignment: Alignment.topLeft,
         child: RepaintBoundary(
-          child: Text('Hello',
+          child: Text(
+            'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               foreground: Paint()
@@ -119,7 +122,8 @@ void main() {
       Align(
         alignment: Alignment.topLeft,
         child: RepaintBoundary(
-          child: Text('Hello',
+          child: Text(
+            'Hello',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               foreground: Paint()
@@ -162,16 +166,14 @@ void main() {
                 text: 'text1 ',
                 style: TextStyle(
                   color: translucentGreen,
-                  background: Paint()
-                    ..color = red.withOpacity(0.5),
+                  background: Paint()..color = red.withOpacity(0.5),
                 ),
                 children: <InlineSpan>[
                   TextSpan(
                     text: 'text2',
                     style: TextStyle(
                       color: translucentDarkRed,
-                      background: Paint()
-                        ..color = blue.withOpacity(0.5),
+                      background: Paint()..color = blue.withOpacity(0.5),
                     ),
                   ),
                 ],
@@ -191,26 +193,25 @@ void main() {
 
   testWidgetsWithLeakTracking('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: RepaintBoundary(
-              child: Center(
-                child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  color: Colors.green,
-                  child: Center(
-                    child: Container(
-                      width: 100.0,
-                      color: Colors.blue,
-                      child: const Text(
-                        'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
-                        style: TextStyle(color: Colors.black),
-                        maxLines: 3,
-                        overflow: TextOverflow.fade,
-                      ),
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: RepaintBoundary(
+            child: Center(
+              child: Container(
+                width: 200.0,
+                height: 200.0,
+                color: Colors.green,
+                child: Center(
+                  child: Container(
+                    width: 100.0,
+                    color: Colors.blue,
+                    child: const Text(
+                      'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
+                      style: TextStyle(color: Colors.black),
+                      maxLines: 3,
+                      overflow: TextOverflow.fade,
                     ),
                   ),
                 ),
@@ -218,6 +219,7 @@ void main() {
             ),
           ),
         ),
+      ),
     );
 
     await expectLater(
@@ -226,7 +228,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Default Strut text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default Strut text',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -236,7 +239,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: const Text(
+              'Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(),
@@ -261,7 +265,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine2\nLine3',
+            child: const Text(
+              'Hello\nLine2\nLine3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -288,7 +293,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: const Text(
+              'Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -357,7 +363,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Strut text font fallback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Strut text font fallback',
+      (WidgetTester tester) async {
     // Font Fallback
     await tester.pumpWidget(
       Center(
@@ -368,7 +375,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Color(0xff00ff00),
             ),
-            child: const Text('Hello\nLine 2\nLine 3',
+            child: const Text(
+              'Hello\nLine 2\nLine 3',
               textDirection: TextDirection.ltr,
               style: TextStyle(),
               strutStyle: StrutStyle(
@@ -392,7 +400,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Strut text rich forceStrutHeight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Strut text rich forceStrutHeight',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -443,7 +452,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Decoration thickness', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Decoration thickness',
+      (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
       <TextDecoration>[
         TextDecoration.underline,
@@ -481,7 +491,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Decoration thickness', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Decoration thickness',
+      (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
       <TextDecoration>[
         TextDecoration.underline,
@@ -520,93 +531,98 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
-      Theme(data: ThemeData(useMaterial3: false), child: Center(
-        child: RepaintBoundary(
-          child: Material(
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Container(
-                width: 400.0,
-                height: 200.0,
-                decoration: const BoxDecoration(
-                  color: Color(0xff00ff00),
-                ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
-                  child: const Text.rich(
-                    TextSpan(
-                      text: 'C ',
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                      children: <InlineSpan>[
-                        WidgetSpan(
-                          child: Checkbox(value: true, onChanged: null),
-                        ),
-                        WidgetSpan(
-                          child: Checkbox(value: false, onChanged: null),
-                        ),
-                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
-                        WidgetSpan(
-                          child: SizedBox(
-                            width: 50.0,
-                            height: 55.0,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Color(0xffffff00),
-                              ),
-                              child: Center(
-                                child:SizedBox(
-                                  width: 10.0,
-                                  height: 15.0,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: Color(0xffff0000),
+      Theme(
+          data: ThemeData(useMaterial3: false),
+          child: Center(
+            child: RepaintBoundary(
+              child: Material(
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Container(
+                    width: 400.0,
+                    height: 200.0,
+                    decoration: const BoxDecoration(
+                      color: Color(0xff00ff00),
+                    ),
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                      child: const Text.rich(
+                        TextSpan(
+                          text: 'C ',
+                          style: TextStyle(
+                            fontSize: 16,
+                          ),
+                          children: <InlineSpan>[
+                            WidgetSpan(
+                              child: Checkbox(value: true, onChanged: null),
+                            ),
+                            WidgetSpan(
+                              child: Checkbox(value: false, onChanged: null),
+                            ),
+                            TextSpan(
+                                text: 'He ', style: TextStyle(fontSize: 20)),
+                            WidgetSpan(
+                              child: SizedBox(
+                                width: 50.0,
+                                height: 55.0,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Color(0xffffff00),
+                                  ),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 10.0,
+                                      height: 15.0,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffff0000),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
+                            TextSpan(text: 'hello world! seize the day!'),
+                            WidgetSpan(
+                              child: Checkbox(value: false, onChanged: null),
+                            ),
+                            WidgetSpan(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Checkbox(value: true, onChanged: null),
+                              ),
+                            ),
+                            WidgetSpan(
+                              child: Checkbox(value: false, onChanged: null),
+                              alignment: PlaceholderAlignment.baseline,
+                              baseline: TextBaseline.alphabetic,
+                            ),
+                            WidgetSpan(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Checkbox(value: true, onChanged: null),
+                              ),
+                            ),
+                            WidgetSpan(
+                              child: Text('embedded'),
+                            ),
+                          ],
                         ),
-                        TextSpan(text: 'hello world! seize the day!'),
-                        WidgetSpan(
-                          child: Checkbox(value: false, onChanged: null),
-                        ),
-                        WidgetSpan(
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Checkbox(value: true, onChanged: null),
-                          ),
-                        ),
-                        WidgetSpan(
-                          child: Checkbox(value: false, onChanged: null),
-                          alignment: PlaceholderAlignment.baseline,
-                          baseline: TextBaseline.alphabetic,
-                        ),
-                        WidgetSpan(
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Checkbox(value: true, onChanged: null),
-                          ),
-                        ),
-                        WidgetSpan(
-                          child: Text('embedded'),
-                        ),
-                      ],
+                        textDirection: TextDirection.ltr,
+                      ),
                     ),
-                    textDirection: TextDirection.ltr,
                   ),
                 ),
               ),
             ),
-          ),
-        ),
-      )),
+          )),
     );
     await expectLater(
       find.byType(Container),
@@ -614,7 +630,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget textfield', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget textfield',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
@@ -628,7 +645,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'My name is: ',
@@ -637,11 +655,15 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(
+                              width: 70, height: 25, child: TextField()),
                         ),
-                        TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
+                        TextSpan(
+                            text: ', and my favorite city is: ',
+                            style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(
+                              width: 70, height: 25, child: TextField()),
                         ),
                       ],
                     ),
@@ -661,7 +683,8 @@ void main() {
   });
 
   // This tests if multiple Text.rich widgets are able to inline nest within each other.
-  testWidgetsWithLeakTracking('Text Inline widget nesting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget nesting',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
@@ -675,7 +698,8 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                  constraints:
+                      const BoxConstraints(maxWidth: 200, maxHeight: 100),
                   child: const Text.rich(
                     TextSpan(
                       text: 'outer',
@@ -693,7 +717,8 @@ void main() {
                                   child: Text.rich(
                                     TextSpan(
                                       text: 'inner2',
-                                      style: TextStyle(color: Color(0xf003ffff)),
+                                      style:
+                                          TextStyle(color: Color(0xf003ffff)),
                                       children: <InlineSpan>[
                                         WidgetSpan(
                                           child: SizedBox(
@@ -704,7 +729,7 @@ void main() {
                                                 color: Color(0xffffff30),
                                               ),
                                               child: Center(
-                                                child:SizedBox(
+                                                child: SizedBox(
                                                   width: 10.0,
                                                   height: 15.0,
                                                   child: DecoratedBox(
@@ -730,7 +755,7 @@ void main() {
                                         color: Color(0xff5fff00),
                                       ),
                                       child: Center(
-                                        child:SizedBox(
+                                        child: SizedBox(
                                           width: 10.0,
                                           height: 15.0,
                                           child: DecoratedBox(
@@ -749,7 +774,8 @@ void main() {
                         ),
                         TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          child: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(
+                              width: 70, height: 25, child: TextField()),
                         ),
                         WidgetSpan(
                           child: SizedBox(
@@ -760,7 +786,7 @@ void main() {
                                 color: Color(0xffff00ff),
                               ),
                               child: Center(
-                                child:SizedBox(
+                                child: SizedBox(
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
@@ -790,7 +816,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget baseline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget baseline',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -806,7 +833,8 @@ void main() {
                     color: Color(0xff00ff00),
                   ),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                    constraints:
+                        const BoxConstraints(maxWidth: 200, maxHeight: 100),
                     child: const Text.rich(
                       TextSpan(
                         text: 'C ',
@@ -834,7 +862,7 @@ void main() {
                                   color: Color(0xffffff00),
                                 ),
                                 child: Center(
-                                  child:SizedBox(
+                                  child: SizedBox(
                                     width: 10.0,
                                     height: 15.0,
                                     child: DecoratedBox(
@@ -900,7 +928,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget aboveBaseline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget aboveBaseline',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -916,7 +945,8 @@ void main() {
                     color: Color(0xff00ff00),
                   ),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                    constraints:
+                        const BoxConstraints(maxWidth: 200, maxHeight: 100),
                     child: const Text.rich(
                       TextSpan(
                         text: 'C ',
@@ -944,7 +974,7 @@ void main() {
                                   color: Color(0xffffff00),
                                 ),
                                 child: Center(
-                                  child:SizedBox(
+                                  child: SizedBox(
                                     width: 10.0,
                                     height: 15.0,
                                     child: DecoratedBox(
@@ -1010,7 +1040,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget belowBaseline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget belowBaseline',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1026,7 +1057,8 @@ void main() {
                     color: Color(0xff00ff00),
                   ),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                    constraints:
+                        const BoxConstraints(maxWidth: 200, maxHeight: 100),
                     child: const Text.rich(
                       TextSpan(
                         text: 'C ',
@@ -1054,7 +1086,7 @@ void main() {
                                   color: Color(0xffffff00),
                                 ),
                                 child: Center(
-                                  child:SizedBox(
+                                  child: SizedBox(
                                     width: 10.0,
                                     height: 15.0,
                                     child: DecoratedBox(
@@ -1120,7 +1152,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget top', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget top',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1136,7 +1169,8 @@ void main() {
                     color: Color(0xff00ff00),
                   ),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                    constraints:
+                        const BoxConstraints(maxWidth: 200, maxHeight: 100),
                     child: const Text.rich(
                       TextSpan(
                         text: 'C ',
@@ -1164,7 +1198,7 @@ void main() {
                                   color: Color(0xffffff00),
                                 ),
                                 child: Center(
-                                  child:SizedBox(
+                                  child: SizedBox(
                                     width: 10.0,
                                     height: 15.0,
                                     child: DecoratedBox(
@@ -1230,7 +1264,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text Inline widget middle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text Inline widget middle',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -1246,7 +1281,8 @@ void main() {
                     color: Color(0xff00ff00),
                   ),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                    constraints:
+                        const BoxConstraints(maxWidth: 200, maxHeight: 100),
                     child: const Text.rich(
                       TextSpan(
                         text: 'C ',
@@ -1274,7 +1310,7 @@ void main() {
                                   color: Color(0xffffff00),
                                 ),
                                 child: Center(
-                                  child:SizedBox(
+                                  child: SizedBox(
                                     width: 10.0,
                                     height: 15.0,
                                     child: DecoratedBox(
@@ -1340,7 +1376,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text TextHeightBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text TextHeightBehavior',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -1352,11 +1389,13 @@ void main() {
             ),
             child: const Column(
               children: <Widget>[
-                Text('Hello\nLine 2\nLine 3',
+                Text(
+                  'Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5),
                 ),
-                Text('Hello\nLine 2\nLine 3',
+                Text(
+                  'Hello\nLine 2\nLine 3',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(
@@ -1364,7 +1403,8 @@ void main() {
                     applyHeightToLastDescent: false,
                   ),
                 ),
-                Text('Hello',
+                Text(
+                  'Hello',
                   textDirection: TextDirection.ltr,
                   style: TextStyle(height: 5),
                   textHeightBehavior: TextHeightBehavior(

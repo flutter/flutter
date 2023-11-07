@@ -42,7 +42,8 @@ class PushRouteInformationObserver with WidgetsBindingObserver {
   late RouteInformation pushedRouteInformation;
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+  Future<bool> didPushRouteInformation(
+      RouteInformation routeInformation) async {
     pushedRouteInformation = routeInformation;
     return true;
   }
@@ -141,13 +142,16 @@ void main() {
     final ByteData? message =
         const StringCodec().encodeMessage(state.toString());
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage('flutter/lifecycle', message, (_) { });
+        .handlePlatformMessage('flutter/lifecycle', message, (_) {});
   }
 
-  testWidgetsWithLeakTracking('Rentrant observer callbacks do not result in exceptions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Rentrant observer callbacks do not result in exceptions',
+      (WidgetTester tester) async {
     final RentrantObserver observer = RentrantObserver();
     WidgetsBinding.instance.handleAccessibilityFeaturesChanged();
-    WidgetsBinding.instance.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    WidgetsBinding.instance
+        .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     WidgetsBinding.instance.handleLocaleChanged();
     WidgetsBinding.instance.handleMetricsChanged();
     WidgetsBinding.instance.handlePlatformBrightnessChanged();
@@ -161,21 +165,26 @@ void main() {
     expect(observer.removeSelf(), 0);
   });
 
-  testWidgetsWithLeakTracking('didHaveMemoryPressure callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('didHaveMemoryPressure callback',
+      (WidgetTester tester) async {
     final MemoryPressureObserver observer = MemoryPressureObserver();
     WidgetsBinding.instance.addObserver(observer);
-    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    final ByteData message = const JSONMessageCodec()
+        .encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+    await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/system', message, (_) {});
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('handleLifecycleStateChanged callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('handleLifecycleStateChanged callback',
+      (WidgetTester tester) async {
     final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     await setAppLifeCycleState(AppLifecycleState.paused);
-    expect(observer.accumulatedStates, <AppLifecycleState>[AppLifecycleState.paused]);
+    expect(observer.accumulatedStates,
+        <AppLifecycleState>[AppLifecycleState.paused]);
 
     observer.accumulatedStates.clear();
     await setAppLifeCycleState(AppLifecycleState.resumed);
@@ -225,23 +234,30 @@ void main() {
     ]);
 
     observer.accumulatedStates.clear();
-    await expectLater(() async => setAppLifeCycleState(AppLifecycleState.detached), throwsAssertionError);
+    await expectLater(
+        () async => setAppLifeCycleState(AppLifecycleState.detached),
+        throwsAssertionError);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('didPushRoute callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('didPushRoute callback',
+      (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const String testRouteName = 'testRouteName';
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('pushRoute', testRouteName));
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
+    final ByteData message = const JSONMethodCodec()
+        .encodeMethodCall(const MethodCall('pushRoute', testRouteName));
+    await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRoute, testRouteName);
 
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'didPushRouteInformation calls didPushRoute by default',
+      (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -259,7 +275,9 @@ void main() {
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('didPushRouteInformation calls didPushRoute correctly when handling url', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'didPushRouteInformation calls didPushRoute correctly when handling url',
+      (WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -291,8 +309,10 @@ void main() {
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('didPushRouteInformation callback', (WidgetTester tester) async {
-    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+  testWidgetsWithLeakTracking('didPushRouteInformation callback',
+      (WidgetTester tester) async {
+    final PushRouteInformationObserver observer =
+        PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
@@ -302,14 +322,17 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRouteInformation.uri.toString(), 'testRouteName');
     expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('didPushRouteInformation callback can handle url', (WidgetTester tester) async {
-    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+  testWidgetsWithLeakTracking('didPushRouteInformation callback can handle url',
+      (WidgetTester tester) async {
+    final PushRouteInformationObserver observer =
+        PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
@@ -319,15 +342,21 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
-    expect(observer.pushedRouteInformation.location, '/abc?def=123&def=456#789');
-    expect(observer.pushedRouteInformation.uri.toString(), 'http://hostname/abc?def=123&def=456#789');
+    await ServicesBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {});
+    expect(
+        observer.pushedRouteInformation.location, '/abc?def=123&def=456#789');
+    expect(observer.pushedRouteInformation.uri.toString(),
+        'http://hostname/abc?def=123&def=456#789');
     expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('didPushRouteInformation callback with null state', (WidgetTester tester) async {
-    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+  testWidgetsWithLeakTracking(
+      'didPushRouteInformation callback with null state',
+      (WidgetTester tester) async {
+    final PushRouteInformationObserver observer =
+        PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
@@ -338,13 +367,15 @@ void main() {
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
 
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRouteInformation.uri.toString(), 'testRouteName');
     expect(observer.pushedRouteInformation.state, null);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgetsWithLeakTracking('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Application lifecycle affects frame scheduling',
+      (WidgetTester tester) async {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     await setAppLifeCycleState(AppLifecycleState.paused);
@@ -388,7 +419,8 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 0);
 
-    tester.binding.scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
+    tester.binding
+        .scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 1);
 
@@ -398,10 +430,11 @@ void main() {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('scheduleFrameCallback error control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('scheduleFrameCallback error control test',
+      (WidgetTester tester) async {
     late FlutterError error;
     try {
-      tester.binding.scheduleFrameCallback((Duration _) { }, rescheduling: true);
+      tester.binding.scheduleFrameCallback((Duration _) {}, rescheduling: true);
     } on FlutterError catch (e) {
       error = e;
     }
@@ -430,7 +463,9 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('defaultStackFilter elides framework Element mounting stacks', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'defaultStackFilter elides framework Element mounting stacks',
+      (WidgetTester tester) async {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     late FlutterErrorDetails errorDetails;
     FlutterError.onError = (FlutterErrorDetails details) {

@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Leaf extends StatefulWidget {
-  const Leaf({ required Key key, required this.child }) : super(key: key);
+  const Leaf({required Key key, required this.child}) : super(key: key);
   final Widget child;
   @override
   State<Leaf> createState() => _LeafState();
@@ -50,7 +50,7 @@ class _LeafState extends State<Leaf> {
   }
 }
 
-List<Widget> generateList(Widget child, { required bool impliedMode }) {
+List<Widget> generateList(Widget child, {required bool impliedMode}) {
   return List<Widget>.generate(
     100,
     (int index) {
@@ -67,8 +67,10 @@ List<Widget> generateList(Widget child, { required bool impliedMode }) {
   );
 }
 
-void tests({ required bool impliedMode }) {
-  testWidgetsWithLeakTracking('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+void tests({required bool impliedMode}) {
+  testWidgetsWithLeakTracking(
+      'AutomaticKeepAlive with ListView with itemExtent',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -84,39 +86,71 @@ void tests({ required bool impliedMode }) {
     );
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    await tester.drag(find.byType(ListView), const Offset(0.0, -300.0)); // about 25 widgets' worth
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
+    await tester.drag(find.byType(ListView),
+        const Offset(0.0, -300.0)); // about 25 widgets' worth
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false),
+        findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(true);
-    await tester.drag(find.byType(ListView), const Offset(0.0, 300.0)); // back to top
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
   });
 
-  testWidgetsWithLeakTracking('AutomaticKeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AutomaticKeepAlive with ListView without itemExtent',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -126,7 +160,8 @@ void tests({ required bool impliedMode }) {
           addSemanticIndexes: false,
           cacheExtent: 0.0,
           children: generateList(
-            const SizedBox(height: 12.3, child: Placeholder()), // about 50 widgets visible
+            const SizedBox(
+                height: 12.3, child: Placeholder()), // about 50 widgets visible
             impliedMode: impliedMode,
           ),
         ),
@@ -134,39 +169,70 @@ void tests({ required bool impliedMode }) {
     );
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    await tester.drag(find.byType(ListView), const Offset(0.0, -300.0)); // about 25 widgets' worth
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
+    await tester.drag(find.byType(ListView),
+        const Offset(0.0, -300.0)); // about 25 widgets' worth
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false),
+        findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(true);
-    await tester.drag(find.byType(ListView), const Offset(0.0, 300.0)); // back to top
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
   });
 
-  testWidgetsWithLeakTracking('AutomaticKeepAlive with GridView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with GridView',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -186,44 +252,79 @@ void tests({ required bool impliedMode }) {
     );
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
-    await tester.drag(find.byType(GridView), const Offset(0.0, -300.0)); // about 25 widgets' worth
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
+    await tester.drag(find.byType(GridView),
+        const Offset(0.0, -300.0)); // about 25 widgets' worth
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false),
+        findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(59)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(true);
-    await tester.drag(find.byType(GridView), const Offset(0.0, 300.0)); // back to top
+    await tester.drag(
+        find.byType(GridView), const Offset(0.0, 300.0)); // back to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(60)), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(60).currentState!.setKeepAlive(false);
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(59), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(60), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(61), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false),
+        findsNothing);
   });
 }
 
 void main() {
-  group('Explicit automatic keep-alive', () { tests(impliedMode: false); });
-  group('Implied automatic keep-alive', () { tests(impliedMode: true); });
+  group('Explicit automatic keep-alive', () {
+    tests(impliedMode: false);
+  });
+  group('Implied automatic keep-alive', () {
+    tests(impliedMode: true);
+  });
 
-  testWidgetsWithLeakTracking('AutomaticKeepAlive double', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive double',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -237,8 +338,12 @@ void main() {
               child: SizedBox(
                 height: 400.0,
                 child: Stack(children: <Widget>[
-                  Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
-                  Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(0),
+                      child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(1),
+                      child: Placeholder()),
                 ]),
               ),
             ),
@@ -261,53 +366,81 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
-    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false),
+        findsNothing);
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false),
+        findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0.0, 1000.0)); // move to top
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, 1000.0)); // move to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
-    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     const GlobalObjectKey<_LeafState>(1).currentState!.setKeepAlive(true);
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(false);
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     const GlobalObjectKey<_LeafState>(1).currentState!.setKeepAlive(false);
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false),
+        findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('AutomaticKeepAlive double 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive double 2',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -321,8 +454,12 @@ void main() {
               child: SizedBox(
                 height: 400.0,
                 child: Stack(children: <Widget>[
-                  Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
-                  Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(0),
+                      child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(1),
+                      child: Placeholder()),
                 ]),
               ),
             ),
@@ -330,8 +467,12 @@ void main() {
               child: SizedBox(
                 height: 400.0,
                 child: Stack(children: <Widget>[
-                  Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
-                  Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(2),
+                      child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(3),
+                      child: Placeholder()),
                 ]),
               ),
             ),
@@ -339,8 +480,12 @@ void main() {
               child: SizedBox(
                 height: 400.0,
                 child: Stack(children: <Widget>[
-                  Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
-                  Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(4),
+                      child: Placeholder()),
+                  Leaf(
+                      key: GlobalObjectKey<_LeafState>(5),
+                      child: Placeholder()),
                 ]),
               ),
             ),
@@ -352,13 +497,22 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false),
+        findsNothing);
     const GlobalObjectKey<_LeafState>(0).currentState!.setKeepAlive(true);
-    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
@@ -403,21 +557,31 @@ void main() {
         ],
       ),
     ));
-    await tester.pump(); // Sometimes AutomaticKeepAlive needs an extra pump to clean things up.
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false), findsNothing);
+    await tester
+        .pump(); // Sometimes AutomaticKeepAlive needs an extra pump to clean things up.
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(1), skipOffstage: false),
+        findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0.0, 1000.0)); // move to top
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, 1000.0)); // move to top
     await tester.pump();
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false),
+        findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false),
+        findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
@@ -426,9 +590,15 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsNothing);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView(
@@ -466,16 +636,27 @@ void main() {
         ],
       ),
     ));
-    await tester.pump(); // Sometimes AutomaticKeepAlive needs an extra pump to clean things up.
+    await tester
+        .pump(); // Sometimes AutomaticKeepAlive needs an extra pump to clean things up.
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(2)), findsOneWidget);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false), findsNothing);
-    expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(3), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(4), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(5), skipOffstage: false),
+        findsNothing);
+    expect(
+        find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false),
+        findsNothing);
   });
 
-  testWidgetsWithLeakTracking('AutomaticKeepAlive with keepAlive set to true before initState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AutomaticKeepAlive with keepAlive set to true before initState',
+      (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -500,17 +681,24 @@ void main() {
     expect(find.text('FooBar 1'), findsOneWidget);
     expect(find.text('FooBar 2'), findsOneWidget);
 
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)),
+        findsOneWidget);
+    await tester.drag(
+        find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0),
+            skipOffstage: false),
+        findsOneWidget);
 
     expect(find.text('keep me alive', skipOffstage: false), findsOneWidget);
     expect(find.text('FooBar 1'), findsNothing);
     expect(find.text('FooBar 2'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope',
+      (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -534,14 +722,18 @@ void main() {
     expect(find.text('FooBar 1'), findsOneWidget);
     expect(find.text('FooBar 3'), findsOneWidget);
 
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)),
+        findsOneWidget);
 
     final ScrollableState state = tester.state(find.byType(Scrollable));
     final ScrollPosition position = state.position;
     position.jumpTo(3025.0);
 
     await tester.pump();
-    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0), skipOffstage: false), findsOneWidget);
+    expect(
+        find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0),
+            skipOffstage: false),
+        findsOneWidget);
 
     expect(find.text('keep me alive', skipOffstage: false), findsNWidgets(23));
     expect(find.text('FooBar 1'), findsNothing);
@@ -549,11 +741,13 @@ void main() {
     expect(find.text('FooBar 73'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with SliverKeepAliveWidget',
+      (WidgetTester tester) async {
     // We're just doing a basic test here to make sure that the functionality of
     // RenderSliverWithKeepAliveMixin doesn't get regressed or deleted. As testing
     // the full functionality would be cumbersome.
-    final RenderSliverMultiBoxAdaptorAlt alternate = RenderSliverMultiBoxAdaptorAlt();
+    final RenderSliverMultiBoxAdaptorAlt alternate =
+        RenderSliverMultiBoxAdaptorAlt();
     addTearDown(alternate.dispose);
     final RenderBox child = RenderBoxKeepAlive();
     addTearDown(child.dispose);
@@ -562,7 +756,9 @@ void main() {
     expect(alternate.children.length, 1);
   });
 
-  testWidgetsWithLeakTracking('Keep alive Listenable has its listener removed once called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Keep alive Listenable has its listener removed once called',
+      (WidgetTester tester) async {
     final LeakCheckerHandle handle = LeakCheckerHandle();
     addTearDown(handle.dispose);
     await tester.pumpWidget(Directionality(
@@ -570,11 +766,14 @@ void main() {
       child: ListView.builder(
         itemCount: 1,
         itemBuilder: (BuildContext context, int index) {
-          return const KeepAliveListenableLeakChecker(key: GlobalObjectKey<_KeepAliveListenableLeakCheckerState>(0));
+          return const KeepAliveListenableLeakChecker(
+              key: GlobalObjectKey<_KeepAliveListenableLeakCheckerState>(0));
         },
       ),
     ));
-    final _KeepAliveListenableLeakCheckerState state = const GlobalObjectKey<_KeepAliveListenableLeakCheckerState>(0).currentState!;
+    final _KeepAliveListenableLeakCheckerState state =
+        const GlobalObjectKey<_KeepAliveListenableLeakCheckerState>(0)
+            .currentState!;
 
     expect(handle.hasListeners, false);
     state.dispatch(handle);
@@ -585,13 +784,14 @@ void main() {
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
-  const _AlwaysKeepAlive({ required Key key }) : super(key: key);
+  const _AlwaysKeepAlive({required Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AlwaysKeepAliveState();
 }
 
-class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
+class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive>
+    with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
   @override
   bool get wantKeepAlive => true;
 
@@ -605,7 +805,7 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
   }
 }
 
-class RenderBoxKeepAlive extends RenderBox { }
+class RenderBoxKeepAlive extends RenderBox {}
 
 mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   @override
@@ -615,14 +815,14 @@ mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   bool keepAlive = false;
 }
 
-class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
-    KeepAliveParentDataMixinAlt,
-    RenderSliverHelpers,
-    RenderSliverWithKeepAliveMixin {
-
+class RenderSliverMultiBoxAdaptorAlt extends RenderSliver
+    with
+        KeepAliveParentDataMixinAlt,
+        RenderSliverHelpers,
+        RenderSliverWithKeepAliveMixin {
   final List<RenderBox> children = <RenderBox>[];
 
-  void insert(RenderBox child, { RenderBox? after }) {
+  void insert(RenderBox child, {RenderBox? after}) {
     children.add(child);
   }
 
@@ -632,7 +832,7 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
   }
 
   @override
-  void performLayout() { }
+  void performLayout() {}
 }
 
 class LeakCheckerHandle with ChangeNotifier {
@@ -650,10 +850,12 @@ class KeepAliveListenableLeakChecker extends StatefulWidget {
   const KeepAliveListenableLeakChecker({super.key});
 
   @override
-  State<KeepAliveListenableLeakChecker> createState() => _KeepAliveListenableLeakCheckerState();
+  State<KeepAliveListenableLeakChecker> createState() =>
+      _KeepAliveListenableLeakCheckerState();
 }
 
-class _KeepAliveListenableLeakCheckerState extends State<KeepAliveListenableLeakChecker> {
+class _KeepAliveListenableLeakCheckerState
+    extends State<KeepAliveListenableLeakChecker> {
   void dispatch(Listenable handle) {
     KeepAliveNotification(handle).dispatch(context);
   }

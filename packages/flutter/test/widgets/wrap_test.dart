@@ -8,14 +8,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void verify(WidgetTester tester, List<Offset> answerKey) {
-  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero),
-  ).toList();
+  final List<Offset> testAnswers = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox))
+      .map<Offset>(
+        (RenderBox target) => target.localToGlobal(Offset.zero),
+      )
+      .toList();
   expect(testAnswers, equals(answerKey));
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Basic Wrap test (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Basic Wrap test (LTR)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Wrap(
         textDirection: TextDirection.ltr,
@@ -127,10 +131,10 @@ void main() {
       const Offset(0.0, 100.0),
       const Offset(300.0, 150.0),
     ]);
-
   });
 
-  testWidgetsWithLeakTracking('Basic Wrap test (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Basic Wrap test (RTL)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Wrap(
         textDirection: TextDirection.rtl,
@@ -245,15 +249,17 @@ void main() {
       const Offset(0.0, 400.0),
       const Offset(300.0, 400.0),
     ]);
-
   });
 
   testWidgetsWithLeakTracking('Empty wrap', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: Wrap(alignment: WrapAlignment.center)));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(Size.zero));
+    await tester
+        .pumpWidget(const Center(child: Wrap(alignment: WrapAlignment.center)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(Size.zero));
   });
 
-  testWidgetsWithLeakTracking('Wrap alignment (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrap alignment (LTR)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       alignment: WrapAlignment.center,
       spacing: 5.0,
@@ -264,7 +270,8 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(95.0, 0.0),
       const Offset(200.0, 0.0),
@@ -281,7 +288,8 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(200.0, 0.0),
@@ -298,7 +306,8 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(30.0, 0.0),
       const Offset(195.0, 0.0),
@@ -315,7 +324,8 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(45.0, 0.0),
       const Offset(195.0, 0.0),
@@ -323,7 +333,8 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Wrap alignment (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrap alignment (RTL)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       alignment: WrapAlignment.center,
       spacing: 5.0,
@@ -334,7 +345,8 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(605.0, 0.0),
       const Offset(400.0, 0.0),
@@ -351,7 +363,8 @@ void main() {
         SizedBox(width: 300.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(700.0, 0.0),
       const Offset(400.0, 0.0),
@@ -368,7 +381,8 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(670.0, 0.0),
       const Offset(405.0, 0.0),
@@ -385,7 +399,8 @@ void main() {
         SizedBox(width: 310.0, height: 30.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(655.0, 0.0),
       const Offset(405.0, 0.0),
@@ -393,7 +408,8 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Wrap runAlignment (DOWN)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrap runAlignment (DOWN)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       runAlignment: WrapAlignment.center,
       runSpacing: 5.0,
@@ -406,7 +422,8 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 230.0),
       const Offset(100.0, 230.0),
@@ -427,7 +444,8 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(100.0, 0.0),
@@ -448,7 +466,8 @@ void main() {
         SizedBox(width: 500.0, height: 70.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 75.0),
       const Offset(100.0, 75.0),
@@ -469,7 +488,8 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 115.0),
       const Offset(100.0, 115.0),
@@ -477,10 +497,10 @@ void main() {
       const Offset(0.0, 265.0),
       const Offset(0.0, 425.0),
     ]);
-
   });
 
-  testWidgetsWithLeakTracking('Wrap runAlignment (UP)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrap runAlignment (UP)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       runAlignment: WrapAlignment.center,
       runSpacing: 5.0,
@@ -494,7 +514,8 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 360.0),
       const Offset(100.0, 350.0),
@@ -516,7 +537,8 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 590.0),
       const Offset(100.0, 580.0),
@@ -538,7 +560,8 @@ void main() {
         SizedBox(width: 500.0, height: 70.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 515.0),
       const Offset(100.0, 505.0),
@@ -560,7 +583,8 @@ void main() {
         SizedBox(width: 500.0, height: 60.0),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 475.0),
       const Offset(100.0, 465.0),
@@ -568,10 +592,10 @@ void main() {
       const Offset(0.0, 295.0),
       const Offset(0.0, 115.0),
     ]);
-
   });
 
-  testWidgetsWithLeakTracking('Shrink-wrapping Wrap test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shrink-wrapping Wrap test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Align(
         alignment: Alignment.topLeft,
@@ -588,7 +612,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(600.0, 70.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(600.0, 70.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 20.0),
       const Offset(100.0, 10.0),
@@ -612,7 +637,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(700.0, 60.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(700.0, 60.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(400.0, 10.0),
@@ -637,7 +663,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(500.0, 130.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(500.0, 130.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(0.0, 20.0),
@@ -646,7 +673,8 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Vertical Wrap test with spacing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Vertical Wrap test with spacing',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Align(
         alignment: Alignment.topLeft,
@@ -666,7 +694,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(150.0, 510.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(150.0, 510.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(0.0, 260.0),
@@ -694,7 +723,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(270.0, 250.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(270.0, 250.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(22.0, 0.0),
@@ -705,7 +735,8 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Visual overflow generates a clip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Visual overflow generates a clip',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -713,7 +744,8 @@ void main() {
       ],
     ));
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)), isNot(paints..clipRect()));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)),
+        isNot(paints..clipRect()));
 
     await tester.pumpWidget(const Wrap(
       textDirection: TextDirection.ltr,
@@ -724,10 +756,12 @@ void main() {
       ],
     ));
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)), paints..clipRect());
+    expect(
+        tester.renderObject<RenderBox>(find.byType(Wrap)), paints..clipRect());
   });
 
-  testWidgetsWithLeakTracking('Hit test children in wrap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hit test children in wrap',
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(Wrap(
@@ -744,7 +778,9 @@ void main() {
           height: 300.0,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () { log.add('hit'); },
+            onTap: () {
+              log.add('hit');
+            },
           ),
         ),
       ],
@@ -763,14 +799,16 @@ void main() {
     expect(log, equals(<String>['hit']));
   });
 
-  testWidgetsWithLeakTracking('RenderWrap toStringShallow control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderWrap toStringShallow control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(alignment: WrapAlignment.center));
 
     final RenderBox wrap = tester.renderObject(find.byType(Wrap));
     expect(wrap.toStringShallow(), hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('RenderWrap toString control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderWrap toString control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       direction: Axis.vertical,
       runSpacing: 7.0,
@@ -788,7 +826,8 @@ void main() {
     expect(width, equals(2021));
   });
 
-  testWidgetsWithLeakTracking('Wrap baseline control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrap baseline control test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Baseline(
@@ -809,14 +848,16 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
+    expect(tester.renderObject<RenderBox>(find.text('X')).size,
+        const Size(100.0, 100.0));
     expect(
       tester.renderObject<RenderBox>(find.byType(Baseline)).size,
       const Size(100.0, 200.0),
     );
   });
 
-  testWidgetsWithLeakTracking('Spacing with slight overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Spacing with slight overflow',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       textDirection: TextDirection.ltr,
       spacing: 10.0,
@@ -829,7 +870,8 @@ void main() {
       ],
     ));
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(210.0, 0.0),
@@ -838,7 +880,8 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Object exactly matches container width', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Object exactly matches container width',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Column(
         children: <Widget>[
@@ -854,7 +897,8 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 10.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 10.0)));
     verify(tester, <Offset>[Offset.zero]);
 
     await tester.pumpWidget(
@@ -873,23 +917,28 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 30.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size,
+        equals(const Size(800.0, 30.0)));
     verify(tester, <Offset>[
       Offset.zero,
       const Offset(0.0, 20.0),
     ]);
   });
 
-  testWidgetsWithLeakTracking('Wrap can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrap can set and update clipBehavior',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(textDirection: TextDirection.ltr));
-    final RenderWrap renderObject = tester.allRenderObjects.whereType<RenderWrap>().first;
+    final RenderWrap renderObject =
+        tester.allRenderObjects.whereType<RenderWrap>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
-    await tester.pumpWidget(const Wrap(textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias));
+    await tester.pumpWidget(const Wrap(
+        textDirection: TextDirection.ltr, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgetsWithLeakTracking('Horizontal wrap - IntrinsicsHeight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Horizontal wrap - IntrinsicsHeight',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
       const Directionality(
@@ -921,7 +970,8 @@ void main() {
     expect(tester.getSize(find.byType(IntrinsicHeight)).height, 2 * 16 + 40);
   });
 
-  testWidgetsWithLeakTracking('Vertical wrap - IntrinsicsWidth', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Vertical wrap - IntrinsicsWidth',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
       const Directionality(
@@ -951,6 +1001,7 @@ void main() {
     // The column takes up the full height, therefore the "Start" and "End" text
     // are placed to the left and right of it and the total width is the sum of
     // the individual widths.
-    expect(tester.getSize(find.byType(IntrinsicWidth)).width, 5 * 16 + 60 + 3 * 16);
+    expect(tester.getSize(find.byType(IntrinsicWidth)).width,
+        5 * 16 + 60 + 3 * 16);
   });
 }

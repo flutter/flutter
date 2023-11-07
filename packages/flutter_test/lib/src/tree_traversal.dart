@@ -21,7 +21,8 @@ Iterable<Element> collectAllElementsFrom(
   Element rootElement, {
   required bool skipOffstage,
 }) {
-  return CachingIterable<Element>(_DepthFirstElementTreeIterator(rootElement, !skipOffstage));
+  return CachingIterable<Element>(
+      _DepthFirstElementTreeIterator(rootElement, !skipOffstage));
 }
 
 /// Provides an iterable that efficiently returns all the [SemanticsNode]s
@@ -41,9 +42,10 @@ Iterable<Element> collectAllElementsFrom(
 /// are also cached.
 Iterable<SemanticsNode> collectAllSemanticsNodesFrom(
   SemanticsNode root, {
-    DebugSemanticsDumpOrder order = DebugSemanticsDumpOrder.traversalOrder,
-  }) {
-    return CachingIterable<SemanticsNode>(_DepthFirstSemanticsTreeIterator(root, order));
+  DebugSemanticsDumpOrder order = DebugSemanticsDumpOrder.traversalOrder,
+}) {
+  return CachingIterable<SemanticsNode>(
+      _DepthFirstSemanticsTreeIterator(root, order));
 }
 
 /// Provides a recursive, efficient, depth first search of a tree.
@@ -144,7 +146,8 @@ class _DepthFirstElementTreeIterator extends _DepthFirstTreeIterator<Element> {
 /// so the results can be used to simulate the same traversal the engine will
 /// make. The results are not filtered based on flags or visibility, so they
 /// will need to be further filtered to fully simulate an accessiblity service.
-class _DepthFirstSemanticsTreeIterator extends _DepthFirstTreeIterator<SemanticsNode> {
+class _DepthFirstSemanticsTreeIterator
+    extends _DepthFirstTreeIterator<SemanticsNode> {
   _DepthFirstSemanticsTreeIterator(super.root, this.order);
 
   final DebugSemanticsDumpOrder order;

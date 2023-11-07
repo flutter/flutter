@@ -22,17 +22,19 @@ Analytics getAnalytics({
   bool enableAsserts = false,
   FakeAnalytics? analyticsOverride,
 }) {
-  final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
-  final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final String version =
+      flutterVersion.getVersionString(redactUnknownBranches: true);
+  final bool suppressEnvFlag =
+      environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
 
-  if (// Ignore local user branches.
+  if ( // Ignore local user branches.
       version.startsWith('[user-branch]') ||
-      // Many CI systems don't do a full git checkout.
-      version.endsWith('/unknown') ||
-      // Ignore bots.
-      runningOnBot ||
-      // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
-      suppressEnvFlag) {
+          // Many CI systems don't do a full git checkout.
+          version.endsWith('/unknown') ||
+          // Ignore bots.
+          runningOnBot ||
+          // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
+          suppressEnvFlag) {
     return NoOpAnalytics();
   }
 

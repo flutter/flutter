@@ -7,9 +7,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(
-    const PlatformViewApp()
-  );
+  runApp(const PlatformViewApp());
 }
 
 class PlatformViewApp extends StatefulWidget {
@@ -33,25 +31,26 @@ class PlatformViewAppState extends State<PlatformViewApp> {
 }
 
 class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({ super.key });
+  const PlatformViewLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Platform View Scrolling Layout')),
       body: ListView.builder(
-        key: const Key('platform-views-scroll'), // This key is used by the driver test.
+        key: const Key(
+            'platform-views-scroll'), // This key is used by the driver test.
         itemCount: 200,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
             padding: const EdgeInsets.all(5.0),
             child: Material(
-              elevation: (index % 5 + 1).toDouble(),
-              color: Colors.white,
-              child: index.isEven
-                ? CustomPaint(painter: ExpensivePainter(), size: const Size(400, 200))
-                : const DummyPlatformView()
-            ),
+                elevation: (index % 5 + 1).toDouble(),
+                color: Colors.white,
+                child: index.isEven
+                    ? CustomPaint(
+                        painter: ExpensivePainter(), size: const Size(400, 200))
+                    : const DummyPlatformView()),
           );
         },
       ),
@@ -64,7 +63,8 @@ class DummyPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
+    const String viewType =
+        'benchmarks/platform_views_layout/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
       nativeView = const UiKitView(
@@ -92,11 +92,13 @@ class ExpensivePainter extends CustomPainter {
     final double boxHeight = size.height / 50;
     for (int i = 0; i < 50; i++) {
       for (int j = 0; j < 50; j++) {
-        final Rect rect = Rect.fromLTWH(i * boxWidth, j * boxHeight, boxWidth, boxHeight);
-        canvas.drawRect(rect, Paint()
-          ..style = PaintingStyle.fill
-          ..color = Colors.red
-        );
+        final Rect rect =
+            Rect.fromLTWH(i * boxWidth, j * boxHeight, boxWidth, boxHeight);
+        canvas.drawRect(
+            rect,
+            Paint()
+              ..style = PaintingStyle.fill
+              ..color = Colors.red);
       }
     }
   }

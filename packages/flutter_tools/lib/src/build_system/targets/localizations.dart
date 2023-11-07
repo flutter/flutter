@@ -21,9 +21,10 @@ class GenerateLocalizationsTarget extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-    // This is added as a convenience for developing the tool.
-    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/localizations.dart'),
-  ];
+        // This is added as a convenience for developing the tool.
+        const Source.pattern(
+            '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/localizations.dart'),
+      ];
 
   @override
   String get name => 'gen_localizations';
@@ -50,7 +51,8 @@ class GenerateLocalizationsTarget extends Target {
     // 2. flutter_tools/test/general.shard/build_system/targets/localizations_test.dart
     // Keep the value consistent in all three locations to ensure behavior is the
     // same across "flutter gen-l10n" and "flutter run".
-    final String defaultArbDir = environment.fileSystem.path.join('lib', 'l10n');
+    final String defaultArbDir =
+        environment.fileSystem.path.join('lib', 'l10n');
 
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
@@ -67,9 +69,9 @@ class GenerateLocalizationsTarget extends Target {
       processManager: environment.processManager,
     );
 
-    final Map<String, Object?> dependencies = json.decode(
-      environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()
-    ) as Map<String, Object?>;
+    final Map<String, Object?> dependencies = json.decode(environment.buildDir
+        .childFile(_kDependenciesFileName)
+        .readAsStringSync()) as Map<String, Object?>;
     final List<Object?>? inputs = dependencies['inputs'] as List<Object?>?;
     final List<Object?>? outputs = dependencies['outputs'] as List<Object?>?;
     final Depfile depfile = Depfile(

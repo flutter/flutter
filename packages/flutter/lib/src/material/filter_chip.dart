@@ -100,9 +100,9 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0),
-       _chipVariant = _ChipVariant.flat;
+  })  : assert(pressElevation == null || pressElevation >= 0.0),
+        assert(elevation == null || elevation >= 0.0),
+        _chipVariant = _ChipVariant.flat;
 
   /// Create an elevated chip that acts like a checkbox.
   ///
@@ -143,9 +143,9 @@ class FilterChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-  }) : assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0),
-       _chipVariant = _ChipVariant.elevated;
+  })  : assert(pressElevation == null || pressElevation >= 0.0),
+        assert(elevation == null || elevation >= 0.0),
+        _chipVariant = _ChipVariant.elevated;
 
   @override
   final Widget? avatar;
@@ -221,10 +221,12 @@ class FilterChip extends StatelessWidget
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
-      : null;
-    final Widget? resolvedDeleteIcon = deleteIcon
-      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
+        ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
+        : null;
+    final Widget? resolvedDeleteIcon = deleteIcon ??
+        (Theme.of(context).useMaterial3
+            ? const Icon(Icons.clear, size: 18)
+            : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -278,9 +280,10 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
     this.isSelected,
     this._chipVariant,
   ) : super(
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
-        showCheckmark: true,
-      );
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          showCheckmark: true,
+        );
 
   final BuildContext context;
   final bool isEnabled;
@@ -291,8 +294,10 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
 
   @override
   double? get elevation => _chipVariant == _ChipVariant.flat
-    ? 0.0
-    : isEnabled ? 1.0 : 0.0;
+      ? 0.0
+      : isEnabled
+          ? 1.0
+          : 0.0;
 
   @override
   double? get pressElevation => 1.0;
@@ -302,31 +307,29 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
 
   @override
   MaterialStateProperty<Color?>? get color =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
-        return _chipVariant == _ChipVariant.flat
-          ? _colors.onSurface.withOpacity(0.12)
-          : _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return _chipVariant == _ChipVariant.flat
-          ? null
-          : _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.selected)) {
-        return _chipVariant == _ChipVariant.flat
-          ? _colors.secondaryContainer
-          : _colors.secondaryContainer;
-      }
-      return _chipVariant == _ChipVariant.flat
-        ? null
-        : null;
-    });
+      MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected) &&
+            states.contains(MaterialState.disabled)) {
+          return _chipVariant == _ChipVariant.flat
+              ? _colors.onSurface.withOpacity(0.12)
+              : _colors.onSurface.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.disabled)) {
+          return _chipVariant == _ChipVariant.flat
+              ? null
+              : _colors.onSurface.withOpacity(0.12);
+        }
+        if (states.contains(MaterialState.selected)) {
+          return _chipVariant == _ChipVariant.flat
+              ? _colors.secondaryContainer
+              : _colors.secondaryContainer;
+        }
+        return _chipVariant == _ChipVariant.flat ? null : null;
+      });
 
   @override
-  Color? get shadowColor => _chipVariant == _ChipVariant.flat
-    ? Colors.transparent
-    : _colors.shadow;
+  Color? get shadowColor =>
+      _chipVariant == _ChipVariant.flat ? Colors.transparent : _colors.shadow;
 
   @override
   Color? get surfaceTintColor => _colors.surfaceTint;
@@ -339,18 +342,16 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat && !isSelected
-    ? isEnabled
-      ? BorderSide(color: _colors.outline)
-      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
-    : const BorderSide(color: Colors.transparent);
+      ? isEnabled
+          ? BorderSide(color: _colors.outline)
+          : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+      : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
-    color: isEnabled
-      ? null
-      : _colors.onSurface,
-    size: 18.0,
-  );
+        color: isEnabled ? null : _colors.onSurface,
+        size: 18.0,
+      );
 
   @override
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
@@ -361,10 +362,11 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   /// remains 4px.
   @override
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
-    const EdgeInsets.symmetric(horizontal: 8.0),
-    const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
-  )!;
+        const EdgeInsets.symmetric(horizontal: 8.0),
+        const EdgeInsets.symmetric(horizontal: 4.0),
+        clampDouble(
+            MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
+      )!;
 }
 
 // END GENERATED TOKEN PROPERTIES - FilterChip

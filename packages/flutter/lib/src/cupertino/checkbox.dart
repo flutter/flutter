@@ -167,7 +167,8 @@ class CupertinoCheckbox extends StatefulWidget {
   State<CupertinoCheckbox> createState() => _CupertinoCheckboxState();
 }
 
-class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProviderStateMixin, ToggleableStateMixin {
+class _CupertinoCheckboxState extends State<CupertinoCheckbox>
+    with TickerProviderStateMixin, ToggleableStateMixin {
   final _CheckboxPainter _painter = _CheckboxPainter();
   bool? _previousValue;
 
@@ -210,21 +211,21 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveActiveColor = widget.activeColor
-      ?? CupertinoColors.activeBlue;
+    final Color effectiveActiveColor =
+        widget.activeColor ?? CupertinoColors.activeBlue;
     final Color? inactiveColor = widget.inactiveColor;
-    final Color effectiveInactiveColor = inactiveColor
-      ?? CupertinoColors.inactiveGray;
+    final Color effectiveInactiveColor =
+        inactiveColor ?? CupertinoColors.inactiveGray;
 
-    final Color effectiveFocusOverlayColor = widget.focusColor
-      ?? HSLColor
-          .fromColor(effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
-          .withLightness(_kCupertinoFocusColorBrightness)
-          .withSaturation(_kCupertinoFocusColorSaturation)
-          .toColor();
+    final Color effectiveFocusOverlayColor = widget.focusColor ??
+        HSLColor.fromColor(
+                effectiveActiveColor.withOpacity(_kCupertinoFocusColorOpacity))
+            .withLightness(_kCupertinoFocusColorBrightness)
+            .withSaturation(_kCupertinoFocusColorSaturation)
+            .toColor();
 
-    final Color effectiveCheckColor = widget.checkColor
-      ?? CupertinoColors.white;
+    final Color effectiveCheckColor =
+        widget.checkColor ?? CupertinoColors.white;
 
     return Semantics(
       checked: widget.value ?? false,
@@ -244,9 +245,10 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..value = value
           ..previousValue = _previousValue
           ..isActive = widget.onChanged != null
-          ..shape = widget.shape ?? RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.0),
-          )
+          ..shape = widget.shape ??
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.0),
+              )
           ..side = widget.side,
       ),
     );
@@ -325,7 +327,8 @@ class _CheckboxPainter extends ToggleablePainter {
       ..strokeCap = StrokeCap.round;
   }
 
-  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
+  void _drawBox(
+      Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
     if (fill) {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
@@ -339,9 +342,12 @@ class _CheckboxPainter extends ToggleablePainter {
     // The ratios for the offsets below were found from looking at the checkbox
     // examples on in the HIG docs. The distance from the needed point to the
     // edge was measured, then devided by the total width.
-    const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.52);
-    const Offset mid = Offset(CupertinoCheckbox.width * 0.46, CupertinoCheckbox.width * 0.75);
-    const Offset end = Offset(CupertinoCheckbox.width * 0.72, CupertinoCheckbox.width * 0.29);
+    const Offset start =
+        Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.52);
+    const Offset mid =
+        Offset(CupertinoCheckbox.width * 0.46, CupertinoCheckbox.width * 0.75);
+    const Offset end =
+        Offset(CupertinoCheckbox.width * 0.72, CupertinoCheckbox.width * 0.29);
     path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
     path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
     canvas.drawPath(path, paint);
@@ -353,25 +359,26 @@ class _CheckboxPainter extends ToggleablePainter {
   void _drawDash(Canvas canvas, Offset origin, Paint paint) {
     // From measuring the checkbox example in the HIG docs, the dash was found
     // to be half the total width, centered in the middle.
-    const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.5);
-    const Offset end = Offset(CupertinoCheckbox.width * 0.75, CupertinoCheckbox.width * 0.5);
+    const Offset start =
+        Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.5);
+    const Offset end =
+        Offset(CupertinoCheckbox.width * 0.75, CupertinoCheckbox.width * 0.5);
     canvas.drawLine(origin + start, origin + end, paint);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = size / 2.0 - const Size.square(CupertinoCheckbox.width) / 2.0 as Offset;
+    final Offset origin =
+        size / 2.0 - const Size.square(CupertinoCheckbox.width) / 2.0 as Offset;
 
     final Rect outer = _outerRectAt(origin);
     final Paint paint = Paint()..color = _colorAt(value ?? true);
 
     if (value == false) {
-
       final BorderSide border = side ?? BorderSide(color: paint.color);
       _drawBox(canvas, outer, paint, border, false);
     } else {
-
       _drawBox(canvas, outer, paint, side, true);
       if (value ?? false) {
         _drawCheck(canvas, origin, strokePaint);

@@ -7,7 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('ListView can handle shrinking top elements', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView can handle shrinking top elements',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -68,7 +69,9 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dy, equals(200.0));
   });
 
-  testWidgetsWithLeakTracking('ListView can handle shrinking top elements with cache extent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'ListView can handle shrinking top elements with cache extent',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -127,7 +130,8 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dy, equals(150.0));
   });
 
-  testWidgetsWithLeakTracking('ListView can handle inserts at 0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView can handle inserts at 0',
+      (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -150,8 +154,10 @@ void main() {
     expect(find.text('2'), findsNothing);
     expect(find.text('3'), findsNothing);
 
-    final Finder findItemA = find.descendant(of: find.byType(SizedBox), matching: find.text('A'));
-    final Finder findItemB = find.descendant(of: find.byType(SizedBox), matching: find.text('B'));
+    final Finder findItemA =
+        find.descendant(of: find.byType(SizedBox), matching: find.text('A'));
+    final Finder findItemB =
+        find.descendant(of: find.byType(SizedBox), matching: find.text('B'));
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -174,7 +180,6 @@ void main() {
     expect(tester.getBottomRight(findItemA).dy, 10.0);
     expect(tester.getTopLeft(findItemB).dy, 10.0);
     expect(tester.getBottomRight(findItemB).dy, 20.0);
-
 
     controller.jumpTo(1200.0);
     await tester.pump();
@@ -208,10 +213,10 @@ void main() {
     controller.jumpTo(0.0);
     await tester.pump();
     expect(find.text('B'), findsOneWidget);
-    expect(controller.offset, greaterThan(0.0)); // RenderSliverList corrected the offset.
+    expect(controller.offset,
+        greaterThan(0.0)); // RenderSliverList corrected the offset.
     expect(tester.getTopLeft(findItemB).dy, -180.0);
     expect(tester.getBottomRight(findItemB).dy, 20.0);
-
 
     controller.jumpTo(0.0);
     await tester.pump();

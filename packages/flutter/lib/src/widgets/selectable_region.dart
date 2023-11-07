@@ -1918,8 +1918,6 @@ abstract class MultiSelectableSelectionContainerDelegate
     return length;
   }
 
-
-
   @override
   TextSelection? getLocalTextSelection() {
     int start = 0;
@@ -1932,7 +1930,7 @@ abstract class MultiSelectableSelectionContainerDelegate
       final SelectedContent? data = selectable.getSelectedContent();
       if (data != null) {
         final TextSelection? selection = selectable.getLocalTextSelection();
-        if(!enteredSelectedRegion) {
+        if (!enteredSelectedRegion) {
           start += selection!.start;
         }
         enteredSelectedRegion = true;
@@ -1944,10 +1942,9 @@ abstract class MultiSelectableSelectionContainerDelegate
       }
     }
     if (numSelected == 0) {
-     return null;
+      return null;
     }
     end = numSelected + start;
-
 
     return TextSelection(
       baseOffset: start,

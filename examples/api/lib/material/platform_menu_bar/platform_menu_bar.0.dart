@@ -97,7 +97,8 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
                   menus: <PlatformMenuItem>[
                     PlatformMenuItem(
                       label: 'I am not throwing away my shot.',
-                      shortcut: const SingleActivator(LogicalKeyboardKey.digit1, meta: true),
+                      shortcut: const SingleActivator(LogicalKeyboardKey.digit1,
+                          meta: true),
                       onSelected: () {
                         setState(() {
                           _message = 'I am not throwing away my shot.';
@@ -105,11 +106,14 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
                       },
                     ),
                     PlatformMenuItem(
-                      label: "There's a million things I haven't done, but just you wait.",
-                      shortcut: const SingleActivator(LogicalKeyboardKey.digit2, meta: true),
+                      label:
+                          "There's a million things I haven't done, but just you wait.",
+                      shortcut: const SingleActivator(LogicalKeyboardKey.digit2,
+                          meta: true),
                       onSelected: () {
                         setState(() {
-                          _message = "There's a million things I haven't done, but just you wait.";
+                          _message =
+                              "There's a million things I haven't done, but just you wait.";
                         });
                       },
                     ),
@@ -117,8 +121,10 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
                 ),
               ],
             ),
-            if (PlatformProvidedMenuItem.hasMenu(PlatformProvidedMenuItemType.quit))
-              const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
+            if (PlatformProvidedMenuItem.hasMenu(
+                PlatformProvidedMenuItemType.quit))
+              const PlatformProvidedMenuItem(
+                  type: PlatformProvidedMenuItemType.quit),
           ],
         ),
       ],

@@ -5,10 +5,9 @@
 import 'template.dart';
 
 class InputDecoratorTemplate extends TokenTemplate {
-  const InputDecoratorTemplate(super.blockName, super.fileName, super.tokens, {
-    super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
-  });
+  const InputDecoratorTemplate(super.blockName, super.fileName, super.tokens,
+      {super.colorSchemePrefix = '_colors.',
+      super.textThemePrefix = '_textTheme.'});
 
   @override
   String generate() => '''
@@ -47,7 +46,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
         return ${border('md.comp.filled-text-field.error.hover.active-indicator')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${mergedBorder('md.comp.filled-text-field.error.focus.active-indicator','md.comp.filled-text-field.focus.active-indicator')};
+        return ${mergedBorder('md.comp.filled-text-field.error.focus.active-indicator', 'md.comp.filled-text-field.focus.active-indicator')};
       }
       return ${border('md.comp.filled-text-field.error.active-indicator')};
     }
@@ -70,7 +69,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
         return ${border('md.comp.outlined-text-field.error.hover.outline')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${mergedBorder('md.comp.outlined-text-field.error.focus.outline','md.comp.outlined-text-field.focus.outline')};
+        return ${mergedBorder('md.comp.outlined-text-field.error.focus.outline', 'md.comp.outlined-text-field.focus.outline')};
       }
       return ${border('md.comp.outlined-text-field.error.outline')};
     }
@@ -211,11 +210,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   /// Generate a [BorderSide] for the given components.
   String mergedBorder(String componentToken1, String componentToken2) {
-    final String borderColor = componentColor(componentToken1)!= 'null'
+    final String borderColor = componentColor(componentToken1) != 'null'
         ? componentColor(componentToken1)
         : componentColor(componentToken2);
-    final double width = (
-        getToken('$componentToken1.width') ??
+    final double width = (getToken('$componentToken1.width') ??
         getToken('$componentToken1.height') ??
         getToken('$componentToken2.width') ??
         getToken('$componentToken2.height') ??

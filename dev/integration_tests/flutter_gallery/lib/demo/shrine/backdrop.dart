@@ -13,10 +13,10 @@ const double _kPeakVelocityProgress = 0.379146;
 
 class _TappableWhileStatusIs extends StatefulWidget {
   const _TappableWhileStatusIs(
-      this.status, {
-        this.controller,
-        this.child,
-      });
+    this.status, {
+    this.controller,
+    this.child,
+  });
 
   final AnimationController? controller;
   final AnimationStatus status;
@@ -138,14 +138,16 @@ class _BackdropTitle extends AnimatedWidget {
             icon: Stack(children: <Widget>[
               Opacity(
                 opacity: animation.value,
-                child: const ImageIcon(AssetImage('packages/shrine_images/slanted_menu.png')),
+                child: const ImageIcon(
+                    AssetImage('packages/shrine_images/slanted_menu.png')),
               ),
               FractionalTranslation(
                 translation: Tween<Offset>(
                   begin: Offset.zero,
                   end: const Offset(1.0, 0.0),
                 ).evaluate(animation),
-                child: const ImageIcon(AssetImage('packages/shrine_images/diamond.png')),
+                child: const ImageIcon(
+                    AssetImage('packages/shrine_images/diamond.png')),
               ),
             ]),
           ),
@@ -213,7 +215,8 @@ class Backdrop extends StatefulWidget {
   State<Backdrop> createState() => _BackdropState();
 }
 
-class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
+class _BackdropState extends State<Backdrop>
+    with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   AnimationController? _controller;
   late Animation<RelativeRect> _layerAnimation;
@@ -232,7 +235,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   bool get _frontLayerVisible {
     final AnimationStatus status = _controller!.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
+    return status == AnimationStatus.completed ||
+        status == AnimationStatus.forward;
   }
 
   void _toggleBackdropLayerVisibility() {
@@ -352,7 +356,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => const LoginPage()),
+              MaterialPageRoute<void>(
+                  builder: (BuildContext context) => const LoginPage()),
             );
           },
         ),
@@ -361,7 +366,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => const LoginPage()),
+              MaterialPageRoute<void>(
+                  builder: (BuildContext context) => const LoginPage()),
             );
           },
         ),

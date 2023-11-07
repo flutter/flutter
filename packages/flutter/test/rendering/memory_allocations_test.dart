@@ -20,7 +20,8 @@ void main() {
     void listener(ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
-    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
+    final int expectedEventCount =
+        await _activateFlutterObjectsAndReturnCountOfEvents();
     expect(eventCount, expectedEventCount);
 
     ma.removeListener(listener);
@@ -45,7 +46,7 @@ class _TestRenderObject extends RenderObject {
   Rect get semanticBounds => throw UnimplementedError();
 }
 
-class _TestLayer extends Layer{
+class _TestLayer extends Layer {
   @override
   void addToScene(ui.SceneBuilder builder) {}
 }
@@ -54,11 +55,15 @@ class _TestLayer extends Layer{
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
 
-  final RenderObject renderObject = _TestRenderObject(); count++;
-  final Layer layer = _TestLayer(); count++;
+  final RenderObject renderObject = _TestRenderObject();
+  count++;
+  final Layer layer = _TestLayer();
+  count++;
 
-  renderObject.dispose(); count++;
-  layer.dispose(); count++;
+  renderObject.dispose();
+  count++;
+  layer.dispose();
+  count++;
 
   return count;
 }

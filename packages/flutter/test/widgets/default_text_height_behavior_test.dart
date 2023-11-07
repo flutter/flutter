@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Text widget parameter takes precedence over DefaultTextHeightBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Text widget parameter takes precedence over DefaultTextHeightBehavior',
+      (WidgetTester tester) async {
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
@@ -32,7 +34,9 @@ void main() {
     expect(text.textHeightBehavior, behavior1);
   });
 
-  testWidgetsWithLeakTracking('DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'DefaultTextStyle.textHeightBehavior takes precedence over DefaultTextHeightBehavior ',
+      (WidgetTester tester) async {
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,
       applyHeightToFirstAscent: false,
@@ -78,7 +82,9 @@ void main() {
     expect(text.textHeightBehavior, behavior1);
   });
 
-  testWidgetsWithLeakTracking('DefaultTextHeightBehavior changes propagate to Text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'DefaultTextHeightBehavior changes propagate to Text',
+      (WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextHeightBehavior behavior1 = TextHeightBehavior(
       applyHeightToLastDescent: false,

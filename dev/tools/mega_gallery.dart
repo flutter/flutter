@@ -32,7 +32,8 @@ void main(List<String> args) {
     exit(0);
   }
 
-  final Directory source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
+  final Directory source =
+      Directory(_normalize('dev/integration_tests/flutter_gallery'));
   final Directory out = Directory(_normalize(results['out'] as String));
 
   if (results['delete'] as bool) {
@@ -61,8 +62,10 @@ void main(List<String> args) {
   print('Making $copies copies of flutter_gallery.');
   print('');
   print('Stats:');
-  print('  packages/flutter            : ${getStatsFor(Directory("packages/flutter"))}');
-  print('  dev/integration_tests/flutter_gallery    : ${getStatsFor(Directory("dev/integration_tests/flutter_gallery"))}');
+  print(
+      '  packages/flutter            : ${getStatsFor(Directory("packages/flutter"))}');
+  print(
+      '  dev/integration_tests/flutter_gallery    : ${getStatsFor(Directory("dev/integration_tests/flutter_gallery"))}');
 
   final Directory lib = _dir(out, 'lib');
   if (lib.existsSync()) {
@@ -82,7 +85,8 @@ void main(List<String> args) {
 
   // Update the pubspec.
   String pubspec = _file(out, 'pubspec.yaml').readAsStringSync();
-  pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
+  pubspec =
+      pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
   _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
 
   // Remove the (flutter_gallery specific) analysis_options.yaml file.
@@ -129,7 +133,8 @@ void _copyGallery(Directory galleryDir, int index) {
   // Copy demo/, gallery/, and main.dart.
   _copy(_dir(lib, 'demo'), _dir(dest, 'demo'));
   _copy(_dir(lib, 'gallery'), _dir(dest, 'gallery'));
-  _file(dest, 'main.dart').writeAsBytesSync(_file(lib, 'main.dart').readAsBytesSync());
+  _file(dest, 'main.dart')
+      .writeAsBytesSync(_file(lib, 'main.dart').readAsBytesSync());
 }
 
 void _copy(Directory source, Directory target) {
@@ -155,7 +160,8 @@ void _copy(Directory source, Directory target) {
   }
 }
 
-Directory _dir(Directory parent, String name) => Directory(path.join(parent.path, name));
+Directory _dir(Directory parent, String name) =>
+    Directory(path.join(parent.path, name));
 File _file(Directory parent, String name) => File(path.join(parent.path, name));
 String _normalize(String filePath) => path.normalize(path.absolute(filePath));
 
@@ -164,7 +170,8 @@ class SourceStats {
   int lines = 0;
 
   @override
-  String toString() => '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
+  String toString() =>
+      '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
 }
 
 SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {

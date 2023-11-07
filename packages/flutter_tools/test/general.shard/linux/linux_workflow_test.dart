@@ -46,7 +46,8 @@ void main() {
     expect(linuxWorkflow.canListEmulators, false);
   });
 
-  testWithoutContext('Does not apply when the Linux desktop feature is disabled', () {
+  testWithoutContext(
+      'Does not apply when the Linux desktop feature is disabled', () {
     final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
       platform: linux,
       featureFlags: disabledFlags,

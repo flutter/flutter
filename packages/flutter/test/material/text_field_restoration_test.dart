@@ -10,7 +10,8 @@ const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';
 
 void main() {
-  testWidgetsWithLeakTracking('TextField restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextField restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -21,7 +22,8 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('TextField restoration with external controller', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextField restoration with external controller',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'root',
@@ -37,22 +39,26 @@ void main() {
 
 Future<void> restoreAndVerify(WidgetTester tester) async {
   expect(find.text(text), findsNothing);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      0);
 
   await tester.enterText(find.byType(TextField), text);
   await skipPastScrollingAnimation(tester);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      0);
 
   await tester.drag(find.byType(Scrollable), const Offset(0, -80));
   await skipPastScrollingAnimation(tester);
 
   expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      60);
 
   await tester.restartAndRestore();
 
   expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      60);
 
   final TestRestorationData data = await tester.getRestorationData();
 
@@ -62,12 +68,14 @@ Future<void> restoreAndVerify(WidgetTester tester) async {
   await skipPastScrollingAnimation(tester);
 
   expect(find.text(text), findsNothing);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, isNot(60));
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      isNot(60));
 
   await tester.restoreFrom(data);
 
   expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      60);
 }
 
 class TestWidget extends StatefulWidget {
@@ -80,7 +88,8 @@ class TestWidget extends StatefulWidget {
 }
 
 class TestWidgetState extends State<TestWidget> with RestorationMixin {
-  final RestorableTextEditingController controller = RestorableTextEditingController();
+  final RestorableTextEditingController controller =
+      RestorableTextEditingController();
 
   @override
   String get restorationId => 'widget';

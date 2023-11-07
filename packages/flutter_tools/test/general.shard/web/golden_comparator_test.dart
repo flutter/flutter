@@ -20,11 +20,10 @@ import '../../src/context.dart';
 final Uri goldenKey = Uri.parse('file://golden_key');
 final Uri goldenKey2 = Uri.parse('file://second_golden_key');
 final Uri testUri = Uri.parse('file://test_uri');
-final Uri testUri2  = Uri.parse('file://second_test_uri');
+final Uri testUri2 = Uri.parse('file://second_test_uri');
 final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 
 void main() {
-
   group('Test that TestGoldenComparator', () {
     late FakeProcessManager processManager;
 
@@ -61,11 +60,13 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result = await comparator.compareGoldens(
+          testUri, imageBytes, goldenKey, false);
       expect(result, null);
     });
 
-    testWithoutContext('fail with error message when golden comparison failed', () async {
+    testWithoutContext('fail with error message when golden comparison failed',
+        () async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': false,
         'message': 'some message',
@@ -78,7 +79,8 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse)}\n',
+        ],
+        stdout: '${jsonEncode(expectedResponse)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -90,7 +92,8 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
       );
 
-      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result = await comparator.compareGoldens(
+          testUri, imageBytes, goldenKey, false);
       expect(result, 'some message');
     });
 
@@ -111,7 +114,9 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
+        ],
+        stdout:
+            '${jsonEncode(expectedResponse1)}\n${jsonEncode(expectedResponse2)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -123,14 +128,17 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result1 = await comparator.compareGoldens(
+          testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
 
-      final String? result2 = await comparator.compareGoldens(testUri, imageBytes, goldenKey2, false);
+      final String? result2 = await comparator.compareGoldens(
+          testUri, imageBytes, goldenKey2, false);
       expect(result2, 'some other message');
     });
 
-    testWithoutContext('does not reuse the process for different test file', () async {
+    testWithoutContext('does not reuse the process for different test file',
+        () async {
       final Map<String, dynamic> expectedResponse1 = <String, dynamic>{
         'success': false,
         'message': 'some message',
@@ -147,7 +155,8 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse1)}\n',
+        ],
+        stdout: '${jsonEncode(expectedResponse1)}\n',
       ));
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -156,7 +165,8 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse2)}\n',
+        ],
+        stdout: '${jsonEncode(expectedResponse2)}\n',
       ));
 
       final TestGoldenComparator comparator = TestGoldenComparator(
@@ -168,10 +178,12 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
       );
 
-      final String? result1 = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result1 = await comparator.compareGoldens(
+          testUri, imageBytes, goldenKey, false);
       expect(result1, 'some message');
 
-      final String? result2 = await comparator.compareGoldens(testUri2, imageBytes, goldenKey2, false);
+      final String? result2 = await comparator.compareGoldens(
+          testUri2, imageBytes, goldenKey2, false);
       expect(result2, 'some other message');
     });
 
@@ -181,7 +193,8 @@ void main() {
         'success': true,
         'message': 'some message',
       };
-      final StreamController<List<int>> controller = StreamController<List<int>>();
+      final StreamController<List<int>> controller =
+          StreamController<List<int>>();
       final IOSink stdin = IOSink(controller.sink);
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -190,7 +203,8 @@ void main() {
           '--non-interactive',
           '--packages=.dart_tool/package_config.json',
           'compiler_output',
-        ], stdout: '${jsonEncode(expectedResponse)}\n',
+        ],
+        stdout: '${jsonEncode(expectedResponse)}\n',
         stdin: stdin,
       ));
 
@@ -203,7 +217,8 @@ void main() {
         webRenderer: WebRendererMode.html,
       );
 
-      final String? result = await comparator.compareGoldens(testUri, imageBytes, goldenKey, false);
+      final String? result = await comparator.compareGoldens(
+          testUri, imageBytes, goldenKey, false);
       expect(result, null);
 
       await comparator.close();
@@ -219,5 +234,5 @@ class FakeTestCompiler extends Fake implements TestCompiler {
   }
 
   @override
-  Future<void> dispose() async { }
+  Future<void> dispose() async {}
 }

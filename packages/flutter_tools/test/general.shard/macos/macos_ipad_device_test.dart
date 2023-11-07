@@ -27,12 +27,14 @@ void main() {
 
     testWithoutContext('does not support non-macOS platforms', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer =
+          MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'windows'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        operatingSystemUtils:
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
       );
 
@@ -40,12 +42,14 @@ void main() {
     });
 
     testWithoutContext('discovery not allowed', () async {
-      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer =
+          MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        operatingSystemUtils:
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
       );
       expect(discoverer.supportsPlatform, isTrue);
@@ -56,12 +60,14 @@ void main() {
 
     testWithoutContext('no device on x86', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer =
+          MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
+        operatingSystemUtils:
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
       );
       expect(discoverer.supportsPlatform, isTrue);
@@ -72,12 +78,14 @@ void main() {
 
     testWithoutContext('no device on when iOS development off', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer =
+          MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        operatingSystemUtils:
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: false),
       );
       expect(discoverer.supportsPlatform, isTrue);
@@ -88,12 +96,14 @@ void main() {
 
     testWithoutContext('device discovery on arm', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
-      final MacOSDesignedForIPadDevices discoverer = MacOSDesignedForIPadDevices(
+      final MacOSDesignedForIPadDevices discoverer =
+          MacOSDesignedForIPadDevices(
         platform: FakePlatform(operatingSystem: 'macos'),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        operatingSystemUtils:
+            FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
       );
       expect(discoverer.supportsPlatform, isTrue);
@@ -106,7 +116,8 @@ void main() {
       expect(device.id, 'designed-for-ipad');
 
       // Timeout ignored.
-      devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
+      devices = await discoverer.discoverDevices(
+          timeout: const Duration(seconds: 10));
       expect(devices, hasLength(1));
     });
   });
@@ -116,7 +127,8 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+      operatingSystemUtils:
+          FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
     );
     expect(device.id, 'designed-for-ipad');
     expect(await device.isLocalEmulator, isFalse);
@@ -126,22 +138,24 @@ void main() {
 
     expect(await device.installApp(FakeApplicationPackage()), isTrue);
     expect(await device.isAppInstalled(FakeApplicationPackage()), isTrue);
-    expect(await device.isLatestBuildInstalled(FakeApplicationPackage()), isTrue);
+    expect(
+        await device.isLatestBuildInstalled(FakeApplicationPackage()), isTrue);
     expect(await device.uninstallApp(FakeApplicationPackage()), isTrue);
 
     expect(device.isSupported(), isTrue);
     expect(device.getLogReader(), isA<DesktopLogReader>());
 
-     expect(await device.stopApp(FakeIOSApp()), isFalse);
+    expect(await device.stopApp(FakeIOSApp()), isFalse);
 
     await expectLater(
-          () => device.startApp(
+      () => device.startApp(
         FakeIOSApp(),
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
       ),
       throwsA(isA<UnimplementedError>()),
     );
-    await expectLater(() => device.buildForDevice(buildInfo: BuildInfo.debug), throwsA(isA<UnimplementedError>()));
+    await expectLater(() => device.buildForDevice(buildInfo: BuildInfo.debug),
+        throwsA(isA<UnimplementedError>()));
     expect(device.executablePathForDevice(FakeIOSApp(), BuildInfo.debug), null);
   });
 }
@@ -154,4 +168,5 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
 }
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+
 class FakeIOSApp extends Fake implements IOSApp {}

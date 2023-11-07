@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('CustomScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CustomScrollView restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: CustomScrollView(
@@ -34,7 +35,8 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('ListView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView(
@@ -54,7 +56,8 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('ListView.builder restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.builder restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView.builder(
@@ -71,14 +74,16 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('ListView.separated restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.separated restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView.separated(
           restorationId: 'list',
           cacheExtent: 0,
           itemCount: 50,
-          separatorBuilder: (BuildContext context, int index) => const SizedBox.shrink(),
+          separatorBuilder: (BuildContext context, int index) =>
+              const SizedBox.shrink(),
           itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
@@ -90,7 +95,8 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('ListView.custom restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.custom restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView.custom(
@@ -112,13 +118,15 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('GridView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView(
           restorationId: 'grid',
           cacheExtent: 0,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1),
           children: List<Widget>.generate(
             50,
             (int index) => SizedBox(
@@ -133,13 +141,15 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('GridView.builder restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.builder restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.builder(
           restorationId: 'grid',
           cacheExtent: 0,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1),
           itemBuilder: (BuildContext context, int index) => SizedBox(
             height: 50,
             child: Text('Tile $index'),
@@ -151,13 +161,15 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('GridView.custom restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.custom restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.custom(
           restorationId: 'grid',
           cacheExtent: 0,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1),
           childrenDelegate: SliverChildListDelegate(
             List<Widget>.generate(
               50,
@@ -174,7 +186,8 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('GridView.count restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.count restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.count(
@@ -195,7 +208,8 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('GridView.extent restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.extent restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.extent(
@@ -216,7 +230,8 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('SingleChildScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SingleChildScrollView restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: SingleChildScrollView(
@@ -245,7 +260,9 @@ void main() {
 
     await tester.restartAndRestore();
 
-    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 525);
+    expect(
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+        525);
     expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, -525));
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, -475));
 
@@ -258,12 +275,15 @@ void main() {
 
     await tester.restoreFrom(data);
 
-    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 525);
+    expect(
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+        525);
     expect(tester.getTopLeft(find.text('Tile 0')), const Offset(0, -525));
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, -475));
   });
 
-  testWidgetsWithLeakTracking('PageView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageView restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView(
@@ -279,7 +299,8 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgetsWithLeakTracking('PageView.builder restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageView.builder restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView.builder(
@@ -295,7 +316,8 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgetsWithLeakTracking('PageView.custom restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageView.custom restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView.custom(
@@ -316,7 +338,8 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgetsWithLeakTracking('ListWheelScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListWheelScrollView restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListWheelScrollView(
@@ -333,7 +356,8 @@ void main() {
     await restoreScrollAndVerify(tester, secondOffset: 542);
   });
 
-  testWidgetsWithLeakTracking('ListWheelScrollView.useDelegate restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListWheelScrollView.useDelegate restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListWheelScrollView.useDelegate(
@@ -355,17 +379,20 @@ void main() {
     await restoreScrollAndVerify(tester, secondOffset: 542);
   });
 
-  testWidgetsWithLeakTracking('NestedScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView restoration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: TestHarness(
           height: 200,
           child: NestedScrollView(
             restorationId: 'outer',
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                   sliver: SliverAppBar(
                     title: const Text('Books'),
                     pinned: true,
@@ -391,20 +418,35 @@ void main() {
       ),
     );
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        150);
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.drag(find.byType(NestedScrollView), const Offset(0, -500));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
     await tester.restartAndRestore();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
@@ -412,18 +454,30 @@ void main() {
     await tester.drag(find.byType(NestedScrollView), const Offset(0, 600));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        150);
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.restoreFrom(data);
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+        tester
+            .renderObject<RenderSliver>(find.byType(SliverAppBar))
+            .geometry!
+            .paintExtent,
+        56);
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('RestorationData is flushed even if no frame is scheduled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'RestorationData is flushed even if no frame is scheduled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView(
@@ -447,7 +501,8 @@ void main() {
     expect(find.text('Tile 12'), findsNothing);
 
     final TestRestorationData initialData = await tester.getRestorationData();
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    final TestGesture gesture =
+        await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await gesture.moveBy(const Offset(0, -525));
     await tester.pump();
 
@@ -471,7 +526,10 @@ Future<void> pageViewScrollAndRestore(WidgetTester tester) async {
   expect(find.text('Tile 0'), findsOneWidget);
   expect(find.text('Tile 10'), findsNothing);
 
-  tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(50.0 * 10);
+  tester
+      .state<ScrollableState>(find.byType(Scrollable))
+      .position
+      .jumpTo(50.0 * 10);
   await tester.pumpAndSettle();
 
   expect(find.text('Tile 0'), findsNothing);
@@ -479,7 +537,8 @@ Future<void> pageViewScrollAndRestore(WidgetTester tester) async {
 
   await tester.restartAndRestore();
 
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 50.0 * 10);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      50.0 * 10);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);
 
@@ -492,13 +551,16 @@ Future<void> pageViewScrollAndRestore(WidgetTester tester) async {
 
   await tester.restoreFrom(data);
 
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 50.0 * 10);
+  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      50.0 * 10);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);
 }
 
-Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 525}) async {
-  final Finder findScrollable = find.byElementPredicate((Element e) => e.widget is Scrollable);
+Future<void> restoreScrollAndVerify(WidgetTester tester,
+    {double secondOffset = 525}) async {
+  final Finder findScrollable =
+      find.byElementPredicate((Element e) => e.widget is Scrollable);
 
   expect(find.text('Tile 0'), findsOneWidget);
   expect(find.text('Tile 1'), findsOneWidget);
@@ -517,7 +579,8 @@ Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 
 
   await tester.restartAndRestore();
 
-  expect(tester.state<ScrollableState>(findScrollable).position.pixels, secondOffset);
+  expect(tester.state<ScrollableState>(findScrollable).position.pixels,
+      secondOffset);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 1'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);
@@ -536,7 +599,8 @@ Future<void> restoreScrollAndVerify(WidgetTester tester, {double secondOffset = 
 
   await tester.restoreFrom(data);
 
-  expect(tester.state<ScrollableState>(findScrollable).position.pixels, secondOffset);
+  expect(tester.state<ScrollableState>(findScrollable).position.pixels,
+      secondOffset);
   expect(find.text('Tile 0'), findsNothing);
   expect(find.text('Tile 1'), findsNothing);
   expect(find.text('Tile 10'), findsOneWidget);

@@ -11,7 +11,8 @@ import 'selection_container.dart';
 
 /// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
 @visibleForTesting
-typedef RegisterViewFactory = void Function(String, Object Function(int viewId), {bool isVisible});
+typedef RegisterViewFactory = void Function(String, Object Function(int viewId),
+    {bool isVisible});
 
 /// A widget that provides native selection context menu for its child subtree.
 ///
@@ -35,10 +36,12 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   });
 
   /// Attaches the `client` to be able to open platform-appropriate context menus.
-  static void attach(SelectionContainerDelegate client) => throw UnimplementedError();
+  static void attach(SelectionContainerDelegate client) =>
+      throw UnimplementedError();
 
   /// Detaches the `client` from the platform-appropriate selection context menus.
-  static void detach(SelectionContainerDelegate client) => throw UnimplementedError();
+  static void detach(SelectionContainerDelegate client) =>
+      throw UnimplementedError();
 
   /// Override this to provide a custom implementation of `ui_web.platformViewRegistry.registerViewFactory`.
   ///

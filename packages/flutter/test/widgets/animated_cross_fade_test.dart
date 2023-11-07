@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('AnimatedCrossFade test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade test',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -62,7 +63,8 @@ void main() {
     expect(box.size.height, equals(150.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade test showSecond', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade test showSecond',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -89,7 +91,8 @@ void main() {
     expect(box.size.height, equals(200.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade alignment (VISUAL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade alignment (VISUAL)',
+      (WidgetTester tester) async {
     final Key firstKey = UniqueKey();
     final Key secondKey = UniqueKey();
 
@@ -147,7 +150,8 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade alignment (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade alignment (LTR)',
+      (WidgetTester tester) async {
     final Key firstKey = UniqueKey();
     final Key secondKey = UniqueKey();
 
@@ -205,7 +209,8 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade alignment (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade alignment (RTL)',
+      (WidgetTester tester) async {
     final Key firstKey = UniqueKey();
     final Key secondKey = UniqueKey();
 
@@ -263,22 +268,26 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(325.0, 175.0));
   });
 
-  Widget crossFadeWithWatcher({ bool towardsSecond = false }) {
+  Widget crossFadeWithWatcher({bool towardsSecond = false}) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AnimatedCrossFade(
         firstChild: const _TickerWatchingWidget(),
         secondChild: Container(),
-        crossFadeState: towardsSecond ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        crossFadeState: towardsSecond
+            ? CrossFadeState.showSecond
+            : CrossFadeState.showFirst,
         duration: const Duration(milliseconds: 50),
       ),
     );
   }
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade preserves widget state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade preserves widget state',
+      (WidgetTester tester) async {
     await tester.pumpWidget(crossFadeWithWatcher());
 
-    _TickerWatchingWidgetState findState() => tester.state(find.byType(_TickerWatchingWidget));
+    _TickerWatchingWidgetState findState() =>
+        tester.state(find.byType(_TickerWatchingWidget));
     final _TickerWatchingWidgetState state = findState();
 
     await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
@@ -288,17 +297,21 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade switches off TickerMode and semantics on faded out widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'AnimatedCrossFade switches off TickerMode and semantics on faded out widget',
+      (WidgetTester tester) async {
     ExcludeSemantics findSemantics() {
       return tester.widget(find.descendant(
-        of: find.byKey(const ValueKey<CrossFadeState>(CrossFadeState.showFirst)),
+        of: find
+            .byKey(const ValueKey<CrossFadeState>(CrossFadeState.showFirst)),
         matching: find.byType(ExcludeSemantics),
       ));
     }
 
     await tester.pumpWidget(crossFadeWithWatcher());
 
-    final _TickerWatchingWidgetState state = tester.state(find.byType(_TickerWatchingWidget));
+    final _TickerWatchingWidgetState state =
+        tester.state(find.byType(_TickerWatchingWidget));
     expect(state.ticker.muted, false);
     expect(findSemantics().excluding, false);
 
@@ -318,7 +331,8 @@ void main() {
     expect(findSemantics().excluding, true);
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade.layoutBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade.layoutBuilder',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -362,7 +376,8 @@ void main() {
     expect(find.text('AAA'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade test focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade test focus',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -375,18 +390,21 @@ void main() {
       ),
     );
 
-    final FocusNode visibleNode = Focus.of(tester.element(find.text('AAA')), scopeOk: true);
+    final FocusNode visibleNode =
+        Focus.of(tester.element(find.text('AAA')), scopeOk: true);
     visibleNode.requestFocus();
     await tester.pump();
     expect(visibleNode.hasPrimaryFocus, isTrue);
 
-    final FocusNode hiddenNode = Focus.of(tester.element(find.text('BBB')), scopeOk: true);
+    final FocusNode hiddenNode =
+        Focus.of(tester.element(find.text('BBB')), scopeOk: true);
     hiddenNode.requestFocus();
     await tester.pump();
     expect(hiddenNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade bottom child can have focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedCrossFade bottom child can have focus',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -400,18 +418,21 @@ void main() {
       ),
     );
 
-    final FocusNode visibleNode = Focus.of(tester.element(find.text('AAA')), scopeOk: true);
+    final FocusNode visibleNode =
+        Focus.of(tester.element(find.text('AAA')), scopeOk: true);
     visibleNode.requestFocus();
     await tester.pump();
     expect(visibleNode.hasPrimaryFocus, isTrue);
 
-    final FocusNode hiddenNode = Focus.of(tester.element(find.text('BBB')), scopeOk: true);
+    final FocusNode hiddenNode =
+        Focus.of(tester.element(find.text('BBB')), scopeOk: true);
     hiddenNode.requestFocus();
     await tester.pump();
     expect(hiddenNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('AnimatedCrossFade second child do not receive touch events',
+  testWidgetsWithLeakTracking(
+      'AnimatedCrossFade second child do not receive touch events',
       (WidgetTester tester) async {
     int numberOfTouchEventNoticed = 0;
 
@@ -425,11 +446,12 @@ void main() {
             child: AnimatedCrossFade(
               firstChild: const Text('AAA'),
               secondChild: TextButton(
-                  style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 600)),
-                  onPressed: () {
-                    numberOfTouchEventNoticed++;
-                  },
-                  child: const Text('BBB'),
+                style: TextButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 600)),
+                onPressed: () {
+                  numberOfTouchEventNoticed++;
+                },
+                child: const Text('BBB'),
               ),
               crossFadeState: crossFadeState,
               duration: const Duration(milliseconds: 50),
@@ -440,8 +462,8 @@ void main() {
     }
 
     Future<void> touchSecondButton() async {
-      final TestGesture gestureTouchSecondButton = await tester
-          .startGesture(const Offset(150, 300));
+      final TestGesture gestureTouchSecondButton =
+          await tester.startGesture(const Offset(150, 300));
 
       return gestureTouchSecondButton.up();
     }
@@ -466,13 +488,14 @@ class _TickerWatchingWidget extends StatefulWidget {
   State<StatefulWidget> createState() => _TickerWatchingWidgetState();
 }
 
-class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with SingleTickerProviderStateMixin {
+class _TickerWatchingWidgetState extends State<_TickerWatchingWidget>
+    with SingleTickerProviderStateMixin {
   late Ticker ticker;
 
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((_) { })..start();
+    ticker = createTicker((_) {})..start();
   }
 
   @override

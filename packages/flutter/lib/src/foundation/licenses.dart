@@ -148,7 +148,8 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     int lastLineIndent = 0;
     int currentLineIndent = 0;
     int? currentParagraphIndentation;
-    _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
+    _LicenseEntryWithLineBreaksParserState state =
+        _LicenseEntryWithLineBreaksParserState.beforeParagraph;
     final List<String> lines = <String>[];
     final List<LicenseParagraph> result = <LicenseParagraph>[];
 
@@ -160,7 +161,8 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     LicenseParagraph getParagraph() {
       assert(lines.isNotEmpty);
       assert(currentParagraphIndentation != null);
-      final LicenseParagraph result = LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
+      final LicenseParagraph result =
+          LicenseParagraph(lines.join(' '), currentParagraphIndentation!);
       assert(result.text.trimLeft() == result.text);
       assert(result.text.isNotEmpty);
       lines.clear();
@@ -186,8 +188,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               if (lines.isNotEmpty) {
                 result.add(getParagraph());
               }
-              if (text[currentPosition] == '\r' && currentPosition < text.length - 1
-                  && text[currentPosition + 1] == '\n') {
+              if (text[currentPosition] == '\r' &&
+                  currentPosition < text.length - 1 &&
+                  text[currentPosition + 1] == '\n') {
                 currentPosition += 1;
               }
               lastLineIndent = 0;
@@ -255,7 +258,6 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     return result;
   }
 }
-
 
 /// A registry for packages to add licenses to, so that they can be displayed
 /// together in an interface such as the [LicensePage].

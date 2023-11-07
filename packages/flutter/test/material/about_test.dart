@@ -17,7 +17,8 @@ void main() {
     LicenseRegistry.reset();
   });
 
-  testWidgetsWithLeakTracking('Material3 has sentence case labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 has sentence case labels',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
       builder: (BuildContext context, Widget? child) {
@@ -57,7 +58,8 @@ void main() {
     expect(find.text('View licenses'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Material2 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - AboutListTile control test',
+      (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -74,7 +76,8 @@ void main() {
                 AboutListTile(
                   applicationVersion: '0.1.2',
                   applicationIcon: logo,
-                  applicationLegalese: 'I am the very model of a modern major general.',
+                  applicationLegalese:
+                      'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
                     Text('About box'),
                   ],
@@ -121,7 +124,8 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['Pirate package '], 'Pirate license'),
+        const LicenseEntryWithLineBreaks(
+            <String>['Pirate package '], 'Pirate license'),
       ]);
     });
 
@@ -140,7 +144,8 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Material3 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AboutListTile control test',
+      (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -157,7 +162,8 @@ void main() {
                 AboutListTile(
                   applicationVersion: '0.1.2',
                   applicationIcon: logo,
-                  applicationLegalese: 'I am the very model of a modern major general.',
+                  applicationLegalese:
+                      'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
                     Text('About box'),
                   ],
@@ -204,7 +210,8 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['Pirate package '], 'Pirate license'),
+        const LicenseEntryWithLineBreaks(
+            <String>['Pirate package '], 'Pirate license'),
       ]);
     });
 
@@ -223,7 +230,9 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('About box logic defaults to executable name for app name', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'About box logic defaults to executable name for app name',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         title: 'flutter_tester',
@@ -233,7 +242,8 @@ void main() {
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('LicensePage control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage control test',
+      (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -284,7 +294,8 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage control test with all properties',
+      (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     LicenseRegistry.addLicense(() {
@@ -310,7 +321,8 @@ void main() {
             applicationName: 'LicensePage test app',
             applicationVersion: '0.1.2',
             applicationIcon: logo,
-            applicationLegalese: 'I am the very model of a modern major general.',
+            applicationLegalese:
+                'I am the very model of a modern major general.',
           ),
         ),
       ),
@@ -360,7 +372,9 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Material2 - _PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material2 - _PackageLicensePage title style without AppBarTheme',
+      (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -408,7 +422,9 @@ void main() {
     expect(subtitle.style, subtitleTextStyle);
   });
 
-  testWidgetsWithLeakTracking('Material3 - _PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material3 - _PackageLicensePage title style without AppBarTheme',
+      (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -456,7 +472,9 @@ void main() {
     expect(subtitle.style, subtitleTextStyle);
   });
 
-  testWidgetsWithLeakTracking('_PackageLicensePage title style with AppBarTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      '_PackageLicensePage title style with AppBarTheme',
+      (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -506,7 +524,8 @@ void main() {
     expect(title.style, titleTextStyle);
   });
 
-  testWidgetsWithLeakTracking('Material2 - LicensePage respects the notch', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - LicensePage respects the notch',
+      (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
 
     LicenseRegistry.addLicense(() {
@@ -537,7 +556,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - LicensePage respects the notch', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - LicensePage respects the notch',
+      (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
 
     LicenseRegistry.addLicense(() {
@@ -566,9 +586,12 @@ void main() {
       tester.getTopLeft(find.text('Licenses')),
       const Offset(16.0 + safeareaPadding, 14.0 + safeareaPadding),
     );
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  },
+      skip: kIsWeb &&
+          !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-  testWidgetsWithLeakTracking('LicensePage returns early if unmounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage returns early if unmounted',
+      (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -593,7 +616,8 @@ void main() {
     expect(licenseEntry.packagesCalled, false);
   });
 
-  testWidgetsWithLeakTracking('LicensePage returns late if unmounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage returns late if unmounted',
+      (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -618,7 +642,9 @@ void main() {
     expect(licenseEntry.packagesCalled, true);
   });
 
-  testWidgetsWithLeakTracking('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'LicensePage logic defaults to executable name for app name',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         title: 'flutter_tester',
@@ -628,7 +654,8 @@ void main() {
     expect(find.text('flutter_tester'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('AboutListTile dense property is applied', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AboutListTile dense property is applied',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(child: Center(child: AboutListTile())),
     ));
@@ -648,7 +675,9 @@ void main() {
     expect(tileRect.height, 48.0);
   });
 
-  testWidgetsWithLeakTracking('showLicensePage uses nested navigator by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'showLicensePage uses nested navigator by default',
+      (WidgetTester tester) async {
     final LicensePageObserver rootObserver = LicensePageObserver();
     final LicensePageObserver nestedObserver = LicensePageObserver();
 
@@ -686,7 +715,9 @@ void main() {
     expect(nestedObserver.licensePageCount, 1);
   });
 
-  testWidgetsWithLeakTracking('showLicensePage uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'showLicensePage uses root navigator if useRootNavigator is true',
+      (WidgetTester tester) async {
     final LicensePageObserver rootObserver = LicensePageObserver();
     final LicensePageObserver nestedObserver = LicensePageObserver();
 
@@ -732,7 +763,8 @@ void main() {
       rootObserver = AboutDialogObserver();
     });
 
-    testWidgetsWithLeakTracking('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Barrier is dismissible with default parameter',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -764,7 +796,9 @@ void main() {
       expect(rootObserver.dialogCount, 0);
     });
 
-    testWidgetsWithLeakTracking('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking(
+        'Barrier is not dismissible with barrierDismissible is false',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -775,9 +809,7 @@ void main() {
                   return ElevatedButton(
                     child: const Text('X'),
                     onPressed: () => showAboutDialog(
-                        context: context,
-                        barrierDismissible: false
-                    ),
+                        context: context, barrierDismissible: false),
                   );
                 },
               ),
@@ -821,7 +853,8 @@ void main() {
     // Open the dialog.
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
-    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.black54);
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+        Colors.black54);
 
     // Dismiss the dialog.
     await tester.tapAt(const Offset(10.0, 10.0));
@@ -849,7 +882,8 @@ void main() {
     // Open the dialog.
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
-    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+        Colors.pink);
   });
 
   testWidgetsWithLeakTracking('Barrier Label', (WidgetTester tester) async {
@@ -876,10 +910,15 @@ void main() {
     // Open the dialog.
     await tester.tap(find.byType(ElevatedButton));
     await tester.pumpAndSettle();
-    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).semanticsLabel, 'Custom Label');
+    expect(
+        tester
+            .widget<ModalBarrier>(find.byType(ModalBarrier).last)
+            .semanticsLabel,
+        'Custom Label');
   });
 
-  testWidgetsWithLeakTracking('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showAboutDialog uses root navigator by default',
+      (WidgetTester tester) async {
     final AboutDialogObserver rootObserver = AboutDialogObserver();
     final AboutDialogObserver nestedObserver = AboutDialogObserver();
 
@@ -912,7 +951,9 @@ void main() {
     expect(nestedObserver.dialogCount, 0);
   });
 
-  testWidgetsWithLeakTracking('showAboutDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'showAboutDialog uses nested navigator if useRootNavigator is false',
+      (WidgetTester tester) async {
     final AboutDialogObserver rootObserver = AboutDialogObserver();
     final AboutDialogObserver nestedObserver = AboutDialogObserver();
 
@@ -947,7 +988,8 @@ void main() {
   });
 
   group('showAboutDialog avoids overlapping display features', () {
-    testWidgetsWithLeakTracking('default positioning', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default positioning',
+        (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
@@ -985,10 +1027,12 @@ void main() {
 
       // By default it should place the dialog on the left screen
       expect(tester.getTopLeft(find.byType(AboutDialog)), Offset.zero);
-      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(390.0, 600.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)),
+          const Offset(390.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning using anchorPoint', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using anchorPoint',
+        (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
@@ -1026,11 +1070,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // The anchorPoint hits the right side of the display
-      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
-      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
+      expect(tester.getTopLeft(find.byType(AboutDialog)),
+          const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)),
+          const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning using Directionality', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using Directionality',
+        (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
@@ -1070,12 +1117,16 @@ void main() {
       await tester.pumpAndSettle();
 
       // Since this is rtl, the first screen is the on the right
-      expect(tester.getTopLeft(find.byType(AboutDialog)), const Offset(410.0, 0.0));
-      expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
+      expect(tester.getTopLeft(find.byType(AboutDialog)),
+          const Offset(410.0, 0.0));
+      expect(tester.getBottomRight(find.byType(AboutDialog)),
+          const Offset(800.0, 600.0));
     });
   });
 
-  testWidgetsWithLeakTracking("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "AboutListTile's child should not be offset when the icon is not specified.",
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1095,7 +1146,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking("AboutDialog's contents are scrollable", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("AboutDialog's contents are scrollable",
+      (WidgetTester tester) async {
     final Key contentKey = UniqueKey();
     await tester.pumpWidget(MaterialApp(
       home: Navigator(
@@ -1133,17 +1185,21 @@ void main() {
     Offset originalOffset = box.localToGlobal(Offset.zero);
     await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
 
-    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
+    expect(box.localToGlobal(Offset.zero),
+        equals(originalOffset.translate(0.0, -20.0)));
 
     // Try dragging by the additional children in contents.
     box = tester.renderObject(find.byKey(contentKey));
     originalOffset = box.localToGlobal(Offset.zero);
     await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
 
-    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
+    expect(box.localToGlobal(Offset.zero),
+        equals(originalOffset.translate(0.0, -20.0)));
   });
 
-  testWidgetsWithLeakTracking("Material2 - LicensePage's color must be same whether loading or done", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Material2 - LicensePage's color must be same whether loading or done",
+      (WidgetTester tester) async {
     const Color scaffoldColor = Color(0xFF123456);
     const Color cardColor = Color(0xFF654321);
 
@@ -1175,7 +1231,8 @@ void main() {
     await tester.pump();
 
     // Check color when loading.
-    final List<Material> materialLoadings = tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materialLoadings =
+        tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materialLoadings.length, equals(4));
     expect(materialLoadings[1].color, scaffoldColor);
     expect(materialLoadings[2].color, cardColor);
@@ -1183,14 +1240,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check color when done.
-    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)), findsOneWidget);
-    final List<Material> materialDones = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)),
+        findsOneWidget);
+    final List<Material> materialDones =
+        tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materialDones.length, equals(3));
     expect(materialDones[0].color, scaffoldColor);
     expect(materialDones[1].color, cardColor);
   });
 
-  testWidgetsWithLeakTracking("Material3 - LicensePage's color must be same whether loading or done", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Material3 - LicensePage's color must be same whether loading or done",
+      (WidgetTester tester) async {
     const Color scaffoldColor = Color(0xFF123456);
     const Color cardColor = Color(0xFF654321);
 
@@ -1222,7 +1283,8 @@ void main() {
     await tester.pump();
 
     // Check color when loading.
-    final List<Material> materialLoadings = tester.widgetList<Material>(find.byType(Material)).toList();
+    final List<Material> materialLoadings =
+        tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materialLoadings.length, equals(5));
     expect(materialLoadings[1].color, scaffoldColor);
     expect(materialLoadings[2].color, cardColor);
@@ -1230,14 +1292,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check color when done.
-    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)), findsOneWidget);
-    final List<Material> materialDones = tester.widgetList<Material>(find.byType(Material)).toList();
+    expect(find.byKey(const ValueKey<ConnectionState>(ConnectionState.done)),
+        findsOneWidget);
+    final List<Material> materialDones =
+        tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materialDones.length, equals(4));
     expect(materialDones[0].color, scaffoldColor);
     expect(materialDones[1].color, cardColor);
   });
 
-  testWidgetsWithLeakTracking('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -1276,14 +1342,14 @@ void main() {
     }
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
-
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('ListView of license entries is primary', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView of license entries is primary',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/120710
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-         LicenseEntryWithLineBreaks(
+        LicenseEntryWithLineBreaks(
           <String>['AAA'],
           // Add enough content to scroll
           List<String>.generate(500, (int index) => 'BBBB').join('\n'),
@@ -1291,21 +1357,19 @@ void main() {
       ]);
     });
 
-    await tester.pumpWidget(
-      MaterialApp(
-        title: 'Flutter Code Sample',
-        home: Scaffold(
-          body: Builder(
-            builder: (BuildContext context) => TextButton(
-              child: const Text('Show License Page'),
-              onPressed: () {
-                showLicensePage(context: context);
-              },
-            ),
+    await tester.pumpWidget(MaterialApp(
+      title: 'Flutter Code Sample',
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) => TextButton(
+            child: const Text('Show License Page'),
+            onPressed: () {
+              showLicensePage(context: context);
+            },
           ),
         ),
-      )
-    );
+      ),
+    ));
     await tester.pumpAndSettle();
 
     expect(find.text('Show License Page'), findsOneWidget);
@@ -1338,7 +1402,8 @@ void main() {
     await tester.pumpAndSettle(); // No exception triggered.
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('LicensePage padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage padding',
+      (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -1349,7 +1414,8 @@ void main() {
             applicationName: 'LicensePage test app',
             applicationIcon: logo,
             applicationVersion: '0.1.2',
-            applicationLegalese: 'I am the very model of a modern major general.',
+            applicationLegalese:
+                'I am the very model of a modern major general.',
           ),
         ),
       ),
@@ -1358,7 +1424,8 @@ void main() {
     final Finder appName = find.text('LicensePage test app');
     final Finder appIcon = find.byType(FlutterLogo);
     final Finder appVersion = find.text('0.1.2');
-    final Finder appLegalese = find.text('I am the very model of a modern major general.');
+    final Finder appLegalese =
+        find.text('I am the very model of a modern major general.');
     final Finder appPowered = find.text('Powered by Flutter');
 
     expect(appName, findsOneWidget);
@@ -1368,20 +1435,26 @@ void main() {
     expect(appPowered, findsOneWidget);
 
     // Bottom padding is applied to the app version and app legalese text.
-    final double appNameBottomPadding = tester.getTopLeft(appIcon).dy - tester.getBottomLeft(appName).dy;
+    final double appNameBottomPadding =
+        tester.getTopLeft(appIcon).dy - tester.getBottomLeft(appName).dy;
     expect(appNameBottomPadding, 0.0);
 
-    final double appIconBottomPadding = tester.getTopLeft(appVersion).dy - tester.getBottomLeft(appIcon).dy;
+    final double appIconBottomPadding =
+        tester.getTopLeft(appVersion).dy - tester.getBottomLeft(appIcon).dy;
     expect(appIconBottomPadding, 0.0);
 
-    final double appVersionBottomPadding = tester.getTopLeft(appLegalese).dy - tester.getBottomLeft(appVersion).dy;
+    final double appVersionBottomPadding =
+        tester.getTopLeft(appLegalese).dy - tester.getBottomLeft(appVersion).dy;
     expect(appVersionBottomPadding, 18.0);
 
-    final double appLegaleseBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appLegalese).dy;
+    final double appLegaleseBottomPadding =
+        tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appLegalese).dy;
     expect(appLegaleseBottomPadding, 18.0);
   });
 
-  testWidgetsWithLeakTracking('LicensePage has no extra padding between app icon and app powered text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'LicensePage has no extra padding between app icon and app powered text',
+      (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/99559
 
     const FlutterLogo logo = FlutterLogo();
@@ -1400,7 +1473,8 @@ void main() {
     final Finder appName = find.text('LicensePage test app');
     final Finder appIcon = find.byType(FlutterLogo);
     final Finder appVersion = find.text('0.1.2');
-    final Finder appLegalese = find.text('I am the very model of a modern major general.');
+    final Finder appLegalese =
+        find.text('I am the very model of a modern major general.');
     final Finder appPowered = find.text('Powered by Flutter');
 
     expect(appName, findsNothing);
@@ -1410,57 +1484,62 @@ void main() {
     expect(appPowered, findsOneWidget);
 
     // Padding between app icon and app powered text.
-    final double appIconBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
+    final double appIconBottomPadding =
+        tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
     expect(appIconBottomPadding, 18.0);
   });
 
-  testWidgetsWithLeakTracking('Material2 - Error handling test', (WidgetTester tester) async {
-    LicenseRegistry.addLicense(() => Stream<LicenseEntry>.error(Exception('Injected failure')));
-    await tester.pumpWidget(
-      MaterialApp(
+  testWidgetsWithLeakTracking('Material2 - Error handling test',
+      (WidgetTester tester) async {
+    LicenseRegistry.addLicense(
+        () => Stream<LicenseEntry>.error(Exception('Injected failure')));
+    await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: const Material(child: AboutListTile())
-      )
-    );
+        home: const Material(child: AboutListTile())));
     await tester.tap(find.byType(ListTile));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.tap(find.text('VIEW LICENSES'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
-    final Finder finder = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_PackagesView');
+    final Finder finder = find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PackagesView');
     // force the stream to complete (has to be done in a runAsync block since it's areal async process)
-    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>); // ignore: avoid_dynamic_calls
+    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses
+        as Future<dynamic>); // ignore: avoid_dynamic_calls
     expect(tester.takeException().toString(), 'Exception: Injected failure');
     await tester.pumpAndSettle();
     expect(tester.takeException().toString(), 'Exception: Injected failure');
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Material3 - Error handling test', (WidgetTester tester) async {
-    LicenseRegistry.addLicense(() => Stream<LicenseEntry>.error(Exception('Injected failure')));
-    await tester.pumpWidget(
-      MaterialApp(
+  testWidgetsWithLeakTracking('Material3 - Error handling test',
+      (WidgetTester tester) async {
+    LicenseRegistry.addLicense(
+        () => Stream<LicenseEntry>.error(Exception('Injected failure')));
+    await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: true),
-        home: const Material(child: AboutListTile())
-      )
-    );
+        home: const Material(child: AboutListTile())));
     await tester.tap(find.byType(ListTile));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.tap(find.text('View licenses'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
-    final Finder finder = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_PackagesView');
+    final Finder finder = find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PackagesView');
     // force the stream to complete (has to be done in a runAsync block since it's areal async process)
-    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>); // ignore: avoid_dynamic_calls
+    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses
+        as Future<dynamic>); // ignore: avoid_dynamic_calls
     expect(tester.takeException().toString(), 'Exception: Injected failure');
     await tester.pumpAndSettle();
     expect(tester.takeException().toString(), 'Exception: Injected failure');
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Material2 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material2 - LicensePage master view layout position - ltr',
+      (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1497,7 +1576,8 @@ void main() {
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
     expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
-    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
+    expect(tester.getCenter(find.byType(ListView)),
+        Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
@@ -1521,11 +1601,14 @@ void main() {
     // at the top left.
     titleOffset = tester.getTopRight(find.text(title));
     expect(titleOffset, const Offset(292.0, 136.0));
-    expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
+    expect(titleOffset.dx,
+        lessThan(wideSize.width - 320)); // Default master view width is 320.0.
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
   });
 
-  testWidgetsWithLeakTracking('Material3 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material3 - LicensePage master view layout position - ltr',
+      (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1561,10 +1644,12 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isCanvasKit) {
+      // https://github.com/flutter/flutter/issues/99933
       expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
     }
-    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
+    expect(tester.getCenter(find.byType(ListView)),
+        Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
@@ -1588,11 +1673,14 @@ void main() {
     // at the top left.
     titleOffset = tester.getTopRight(find.text(title));
     expect(titleOffset, const Offset(292.0, 136.0));
-    expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
+    expect(titleOffset.dx,
+        lessThan(wideSize.width - 320)); // Default master view width is 320.0.
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
   });
 
-  testWidgetsWithLeakTracking('Material2 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material2 - LicensePage master view layout position - rtl',
+      (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1629,7 +1717,8 @@ void main() {
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
     expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
-    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
+    expect(tester.getCenter(find.byType(ListView)),
+        Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
@@ -1653,11 +1742,17 @@ void main() {
     // at the top right.
     titleOffset = tester.getTopLeft(find.text(title));
     expect(titleOffset, const Offset(908.0, 136.0));
-    expect(titleOffset.dx, greaterThan(wideSize.width - 320)); // Default master view width is 320.0.
-    expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
+    expect(
+        titleOffset.dx,
+        greaterThan(
+            wideSize.width - 320)); // Default master view width is 320.0.
+    expect(
+        tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
   });
 
-  testWidgetsWithLeakTracking('Material3 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material3 - LicensePage master view layout position - rtl',
+      (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1693,10 +1788,12 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isCanvasKit) {
+      // https://github.com/flutter/flutter/issues/99933
       expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
     }
-    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
+    expect(tester.getCenter(find.byType(ListView)),
+        Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
     await tester.binding.setSurfaceSize(wideSize);
@@ -1720,11 +1817,17 @@ void main() {
     // at the top right.
     titleOffset = tester.getTopLeft(find.text(title));
     expect(titleOffset, const Offset(908.0, 136.0));
-    expect(titleOffset.dx, greaterThan(wideSize.width - 320)); // Default master view width is 320.0.
-    expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
+    expect(
+        titleOffset.dx,
+        greaterThan(
+            wideSize.width - 320)); // Default master view width is 320.0.
+    expect(
+        tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
   });
 
-  testWidgetsWithLeakTracking('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'License page title in lateral UI does not use AppBarTheme.foregroundColor',
+      (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
     final ThemeData theme = ThemeData(
       appBarTheme: const AppBarTheme(foregroundColor: Color(0xFFFFFFFF)),
@@ -1756,16 +1859,21 @@ void main() {
 
     await tester.pumpAndSettle(); // Finish rendering the page.
 
-    final RenderParagraph renderParagraph = tester.renderObject(find.text('ABC').last) as RenderParagraph;
+    final RenderParagraph renderParagraph =
+        tester.renderObject(find.text('ABC').last) as RenderParagraph;
 
     // License page title should not use AppBarTheme's foregroundColor.
-    expect(renderParagraph.text.style!.color, isNot(theme.appBarTheme.foregroundColor));
+    expect(renderParagraph.text.style!.color,
+        isNot(theme.appBarTheme.foregroundColor));
 
     // License page title in the lateral UI uses default text style color.
-    expect(renderParagraph.text.style!.color, theme.textTheme.titleLarge!.color);
+    expect(
+        renderParagraph.text.style!.color, theme.textTheme.titleLarge!.color);
   });
 
-  testWidgetsWithLeakTracking('License page default title text color in the nested UI', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'License page default title text color in the nested UI',
+      (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String title = 'License ABC';
@@ -1797,8 +1905,10 @@ void main() {
     // Master view is no longer visible.
     expect(find.text('License ABC'), findsNothing);
 
-    final RenderParagraph renderParagraph = tester.renderObject(find.text('ABC').first) as RenderParagraph;
-    expect(renderParagraph.text.style!.color, theme.textTheme.titleLarge!.color);
+    final RenderParagraph renderParagraph =
+        tester.renderObject(find.text('ABC').first) as RenderParagraph;
+    expect(
+        renderParagraph.text.style!.color, theme.textTheme.titleLarge!.color);
   });
 
   group('Material 2', () {
@@ -1806,7 +1916,9 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('License page default title text color in the nested UI', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking(
+        'License page default title text color in the nested UI',
+        (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/108991
       final ThemeData theme = ThemeData(useMaterial3: false);
       const String title = 'License ABC';
@@ -1838,8 +1950,10 @@ void main() {
       // Master view is no longer visible.
       expect(find.text('License ABC'), findsNothing);
 
-      final RenderParagraph renderParagraph = tester.renderObject(find.text('ABC').first) as RenderParagraph;
-      expect(renderParagraph.text.style!.color, theme.primaryTextTheme.titleLarge!.color);
+      final RenderParagraph renderParagraph =
+          tester.renderObject(find.text('ABC').first) as RenderParagraph;
+      expect(renderParagraph.text.style!.color,
+          theme.primaryTextTheme.titleLarge!.color);
     });
   });
 }

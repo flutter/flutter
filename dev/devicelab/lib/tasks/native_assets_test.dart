@@ -39,9 +39,12 @@ TaskFunction createNativeAssetsTest({
       if (buildMode != 'debug' && isIosSimulator) {
         continue;
       }
-      final TaskResult buildModeResult = await inTempDir((Directory tempDirectory) async {
-        final Directory packageDirectory = await createTestProject(_packageName, tempDirectory);
-        final Directory exampleDirectory = dir(packageDirectory.uri.resolve('example/').toFilePath());
+      final TaskResult buildModeResult =
+          await inTempDir((Directory tempDirectory) async {
+        final Directory packageDirectory =
+            await createTestProject(_packageName, tempDirectory);
+        final Directory exampleDirectory =
+            dir(packageDirectory.uri.resolve('example/').toFilePath());
 
         final List<String> options = <String>[
           '-d',
@@ -97,7 +100,8 @@ TaskFunction createNativeAssetsTest({
             },
           );
           if (runFlutterResult != 0) {
-            print('Flutter run returned non-zero exit code: $runFlutterResult.');
+            print(
+                'Flutter run returned non-zero exit code: $runFlutterResult.');
           }
         });
 
@@ -129,12 +133,18 @@ Future<int> runFlutter({
 
   final Completer<void> stdoutDone = Completer<void>();
   final Completer<void> stderrDone = Completer<void>();
-  process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+  process.stdout
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) {
     onLine(line, process);
     print('stdout: $line');
   }, onDone: stdoutDone.complete);
 
-  process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(
+  process.stderr
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen(
         (String line) => print('stderr: $line'),
         onDone: stderrDone.complete,
       );
@@ -177,12 +187,14 @@ Future<Directory> createTestProject(
   );
   assert(createResult == 0);
 
-  final Directory packageDirectory = Directory.fromUri(tempDirectory.uri.resolve('$packageName/'));
+  final Directory packageDirectory =
+      Directory.fromUri(tempDirectory.uri.resolve('$packageName/'));
   return packageDirectory;
 }
 
 Future<T> inTempDir<T>(Future<T> Function(Directory tempDirectory) fun) async {
-  final Directory tempDirectory = dir(Directory.systemTemp.createTempSync().resolveSymbolicLinksSync());
+  final Directory tempDirectory =
+      dir(Directory.systemTemp.createTempSync().resolveSymbolicLinksSync());
   try {
     return await fun(tempDirectory);
   } finally {

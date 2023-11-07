@@ -9,7 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 class TestImageInfo extends ImageInfo {
-  const TestImageInfo(this.value, {
+  const TestImageInfo(
+    this.value, {
     required super.image,
     super.scale,
     super.debugLabel,
@@ -22,7 +23,8 @@ class TestImageInfo extends ImageInfo {
 
   @override
   TestImageInfo clone() {
-    return TestImageInfo(value, image: image.clone(), scale: scale, debugLabel: debugLabel);
+    return TestImageInfo(value,
+        image: image.clone(), scale: scale, debugLabel: debugLabel);
   }
 
   @override
@@ -33,16 +35,16 @@ class TestImageInfo extends ImageInfo {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TestImageInfo
-        && other.value == value
-        && other.image.isCloneOf(image)
-        && other.scale == scale
-        && other.debugLabel == debugLabel;
+    return other is TestImageInfo &&
+        other.value == value &&
+        other.image.isCloneOf(image) &&
+        other.scale == scale &&
+        other.debugLabel == debugLabel;
   }
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue, { required this.image });
+  const TestImageProvider(this.key, this.imageValue, {required this.image});
 
   final int key;
   final int imageValue;
@@ -56,20 +58,24 @@ class TestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(imageValue, image: image.clone())),
+      SynchronousFuture<ImageInfo>(
+          TestImageInfo(imageValue, image: image.clone())),
     );
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TestImageProvider')}($key, $imageValue)';
+  String toString() =>
+      '${objectRuntimeType(this, 'TestImageProvider')}($key, $imageValue)';
 }
 
 class FailingTestImageProvider extends TestImageProvider {
-  const FailingTestImageProvider(super.key, super.imageValue, { required super.image });
+  const FailingTestImageProvider(super.key, super.imageValue,
+      {required super.image});
 
   @override
   ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
-    return OneFrameImageStreamCompleter(Future<ImageInfo>.sync(() => Future<ImageInfo>.error('loading failed!')));
+    return OneFrameImageStreamCompleter(Future<ImageInfo>.sync(
+        () => Future<ImageInfo>.error('loading failed!')));
   }
 }
 
@@ -86,12 +92,14 @@ Future<ImageInfo> extractOneFrame(ImageStream stream) {
 
 class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
   @override
-  ImageStreamCompleter loadImage(ErrorImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      ErrorImageProvider key, ImageDecoderCallback decode) {
     throw Error();
   }
 
   @override
-  ImageStreamCompleter loadBuffer(ErrorImageProvider key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(
+      ErrorImageProvider key, DecoderBufferCallback decode) {
     throw Error();
   }
 
@@ -101,31 +109,37 @@ class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
   }
 }
 
-class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvider> {
+class ObtainKeyErrorImageProvider
+    extends ImageProvider<ObtainKeyErrorImageProvider> {
   @override
-  ImageStreamCompleter loadImage(ObtainKeyErrorImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      ObtainKeyErrorImageProvider key, ImageDecoderCallback decode) {
     throw Error();
   }
 
   @override
-  ImageStreamCompleter loadBuffer(ObtainKeyErrorImageProvider key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(
+      ObtainKeyErrorImageProvider key, DecoderBufferCallback decode) {
     throw UnimplementedError();
   }
 
   @override
-  Future<ObtainKeyErrorImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<ObtainKeyErrorImageProvider> obtainKey(
+      ImageConfiguration configuration) {
     throw Error();
   }
 }
 
 class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
   @override
-  ImageStreamCompleter loadImage(LoadErrorImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      LoadErrorImageProvider key, ImageDecoderCallback decode) {
     throw Error();
   }
 
   @override
-  ImageStreamCompleter loadBuffer(LoadErrorImageProvider key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(
+      LoadErrorImageProvider key, DecoderBufferCallback decode) {
     throw UnimplementedError();
   }
 
@@ -135,16 +149,19 @@ class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
   }
 }
 
-class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
+class LoadErrorCompleterImageProvider
+    extends ImageProvider<LoadErrorCompleterImageProvider> {
   @override
-  ImageStreamCompleter loadImage(LoadErrorCompleterImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      LoadErrorCompleterImageProvider key, ImageDecoderCallback decode) {
     final Completer<ImageInfo> completer = Completer<ImageInfo>.sync();
     completer.completeError(Error());
     return OneFrameImageStreamCompleter(completer.future);
   }
 
   @override
-  Future<LoadErrorCompleterImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<LoadErrorCompleterImageProvider> obtainKey(
+      ImageConfiguration configuration) {
     return SynchronousFuture<LoadErrorCompleterImageProvider>(this);
   }
 }

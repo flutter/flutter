@@ -32,8 +32,8 @@ class FileSystemUtils {
   FileSystemUtils({
     required FileSystem fileSystem,
     required Platform platform,
-  }) : _fileSystem = fileSystem,
-       _platform = platform;
+  })  : _fileSystem = fileSystem,
+        _platform = platform;
 
   final FileSystem _fileSystem;
 
@@ -53,7 +53,8 @@ class FileSystemUtils {
 
     while (true) {
       final String name = '${baseName}_${i.toString().padLeft(2, '0')}';
-      final Directory directory = fs.directory(_fileSystem.path.join(dir.path, name));
+      final Directory directory =
+          fs.directory(_fileSystem.path.join(dir.path, name));
       if (!directory.existsSync()) {
         return directory;
       }
@@ -65,7 +66,8 @@ class FileSystemUtils {
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
   /// path unchanged.
-  String escapePath(String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
+  String escapePath(String path) =>
+      _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
 
   /// Returns true if the file system [entity] has not been modified since the
   /// latest modification to [referenceFile].
@@ -80,15 +82,15 @@ class FileSystemUtils {
     if (!entity.existsSync()) {
       return true;
     }
-    return referenceFile.existsSync()
-        && referenceFile.statSync().modified.isAfter(entity.statSync().modified);
+    return referenceFile.existsSync() &&
+        referenceFile.statSync().modified.isAfter(entity.statSync().modified);
   }
 
   /// Return the absolute path of the user's home directory.
   String? get homeDirPath {
     String? path = _platform.isWindows
-      ? _platform.environment['USERPROFILE']
-      : _platform.environment['HOME'];
+        ? _platform.environment['USERPROFILE']
+        : _platform.environment['HOME'];
     if (path != null) {
       path = _fileSystem.path.absolute(path);
     }
@@ -99,7 +101,8 @@ class FileSystemUtils {
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
 String getDisplayPath(String fullPath, FileSystem fileSystem) {
-  final String cwd = fileSystem.currentDirectory.path + fileSystem.path.separator;
+  final String cwd =
+      fileSystem.currentDirectory.path + fileSystem.path.separator;
   return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
 
@@ -117,7 +120,8 @@ void copyDirectory(
   void Function(File srcFile, File destFile)? onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
-    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+    throw Exception(
+        'Source directory "${srcDir.path}" does not exist, nothing to copy');
   }
 
   if (!destDir.existsSync()) {
@@ -125,7 +129,8 @@ void copyDirectory(
   }
 
   for (final FileSystemEntity entity in srcDir.listSync()) {
-    final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
+    final String newPath =
+        destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is Link) {
       final Link newLink = destDir.fileSystem.link(newPath);
       newLink.createSync(entity.targetSync());
@@ -147,7 +152,8 @@ void copyDirectory(
         onFileCopied: onFileCopied,
       );
     } else {
-      throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
+      throw Exception(
+          '${entity.path} is neither File nor Directory, was ${entity.runtimeType}');
     }
   }
 }
@@ -192,7 +198,8 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
 
   Future<void> dispose() async {
     _tryToDeleteTemp();
-    for (final MapEntry<ProcessSignal, Object> signalToken in _signalTokens.entries) {
+    for (final MapEntry<ProcessSignal, Object> signalToken
+        in _signalTokens.entries) {
       await _signals.removeHandler(signalToken.key, signalToken.value);
     }
     _signalTokens.clear();
@@ -221,9 +228,9 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
   Directory get systemTempDirectory {
     if (_systemTemp == null) {
       if (!superSystemTempDirectory.existsSync()) {
-        throwToolExit('Your system temp directory (${superSystemTempDirectory.path}) does not exist. '
-          'Did you set an invalid override in your environment? See issue https://github.com/flutter/flutter/issues/74042 for more context.'
-        );
+        throwToolExit(
+            'Your system temp directory (${superSystemTempDirectory.path}) does not exist. '
+            'Did you set an invalid override in your environment? See issue https://github.com/flutter/flutter/issues/74042 for more context.');
       }
       _systemTemp = superSystemTempDirectory.createTempSync('flutter_tools.')
         ..createSync(recursive: true);

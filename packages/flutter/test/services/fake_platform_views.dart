@@ -62,7 +62,8 @@ class FakeAndroidViewController implements AndroidViewController {
 
   Offset? createPosition;
 
-  final List<PlatformViewCreatedCallback> _createdCallbacks = <PlatformViewCreatedCallback>[];
+  final List<PlatformViewCreatedCallback> _createdCallbacks =
+      <PlatformViewCreatedCallback>[];
 
   /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
@@ -118,7 +119,8 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+  void removeOnPlatformViewCreatedListener(
+      PlatformViewCreatedCallback listener) {
     createdCallbacks.remove(listener);
   }
 
@@ -138,7 +140,8 @@ class FakeAndroidViewController implements AndroidViewController {
     if (requiresSize && size != null) {
       assert(!size.isEmpty);
     }
-    _createCalledSuccessfully = size != null && position != null || !requiresSize;
+    _createCalledSuccessfully =
+        size != null && position != null || !requiresSize;
     createPosition = position;
   }
 
@@ -151,13 +154,16 @@ class FakeAndroidViewController implements AndroidViewController {
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeAndroidPlatformView> get views => _views.values;
-  final Map<int, FakeAndroidPlatformView> _views = <int, FakeAndroidPlatformView>{};
+  final Map<int, FakeAndroidPlatformView> _views =
+      <int, FakeAndroidPlatformView>{};
 
-  final Map<int, List<FakeAndroidMotionEvent>> motionEvents = <int, List<FakeAndroidMotionEvent>>{};
+  final Map<int, List<FakeAndroidMotionEvent>> motionEvents =
+      <int, List<FakeAndroidMotionEvent>>{};
 
   final Set<String> _registeredViewTypes = <String>{};
 
@@ -182,9 +188,11 @@ class FakeAndroidPlatformViewsController {
 
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
-    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
+    final ByteData data =
+        codec.encodeMethodCall(MethodCall('viewFocused', viewId));
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
+        .handlePlatformMessage(
+            SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
@@ -223,14 +231,16 @@ class FakeAndroidPlatformViewsController {
     if (_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create an already created platform view, view id: $id',
+        message:
+            'Trying to create an already created platform view, view id: $id',
       );
     }
 
     if (!_registeredViewTypes.contains(viewType)) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create a platform view of unregistered type: $viewType',
+        message:
+            'Trying to create a platform view of unregistered type: $viewType',
       );
     }
 
@@ -238,20 +248,22 @@ class FakeAndroidPlatformViewsController {
       await createCompleter!.future;
     }
 
-    _views[id] = FakeAndroidPlatformView(id, viewType,
-        width != null && height != null ? Size(width, height) : null,
-        layoutDirection,
-        hybrid: hybrid,
-        hybridFallback: hybridFallback,
-        creationParams: creationParams,
-        position: left != null && top != null ? Offset(left, top) : null,
+    _views[id] = FakeAndroidPlatformView(
+      id,
+      viewType,
+      width != null && height != null ? Size(width, height) : null,
+      layoutDirection,
+      hybrid: hybrid,
+      hybridFallback: hybridFallback,
+      creationParams: creationParams,
+      position: left != null && top != null ? Offset(left, top) : null,
     );
     // Return a hybrid result (null rather than a texture ID) if:
     final bool hybridResult =
-      // hybrid was explicitly requested, or
-      (hybrid ?? false) ||
-      // hybrid fallback was requested and simulated.
-      (!allowTextureLayerMode && (hybridFallback ?? false));
+        // hybrid was explicitly requested, or
+        (hybrid ?? false) ||
+            // hybrid fallback was requested and simulated.
+            (!allowTextureLayerMode && (hybridFallback ?? false));
     if (hybridResult) {
       return Future<void>.value();
     }
@@ -261,15 +273,18 @@ class FakeAndroidPlatformViewsController {
 
   Future<dynamic> _dispose(MethodCall call) {
     assert(call.arguments is Map);
-    final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
+    final Map<Object?, Object?> arguments =
+        call.arguments as Map<Object?, Object?>;
 
     final int id = arguments['id']! as int;
     final bool hybrid = arguments['hybrid']! as bool;
 
     if (hybrid && !_views[id]!.hybrid!) {
-      throw ArgumentError('An $AndroidViewController using hybrid composition must pass `hybrid: true`');
+      throw ArgumentError(
+          'An $AndroidViewController using hybrid composition must pass `hybrid: true`');
     } else if (!hybrid && (_views[id]!.hybrid ?? false)) {
-      throw ArgumentError('An $AndroidViewController not using hybrid composition must pass `hybrid: false`');
+      throw ArgumentError(
+          'An $AndroidViewController not using hybrid composition must pass `hybrid: false`');
     }
 
     if (!_views.containsKey(id)) {
@@ -301,7 +316,8 @@ class FakeAndroidPlatformViewsController {
     }
     _views[id] = _views[id]!.copyWith(size: Size(width, height));
 
-    return Future<Map<dynamic, dynamic>>.sync(() => <dynamic, dynamic>{'width': width, 'height': height});
+    return Future<Map<dynamic, dynamic>>.sync(
+        () => <dynamic, dynamic>{'width': width, 'height': height});
   }
 
   Future<dynamic> _offset(MethodCall call) async {
@@ -317,10 +333,12 @@ class FakeAndroidPlatformViewsController {
     final List<dynamic> args = call.arguments as List<dynamic>;
     final int id = args[0] as int;
     final int action = args[3] as int;
-    final List<List<dynamic>> pointerProperties = (args[5] as List<dynamic>).cast<List<dynamic>>();
-    final List<List<dynamic>> pointerCoords = (args[6] as List<dynamic>).cast<List<dynamic>>();
-    final List<Offset> pointerOffsets = <Offset> [];
-    final List<int> pointerIds = <int> [];
+    final List<List<dynamic>> pointerProperties =
+        (args[5] as List<dynamic>).cast<List<dynamic>>();
+    final List<List<dynamic>> pointerCoords =
+        (args[6] as List<dynamic>).cast<List<dynamic>>();
+    final List<Offset> pointerOffsets = <Offset>[];
+    final List<int> pointerIds = <int>[];
     for (int i = 0; i < pointerCoords.length; i++) {
       pointerIds.add(pointerProperties[i][0] as int);
       final double x = pointerCoords[i][7] as double;
@@ -329,10 +347,11 @@ class FakeAndroidPlatformViewsController {
     }
 
     if (!motionEvents.containsKey(id)) {
-      motionEvents[id] = <FakeAndroidMotionEvent> [];
+      motionEvents[id] = <FakeAndroidMotionEvent>[];
     }
 
-    motionEvents[id]!.add(FakeAndroidMotionEvent(action, pointerIds, pointerOffsets));
+    motionEvents[id]!
+        .add(FakeAndroidMotionEvent(action, pointerIds, pointerOffsets));
     return Future<dynamic>.sync(() => null);
   }
 
@@ -359,7 +378,8 @@ class FakeAndroidPlatformViewsController {
     if (!_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to clear the focus on a platform view with unknown id: $id',
+        message:
+            'Trying to clear the focus on a platform view with unknown id: $id',
       );
     }
 
@@ -370,7 +390,8 @@ class FakeAndroidPlatformViewsController {
 
 class FakeIosPlatformViewsController {
   FakeIosPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeUiKitView> get views => _views.values;
@@ -394,9 +415,11 @@ class FakeIosPlatformViewsController {
 
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
-    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
+    final ByteData data =
+        codec.encodeMethodCall(MethodCall('viewFocused', viewId));
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
+        .handlePlatformMessage(
+            SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
@@ -425,14 +448,16 @@ class FakeIosPlatformViewsController {
     if (_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create an already created platform view, view id: $id',
+        message:
+            'Trying to create an already created platform view, view id: $id',
       );
     }
 
     if (!_registeredViewTypes.contains(viewType)) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create a platform view of unregistered type: $viewType',
+        message:
+            'Trying to create a platform view of unregistered type: $viewType',
       );
     }
 
@@ -473,7 +498,8 @@ class FakeIosPlatformViewsController {
 
 class FakeMacosPlatformViewsController {
   FakeMacosPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeAppKitView> get views => _views.values;
@@ -497,9 +523,11 @@ class FakeMacosPlatformViewsController {
 
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
-    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
+    final ByteData data =
+        codec.encodeMethodCall(MethodCall('viewFocused', viewId));
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
+        .handlePlatformMessage(
+            SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
@@ -528,14 +556,16 @@ class FakeMacosPlatformViewsController {
     if (_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create an already created platform view, view id: $id',
+        message:
+            'Trying to create an already created platform view, view id: $id',
       );
     }
 
     if (!_registeredViewTypes.contains(viewType)) {
       throw PlatformException(
         code: 'error',
-        message: 'Trying to create a platform view of unregistered type: $viewType',
+        message:
+            'Trying to create a platform view of unregistered type: $viewType',
       );
     }
 
@@ -576,8 +606,9 @@ class FakeMacosPlatformViewsController {
 
 @immutable
 class FakeAndroidPlatformView {
-  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection,
-    {this.hybrid, this.hybridFallback, this.creationParams, this.position});
+  const FakeAndroidPlatformView(
+      this.id, this.type, this.size, this.layoutDirection,
+      {this.hybrid, this.hybridFallback, this.creationParams, this.position});
 
   final int id;
   final String type;
@@ -588,50 +619,51 @@ class FakeAndroidPlatformView {
   final bool? hybridFallback;
   final Offset? position;
 
-  FakeAndroidPlatformView copyWith({Size? size, int? layoutDirection}) => FakeAndroidPlatformView(
-    id,
-    type,
-    size ?? this.size,
-    layoutDirection ?? this.layoutDirection,
-    hybrid: hybrid,
-    hybridFallback: hybridFallback,
-    creationParams: creationParams,
-    position: position,
-  );
+  FakeAndroidPlatformView copyWith({Size? size, int? layoutDirection}) =>
+      FakeAndroidPlatformView(
+        id,
+        type,
+        size ?? this.size,
+        layoutDirection ?? this.layoutDirection,
+        hybrid: hybrid,
+        hybridFallback: hybridFallback,
+        creationParams: creationParams,
+        position: position,
+      );
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FakeAndroidPlatformView
-        && other.id == id
-        && other.type == type
-        && listEquals<int>(other.creationParams, creationParams)
-        && other.size == size
-        && other.hybrid == hybrid
-        && other.hybridFallback == hybridFallback
-        && other.layoutDirection == layoutDirection
-        && other.position == position;
+    return other is FakeAndroidPlatformView &&
+        other.id == id &&
+        other.type == type &&
+        listEquals<int>(other.creationParams, creationParams) &&
+        other.size == size &&
+        other.hybrid == hybrid &&
+        other.hybridFallback == hybridFallback &&
+        other.layoutDirection == layoutDirection &&
+        other.position == position;
   }
 
   @override
   int get hashCode => Object.hash(
-    id,
-    type,
-    creationParams == null ? null : Object.hashAll(creationParams!),
-    size,
-    layoutDirection,
-    hybrid,
-    hybridFallback,
-    position,
-  );
+        id,
+        type,
+        creationParams == null ? null : Object.hashAll(creationParams!),
+        size,
+        layoutDirection,
+        hybrid,
+        hybridFallback,
+        position,
+      );
 
   @override
   String toString() {
     return 'FakeAndroidPlatformView(id: $id, type: $type, size: $size, '
-      'layoutDirection: $layoutDirection, hybrid: $hybrid, '
-      'hybridFallback: $hybridFallback, creationParams: $creationParams, position: $position)';
+        'layoutDirection: $layoutDirection, hybrid: $hybrid, '
+        'hybridFallback: $hybridFallback, creationParams: $creationParams, position: $position)';
   }
 }
 
@@ -643,17 +675,17 @@ class FakeAndroidMotionEvent {
   final List<Offset> pointers;
   final List<int> pointerIds;
 
-
   @override
   bool operator ==(Object other) {
-    return other is FakeAndroidMotionEvent
-        && listEquals<int>(other.pointerIds, pointerIds)
-        && other.action == action
-        && listEquals<Offset>(other.pointers, pointers);
+    return other is FakeAndroidMotionEvent &&
+        listEquals<int>(other.pointerIds, pointerIds) &&
+        other.action == action &&
+        listEquals<Offset>(other.pointers, pointers);
   }
 
   @override
-  int get hashCode => Object.hash(action, Object.hashAll(pointers), Object.hashAll(pointerIds));
+  int get hashCode =>
+      Object.hash(action, Object.hashAll(pointers), Object.hashAll(pointerIds));
 
   @override
   String toString() {
@@ -674,10 +706,10 @@ class FakeUiKitView {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FakeUiKitView
-        && other.id == id
-        && other.type == type
-        && other.creationParams == creationParams;
+    return other is FakeUiKitView &&
+        other.id == id &&
+        other.type == type &&
+        other.creationParams == creationParams;
   }
 
   @override
@@ -702,10 +734,10 @@ class FakeAppKitView {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is FakeAppKitView
-        && other.id == id
-        && other.type == type
-        && other.creationParams == creationParams;
+    return other is FakeAppKitView &&
+        other.id == id &&
+        other.type == type &&
+        other.creationParams == creationParams;
   }
 
   @override

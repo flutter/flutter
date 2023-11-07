@@ -20,7 +20,8 @@ class TestStatusTransitionWidget extends StatusTransitionWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Status transition control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Status transition control test',
+      (WidgetTester tester) async {
     bool didBuild = false;
     final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 1),

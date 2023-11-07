@@ -30,7 +30,8 @@ class GridViewExampleApp extends StatelessWidget {
               final math.Random random = math.Random(index);
               return GridTile(
                 header: GridTileBar(
-                  title: Text('$index', style: const TextStyle(color: Colors.black)),
+                  title: Text('$index',
+                      style: const TextStyle(color: Colors.black)),
                 ),
                 child: Container(
                   margin: const EdgeInsets.all(12.0),
@@ -39,11 +40,12 @@ class GridViewExampleApp extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     gradient: const RadialGradient(
-                      colors: <Color>[ Color(0x0F88EEFF), Color(0x2F0099BB) ],
+                      colors: <Color>[Color(0x0F88EEFF), Color(0x2F0099BB)],
                     ),
                   ),
                   child: FlutterLogo(
-                    style: FlutterLogoStyle.values[random.nextInt(FlutterLogoStyle.values.length)],
+                    style: FlutterLogoStyle
+                        .values[random.nextInt(FlutterLogoStyle.values.length)],
                   ),
                 ),
               );
@@ -56,7 +58,7 @@ class GridViewExampleApp extends StatelessWidget {
 }
 
 class CustomGridDelegate extends SliverGridDelegate {
-  CustomGridDelegate({ required this.dimension });
+  CustomGridDelegate({required this.dimension});
 
   // This is the desired height of each row (and width of each square).
   // When there is not enough room, we shrink this to the width of the scroll view.
@@ -74,7 +76,8 @@ class CustomGridDelegate extends SliverGridDelegate {
     final double squareDimension = constraints.crossAxisExtent / count;
     return CustomGridLayout(
       crossAxisCount: count,
-      fullRowPeriod: 3, // Number of rows per block (one of which is the full row).
+      fullRowPeriod:
+          3, // Number of rows per block (one of which is the full row).
       dimension: squareDimension,
     );
   }
@@ -90,10 +93,10 @@ class CustomGridLayout extends SliverGridLayout {
     required this.crossAxisCount,
     required this.dimension,
     required this.fullRowPeriod,
-  }) : assert(crossAxisCount > 0),
-       assert(fullRowPeriod > 1),
-       loopLength = crossAxisCount * (fullRowPeriod - 1) + 1,
-       loopHeight = fullRowPeriod * dimension;
+  })  : assert(crossAxisCount > 0),
+        assert(fullRowPeriod > 1),
+        loopLength = crossAxisCount * (fullRowPeriod - 1) + 1,
+        loopHeight = fullRowPeriod * dimension;
 
   final int crossAxisCount;
   final double dimension;
@@ -112,8 +115,8 @@ class CustomGridLayout extends SliverGridLayout {
     if (childCount == 0 || dimension == 0) {
       return 0;
     }
-    return (childCount ~/ loopLength) * loopHeight
-         + ((childCount % loopLength) ~/ crossAxisCount) * dimension;
+    return (childCount ~/ loopLength) * loopHeight +
+        ((childCount % loopLength) ~/ crossAxisCount) * dimension;
   }
 
   @override

@@ -15,15 +15,16 @@ import 'test_border.dart' show TestBorder;
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  final ui.Image rawImage =
+      await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
-  testWidgetsWithLeakTracking('ShapeDecoration.image', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ShapeDecoration.image',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DecoratedBox(
           decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) +
-                   Border.all(),
+            shape: Border.all(color: Colors.white) + Border.all(),
             image: DecorationImage(
               image: image,
             ),
@@ -40,13 +41,13 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('ShapeDecoration.color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ShapeDecoration.color',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DecoratedBox(
           decoration: ShapeDecoration(
-            shape: Border.all(color: Colors.white) +
-                   Border.all(),
+            shape: Border.all(color: Colors.white) + Border.all(),
             color: Colors.blue,
           ),
         ),
@@ -69,7 +70,8 @@ Future<void> main() async {
     expect(decoration.padding, isA<EdgeInsetsDirectional>());
   });
 
-  testWidgetsWithLeakTracking('TestBorder and Directionality - 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TestBorder and Directionality - 1',
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -90,7 +92,8 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('TestBorder and Directionality - 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TestBorder and Directionality - 2',
+      (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(
@@ -114,7 +117,8 @@ Future<void> main() async {
     );
   });
 
-  testWidgetsWithLeakTracking('Does not crash with directional gradient', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not crash with directional gradient',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/76967.
 
     await tester.pumpWidget(

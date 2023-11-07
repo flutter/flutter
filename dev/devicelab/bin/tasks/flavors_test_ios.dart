@@ -34,7 +34,8 @@ Future<void> main() async {
         );
 
         final String stderrString = stderr.toString();
-        if (!stderrString.contains('The Xcode project defines schemes: free, paid')) {
+        if (!stderrString
+            .contains('The Xcode project defines schemes: free, paid')) {
           print(stderrString);
           return TaskResult.failure('Should not succeed with bogus flavor');
         }

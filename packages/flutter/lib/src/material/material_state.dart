@@ -149,7 +149,8 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// }
 /// ```
 /// {@end-tool}
-abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
+abstract class MaterialStateColor extends Color
+    implements MaterialStateProperty<Color> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateColor(super.defaultValue);
@@ -162,7 +163,9 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   ///
   /// The given callback parameter must return a non-null color in the default
   /// state.
-  static MaterialStateColor resolveWith(MaterialPropertyResolver<Color> callback) => _MaterialStateColor(callback);
+  static MaterialStateColor resolveWith(
+          MaterialPropertyResolver<Color> callback) =>
+      _MaterialStateColor(callback);
 
   /// Returns a [Color] that's to be used when a Material component is in the
   /// specified state.
@@ -218,7 +221,8 @@ class _MaterialStateColor extends MaterialStateColor {
 ///  * [MouseCursor] for introduction on the mouse cursor system.
 ///  * [SystemMouseCursors], which defines cursors that are supported by
 ///    native platforms.
-abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialStateProperty<MouseCursor> {
+abstract class MaterialStateMouseCursor extends MouseCursor
+    implements MaterialStateProperty<MouseCursor> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateMouseCursor();
@@ -243,7 +247,8 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
   /// This cursor is the default for many Material widgets.
-  static const MaterialStateMouseCursor clickable = _EnabledAndDisabledMouseCursor(
+  static const MaterialStateMouseCursor clickable =
+      _EnabledAndDisabledMouseCursor(
     enabledCursor: SystemMouseCursors.click,
     disabledCursor: SystemMouseCursors.basic,
     name: 'clickable',
@@ -256,7 +261,8 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   /// disabled, the cursor resolves to [SystemMouseCursors.basic].
   ///
   /// This cursor is the default for many Material widgets.
-  static const MaterialStateMouseCursor textable = _EnabledAndDisabledMouseCursor(
+  static const MaterialStateMouseCursor textable =
+      _EnabledAndDisabledMouseCursor(
     enabledCursor: SystemMouseCursors.text,
     disabledCursor: SystemMouseCursors.basic,
     name: 'textable',
@@ -306,7 +312,8 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
 ///
 /// This class should only be used for parameters which are documented to take
 /// [MaterialStateBorderSide], otherwise only the default state will be used.
-abstract class MaterialStateBorderSide extends BorderSide implements MaterialStateProperty<BorderSide?> {
+abstract class MaterialStateBorderSide extends BorderSide
+    implements MaterialStateProperty<BorderSide?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateBorderSide();
@@ -354,7 +361,8 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   ///   }),
   /// ),
   /// ```
-  static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
+  static MaterialStateBorderSide resolveWith(
+          MaterialPropertyResolver<BorderSide?> callback) =>
       _MaterialStateBorderSide(callback);
 }
 
@@ -397,7 +405,8 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 /// See also:
 ///
 ///  * [ShapeBorder] the base class for shape outlines.
-abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements MaterialStateProperty<OutlinedBorder?> {
+abstract class MaterialStateOutlinedBorder extends OutlinedBorder
+    implements MaterialStateProperty<OutlinedBorder?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateOutlinedBorder();
@@ -434,7 +443,8 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
 /// [MaterialStateTextStyle] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateTextStyle extends TextStyle implements MaterialStateProperty<TextStyle> {
+abstract class MaterialStateTextStyle extends TextStyle
+    implements MaterialStateProperty<TextStyle> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateTextStyle();
@@ -447,7 +457,8 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
+  static MaterialStateTextStyle resolveWith(
+          MaterialPropertyResolver<TextStyle> callback) =>
       _MaterialStateTextStyle(callback);
 
   /// Returns a [TextStyle] that's to be used when a Material component is in the
@@ -497,7 +508,8 @@ class _MaterialStateTextStyle extends MaterialStateTextStyle {
 /// [MaterialStateOutlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implements MaterialStateProperty<InputBorder> {
+abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder
+    implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateOutlineInputBorder();
@@ -510,7 +522,8 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateOutlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+  static MaterialStateOutlineInputBorder resolveWith(
+          MaterialPropertyResolver<InputBorder> callback) =>
       _MaterialStateOutlineInputBorder(callback);
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
@@ -560,7 +573,8 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
 /// [MaterialStateUnderlineInputBorder] and override its [resolve] method. You'll also need
 /// to provide a `defaultValue` to the super constructor, so that we can know
 /// at compile-time what its default color is.
-abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder implements MaterialStateProperty<InputBorder> {
+abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder
+    implements MaterialStateProperty<InputBorder> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const MaterialStateUnderlineInputBorder();
@@ -573,7 +587,8 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateUnderlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+  static MaterialStateUnderlineInputBorder resolveWith(
+          MaterialPropertyResolver<InputBorder> callback) =>
       _MaterialStateUnderlineInputBorder(callback);
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
@@ -589,7 +604,8 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
 /// be used.
 ///
 /// Used by [MaterialStateTextStyle.resolveWith].
-class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBorder {
+class _MaterialStateUnderlineInputBorder
+    extends MaterialStateUnderlineInputBorder {
   const _MaterialStateUnderlineInputBorder(this._resolve);
 
   final MaterialPropertyResolver<InputBorder> _resolve;
@@ -655,7 +671,9 @@ abstract class MaterialStateProperty<T> {
 
   /// Convenience method for creating a [MaterialStateProperty] from a
   /// [MaterialPropertyResolver] function alone.
-  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStatePropertyWith<T>(callback);
+  static MaterialStateProperty<T> resolveWith<T>(
+          MaterialPropertyResolver<T> callback) =>
+      _MaterialStatePropertyWith<T>(callback);
 
   /// Convenience method for creating a [MaterialStateProperty] that resolves
   /// to a single value for all states.
@@ -665,7 +683,8 @@ abstract class MaterialStateProperty<T> {
   // TODO(darrenaustin): Deprecate this when we have the ability to create
   // a dart fix that will replace this with MaterialStatePropertyAll:
   // https://github.com/dart-lang/sdk/issues/49056.
-  static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
+  static MaterialStateProperty<T> all<T>(T value) =>
+      MaterialStatePropertyAll<T>(value);
 
   /// Linearly interpolate between two [MaterialStateProperty]s.
   static MaterialStateProperty<T?>? lerp<T>(
@@ -710,7 +729,6 @@ class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
 /// Convenience class for creating a [MaterialStateProperty] that
 /// resolves to the given value for all states.
 class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
-
   /// Constructs a [MaterialStateProperty] that always resolves to the given
   /// value.
   const MaterialStatePropertyAll(this.value);
@@ -752,7 +770,8 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// notify listeners of the change.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
-  MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
+  MaterialStatesController([Set<MaterialState>? value])
+      : super(<MaterialState>{...?value});
 
   /// Adds [state] to [value] if [add] is true, and removes it otherwise,
   /// and notifies listeners if [value] has changed.

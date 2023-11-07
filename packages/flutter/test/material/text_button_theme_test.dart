@@ -13,7 +13,9 @@ void main() {
     expect(identical(TextButtonThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('Material3: Passing no TextButtonTheme returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material3: Passing no TextButtonTheme returns defaults',
+      (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
@@ -21,7 +23,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: TextButton(
-              onPressed: () { },
+              onPressed: () {},
               child: const Text('button'),
             ),
           ),
@@ -46,11 +48,14 @@ void main() {
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
 
-    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+    final Align align = tester.firstWidget<Align>(
+        find.ancestor(of: find.text('button'), matching: find.byType(Align)));
     expect(align.alignment, Alignment.center);
   });
 
-  testWidgetsWithLeakTracking('Material2: Passing no TextButtonTheme returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material2: Passing no TextButtonTheme returns defaults',
+      (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
@@ -58,7 +63,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: TextButton(
-              onPressed: () { },
+              onPressed: () {},
               child: const Text('button'),
             ),
           ),
@@ -77,13 +82,17 @@ void main() {
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
     expect(material.shadowColor, const Color(0xff000000));
-    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))));
+    expect(
+        material.shape,
+        const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4.0))));
     expect(material.textStyle!.color, colorScheme.primary);
     expect(material.textStyle!.fontFamily, 'Roboto');
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
 
-    final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+    final Align align = tester.firstWidget<Align>(
+        find.ancestor(of: find.text('button'), matching: find.byType(Align)));
     expect(align.alignment, Alignment.center);
   });
 
@@ -97,10 +106,12 @@ void main() {
     const EdgeInsets padding = EdgeInsets.all(3);
     const Size minimumSize = Size(200, 200);
     const BorderSide side = BorderSide(color: Colors.green, width: 2);
-    const OutlinedBorder shape = RoundedRectangleBorder(side: side, borderRadius: BorderRadius.all(Radius.circular(2)));
+    const OutlinedBorder shape = RoundedRectangleBorder(
+        side: side, borderRadius: BorderRadius.all(Radius.circular(2)));
     const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
     const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
-    const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
+    const MaterialTapTargetSize tapTargetSize =
+        MaterialTapTargetSize.shrinkWrap;
     const Duration animationDuration = Duration(milliseconds: 25);
     const bool enableFeedback = false;
     const AlignmentGeometry alignment = Alignment.centerLeft;
@@ -125,12 +136,15 @@ void main() {
       alignment: alignment,
     );
 
-    Widget buildFrame({ ButtonStyle? buttonStyle, ButtonStyle? themeStyle, ButtonStyle? overallStyle }) {
+    Widget buildFrame(
+        {ButtonStyle? buttonStyle,
+        ButtonStyle? themeStyle,
+        ButtonStyle? overallStyle}) {
       final Widget child = Builder(
         builder: (BuildContext context) {
           return TextButton(
             style: buttonStyle,
-            onPressed: () { },
+            onPressed: () {},
             child: const Text('button'),
           );
         },
@@ -143,10 +157,12 @@ void main() {
           body: Center(
             // If the TextButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.textButtonTheme.
-            child: themeStyle == null ? child : TextButtonTheme(
-              data: TextButtonThemeData(style: themeStyle),
-              child: child,
-            ),
+            child: themeStyle == null
+                ? child
+                : TextButtonTheme(
+                    data: TextButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );
@@ -163,9 +179,9 @@ void main() {
     );
 
     const Set<MaterialState> enabled = <MaterialState>{};
-    const Set<MaterialState> disabled = <MaterialState>{ MaterialState.disabled };
-    const Set<MaterialState> hovered = <MaterialState>{ MaterialState.hovered };
-    const Set<MaterialState> focused = <MaterialState>{ MaterialState.focused };
+    const Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
+    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
 
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
@@ -175,32 +191,45 @@ void main() {
       expect(material.color, backgroundColor);
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
-      expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, enabled), enabledMouseCursor);
-      expect(MaterialStateProperty.resolveAs<MouseCursor?>(inkWell.mouseCursor, disabled), disabledMouseCursor);
-      expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.04));
-      expect(inkWell.overlayColor!.resolve(focused), foregroundColor.withOpacity(0.12));
+      expect(
+          MaterialStateProperty.resolveAs<MouseCursor?>(
+              inkWell.mouseCursor, enabled),
+          enabledMouseCursor);
+      expect(
+          MaterialStateProperty.resolveAs<MouseCursor?>(
+              inkWell.mouseCursor, disabled),
+          disabledMouseCursor);
+      expect(inkWell.overlayColor!.resolve(hovered),
+          foregroundColor.withOpacity(0.04));
+      expect(inkWell.overlayColor!.resolve(focused),
+          foregroundColor.withOpacity(0.12));
       expect(inkWell.enableFeedback, enableFeedback);
       expect(material.borderRadius, null);
       expect(material.shape, shape);
       expect(material.animationDuration, animationDuration);
       expect(tester.getSize(find.byType(TextButton)), const Size(200, 200));
-      final Align align = tester.firstWidget<Align>(find.ancestor(of: find.text('button'), matching: find.byType(Align)));
+      final Align align = tester.firstWidget<Align>(
+          find.ancestor(of: find.text('button'), matching: find.byType(Align)));
       expect(align.alignment, alignment);
     }
 
-    testWidgetsWithLeakTracking('Button style overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Button style overrides defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(buttonStyle: style));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
-    testWidgetsWithLeakTracking('Button theme style overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Button theme style overrides defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(themeStyle: style));
       await tester.pumpAndSettle();
       checkButton(tester);
     });
 
-    testWidgetsWithLeakTracking('Overall Theme button theme style overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking(
+        'Overall Theme button theme style overrides defaults',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallStyle: style));
       await tester.pumpAndSettle();
       checkButton(tester);
@@ -208,31 +237,48 @@ void main() {
 
     // Same as the previous tests with empty ButtonStyle's instead of null.
 
-    testWidgetsWithLeakTracking('Button style overrides defaults, empty theme and overall styles', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(buttonStyle: style, themeStyle: const ButtonStyle(), overallStyle: const ButtonStyle()));
+    testWidgetsWithLeakTracking(
+        'Button style overrides defaults, empty theme and overall styles',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+          buttonStyle: style,
+          themeStyle: const ButtonStyle(),
+          overallStyle: const ButtonStyle()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
-    testWidgetsWithLeakTracking('Button theme style overrides defaults, empty button and overall styles', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), themeStyle: style, overallStyle: const ButtonStyle()));
+    testWidgetsWithLeakTracking(
+        'Button theme style overrides defaults, empty button and overall styles',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+          buttonStyle: const ButtonStyle(),
+          themeStyle: style,
+          overallStyle: const ButtonStyle()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
-    testWidgetsWithLeakTracking('Overall Theme button theme style overrides defaults, null theme and empty overall style', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), overallStyle: style));
+    testWidgetsWithLeakTracking(
+        'Overall Theme button theme style overrides defaults, null theme and empty overall style',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildFrame(buttonStyle: const ButtonStyle(), overallStyle: style));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
   });
 
-  testWidgetsWithLeakTracking('Material3: Theme shadowColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3: Theme shadowColor',
+      (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
 
-    Widget buildFrame({ Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor }) {
+    Widget buildFrame(
+        {Color? overallShadowColor,
+        Color? themeShadowColor,
+        Color? shadowColor}) {
       return MaterialApp(
         theme: ThemeData.from(
           useMaterial3: true,
@@ -252,7 +298,7 @@ void main() {
                     style: TextButton.styleFrom(
                       shadowColor: shadowColor,
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('button'),
                   );
                 },
@@ -287,25 +333,32 @@ void main() {
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
 
-    await tester.pumpWidget(buildFrame(overallShadowColor: overriddenColor, themeShadowColor: shadowColor));
+    await tester.pumpWidget(buildFrame(
+        overallShadowColor: overriddenColor, themeShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
 
-    await tester.pumpWidget(buildFrame(themeShadowColor: overriddenColor, shadowColor: shadowColor));
+    await tester.pumpWidget(buildFrame(
+        themeShadowColor: overriddenColor, shadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgetsWithLeakTracking('Material2: Theme shadowColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2: Theme shadowColor',
+      (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
 
-    Widget buildFrame({ Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor }) {
+    Widget buildFrame(
+        {Color? overallShadowColor,
+        Color? themeShadowColor,
+        Color? shadowColor}) {
       return MaterialApp(
-        theme: ThemeData.from(useMaterial3: false, colorScheme: colorScheme).copyWith(
+        theme: ThemeData.from(useMaterial3: false, colorScheme: colorScheme)
+            .copyWith(
           shadowColor: overallShadowColor,
         ),
         home: Scaffold(
@@ -322,7 +375,7 @@ void main() {
                     style: TextButton.styleFrom(
                       shadowColor: shadowColor,
                     ),
-                    onPressed: () { },
+                    onPressed: () {},
                     child: const Text('button'),
                   );
                 },
@@ -357,12 +410,14 @@ void main() {
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
 
-    await tester.pumpWidget(buildFrame(overallShadowColor: overriddenColor, themeShadowColor: shadowColor));
+    await tester.pumpWidget(buildFrame(
+        overallShadowColor: overriddenColor, themeShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);
 
-    await tester.pumpWidget(buildFrame(themeShadowColor: overriddenColor, shadowColor: shadowColor));
+    await tester.pumpWidget(buildFrame(
+        themeShadowColor: overriddenColor, shadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
     expect(material.shadowColor, shadowColor);

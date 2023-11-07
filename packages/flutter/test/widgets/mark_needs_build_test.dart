@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('setState can be called from build, initState, didChangeDependencies, and didUpdateWidget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'setState can be called from build, initState, didChangeDependencies, and didUpdateWidget',
+      (WidgetTester tester) async {
     // Initial build.
     await tester.pumpWidget(
       const Directionality(

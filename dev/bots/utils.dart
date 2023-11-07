@@ -10,21 +10,27 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
+const Duration _quietTimeout = Duration(
+    minutes:
+        10); // how long the output should be hidden between calls to printProgress before just being verbose
 
 // If running from LUCI set to False.
-final bool isLuci =  Platform.environment['LUCI_CI'] == 'True';
+final bool isLuci = Platform.environment['LUCI_CI'] == 'True';
 final bool hasColor = stdout.supportsAnsiEscapes && !isLuci;
-
 
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
 final String green = hasColor ? '\x1B[32m' : ''; // section titles, commands
-final String yellow = hasColor ? '\x1B[33m' : ''; // indications that a test was skipped (usually renders orange or brown)
+final String yellow = hasColor
+    ? '\x1B[33m'
+    : ''; // indications that a test was skipped (usually renders orange or brown)
 final String cyan = hasColor ? '\x1B[36m' : ''; // paths
 final String reverse = hasColor ? '\x1B[7m' : ''; // clocks
-final String gray = hasColor ? '\x1B[30m' : ''; // subtle decorative items (usually renders as dark gray)
-final String white = hasColor ? '\x1B[37m' : ''; // last log line (usually renders as light gray)
+final String gray = hasColor
+    ? '\x1B[30m'
+    : ''; // subtle decorative items (usually renders as dark gray)
+final String white =
+    hasColor ? '\x1B[37m' : ''; // last log line (usually renders as light gray)
 final String reset = hasColor ? '\x1B[0m' : '';
 
 const int kESC = 0x1B;
@@ -36,7 +42,6 @@ const int kCSIIntermediateRangeEnd = 0x2F;
 const int kCSIFinalRangeStart = 0x40;
 const int kCSIFinalRangeEnd = 0x7E;
 
-
 String get redLine {
   if (hasColor) {
     return '$red${'━' * stdout.terminalColumns}$reset';
@@ -47,10 +52,10 @@ String get redLine {
 String get clock {
   final DateTime now = DateTime.now();
   return '$reverse▌'
-         '${now.hour.toString().padLeft(2, "0")}:'
-         '${now.minute.toString().padLeft(2, "0")}:'
-         '${now.second.toString().padLeft(2, "0")}'
-         '▐$reset';
+      '${now.hour.toString().padLeft(2, "0")}:'
+      '${now.minute.toString().padLeft(2, "0")}:'
+      '${now.second.toString().padLeft(2, "0")}'
+      '▐$reset';
 }
 
 String prettyPrintDuration(Duration duration) {
@@ -60,7 +65,8 @@ String prettyPrintDuration(Duration duration) {
     result += '${minutes}min ';
   }
   final int seconds = duration.inSeconds - minutes * 60;
-  final int milliseconds = duration.inMilliseconds - (seconds * 1000 + minutes * 60 * 1000);
+  final int milliseconds =
+      duration.inMilliseconds - (seconds * 1000 + minutes * 60 * 1000);
   result += '$seconds.${milliseconds.toString().padLeft(3, "0")}s';
   return result;
 }
@@ -96,7 +102,8 @@ void foundError(List<String> messages) {
   // wrapping it in a red box.
   final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
   print('$red╔═╡${bold}ERROR$reset$red╞═${"═" * (width - 9)}');
-  for (final String message in messages.expand((String line) => line.split('\n'))) {
+  for (final String message
+      in messages.expand((String line) => line.split('\n'))) {
     print('$red║$reset $message');
   }
   print('$red╚${"═" * width}');
@@ -134,8 +141,10 @@ Never reportErrorsAndExit(String message) {
   _hideTimer = null;
   print('$clock $message$reset');
   print(redLine);
-  print('${red}For your convenience, the error messages reported above are repeated here:$reset');
-  final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
+  print(
+      '${red}For your convenience, the error messages reported above are repeated here:$reset');
+  final bool printSeparators =
+      _errorMessages.any((List<String> messages) => messages.length > 1);
   if (printSeparators) {
     print('  🙙  🙛  ');
   }
@@ -185,21 +194,30 @@ void _printQuietly(Object? message) {
     int index = start;
     int length = 0;
     while (index < line.length && length < stdout.terminalColumns) {
-      if (line.codeUnitAt(index) == kESC) { // 0x1B
+      if (line.codeUnitAt(index) == kESC) {
+        // 0x1B
         index += 1;
-        if (index < line.length && line.codeUnitAt(index) == kOpenSquareBracket) { // 0x5B, [
+        if (index < line.length &&
+            line.codeUnitAt(index) == kOpenSquareBracket) {
+          // 0x5B, [
           // That was the start of a CSI sequence.
           index += 1;
-          while (index < line.length && line.codeUnitAt(index) >= kCSIParameterRangeStart
-                                     && line.codeUnitAt(index) <= kCSIParameterRangeEnd) { // 0x30..0x3F
+          while (index < line.length &&
+              line.codeUnitAt(index) >= kCSIParameterRangeStart &&
+              line.codeUnitAt(index) <= kCSIParameterRangeEnd) {
+            // 0x30..0x3F
             index += 1; // ...parameter bytes...
           }
-          while (index < line.length && line.codeUnitAt(index) >= kCSIIntermediateRangeStart
-                                     && line.codeUnitAt(index) <= kCSIIntermediateRangeEnd) { // 0x20..0x2F
+          while (index < line.length &&
+              line.codeUnitAt(index) >= kCSIIntermediateRangeStart &&
+              line.codeUnitAt(index) <= kCSIIntermediateRangeEnd) {
+            // 0x20..0x2F
             index += 1; // ...intermediate bytes...
           }
-          if (index < line.length && line.codeUnitAt(index) >= kCSIFinalRangeStart
-                                  && line.codeUnitAt(index) <= kCSIFinalRangeEnd) { // 0x40..0x7E
+          if (index < line.length &&
+              line.codeUnitAt(index) >= kCSIFinalRangeStart &&
+              line.codeUnitAt(index) <= kCSIFinalRangeEnd) {
+            // 0x40..0x7E
             index += 1; // ...final byte.
           }
         }

@@ -27,7 +27,9 @@ void main() async {
       // We don't load images like this. PlatformAssetBundle is used for
       // other assets (like Rive animations). We are using an image because it's
       // conveniently sized and available for the test.
-      tally += (await bundle.load('packages/flutter_gallery_assets/places/india_pondicherry_salt_farm.png')).lengthInBytes;
+      tally += (await bundle.load(
+              'packages/flutter_gallery_assets/places/india_pondicherry_salt_farm.png'))
+          .lengthInBytes;
     }
     watch.stop();
     values.add(watch.elapsedMicroseconds.toDouble() / _kBatchSize);

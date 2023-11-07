@@ -15,13 +15,20 @@ import 'test_data/hot_reload_index_html_samples.dart';
 
 void main() async {
   await _testProject(HotReloadProject()); // default
-  await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsCallback), name: 'flutter.js (callback)');
-  await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesFull), name: 'flutter.js (promises)');
-  await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesShort), name: 'flutter.js (promises, short)');
-  await _testProject(HotReloadProject(indexHtml: indexHtmlNoFlutterJs), name: 'No flutter.js');
+  await _testProject(HotReloadProject(indexHtml: indexHtmlFlutterJsCallback),
+      name: 'flutter.js (callback)');
+  await _testProject(
+      HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesFull),
+      name: 'flutter.js (promises)');
+  await _testProject(
+      HotReloadProject(indexHtml: indexHtmlFlutterJsPromisesShort),
+      name: 'flutter.js (promises, short)');
+  await _testProject(HotReloadProject(indexHtml: indexHtmlNoFlutterJs),
+      name: 'No flutter.js');
 }
 
-Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) async {
+Future<void> _testProject(HotReloadProject project,
+    {String name = 'Default'}) async {
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
@@ -41,19 +48,25 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
 
   testWithoutContext('$testName: hot restart works without error', () async {
     flutter.stdout.listen(printOnFailure);
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(
+        chrome: true,
+        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.hotRestart();
   });
 
-  testWithoutContext('$testName: newly added code executes during hot restart', () async {
+  testWithoutContext('$testName: newly added code executes during hot restart',
+      () async {
     final Completer<void> completer = Completer<void>();
-    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+    final StreamSubscription<String> subscription =
+        flutter.stdout.listen((String line) {
       printOnFailure(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
+    await flutter.run(
+        chrome: true,
+        additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -63,16 +76,21 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     }
   });
 
-  testWithoutContext('$testName: newly added code executes during hot restart - canvaskit', () async {
+  testWithoutContext(
+      '$testName: newly added code executes during hot restart - canvaskit',
+      () async {
     final Completer<void> completer = Completer<void>();
-    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+    final StreamSubscription<String> subscription =
+        flutter.stdout.listen((String line) {
       printOnFailure(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }
     });
-    await flutter.run(chrome: true,
-      additionalCommandArgs: <String>['--dart-define=FLUTTER_WEB_USE_SKIA=true', '--verbose']);
+    await flutter.run(chrome: true, additionalCommandArgs: <String>[
+      '--dart-define=FLUTTER_WEB_USE_SKIA=true',
+      '--verbose'
+    ]);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
@@ -80,5 +98,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
     } finally {
       await subscription.cancel();
     }
-  }, skip: true); // Skipped for https://github.com/flutter/flutter/issues/110879.
+  },
+      skip:
+          true); // Skipped for https://github.com/flutter/flutter/issues/110879.
 }

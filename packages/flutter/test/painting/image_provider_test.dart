@@ -51,12 +51,14 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       caughtError.complete(true);
     };
-    await imageProvider.obtainCacheStatus(configuration: ImageConfiguration.empty);
+    await imageProvider.obtainCacheStatus(
+        configuration: ImageConfiguration.empty);
 
     expect(await caughtError.future, true);
   });
 
-  test('File image with empty file throws expected error and evicts from cache', () async {
+  test('File image with empty file throws expected error and evicts from cache',
+      () async {
     final Completer<StateError> error = Completer<StateError>();
     FlutterError.onError = (FlutterErrorDetails details) {
       error.complete(details.exception as StateError);
@@ -87,23 +89,30 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.loadBuffer(provider, (ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-      return Future<Codec>.value(FakeCodec());
-    }), isA<MultiFrameImageStreamCompleter>());
+    expect(
+        provider.loadBuffer(provider, (ImmutableBuffer buffer,
+            {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+          return Future<Codec>.value(FakeCodec());
+        }),
+        isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(ImmutableBuffer buffer,
+      {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
-    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
+    final File file = fs.file('/blue.png')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(
+        provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
@@ -112,32 +121,39 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(
+        provider, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
 
   test('Asset image sets tag', () async {
     const String asset = 'images/blue.png';
-    final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
-    final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(key, decoder) as MultiFrameImageStreamCompleter;
+    final ExactAssetImage provider =
+        ExactAssetImage(asset, bundle: _TestAssetBundle());
+    final AssetBundleImageKey key =
+        await provider.obtainKey(ImageConfiguration.empty);
+    final MultiFrameImageStreamCompleter completer =
+        provider.loadBuffer(key, decoder) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, asset);
   });
 
   test('Resize image sets tag', () async {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
-    final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
+    final ResizeImage provider =
+        ResizeImage(MemoryImage(bytes), width: 40, height: 40);
     final MultiFrameImageStreamCompleter completer = provider.loadBuffer(
       await provider.obtainKey(ImageConfiguration.empty),
       decoder,
     ) as MultiFrameImageStreamCompleter;
 
-    expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
+    expect(completer.debugLabel,
+        'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
 
-  test('File image throws error when given a real but non-image file', () async {
+  test('File image throws error when given a real but non-image file',
+      () async {
     final Completer<Exception> error = Completer<Exception>();
     FlutterError.onError = (FlutterErrorDetails details) {
       error.complete(details.exception as Exception);
@@ -152,8 +168,10 @@ void main() {
     expect(imageCache.statusForKey(provider).pending, true);
     expect(imageCache.pendingImageCount, 1);
 
-    expect(await error.future, isException
-      .having((Exception exception) => exception.toString(), 'toString', contains('Invalid image data')));
+    expect(
+        await error.future,
+        isException.having((Exception exception) => exception.toString(),
+            'toString', contains('Invalid image data')));
 
     // Invalid images are marked as pending so that we do not attempt to reload them.
     expect(imageCache.statusForKey(provider).untracked, false);
@@ -161,9 +179,12 @@ void main() {
   }, skip: kIsWeb); // [intended] The web cannot load files.
 
   test('ImageProvider toStrings', () async {
-    expect(const NetworkImage('test', scale: 1.21).toString(), 'NetworkImage("test", scale: 1.2)');
-    expect(const ExactAssetImage('test', scale: 1.21).toString(), 'ExactAssetImage(name: "test", scale: 1.2, bundle: null)');
-    expect(MemoryImage(Uint8List(0), scale: 1.21).toString(), equalsIgnoringHashCodes('MemoryImage(Uint8List#00000, scale: 1.2)'));
+    expect(const NetworkImage('test', scale: 1.21).toString(),
+        'NetworkImage("test", scale: 1.2)');
+    expect(const ExactAssetImage('test', scale: 1.21).toString(),
+        'ExactAssetImage(name: "test", scale: 1.2, bundle: null)');
+    expect(MemoryImage(Uint8List(0), scale: 1.21).toString(),
+        equalsIgnoringHashCodes('MemoryImage(Uint8List#00000, scale: 1.2)'));
   });
 }
 

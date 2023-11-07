@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/route/show_cupertino_modal_popup.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/route/show_cupertino_modal_popup.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tap on button displays cupertino modal dialog', (WidgetTester tester) async {
+  testWidgets('Tap on button displays cupertino modal dialog',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ModalPopupApp(),
     );

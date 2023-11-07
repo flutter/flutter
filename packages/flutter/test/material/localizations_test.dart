@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('English translations exist for all MaterialLocalizations properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'English translations exist for all MaterialLocalizations properties',
+      (WidgetTester tester) async {
     const MaterialLocalizations localizations = DefaultMaterialLocalizations();
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
@@ -147,30 +149,69 @@ void main() {
     expect(localizations.selectedRowCountTitle(1), isNotNull);
     expect(localizations.selectedRowCountTitle(2), isNotNull);
     expect(localizations.selectedRowCountTitle(100), isNotNull);
-    expect(localizations.selectedRowCountTitle(0).contains(r'$selectedRowCount'), isFalse);
-    expect(localizations.selectedRowCountTitle(1).contains(r'$selectedRowCount'), isFalse);
-    expect(localizations.selectedRowCountTitle(2).contains(r'$selectedRowCount'), isFalse);
-    expect(localizations.selectedRowCountTitle(100).contains(r'$selectedRowCount'), isFalse);
+    expect(
+        localizations.selectedRowCountTitle(0).contains(r'$selectedRowCount'),
+        isFalse);
+    expect(
+        localizations.selectedRowCountTitle(1).contains(r'$selectedRowCount'),
+        isFalse);
+    expect(
+        localizations.selectedRowCountTitle(2).contains(r'$selectedRowCount'),
+        isFalse);
+    expect(
+        localizations.selectedRowCountTitle(100).contains(r'$selectedRowCount'),
+        isFalse);
 
     expect(localizations.pageRowsInfoTitle(1, 10, 100, true), isNotNull);
     expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNotNull);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$firstRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$lastRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$rowCount'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$firstRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$lastRow'), isFalse);
-    expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, true)
+            .contains(r'$firstRow'),
+        isFalse);
+    expect(
+        localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$lastRow'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, true)
+            .contains(r'$rowCount'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, false)
+            .contains(r'$firstRow'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, false)
+            .contains(r'$lastRow'),
+        isFalse);
+    expect(
+        localizations
+            .pageRowsInfoTitle(1, 10, 100, false)
+            .contains(r'$rowCount'),
+        isFalse);
 
     expect(localizations.licensesPackageDetailText(0), isNotNull);
     expect(localizations.licensesPackageDetailText(1), isNotNull);
     expect(localizations.licensesPackageDetailText(2), isNotNull);
     expect(localizations.licensesPackageDetailText(100), isNotNull);
-    expect(localizations.licensesPackageDetailText(1).contains(r'$licensesCount'), isFalse);
-    expect(localizations.licensesPackageDetailText(2).contains(r'$licensesCount'), isFalse);
-    expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
+    expect(
+        localizations.licensesPackageDetailText(1).contains(r'$licensesCount'),
+        isFalse);
+    expect(
+        localizations.licensesPackageDetailText(2).contains(r'$licensesCount'),
+        isFalse);
+    expect(
+        localizations
+            .licensesPackageDetailText(100)
+            .contains(r'$licensesCount'),
+        isFalse);
   });
 
-  testWidgetsWithLeakTracking('MaterialLocalizations.of throws', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialLocalizations.of throws',
+      (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -185,16 +226,22 @@ void main() {
       ),
     );
 
-    expect(() => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
-      'message',
-      contains('No MaterialLocalizations found'),
-    )));
+    expect(
+        () =>
+            MaterialLocalizations.of(noLocalizationsAvailable.currentContext!),
+        throwsA(isAssertionError.having(
+          (AssertionError e) => e.message,
+          'message',
+          contains('No MaterialLocalizations found'),
+        )));
 
-    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
+    expect(MaterialLocalizations.of(localizationsAvailable.currentContext!),
+        isA<MaterialLocalizations>());
   });
 
-  testWidgetsWithLeakTracking("parseCompactDate doesn't throw an exception on invalid text", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "parseCompactDate doesn't throw an exception on invalid text",
+      (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/126397.
     final GlobalKey localizations = GlobalKey();
 
@@ -207,7 +254,8 @@ void main() {
       ),
     );
 
-    final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(localizations.currentContext!);
+    final MaterialLocalizations materialLocalizations =
+        MaterialLocalizations.of(localizations.currentContext!);
     expect(materialLocalizations.parseCompactDate('10/05/2023'), isNotNull);
     expect(tester.takeException(), null);
 

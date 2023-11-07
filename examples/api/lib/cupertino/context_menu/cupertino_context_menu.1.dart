@@ -38,7 +38,8 @@ class ContextMenuExample extends StatelessWidget {
   const ContextMenuExample({super.key});
 
   // Or just do this inline in the builder below?
-  static Animation<Decoration> _boxDecorationAnimation(Animation<double> animation) {
+  static Animation<Decoration> _boxDecorationAnimation(
+      Animation<double> animation) {
     return _tween.animate(
       CurvedAnimation(
         parent: animation,
@@ -94,11 +95,14 @@ class ContextMenuExample extends StatelessWidget {
               ),
             ],
             builder: (BuildContext context, Animation<double> animation) {
-              final Animation<Decoration> boxDecorationAnimation = _boxDecorationAnimation(animation);
+              final Animation<Decoration> boxDecorationAnimation =
+                  _boxDecorationAnimation(animation);
 
               return Container(
                 decoration:
-                    animation.value < CupertinoContextMenu.animationOpensAt ? boxDecorationAnimation.value : null,
+                    animation.value < CupertinoContextMenu.animationOpensAt
+                        ? boxDecorationAnimation.value
+                        : null,
                 child: Container(
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemYellow,

@@ -19,8 +19,9 @@ class LiveText {
 
   /// Returns true if the Live Text input feature is available on the current device.
   static Future<bool> isLiveTextInputAvailable() async {
-    final bool supportLiveTextInput =
-        await SystemChannels.platform.invokeMethod('LiveText.isLiveTextInputAvailable') ?? false;
+    final bool supportLiveTextInput = await SystemChannels.platform
+            .invokeMethod('LiveText.isLiveTextInputAvailable') ??
+        false;
     return supportLiveTextInput;
   }
 

@@ -13,19 +13,20 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-
   late Directory tempDir;
 
-  setUp(()  {
+  setUp(() {
     Cache.flutterRoot = getFlutterRoot();
-    tempDir = createResolvedTempDirectorySync('android_plugin_new_output_dir_test.');
+    tempDir =
+        createResolvedTempDirectorySync('android_plugin_new_output_dir_test.');
   });
 
   tearDown(() async {
     tryToDelete(tempDir);
   });
 
-  test("error logged when plugin's build output dir was not private.", () async {
+  test("error logged when plugin's build output dir was not private.",
+      () async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
@@ -40,9 +41,11 @@ void main() {
       'flutter_project'
     ], workingDirectory: tempDir.path);
 
-    final String projectPath = fileSystem.path.join(tempDir.path, 'flutter_project');
+    final String projectPath =
+        fileSystem.path.join(tempDir.path, 'flutter_project');
 
-    final File modulePubspec = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
+    final File modulePubspec =
+        fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
     String pubspecContent = modulePubspec.readAsStringSync();
     pubspecContent = pubspecContent.replaceFirst(
       'dependencies:',
@@ -65,9 +68,10 @@ dependencies:
 
     // Check outputDir existed
     final Directory outputDir = fileSystem.directory(fileSystem.path.join(
-        projectPath, '.android', 'plugins_build_output', 'image_picker_android'
-    ));
+        projectPath,
+        '.android',
+        'plugins_build_output',
+        'image_picker_android'));
     expect(outputDir, exists);
-
   });
 }

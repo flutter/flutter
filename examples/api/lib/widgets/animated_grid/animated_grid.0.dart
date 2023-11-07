@@ -21,7 +21,8 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   final GlobalKey<AnimatedGridState> _gridKey = GlobalKey<AnimatedGridState>();
   late ListModel<int> _list;
   int? _selectedItem;
-  late int _nextItem; // The next item inserted when the user presses the '+' button.
+  late int
+      _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
@@ -35,7 +36,8 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(
+      BuildContext context, int index, Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -53,7 +55,8 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   // completed (even though it's gone as far as this ListModel is concerned).
   // The widget will be used by the [AnimatedGridState.removeItem] method's
   // [AnimatedGridRemovedItemBuilder] parameter.
-  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+  Widget _buildRemovedItem(
+      int item, BuildContext context, Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: item,
@@ -64,7 +67,8 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
 
   // Insert the "next item" into the list model.
   void _insert() {
-    final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
+    final int index =
+        _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
     setState(() {
       _list.insert(index, _nextItem++);
     });
@@ -128,7 +132,8 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   }
 }
 
-typedef RemovedItemBuilder<T> = Widget Function(T item, BuildContext context, Animation<double> animation);
+typedef RemovedItemBuilder<T> = Widget Function(
+    T item, BuildContext context, Animation<double> animation);
 
 /// Keeps a Dart [List] in sync with an [AnimatedGrid].
 ///
@@ -211,7 +216,9 @@ class CardItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: ScaleTransition(
-        scale: CurvedAnimation(parent: animation, curve: removing ? Curves.easeInOut : Curves.bounceOut),
+        scale: CurvedAnimation(
+            parent: animation,
+            curve: removing ? Curves.easeInOut : Curves.bounceOut),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onTap,

@@ -7,7 +7,8 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 
 abstract class ApplicationPackageFactory {
-  static ApplicationPackageFactory? get instance => context.get<ApplicationPackageFactory>();
+  static ApplicationPackageFactory? get instance =>
+      context.get<ApplicationPackageFactory>();
 
   /// Create an [ApplicationPackage] for the given platform.
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -18,7 +19,7 @@ abstract class ApplicationPackageFactory {
 }
 
 abstract class ApplicationPackage {
-  ApplicationPackage({ required this.id });
+  ApplicationPackage({required this.id});
 
   /// Package ID from the Android Manifest or equivalent.
   final String id;

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class NavigationBarUseCase extends UseCase {
-
   @override
   String get name => 'NavigationBar';
 

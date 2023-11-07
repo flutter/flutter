@@ -25,7 +25,8 @@ class AutocompleteExampleApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text('Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.'),
+              Text(
+                  'Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.'),
               const _AsyncAutocomplete(),
             ],
           ),
@@ -39,10 +40,10 @@ class _AsyncAutocomplete extends StatefulWidget {
   const _AsyncAutocomplete();
 
   @override
-  State<_AsyncAutocomplete > createState() => _AsyncAutocompleteState();
+  State<_AsyncAutocomplete> createState() => _AsyncAutocompleteState();
 }
 
-class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
+class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   // The query currently being searched for. If null, there is no pending
   // request.
   String? _searchingWithQuery;
@@ -55,7 +56,8 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
         _searchingWithQuery = textEditingValue.text;
-        final Iterable<String> options = await _FakeAPI.search(_searchingWithQuery!);
+        final Iterable<String> options =
+            await _FakeAPI.search(_searchingWithQuery!);
 
         // If another search happened after this one, throw away these options.
         // Use the previous options intead and wait for the newer request to

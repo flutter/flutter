@@ -11,7 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'text_input_utils.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized();
 
   group('DeltaTextInputClient', () {
     late FakeTextChannel fakeTextChannel;
@@ -30,8 +31,10 @@ void main() {
       'DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly',
       () async {
         // Assemble a TextInputConnection so we can verify its change in state.
-        final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-        const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+        final FakeDeltaTextInputClient client =
+            FakeDeltaTextInputClient(TextEditingValue.empty);
+        const TextInputConfiguration configuration =
+            TextInputConfiguration(enableDeltaModel: true);
         TextInput.attach(client, configuration);
         expect(client.configuration.enableDeltaModel, true);
 
@@ -50,7 +53,8 @@ void main() {
             ' "composingExtent": -1}';
 
         // Send updateEditingValueWithDeltas message.
-        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        final ByteData? messageBytes =
+            const JSONMessageCodec().encodeMessage(<String, dynamic>{
           'args': <dynamic>[
             1,
             jsonDecode('{"deltas": [$jsonDelta]}'),
@@ -60,21 +64,25 @@ void main() {
         await binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/textinput',
           messageBytes,
-              (ByteData? _) {},
+          (ByteData? _) {},
         );
 
         expect(client.latestMethodCall, 'updateEditingValueWithDeltas');
       },
     );
 
-    test('Invalid TextRange fails loudly when being converted to JSON - NonTextUpdate', () async {
+    test(
+        'Invalid TextRange fails loudly when being converted to JSON - NonTextUpdate',
+        () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
       };
 
-      final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(const TextEditingValue(text: '1'));
-      const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+      final FakeDeltaTextInputClient client =
+          FakeDeltaTextInputClient(const TextEditingValue(text: '1'));
+      const TextInputConfiguration configuration =
+          TextInputConfiguration(enableDeltaModel: true);
       TextInput.attach(client, configuration);
 
       const String jsonDelta = '{'
@@ -89,7 +97,8 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'method': 'TextInputClient.updateEditingStateWithDeltas',
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
@@ -102,18 +111,28 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bThe selection range: TextSelection.collapsed\(offset: 3, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: 1 of length: 1\b')));
+      expect(
+          record[0].exception.toString(),
+          matches(RegExp(
+              r'\bThe selection range: TextSelection.collapsed\(offset: 3, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)')));
+      expect(
+          record[0].exception.toString(),
+          matches(
+              RegExp(r'\bis not within the bounds of text: 1 of length: 1\b')));
     });
 
-    test('Invalid TextRange fails loudly when being converted to JSON - Faulty deltaStart and deltaEnd', () async {
+    test(
+        'Invalid TextRange fails loudly when being converted to JSON - Faulty deltaStart and deltaEnd',
+        () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
       };
 
-      final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+      final FakeDeltaTextInputClient client =
+          FakeDeltaTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration =
+          TextInputConfiguration(enableDeltaModel: true);
       TextInput.attach(client, configuration);
 
       const String jsonDelta = '{'
@@ -128,7 +147,8 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'method': 'TextInputClient.updateEditingStateWithDeltas',
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
@@ -141,18 +161,28 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bThe delta range: TextRange\(start: 0, end: 5\)(?!\w)')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text:  of length: 0\b')));
+      expect(
+          record[0].exception.toString(),
+          matches(RegExp(
+              r'\bThe delta range: TextRange\(start: 0, end: 5\)(?!\w)')));
+      expect(
+          record[0].exception.toString(),
+          matches(
+              RegExp(r'\bis not within the bounds of text:  of length: 0\b')));
     });
 
-    test('Invalid TextRange fails loudly when being converted to JSON - Faulty Selection', () async {
+    test(
+        'Invalid TextRange fails loudly when being converted to JSON - Faulty Selection',
+        () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
       };
 
-      final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+      final FakeDeltaTextInputClient client =
+          FakeDeltaTextInputClient(TextEditingValue.empty);
+      const TextInputConfiguration configuration =
+          TextInputConfiguration(enableDeltaModel: true);
       TextInput.attach(client, configuration);
 
       const String jsonDelta = '{'
@@ -167,7 +197,8 @@ void main() {
           ' "composingBase": -1,'
           ' "composingExtent": -1}';
 
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'method': 'TextInputClient.updateEditingStateWithDeltas',
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
@@ -180,18 +211,28 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bThe selection range: TextSelection.collapsed\(offset: 6, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: hello of length: 5\b')));
+      expect(
+          record[0].exception.toString(),
+          matches(RegExp(
+              r'\bThe selection range: TextSelection.collapsed\(offset: 6, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)')));
+      expect(
+          record[0].exception.toString(),
+          matches(RegExp(
+              r'\bis not within the bounds of text: hello of length: 5\b')));
     });
 
-    test('Invalid TextRange fails loudly when being converted to JSON - Faulty Composing Region', () async {
+    test(
+        'Invalid TextRange fails loudly when being converted to JSON - Faulty Composing Region',
+        () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
       };
 
-      final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(const TextEditingValue(text: 'worl'));
-      const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+      final FakeDeltaTextInputClient client =
+          FakeDeltaTextInputClient(const TextEditingValue(text: 'worl'));
+      const TextInputConfiguration configuration =
+          TextInputConfiguration(enableDeltaModel: true);
       TextInput.attach(client, configuration);
 
       const String jsonDelta = '{'
@@ -206,7 +247,8 @@ void main() {
           ' "composingBase": 0,'
           ' "composingExtent": 6}';
 
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      final ByteData? messageBytes =
+          const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'method': 'TextInputClient.updateEditingStateWithDeltas',
         'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
       });
@@ -219,8 +261,14 @@ void main() {
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
       // differently from others.
-      expect(record[0].exception.toString(), matches(RegExp(r'\bThe composing range: TextRange\(start: 0, end: 6\)(?!\w)')));
-      expect(record[0].exception.toString(), matches(RegExp(r'\bis not within the bounds of text: world of length: 5\b')));
+      expect(
+          record[0].exception.toString(),
+          matches(RegExp(
+              r'\bThe composing range: TextRange\(start: 0, end: 6\)(?!\w)')));
+      expect(
+          record[0].exception.toString(),
+          matches(RegExp(
+              r'\bis not within the bounds of text: world of length: 5\b')));
     });
   });
 }
@@ -296,10 +344,12 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
     latestMethodCall = 'performSelector';
   }
 
-  TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
+  TextInputConfiguration get configuration =>
+      const TextInputConfiguration(enableDeltaModel: true);
 
   @override
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+  void didChangeInputControl(
+      TextInputControl? oldControl, TextInputControl? newControl) {
     latestMethodCall = 'didChangeInputControl';
   }
 }

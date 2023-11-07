@@ -25,7 +25,8 @@ class TestApp extends StatefulWidget {
 }
 
 class _TestAppState extends State<TestApp> {
-  static final dynamic anUnknownValue = DateTime.fromMillisecondsSinceEpoch(1520777802314);
+  static final dynamic anUnknownValue =
+      DateTime.fromMillisecondsSinceEpoch(1520777802314);
   static final List<dynamic> aList = <dynamic>[
     false,
     0,
@@ -71,8 +72,7 @@ class _TestAppState extends State<TestApp> {
     double.maxFinite,
     double.infinity,
   ]);
-  static final Float64List someFloat64s =
-      Float64List.fromList(<double>[
+  static final Float64List someFloat64s = Float64List.fromList(<double>[
     double.nan,
     double.negativeInfinity,
     -double.maxFinite,

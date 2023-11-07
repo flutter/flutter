@@ -72,8 +72,10 @@ class _TapAndDragToZoomWidgetState extends State<TapAndDragToZoomWidget> {
   }
 
   void _zoomLogic(Offset currentDragPosition) {
-    final double dx = (_previousDragPosition!.dx - currentDragPosition.dx).abs();
-    final double dy = (_previousDragPosition!.dy - currentDragPosition.dy).abs();
+    final double dx =
+        (_previousDragPosition!.dx - currentDragPosition.dx).abs();
+    final double dy =
+        (_previousDragPosition!.dy - currentDragPosition.dy).abs();
 
     if (dx > dy) {
       // Ignore horizontal drags.
@@ -101,33 +103,33 @@ class _TapAndDragToZoomWidgetState extends State<TapAndDragToZoomWidget> {
   Widget build(BuildContext context) {
     return RawGestureDetector(
       gestures: <Type, GestureRecognizerFactory>{
-        TapAndPanGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-          () => TapAndPanGestureRecognizer(),
-          (TapAndPanGestureRecognizer instance) {
-            instance
-              ..onTapDown = (TapDragDownDetails details) {
-                _previousDragPosition = details.globalPosition;
+        TapAndPanGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+                () => TapAndPanGestureRecognizer(),
+                (TapAndPanGestureRecognizer instance) {
+          instance
+            ..onTapDown = (TapDragDownDetails details) {
+              _previousDragPosition = details.globalPosition;
+            }
+            ..onDragStart = (TapDragStartDetails details) {
+              if (details.consecutiveTapCount == 2) {
+                _zoomLogic(details.globalPosition);
               }
-              ..onDragStart = (TapDragStartDetails details) {
-                if (details.consecutiveTapCount == 2) {
-                  _zoomLogic(details.globalPosition);
-                }
+            }
+            ..onDragUpdate = (TapDragUpdateDetails details) {
+              if (details.consecutiveTapCount == 2) {
+                _zoomLogic(details.globalPosition);
               }
-              ..onDragUpdate = (TapDragUpdateDetails details) {
-                if (details.consecutiveTapCount == 2) {
-                  _zoomLogic(details.globalPosition);
-                }
+            }
+            ..onDragEnd = (TapDragEndDetails details) {
+              if (details.consecutiveTapCount == 2) {
+                setState(() {
+                  _currentScale = 1.0;
+                });
+                _previousDragPosition = null;
               }
-              ..onDragEnd = (TapDragEndDetails details) {
-                if (details.consecutiveTapCount == 2) {
-                  setState(() {
-                    _currentScale = 1.0;
-                  });
-                  _previousDragPosition = null;
-                }
-              };
-          }
-        ),
+            };
+        }),
       },
       child: Transform.scale(
         scale: _currentScale,

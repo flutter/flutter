@@ -28,10 +28,11 @@ void main() {
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
+            ? FileSystemStyle.windows
+            : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory
+          .createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('nonempty', () async {
@@ -51,28 +52,28 @@ void main() {
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys,
-        unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin'])
-      );
+          unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin']));
       const String expectedJsonAssetManifest = '{}';
       const Map<Object, Object> expectedBinAssetManifest = <Object, Object>{};
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
+        utf8.decode(
+            await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         expectedJsonAssetManifest,
       );
       expect(
-        const StandardMessageCodec().decodeMessage(ByteData.sublistView(Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()))),
-        expectedBinAssetManifest
-      );
-
+          const StandardMessageCodec().decodeMessage(ByteData.sublistView(
+              Uint8List.fromList(await bundle.entries['AssetManifest.bin']!
+                  .contentsAsBytes()))),
+          expectedBinAssetManifest);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('wildcard directories do not include subdirectories', () async {
+    testUsingContext('wildcard directories do not include subdirectories',
+        () async {
       globals.fs.file('.packages').createSync();
-      globals.fs.file('pubspec.yaml').writeAsStringSync(
-'''
+      globals.fs.file('pubspec.yaml').writeAsStringSync('''
 name: test
 dependencies:
   flutter:
@@ -81,8 +82,7 @@ flutter:
   assets:
     - assets/foo/
     - assets/bar/lizard.png
-'''
-      );
+''');
 
       final List<String> assets = <String>[
         'assets/foo/dog.png',
@@ -92,31 +92,35 @@ flutter:
       ];
 
       for (final String asset in assets) {
-        final File assetFile = globals.fs.file(
-          globals.fs.path.joinAll(asset.split('/'))
-        );
+        final File assetFile =
+            globals.fs.file(globals.fs.path.joinAll(asset.split('/')));
         assetFile.createSync(recursive: true);
       }
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
 
-      expect(bundle.entries.keys, unorderedEquals(<String>[
-        'AssetManifest.json',
-        'AssetManifest.bin',
-        'FontManifest.json',
-        'NOTICES.Z',
-        'assets/foo/dog.png',
-        'assets/bar/lizard.png'
-      ]));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z',
+            'assets/foo/dog.png',
+            'assets/bar/lizard.png'
+          ]));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('wildcard directories are updated when filesystem changes', () async {
+    testUsingContext('wildcard directories are updated when filesystem changes',
+        () async {
       final File packageFile = globals.fs.file('.packages')..createSync();
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -127,25 +131,42 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z',
+            'assets/foo/bar.txt'
+          ]));
       // Simulate modifying the files by updating the filestat time manually.
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'fizz.txt'))
         ..createSync(recursive: true)
-        ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
+        ..setLastModifiedSync(
+            packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
       expect(bundle.needsBuild(), true);
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-          'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt',
-          'assets/foo/fizz.txt']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z',
+            'assets/foo/bar.txt',
+            'assets/foo/fizz.txt'
+          ]));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
       final File pubspec = globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -157,13 +178,23 @@ flutter:
       globals.fs.file('.packages').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z',
+            'assets/foo/bar.txt'
+          ]));
       expect(bundle.needsBuild(), false);
 
       // Delete the wildcard directory and update pubspec file.
-      final DateTime modifiedTime = pubspec.lastModifiedSync().add(const Duration(hours: 1));
-      globals.fs.directory(globals.fs.path.join('assets', 'foo')).deleteSync(recursive: true);
+      final DateTime modifiedTime =
+          pubspec.lastModifiedSync().add(const Duration(hours: 1));
+      globals.fs
+          .directory(globals.fs.path.join('assets', 'foo'))
+          .deleteSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -171,16 +202,22 @@ name: example''')
         ..setLastModifiedSync(modifiedTime);
 
       // touch .packages to make sure its change time is after pubspec.yaml's
-      globals.fs.file('.packages')
-        .setLastModifiedSync(modifiedTime);
+      globals.fs.file('.packages').setLastModifiedSync(modifiedTime);
 
       // Even though the previous file was removed, it is left in the
       // asset manifest and not updated. This is due to the devfs not
       // supporting file deletion.
       expect(bundle.needsBuild(), true);
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z',
+            'assets/foo/bar.txt'
+          ]));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -188,10 +225,14 @@ name: example''')
 
     // https://github.com/flutter/flutter/issues/42723
     testUsingContext('Test regression for mistyped file', () async {
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
       // Create a directory in the same path to test that we're only looking at File
       // objects.
-      globals.fs.directory(globals.fs.path.join('assets', 'foo', 'bar')).createSync();
+      globals.fs
+          .directory(globals.fs.path.join('assets', 'foo', 'bar'))
+          .createSync();
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -203,8 +244,15 @@ flutter:
       globals.fs.file('.packages').createSync();
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z',
+            'assets/foo/bar.txt'
+          ]));
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -213,9 +261,15 @@ flutter:
 
     testUsingContext('deferred assets are parsed', () async {
       globals.fs.file('.packages').createSync();
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'bar', 'barbie.txt'))
+          .createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'wild', 'dash.txt'))
+          .createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -235,9 +289,17 @@ flutter:
         platform: globals.platform,
         splitDeferredAssets: true,
       ).createBundle();
-      await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
-      expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+      await bundle.build(
+          packagesPath: '.packages', deferredComponentsEnabled: true);
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z',
+            'assets/foo/bar.txt'
+          ]));
       expect(bundle.deferredComponentsEntries.length, 1);
       expect(bundle.deferredComponentsEntries['component1']!.length, 2);
       expect(bundle.needsBuild(), false);
@@ -246,11 +308,19 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('deferred assets are parsed regularly when splitDeferredAssets Disabled', () async {
+    testUsingContext(
+        'deferred assets are parsed regularly when splitDeferredAssets Disabled',
+        () async {
       globals.fs.file('.packages').createSync();
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'bar', 'barbie.txt'))
+          .createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'wild', 'dash.txt'))
+          .createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -266,9 +336,17 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
-        'assets/bar/barbie.txt', 'assets/wild/dash.txt', 'AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'assets/foo/bar.txt',
+            'assets/bar/barbie.txt',
+            'assets/wild/dash.txt',
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z'
+          ]));
       expect(bundle.deferredComponentsEntries.isEmpty, true);
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
@@ -278,9 +356,15 @@ flutter:
 
     testUsingContext('deferred assets wildcard parsed', () async {
       final File packageFile = globals.fs.file('.packages')..createSync();
-      globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('assets', 'bar', 'barbie.txt')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join('assets', 'wild', 'dash.txt')).createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'bar', 'barbie.txt'))
+          .createSync(recursive: true);
+      globals.fs
+          .file(globals.fs.path.join('assets', 'wild', 'dash.txt'))
+          .createSync(recursive: true);
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -300,9 +384,17 @@ flutter:
         platform: globals.platform,
         splitDeferredAssets: true,
       ).createBundle();
-      await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
-      expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
-        'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+      await bundle.build(
+          packagesPath: '.packages', deferredComponentsEnabled: true);
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'assets/foo/bar.txt',
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z'
+          ]));
       expect(bundle.deferredComponentsEntries.length, 1);
       expect(bundle.deferredComponentsEntries['component1']!.length, 2);
       expect(bundle.needsBuild(), false);
@@ -310,13 +402,22 @@ flutter:
       // Simulate modifying the files by updating the filestat time manually.
       globals.fs.file(globals.fs.path.join('assets', 'wild', 'fizz.txt'))
         ..createSync(recursive: true)
-        ..setLastModifiedSync(packageFile.lastModifiedSync().add(const Duration(hours: 1)));
+        ..setLastModifiedSync(
+            packageFile.lastModifiedSync().add(const Duration(hours: 1)));
 
       expect(bundle.needsBuild(), true);
-      await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
+      await bundle.build(
+          packagesPath: '.packages', deferredComponentsEnabled: true);
 
-      expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
-        'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'assets/foo/bar.txt',
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'FontManifest.json',
+            'NOTICES.Z'
+          ]));
       expect(bundle.deferredComponentsEntries.length, 1);
       expect(bundle.deferredComponentsEntries['component1']!.length, 3);
     }, overrides: <Type, Generator>{
@@ -331,10 +432,11 @@ flutter:
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: globals.platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
+            ? FileSystemStyle.windows
+            : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory
+          .createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('empty pubspec', () async {
@@ -343,21 +445,25 @@ flutter:
         ..writeAsStringSync('');
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
+      await bundle.build(
+          packagesPath: '.packages',
+          targetPlatform: TargetPlatform.web_javascript);
 
-      expect(bundle.entries.keys,
-        unorderedEquals(<String>[
-          'AssetManifest.json',
-          'AssetManifest.bin',
-          'AssetManifest.bin.json',
-        ])
-      );
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'AssetManifest.bin.json',
+          ]));
+      expect(
+        utf8.decode(
+            await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
         '{}',
       );
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
+        utf8.decode(
+            await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
         '""',
       );
     }, overrides: <Type, Generator>{
@@ -376,45 +482,42 @@ flutter:
   assets:
     - assets/bar/lizard.png
 ''');
-      globals.fs.file(
-        globals.fs.path.joinAll(<String>['assets', 'bar', 'lizard.png'])
-      ).createSync(recursive: true);
+      globals.fs
+          .file(
+              globals.fs.path.joinAll(<String>['assets', 'bar', 'lizard.png']))
+          .createSync(recursive: true);
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-      await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
+      await bundle.build(
+          packagesPath: '.packages',
+          targetPlatform: TargetPlatform.web_javascript);
 
-      expect(bundle.entries.keys,
-        unorderedEquals(<String>[
-          'AssetManifest.json',
-          'AssetManifest.bin',
-          'AssetManifest.bin.json',
-          'FontManifest.json',
-          'NOTICES', // not .Z
-          'assets/bar/lizard.png',
-        ])
-      );
-      final Map<Object?, Object?> manifestJson = json.decode(
-        utf8.decode(
-          await bundle.entries['AssetManifest.json']!.contentsAsBytes()
-        )
-      ) as Map<Object?, Object?>;
+      expect(
+          bundle.entries.keys,
+          unorderedEquals(<String>[
+            'AssetManifest.json',
+            'AssetManifest.bin',
+            'AssetManifest.bin.json',
+            'FontManifest.json',
+            'NOTICES', // not .Z
+            'assets/bar/lizard.png',
+          ]));
+      final Map<Object?, Object?> manifestJson = json.decode(utf8.decode(
+              await bundle.entries['AssetManifest.json']!.contentsAsBytes()))
+          as Map<Object?, Object?>;
       expect(manifestJson, isNotEmpty);
       expect(manifestJson['assets/bar/lizard.png'], isNotNull);
 
-      final Uint8List manifestBinJsonBytes = base64.decode(
-        json.decode(
-          utf8.decode(
-            await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()
-          )
-        ) as String
-      );
+      final Uint8List manifestBinJsonBytes = base64.decode(json.decode(
+          utf8.decode(await bundle.entries['AssetManifest.bin.json']!
+              .contentsAsBytes())) as String);
 
       final Uint8List manifestBinBytes = Uint8List.fromList(
-        await bundle.entries['AssetManifest.bin']!.contentsAsBytes()
-      );
+          await bundle.entries['AssetManifest.bin']!.contentsAsBytes());
 
       expect(manifestBinJsonBytes, equals(manifestBinBytes),
-        reason: 'JSON-encoded binary content should be identical to BIN file.');
+          reason:
+              'JSON-encoded binary content should be identical to BIN file.');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -423,11 +526,12 @@ flutter:
 
   testUsingContext('Failed directory delete shows message', () async {
     final FileExceptionHandler handler = FileExceptionHandler();
-    final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final FileSystem fileSystem =
+        MemoryFileSystem.test(opHandle: handler.opHandle);
 
-    final Directory directory = fileSystem.directory('foo')
-      ..createSync();
-    handler.addError(directory, FileSystemOp.delete, const FileSystemException('Expected Error Text'));
+    final Directory directory = fileSystem.directory('foo')..createSync();
+    handler.addError(directory, FileSystemOp.delete,
+        const FileSystemException('Expected Error Text'));
 
     await writeBundle(
       directory,
@@ -440,9 +544,13 @@ flutter:
     expect(testLogger.warningText, contains('Expected Error Text'));
   });
 
-  testUsingContext('does not unnecessarily recreate asset manifest, font manifest, license', () async {
+  testUsingContext(
+      'does not unnecessarily recreate asset manifest, font manifest, license',
+      () async {
     globals.fs.file('.packages').createSync();
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+    globals.fs
+        .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+        .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -454,12 +562,12 @@ assets:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
 
-    final DevFSStringContent? assetManifest = bundle.entries['AssetManifest.json']
-      as DevFSStringContent?;
-    final DevFSStringContent? fontManifest = bundle.entries['FontManifest.json']
-      as DevFSStringContent?;
-    final DevFSStringContent? license = bundle.entries['NOTICES']
-      as DevFSStringContent?;
+    final DevFSStringContent? assetManifest =
+        bundle.entries['AssetManifest.json'] as DevFSStringContent?;
+    final DevFSStringContent? fontManifest =
+        bundle.entries['FontManifest.json'] as DevFSStringContent?;
+    final DevFSStringContent? license =
+        bundle.entries['NOTICES'] as DevFSStringContent?;
 
     await bundle.build(packagesPath: '.packages');
 
@@ -471,10 +579,13 @@ assets:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('inserts dummy file into additionalDependencies when '
-    'wildcards are used', () async {
+  testUsingContext(
+      'inserts dummy file into additionalDependencies when '
+      'wildcards are used', () async {
     globals.fs.file('.packages').createSync();
-    globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
+    globals.fs
+        .file(globals.fs.path.join('assets', 'bar.txt'))
+        .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -486,16 +597,20 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect(bundle.additionalDependencies.single.path, contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'));
+    expect(bundle.additionalDependencies.single.path,
+        contains('DOES_NOT_EXIST_RERUN_FOR_WILDCARD'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Does not insert dummy file into additionalDependencies '
-    'when wildcards are not used', () async {
+  testUsingContext(
+      'Does not insert dummy file into additionalDependencies '
+      'when wildcards are not used', () async {
     globals.fs.file('.packages').createSync();
-    globals.fs.file(globals.fs.path.join('assets', 'bar.txt')).createSync(recursive: true);
+    globals.fs
+        .file(globals.fs.path.join('assets', 'bar.txt'))
+        .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -513,7 +628,6 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-
   group('Shaders: ', () {
     late MemoryFileSystem fileSystem;
     late Artifacts artifacts;
@@ -530,14 +644,16 @@ flutter:
 
       fileSystem.file(impellerc).createSync(recursive: true);
 
-      output = fileSystem.directory('asset_output')..createSync(recursive: true);
+      output = fileSystem.directory('asset_output')
+        ..createSync(recursive: true);
       assetsPath = 'assets';
       shaderPath = fileSystem.path.join(assetsPath, 'shader.frag');
       outputPath = fileSystem.path.join(output.path, assetsPath, 'shader.frag');
       fileSystem.file(shaderPath).createSync(recursive: true);
     });
 
-    testUsingContext('Including a shader triggers the shader compiler', () async {
+    testUsingContext('Including a shader triggers the shader compiler',
+        () async {
       fileSystem.file('.packages').createSync();
       fileSystem.file('pubspec.yaml')
         ..createSync()
@@ -558,29 +674,30 @@ flutter:
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
       );
-
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            impellerc,
-            '--sksl',
-            '--iplr',
-            '--sl=$outputPath',
-            '--spirv=$outputPath.spirv',
-            '--input=/$shaderPath',
-            '--input-type=frag',
-            '--include=/$assetsPath',
-            '--include=$shaderLibDir',
-          ],
-          onRun: () {
-            fileSystem.file(outputPath).createSync(recursive: true);
-            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-          },
-        ),
-      ]),
+            FakeCommand(
+              command: <String>[
+                impellerc,
+                '--sksl',
+                '--iplr',
+                '--sl=$outputPath',
+                '--spirv=$outputPath.spirv',
+                '--input=/$shaderPath',
+                '--input-type=frag',
+                '--include=/$assetsPath',
+                '--include=$shaderLibDir',
+              ],
+              onRun: () {
+                fileSystem.file(outputPath).createSync(recursive: true);
+                fileSystem
+                    .file('$outputPath.spirv')
+                    .createSync(recursive: true);
+              },
+            ),
+          ]),
     });
 
     testUsingContext('Included shaders are compiled for the web', () async {
@@ -595,7 +712,11 @@ flutter:
   ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+      expect(
+          await bundle.build(
+              packagesPath: '.packages',
+              targetPlatform: TargetPlatform.web_javascript),
+          0);
 
       await writeBundle(
         output,
@@ -604,30 +725,31 @@ flutter:
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
       );
-
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            impellerc,
-            '--sksl',
-            '--iplr',
-            '--json',
-            '--sl=$outputPath',
-            '--spirv=$outputPath.spirv',
-            '--input=/$shaderPath',
-            '--input-type=frag',
-            '--include=/$assetsPath',
-            '--include=$shaderLibDir',
-          ],
-          onRun: () {
-            fileSystem.file(outputPath).createSync(recursive: true);
-            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-          },
-        ),
-      ]),
+            FakeCommand(
+              command: <String>[
+                impellerc,
+                '--sksl',
+                '--iplr',
+                '--json',
+                '--sl=$outputPath',
+                '--spirv=$outputPath.spirv',
+                '--input=/$shaderPath',
+                '--input-type=frag',
+                '--include=/$assetsPath',
+                '--include=$shaderLibDir',
+              ],
+              onRun: () {
+                fileSystem.file(outputPath).createSync(recursive: true);
+                fileSystem
+                    .file('$outputPath.spirv')
+                    .createSync(recursive: true);
+              },
+            ),
+          ]),
     });
 
     testUsingContext('Material shaders are compiled for the web', () async {
@@ -635,39 +757,46 @@ flutter:
 
       final String materialIconsPath = fileSystem.path.join(
         getFlutterRoot(),
-        'bin', 'cache', 'artifacts', 'material_fonts',
+        'bin',
+        'cache',
+        'artifacts',
+        'material_fonts',
         'MaterialIcons-Regular.otf',
       );
       fileSystem.file(materialIconsPath).createSync(recursive: true);
 
       final String materialPath = fileSystem.path.join(
         getFlutterRoot(),
-        'packages', 'flutter', 'lib', 'src', 'material',
+        'packages',
+        'flutter',
+        'lib',
+        'src',
+        'material',
       );
-      final Directory materialDir = fileSystem.directory(materialPath)..createSync(recursive: true);
+      final Directory materialDir = fileSystem.directory(materialPath)
+        ..createSync(recursive: true);
       for (final String shader in kMaterialShaders) {
         materialDir.childFile(shader).createSync(recursive: true);
       }
 
-      (globals.processManager as FakeProcessManager)
-        .addCommand(FakeCommand(
-          command: <String>[
-            impellerc,
-            '--sksl',
-            '--iplr',
-            '--json',
-            '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
-            '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
-            '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
-            '--input-type=frag',
-            '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
-            '--include=$shaderLibDir',
-          ],
-          onRun: () {
-            fileSystem.file(outputPath).createSync(recursive: true);
-            fileSystem.file('$outputPath.spirv').createSync(recursive: true);
-          },
-        ));
+      (globals.processManager as FakeProcessManager).addCommand(FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--iplr',
+          '--json',
+          '--sl=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag')}',
+          '--spirv=${fileSystem.path.join(output.path, 'shaders', 'ink_sparkle.frag.spirv')}',
+          '--input=${fileSystem.path.join(materialDir.path, 'shaders', 'ink_sparkle.frag')}',
+          '--input-type=frag',
+          '--include=${fileSystem.path.join(materialDir.path, 'shaders')}',
+          '--include=$shaderLibDir',
+        ],
+        onRun: () {
+          fileSystem.file(outputPath).createSync(recursive: true);
+          fileSystem.file('$outputPath.spirv').createSync(recursive: true);
+        },
+      ));
 
       fileSystem.file('pubspec.yaml')
         ..createSync()
@@ -678,7 +807,11 @@ flutter:
   ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
-      expect(await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript), 0);
+      expect(
+          await bundle.build(
+              packagesPath: '.packages',
+              targetPlatform: TargetPlatform.web_javascript),
+          0);
 
       await writeBundle(
         output,
@@ -687,7 +820,10 @@ flutter:
         loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
       );
-      expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
+      expect(
+          (globals.processManager as FakeProcessManager)
+              .hasRemainingExpectations,
+          false);
     }, overrides: <Type, Generator>{
       Artifacts: () => artifacts,
       FileSystem: () => fileSystem,
@@ -695,14 +831,16 @@ flutter:
     });
   });
 
-  testUsingContext('Does not insert dummy file into additionalDependencies '
-    'when wildcards are used by dependencies', () async {
+  testUsingContext(
+      'Does not insert dummy file into additionalDependencies '
+      'when wildcards are used by dependencies', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 foo:foo/lib/
 ''');
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
-      .createSync(recursive: true);
+    globals.fs
+        .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+        .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -730,13 +868,15 @@ flutter:
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('does not track wildcard directories from dependencies', () async {
+  testUsingContext('does not track wildcard directories from dependencies',
+      () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 foo:foo/lib/
 ''');
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
-      .createSync(recursive: true);
+    globals.fs
+        .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+        .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -758,13 +898,21 @@ flutter:
 
     await bundle.build(packagesPath: '.packages');
 
-      expect(bundle.entries.keys, unorderedEquals(<String>['packages/foo/bar/fizz.txt',
-        'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+    expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'packages/foo/bar/fizz.txt',
+          'AssetManifest.json',
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z'
+        ]));
     expect(bundle.needsBuild(), false);
 
     // Does not track dependency's wildcard directories.
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
-      .deleteSync();
+    globals.fs
+        .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+        .deleteSync();
 
     expect(bundle.needsBuild(), false);
   }, overrides: <Type, Generator>{
@@ -773,14 +921,16 @@ flutter:
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('reports package that causes asset bundle error when it is '
-    'a dependency', () async {
+  testUsingContext(
+      'reports package that causes asset bundle error when it is '
+      'a dependency', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 foo:foo/lib/
 ''');
-    globals.fs.file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
-      .createSync(recursive: true);
+    globals.fs
+        .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+        .createSync(recursive: true);
     globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -800,15 +950,17 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 1);
-    expect(testLogger.errorText, contains('This asset was included from package foo'));
+    expect(testLogger.errorText,
+        contains('This asset was included from package foo'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('does not report package that causes asset bundle error '
-    'when it is from own pubspec', () async {
+  testUsingContext(
+      'does not report package that causes asset bundle error '
+      'when it is from own pubspec', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 ''');
@@ -823,15 +975,17 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 1);
-    expect(testLogger.errorText, isNot(contains('This asset was included from')));
+    expect(
+        testLogger.errorText, isNot(contains('This asset was included from')));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('does not include Material Design assets if uses-material-design: true is '
-    'specified only by a dependency', () async {
+  testUsingContext(
+      'does not include Material Design assets if uses-material-design: true is '
+      'specified only by a dependency', () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 foo:foo/lib/
@@ -857,18 +1011,21 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string, '[]');
-    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string, '{}');
-    expect(testLogger.errorText, contains(
-      'package:foo has `uses-material-design: true` set'
-    ));
+    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string,
+        '[]');
+    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string,
+        '{}');
+    expect(testLogger.errorText,
+        contains('package:foo has `uses-material-design: true` set'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('does not include assets in project directories as asset variants', () async {
+  testUsingContext(
+      'does not include assets in project directories as asset variants',
+      () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 ''');
@@ -894,15 +1051,24 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo.txt',
-      'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+    expect(
+        bundle.entries.keys,
+        unorderedEquals(<String>[
+          'assets/foo.txt',
+          'AssetManifest.json',
+          'AssetManifest.bin',
+          'FontManifest.json',
+          'NOTICES.Z'
+        ]));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => FakePlatform(),
   });
 
-  testUsingContext('deferred and regular assets are included in manifest alphabetically', () async {
+  testUsingContext(
+      'deferred and regular assets are included in manifest alphabetically',
+      () async {
     globals.fs.file('.packages').writeAsStringSync(r'''
 example:lib/
 ''');
@@ -929,10 +1095,12 @@ flutter:
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
-    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string, '[]');
+    expect((bundle.entries['FontManifest.json']! as DevFSStringContent).string,
+        '[]');
     // The assets from deferred components and regular assets
     // are both included in alphabetical order
-    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string, '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
+    expect((bundle.entries['AssetManifest.json']! as DevFSStringContent).string,
+        '{"assets/apple.jpg":["assets/apple.jpg"],"assets/bar.jpg":["assets/bar.jpg"],"assets/foo.jpg":["assets/foo.jpg"],"assets/zebra.jpg":["assets/zebra.jpg"]}');
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),

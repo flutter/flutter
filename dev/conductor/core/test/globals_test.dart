@@ -35,24 +35,18 @@ void main() {
         ..engine = (pb.Repository.create()
           ..candidateBranch = candidateBranch
           ..cherrypicks.addAll(<pb.Cherrypick>[
-            pb.Cherrypick.create()
-              ..trunkRevision = engineCherrypick1,
-            pb.Cherrypick.create()
-              ..trunkRevision = engineCherrypick2,
+            pb.Cherrypick.create()..trunkRevision = engineCherrypick1,
+            pb.Cherrypick.create()..trunkRevision = engineCherrypick2,
           ])
           ..dartRevision = dartRevision
-          ..workingBranch = workingBranch
-        )
+          ..workingBranch = workingBranch)
         ..framework = (pb.Repository.create()
           ..candidateBranch = candidateBranch
-          ..cherrypicks.add(pb.Cherrypick.create()
-              ..trunkRevision = frameworkCherrypick
-          )
-          ..workingBranch = workingBranch
-        )
+          ..cherrypicks
+              .add(pb.Cherrypick.create()..trunkRevision = frameworkCherrypick)
+          ..workingBranch = workingBranch)
         ..releaseChannel = releaseChannel
-        ..releaseVersion = releaseVersion
-      );
+        ..releaseVersion = releaseVersion);
     });
 
     test('throws on an invalid repoName', () {
@@ -194,7 +188,7 @@ class FakeArgs implements ArgResults {
   }
 
   @override
-  Object? operator[](String name) {
+  Object? operator [](String name) {
     return results[name];
   }
 }

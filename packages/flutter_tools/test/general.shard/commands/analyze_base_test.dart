@@ -7,7 +7,8 @@ import 'package:flutter_tools/src/commands/analyze_base.dart';
 import '../../src/common.dart';
 
 void main() {
-  testWithoutContext('AnalyzeBase message formatting with zero issues', () async {
+  testWithoutContext('AnalyzeBase message formatting with zero issues',
+      () async {
     final String message = AnalyzeBase.generateErrorsMessage(
       issueCount: 0,
       seconds: '10',

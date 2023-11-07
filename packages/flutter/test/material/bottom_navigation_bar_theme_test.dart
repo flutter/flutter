@@ -9,20 +9,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
-
 void main() {
   test('BottomNavigationBarThemeData copyWith, ==, hashCode basics', () {
-    expect(const BottomNavigationBarThemeData(), const BottomNavigationBarThemeData().copyWith());
-    expect(const BottomNavigationBarThemeData().hashCode, const BottomNavigationBarThemeData().copyWith().hashCode);
+    expect(const BottomNavigationBarThemeData(),
+        const BottomNavigationBarThemeData().copyWith());
+    expect(const BottomNavigationBarThemeData().hashCode,
+        const BottomNavigationBarThemeData().copyWith().hashCode);
   });
 
   test('BottomNavigationBarThemeData lerp special cases', () {
     const BottomNavigationBarThemeData data = BottomNavigationBarThemeData();
-    expect(identical(BottomNavigationBarThemeData.lerp(data, data, 0.5), data), true);
+    expect(identical(BottomNavigationBarThemeData.lerp(data, data, 0.5), data),
+        true);
   });
 
   test('BottomNavigationBarThemeData defaults', () {
-    const BottomNavigationBarThemeData themeData = BottomNavigationBarThemeData();
+    const BottomNavigationBarThemeData themeData =
+        BottomNavigationBarThemeData();
     expect(themeData.backgroundColor, null);
     expect(themeData.elevation, null);
     expect(themeData.selectedIconTheme, null);
@@ -37,7 +40,8 @@ void main() {
     expect(themeData.landscapeLayout, null);
     expect(themeData.mouseCursor, null);
 
-    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(data: BottomNavigationBarThemeData(), child: SizedBox());
+    const BottomNavigationBarTheme theme = BottomNavigationBarTheme(
+        data: BottomNavigationBarThemeData(), child: SizedBox());
     expect(theme.data.backgroundColor, null);
     expect(theme.data.elevation, null);
     expect(theme.data.selectedIconTheme, null);
@@ -53,7 +57,9 @@ void main() {
     expect(themeData.mouseCursor, null);
   });
 
-  testWidgetsWithLeakTracking('Default BottomNavigationBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Default BottomNavigationBarThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData().debugFillProperties(builder);
 
@@ -65,7 +71,9 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('BottomNavigationBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomNavigationBarThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -93,20 +101,24 @@ void main() {
     // Ignore instance address for IconThemeData.
     expect(description[2].contains('selectedIconTheme: IconThemeData'), isTrue);
     expect(description[2].contains('(size: 1.0)'), isTrue);
-    expect(description[3].contains('unselectedIconTheme: IconThemeData'), isTrue);
+    expect(
+        description[3].contains('unselectedIconTheme: IconThemeData'), isTrue);
     expect(description[3].contains('(size: 2.0)'), isTrue);
 
     expect(description[4], 'selectedItemColor: Color(0xfffffff1)');
     expect(description[5], 'unselectedItemColor: Color(0xfffffff2)');
-    expect(description[6], 'selectedLabelStyle: TextStyle(inherit: true, size: 3.0)');
-    expect(description[7], 'unselectedLabelStyle: TextStyle(inherit: true, size: 4.0)');
+    expect(description[6],
+        'selectedLabelStyle: TextStyle(inherit: true, size: 3.0)');
+    expect(description[7],
+        'unselectedLabelStyle: TextStyle(inherit: true, size: 4.0)');
     expect(description[8], 'showSelectedLabels: true');
     expect(description[9], 'showUnselectedLabels: true');
     expect(description[10], 'type: BottomNavigationBarType.fixed');
     expect(description[11], 'mouseCursor: MaterialStateMouseCursor(clickable)');
   });
 
-  testWidgetsWithLeakTracking('BottomNavigationBar is themeable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBar is themeable',
+      (WidgetTester tester) async {
     const Color backgroundColor = Color(0xFF000001);
     const Color selectedItemColor = Color(0xFF000002);
     const Color unselectedItemColor = Color(0xFF000003);
@@ -131,7 +143,8 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
-            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
+            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>(
+                (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return SystemMouseCursors.grab;
               }
@@ -170,14 +183,16 @@ void main() {
         matching: find.byType(Transform),
       ),
     );
-    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+    final TextStyle selectedFontStyle =
+        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.fontSize, selectedFontStyle.fontSize);
     // Unselected label has a font size of 22 but is scaled down to be font size 21.
     expect(
       tester.firstWidget<Transform>(findAlarmTransform).transform,
-      equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
+      equals(Matrix4.diagonal3(Vector3.all(
+          unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
     );
     expect(selectedIcon.color, equals(selectedItemColor));
     expect(selectedIcon.fontSize, equals(selectedIconTheme.size));
@@ -200,17 +215,22 @@ void main() {
 
     final Offset selectedBarItem = tester.getCenter(findACTransform);
     final Offset unselectedBarItem = tester.getCenter(findAlarmTransform);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(selectedBarItem);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grab);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.grab);
     await gesture.moveTo(unselectedBarItem);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.move);
   });
 
-  testWidgetsWithLeakTracking('BottomNavigationBar properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomNavigationBar properties are taken over the theme values',
+      (WidgetTester tester) async {
     const Color themeBackgroundColor = Color(0xFF000001);
     const Color themeSelectedItemColor = Color(0xFF000002);
     const Color themeUnselectedItemColor = Color(0xFF000003);
@@ -219,8 +239,10 @@ void main() {
     const TextStyle themeSelectedTextStyle = TextStyle(fontSize: 22);
     const TextStyle themeUnselectedTextStyle = TextStyle(fontSize: 21);
     const double themeElevation = 9.0;
-    const BottomNavigationBarLandscapeLayout themeLandscapeLayout = BottomNavigationBarLandscapeLayout.centered;
-    const MaterialStateMouseCursor themeCursor = MaterialStateMouseCursor.clickable;
+    const BottomNavigationBarLandscapeLayout themeLandscapeLayout =
+        BottomNavigationBarLandscapeLayout.centered;
+    const MaterialStateMouseCursor themeCursor =
+        MaterialStateMouseCursor.clickable;
 
     const Color backgroundColor = Color(0xFF000004);
     const Color selectedItemColor = Color(0xFF000005);
@@ -230,7 +252,8 @@ void main() {
     const TextStyle selectedTextStyle = TextStyle(fontSize: 25);
     const TextStyle unselectedTextStyle = TextStyle(fontSize: 26);
     const double elevation = 7.0;
-    const BottomNavigationBarLandscapeLayout landscapeLayout = BottomNavigationBarLandscapeLayout.spread;
+    const BottomNavigationBarLandscapeLayout landscapeLayout =
+        BottomNavigationBarLandscapeLayout.spread;
     const MaterialStateMouseCursor cursor = MaterialStateMouseCursor.textable;
 
     await tester.pumpWidget(
@@ -289,21 +312,25 @@ void main() {
       );
     }
 
-    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
+    final TextStyle selectedFontStyle =
+        tester.renderObject<RenderParagraph>(find.text('AC')).text.style!;
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.fontSize, selectedFontStyle.fontSize);
     // Unselected label has a font size of 22 but is scaled down to be font size 21.
     expect(
-      tester.firstWidget<Transform>(
-        findDescendantOfBottomNavigationBar(
-          find.ancestor(
-            of: find.text('Alarm'),
-            matching: find.byType(Transform),
-          ),
-        ),
-      ).transform,
-      equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
+      tester
+          .firstWidget<Transform>(
+            findDescendantOfBottomNavigationBar(
+              find.ancestor(
+                of: find.text('Alarm'),
+                matching: find.byType(Transform),
+              ),
+            ),
+          )
+          .transform,
+      equals(Matrix4.diagonal3(Vector3.all(
+          unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!))),
     );
     expect(selectedIcon.color, equals(selectedItemColor));
     expect(selectedIcon.fontSize, equals(selectedIconTheme.size));
@@ -330,14 +357,18 @@ void main() {
         ),
       ),
     );
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(barItem);
     await tester.pumpAndSettle();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.text);
   });
 
-  testWidgetsWithLeakTracking('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomNavigationBarTheme can be used to hide all labels',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66738.
     await tester.pumpWidget(
       MaterialApp(
@@ -364,7 +395,6 @@ void main() {
       ),
     );
 
-
     final Finder findVisibility = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(Visibility),
@@ -375,7 +405,9 @@ void main() {
     expect(tester.widget<Visibility>(findVisibility.at(1)).visible, false);
   });
 
-  testWidgetsWithLeakTracking('BottomNavigationBarTheme can be used to hide selected labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomNavigationBarTheme can be used to hide selected labels',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66738.
     await tester.pumpWidget(
       MaterialApp(
@@ -402,18 +434,23 @@ void main() {
       ),
     );
 
-
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(FadeTransition),
     );
 
     expect(findFadeTransition, findsNWidgets(2));
-    expect(tester.widget<FadeTransition>(findFadeTransition.at(0)).opacity.value, 0.0);
-    expect(tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value, 1.0);
+    expect(
+        tester.widget<FadeTransition>(findFadeTransition.at(0)).opacity.value,
+        0.0);
+    expect(
+        tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value,
+        1.0);
   });
 
-  testWidgetsWithLeakTracking('BottomNavigationBarTheme can be used to hide unselected labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomNavigationBarTheme can be used to hide unselected labels',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -439,15 +476,18 @@ void main() {
       ),
     );
 
-
     final Finder findFadeTransition = find.descendant(
       of: find.byType(BottomNavigationBar),
       matching: find.byType(FadeTransition),
     );
 
     expect(findFadeTransition, findsNWidgets(2));
-    expect(tester.widget<FadeTransition>(findFadeTransition.at(0)).opacity.value, 1.0);
-    expect(tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value, 0.0);
+    expect(
+        tester.widget<FadeTransition>(findFadeTransition.at(0)).opacity.value,
+        1.0);
+    expect(
+        tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value,
+        0.0);
   });
 }
 
@@ -460,6 +500,7 @@ TextStyle _iconStyle(WidgetTester tester, IconData icon) {
 
 Material _material(WidgetTester tester) {
   return tester.firstWidget<Material>(
-    find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
+    find.descendant(
+        of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
   );
 }

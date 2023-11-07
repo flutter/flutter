@@ -56,7 +56,8 @@ export 'dart:ui' show Locale;
 ///  * [LocaleResolutionCallback], which takes only one default locale (instead of a list)
 ///    and is attempted only after this callback fails or is null. [LocaleListResolutionCallback]
 ///    is recommended over [LocaleResolutionCallback].
-typedef LocaleListResolutionCallback = Locale? Function(List<Locale>? locales, Iterable<Locale> supportedLocales);
+typedef LocaleListResolutionCallback = Locale? Function(
+    List<Locale>? locales, Iterable<Locale> supportedLocales);
 
 /// {@template flutter.widgets.LocaleResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
@@ -84,7 +85,8 @@ typedef LocaleListResolutionCallback = Locale? Function(List<Locale>? locales, I
 ///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
 ///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
 /// {@endtemplate}
-typedef LocaleResolutionCallback = Locale? Function(Locale? locale, Iterable<Locale> supportedLocales);
+typedef LocaleResolutionCallback = Locale? Function(
+    Locale? locale, Iterable<Locale> supportedLocales);
 
 /// The default locale resolution algorithm.
 ///
@@ -128,7 +130,8 @@ typedef LocaleResolutionCallback = Locale? Function(Locale? locale, Iterable<Loc
 /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
 /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
 /// than Chinese).
-Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
+Locale basicLocaleListResolution(
+    List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
   // preferredLocales can be null when called before the platform has had a chance to
   // initialize the locales. Platforms without locale passing support will provide an empty list.
   // We default to the first supported locale in these cases.
@@ -138,14 +141,20 @@ Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale
   // Hash the supported locales because apps can support many locales and would
   // be expensive to search through them many times.
   final Map<String, Locale> allSupportedLocales = HashMap<String, Locale>();
-  final Map<String, Locale> languageAndCountryLocales = HashMap<String, Locale>();
-  final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
+  final Map<String, Locale> languageAndCountryLocales =
+      HashMap<String, Locale>();
+  final Map<String, Locale> languageAndScriptLocales =
+      HashMap<String, Locale>();
   final Map<String, Locale> languageLocales = HashMap<String, Locale>();
   final Map<String?, Locale> countryLocales = HashMap<String?, Locale>();
   for (final Locale locale in supportedLocales) {
-    allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
-    languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
-    languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
+    allSupportedLocales[
+            '${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??=
+        locale;
+    languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??=
+        locale;
+    languageAndCountryLocales[
+        '${locale.languageCode}_${locale.countryCode}'] ??= locale;
     languageLocales[locale.languageCode] ??= locale;
     countryLocales[locale.countryCode] ??= locale;
   }
@@ -158,22 +167,27 @@ Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale
   Locale? matchesLanguageCode;
   Locale? matchesCountryCode;
   // Loop over user's preferred locales
-  for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
+  for (int localeIndex = 0;
+      localeIndex < preferredLocales.length;
+      localeIndex += 1) {
     final Locale userLocale = preferredLocales[localeIndex];
     // Look for perfect match.
-    if (allSupportedLocales.containsKey('${userLocale.languageCode}_${userLocale.scriptCode}_${userLocale.countryCode}')) {
+    if (allSupportedLocales.containsKey(
+        '${userLocale.languageCode}_${userLocale.scriptCode}_${userLocale.countryCode}')) {
       return userLocale;
     }
     // Look for language+script match.
     if (userLocale.scriptCode != null) {
-      final Locale? match = languageAndScriptLocales['${userLocale.languageCode}_${userLocale.scriptCode}'];
+      final Locale? match = languageAndScriptLocales[
+          '${userLocale.languageCode}_${userLocale.scriptCode}'];
       if (match != null) {
         return match;
       }
     }
     // Look for language+country match.
     if (userLocale.countryCode != null) {
-      final Locale? match = languageAndCountryLocales['${userLocale.languageCode}_${userLocale.countryCode}'];
+      final Locale? match = languageAndCountryLocales[
+          '${userLocale.languageCode}_${userLocale.countryCode}'];
       if (match != null) {
         return match;
       }
@@ -193,7 +207,9 @@ Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale
       // languageCode is the same, we defer hastily returning until the next iteration
       // since at worst it is the same and at best an improved match.
       if (localeIndex == 0 &&
-          !(localeIndex + 1 < preferredLocales.length && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
+          !(localeIndex + 1 < preferredLocales.length &&
+              preferredLocales[localeIndex + 1].languageCode ==
+                  userLocale.languageCode)) {
         return matchesLanguageCode;
       }
     }
@@ -210,7 +226,8 @@ Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale
   // When there is no languageCode-only match. Fallback to matching countryCode only. Country
   // fallback only applies on iOS. When there is no countryCode-only match, we return first
   // supported locale.
-  final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
+  final Locale resolvedLocale =
+      matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
   return resolvedLocale;
 }
 
@@ -227,12 +244,14 @@ typedef GenerateAppTitle = String Function(BuildContext context);
 /// The signature of [WidgetsApp.pageRouteBuilder].
 ///
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
-typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
+typedef PageRouteFactory = PageRoute<T> Function<T>(
+    RouteSettings settings, WidgetBuilder builder);
 
 /// The signature of [WidgetsApp.onGenerateInitialRoutes].
 ///
 /// Creates a series of one or more initial routes.
-typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
+typedef InitialRouteListFactory = List<Route<dynamic>> Function(
+    String initialRoute);
 
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
@@ -307,14 +326,16 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/widgets/app/widgets_app.widgets_app.0.dart **
   /// {@end-tool}
-  WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
+  WidgetsApp({
+    // can't be const because the asserts use methods on Iterable :-(
     super.key,
     this.navigatorKey,
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
     this.onNavigationNotification,
-    List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
+    List<NavigatorObserver> this.navigatorObservers =
+        const <NavigatorObserver>[],
     this.initialRoute,
     this.pageRouteBuilder,
     this.home,
@@ -339,70 +360,65 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
-    @Deprecated(
-      'Remove this parameter as it is now ignored. '
-      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
-    )
+    @Deprecated('Remove this parameter as it is now ignored. '
+        'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+        'This feature was deprecated after v3.7.0-29.0.pre.')
     this.useInheritedMediaQuery = false,
-  }) : assert(
-         home == null ||
-         onGenerateInitialRoutes == null,
-         'If onGenerateInitialRoutes is specified, the home argument will be '
-         'redundant.',
-       ),
-       assert(
-         home == null ||
-         !routes.containsKey(Navigator.defaultRouteName),
-         'If the home property is specified, the routes table '
-         'cannot include an entry for "/", since it would be redundant.',
-       ),
-       assert(
-         builder != null ||
-         home != null ||
-         routes.containsKey(Navigator.defaultRouteName) ||
-         onGenerateRoute != null ||
-         onUnknownRoute != null,
-         'Either the home property must be specified, '
-         'or the routes table must include an entry for "/", '
-         'or there must be on onGenerateRoute callback specified, '
-         'or there must be an onUnknownRoute callback specified, '
-         'or the builder property must be specified, '
-         'because otherwise there is nothing to fall back on if the '
-         'app is started with an intent that specifies an unknown route.',
-       ),
-       assert(
-         (home != null ||
-          routes.isNotEmpty ||
-          onGenerateRoute != null ||
-          onUnknownRoute != null)
-         ||
-         (builder != null &&
-          navigatorKey == null &&
-          initialRoute == null &&
-          navigatorObservers.isEmpty),
-         'If no route is provided using '
-         'home, routes, onGenerateRoute, or onUnknownRoute, '
-         'a non-null callback for the builder property must be provided, '
-         'and the other navigator-related properties, '
-         'navigatorKey, initialRoute, and navigatorObservers, '
-         'must have their initial values '
-         '(null, null, and the empty list, respectively).',
-       ),
-       assert(
-         builder != null ||
-         onGenerateRoute != null ||
-         pageRouteBuilder != null,
-         'If neither builder nor onGenerateRoute are provided, the '
-         'pageRouteBuilder must be specified so that the default handler '
-         'will know what kind of PageRoute transition to build.',
-       ),
-       assert(supportedLocales.isNotEmpty),
-       routeInformationProvider = null,
-       routeInformationParser = null,
-       routerDelegate = null,
-       backButtonDispatcher = null,
-       routerConfig = null;
+  })  : assert(
+          home == null || onGenerateInitialRoutes == null,
+          'If onGenerateInitialRoutes is specified, the home argument will be '
+          'redundant.',
+        ),
+        assert(
+          home == null || !routes.containsKey(Navigator.defaultRouteName),
+          'If the home property is specified, the routes table '
+          'cannot include an entry for "/", since it would be redundant.',
+        ),
+        assert(
+          builder != null ||
+              home != null ||
+              routes.containsKey(Navigator.defaultRouteName) ||
+              onGenerateRoute != null ||
+              onUnknownRoute != null,
+          'Either the home property must be specified, '
+          'or the routes table must include an entry for "/", '
+          'or there must be on onGenerateRoute callback specified, '
+          'or there must be an onUnknownRoute callback specified, '
+          'or the builder property must be specified, '
+          'because otherwise there is nothing to fall back on if the '
+          'app is started with an intent that specifies an unknown route.',
+        ),
+        assert(
+          (home != null ||
+                  routes.isNotEmpty ||
+                  onGenerateRoute != null ||
+                  onUnknownRoute != null) ||
+              (builder != null &&
+                  navigatorKey == null &&
+                  initialRoute == null &&
+                  navigatorObservers.isEmpty),
+          'If no route is provided using '
+          'home, routes, onGenerateRoute, or onUnknownRoute, '
+          'a non-null callback for the builder property must be provided, '
+          'and the other navigator-related properties, '
+          'navigatorKey, initialRoute, and navigatorObservers, '
+          'must have their initial values '
+          '(null, null, and the empty list, respectively).',
+        ),
+        assert(
+          builder != null ||
+              onGenerateRoute != null ||
+              pageRouteBuilder != null,
+          'If neither builder nor onGenerateRoute are provided, the '
+          'pageRouteBuilder must be specified so that the default handler '
+          'will know what kind of PageRoute transition to build.',
+        ),
+        assert(supportedLocales.isNotEmpty),
+        routeInformationProvider = null,
+        routeInformationParser = null,
+        routerDelegate = null,
+        backButtonDispatcher = null,
+        routerConfig = null;
 
   /// Creates a [WidgetsApp] that uses the [Router] instead of a [Navigator].
   ///
@@ -439,37 +455,40 @@ class WidgetsApp extends StatefulWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
-    @Deprecated(
-      'Remove this parameter as it is now ignored. '
-      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
-      'This feature was deprecated after v3.7.0-29.0.pre.'
-    )
+    @Deprecated('Remove this parameter as it is now ignored. '
+        'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+        'This feature was deprecated after v3.7.0-29.0.pre.')
     this.useInheritedMediaQuery = false,
-  }) : assert((){
-         if (routerConfig != null) {
-           assert(
-             (routeInformationProvider ?? routeInformationParser ?? routerDelegate ?? backButtonDispatcher) == null,
-             'If the routerConfig is provided, all the other router delegates must not be provided',
-           );
-           return true;
-         }
-         assert(routerDelegate != null, 'Either one of routerDelegate or routerConfig must be provided');
-         assert(
-           routeInformationProvider == null || routeInformationParser != null,
-           'If routeInformationProvider is provided, routeInformationParser must also be provided',
-         );
-         return true;
-       }()),
-       assert(supportedLocales.isNotEmpty),
-       navigatorObservers = null,
-       navigatorKey = null,
-       onGenerateRoute = null,
-       pageRouteBuilder = null,
-       home = null,
-       onGenerateInitialRoutes = null,
-       onUnknownRoute = null,
-       routes = null,
-       initialRoute = null;
+  })  : assert(() {
+          if (routerConfig != null) {
+            assert(
+              (routeInformationProvider ??
+                      routeInformationParser ??
+                      routerDelegate ??
+                      backButtonDispatcher) ==
+                  null,
+              'If the routerConfig is provided, all the other router delegates must not be provided',
+            );
+            return true;
+          }
+          assert(routerDelegate != null,
+              'Either one of routerDelegate or routerConfig must be provided');
+          assert(
+            routeInformationProvider == null || routeInformationParser != null,
+            'If routeInformationProvider is provided, routeInformationParser must also be provided',
+          );
+          return true;
+        }()),
+        assert(supportedLocales.isNotEmpty),
+        navigatorObservers = null,
+        navigatorKey = null,
+        onGenerateRoute = null,
+        pageRouteBuilder = null,
+        home = null,
+        onGenerateInitialRoutes = null,
+        onUnknownRoute = null,
+        routes = null,
+        initialRoute = null;
 
   /// {@template flutter.widgets.widgetsApp.navigatorKey}
   /// A key to use when building the [Navigator].
@@ -708,7 +727,8 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// By default this updates the engine with the navigation status.
   /// {@endtemplate}
-  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
+  final NotificationListenerCallback<NavigationNotification>?
+      onNavigationNotification;
 
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
@@ -1176,11 +1196,9 @@ class WidgetsApp extends StatefulWidget {
   /// The widget never introduces its own [MediaQuery]; the [View] widget takes
   /// care of that.
   /// {@endtemplate}
-  @Deprecated(
-    'This setting is now ignored. '
-    'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
-    'This feature was deprecated after v3.7.0-29.0.pre.'
-  )
+  @Deprecated('This setting is now ignored. '
+      'WidgetsApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.')
   final bool useInheritedMediaQuery;
 
   /// If true, forces the performance overlay to be visible in all instances.
@@ -1201,11 +1219,13 @@ class WidgetsApp extends StatefulWidget {
   static bool get debugShowWidgetInspectorOverride {
     return _debugShowWidgetInspectorOverrideNotifier.value;
   }
+
   static set debugShowWidgetInspectorOverride(bool value) {
     _debugShowWidgetInspectorOverrideNotifier.value = value;
   }
 
-  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier = ValueNotifier<bool>(false);
+  static final ValueNotifier<bool> _debugShowWidgetInspectorOverrideNotifier =
+      ValueNotifier<bool>(false);
 
   /// If false, prevents the debug banner from being visible.
   ///
@@ -1215,7 +1235,8 @@ class WidgetsApp extends StatefulWidget {
   /// with "s".
   static bool debugAllowBannerOverride = true;
 
-  static const Map<ShortcutActivator, Intent> _defaultShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _defaultShortcuts =
+      <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
@@ -1228,27 +1249,39 @@ class WidgetsApp extends StatefulWidget {
     // Keyboard traversal.
     SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
     SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
-    SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
-    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowLeft):
+        DirectionalFocusIntent(TraversalDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight):
+        DirectionalFocusIntent(TraversalDirection.right),
+    SingleActivator(LogicalKeyboardKey.arrowDown):
+        DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp):
+        DirectionalFocusIntent(TraversalDirection.up),
 
     // Scrolling
-    SingleActivator(LogicalKeyboardKey.arrowUp, control: true): ScrollIntent(direction: AxisDirection.up),
-    SingleActivator(LogicalKeyboardKey.arrowDown, control: true): ScrollIntent(direction: AxisDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): ScrollIntent(direction: AxisDirection.left),
-    SingleActivator(LogicalKeyboardKey.arrowRight, control: true): ScrollIntent(direction: AxisDirection.right),
-    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.arrowUp, control: true):
+        ScrollIntent(direction: AxisDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown, control: true):
+        ScrollIntent(direction: AxisDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
+        ScrollIntent(direction: AxisDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
+        ScrollIntent(direction: AxisDirection.right),
+    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(
+        direction: AxisDirection.up, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(
+        direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   // Default shortcuts for the web platform.
-  static const Map<ShortcutActivator, Intent> _defaultWebShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _defaultWebShortcuts =
+      <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.space): PrioritizedIntents(
       orderedIntents: <Intent>[
         ActivateIntent(),
-        ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+        ScrollIntent(
+            direction: AxisDirection.down, type: ScrollIncrementType.page),
       ],
     ),
     // On the web, enter activates buttons, but not other controls.
@@ -1263,16 +1296,23 @@ class WidgetsApp extends StatefulWidget {
     SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
 
     // Scrolling
-    SingleActivator(LogicalKeyboardKey.arrowUp): ScrollIntent(direction: AxisDirection.up),
-    SingleActivator(LogicalKeyboardKey.arrowDown): ScrollIntent(direction: AxisDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowLeft): ScrollIntent(direction: AxisDirection.left),
-    SingleActivator(LogicalKeyboardKey.arrowRight): ScrollIntent(direction: AxisDirection.right),
-    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.arrowUp):
+        ScrollIntent(direction: AxisDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown):
+        ScrollIntent(direction: AxisDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowLeft):
+        ScrollIntent(direction: AxisDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight):
+        ScrollIntent(direction: AxisDirection.right),
+    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(
+        direction: AxisDirection.up, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(
+        direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   // Default shortcuts for the macOS platform.
-  static const Map<ShortcutActivator, Intent> _defaultAppleOsShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _defaultAppleOsShortcuts =
+      <ShortcutActivator, Intent>{
     // Activation
     SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
     SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
@@ -1284,18 +1324,28 @@ class WidgetsApp extends StatefulWidget {
     // Keyboard traversal
     SingleActivator(LogicalKeyboardKey.tab): NextFocusIntent(),
     SingleActivator(LogicalKeyboardKey.tab, shift: true): PreviousFocusIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
-    SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
-    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowLeft):
+        DirectionalFocusIntent(TraversalDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight):
+        DirectionalFocusIntent(TraversalDirection.right),
+    SingleActivator(LogicalKeyboardKey.arrowDown):
+        DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp):
+        DirectionalFocusIntent(TraversalDirection.up),
 
     // Scrolling
-    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): ScrollIntent(direction: AxisDirection.up),
-    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): ScrollIntent(direction: AxisDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): ScrollIntent(direction: AxisDirection.left),
-    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): ScrollIntent(direction: AxisDirection.right),
-    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.arrowUp, meta: true):
+        ScrollIntent(direction: AxisDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true):
+        ScrollIntent(direction: AxisDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true):
+        ScrollIntent(direction: AxisDirection.left),
+    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true):
+        ScrollIntent(direction: AxisDirection.right),
+    SingleActivator(LogicalKeyboardKey.pageUp): ScrollIntent(
+        direction: AxisDirection.up, type: ScrollIncrementType.page),
+    SingleActivator(LogicalKeyboardKey.pageDown): ScrollIntent(
+        direction: AxisDirection.down, type: ScrollIncrementType.page),
   };
 
   /// Generates the default shortcut key bindings based on the
@@ -1342,9 +1392,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // If window.defaultRouteName isn't '/', we should assume it was set
   // intentionally via `setInitialRoute`, and should override whatever is in
   // [widget.initialRoute].
-  String get _initialRouteName => WidgetsBinding.instance.platformDispatcher.defaultRouteName != Navigator.defaultRouteName
-    ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
-    : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+  String get _initialRouteName =>
+      WidgetsBinding.instance.platformDispatcher.defaultRouteName !=
+              Navigator.defaultRouteName
+          ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
+          : widget.initialRoute ??
+              WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
   AppLifecycleState? _appLifecycleState;
 
@@ -1378,7 +1431,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _updateRouting();
-    _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
+    _locale = _resolveLocales(
+        WidgetsBinding.instance.platformDispatcher.locales,
+        widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
     _appLifecycleState = WidgetsBinding.instance.lifecycleState;
   }
@@ -1410,7 +1465,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (_usesRouterWithDelegates) {
       assert(!_usesNavigator && !_usesRouterWithConfig);
       _clearNavigatorResource();
-      if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
+      if (widget.routeInformationProvider == null &&
+          widget.routeInformationParser != null) {
         _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
             uri: Uri.parse(_initialRouteName),
@@ -1423,12 +1479,13 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.backButtonDispatcher == null) {
         _defaultBackButtonDispatcher ??= RootBackButtonDispatcher();
       }
-
     } else if (_usesNavigator) {
       assert(!_usesRouterWithDelegates && !_usesRouterWithConfig);
       _clearRouterResource();
-      if (_navigator == null || widget.navigatorKey != oldWidget!.navigatorKey) {
-        _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
+      if (_navigator == null ||
+          widget.navigatorKey != oldWidget!.navigatorKey) {
+        _navigator =
+            widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
       }
       assert(_navigator != null);
     } else {
@@ -1443,16 +1500,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   bool get _usesRouterWithDelegates => widget.routerDelegate != null;
   bool get _usesRouterWithConfig => widget.routerConfig != null;
-  bool get _usesNavigator => widget.home != null
-      || (widget.routes?.isNotEmpty ?? false)
-      || widget.onGenerateRoute != null
-      || widget.onUnknownRoute != null;
+  bool get _usesNavigator =>
+      widget.home != null ||
+      (widget.routes?.isNotEmpty ?? false) ||
+      widget.onGenerateRoute != null ||
+      widget.onUnknownRoute != null;
 
   // ROUTER
 
-  RouteInformationProvider? get _effectiveRouteInformationProvider => widget.routeInformationProvider ?? _defaultRouteInformationProvider;
+  RouteInformationProvider? get _effectiveRouteInformationProvider =>
+      widget.routeInformationProvider ?? _defaultRouteInformationProvider;
   PlatformRouteInformationProvider? _defaultRouteInformationProvider;
-  BackButtonDispatcher get _effectiveBackButtonDispatcher => widget.backButtonDispatcher ?? _defaultBackButtonDispatcher!;
+  BackButtonDispatcher get _effectiveBackButtonDispatcher =>
+      widget.backButtonDispatcher ?? _defaultBackButtonDispatcher!;
   RootBackButtonDispatcher? _defaultBackButtonDispatcher;
 
   // NAVIGATOR
@@ -1461,9 +1521,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
     final String? name = settings.name;
-    final WidgetBuilder? pageContentBuilder = name == Navigator.defaultRouteName && widget.home != null
-        ? (BuildContext context) => widget.home!
-        : widget.routes![name];
+    final WidgetBuilder? pageContentBuilder =
+        name == Navigator.defaultRouteName && widget.home != null
+            ? (BuildContext context) => widget.home!
+            : widget.routes![name];
 
     if (pageContentBuilder != null) {
       assert(
@@ -1535,7 +1596,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+  Future<bool> didPushRouteInformation(
+      RouteInformation routeInformation) async {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
@@ -1552,7 +1614,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       Uri.decodeComponent(
         Uri(
           path: uri.path.isEmpty ? '/' : uri.path,
-          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          queryParameters:
+              uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
           fragment: uri.fragment.isEmpty ? null : uri.fragment,
         ).toString(),
       ),
@@ -1565,10 +1628,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   /// This is the resolved locale, and is one of the supportedLocales.
   Locale? _locale;
 
-  Locale _resolveLocales(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
+  Locale _resolveLocales(
+      List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
     // Attempt to use localeListResolutionCallback.
     if (widget.localeListResolutionCallback != null) {
-      final Locale? locale = widget.localeListResolutionCallback!(preferredLocales, widget.supportedLocales);
+      final Locale? locale = widget.localeListResolutionCallback!(
+          preferredLocales, widget.supportedLocales);
       if (locale != null) {
         return locale;
       }
@@ -1576,7 +1641,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     // localeListResolutionCallback failed, falling back to localeResolutionCallback.
     if (widget.localeResolutionCallback != null) {
       final Locale? locale = widget.localeResolutionCallback!(
-        preferredLocales != null && preferredLocales.isNotEmpty ? preferredLocales.first : null,
+        preferredLocales != null && preferredLocales.isNotEmpty
+            ? preferredLocales.first
+            : null,
         widget.supportedLocales,
       );
       if (locale != null) {
@@ -1614,9 +1681,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   bool _debugCheckLocalizations(Locale appLocale) {
     assert(() {
-      final Set<Type> unsupportedTypes =
-        _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
-      for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+      final Set<Type> unsupportedTypes = _localizationsDelegates
+          .map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type)
+          .toSet();
+      for (final LocalizationsDelegate<dynamic> delegate
+          in _localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type)) {
           continue;
         }
@@ -1629,7 +1698,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
 
       FlutterError.reportError(FlutterErrorDetails(
-        exception: "Warning: This application's locale, $appLocale, is not supported by all of its localization delegates.",
+        exception:
+            "Warning: This application's locale, $appLocale, is not supported by all of its localization delegates.",
         library: 'widgets',
         informationCollector: () => <DiagnosticsNode>[
           for (final Type unsupportedType in unsupportedTypes)
@@ -1637,20 +1707,19 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
               '• A $unsupportedType delegate that supports the $appLocale locale was not found.',
             ),
           ErrorSpacer(),
-          if (unsupportedTypes.length == 1 && unsupportedTypes.single.toString() == 'CupertinoLocalizations')
+          if (unsupportedTypes.length == 1 &&
+              unsupportedTypes.single.toString() == 'CupertinoLocalizations')
             // We previously explicitly avoided checking for this class so it's not uncommon for applications
             // to have omitted importing the required delegate.
             ...<DiagnosticsNode>[
-              ErrorHint(
+            ErrorHint(
                 'If the application is built using GlobalMaterialLocalizations.delegate, consider using '
                 'GlobalMaterialLocalizations.delegates (plural) instead, as that will automatically declare '
-                'the appropriate Cupertino localizations.'
-              ),
-              ErrorSpacer(),
-            ],
+                'the appropriate Cupertino localizations.'),
+            ErrorSpacer(),
+          ],
           ErrorHint(
-            'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}'
-          ),
+              'The declared supported locales for this app are: ${widget.supportedLocales.join(", ")}'),
           ErrorSpacer(),
           ErrorDescription(
             'See https://flutter.dev/tutorials/internationalization/ for more '
@@ -1687,13 +1756,15 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           initialRoute: _initialRouteName,
           onGenerateRoute: _onGenerateRoute,
           onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
-            ? Navigator.defaultGenerateInitialRoutes
-            : (NavigatorState navigator, String initialRouteName) {
-              return widget.onGenerateInitialRoutes!(initialRouteName);
-            },
+              ? Navigator.defaultGenerateInitialRoutes
+              : (NavigatorState navigator, String initialRouteName) {
+                  return widget.onGenerateInitialRoutes!(initialRouteName);
+                },
           onUnknownRoute: _onUnknownRoute,
           observers: widget.navigatorObservers!,
-          routeTraversalEdgeBehavior: kIsWeb ? TraversalEdgeBehavior.leaveFlutterView : TraversalEdgeBehavior.parentScope,
+          routeTraversalEdgeBehavior: kIsWeb
+              ? TraversalEdgeBehavior.leaveFlutterView
+              : TraversalEdgeBehavior.parentScope,
           reportsRouteUpdateToEngine: true,
         ),
       );
@@ -1726,12 +1797,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     PerformanceOverlay? performanceOverlay;
     // We need to push a performance overlay if any of the display or checkerboarding
     // options are set.
-    if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
+    if (widget.showPerformanceOverlay ||
+        WidgetsApp.showPerformanceOverlayOverride) {
       performanceOverlay = PerformanceOverlay.allEnabled(
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       );
-    } else if (widget.checkerboardRasterCacheImages || widget.checkerboardOffscreenLayers) {
+    } else if (widget.checkerboardRasterCacheImages ||
+        widget.checkerboardOffscreenLayers) {
       performanceOverlay = PerformanceOverlay(
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
@@ -1741,7 +1814,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       result = Stack(
         children: <Widget>[
           result,
-          Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
+          Positioned(
+              top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
         ],
       );
     }
@@ -1755,8 +1829,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       result = ValueListenableBuilder<bool>(
         valueListenable: WidgetsApp._debugShowWidgetInspectorOverrideNotifier,
-        builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
-          if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
+        builder: (BuildContext context, bool debugShowWidgetInspectorOverride,
+            Widget? child) {
+          if (widget.debugShowWidgetInspector ||
+              debugShowWidgetInspectorOverride) {
             return WidgetInspector(
               selectButtonBuilder: widget.inspectorSelectButtonBuilder,
               child: child!,
@@ -1766,7 +1842,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         },
         child: result,
       );
-      if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
+      if (widget.debugShowCheckedModeBanner &&
+          WidgetsApp.debugAllowBannerOverride) {
         result = CheckedModeBanner(
           child: result,
         );
@@ -1798,8 +1875,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
 
     final Locale appLocale = widget.locale != null
-      ? _resolveLocales(<Locale>[widget.locale!], widget.supportedLocales)
-      : _locale!;
+        ? _resolveLocales(<Locale>[widget.locale!], widget.supportedLocales)
+        : _locale!;
 
     assert(_debugCheckLocalizations(appLocale));
 
@@ -1807,7 +1884,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       restorationId: widget.restorationScopeId,
       child: SharedAppData(
         child: NotificationListener<NavigationNotification>(
-          onNotification: widget.onNavigationNotification ?? _defaultOnNavigationNotification,
+          onNotification: widget.onNavigationNotification ??
+              _defaultOnNavigationNotification,
           child: Shortcuts(
             debugLabel: '<Default WidgetsApp Shortcuts>',
             shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
@@ -1815,10 +1893,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
             // fall through to the defaultShortcuts.
             child: DefaultTextEditingShortcuts(
               child: Actions(
-                actions: widget.actions ?? <Type, Action<Intent>>{
-                  ...WidgetsApp.defaultActions,
-                  ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
-                },
+                actions: widget.actions ??
+                    <Type, Action<Intent>>{
+                      ...WidgetsApp.defaultActions,
+                      ScrollIntent: Action<ScrollIntent>.overridable(
+                          context: context, defaultAction: ScrollAction()),
+                    },
                 child: FocusTraversalGroup(
                   policy: ReadingOrderTraversalPolicy(),
                   child: TapRegionSurface(

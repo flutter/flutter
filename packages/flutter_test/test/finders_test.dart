@@ -324,8 +324,10 @@ void main() {
         )),
       );
       expect(find.byType(GestureDetector), findsOneWidget);
-      expect(find.byType(GestureDetector, skipOffstage: false), findsNWidgets(2));
-      final Finder hitTestable = find.byType(GestureDetector, skipOffstage: false).hitTestable();
+      expect(
+          find.byType(GestureDetector, skipOffstage: false), findsNWidgets(2));
+      final Finder hitTestable =
+          find.byType(GestureDetector, skipOffstage: false).hitTestable();
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
@@ -397,36 +399,52 @@ void main() {
   });
 
   group('find.byElementPredicate', () {
-    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+    testWidgets('fails with a custom description in the message',
+        (WidgetTester tester) async {
+      await tester
+          .pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       const String customDescription = 'custom description';
       late TestFailure failure;
       try {
-        expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
+        expect(
+            find.byElementPredicate((_) => false,
+                description: customDescription),
+            findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
 
       expect(failure, isNotNull);
-      expect(failure.message, contains('Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with $customDescription'));
+      expect(
+          failure.message,
+          contains(
+              'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with $customDescription'));
     });
   });
 
   group('find.byWidgetPredicate', () {
-    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+    testWidgets('fails with a custom description in the message',
+        (WidgetTester tester) async {
+      await tester
+          .pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       const String customDescription = 'custom description';
       late TestFailure failure;
       try {
-        expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
+        expect(
+            find.byWidgetPredicate((_) => false,
+                description: customDescription),
+            findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
 
       expect(failure, isNotNull);
-      expect(failure.message, contains('Actual: _WidgetPredicateWidgetFinder:<Found 0 widgets with $customDescription'));
+      expect(
+          failure.message,
+          contains(
+              'Actual: _WidgetPredicateWidgetFinder:<Found 0 widgets with $customDescription'));
     });
   });
 
@@ -439,13 +457,16 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.text('bar'),
-      ), findsOneWidget);
+      expect(
+          find.descendant(
+            of: find.widgetWithText(Row, 'foo'),
+            matching: find.text('bar'),
+          ),
+          findsOneWidget);
     });
 
-    testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
+    testWidgets('finds two descendants with different ancestors',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -454,27 +475,33 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.widgetWithText(Column, 'foo'),
-        matching: find.text('bar'),
-      ), findsNWidgets(2));
+      expect(
+          find.descendant(
+            of: find.widgetWithText(Column, 'foo'),
+            matching: find.text('bar'),
+          ),
+          findsNWidgets(2));
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+          Column(
+              children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
           Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
 
       late TestFailure failure;
       try {
-        expect(find.descendant(
-          of: find.widgetWithText(Column, 'foo'),
-          matching: find.text('bar'),
-        ), findsOneWidget);
+        expect(
+            find.descendant(
+              of: find.widgetWithText(Column, 'foo'),
+              matching: find.text('bar'),
+            ),
+            findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -498,13 +525,16 @@ void main() {
         ],
       ));
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.widgetWithText(Row, 'foo'),
-      ), findsOneWidget);
+      expect(
+          find.ancestor(
+            of: find.text('bar'),
+            matching: find.widgetWithText(Row, 'foo'),
+          ),
+          findsOneWidget);
     });
 
-    testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
+    testWidgets('finds two matching ancestors, one descendant',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -516,27 +546,33 @@ void main() {
         ),
       );
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.byType(Row),
-      ), findsNWidgets(2));
+      expect(
+          find.ancestor(
+            of: find.text('bar'),
+            matching: find.byType(Row),
+          ),
+          findsNWidgets(2));
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+          Column(
+              children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
           Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
 
       late TestFailure failure;
       try {
-        expect(find.ancestor(
-          of: find.text('bar'),
-          matching: find.widgetWithText(Column, 'foo'),
-        ), findsOneWidget);
+        expect(
+            find.ancestor(
+              of: find.text('bar'),
+              matching: find.widgetWithText(Column, 'foo'),
+            ),
+            findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -558,10 +594,12 @@ void main() {
         ],
       ));
 
-      expect(find.ancestor(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-      ), findsNothing);
+      expect(
+          find.ancestor(
+            of: find.byType(Column),
+            matching: find.widgetWithText(Column, 'foo'),
+          ),
+          findsNothing);
     });
 
     testWidgets('Match the root', (WidgetTester tester) async {
@@ -572,11 +610,13 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-        matchRoot: true,
-      ), findsOneWidget);
+      expect(
+          find.descendant(
+            of: find.byType(Column),
+            matching: find.widgetWithText(Column, 'foo'),
+            matchRoot: true,
+          ),
+          findsOneWidget);
     });
 
     testWidgets('is fast in deep tree', (WidgetTester tester) async {
@@ -597,10 +637,12 @@ void main() {
         ),
       );
 
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.byType(Row),
-      ), findsOneWidget);
+      expect(
+          find.ancestor(
+            of: find.text('bar'),
+            matching: find.byType(Row),
+          ),
+          findsOneWidget);
     });
   });
 
@@ -616,39 +658,37 @@ void main() {
         hint: 'hint1',
         label: 'label1',
         child: Semantics(
-          container: true,
-          textField: true,
-          onSetText: (_) { },
-          onPaste: () { },
-          onLongPress: () { },
-          value: 'value2',
-          hint: 'hint2',
-          label: 'label2',
-          child: Semantics(
             container: true,
-            readOnly: true,
-            onCopy: () {},
-            value: 'value3',
-            hint: 'hint3',
-            label: 'label3',
+            textField: true,
+            onSetText: (_) {},
+            onPaste: () {},
+            onLongPress: () {},
+            value: 'value2',
+            hint: 'hint2',
+            label: 'label2',
             child: Semantics(
               container: true,
               readOnly: true,
-              onLongPress: () { },
-              value: 'value4',
-              hint: 'hint4',
-              label: 'label4',
+              onCopy: () {},
+              value: 'value3',
+              hint: 'hint3',
+              label: 'label3',
               child: Semantics(
                 container: true,
-                onLongPress: () { },
-                onCopy: () {},
-                value: 'value5',
-                hint: 'hint5',
-                label: 'label5'
+                readOnly: true,
+                onLongPress: () {},
+                value: 'value4',
+                hint: 'hint4',
+                label: 'label4',
+                child: Semantics(
+                    container: true,
+                    onLongPress: () {},
+                    onCopy: () {},
+                    value: 'value5',
+                    hint: 'hint5',
+                    label: 'label5'),
               ),
-            ),
-          )
-        ),
+            )),
       ),
     );
 
@@ -664,7 +704,8 @@ void main() {
         expect(finder, findsExactly(2));
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
@@ -679,12 +720,16 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _AncestorSemanticsFinder:<Found 2 SemanticsNodes with action "SemanticsAction.copy" that are ancestors of SemanticsNodes with label "label4"'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _AncestorSemanticsFinder:<Found 2 SemanticsNodes with action "SemanticsAction.copy" that are ancestors of SemanticsNodes with label "label4"'));
       });
     });
 
     group('descendant', () {
-      testWidgets('finds matching descendant nodes', (WidgetTester tester) async {
+      testWidgets('finds matching descendant nodes',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
         final FinderBase<SemanticsNode> finder = find.semantics.descendant(
@@ -695,7 +740,8 @@ void main() {
         expect(finder, findsOne);
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
@@ -710,18 +756,23 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _DescendantSemanticsFinder:<Found 1 SemanticsNode with action "SemanticsAction.copy" descending from SemanticsNode with label "label4"'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _DescendantSemanticsFinder:<Found 1 SemanticsNode with action "SemanticsAction.copy" descending from SemanticsNode with label "label4"'));
       });
     });
 
     group('byPredicate', () {
-      testWidgets('finds nodes matching given predicate', (WidgetTester tester) async {
+      testWidgets('finds nodes matching given predicate',
+          (WidgetTester tester) async {
         final RegExp replaceRegExp = RegExp(r'^[^\d]+');
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byPredicate(
           (SemanticsNode node) {
-            final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
+            final int labelNum =
+                int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
             return labelNum > 1;
           },
         );
@@ -736,7 +787,8 @@ void main() {
 
         final SemanticsFinder finder = find.semantics.byPredicate(
           (SemanticsNode node) {
-            final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
+            final int labelNum =
+                int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
             return labelNum > 1;
           },
         );
@@ -746,7 +798,10 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 4 matching semantics predicate'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _PredicateSemanticsFinder:<Found 4 matching semantics predicate'));
       });
 
       testWidgets('fails with given message', (WidgetTester tester) async {
@@ -757,7 +812,8 @@ void main() {
 
         final SemanticsFinder finder = find.semantics.byPredicate(
           (SemanticsNode node) {
-            final int labelNum = int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
+            final int labelNum =
+                int.tryParse(node.label.replaceAll(replaceRegExp, '')) ?? -1;
             return labelNum > 1;
           },
           describeMatch: (_) => expected,
@@ -773,7 +829,8 @@ void main() {
     });
 
     group('byLabel', () {
-      testWidgets('finds nodes with matching label using String', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching label using String',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byLabel('label3');
@@ -782,16 +839,22 @@ void main() {
         expect(finder.found.first.label, 'label3');
       });
 
-      testWidgets('finds nodes with matching label using RegEx', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching label using RegEx',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byLabel(RegExp('^label.*'));
+        final SemanticsFinder finder =
+            find.semantics.byLabel(RegExp('^label.*'));
 
         expect(finder, findsExactly(5));
-        expect(finder.found.every((SemanticsNode node) => node.label.startsWith('label')), isTrue);
+        expect(
+            finder.found
+                .every((SemanticsNode node) => node.label.startsWith('label')),
+            isTrue);
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
@@ -803,12 +866,16 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with label "label3"'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with label "label3"'));
       });
     });
 
     group('byValue', () {
-      testWidgets('finds nodes with matching value using String', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching value using String',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byValue('value3');
@@ -817,16 +884,22 @@ void main() {
         expect(finder.found.first.value, 'value3');
       });
 
-      testWidgets('finds nodes with matching value using RegEx', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching value using RegEx',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byValue(RegExp('^value.*'));
+        final SemanticsFinder finder =
+            find.semantics.byValue(RegExp('^value.*'));
 
         expect(finder, findsExactly(5));
-        expect(finder.found.every((SemanticsNode node) => node.value.startsWith('value')), isTrue);
+        expect(
+            finder.found
+                .every((SemanticsNode node) => node.value.startsWith('value')),
+            isTrue);
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
@@ -838,12 +911,16 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with value "value3"'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with value "value3"'));
       });
     });
 
     group('byHint', () {
-      testWidgets('finds nodes with matching hint using String', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching hint using String',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byHint('hint3');
@@ -852,16 +929,21 @@ void main() {
         expect(finder.found.first.hint, 'hint3');
       });
 
-      testWidgets('finds nodes with matching hint using RegEx', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching hint using RegEx',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byHint(RegExp('^hint.*'));
 
         expect(finder, findsExactly(5));
-        expect(finder.found.every((SemanticsNode node) => node.hint.startsWith('hint')), isTrue);
+        expect(
+            finder.found
+                .every((SemanticsNode node) => node.hint.startsWith('hint')),
+            isTrue);
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
@@ -873,24 +955,31 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with hint "hint3"'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _PredicateSemanticsFinder:<Found 1 SemanticsNode with hint "hint3"'));
       });
     });
 
     group('byAction', () {
-      testWidgets('finds nodes with matching action', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching action',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byAction(SemanticsAction.copy);
+        final SemanticsFinder finder =
+            find.semantics.byAction(SemanticsAction.copy);
 
         expect(finder, findsExactly(3));
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byAction(SemanticsAction.copy);
+        final SemanticsFinder finder =
+            find.semantics.byAction(SemanticsAction.copy);
 
         try {
           expect(finder, findsExactly(4));
@@ -898,15 +987,20 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 3 SemanticsNodes with action "SemanticsAction.copy"'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _PredicateSemanticsFinder:<Found 3 SemanticsNodes with action "SemanticsAction.copy"'));
       });
     });
 
     group('byAnyAction', () {
-      testWidgets('finds nodes with any matching actions', (WidgetTester tester) async {
+      testWidgets('finds nodes with any matching actions',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byAnyAction(<SemanticsAction>[
+        final SemanticsFinder finder =
+            find.semantics.byAnyAction(<SemanticsAction>[
           SemanticsAction.paste,
           SemanticsAction.longPress,
         ]);
@@ -914,11 +1008,13 @@ void main() {
         expect(finder, findsExactly(4));
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byAnyAction(<SemanticsAction>[
+        final SemanticsFinder finder =
+            find.semantics.byAnyAction(<SemanticsAction>[
           SemanticsAction.paste,
           SemanticsAction.longPress,
         ]);
@@ -929,24 +1025,31 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 4 SemanticsNodes with any of the following actions: [SemanticsAction.paste, SemanticsAction.longPress]:'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _PredicateSemanticsFinder:<Found 4 SemanticsNodes with any of the following actions: [SemanticsAction.paste, SemanticsAction.longPress]:'));
       });
     });
 
     group('byFlag', () {
-      testWidgets('finds nodes with matching flag', (WidgetTester tester) async {
+      testWidgets('finds nodes with matching flag',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byFlag(SemanticsFlag.isReadOnly);
+        final SemanticsFinder finder =
+            find.semantics.byFlag(SemanticsFlag.isReadOnly);
 
         expect(finder, findsExactly(3));
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
-        final SemanticsFinder finder = find.semantics.byFlag(SemanticsFlag.isReadOnly);
+        final SemanticsFinder finder =
+            find.semantics.byFlag(SemanticsFlag.isReadOnly);
 
         try {
           expect(finder, findsExactly(4));
@@ -954,12 +1057,16 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('_PredicateSemanticsFinder:<Found 3 SemanticsNodes with flag "SemanticsFlag.isReadOnly":'));
+        expect(
+            failure.message,
+            contains(
+                '_PredicateSemanticsFinder:<Found 3 SemanticsNodes with flag "SemanticsFlag.isReadOnly":'));
       });
     });
 
     group('byAnyFlag', () {
-      testWidgets('finds nodes with any matching flag', (WidgetTester tester) async {
+      testWidgets('finds nodes with any matching flag',
+          (WidgetTester tester) async {
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byAnyFlag(<SemanticsFlag>[
@@ -970,7 +1077,8 @@ void main() {
         expect(finder, findsExactly(2));
       });
 
-      testWidgets('fails with descriptive message', (WidgetTester tester) async {
+      testWidgets('fails with descriptive message',
+          (WidgetTester tester) async {
         late TestFailure failure;
         await tester.pumpWidget(semanticsTree);
 
@@ -985,12 +1093,16 @@ void main() {
           failure = e;
         }
 
-        expect(failure.message, contains('Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:'));
+        expect(
+            failure.message,
+            contains(
+                'Actual: _PredicateSemanticsFinder:<Found 2 SemanticsNodes with any of the following flags: [SemanticsFlag.isHeader, SemanticsFlag.isTextField]:'));
       });
     });
 
     group('scrollable', () {
-      testWidgets('can find node that can scroll up', (WidgetTester tester) async {
+      testWidgets('can find node that can scroll up',
+          (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         await tester.pumpWidget(MaterialApp(
           home: SingleChildScrollView(
@@ -999,14 +1111,18 @@ void main() {
           ),
         ));
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollUpAction: true,
-          hasScrollDownAction: false,
-        ));
+        expect(
+            find.semantics.scrollable(),
+            containsSemantics(
+              hasScrollUpAction: true,
+              hasScrollDownAction: false,
+            ));
       });
 
-      testWidgets('can find node that can scroll down', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController(initialScrollOffset: 400);
+      testWidgets('can find node that can scroll down',
+          (WidgetTester tester) async {
+        final ScrollController controller =
+            ScrollController(initialScrollOffset: 400);
         await tester.pumpWidget(MaterialApp(
           home: SingleChildScrollView(
             controller: controller,
@@ -1014,13 +1130,16 @@ void main() {
           ),
         ));
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollUpAction: false,
-          hasScrollDownAction: true,
-        ));
+        expect(
+            find.semantics.scrollable(),
+            containsSemantics(
+              hasScrollUpAction: false,
+              hasScrollDownAction: true,
+            ));
       });
 
-      testWidgets('can find node that can scroll left', (WidgetTester tester) async {
+      testWidgets('can find node that can scroll left',
+          (WidgetTester tester) async {
         final ScrollController controller = ScrollController();
         await tester.pumpWidget(MaterialApp(
           home: SingleChildScrollView(
@@ -1030,14 +1149,18 @@ void main() {
           ),
         ));
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollLeftAction: true,
-          hasScrollRightAction: false,
-        ));
+        expect(
+            find.semantics.scrollable(),
+            containsSemantics(
+              hasScrollLeftAction: true,
+              hasScrollRightAction: false,
+            ));
       });
 
-      testWidgets('can find node that can scroll right', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController(initialScrollOffset: 200);
+      testWidgets('can find node that can scroll right',
+          (WidgetTester tester) async {
+        final ScrollController controller =
+            ScrollController(initialScrollOffset: 200);
         await tester.pumpWidget(MaterialApp(
           home: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -1046,48 +1169,50 @@ void main() {
           ),
         ));
 
-        expect(find.semantics.scrollable(), containsSemantics(
-          hasScrollLeftAction: false,
-          hasScrollRightAction: true,
-        ));
+        expect(
+            find.semantics.scrollable(),
+            containsSemantics(
+              hasScrollLeftAction: false,
+              hasScrollRightAction: true,
+            ));
       });
 
-      testWidgets('can exclusively find node that scrolls horizontally', (WidgetTester tester) async {
+      testWidgets('can exclusively find node that scrolls horizontally',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
-          home: Column(
-            children: <Widget>[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(width: 1000, height: 100),
+            home: Column(
+          children: <Widget>[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(width: 1000, height: 100),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: SizedBox(width: 100, height: 1000),
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SizedBox(width: 100, height: 1000),
-                ),
-              ),
-            ],
-          )
-        ));
+            ),
+          ],
+        )));
 
         expect(find.semantics.scrollable(axis: Axis.horizontal), findsOne);
       });
 
-      testWidgets('can exclusively find node that scrolls vertically', (WidgetTester tester) async {
+      testWidgets('can exclusively find node that scrolls vertically',
+          (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
-          home: Column(
-            children: <Widget>[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(width: 1000, height: 100),
+            home: Column(
+          children: <Widget>[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(width: 1000, height: 100),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: SizedBox(width: 100, height: 1000),
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SizedBox(width: 100, height: 1000),
-                ),
-              ),
-            ],
-          )
-        ));
+            ),
+          ],
+        )));
 
         expect(find.semantics.scrollable(axis: Axis.vertical), findsOne);
       });
@@ -1107,7 +1232,8 @@ void main() {
       });
 
       for (int i = 0; i < 4; i++) {
-        test('gets expected plurality for $i when reporting results from find', () {
+        test('gets expected plurality for $i when reporting results from find',
+            () {
           final Plurality expected = switch (i) {
             0 => Plurality.zero,
             1 => Plurality.one,
@@ -1119,14 +1245,17 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.evaluate().toString();
 
           expect(actual, expected);
         });
 
-        test('gets expected plurality for $i when reporting results from toString', () {
+        test(
+            'gets expected plurality for $i when reporting results from toString',
+            () {
           final Plurality expected = switch (i) {
             0 => Plurality.zero,
             1 => Plurality.one,
@@ -1138,7 +1267,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString();
 
@@ -1153,7 +1283,8 @@ void main() {
               actual = plurality;
               return 'Fake description';
             },
-            findInCandidatesCallback: (_) => Iterable<String>.generate(i, (int index) => index.toString()),
+            findInCandidatesCallback: (_) =>
+                Iterable<String>.generate(i, (int index) => index.toString()),
           );
           finder.toString(describeSelf: true);
 
@@ -1163,7 +1294,12 @@ void main() {
     });
 
     test('findInCandidates gets allCandidates', () {
-      final List<String> expected = <String>['Test1', 'Test2', 'Test3', 'Test4'];
+      final List<String> expected = <String>[
+        'Test1',
+        'Test2',
+        'Test3',
+        'Test4'
+      ];
       late final List<String> actual;
       final _FakeFinder finder = _FakeFinder(
         allCandidatesCallback: () => expected,
@@ -1247,10 +1383,11 @@ void main() {
       });
 
       test('has expected results after call to tryFind', () {
-        final Iterable<String> expected = Iterable<String>.generate(10, (int i) => i.toString());
-        final _FakeFinder finder = _FakeFinder(findInCandidatesCallback: (_) => expected);
+        final Iterable<String> expected =
+            Iterable<String>.generate(10, (int i) => i.toString());
+        final _FakeFinder finder =
+            _FakeFinder(findInCandidatesCallback: (_) => expected);
         finder.tryEvaluate();
-
 
         expect(finder.hasFound, true);
         expect(finder.found, orderedEquals(expected));
@@ -1328,22 +1465,26 @@ class _FakeFinder extends FinderBase<String> {
 
   final Iterable<String> Function()? allCandidatesCallback;
   final DescribeMatchCallback? describeMatchCallback;
-  final Iterable<String> Function(Iterable<String> candidates)? findInCandidatesCallback;
-
+  final Iterable<String> Function(Iterable<String> candidates)?
+      findInCandidatesCallback;
 
   @override
   Iterable<String> get allCandidates {
-    return allCandidatesCallback?.call() ?? <String>[
-      'String 1', 'String 2', 'String 3',
-    ];
+    return allCandidatesCallback?.call() ??
+        <String>[
+          'String 1',
+          'String 2',
+          'String 3',
+        ];
   }
 
   @override
   String describeMatch(Plurality plurality) {
-    return describeMatchCallback?.call(plurality) ?? switch (plurality) {
-      Plurality.one => 'String',
-      Plurality.many || Plurality.zero => 'Strings',
-    };
+    return describeMatchCallback?.call(plurality) ??
+        switch (plurality) {
+          Plurality.one => 'String',
+          Plurality.many || Plurality.zero => 'Strings',
+        };
   }
 
   @override

@@ -15,7 +15,8 @@ void main() {
   final PaintingBindingSpy binding = PaintingBindingSpy();
   test('Image decoder control test', () async {
     expect(binding.instantiateImageCodecCalledCount, 0);
-    final ui.Image image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+    final ui.Image image =
+        await decodeImageFromList(Uint8List.fromList(kTransparentImage));
     expect(image, isNotNull);
     expect(image.width, 1);
     expect(image.height, 1);

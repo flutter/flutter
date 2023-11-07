@@ -57,10 +57,13 @@ mixin ScrollMetrics {
     double? devicePixelRatio,
   }) {
     return FixedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
-      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
+      minScrollExtent: minScrollExtent ??
+          (hasContentDimensions ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ??
+          (hasContentDimensions ? this.maxScrollExtent : null),
       pixels: pixels ?? (hasPixels ? this.pixels : null),
-      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
+      viewportDimension: viewportDimension ??
+          (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
@@ -126,10 +129,12 @@ mixin ScrollMetrics {
   double get extentInside {
     assert(minScrollExtent <= maxScrollExtent);
     return viewportDimension
-      // "above" overscroll value
-      - clampDouble(minScrollExtent - pixels, 0, viewportDimension)
-      // "below" overscroll value
-      - clampDouble(pixels - maxScrollExtent, 0, viewportDimension);
+        // "above" overscroll value
+        -
+        clampDouble(minScrollExtent - pixels, 0, viewportDimension)
+        // "below" overscroll value
+        -
+        clampDouble(pixels - maxScrollExtent, 0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
@@ -140,7 +145,8 @@ mixin ScrollMetrics {
   ///
   /// This is the sum of [extentBefore], [extentInside], and [extentAfter], modulo
   /// any rounding errors.
-  double get extentTotal => maxScrollExtent - minScrollExtent + viewportDimension;
+  double get extentTotal =>
+      maxScrollExtent - minScrollExtent + viewportDimension;
 
   /// The [FlutterView.devicePixelRatio] of the view that the [Scrollable]
   /// associated with this metrics object is drawn into.
@@ -167,10 +173,10 @@ class FixedScrollMetrics with ScrollMetrics {
     required double? viewportDimension,
     required this.axisDirection,
     required this.devicePixelRatio,
-  }) : _minScrollExtent = minScrollExtent,
-       _maxScrollExtent = maxScrollExtent,
-       _pixels = pixels,
-       _viewportDimension = viewportDimension;
+  })  : _minScrollExtent = minScrollExtent,
+        _maxScrollExtent = maxScrollExtent,
+        _pixels = pixels,
+        _viewportDimension = viewportDimension;
 
   @override
   double get minScrollExtent => _minScrollExtent!;
@@ -181,7 +187,8 @@ class FixedScrollMetrics with ScrollMetrics {
   final double? _maxScrollExtent;
 
   @override
-  bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
+  bool get hasContentDimensions =>
+      _minScrollExtent != null && _maxScrollExtent != null;
 
   @override
   double get pixels => _pixels!;

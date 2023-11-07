@@ -31,7 +31,8 @@ TaskFunction createFlavorsTest({Map<String, String>? environment}) {
   ).call;
 }
 
-TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}) {
+TaskFunction createIntegrationTestFlavorsTest(
+    {Map<String, String>? environment}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'integration_test/integration_test.dart',
@@ -133,9 +134,10 @@ TaskFunction createEndToEndKeyboardTextfieldTest() {
 TaskFunction dartDefinesTask() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/defines.dart', extraOptions: <String>[
-    '--dart-define=test.valueA=Example,A',
-    '--dart-define=test.valueB=Value',
+    'lib/defines.dart',
+    extraOptions: <String>[
+      '--dart-define=test.valueA=Example,A',
+      '--dart-define=test.valueB=Value',
     ],
   ).call;
 }
@@ -174,11 +176,10 @@ class DriverTest {
   DriverTest(
     this.testDirectory,
     this.testTarget, {
-      this.extraOptions = const <String>[],
-      this.deviceIdOverride,
-      this.environment,
-    }
-  );
+    this.extraOptions = const <String>[],
+    this.deviceIdOverride,
+    this.environment,
+  });
 
   final String testDirectory;
   final String testTarget;
@@ -218,12 +219,11 @@ class IntegrationTest {
   IntegrationTest(
     this.testDirectory,
     this.testTarget, {
-      this.extraOptions = const <String>[],
-      this.createPlatforms = const <String>[],
-      this.withTalkBack = false,
-      this.environment,
-    }
-  );
+    this.extraOptions = const <String>[],
+    this.createPlatforms = const <String>[],
+    this.withTalkBack = false,
+    this.environment,
+  });
 
   final String testDirectory;
   final String testTarget;
@@ -250,7 +250,8 @@ class IntegrationTest {
 
       if (withTalkBack) {
         if (device is! AndroidDevice) {
-          return TaskResult.failure('A test that enables TalkBack can only be run on Android devices');
+          return TaskResult.failure(
+              'A test that enables TalkBack can only be run on Android devices');
         }
         await enableTalkBack();
       }

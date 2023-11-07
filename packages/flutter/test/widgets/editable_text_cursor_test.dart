@@ -42,7 +42,8 @@ void main() {
     focusScopeNode.dispose();
   });
 
-  testWidgetsWithLeakTracking('cursor has expected width, height, and radius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor has expected width, height, and radius',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -62,15 +63,18 @@ void main() {
       ),
     );
 
-    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    final EditableText editableText =
+        tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorWidth, 10.0);
     expect(editableText.cursorHeight, 10.0);
     expect(editableText.cursorRadius!.x, 2.0);
   });
 
-  testWidgetsWithLeakTracking('cursor layout has correct width', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor layout has correct width',
+      (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -96,7 +100,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -124,8 +129,10 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgetsWithLeakTracking('cursor layout has correct radius', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+  testWidgetsWithLeakTracking('cursor layout has correct radius',
+      (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -152,7 +159,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = ' ';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -179,7 +187,8 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Cursor animates on iOS', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor animates on iOS',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -192,7 +201,8 @@ void main() {
     await tester.tap(textFinder);
     await tester.pump();
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorColor!.opacity, 1.0);
@@ -200,10 +210,12 @@ void main() {
     int walltimeMicrosecond = 0;
     double lastVerifiedOpacity = 1.0;
 
-    Future<void> verifyKeyFrame({ required double opacity, required int at }) async {
+    Future<void> verifyKeyFrame(
+        {required double opacity, required int at}) async {
       const int delta = 1;
       assert(at - delta > walltimeMicrosecond);
-      await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
+      await tester
+          .pump(Duration(microseconds: at - delta - walltimeMicrosecond));
 
       // Instead of verifying the opacity at each key frame, this function
       // verifies the opacity immediately *before* each key frame to avoid
@@ -211,26 +223,29 @@ void main() {
       expect(
         renderEditable.cursorColor!.opacity,
         closeTo(lastVerifiedOpacity, 0.01),
-        reason: 'opacity at ${at-delta} microseconds',
+        reason: 'opacity at ${at - delta} microseconds',
       );
 
       walltimeMicrosecond = at - delta;
       lastVerifiedOpacity = opacity;
     }
 
-    await verifyKeyFrame(opacity: 1.0,  at: 500000);
+    await verifyKeyFrame(opacity: 1.0, at: 500000);
     await verifyKeyFrame(opacity: 0.75, at: 537500);
-    await verifyKeyFrame(opacity: 0.5,  at: 575000);
+    await verifyKeyFrame(opacity: 0.5, at: 575000);
     await verifyKeyFrame(opacity: 0.25, at: 612500);
-    await verifyKeyFrame(opacity: 0.0,  at: 650000);
-    await verifyKeyFrame(opacity: 0.0,  at: 850000);
+    await verifyKeyFrame(opacity: 0.0, at: 650000);
+    await verifyKeyFrame(opacity: 0.0, at: 850000);
     await verifyKeyFrame(opacity: 0.25, at: 887500);
-    await verifyKeyFrame(opacity: 0.5,  at: 925000);
+    await verifyKeyFrame(opacity: 0.5, at: 925000);
     await verifyKeyFrame(opacity: 0.75, at: 962500);
-    await verifyKeyFrame(opacity: 1.0,  at: 1000000);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+    await verifyKeyFrame(opacity: 1.0, at: 1000000);
+  },
+      variant:
+          const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-  testWidgetsWithLeakTracking('Cursor does not animate on non-iOS platforms', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not animate on non-iOS platforms',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(child: TextField(maxLines: 3)),
@@ -247,10 +262,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(tester.hasRunningAnimations, false);
     }
-  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
+  },
+      variant: TargetPlatformVariant.all(
+          excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-  testWidgetsWithLeakTracking('Cursor does not animate on Android', (WidgetTester tester) async {
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
+  testWidgetsWithLeakTracking('Cursor does not animate on Android',
+      (WidgetTester tester) async {
+    final Color defaultCursorColor =
+        Color(ThemeData.fallback().colorScheme.primary.value);
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -263,7 +282,8 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pump();
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     await tester.pump();
@@ -289,48 +309,56 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgetsWithLeakTracking('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
-    EditableText.debugDeterministicCursor = true;
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-    const Widget widget = MaterialApp(
-      home: Material(
-        child: TextField(
-          maxLines: 3,
+  testWidgetsWithLeakTracking(
+    'Cursor does not animates when debugDeterministicCursor is set',
+    (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      final Color defaultCursorColor =
+          Color(ThemeData.fallback().colorScheme.primary.value);
+      const Widget widget = MaterialApp(
+        home: Material(
+          child: TextField(
+            maxLines: 3,
+          ),
         ),
-      ),
-    );
-    await tester.pumpWidget(widget);
+      );
+      await tester.pumpWidget(widget);
 
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
+      final EditableTextState editableTextState =
+          tester.firstState(find.byType(EditableText));
+      final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable.cursorColor!.alpha, 255);
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: defaultCursorColor));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rrect(color: defaultCursorColor));
 
-    // Cursor draw never changes.
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: defaultCursorColor));
+      // Cursor draw never changes.
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rrect(color: defaultCursorColor));
 
-    // No more transient calls.
-    await tester.pumpAndSettle();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rrect(color: defaultCursorColor));
+      // No more transient calls.
+      await tester.pumpAndSettle();
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rrect(color: defaultCursorColor));
 
-    EditableText.debugDeterministicCursor = false;
-  },
-  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+      EditableText.debugDeterministicCursor = false;
+    },
+    variant: const TargetPlatformVariant(
+        <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
-  testWidgetsWithLeakTracking('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
+  testWidgetsWithLeakTracking(
+      'Cursor does not animate on Android when debugDeterministicCursor is set',
+      (WidgetTester tester) async {
+    final Color defaultCursorColor =
+        Color(ThemeData.fallback().colorScheme.primary.value);
     EditableText.debugDeterministicCursor = true;
     const Widget widget = MaterialApp(
       home: Material(
@@ -344,7 +372,8 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pump();
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     await tester.pump();
@@ -368,87 +397,92 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgetsWithLeakTracking('Cursor animation restarts when it is moved using keys on desktop', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+  testWidgetsWithLeakTracking(
+    'Cursor animation restarts when it is moved using keys on desktop',
+    (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
 
-    const String testText = 'Some text long enough to move the cursor around';
-    controller.text = testText;
+      const String testText = 'Some text long enough to move the cursor around';
+      controller.text = testText;
 
-    final Widget widget = MaterialApp(
-      home: EditableText(
-        controller: controller,
-        focusNode: focusNode,
-        style: const TextStyle(fontSize: 20.0),
-        cursorColor: Colors.blue,
-        backgroundCursorColor: Colors.grey,
-        selectionControls: materialTextSelectionControls,
-        keyboardType: TextInputType.text,
-        textAlign: TextAlign.left,
-      ),
-    );
-    await tester.pumpWidget(widget);
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: const TextStyle(fontSize: 20.0),
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          selectionControls: materialTextSelectionControls,
+          keyboardType: TextInputType.text,
+          textAlign: TextAlign.left,
+        ),
+      );
+      await tester.pumpWidget(widget);
 
-    await tester.tap(find.byType(EditableText));
-    await tester.pump();
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
+      final EditableTextState editableTextState =
+          tester.firstState(find.byType(EditableText));
+      final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    await tester.pump();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      await tester.pump();
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    // Android cursor goes from exactly on to exactly off on the 500ms dot.
-    await tester.pump(const Duration(milliseconds: 499));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      // Android cursor goes from exactly on to exactly off on the 500ms dot.
+      await tester.pump(const Duration(milliseconds: 499));
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
 
-    await tester.pump();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      await tester.pump();
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    await tester.pump(const Duration(milliseconds: 299));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      await tester.pump(const Duration(milliseconds: 299));
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
 
-    await tester.pump();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      await tester.pump();
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    await tester.pump(const Duration(milliseconds: 299));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
+      await tester.pump(const Duration(milliseconds: 299));
+      expect(renderEditable.cursorColor!.alpha, 255);
+      expect(renderEditable, paints..rect(color: const Color(0xff2196f3)));
 
-    await tester.pump(const Duration(milliseconds: 1));
-    expect(renderEditable.cursorColor!.alpha, 0);
-    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(renderEditable.cursorColor!.alpha, 0);
+      expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
 
-    debugDefaultTargetPlatformOverride = null;
-  },
-  variant: KeySimulatorTransitModeVariant.all(),
+      debugDefaultTargetPlatformOverride = null;
+    },
+    variant: KeySimulatorTransitModeVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Cursor does not show when showCursor set to false',
+      (WidgetTester tester) async {
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -462,7 +496,8 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pump();
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     // Make sure it does not paint for a period of time.
@@ -476,7 +511,8 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgetsWithLeakTracking('Cursor does not show when not focused', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor does not show when not focused',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106512 .
     await tester.pumpWidget(
       MaterialApp(
@@ -486,7 +522,8 @@ void main() {
       ),
     );
     assert(focusNode.hasFocus);
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     focusNode.unfocus();
@@ -506,7 +543,8 @@ void main() {
     expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
   });
 
-  testWidgetsWithLeakTracking('Cursor radius is 2.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor radius is 2.0',
+      (WidgetTester tester) async {
     const Widget widget = MaterialApp(
       home: Material(
         child: TextField(
@@ -516,13 +554,18 @@ void main() {
     );
     await tester.pumpWidget(widget);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgetsWithLeakTracking('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Cursor gets placed correctly after going out of bounds',
+      (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
@@ -548,14 +591,17 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+    renderEditable.selection =
+        const TextSelection(baseOffset: 29, extentOffset: 29);
 
     expect(controller.selection.baseOffset, 29);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     expect(controller.selection.baseOffset, 29);
 
@@ -579,7 +625,8 @@ void main() {
       offset: const Offset(1400, 20),
     ));
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
     // The cursor has been set.
@@ -588,7 +635,8 @@ void main() {
     // Go in the other direction.
 
     // Sets the origin.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
       state: FloatingCursorDragState.Update,
@@ -609,14 +657,17 @@ void main() {
       offset: const Offset(-4850, 20),
     ));
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgetsWithLeakTracking('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Updating the floating cursor correctly moves the cursor',
+      (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
@@ -642,11 +693,13 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+    renderEditable.selection =
+        const TextSelection(baseOffset: 29, extentOffset: 29);
 
     expect(controller.selection.baseOffset, 29);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
@@ -665,14 +718,17 @@ void main() {
     // But we have not yet set the offset because the user is not done placing the cursor.
     expect(controller.selection.baseOffset, 29);
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgetsWithLeakTracking('Updating the floating cursor can end without update', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Updating the floating cursor can end without update',
+      (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
@@ -698,16 +754,20 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+    renderEditable.selection =
+        const TextSelection(baseOffset: 29, extentOffset: 29);
 
     expect(controller.selection.baseOffset, 29);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
 
     expect(controller.selection.baseOffset, 29);
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.End));
 
     await tester.pumpAndSettle();
     // The cursor did not change.
@@ -715,7 +775,8 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Drag the floating cursor, it won't blink.",
+      (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
@@ -739,23 +800,26 @@ void main() {
       ),
     );
 
-    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    final EditableTextState editableText =
+        tester.state(find.byType(EditableText));
 
     // Check that the cursor visibility toggles after each blink interval.
     // Or if it's not blinking at all, it stays on.
-    Future<void> checkCursorBlinking({ bool isBlinking = true }) async {
+    Future<void> checkCursorBlinking({bool isBlinking = true}) async {
       bool initialShowCursor = true;
       if (isBlinking) {
         initialShowCursor = editableText.cursorCurrentlyVisible;
       }
       await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      expect(editableText.cursorCurrentlyVisible,
+          equals(isBlinking ? !initialShowCursor : initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval ~/ 10);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval);
-      expect(editableText.cursorCurrentlyVisible, equals(isBlinking ? !initialShowCursor : initialShowCursor));
+      expect(editableText.cursorCurrentlyVisible,
+          equals(isBlinking ? !initialShowCursor : initialShowCursor));
       await tester.pump(editableText.cursorBlinkInterval);
       expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
     }
@@ -768,28 +832,34 @@ void main() {
     // Before dragging, the cursor should blink.
     await checkCursorBlinking();
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.Start));
 
     // When drag cursor, the cursor shouldn't blink.
     await checkCursorBlinking(isBlinking: false);
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
 
     // After dragging, the cursor should blink.
     await checkCursorBlinking();
   });
 
-  testWidgetsWithLeakTracking('Turning showCursor off stops the cursor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Turning showCursor off stops the cursor',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/108187.
     final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
     // This doesn't really matter.
     EditableText.debugDeterministicCursor = false;
-    addTearDown(() { EditableText.debugDeterministicCursor = debugDeterministicCursor; });
+    addTearDown(() {
+      EditableText.debugDeterministicCursor = debugDeterministicCursor;
+    });
     const Key key = Key('EditableText');
 
-    Widget buildEditableText({ required bool showCursor }) {
+    Widget buildEditableText({required bool showCursor}) {
       return MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
@@ -808,7 +878,9 @@ void main() {
         ),
       );
     }
-    late final EditableTextState editableTextState = tester.state(find.byKey(key));
+
+    late final EditableTextState editableTextState =
+        tester.state(find.byKey(key));
     await tester.pumpWidget(buildEditableText(showCursor: false));
     await tester.tap(find.byKey(key));
     await tester.pump();
@@ -830,7 +902,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/30475.
-  testWidgetsWithLeakTracking('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Trying to select with the floating cursor does not crash',
+      (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
@@ -856,11 +930,13 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     final RenderEditable renderEditable = findRenderEditable(tester);
-    renderEditable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+    renderEditable.selection =
+        const TextSelection(baseOffset: 29, extentOffset: 29);
 
     expect(controller.selection.baseOffset, 29);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byType(EditableText));
 
     // Sets the origin.
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
@@ -879,10 +955,12 @@ void main() {
     // But we have not yet set the offset because the user is not done placing the cursor.
     expect(controller.selection.baseOffset, 29);
 
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     // Immediately start a new floating cursor, in the same way as happens when
     // the user tries to select text in trackpad mode.
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
+    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start, offset: const Offset(20, 20)));
     await tester.pumpAndSettle();
 
     // Set and move the second cursor like a selection. Previously, the second
@@ -891,11 +969,13 @@ void main() {
       state: FloatingCursorDragState.Update,
       offset: const Offset(-250, 20),
     ));
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+    editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('autofocus sets cursor to the end of text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autofocus sets cursor to the end of text',
+      (WidgetTester tester) async {
     const String text = 'hello world';
     controller.text = text;
 
@@ -925,89 +1005,105 @@ void main() {
     expect(controller.selection.baseOffset, text.length);
   });
 
-  testWidgetsWithLeakTracking('Floating cursor is painted', (WidgetTester tester) async {
-    const TextStyle textStyle = TextStyle();
-    const String text = 'hello world this is fun and cool and awesome!';
-    controller.text = text;
+  testWidgetsWithLeakTracking(
+    'Floating cursor is painted',
+    (WidgetTester tester) async {
+      const TextStyle textStyle = TextStyle();
+      const String text = 'hello world this is fun and cool and awesome!';
+      controller.text = text;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Padding(
-          padding: const EdgeInsets.only(top: 0.25),
-          child: Material(
-            child: TextField(
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Padding(
+            padding: const EdgeInsets.only(top: 0.25),
+            child: Material(
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                style: textStyle,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.byType(EditableText));
-    final RenderEditable editable = findRenderEditable(tester);
-    editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
+      await tester.tap(find.byType(EditableText));
+      final RenderEditable editable = findRenderEditable(tester);
+      editable.selection =
+          const TextSelection(baseOffset: 29, extentOffset: 29);
 
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    editableTextState.updateFloatingCursor(
-      RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: const Offset(20, 20)),
-    );
-    await tester.pump();
+      final EditableTextState editableTextState =
+          tester.firstState(find.byType(EditableText));
+      editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(
+            state: FloatingCursorDragState.Start, offset: const Offset(20, 20)),
+      );
+      await tester.pump();
 
-    expect(editable, paints
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
-          const Radius.circular(2.0),
+      expect(
+        editable,
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(463.3333435058594, -0.916666666666668,
+                  465.3333435058594, 17.083333015441895),
+              const Radius.circular(2.0),
+            ),
+            color: const Color(0xff999999),
+          )
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(463.8333435058594, -0.916666666666668,
+                  466.8333435058594, 19.083333969116211),
+              const Radius.circular(1.0),
+            ),
+            color: const Color(0xbf2196f3),
+          ),
+      );
+
+      // Moves the cursor right a few characters.
+      editableTextState.updateFloatingCursor(
+        RawFloatingCursorPoint(
+          state: FloatingCursorDragState.Update,
+          offset: const Offset(-250, 20),
         ),
-        color: const Color(0xff999999),
-      )
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(463.8333435058594, -0.916666666666668, 466.8333435058594, 19.083333969116211),
-          const Radius.circular(1.0),
-        ),
-        color: const Color(0xbf2196f3),
-      ),
-    );
+      );
 
-    // Moves the cursor right a few characters.
-    editableTextState.updateFloatingCursor(
-      RawFloatingCursorPoint(
-        state: FloatingCursorDragState.Update,
-        offset: const Offset(-250, 20),
-      ),
-    );
+      expect(
+        find.byType(EditableText),
+        paints
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(191.3333282470703, -0.916666666666668,
+                  193.3333282470703, 17.083333015441895),
+              const Radius.circular(2.0),
+            ),
+            color: const Color(0xff999999),
+          )
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTRB(193.83334350585938, -0.916666666666668,
+                  196.83334350585938, 19.083333969116211),
+              const Radius.circular(1.0),
+            ),
+            color: const Color(0xbf2196f3),
+          ),
+      );
 
-    expect(find.byType(EditableText), paints
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
-          const Radius.circular(2.0),
-        ),
-        color: const Color(0xff999999),
-      )
-      ..rrect(
-        rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),
-          const Radius.circular(1.0),
-        ),
-        color: const Color(0xbf2196f3),
-      ),
-    );
-
-    editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-    await tester.pumpAndSettle();
-    debugDefaultTargetPlatformOverride = null;
-  },
-  variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+      editableTextState.updateFloatingCursor(
+          RawFloatingCursorPoint(state: FloatingCursorDragState.End));
+      await tester.pumpAndSettle();
+      debugDefaultTargetPlatformOverride = null;
+    },
+    variant: const TargetPlatformVariant(
+        <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}),
   );
 
   testWidgetsWithLeakTracking('cursor layout', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -1021,7 +1117,9 @@ void main() {
               key: editableTextKey,
               controller: controller,
               focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
+              style: Typography.material2018(platform: TargetPlatform.iOS)
+                  .black
+                  .titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -1038,7 +1136,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -1064,11 +1163,15 @@ void main() {
       matchesGoldenFile('editable_text_test.2.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgetsWithLeakTracking('cursor layout has correct height', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor layout has correct height',
+      (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -1082,7 +1185,9 @@ void main() {
               key: editableTextKey,
               controller: controller,
               focusNode: focusNode,
-              style: Typography.material2018(platform: TargetPlatform.iOS).black.titleMedium!,
+              style: Typography.material2018(platform: TargetPlatform.iOS)
+                  .black
+                  .titleMedium!,
               cursorColor: Colors.blue,
               selectionControls: materialTextSelectionControls,
               keyboardType: TextInputType.text,
@@ -1100,7 +1205,8 @@ void main() {
 
     // Populate a fake clipboard.
     const String clipboardContent = 'Hello world!';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform, (MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
@@ -1126,9 +1232,13 @@ void main() {
       matchesGoldenFile('editable_text_test.3.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+      variant: const TargetPlatformVariant(
+          <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS}));
 
-  testWidgetsWithLeakTracking('password briefly does not show last character when disabled by system', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'password briefly does not show last character when disabled by system',
+      (WidgetTester tester) async {
     final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
     EditableText.debugDeterministicCursor = false;
     addTearDown(() {
@@ -1164,9 +1274,12 @@ void main() {
     expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
   });
 
-  testWidgetsWithLeakTracking('getLocalRectForCaret with empty text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('getLocalRectForCaret with empty text',
+      (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    addTearDown(() { EditableText.debugDeterministicCursor = false; });
+    addTearDown(() {
+      EditableText.debugDeterministicCursor = false;
+    });
     const String text = '12';
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(
@@ -1189,12 +1302,15 @@ void main() {
     );
     await tester.pumpWidget(MaterialApp(home: widget));
 
-    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
+    final EditableTextState editableTextState =
+        tester.firstState(find.byWidget(widget));
     final RenderEditable renderEditable = editableTextState.renderEditable;
-    final Rect initialLocalCaretRect = renderEditable.getLocalRectForCaret(const TextPosition(offset: text.length));
+    final Rect initialLocalCaretRect = renderEditable
+        .getLocalRectForCaret(const TextPosition(offset: text.length));
 
     for (int i = 0; i < 3; i++) {
-      Actions.invoke(primaryFocus!.context!, const DeleteCharacterIntent(forward: false));
+      Actions.invoke(
+          primaryFocus!.context!, const DeleteCharacterIntent(forward: false));
       await tester.pump();
       expect(controller.text.length, math.max(0, text.length - 1 - i));
       final Rect localRect = renderEditable.getLocalRectForCaret(
@@ -1209,97 +1325,120 @@ void main() {
     expect(controller.text, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('Caret center space test', (WidgetTester tester) async {
-    EditableText.debugDeterministicCursor = true;
-    addTearDown(() { EditableText.debugDeterministicCursor = false; });
-    final String text = 'test${' ' * 1000}';
-    final TextEditingController controller = TextEditingController.fromValue(
-      TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: text.length, affinity: TextAffinity.upstream),
-      ),
-    );
-    addTearDown(controller.dispose);
+  testWidgetsWithLeakTracking(
+    'Caret center space test',
+    (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      addTearDown(() {
+        EditableText.debugDeterministicCursor = false;
+      });
+      final String text = 'test${' ' * 1000}';
+      final TextEditingController controller = TextEditingController.fromValue(
+        TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(
+              offset: text.length, affinity: TextAffinity.upstream),
+        ),
+      );
+      addTearDown(controller.dispose);
 
-    final Widget widget = EditableText(
-      autofocus: true,
-      backgroundCursorColor: Colors.grey,
-      controller: controller,
-      focusNode: focusNode,
-      style: const TextStyle(),
-      textAlign: TextAlign.center,
-      keyboardType: TextInputType.text,
-      cursorColor: cursorColor,
-      cursorWidth: 13.0,
-      cursorHeight: 17.0,
-      maxLines: null,
-    );
-    await tester.pumpWidget(MaterialApp(home: widget));
+      final Widget widget = EditableText(
+        autofocus: true,
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: const TextStyle(),
+        textAlign: TextAlign.center,
+        keyboardType: TextInputType.text,
+        cursorColor: cursorColor,
+        cursorWidth: 13.0,
+        cursorHeight: 17.0,
+        maxLines: null,
+      );
+      await tester.pumpWidget(MaterialApp(home: widget));
 
-    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
-    final Rect editableTextRect = tester.getRect(find.byWidget(widget));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-    // The trailing whitespaces are not line break opportunities.
-    expect(renderEditable.getLineAtOffset(TextPosition(offset: text.length)).start, 0);
+      final EditableTextState editableTextState =
+          tester.firstState(find.byWidget(widget));
+      final Rect editableTextRect = tester.getRect(find.byWidget(widget));
+      final RenderEditable renderEditable = editableTextState.renderEditable;
+      // The trailing whitespaces are not line break opportunities.
+      expect(
+          renderEditable
+              .getLineAtOffset(TextPosition(offset: text.length))
+              .start,
+          0);
 
-    // The caretRect shouldn't be outside of the RenderEditable.
-    final Rect caretRect = Rect.fromLTWH(
-      editableTextRect.right - 13.0 - 1.0,
-      editableTextRect.top,
-      13.0,
-      17.0,
-    );
-    expect(
-      renderEditable,
-      paints..rect(color: cursorColor, rect: caretRect),
-    );
-  },
-  skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
-  );
-
-  testWidgetsWithLeakTracking('getLocalRectForCaret reports the real caret Rect', (WidgetTester tester) async {
-    EditableText.debugDeterministicCursor = true;
-    addTearDown(() { EditableText.debugDeterministicCursor = false; });
-    final String text = 'test${' ' * 50}\n'
-                        '2nd line\n'
-                        '\n';
-    final TextEditingController controller = TextEditingController.fromValue(TextEditingValue(
-      text: text,
-      selection: const TextSelection.collapsed(offset: 0),
-    ));
-    addTearDown(controller.dispose);
-
-    final Widget widget = EditableText(
-      autofocus: true,
-      backgroundCursorColor: Colors.grey,
-      controller: controller,
-      focusNode: focusNode,
-      style: const TextStyle(fontSize: 20),
-      textAlign: TextAlign.center,
-      keyboardType: TextInputType.text,
-      cursorColor: cursorColor,
-      maxLines: null,
-    );
-    await tester.pumpWidget(MaterialApp(home: widget));
-
-    final EditableTextState editableTextState = tester.firstState(find.byWidget(widget));
-    final Rect editableTextRect = tester.getRect(find.byWidget(widget));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    final Iterable<TextPosition> positions = List<int>
-      .generate(text.length + 1, (int index) => index)
-      .expand((int i) => <TextPosition>[TextPosition(offset: i, affinity: TextAffinity.upstream), TextPosition(offset: i)]);
-    for (final TextPosition position in positions) {
-      controller.selection = TextSelection.fromPosition(position);
-      await tester.pump();
-
-      final Rect localRect = renderEditable.getLocalRectForCaret(position);
+      // The caretRect shouldn't be outside of the RenderEditable.
+      final Rect caretRect = Rect.fromLTWH(
+        editableTextRect.right - 13.0 - 1.0,
+        editableTextRect.top,
+        13.0,
+        17.0,
+      );
       expect(
         renderEditable,
-        paints..rect(color: cursorColor, rect: localRect.shift(editableTextRect.topLeft)),
+        paints..rect(color: cursorColor, rect: caretRect),
       );
-    }
-  },
-  variant: TargetPlatformVariant.all(),
+    },
+    skip: isBrowser &&
+        !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
+  );
+
+  testWidgetsWithLeakTracking(
+    'getLocalRectForCaret reports the real caret Rect',
+    (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      addTearDown(() {
+        EditableText.debugDeterministicCursor = false;
+      });
+      final String text = 'test${' ' * 50}\n'
+          '2nd line\n'
+          '\n';
+      final TextEditingController controller =
+          TextEditingController.fromValue(TextEditingValue(
+        text: text,
+        selection: const TextSelection.collapsed(offset: 0),
+      ));
+      addTearDown(controller.dispose);
+
+      final Widget widget = EditableText(
+        autofocus: true,
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: const TextStyle(fontSize: 20),
+        textAlign: TextAlign.center,
+        keyboardType: TextInputType.text,
+        cursorColor: cursorColor,
+        maxLines: null,
+      );
+      await tester.pumpWidget(MaterialApp(home: widget));
+
+      final EditableTextState editableTextState =
+          tester.firstState(find.byWidget(widget));
+      final Rect editableTextRect = tester.getRect(find.byWidget(widget));
+      final RenderEditable renderEditable = editableTextState.renderEditable;
+
+      final Iterable<TextPosition> positions =
+          List<int>.generate(text.length + 1, (int index) => index)
+              .expand((int i) => <TextPosition>[
+                    TextPosition(offset: i, affinity: TextAffinity.upstream),
+                    TextPosition(offset: i)
+                  ]);
+      for (final TextPosition position in positions) {
+        controller.selection = TextSelection.fromPosition(position);
+        await tester.pump();
+
+        final Rect localRect = renderEditable.getLocalRectForCaret(position);
+        expect(
+          renderEditable,
+          paints
+            ..rect(
+                color: cursorColor,
+                rect: localRect.shift(editableTextRect.topLeft)),
+        );
+      }
+    },
+    variant: TargetPlatformVariant.all(),
   );
 }

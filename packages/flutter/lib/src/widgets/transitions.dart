@@ -354,7 +354,8 @@ class ScaleTransition extends MatrixTransition {
   ///
   /// If the current value of the animation is v, the child will be
   /// painted v times its normal size.
-  static Matrix4 _handleScaleMatrix(double value) => Matrix4.diagonal3Values(value, value, 1.0);
+  static Matrix4 _handleScaleMatrix(double value) =>
+      Matrix4.diagonal3Values(value, value, 1.0);
 }
 
 /// Animates the rotation of a widget.
@@ -393,7 +394,8 @@ class RotationTransition extends MatrixTransition {
   ///
   /// If the current value of the animation is v, the child will be rotated
   /// v * 2 * pi radians before being painted.
-  static Matrix4 _handleTurnsMatrix(double value) => Matrix4.rotationZ(value * math.pi * 2.0);
+  static Matrix4 _handleTurnsMatrix(double value) =>
+      Matrix4.rotationZ(value * math.pi * 2.0);
 }
 
 /// Animates its own size and clips and aligns its child.
@@ -443,8 +445,9 @@ class SizeTransition extends AnimatedWidget {
     this.axisAlignment = 0.0,
     this.fixedCrossAxisSizeFactor,
     this.child,
-  }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
-    super(listenable: sizeFactor);
+  })  : assert(fixedCrossAxisSizeFactor == null ||
+            fixedCrossAxisSizeFactor >= 0.0),
+        super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].
@@ -497,8 +500,12 @@ class SizeTransition extends AnimatedWidget {
     return ClipRect(
       child: Align(
         alignment: alignment,
-        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
-        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
+        heightFactor: axis == Axis.vertical
+            ? math.max(sizeFactor.value, 0.0)
+            : fixedCrossAxisSizeFactor,
+        widthFactor: axis == Axis.horizontal
+            ? math.max(sizeFactor.value, 0.0)
+            : fixedCrossAxisSizeFactor,
         child: child,
       ),
     );
@@ -584,7 +591,8 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
@@ -594,7 +602,8 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties.add(FlagProperty('alwaysIncludeSemantics',
+        value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -674,7 +683,8 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverAnimatedOpacity renderObject) {
+  void updateRenderObject(
+      BuildContext context, RenderSliverAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
@@ -684,7 +694,8 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+    properties.add(FlagProperty('alwaysIncludeSemantics',
+        value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -699,7 +710,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
   ///
   /// The [begin] and [end] properties may be null; the null value
   /// is treated as [RelativeRect.fill].
-  RelativeRectTween({ super.begin, super.end });
+  RelativeRectTween({super.begin, super.end});
 
   /// Returns the value this variable has at the given animation clock value.
   @override
@@ -825,7 +836,8 @@ class RelativePositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final RelativeRect offsets = RelativeRect.fromSize(rect.value ?? Rect.zero, size);
+    final RelativeRect offsets =
+        RelativeRect.fromSize(rect.value ?? Rect.zero, size);
     return Positioned(
       top: offsets.top,
       right: offsets.right,
@@ -936,7 +948,8 @@ class AlignTransition extends AnimatedWidget {
   }) : super(listenable: alignment);
 
   /// The animation that controls the child's alignment.
-  Animation<AlignmentGeometry> get alignment => listenable as Animation<AlignmentGeometry>;
+  Animation<AlignmentGeometry> get alignment =>
+      listenable as Animation<AlignmentGeometry>;
 
   /// If non-null, the child's width factor, see [Align.widthFactor].
   final double? widthFactor;

@@ -9,8 +9,10 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('BottomSheetThemeData copyWith, ==, hashCode basics', () {
-    expect(const BottomSheetThemeData(), const BottomSheetThemeData().copyWith());
-    expect(const BottomSheetThemeData().hashCode, const BottomSheetThemeData().copyWith().hashCode);
+    expect(
+        const BottomSheetThemeData(), const BottomSheetThemeData().copyWith());
+    expect(const BottomSheetThemeData().hashCode,
+        const BottomSheetThemeData().copyWith().hashCode);
   });
 
   test('BottomSheetThemeData lerp special cases', () {
@@ -37,7 +39,9 @@ void main() {
     expect(bottomSheetTheme.dragHandleSize, null);
   });
 
-  testWidgetsWithLeakTracking('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Default BottomSheetThemeData debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData().debugFillProperties(builder);
 
@@ -49,18 +53,21 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomSheetThemeData implements debugFillProperties',
+      (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData(
-      backgroundColor: Color(0xFFFFFFFF),
-      elevation: 2.0,
-      shadowColor: Color(0xFF00FFFF),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
-      clipBehavior: Clip.antiAlias,
-      constraints: BoxConstraints(minWidth: 200, maxWidth: 640),
-      dragHandleColor: Color(0xFFFFFFFF),
-      dragHandleSize: Size(20, 20)
-    ).debugFillProperties(builder);
+            backgroundColor: Color(0xFFFFFFFF),
+            elevation: 2.0,
+            shadowColor: Color(0xFF00FFFF),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(2.0))),
+            clipBehavior: Clip.antiAlias,
+            constraints: BoxConstraints(minWidth: 200, maxWidth: 640),
+            dragHandleColor: Color(0xFFFFFFFF),
+            dragHandleSize: Size(20, 20))
+        .debugFillProperties(builder);
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -79,7 +86,9 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Material3 - Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material3 - Passing no BottomSheetThemeData returns defaults',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -102,11 +111,16 @@ void main() {
     final ThemeData theme = Theme.of(tester.element(find.byType(Scaffold)));
     expect(material.color, theme.colorScheme.surface);
     expect(material.elevation, 1.0);
-    expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))));
+    expect(
+        material.shape,
+        const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))));
     expect(material.clipBehavior, Clip.none);
   });
 
-  testWidgetsWithLeakTracking('Material2 - Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Material2 - Passing no BottomSheetThemeData returns defaults',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: false),
       home: Scaffold(
@@ -131,7 +145,9 @@ void main() {
     expect(material.clipBehavior, Clip.none);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomSheet uses values from BottomSheetThemeData',
+      (WidgetTester tester) async {
     final BottomSheetThemeData bottomSheetTheme = _bottomSheetTheme();
 
     await tester.pumpWidget(MaterialApp(
@@ -158,7 +174,9 @@ void main() {
     expect(material.clipBehavior, bottomSheetTheme.clipBehavior);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'BottomSheet widget properties take priority over theme',
+      (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color shadowColor = Colors.blue;
     const double elevation = 7.0;
@@ -197,7 +215,9 @@ void main() {
     expect(material.clipBehavior, clipBehavior);
   });
 
-  testWidgetsWithLeakTracking('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'Modal bottom sheet-specific parameters are used for modal bottom sheets',
+      (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -208,7 +228,7 @@ void main() {
       modalElevation: modalElevation,
       backgroundColor: persistentBackgroundColor,
       modalBackgroundColor: modalBackgroundColor,
-      modalBarrierColor:modalBarrierColor,
+      modalBarrierColor: modalBarrierColor,
     );
 
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
@@ -224,11 +244,14 @@ void main() {
     expect(material.elevation, modalElevation);
     expect(material.color, modalBackgroundColor);
 
-    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+    final ModalBarrier modalBarrier =
+        tester.widget(find.byType(ModalBarrier).last);
     expect(modalBarrier.color, modalBarrierColor);
   });
 
-  testWidgetsWithLeakTracking('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets',
+      (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -254,7 +277,9 @@ void main() {
     expect(material.color, persistentBackgroundColor);
   });
 
-  testWidgetsWithLeakTracking("Material3 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Material3 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets",
+      (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -277,7 +302,9 @@ void main() {
     expect(material.color, theme.colorScheme.surface);
   });
 
-  testWidgetsWithLeakTracking("Material2 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      "Material2 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets",
+      (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -285,7 +312,8 @@ void main() {
       modalBackgroundColor: modalBackgroundColor,
     );
 
-    await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme, useMaterial3: false));
+    await tester.pumpWidget(
+        bottomSheetWithElevations(bottomSheetTheme, useMaterial3: false));
     await tester.tap(find.text('Show Persistent'));
     await tester.pumpAndSettle();
 
@@ -299,7 +327,8 @@ void main() {
     expect(material.color, null);
   });
 
-  testWidgetsWithLeakTracking('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Modal bottom sheets respond to theme changes',
+      (WidgetTester tester) async {
     const double lightElevation = 5.0;
     const double darkElevation = 3.0;
     const Color lightBackgroundColor = Colors.green;
@@ -358,12 +387,13 @@ void main() {
     expect(lightMaterial.shadowColor, lightShadowColor);
 
     // Simulate the user changing to dark theme
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    tester.binding.platformDispatcher.platformBrightnessTestValue =
+        Brightness.dark;
     await tester.pumpAndSettle();
 
     final Material darkMaterial = tester.widget<Material>(
-    find.descendant(
-      of: find.byType(BottomSheet),
+      find.descendant(
+        of: find.byType(BottomSheet),
         matching: find.byType(Material),
       ),
     );
@@ -373,41 +403,43 @@ void main() {
   });
 }
 
-Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme, {bool useMaterial3 = true}) {
+Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme,
+    {bool useMaterial3 = true}) {
   return MaterialApp(
-    theme: ThemeData(bottomSheetTheme: bottomSheetTheme, useMaterial3: useMaterial3),
+    theme: ThemeData(
+        bottomSheetTheme: bottomSheetTheme, useMaterial3: useMaterial3),
     home: Scaffold(
       body: Builder(
         builder: (BuildContext context) {
           return Column(
-              children: <Widget>[
-                RawMaterialButton(
-                  child: const Text('Show Modal'),
-                  onPressed: () {
-                    showModalBottomSheet<void>(
-                      context: context,
-                      builder: (BuildContext _) {
-                        return const Text(
-                          'This is a modal bottom sheet.',
-                        );
-                      },
-                    );
-                  },
-                ),
-                RawMaterialButton(
-                  child: const Text('Show Persistent'),
-                  onPressed: () {
-                    showBottomSheet<void>(
-                      context: context,
-                      builder: (BuildContext _) {
-                        return const Text(
-                          'This is a persistent bottom sheet.',
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
+            children: <Widget>[
+              RawMaterialButton(
+                child: const Text('Show Modal'),
+                onPressed: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext _) {
+                      return const Text(
+                        'This is a modal bottom sheet.',
+                      );
+                    },
+                  );
+                },
+              ),
+              RawMaterialButton(
+                child: const Text('Show Persistent'),
+                onPressed: () {
+                  showBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext _) {
+                      return const Text(
+                        'This is a persistent bottom sheet.',
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
           );
         },
       ),
@@ -419,7 +451,8 @@ BottomSheetThemeData _bottomSheetTheme() {
   return const BottomSheetThemeData(
     backgroundColor: Colors.orange,
     elevation: 12.0,
-    shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+    shape: BeveledRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12))),
     clipBehavior: Clip.antiAlias,
   );
 }
