@@ -71,7 +71,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   Uri? yamlParentDirectory,
   required FileSystem fileSystem,
   required int targetAndroidNdkApi,
-  bool isBuildingAar = false,
+  bool isAddToApp = false,
 }) async {
   const OS targetOS = OS.android;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOS);
@@ -107,9 +107,9 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  if (isBuildingAar && nativeAssets.isNotEmpty) {
+  if (isAddToApp && nativeAssets.isNotEmpty) {
     throwToolExit(
-        'Native assets are not yet supported in `flutter build aar`.');
+        'Native assets are not yet supported in Android add2app.');
   }
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);

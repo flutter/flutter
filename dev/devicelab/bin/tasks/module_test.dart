@@ -43,6 +43,36 @@ Future<void> main() async {
         );
       });
 
+      section('Create package with native assets');
+
+      await flutter(
+        'config',
+        options: <String>['--enable-native-assets'],
+      );
+
+      const String ffiPackageName = 'ffi_package';
+      await createFfiPackage(ffiPackageName, tempDir);
+
+      section('Add FFI package');
+
+      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        'dependencies:\n',
+        '''
+dependencies:
+  $ffiPackageName:
+    path: ../$ffiPackageName
+''',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'packages',
+          options: <String>['get'],
+        );
+      });
+
       section('Add read-only asset');
 
       final File readonlyTxtAssetFile = await File(path.join(
@@ -63,8 +93,6 @@ Future<void> main() async {
         ]);
       }
 
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '$platformLineSep  # assets:$platformLineSep',
         '$platformLineSep  assets:$platformLineSep    - assets/read-only.txt$platformLineSep',
@@ -73,10 +101,47 @@ Future<void> main() async {
 
       section('Add plugins');
 
-      content = await pubspec.readAsString();
       content = content.replaceFirst(
         '${platformLineSep}dependencies:$platformLineSep',
         '${platformLineSep}dependencies:$platformLineSep  device_info: 2.0.3$platformLineSep  package_info: 2.0.2$platformLineSep',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'packages',
+          options: <String>['get'],
+        );
+      });
+
+      // TODO(dacoharkes): Implement Add2app. https://github.com/flutter/flutter/issues/129757
+      section('Check native assets error');
+
+      await inDirectory(Directory(path.join(projectDir.path, '.android')),
+          () async {
+        final StringBuffer stderr = StringBuffer();
+        await exec(
+          gradlewExecutable,
+          <String>['flutter:assembleDebug'],
+          environment: <String, String>{'JAVA_HOME': javaHome},
+          canFail: true,
+          stderr: stderr,
+        );
+        const String errorString =
+            'Native assets are not yet supported in Android add2app.';
+        if (!stderr.toString().contains(errorString)) {
+          throw TaskResult.failure(
+              'Expected to find `$errorString` in stderr.');
+        }
+      });
+
+      section('Remove FFI package');
+
+      content = content.replaceFirst(
+        '''
+  $ffiPackageName:
+    path: ../$ffiPackageName
+''',
+        '',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {

@@ -172,12 +172,12 @@ void main() {
   );
 
 
-  for (final bool isBuildingAar in <bool>[true, false]) {
+  for (final bool isAddToApp in <bool>[true, false]) {
     for (final bool hasAssets in <bool>[true, false]) {
-      final String buildType = isBuildingAar ? 'aar' : 'not-aar';
+      final String buildType = isAddToApp ? 'aar' : 'not-aar';
       final String withOrWithout = hasAssets ? 'with' : 'without';
       final String throwsOrDoesntThrow =
-          (isBuildingAar && hasAssets) ? 'throws' : 'does not throw';
+          (isAddToApp && hasAssets) ? 'throws' : 'does not throw';
       testUsingContext(
         'flutter build $buildType $withOrWithout native assets $throwsOrDoesntThrow',
         overrides: <Type, Generator>{
@@ -211,10 +211,10 @@ void main() {
               Uri.file('src/foo.c'),
             ]),
           );
-          if (isBuildingAar) {
-            androidEnvironment.defines[kIsBuildingAar] = 'true';
+          if (isAddToApp) {
+            androidEnvironment.defines[kIsAddToApp] = 'true';
           }
-          if (hasAssets && isBuildingAar) {
+          if (hasAssets && isAddToApp) {
             expect(
               NativeAssets(buildRunner: buildRunner).build(androidEnvironment),
               throwsToolExit(),

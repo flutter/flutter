@@ -1032,8 +1032,14 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            // We build an AAR when this property is defined.
-            boolean isBuildingAarValue = project.hasProperty('is-plugin')
+            // Build an AAR when this property is defined.
+            boolean isBuildingAar = project.hasProperty('is-plugin')
+            // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
+            // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
+            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
+            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
+            boolean isAddToAppValue = isBuildingAar || isUsedAsSubproject
 
             String variantBuildMode = buildModeFor(variant.buildType)
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
@@ -1072,7 +1078,7 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory codeSizeDirectoryValue
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
-                isBuildingAar isBuildingAarValue
+                isAddToApp isAddToAppValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -1102,11 +1108,6 @@ class FlutterPlugin implements Plugin<Project> {
             addApiDependencies(project, variant.name, project.files {
                 packFlutterAppAotTask
             })
-            // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
-            // We know that `:flutter` is used as a subproject when these tasks exists and we aren't building an AAR.
-            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
-            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
-            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAarValue
             Task copyFlutterAssetsTask = project.tasks.create(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
                 type: Copy,
@@ -1334,7 +1335,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean validateDeferredComponents
     @Optional @Input
-    Boolean isBuildingAar
+    Boolean isAddToApp
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -1426,8 +1427,8 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args "-dAndroidArchs=${targetPlatformValues.join(' ')}"
             args "-dMinSdkVersion=${minSdkVersion}"
-            if (isBuildingAar != null) {
-                args "-dIsBuildingAar=${isBuildingAar}"
+            if (isAddToApp != null) {
+                args "-dIsAddToApp=${isAddToApp}"
             }
             args ruleNames
         }
