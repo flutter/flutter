@@ -5,6 +5,9 @@
 #ifndef FLUTTER_FML_PLATFORM_DARWIN_SCOPED_NSOBJECT_H_
 #define FLUTTER_FML_PLATFORM_DARWIN_SCOPED_NSOBJECT_H_
 
+#include <type_traits>
+#include <utility>
+
 // Include NSObject.h directly because Foundation.h pulls in many dependencies.
 // (Approx 100k lines of code versus 1.5k for NSObject.h). scoped_nsobject gets
 // singled out because it is most typically included from other header files.
@@ -12,8 +15,11 @@
 
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/platform/darwin/scoped_typeref.h"
 
+#if !defined(__has_feature) || !__has_feature(objc_arc)
 @class NSAutoreleasePool;
+#endif
 
 namespace fml {
 
@@ -36,60 +42,93 @@ namespace fml {
 // scoped_nsautorelease_pool.h instead.
 // We check for bad uses of scoped_nsobject and NSAutoreleasePool at compile
 // time with a template specialization (see below).
+//
+// If Automatic Reference Counting (aka ARC) is enabled then the ownership
+// policy is not controllable by the user as ARC make it really difficult to
+// transfer ownership (the reference passed to scoped_nsobject constructor is
+// sunk by ARC and __attribute((ns_consumed)) appears to not work correctly
+// with Objective-C++ see https://llvm.org/bugs/show_bug.cgi?id=27887). Due to
+// that, the policy is always to |RETAIN| when using ARC.
+
+namespace internal {
+
+id ScopedNSProtocolTraitsRetain(__unsafe_unretained id obj)
+    __attribute((ns_returns_not_retained));
+id ScopedNSProtocolTraitsAutoRelease(__unsafe_unretained id obj)
+    __attribute((ns_returns_not_retained));
+void ScopedNSProtocolTraitsRelease(__unsafe_unretained id obj);
+
+// Traits for ScopedTypeRef<>. As this class may be compiled from file with
+// Automatic Reference Counting enable or not all methods have annotation to
+// enforce the same code generation in both case (in particular, the Retain
+// method uses ns_returns_not_retained to prevent ARC to insert a -release
+// call on the returned value and thus defeating the -retain).
+template <typename NST>
+struct ScopedNSProtocolTraits {
+  static NST InvalidValue() __attribute((ns_returns_not_retained)) {
+    return nil;
+  }
+  static NST Retain(__unsafe_unretained NST nst)
+      __attribute((ns_returns_not_retained)) {
+    return ScopedNSProtocolTraitsRetain(nst);
+  }
+  static void Release(__unsafe_unretained NST nst) {
+    ScopedNSProtocolTraitsRelease(nst);
+  }
+};
+
+}  // namespace internal
 
 template <typename NST>
-class scoped_nsprotocol {
+class scoped_nsprotocol
+    : public ScopedTypeRef<NST, internal::ScopedNSProtocolTraits<NST>> {
  public:
-  explicit scoped_nsprotocol(NST object = nil) : object_(object) {}
+  using Traits = internal::ScopedNSProtocolTraits<NST>;
 
-  scoped_nsprotocol(const scoped_nsprotocol<NST>& that) : object_([that.object_ retain]) {}
+#if !defined(__has_feature) || !__has_feature(objc_arc)
+  explicit scoped_nsprotocol(NST object = Traits::InvalidValue(),
+                             scoped_policy::OwnershipPolicy policy =
+                                 scoped_policy::OwnershipPolicy::kAssume)
+      : ScopedTypeRef<NST, Traits>(object, policy) {}
+#else
+  explicit scoped_nsprotocol(NST object = Traits::InvalidValue())
+      : ScopedTypeRef<NST, Traits>(object,
+                                   scoped_policy::OwnershipPolicy::kRetain) {}
+#endif
 
-  template <typename NSU>
   // NOLINTNEXTLINE(google-explicit-constructor)
-  scoped_nsprotocol(const scoped_nsprotocol<NSU>& that) : object_([that.get() retain]) {}
+  scoped_nsprotocol(const scoped_nsprotocol<NST>& that)
+      : ScopedTypeRef<NST, Traits>(that) {}
 
-  ~scoped_nsprotocol() { [object_ release]; }
+  template <typename NSR>
+  explicit scoped_nsprotocol(const scoped_nsprotocol<NSR>& that_as_subclass)
+      : ScopedTypeRef<NST, Traits>(that_as_subclass) {}
+
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  scoped_nsprotocol(scoped_nsprotocol<NST>&& that)
+      : ScopedTypeRef<NST, Traits>(std::move(that)) {}
 
   scoped_nsprotocol& operator=(const scoped_nsprotocol<NST>& that) {
-    reset([that.get() retain]);
+    ScopedTypeRef<NST, Traits>::operator=(that);
     return *this;
   }
 
-  void reset(NST object = nil) {
-    // We intentionally do not check that object != object_ as the caller must
-    // either already have an ownership claim over whatever it passes to this
-    // method, or call it with the |RETAIN| policy which will have ensured that
-    // the object is retained once more when reaching this point.
-    [object_ release];
-    object_ = object;
+#if !defined(__has_feature) || !__has_feature(objc_arc)
+  void reset(NST object = Traits::InvalidValue(),
+             scoped_policy::OwnershipPolicy policy =
+                 scoped_policy::OwnershipPolicy::kAssume) {
+    ScopedTypeRef<NST, Traits>::reset(object, policy);
   }
-
-  bool operator==(NST that) const { return object_ == that; }
-  bool operator!=(NST that) const { return object_ != that; }
-
-  operator NST() const { return object_; }  // NOLINT(google-explicit-constructor)
-
-  NST get() const { return object_; }
-
-  void swap(scoped_nsprotocol& that) {
-    NST temp = that.object_;
-    that.object_ = object_;
-    object_ = temp;
+#else
+  void reset(NST object = Traits::InvalidValue()) {
+    ScopedTypeRef<NST, Traits>::reset(object,
+                                      scoped_policy::OwnershipPolicy::kRetain);
   }
+#endif
 
   // Shift reference to the autorelease pool to be released later.
-  NST autorelease() { return [release() autorelease]; }
-
- private:
-  NST object_;
-
-  // scoped_nsprotocol<>::release() is like scoped_ptr<>::release.  It is NOT a
-  // wrapper for [object_ release].  To force a scoped_nsprotocol<> to call
-  // [object_ release], use scoped_nsprotocol<>::reset().
-  [[nodiscard]] NST release() {
-    NST temp = object_;
-    object_ = nil;
-    return temp;
+  NST autorelease() __attribute((ns_returns_not_retained)) {
+    return internal::ScopedNSProtocolTraitsAutoRelease(this->release());
   }
 };
 
@@ -112,46 +151,97 @@ bool operator!=(C p1, const scoped_nsprotocol<C>& p2) {
 template <typename NST>
 class scoped_nsobject : public scoped_nsprotocol<NST*> {
  public:
-  explicit scoped_nsobject(NST* object = nil) : scoped_nsprotocol<NST*>(object) {}
+  using Traits = typename scoped_nsprotocol<NST*>::Traits;
 
-  scoped_nsobject(const scoped_nsobject<NST>& that) : scoped_nsprotocol<NST*>(that) {}
+#if !defined(__has_feature) || !__has_feature(objc_arc)
+  explicit scoped_nsobject(NST* object = Traits::InvalidValue(),
+                           scoped_policy::OwnershipPolicy policy =
+                               scoped_policy::OwnershipPolicy::kAssume)
+      : scoped_nsprotocol<NST*>(object, policy) {}
+#else
+  explicit scoped_nsobject(NST* object = Traits::InvalidValue())
+      : scoped_nsprotocol<NST*>(object) {}
+#endif
 
-  template <typename NSU>
   // NOLINTNEXTLINE(google-explicit-constructor)
-  scoped_nsobject(const scoped_nsobject<NSU>& that) : scoped_nsprotocol<NST*>(that) {}
+  scoped_nsobject(const scoped_nsobject<NST>& that)
+      : scoped_nsprotocol<NST*>(that) {}
+
+  template <typename NSR>
+  explicit scoped_nsobject(const scoped_nsobject<NSR>& that_as_subclass)
+      : scoped_nsprotocol<NST*>(that_as_subclass) {}
+
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  scoped_nsobject(scoped_nsobject<NST>&& that)
+      : scoped_nsprotocol<NST*>(std::move(that)) {}
 
   scoped_nsobject& operator=(const scoped_nsobject<NST>& that) {
     scoped_nsprotocol<NST*>::operator=(that);
     return *this;
   }
+
+#if !defined(__has_feature) || !__has_feature(objc_arc)
+  void reset(NST* object = Traits::InvalidValue(),
+             scoped_policy::OwnershipPolicy policy =
+                 scoped_policy::OwnershipPolicy::kAssume) {
+    scoped_nsprotocol<NST*>::reset(object, policy);
+  }
+#else
+  void reset(NST* object = Traits::InvalidValue()) {
+    scoped_nsprotocol<NST*>::reset(object);
+  }
+#endif
+
+#if !defined(__has_feature) || !__has_feature(objc_arc)
+  static_assert(std::is_same<NST, NSAutoreleasePool>::value == false,
+                "Use ScopedNSAutoreleasePool instead");
+#endif
 };
 
 // Specialization to make scoped_nsobject<id> work.
 template <>
 class scoped_nsobject<id> : public scoped_nsprotocol<id> {
  public:
-  explicit scoped_nsobject(id object = nil) : scoped_nsprotocol<id>(object) {}
+  using Traits = typename scoped_nsprotocol<id>::Traits;
 
-  scoped_nsobject(const scoped_nsobject<id>& that) : scoped_nsprotocol<id>(that) {}
+#if !defined(__has_feature) || !__has_feature(objc_arc)
+  explicit scoped_nsobject(id object = Traits::InvalidValue(),
+                           scoped_policy::OwnershipPolicy policy =
+                               scoped_policy::OwnershipPolicy::kAssume)
+      : scoped_nsprotocol<id>(object, policy) {}
+#else
+  explicit scoped_nsobject(id object = Traits::InvalidValue())
+      : scoped_nsprotocol<id>(object) {}
+#endif
 
-  template <typename NSU>
   // NOLINTNEXTLINE(google-explicit-constructor)
-  scoped_nsobject(const scoped_nsobject<NSU>& that) : scoped_nsprotocol<id>(that) {}
+  scoped_nsobject(const scoped_nsobject<id>& that)
+      : scoped_nsprotocol<id>(that) {}
+
+  template <typename NSR>
+  explicit scoped_nsobject(const scoped_nsobject<NSR>& that_as_subclass)
+      : scoped_nsprotocol<id>(that_as_subclass) {}
+
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  scoped_nsobject(scoped_nsobject<id>&& that)
+      : scoped_nsprotocol<id>(std::move(that)) {}
 
   scoped_nsobject& operator=(const scoped_nsobject<id>& that) {
     scoped_nsprotocol<id>::operator=(that);
     return *this;
   }
-};
 
-// Do not use scoped_nsobject for NSAutoreleasePools, use
-// ScopedNSAutoreleasePool instead. This is a compile time check. See details
-// at top of header.
-template <>
-class scoped_nsobject<NSAutoreleasePool> {
- private:
-  explicit scoped_nsobject(NSAutoreleasePool* object = nil);
-  FML_DISALLOW_COPY_AND_ASSIGN(scoped_nsobject);
+#if !defined(__has_feature) || !__has_feature(objc_arc)
+  void reset(id object = Traits::InvalidValue(),
+             scoped_policy::OwnershipPolicy policy =
+                 scoped_policy::OwnershipPolicy::kAssume) {
+    scoped_nsprotocol<id>::reset(object, policy);
+  }
+#else
+  void reset(id object = Traits::InvalidValue()) {
+    scoped_nsprotocol<id>::reset(object);
+  }
+#endif
 };
 
 }  // namespace fml

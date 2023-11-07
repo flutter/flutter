@@ -8,86 +8,40 @@
 #include <Block.h>
 
 #include "flutter/fml/compiler_specific.h"
+#include "flutter/fml/platform/darwin/scoped_typeref.h"
+
+#if defined(__has_feature) && __has_feature(objc_arc)
+#define BASE_MAC_BRIDGE_CAST(TYPE, VALUE) (__bridge TYPE)(VALUE)
+#else
+#define BASE_MAC_BRIDGE_CAST(TYPE, VALUE) VALUE
+#endif
 
 namespace fml {
+
+namespace internal {
+
+template <typename B>
+struct ScopedBlockTraits {
+  static B InvalidValue() { return nullptr; }
+  static B Retain(B block) {
+    return BASE_MAC_BRIDGE_CAST(
+        B, Block_copy(BASE_MAC_BRIDGE_CAST(const void*, block)));
+  }
+  static void Release(B block) {
+    Block_release(BASE_MAC_BRIDGE_CAST(const void*, block));
+  }
+};
+
+}  // namespace internal
 
 // ScopedBlock<> is patterned after ScopedCFTypeRef<>, but uses Block_copy() and
 // Block_release() instead of CFRetain() and CFRelease().
 
-enum class OwnershipPolicy {
-  // The scoped object takes ownership of an object by taking over an existing
-  // ownership claim.
-  kAssume,
-
-  // The scoped object will retain the object and any initial ownership is
-  // not changed.
-  kRetain,
-};
-
 template <typename B>
-class ScopedBlock {
- public:
-  explicit ScopedBlock(B block = nullptr,
-                       OwnershipPolicy policy = OwnershipPolicy::kAssume)
-      : block_(block) {
-    if (block_ && policy == OwnershipPolicy::kRetain) {
-      block_ = Block_copy(block);
-    }
-  }
-
-  ScopedBlock(const ScopedBlock<B>& that) : block_(that.block_) {
-    if (block_) {
-      block_ = Block_copy(block_);
-    }
-  }
-
-  ~ScopedBlock() {
-    if (block_) {
-      Block_release(block_);
-    }
-  }
-
-  ScopedBlock& operator=(const ScopedBlock<B>& that) {
-    reset(that.get(), OwnershipPolicy::kRetain);
-    return *this;
-  }
-
-  void reset(B block = nullptr,
-             OwnershipPolicy policy = OwnershipPolicy::kAssume) {
-    if (block && policy == OwnershipPolicy::kRetain) {
-      block = Block_copy(block);
-    }
-    if (block_) {
-      Block_release(block_);
-    }
-    block_ = block;
-  }
-
-  bool operator==(B that) const { return block_ == that; }
-
-  bool operator!=(B that) const { return block_ != that; }
-
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  operator B() const { return block_; }
-
-  B get() const { return block_; }
-
-  void swap(ScopedBlock& that) {
-    B temp = that.block_;
-    that.block_ = block_;
-    block_ = temp;
-  }
-
-  [[nodiscard]] B release() {
-    B temp = block_;
-    block_ = nullptr;
-    return temp;
-  }
-
- private:
-  B block_;
-};
+using ScopedBlock = ScopedTypeRef<B, internal::ScopedBlockTraits<B>>;
 
 }  // namespace fml
+
+#undef BASE_MAC_BRIDGE_CAST
 
 #endif  // FLUTTER_FML_PLATFORM_DARWIN_SCOPED_BLOCK_H_
