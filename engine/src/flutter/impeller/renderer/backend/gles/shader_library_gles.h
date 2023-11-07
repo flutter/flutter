@@ -30,7 +30,7 @@ class ShaderLibraryGLES final : public ShaderLibrary {
   ShaderFunctionMap functions_ IPLR_GUARDED_BY(functions_mutex_);
   bool is_valid_ = false;
 
-  explicit ShaderLibraryGLES(
+  ShaderLibraryGLES(
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries);
 
   // |ShaderLibrary|

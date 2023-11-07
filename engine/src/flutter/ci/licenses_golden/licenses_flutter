@@ -3136,13 +3136,42 @@ ORIGIN: ../../../flutter/impeller/entity/inline_pass_context.cc + ../../../flutt
 ORIGIN: ../../../flutter/impeller/entity/inline_pass_context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/render_target_cache.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/render_target_cache.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.vert + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_color.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_colorburn.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_colordodge.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_darken.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_difference.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_exclusion.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_hardlight.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_hue.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_lighten.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_luminosity.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_multiply.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_overlay.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_saturation.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_screen.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_softlight.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/blend.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/blend.vert + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/blending/blend_select.glsl + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/blending/framebuffer_blend.frag + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/blending/framebuffer_blend.vert + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend.glsl + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend.vert + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_color.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_colorburn.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_colordodge.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_darken.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_difference.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_exclusion.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_hardlight.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_hue.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_lighten.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_luminosity.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_multiply.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_overlay.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_saturation.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_screen.frag + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_softlight.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/porter_duff_blend.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/porter_duff_blend.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/border_mask_blur.frag + ../../../flutter/LICENSE
@@ -5892,13 +5921,42 @@ FILE: ../../../flutter/impeller/entity/inline_pass_context.cc
 FILE: ../../../flutter/impeller/entity/inline_pass_context.h
 FILE: ../../../flutter/impeller/entity/render_target_cache.cc
 FILE: ../../../flutter/impeller/entity/render_target_cache.h
-FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.glsl
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.vert
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_color.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_colorburn.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_colordodge.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_darken.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_difference.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_exclusion.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_hardlight.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_hue.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_lighten.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_luminosity.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_multiply.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_overlay.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_saturation.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_screen.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_softlight.frag
 FILE: ../../../flutter/impeller/entity/shaders/blending/blend.frag
 FILE: ../../../flutter/impeller/entity/shaders/blending/blend.vert
-FILE: ../../../flutter/impeller/entity/shaders/blending/blend_select.glsl
-FILE: ../../../flutter/impeller/entity/shaders/blending/framebuffer_blend.frag
-FILE: ../../../flutter/impeller/entity/shaders/blending/framebuffer_blend.vert
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend.glsl
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend.vert
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_color.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_colorburn.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_colordodge.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_darken.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_difference.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_exclusion.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_hardlight.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_hue.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_lighten.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_luminosity.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_multiply.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_overlay.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_saturation.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_screen.frag
+FILE: ../../../flutter/impeller/entity/shaders/blending/ios/framebuffer_blend_softlight.frag
 FILE: ../../../flutter/impeller/entity/shaders/blending/porter_duff_blend.frag
 FILE: ../../../flutter/impeller/entity/shaders/blending/porter_duff_blend.vert
 FILE: ../../../flutter/impeller/entity/shaders/border_mask_blur.frag

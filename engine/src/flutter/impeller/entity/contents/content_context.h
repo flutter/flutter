@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -76,11 +75,39 @@
 #include "impeller/entity/radial_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/sweep_gradient_ssbo_fill.frag.h"
 
-#include "impeller/entity/advanced_blend.frag.h"
 #include "impeller/entity/advanced_blend.vert.h"
+#include "impeller/entity/advanced_blend_color.frag.h"
+#include "impeller/entity/advanced_blend_colorburn.frag.h"
+#include "impeller/entity/advanced_blend_colordodge.frag.h"
+#include "impeller/entity/advanced_blend_darken.frag.h"
+#include "impeller/entity/advanced_blend_difference.frag.h"
+#include "impeller/entity/advanced_blend_exclusion.frag.h"
+#include "impeller/entity/advanced_blend_hardlight.frag.h"
+#include "impeller/entity/advanced_blend_hue.frag.h"
+#include "impeller/entity/advanced_blend_lighten.frag.h"
+#include "impeller/entity/advanced_blend_luminosity.frag.h"
+#include "impeller/entity/advanced_blend_multiply.frag.h"
+#include "impeller/entity/advanced_blend_overlay.frag.h"
+#include "impeller/entity/advanced_blend_saturation.frag.h"
+#include "impeller/entity/advanced_blend_screen.frag.h"
+#include "impeller/entity/advanced_blend_softlight.frag.h"
 
-#include "impeller/entity/framebuffer_blend.frag.h"
 #include "impeller/entity/framebuffer_blend.vert.h"
+#include "impeller/entity/framebuffer_blend_color.frag.h"
+#include "impeller/entity/framebuffer_blend_colorburn.frag.h"
+#include "impeller/entity/framebuffer_blend_colordodge.frag.h"
+#include "impeller/entity/framebuffer_blend_darken.frag.h"
+#include "impeller/entity/framebuffer_blend_difference.frag.h"
+#include "impeller/entity/framebuffer_blend_exclusion.frag.h"
+#include "impeller/entity/framebuffer_blend_hardlight.frag.h"
+#include "impeller/entity/framebuffer_blend_hue.frag.h"
+#include "impeller/entity/framebuffer_blend_lighten.frag.h"
+#include "impeller/entity/framebuffer_blend_luminosity.frag.h"
+#include "impeller/entity/framebuffer_blend_multiply.frag.h"
+#include "impeller/entity/framebuffer_blend_overlay.frag.h"
+#include "impeller/entity/framebuffer_blend_saturation.frag.h"
+#include "impeller/entity/framebuffer_blend_screen.frag.h"
+#include "impeller/entity/framebuffer_blend_softlight.frag.h"
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 #include "impeller/entity/texture_fill_external.frag.h"
@@ -165,82 +192,93 @@ using YUVToRGBFilterPipeline =
     RenderPipelineT<YuvToRgbFilterVertexShader, YuvToRgbFilterFragmentShader>;
 
 // Advanced blends
-using BlendColorPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+using BlendColorPipeline = RenderPipelineT<AdvancedBlendVertexShader,
+                                           AdvancedBlendColorFragmentShader>;
 using BlendColorBurnPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendColorburnFragmentShader>;
 using BlendColorDodgePipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
-using BlendDarkenPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendColordodgeFragmentShader>;
+using BlendDarkenPipeline = RenderPipelineT<AdvancedBlendVertexShader,
+                                            AdvancedBlendDarkenFragmentShader>;
 using BlendDifferencePipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendDifferenceFragmentShader>;
 using BlendExclusionPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendExclusionFragmentShader>;
 using BlendHardLightPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendHardlightFragmentShader>;
 using BlendHuePipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendHueFragmentShader>;
 using BlendLightenPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendLightenFragmentShader>;
 using BlendLuminosityPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendLuminosityFragmentShader>;
 using BlendMultiplyPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendMultiplyFragmentShader>;
 using BlendOverlayPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendOverlayFragmentShader>;
 using BlendSaturationPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
-using BlendScreenPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendSaturationFragmentShader>;
+using BlendScreenPipeline = RenderPipelineT<AdvancedBlendVertexShader,
+                                            AdvancedBlendScreenFragmentShader>;
 using BlendSoftLightPipeline =
-    RenderPipelineT<AdvancedBlendVertexShader, AdvancedBlendFragmentShader>;
+    RenderPipelineT<AdvancedBlendVertexShader,
+                    AdvancedBlendSoftlightFragmentShader>;
 // Framebuffer Advanced Blends
 using FramebufferBlendColorPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendColorFragmentShader>;
 using FramebufferBlendColorBurnPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendColorburnFragmentShader>;
 using FramebufferBlendColorDodgePipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendColordodgeFragmentShader>;
 using FramebufferBlendDarkenPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendDarkenFragmentShader>;
 using FramebufferBlendDifferencePipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendDifferenceFragmentShader>;
 using FramebufferBlendExclusionPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendExclusionFragmentShader>;
 using FramebufferBlendHardLightPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendHardlightFragmentShader>;
 using FramebufferBlendHuePipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendHueFragmentShader>;
 using FramebufferBlendLightenPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendLightenFragmentShader>;
 using FramebufferBlendLuminosityPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendLuminosityFragmentShader>;
 using FramebufferBlendMultiplyPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendMultiplyFragmentShader>;
 using FramebufferBlendOverlayPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendOverlayFragmentShader>;
 using FramebufferBlendSaturationPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendSaturationFragmentShader>;
 using FramebufferBlendScreenPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendScreenFragmentShader>;
 using FramebufferBlendSoftLightPipeline =
     RenderPipelineT<FramebufferBlendVertexShader,
-                    FramebufferBlendFragmentShader>;
+                    FramebufferBlendSoftlightFragmentShader>;
 
 /// Geometry Pipelines
 using PointsComputeShaderPipeline = ComputePipelineBuilder<PointsComputeShader>;
@@ -700,10 +738,8 @@ class ContentContext {
     }
 
     void CreateDefault(const Context& context,
-                       const ContentContextOptions& options,
-                       const std::initializer_list<int32_t>& constants = {}) {
-      auto desc =
-          PipelineT::Builder::MakeDefaultPipelineDescriptor(context, constants);
+                       const ContentContextOptions& options) {
+      auto desc = PipelineT::Builder::MakeDefaultPipelineDescriptor(context);
       if (!desc.has_value()) {
         VALIDATION_LOG << "Failed to create default pipeline.";
         return;

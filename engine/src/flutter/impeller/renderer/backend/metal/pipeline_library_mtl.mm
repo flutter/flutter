@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 
-#include <Foundation/Foundation.h>
 #include <Metal/Metal.h>
 
 #include "flutter/fml/build_config.h"
@@ -23,14 +22,22 @@ PipelineLibraryMTL::PipelineLibraryMTL(id<MTLDevice> device)
 
 PipelineLibraryMTL::~PipelineLibraryMTL() = default;
 
-using Callback = std::function<void(MTLRenderPipelineDescriptor*)>;
-
-static void GetMTLRenderPipelineDescriptor(const PipelineDescriptor& desc,
-                                           const Callback& callback) {
+static MTLRenderPipelineDescriptor* GetMTLRenderPipelineDescriptor(
+    const PipelineDescriptor& desc) {
   auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
   descriptor.label = @(desc.GetLabel().c_str());
   descriptor.rasterSampleCount = static_cast<NSUInteger>(desc.GetSampleCount());
-  bool created_specialized_function = false;
+
+  for (const auto& entry : desc.GetStageEntrypoints()) {
+    if (entry.first == ShaderStage::kVertex) {
+      descriptor.vertexFunction =
+          ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
+    }
+    if (entry.first == ShaderStage::kFragment) {
+      descriptor.fragmentFunction =
+          ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
+    }
+  }
 
   if (const auto& vertex_descriptor = desc.GetVertexDescriptor()) {
     VertexDescriptorMTL vertex_descriptor_mtl;
@@ -52,33 +59,7 @@ static void GetMTLRenderPipelineDescriptor(const PipelineDescriptor& desc,
   descriptor.stencilAttachmentPixelFormat =
       ToMTLPixelFormat(desc.GetStencilPixelFormat());
 
-  const auto& constants = desc.GetSpecializationConstants();
-  for (const auto& entry : desc.GetStageEntrypoints()) {
-    if (entry.first == ShaderStage::kVertex) {
-      descriptor.vertexFunction =
-          ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
-    }
-    if (entry.first == ShaderStage::kFragment) {
-      if (constants.empty()) {
-        descriptor.fragmentFunction =
-            ShaderFunctionMTL::Cast(*entry.second).GetMTLFunction();
-      } else {
-        // This code only expects a single specialized function per pipeline.
-        FML_CHECK(!created_specialized_function);
-        created_specialized_function = true;
-        ShaderFunctionMTL::Cast(*entry.second)
-            .GetMTLFunctionSpecialized(
-                constants, [callback, descriptor](id<MTLFunction> function) {
-                  descriptor.fragmentFunction = function;
-                  callback(descriptor);
-                });
-      }
-    }
-  }
-
-  if (!created_specialized_function) {
-    callback(descriptor);
-  }
+  return descriptor;
 }
 
 static MTLComputePipelineDescriptor* GetMTLComputePipelineDescriptor(
@@ -152,12 +133,19 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
             ));
         promise->set_value(new_pipeline);
       };
-  GetMTLRenderPipelineDescriptor(
-      descriptor, [device = device_, completion_handler](
-                      MTLRenderPipelineDescriptor* descriptor) {
-        [device newRenderPipelineStateWithDescriptor:descriptor
-                                   completionHandler:completion_handler];
-      });
+  auto mtl_descriptor = GetMTLRenderPipelineDescriptor(descriptor);
+#if FML_OS_IOS
+  [device_ newRenderPipelineStateWithDescriptor:mtl_descriptor
+                              completionHandler:completion_handler];
+#else   // FML_OS_IOS
+  // TODO(116919): Investigate and revert speculative fix to make MTL pipeline
+  //               state creation use a worker.
+  NSError* error = nil;
+  auto render_pipeline_state =
+      [device_ newRenderPipelineStateWithDescriptor:mtl_descriptor
+                                              error:&error];
+  completion_handler(render_pipeline_state, error);
+#endif  // FML_OS_IOS
   return pipeline_future;
 }
 
