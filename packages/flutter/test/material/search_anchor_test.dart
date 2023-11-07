@@ -927,12 +927,11 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.characters);
   });
 
-  testWidgetsWithLeakTracking('SearchAnchor.bar respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchAnchor.bar respects onChanged and onSubmitted properties', (WidgetTester tester) async {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     int onChangedCalled = 0;
-    int viewOnSubmittedCalled = 0;
-    int barOnSubmittedCalled = 0;
+    int onSubmittedCalled = 0;
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
@@ -940,21 +939,16 @@ void main() {
             child: Material(
               child: SearchAnchor.bar(
                 searchController: controller,
-                barOnSubmitted: (String value) {
+                onSubmitted: (String value) {
                   setState(() {
-                    barOnSubmittedCalled = barOnSubmittedCalled + 1;
+                    onSubmittedCalled = onSubmittedCalled + 1;
                   });
+                  controller.closeView(value);
                 },
-                viewOnChanged: (String value) {
+                onChanged: (String value) {
                   setState(() {
                     onChangedCalled = onChangedCalled + 1;
                   });
-                },
-                viewOnSubmitted: (String value) {
-                  setState(() {
-                    viewOnSubmittedCalled = viewOnSubmittedCalled + 1;
-                  });
-                  controller.closeView(value);
                 },
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
                   return <Widget>[];
@@ -979,13 +973,11 @@ void main() {
     expect(onChangedCalled, 2);
 
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    expect(viewOnSubmittedCalled, 1); // View's onSubmitted is called.
-    expect(barOnSubmittedCalled, 0); // Bar's onSubmitted is not called.
+    expect(onSubmittedCalled, 1);
     expect(controller.isOpen, false);
 
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    expect(viewOnSubmittedCalled, 1); // View's onSubmitted is not called.
-    expect(barOnSubmittedCalled, 1); // Bar's onSubmitted is called.
+    expect(onSubmittedCalled, 2);
   });
 
   testWidgetsWithLeakTracking('hintStyle can override textStyle for hintText', (WidgetTester tester) async {

@@ -149,8 +149,8 @@ class SearchAnchor extends StatefulWidget {
     Iterable<Widget>? barTrailing,
     String? barHintText,
     GestureTapCallback? onTap,
-    ValueChanged<String>? viewOnChanged,
-    ValueChanged<String>? viewOnSubmitted,
+    ValueChanged<String>? onSubmitted,
+    ValueChanged<String>? onChanged,
     MaterialStateProperty<double?>? barElevation,
     MaterialStateProperty<Color?>? barBackgroundColor,
     MaterialStateProperty<Color?>? barOverlayColor,
@@ -159,7 +159,6 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
-    ValueChanged<String>? barOnSubmitted,
     Widget? viewLeading,
     Iterable<Widget>? viewTrailing,
     String? viewHintText,
@@ -929,7 +928,6 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
-    ValueChanged<String>? barOnSubmitted,
     super.viewLeading,
     super.viewTrailing,
     String? viewHintText,
@@ -945,13 +943,15 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
-    super.viewOnChanged,
-    super.viewOnSubmitted,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
     required super.suggestionsBuilder
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
+    viewOnSubmitted: onSubmitted,
+    viewOnChanged: onChanged,
     builder: (BuildContext context, SearchController controller) {
       return SearchBar(
         constraints: constraints,
@@ -960,10 +960,10 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
           controller.openView();
           onTap?.call();
         },
-        onChanged: (_) {
+        onChanged: (String value) {
           controller.openView();
         },
-        onSubmitted: barOnSubmitted,
+        onSubmitted: onSubmitted,
         hintText: barHintText,
         hintStyle: barHintStyle,
         textStyle: barTextStyle,
