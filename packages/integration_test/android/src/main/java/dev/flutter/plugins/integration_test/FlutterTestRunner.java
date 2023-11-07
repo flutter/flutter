@@ -20,7 +20,7 @@ public class FlutterTestRunner extends Runner {
 
   private static final String TAG = "FlutterTestRunner";
 
-  final Class testClass;
+  final Class<?> testClass;
   TestRule rule = null;
 
   public FlutterTestRunner(Class<?> testClass) {
@@ -32,7 +32,7 @@ public class FlutterTestRunner extends Runner {
     for (Field field : fields) {
       if (field.isAnnotationPresent(Rule.class)) {
         try {
-          Object instance = testClass.newInstance();
+          Object instance = testClass.getDeclaredConstructor().newInstance();
           if (field.get(instance) instanceof ActivityTestRule) {
             rule = (TestRule) field.get(instance);
             break;
