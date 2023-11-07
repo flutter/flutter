@@ -37,6 +37,8 @@ public class FlutterTestRunner extends Runner {
             rule = (TestRule) field.get(instance);
             break;
           }
+        } catch (InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException("Unable to contruct " + testClass.getName() + " object for testing");
         } catch (InstantiationException | IllegalAccessException e) {
           // This might occur if the developer did not make the rule public.
           // We could call field.setAccessible(true) but it seems better to throw.
