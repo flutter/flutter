@@ -291,7 +291,7 @@ class FadeInImage extends StatefulWidget {
   ///
   /// See Also:
   ///
-  ///  * [color], The color which applies to the [image].
+  ///  * [color], the color which applies to the [image].
   final Color? placeholderColor;
 
   /// Used to combine [placeholderColor] with the [placeholder] image.
