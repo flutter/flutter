@@ -800,7 +800,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:33v6transitional2"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
@@ -3328,7 +3328,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:33v6transitional2"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -4855,7 +4855,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "android_sdk", "version": "version:33v6transitional2"},
           {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
