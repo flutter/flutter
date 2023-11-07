@@ -267,7 +267,12 @@ class FadeInImage extends StatefulWidget {
   final double? width;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
-  /// Color applies to the [image]
+  ///
+  /// Color applies to the [image].
+  ///
+  /// See Also:
+  ///
+  ///  * [placeholderColor], The color which applies to the [placeholder].
   final Color? color;
 
   /// Used to combine [color] with this image
@@ -281,7 +286,12 @@ class FadeInImage extends StatefulWidget {
   final BlendMode? colorBlendMode;
 
   /// If non-null, this color is blended with each placeholder image pixel using [placeholderColorBlendMode].
-  /// Color applies to the [placeholder]
+  ///
+  /// Color applies to the [placeholder].
+  ///
+  /// See Also:
+  ///
+  ///  * [color], The color which applies to the [image].
   final Color? placeholderColor;
 
   /// Used to combine [placeholderColor] with the placeholder image
