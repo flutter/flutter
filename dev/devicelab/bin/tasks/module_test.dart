@@ -71,7 +71,12 @@ Future<void> main() async {
 
       section('Add read-only asset');
 
-      final File readonlyTxtAssetFile = await File(path.join(projectDir.path, 'assets', 'read-only.txt')).create(recursive: true);
+      final File readonlyTxtAssetFile = await File(path.join(
+        projectDir.path,
+        'assets',
+        'read-only.txt'
+      ))
+      .create(recursive: true);
 
       if (!exists(readonlyTxtAssetFile)) {
         return TaskResult.failure('Failed to create read-only asset');
@@ -112,7 +117,7 @@ Future<void> main() async {
         final StringBuffer stderr = StringBuffer();
         final int exitCode = await exec(
           gradlewExecutable,
-          <String>['flutter:assembleDebug', '-d'],
+          <String>['flutter:assembleDebug'],
           environment: <String, String>{'JAVA_HOME': javaHome},
           canFail: true,
           stderr: stderr,
@@ -132,7 +137,7 @@ exitCode: $exitCode
       section('Remove FFI package');
 
       content = content.replaceFirst(
-        '  $ffiPackageName:$platformLineSep    path: ../$ffiPackageName$platformLineSep',
+        '  $ffiPackageName:$platformLineSep    path: ..${Platform.pathSeparator}$ffiPackageName$platformLineSep',
         '',
       );
       await pubspec.writeAsString(content, flush: true);
