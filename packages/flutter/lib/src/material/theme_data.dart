@@ -509,8 +509,7 @@ class ThemeData with Diagnosticable {
     // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
       primarySwatch: primarySwatch,
-      // primaryColorDark: isDark ? Colors.tealAccent[200]! : primarySwatch[500]!,
-      // primaryColorLight: primarySwatch[200]!,
+      accentColor: isDark ? Colors.tealAccent[200]! : primarySwatch[500]!,
       cardColor: cardColor,
       backgroundColor: isDark ? Colors.grey[700]! : primarySwatch[200]!,
       errorColor: Colors.red[700],
