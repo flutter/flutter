@@ -117,7 +117,7 @@ void main() {
 
     testUsingContext('defaults', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
+        arguments: <String>['--no-pub', '--template=module']);
       await runCommandIn(projectPath);
 
       expect(fakeAndroidBuilder.buildNumber, '1.0');
@@ -147,7 +147,7 @@ void main() {
 
     testUsingContext('parses flags', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
+        arguments: <String>['--no-pub', '--template=module']);
       await runCommandIn(
         projectPath,
         arguments: <String>[
