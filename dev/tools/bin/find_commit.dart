@@ -48,21 +48,17 @@ String findCommit({
     log('on $primaryTrunk, using last commit as anchor');
     anchor = Commit.parse(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', primaryBranch, '--']));
   } else {
-    final List<Commit> branchCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '--']));
-    final List<Commit> trunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryTrunk, '--']));
-    if (branchCommits.isEmpty || trunkCommits.isEmpty || branchCommits.first.hash != trunkCommits.first.hash) {
+    final String mergeBase = git(primaryRepoDirectory, <String>['merge-base', primaryBranch, primaryTrunk], allowFailure: true).trim();
+    if (mergeBase.isEmpty) {
       throw StateError('Branch $primaryBranch does not seem to have a common history with trunk $primaryTrunk.');
     }
-    if (branchCommits.last.hash == trunkCommits.last.hash) {
-      log('$primaryBranch is even with $primaryTrunk, using last commit as anchor');
-      anchor = trunkCommits.last;
+    anchor = Commit.parse(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, '--max-count=1', mergeBase, '--']));
+    final List<Commit> missingTrunkCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryTrunk, '^$primaryBranch', '--']));
+    final List<Commit> extraCommits = Commit.parseList(git(primaryRepoDirectory, <String>['log', Commit.formatArgument, primaryBranch, '^$primaryTrunk', '--']));
+    if (missingTrunkCommits.isEmpty && extraCommits.isEmpty) {
+      log('$primaryBranch is even with $primaryTrunk at $mergeBase');
     } else {
-      int index = 0;
-      while (branchCommits.length > index && trunkCommits.length > index && branchCommits[index].hash == trunkCommits[index].hash) {
-        index += 1;
-      }
-      log('$primaryBranch branched from $primaryTrunk ${branchCommits.length - index} commits ago, trunk has advanced by ${trunkCommits.length - index} commits since then.');
-      anchor = trunkCommits[index - 1];
+      log('$primaryBranch branched from $primaryTrunk ${missingTrunkCommits.length} commits ago, trunk has advanced by ${extraCommits.length} commits since then.');
     }
   }
   return git(secondaryRepoDirectory, <String>[
@@ -75,9 +71,9 @@ String findCommit({
   ]);
 }
 
-String git(String workingDirectory, List<String> arguments) {
+String git(String workingDirectory, List<String> arguments, {bool allowFailure = false}) {
   final ProcessResult result = Process.runSync('git', arguments, workingDirectory: workingDirectory);
-  if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty) {
+  if (!allowFailure && result.exitCode != 0 || '${result.stderr}'.isNotEmpty) {
     throw ProcessException('git', arguments, '${result.stdout}${result.stderr}', result.exitCode);
   }
   return '${result.stdout}';
@@ -89,7 +85,7 @@ void main(List<String> arguments) {
       'Usage: dart find_commit.dart [<path-to-primary-repo>] <path-to-secondary-repo>\n'
       'This script will find the commit in the secondary repo that was contemporary\n'
       'when the commit in the primary repo was created. If that commit is on a\n'
-      "branch, then the date of the branch's creation is used instead.\n"
+      "branch, then the date of the branch's last merge is used instead.\n"
       'If <path-to-primary-repo> is omitted, the current directory is used for the\n'
       'primary repo.'
     );
