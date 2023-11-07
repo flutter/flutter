@@ -88,7 +88,7 @@ source_set("display_list") {
     "//flutter/fml",
     "//flutter/impeller/runtime_stage",
     "//flutter/impeller/typographer",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 
   if (!defined(defines)) {
@@ -218,10 +218,10 @@ source_set("display_list_benchmarks_source") {
     "//flutter/display_list/testing:display_list_surface_provider",
     "//flutter/display_list/testing:display_list_testing",
     "//flutter/fml",
+    "//flutter/skia",
     "//flutter/testing:skia",
     "//flutter/testing:testing_lib",
     "//third_party/dart/runtime:libdart_jit",  # for tracing
-    "//third_party/skia",
   ]
 }
 

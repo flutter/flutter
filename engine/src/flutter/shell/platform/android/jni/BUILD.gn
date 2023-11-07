@@ -18,7 +18,7 @@ source_set("jni") {
     "//flutter/fml",
     "//flutter/lib/ui",
     "//flutter/shell/platform/android/surface:native_window",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 }
 

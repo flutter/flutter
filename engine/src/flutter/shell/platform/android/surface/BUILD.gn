@@ -21,7 +21,7 @@ source_set("surface") {
     "//flutter/shell/common",
     "//flutter/shell/platform/android/context",
     "//flutter/shell/platform/android/jni",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 }
 
@@ -35,7 +35,7 @@ source_set("native_window") {
 
   deps = [
     "//flutter/fml",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 }
 

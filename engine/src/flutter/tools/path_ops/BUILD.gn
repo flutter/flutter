@@ -9,7 +9,7 @@ shared_library("path_ops") {
     "path_ops.cc",
     "path_ops.h",
   ]
-  deps = [ "//third_party/skia" ]
+  deps = [ "//flutter/skia" ]
 
   metadata = {
     entitlement_file_path = [ "libpath_ops.dylib" ]

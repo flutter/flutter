@@ -15,8 +15,8 @@ impeller_component("skia_conversions") {
     "../geometry",
     "//flutter/display_list",
     "//flutter/fml",
-    "//third_party/skia",
-    "//third_party/skia/modules/skparagraph",
+    "//flutter/skia",
+    "//flutter/skia/modules/skparagraph",
   ]
 }
 
@@ -38,7 +38,7 @@ impeller_component("display_list") {
     "//flutter/display_list",
     "//flutter/fml",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 
   if (!defined(defines)) {

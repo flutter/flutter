@@ -18,6 +18,6 @@ impeller_component("typographer_skia_backend") {
 
   public_deps = [
     "//flutter/impeller/typographer",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 }

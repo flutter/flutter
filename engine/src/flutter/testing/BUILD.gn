@@ -70,9 +70,9 @@ source_set("dart") {
     "//flutter/common",
     "//flutter/runtime",
     "//flutter/runtime:libdart",
+    "//flutter/skia",
     "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:elf_loader",
-    "//third_party/skia",
   ]
 }
 
@@ -87,7 +87,7 @@ source_set("skia") {
 
   public_deps = [
     ":testing_lib",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 }
 

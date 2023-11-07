@@ -36,7 +36,7 @@ impeller_component("image_skia_backend") {
 
   deps = [
     "//flutter/fml",
-    "//third_party/skia",
+    "//flutter/skia",
   ]
 }
 
