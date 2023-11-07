@@ -536,7 +536,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     }
   }
 
-  ExpansionTileController _chooseTileController(){
+  ExpansionTileController _chooseTileController() {
     return widget.controller ?? ExpansionTileController(initiallyExpanded: PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded);
   }
 
@@ -703,7 +703,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       || widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
       _updateBackgroundColor(expansionTileTheme);
     }
-    if(widget.controller != oldWidget.controller){
+    if(widget.controller != oldWidget.controller) {
       _disposeTileController(oldWidget);
       _tileController = _chooseTileController();
       _tileController.addListener(_onToggledExpansion);
