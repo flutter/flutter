@@ -29,11 +29,12 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// The controller's [expand] and [collapse] methods cause the
 /// the [ExpansionTile] to rebuild, so they may not be called from
 /// a build method.
-class ExpansionTileController {
-  /// Create a controller to be used with [ExpansionTile.controller].
-  ExpansionTileController();
+class ExpansionTileController with ChangeNotifier {
+  /// Create a controller to be used with [ExpansionTile.controller]. The
+  /// [initiallyExpanded] property must be non-null.
+  ExpansionTileController({bool initiallyExpanded = false}) : _isExpanded = initiallyExpanded;
 
-  _ExpansionTileState? _state;
+  bool _isExpanded;
 
   /// Whether the [ExpansionTile] built with this controller is in expanded state.
   ///
@@ -46,8 +47,7 @@ class ExpansionTileController {
   ///  * [collapse], which collapses the [ExpansionTile].
   ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
   bool get isExpanded {
-    assert(_state != null);
-    return _state!._isExpanded;
+    return _isExpanded;
   }
 
   /// Expands the [ExpansionTile] that was built with this controller;
@@ -70,10 +70,14 @@ class ExpansionTileController {
   ///  * [isExpanded] to check whether the tile is expanded.
   ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
   void expand() {
-    assert(_state != null);
     if (!isExpanded) {
-      _state!._toggleExpansion();
+      _toggleExpansion();
     }
+  }
+
+  void _toggleExpansion() {
+    _isExpanded = !_isExpanded;
+    notifyListeners();
   }
 
   /// Collapses the [ExpansionTile] that was built with this controller.
@@ -96,9 +100,8 @@ class ExpansionTileController {
   ///  * [isExpanded] to check whether the tile is expanded.
   ///  * [ExpansionTile.controller] to create an ExpansionTile with a controller.
   void collapse() {
-    assert(_state != null);
     if (isExpanded) {
-      _state!._toggleExpansion();
+      _toggleExpansion();
     }
   }
 
@@ -222,7 +225,7 @@ class ExpansionTileController {
 class ExpansionTile extends StatefulWidget {
   /// Creates a single-line [ListTile] with an expansion arrow icon that expands or collapses
   /// the tile to reveal or hide the [children]. The [initiallyExpanded] property must
-  /// be non-null.
+  /// be non-null and only has an effect if [controller] is not set.
   const ExpansionTile({
     super.key,
     this.leading,
@@ -513,7 +516,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   late Animation<Color?> _iconColor;
   late Animation<Color?> _backgroundColor;
 
-  bool _isExpanded = false;
   late ExpansionTileController _tileController;
 
   @override
@@ -527,30 +529,39 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconColor = _animationController.drive(_iconColorTween.chain(_easeInTween));
     _backgroundColor = _animationController.drive(_backgroundColorTween.chain(_easeOutTween));
 
-    _isExpanded = PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded;
-    if (_isExpanded) {
+    _tileController = _chooseTileController();
+    _tileController.addListener(_onToggledExpansion);
+    if (_tileController.isExpanded) {
       _animationController.value = 1.0;
     }
+  }
 
-    assert(widget.controller?._state == null);
-    _tileController = widget.controller ?? ExpansionTileController();
-    _tileController._state = this;
+  ExpansionTileController _chooseTileController(){
+    return widget.controller ?? ExpansionTileController(initiallyExpanded: PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.initiallyExpanded);
+  }
+
+  void _disposeTileController(ExpansionTile widget) {
+    if(widget.controller == null) {
+      // Only dispose if this state created the controller.
+      _tileController.dispose();
+    } else {
+      _tileController.removeListener(_onToggledExpansion);
+    }
   }
 
   @override
   void dispose() {
-    _tileController._state = null;
+    _disposeTileController(widget);
     _animationController.dispose();
     super.dispose();
   }
 
-  void _toggleExpansion() {
+  void _onToggledExpansion() {
     final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String stateHint = _isExpanded ? localizations.expandedHint : localizations.collapsedHint;
+    final String stateHint = _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint;
     setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
+      if (_tileController.isExpanded) {
         _animationController.forward();
       } else {
         _animationController.reverse().then<void>((void value) {
@@ -562,14 +573,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           });
         });
       }
-      PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
+      PageStorage.maybeOf(context)?.writeState(context, _tileController.isExpanded);
     });
-    widget.onExpansionChanged?.call(_isExpanded);
+    widget.onExpansionChanged?.call(_tileController.isExpanded);
     SemanticsService.announce(stateHint, textDirection);
   }
 
   void _handleTap() {
-    _toggleExpansion();
+    _tileController._toggleExpansion();
   }
 
   // Platform or null affinity defaults to trailing.
@@ -613,14 +624,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           );
     final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint = _isExpanded
+    final String onTapHint = _tileController.isExpanded
       ? localizations.expansionTileExpandedTapHint
       : localizations.expansionTileCollapsedTapHint;
     String? semanticsHint;
     switch (theme.platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        semanticsHint = _isExpanded
+        semanticsHint = _tileController.isExpanded
           ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
           : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
       case TargetPlatform.android:
@@ -692,6 +703,16 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       || widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
       _updateBackgroundColor(expansionTileTheme);
     }
+    if(widget.controller != oldWidget.controller){
+      _disposeTileController(oldWidget);
+      _tileController = _chooseTileController();
+      _tileController.addListener(_onToggledExpansion);
+      if (_tileController.isExpanded) {
+        _animationController.value = 1.0;
+      }else{
+        _animationController.value = 0;
+      }
+    }
   }
 
   @override
@@ -749,7 +770,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final bool closed = !_isExpanded && _animationController.isDismissed;
+    final bool closed = !_tileController.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveChildren = closed && !widget.maintainState;
 
     final Widget result = Offstage(

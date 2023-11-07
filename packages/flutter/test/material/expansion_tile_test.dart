@@ -1110,17 +1110,98 @@ void main() {
     expect(controller.isExpanded, isFalse);
     await tester.pumpAndSettle();
     expect(find.text('Child 0'), findsNothing);
+
+    controller.dispose();
+  });
+
+  testWidgetsWithLeakTracking('ExpansionTile with changing controller', (WidgetTester tester) async {
+    final ExpansionTileController controller1 = ExpansionTileController();
+    final ExpansionTileController controller2 = ExpansionTileController(initiallyExpanded: true);
+
+    Future<void> pump({ExpansionTileController? controller, bool initiallyExpanded = false}) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            controller: controller,
+            initiallyExpanded: initiallyExpanded,
+            title: const Text('Title'),
+            children: const <Widget>[
+              Text('Child 0'),
+            ],
+          ),
+        ),
+      ));
+    }
+
+    await pump(controller: controller1);
+    expect(find.text('Child 0'), findsNothing);
+
+    await pump(controller: controller2);
+    expect(find.text('Child 0'), findsOneWidget);
+
+    await pump();
+    expect(find.text('Child 0'), findsNothing);
+
+    await pump(initiallyExpanded: true);
+    /// The controller is not recreated.
+    expect(find.text('Child 0'), findsNothing);
+
+    controller1.dispose();
+    controller2.dispose();
+  });
+
+  testWidgetsWithLeakTracking('ExpansionTileController with multiple ExpansionTiles', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              controller: controller,
+              title: const Text('Title'),
+              children: const <Widget>[
+                Text('Child 0'),
+              ],
+            ),
+            ExpansionTile(
+              controller: controller,
+              title: const Text('Title'),
+              children: const <Widget>[
+                Text('Child 1'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(find.text('Child 1'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    controller.expand();
+    expect(controller.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(find.text('Child 1'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+    controller.collapse();
+    expect(controller.isExpanded, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+    expect(find.text('Child 1'), findsNothing);
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('Calling ExpansionTileController.expand/collapsed has no effect if it is already expanded/collapsed', (WidgetTester tester) async {
-    final ExpansionTileController controller = ExpansionTileController();
+    final ExpansionTileController controller = ExpansionTileController(initiallyExpanded: true);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: ExpansionTile(
           controller: controller,
           title: const Text('Title'),
-          initiallyExpanded: true,
           children: const <Widget>[
             Text('Child 0'),
           ],
@@ -1146,6 +1227,8 @@ void main() {
     expect(controller.isExpanded, isFalse);
     await tester.pump();
     expect(tester.hasRunningAnimations, isFalse);
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('Call to ExpansionTileController.of()', (WidgetTester tester) async {
@@ -1197,5 +1280,21 @@ void main() {
 
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
+  });
+
+  testWidgetsWithLeakTracking('Interact with Controller before building.', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget( MaterialApp(
+      home: Scaffold(
+        body: ExpansionTile(
+          controller: controller,
+          title: const Text('Title'),
+          trailing: Icon(controller.isExpanded ? Icons.expand_less : Icons.expand_more),
+        ),
+      ),
+    ));
+
+    controller.dispose();
   });
 }
