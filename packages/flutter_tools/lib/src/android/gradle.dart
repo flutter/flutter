@@ -657,8 +657,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required String buildNumber,
   }) async {
     final FlutterManifest manifest = project.manifest;
-    if (!manifest.isModule && !manifest.isPlugin) {
-      throwToolExit('AARs can only be built for plugin or module projects.');
+    if (!manifest.isModule) {
+      throwToolExit('AARs can only be built for module projects.');
     }
 
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
