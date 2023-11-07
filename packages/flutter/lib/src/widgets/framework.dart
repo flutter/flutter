@@ -1306,7 +1306,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// ## Caveats
   ///
   /// This method is _not_ invoked at times where a developer might otherwise
-  /// expect it.
+  /// expect it, such as application shutdown or dismissal via platform
+  /// native methods.
   ///
   /// ### Application shutdown
   ///
