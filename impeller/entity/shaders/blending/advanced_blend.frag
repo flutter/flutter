@@ -6,6 +6,10 @@
 #include <impeller/color.glsl>
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
+#include "blend_select.glsl"
+
+layout(constant_id = 0) const int blend_type = 0;
+layout(constant_id = 1) const int supports_decal = 1;
 
 uniform BlendInfo {
   float16_t dst_input_alpha;
@@ -25,15 +29,10 @@ in vec2 v_src_texture_coords;
 out f16vec4 frag_color;
 
 f16vec4 Sample(f16sampler2D texture_sampler, vec2 texture_coords) {
-#ifdef IMPELLER_TARGET_OPENGLES
-  if (blend_info.supports_decal_sampler_address_mode > 0.0) {
+  if (supports_decal > 0.0) {
     return texture(texture_sampler, texture_coords);
-  } else {
-    return IPHalfSampleDecal(texture_sampler, texture_coords);
   }
-#else
-  return texture(texture_sampler, texture_coords);
-#endif
+  return IPHalfSampleDecal(texture_sampler, texture_coords);
 }
 
 void main() {
@@ -50,6 +49,7 @@ void main() {
                              ) *
                           blend_info.src_input_alpha;
 
-  f16vec4 blended = mix(src, f16vec4(Blend(dst.rgb, src.rgb), dst.a), dst.a);
+  f16vec3 blend_result = AdvancedBlend(dst.rgb, src.rgb, blend_type);
+  f16vec4 blended = mix(src, f16vec4(blend_result, dst.a), dst.a);
   frag_color = mix(dst_sample, blended, src.a);
 }
