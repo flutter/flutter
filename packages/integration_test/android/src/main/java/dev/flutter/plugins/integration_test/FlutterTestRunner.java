@@ -7,6 +7,7 @@ package dev.flutter.plugins.integration_test;
 import android.util.Log;
 import androidx.test.rule.ActivityTestRule;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.junit.Rule;
