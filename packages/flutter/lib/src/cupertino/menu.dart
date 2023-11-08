@@ -1,5 +1,4 @@
 // ignore_for_file: unused_element
-
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -15,6 +14,7 @@ import 'colors.dart';
 import 'localizations.dart';
 import 'menu_item.dart';
 import 'scrollbar.dart';
+import 'theme.dart';
 
 /// Signature used by [CupertinoMenuButton] to lazily construct menu items shown
 /// when a [CupertinoMenu] is constructed
@@ -287,7 +287,6 @@ class CupertinoMenuButton<T> extends StatefulWidget {
   State<CupertinoMenuButton<T>> createState() => CupertinoMenuButtonState<T>();
 }
 
-
 /// The [State] for a [CupertinoMenuButton].
 ///
 /// To imperatively open a [CupertinoMenuButton] without using a
@@ -453,7 +452,6 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
 }
 
 
-
 /// Shows a Cupertino-style menu with items built by [itemBuilder] at
 /// [anchorPosition].
 ///
@@ -506,6 +504,7 @@ Future<T?> showCupertinoMenu<T>({
   required BuildContext context,
   required RelativeRect anchorPosition,
   required List<CupertinoMenuEntry<T>> Function(BuildContext) itemBuilder,
+  ui.Brightness? brightness,
   Alignment? alignment,
   BoxConstraints? constraints,
   Clip clip = Clip.antiAlias,
@@ -533,10 +532,7 @@ Future<T?> showCupertinoMenu<T>({
   final Size overlaySize = navigator.overlay?.context.size
                            ?? MediaQuery.sizeOf(context);
   final Size anchorSize = anchorPosition.toSize(overlaySize);
-  final CapturedThemes themeWrapper = InheritedTheme.capture(
-    from: context,
-    to: navigator.context,
-  );
+
   return Navigator.of(
     context,
     rootNavigator: useRootNavigator,
@@ -564,7 +560,10 @@ Future<T?> showCupertinoMenu<T>({
             (anchorCenter.dy / overlaySize.height) * 2 - 1,
           );
         }
-        return themeWrapper.wrap(
+        return InheritedTheme.capture(
+          from: context,
+          to: Navigator.of(childContext).context,
+        ).wrap(
           ValueListenableBuilder<int>(
             valueListenable: rebuildSignal,
             builder:(BuildContext context, int value, Widget? child) {
@@ -575,14 +574,16 @@ Future<T?> showCupertinoMenu<T>({
               } else {
                 menuItems = itemBuilder(context);
               }
-
               return CupertinoMenu<T>(
+                brightness: brightness,
                 alignment: alignment!,
                 offset: offset,
                 animation: animation,
                 anchorPosition: anchorPosition,
                 anchorSize: anchorSize,
-                hasLeadingWidget: _menuHasLeadingWidget(menuItems),
+                hasLeadingWidget: menuItems.any(
+                  (CupertinoMenuEntry<T> item) => item.hasLeading
+                ),
                 constraints: constraints,
                 physics: physics,
                 clip: clip,
@@ -597,9 +598,6 @@ Future<T?> showCupertinoMenu<T>({
   );
 }
 
-bool _menuHasLeadingWidget<T>(List<CupertinoMenuEntry<T>> menuItems) {
-  return menuItems.indexWhere((CupertinoMenuEntry<T> item) => item.hasLeading) != -1;
-}
 
 String _getLocalizedBarrierLabel(BuildContext context) {
   // Use this instead of `MaterialLocalizations.of(context)` because
@@ -931,18 +929,18 @@ class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
           : AnimationStatus.reverse,
       )
       ..animateWith(simulation)
-       .whenCompleteOrCancel(() {
-          if (!controller.isAnimating) {
-            controller.overrideStatus(
-                forward
-                ? AnimationStatus.completed
-                : AnimationStatus.dismissed,
-            );
-            simulationCompleter.complete(true);
-          } else {
-            simulationCompleter.complete(false);
-          }
-      });
+          .whenCompleteOrCancel(() {
+            if (!controller.isAnimating) {
+              controller.overrideStatus(
+                  forward
+                  ? AnimationStatus.completed
+                  : AnimationStatus.dismissed,
+              );
+              simulationCompleter.complete(true);
+            } else {
+              simulationCompleter.complete(false);
+            }
+          });
     return simulationCompleter.future;
   }
 
@@ -1544,12 +1542,13 @@ class CupertinoMenu<T> extends StatefulWidget {
     required this.hasLeadingWidget,
     required this.alignment,
     required this.anchorSize,
+    required this.brightness,
     this.clip = Clip.antiAlias,
     this.offset = Offset.zero,
     this.physics,
     this.constraints,
-    this.edgeInsets,
-  });
+    EdgeInsets? edgeInsets,
+  }) : edgeInsets = edgeInsets ?? const EdgeInsets.all(defaultEdgeInsets);
 
   /// The menu items to display.
   final List<CupertinoMenuEntry<T>> children;
@@ -1585,8 +1584,10 @@ class CupertinoMenu<T> extends StatefulWidget {
   final Clip clip;
 
   /// The insets to avoid when positioning the menu.
-  final EdgeInsets? edgeInsets;
+  final EdgeInsets edgeInsets;
 
+  /// The [ui.Brightness] of the menu.
+  final ui.Brightness? brightness;
 
   /// The [Radius] of the menu surface [ClipPath].
   static const Radius radius = Radius.circular(14);
@@ -1702,6 +1703,8 @@ class CupertinoMenu<T> extends StatefulWidget {
   ///    [CupertinoMenuActionRow]
   /// 2. Menu items are wrapped by [ScopedMenuTreeCoordinates] to provide location
   ///    information to the menu items
+  ///
+  // TODO(davidhicks980): Consider moving this logic to [_MenuBody]
   static List<ScopedMenuTreeCoordinates> wrapMenuItems<T>({
     required List<CupertinoMenuEntry<T>> items,
     required int depth,
@@ -1814,14 +1817,14 @@ class _CupertinoMenuState<T> extends State<CupertinoMenu<T>>
     }
 
     _panAnimation
-        ..addListener(updateAnimation)
-        ..animateWith(SpringSimulation(CupertinoMenu.panReboundSpring, 0, 1, 10))
-         .whenCompleteOrCancel(() {
-           if (mounted) {
-             _panAnimation.removeListener(updateAnimation);
-             _panPosition.value = null;
-           }
-         });
+      ..addListener(updateAnimation)
+      ..animateWith(SpringSimulation(CupertinoMenu.panReboundSpring, 0, 1, 10))
+        .whenCompleteOrCancel(() {
+          if (mounted) {
+            _panAnimation.removeListener(updateAnimation);
+            _panPosition.value = null;
+          }
+        });
   }
 
   void _cacheFlowTransformMatrices(List<Matrix4> value) {
@@ -1849,6 +1852,9 @@ class _CupertinoMenuState<T> extends State<CupertinoMenu<T>>
     }
   }
 
+  // Clunky method that stores the last known position of the root menu layer.
+  // This is used to determine the boundaries of the root menu so it can be
+  // scaled when a user drags outside of the menu area.
   void Function(ui.Offset offset) _handleRootLayerPositioned(BuildContext context) {
     final ui.Size? size =
         CupertinoMenuLayer.of(context).constraintsTween.end?.smallest;
@@ -1863,12 +1869,29 @@ class _CupertinoMenuState<T> extends State<CupertinoMenu<T>>
     };
   }
 
+  void _updateRepaintListenable(Animation<double> nestingAnimation) {
+    final int repaintAnimationsHash = Object.hash(
+      _panPosition,
+      _rootMenuRectNotifier,
+      nestingAnimation,
+      widget.animation,
+    );
+    if (repaintAnimationsHash != _repaintAnimationHash) {
+      _repaintFlow = Listenable.merge(<Listenable?>[
+        _panPosition,
+        _rootMenuRectNotifier,
+        nestingAnimation,
+        widget.animation,
+      ]);
+      _repaintAnimationHash = repaintAnimationsHash;
+    }
+  }
+
   RelativeRect _insetAnchorPosition({
     required RelativeRect position,
   }){
     final ui.Size screenSize = MediaQuery.sizeOf(context);
-    final EdgeInsets padding = MediaQuery.paddingOf(context)
-                             + const EdgeInsets.all(CupertinoMenu.defaultEdgeInsets);
+    final EdgeInsets padding = widget.edgeInsets;
     final ui.Size rootAnchorSize = widget.anchorSize;
     return RelativeRect.fromLTRB(
       ui.clampDouble(
@@ -1941,96 +1964,81 @@ class _CupertinoMenuState<T> extends State<CupertinoMenu<T>>
         );
       },
     );
-
-    return _MenuScope(
-      edgeInsets: widget.edgeInsets
-                  ?? const EdgeInsets.all(CupertinoMenu.defaultEdgeInsets),
-      rootMenuLayer: rootMenuLayer,
-      alignment: widget.alignment,
-      anchorPosition: widget.anchorPosition,
-      child: Builder(
-        builder: (BuildContext context) {
-          return GestureDetector(
-            onTap: () {
-              // Removes the top menu layer when the user taps on an underlying
-              // layer.
-              CupertinoMenu.popLayer(context);
-            },
-            child: CupertinoMenuLayer(
-              isInteractive: CupertinoMenu
-                              .interactiveLayersOf(context)
-                              .contains(CupertinoMenu.rootMenuCoordinates),
-              anchorSize: Size.zero,
-              childCount: builtChildren.length,
-              hasLeadingWidget: widget.hasLeadingWidget,
-              coordinates: CupertinoMenu.rootMenuCoordinates,
-              constraints: widget.constraints,
-              child: Builder(
-                builder: (BuildContext context) {
-                  return CupertinoPanListener<PanTarget<StatefulWidget>>(
-                    onPanUpdate: _handlePanUpdate,
-                    onPanEnd: _handlePanEnd,
-                    child: ScaleTransition(
-                      alignment: widget.alignment,
-                      scale: widget.animation,
-                      child: Center(
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            final CupertinoMenuModel model = CupertinoMenu.of(context);
-                            _updateRepaintListenable(model.nestingAnimation);
-                            return Flow(
-                              clipBehavior: Clip.none,
-                              delegate: _CupertinoMenuFlowDelegate(
-                                layers: model.layers,
-                                repaint: _repaintFlow,
-                                onPainted: _cacheFlowTransformMatrices,
-                                alignment: widget.alignment,
-                                routeAnimation: widget.animation,
-                                nestingAnimation: model.nestingAnimation,
-                                growthDirection: model.growthDirection,
-                                overrideTransforms: _flowTransformMatrices,
-                                rootMenuRectNotifier: _rootMenuRectNotifier,
-                                rootAnchorPosition: _insetAnchorPosition(
-                                  position: widget.anchorPosition,
-                                ),
-                                rootAnchorSize: widget.anchorSize,
-                                pointerPositionNotifier: _panPosition,
-                                padding: model.edgeInsets,
+    final CupertinoThemeData theme = CupertinoTheme.of(context);
+    return CupertinoTheme(
+      data: theme.copyWith(
+        brightness: widget.brightness
+                    ?? theme.brightness
+                    ?? CupertinoTheme.maybeBrightnessOf(context)
+                    ?? ui.Brightness.light
+      ),
+      child: _MenuScope(
+        edgeInsets: widget.edgeInsets,
+        rootMenuLayer: rootMenuLayer,
+        alignment: widget.alignment,
+        anchorPosition: widget.anchorPosition,
+        child: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                // Removes the top menu layer when the user taps on an underlying
+                // layer.
+                CupertinoMenu.popLayer(context);
+              },
+              child: CupertinoMenuLayer(
+                isInteractive: CupertinoMenu
+                                .interactiveLayersOf(context)
+                                .contains(CupertinoMenu.rootMenuCoordinates),
+                anchorSize: Size.zero,
+                childCount: builtChildren.length,
+                hasLeadingWidget: widget.hasLeadingWidget,
+                coordinates: CupertinoMenu.rootMenuCoordinates,
+                constraints: widget.constraints,
+                child: CupertinoPanListener<PanTarget<StatefulWidget>>(
+                  onPanUpdate: _handlePanUpdate,
+                  onPanEnd: _handlePanEnd,
+                  child: ScaleTransition(
+                    alignment: widget.alignment,
+                    scale: widget.animation,
+                    child: Center(
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          final CupertinoMenuModel model = CupertinoMenu.of(context);
+                          _updateRepaintListenable(model.nestingAnimation);
+                          return Flow(
+                            clipBehavior: Clip.none,
+                            delegate: _CupertinoMenuFlowDelegate(
+                              layers: model.layers,
+                              repaint: _repaintFlow,
+                              onPainted: _cacheFlowTransformMatrices,
+                              alignment: widget.alignment,
+                              routeAnimation: widget.animation,
+                              nestingAnimation: model.nestingAnimation,
+                              growthDirection: model.growthDirection,
+                              overrideTransforms: _flowTransformMatrices,
+                              rootMenuRectNotifier: _rootMenuRectNotifier,
+                              rootAnchorPosition: _insetAnchorPosition(
+                                position: widget.anchorPosition,
                               ),
-                              children: model.layers
-                                  .map((CupertinoMenuLayerDescription layer) => layer.menu)
-                                  .toList(),
-                            );
-                          },
-                        ),
+                              rootAnchorSize: widget.anchorSize,
+                              pointerPositionNotifier: _panPosition,
+                              padding: model.edgeInsets,
+                            ),
+                            children: model.layers
+                                .map((CupertinoMenuLayerDescription layer) => layer.menu)
+                                .toList(),
+                          );
+                        },
                       ),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
-  }
-
-  void _updateRepaintListenable(Animation<double> nestingAnimation) {
-    final int repaintAnimationsHash = Object.hash(
-      _panPosition,
-      _rootMenuRectNotifier,
-      nestingAnimation,
-      widget.animation,
-    );
-    if (repaintAnimationsHash != _repaintAnimationHash) {
-      _repaintFlow = Listenable.merge(<Listenable?>[
-        _panPosition,
-        _rootMenuRectNotifier,
-        nestingAnimation,
-        widget.animation,
-      ]);
-      _repaintAnimationHash = repaintAnimationsHash;
-    }
   }
 }
 
@@ -2040,8 +2048,6 @@ typedef _CupertinoMenuVerticalOffset = ({
     double menuOffset,
     double layerOffset,
 });
-
-
 
 // Controls the position and scale of menu layers
 class _CupertinoMenuFlowDelegate extends FlowDelegate {
@@ -2322,9 +2328,6 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
     }
   }
 
-
-
-
   double _calculateSquaredDistanceToMenuEdge({
     required Rect rect,
     required Offset position,
@@ -2413,34 +2416,6 @@ mixin CupertinoNestedMenuControlMixin<T, U extends StatefulWidget>
   /// A builder that constructs a  layer. This is only called when the
   /// menu is opened -- it is the responsibility of the implementer to
   /// rebuild the menu when the [rebuildSignal] is triggered.
-  ///
-  /// ***
-  ///
-  /// An example that rebuilds when the [rebuildSignal] is triggered:
-  ///
-  /// ```dart
-  /// Widget? buildMenu(
-  ///   BuildContext rootContext,
-  ///   ValueNotifier<int> rebuildSignal,
-  /// ) {
-  ///   widget.onOpen?.call();
-  ///   return ListenableBuilder(
-  ///     listenable: rebuildSignal,
-  ///     builder: (BuildContext rootListenableContext, Widget? child) {
-  ///       List<CupertinoMenuEntry<T>> items = widget.itemBuilder(rootContext);
-  ///       // Provide the menu items with contextual information
-  ///       return CupertinoNestedMenuLayer<T>(
-  ///         anchorSize: Size(50, 100),
-  ///         coordinates: CupertinoMenuItemCoordinates(...),
-  ///         animation: animation,
-  ///         menuClip: BorderRadius.all(CupertinoMenu.radius),
-  ///         constraints: widget.constraints,
-  ///         items: items
-  ///       );
-  ///     },
-  ///   );
-  /// }
-  /// ```
   Widget? buildMenu(BuildContext context, ValueNotifier<int> rebuildSignal);
 
   /// Called when the menu begins closing
@@ -2551,9 +2526,7 @@ mixin CupertinoNestedMenuControlMixin<T, U extends StatefulWidget>
 /// rebuild signal is sent to the root menu. If the [itemBuilder] returns items,
 /// the [onOpen] callback will be called when the menu expansion starts.
 ///
-///
-///
-/// See also:
+/// **See also**:
 ///
 /// * [CupertinoMenuItem], a simple menu item with a trailing widget slot.
 /// * [CupertinoCheckedMenuItem], a menu item that displays a leading checkmark
@@ -2725,7 +2698,6 @@ class _CupertinoNestedMenuState<T>
   ) {
     bool isMounted = false;
     List<CupertinoMenuEntry<T>> items = widget.itemBuilder(rootContext);
-
     if (items.isEmpty) {
       return null;
     }
@@ -2749,26 +2721,27 @@ class _CupertinoNestedMenuState<T>
         final List<ScopedMenuTreeCoordinates> wrappedItems =
           CupertinoMenu.wrapMenuItems(
             items: <CupertinoMenuEntry<T>>[
-                CupertinoNestedMenuItemAnchor<T>(
-                  key: widget.expandedMenuAnchorKey,
-                  subtitle: widget.subtitle,
-                  trailing: widget.trailing,
-                  animation: animation.drive(_clampedAnimatable),
-                  visible: status != CupertinoMenuStatus.closed,
-                  onTap: widget.enabled ? _handleTap : null,
-                  semanticsHint: 'Tap to collapse',
-                  enabled: widget.enabled,
-                  title: widget.title,
-                ),
-                ...items,
-              ],
+              CupertinoNestedMenuItemAnchor<T>(
+                key: widget.expandedMenuAnchorKey,
+                subtitle: widget.subtitle,
+                trailing: widget.trailing,
+                animation: animation.drive(_clampedAnimatable),
+                visible: status != CupertinoMenuStatus.closed,
+                onTap: widget.enabled ? _handleTap : null,
+                semanticsHint: 'Tap to collapse',
+                enabled: widget.enabled,
+                title: widget.title,
+              ),
+              ...items,
+            ],
             depth: coordinates!.depth,
             path: coordinates!.path + <int>[coordinates!.row],
           );
 
         return CupertinoMenuLayer(
-          isInteractive: CupertinoMenu.interactiveLayersOf(rootListenableContext)
-              .contains(coordinates),
+          isInteractive: CupertinoMenu
+                          .interactiveLayersOf(rootListenableContext)
+                          .contains(coordinates),
           constraints: widget.constraints,
           childCount: wrappedItems.length,
           coordinates: coordinates!,
@@ -2844,7 +2817,6 @@ class _CupertinoNestedMenuState<T>
 /// The [anchorSize] is used to determine the starting size of the menu layer.
 ///
 /// The [menuController] can be used to control this menu layer.
-///
 ///
 /// See also:
 ///
@@ -3097,7 +3069,6 @@ class _RootMenuLayout extends SingleChildLayoutDelegate {
   //
   // This method is only called on the root menu, since all overlapping layers
   // will be positioned on the same screen as the root menu.
-  @protected
   Rect _findClosestScreen(Size size, Offset point, Set<Rect> avoidBounds) {
     final Iterable<ui.Rect> screens =
         DisplayFeatureSubScreen.subScreensInBounds(
@@ -3122,8 +3093,7 @@ class _RootMenuLayout extends SingleChildLayoutDelegate {
   // is only called on the root menu. Overlapping layers will not leave the
   // horizontal bounds of the root menu, and can position themselves vertically
   // using flow.
-  @protected
-  Offset fitInsideScreen(
+  Offset _fitInsideScreen(
     Rect screen,
     Size childSize,
     Offset wantedPosition,
@@ -3198,7 +3168,7 @@ class _RootMenuLayout extends SingleChildLayoutDelegate {
       avoidBounds,
     );
 
-    final Offset position = fitInsideScreen(
+    final Offset position = _fitInsideScreen(
           screen,
           childSize,
           Offset(offsetX, offsetY) + boundedOffset,
@@ -3380,7 +3350,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   CustomPaint _buildShadow(BuildContext context, Widget child) {
     return CustomPaint(
       painter: _MenuLayerShadowPainter(
-        brightness: MediaQuery.platformBrightnessOf(context),
+        brightness: CupertinoTheme.brightnessOf(context),
         depth: widget.depth,
         radius: CupertinoMenu.radius,
         repaint: _nestingAnimationReciprocal,
