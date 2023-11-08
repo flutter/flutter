@@ -8,11 +8,7 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <string>
 #include <type_traits>
-
-#include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
 
 namespace impeller {
 
