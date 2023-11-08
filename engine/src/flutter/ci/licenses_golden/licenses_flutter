@@ -5053,6 +5053,7 @@ ORIGIN: ../../../flutter/shell/platform/linux/fl_view_accessible.cc + ../../../f
 ORIGIN: ../../../flutter/shell/platform/linux/fl_view_accessible.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/linux/fl_view_accessible_test.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/linux/fl_view_private.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/linux/fl_view_test.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/linux/key_mapping.g.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/linux/key_mapping.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h + ../../../flutter/LICENSE
@@ -7835,6 +7836,7 @@ FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view_accessible.h
 FILE: ../../../flutter/shell/platform/linux/fl_view_accessible_test.cc
 FILE: ../../../flutter/shell/platform/linux/fl_view_private.h
+FILE: ../../../flutter/shell/platform/linux/fl_view_test.cc
 FILE: ../../../flutter/shell/platform/linux/key_mapping.g.cc
 FILE: ../../../flutter/shell/platform/linux/key_mapping.h
 FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h
