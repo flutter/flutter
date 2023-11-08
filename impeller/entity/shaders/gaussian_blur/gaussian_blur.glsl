@@ -48,6 +48,11 @@ void main() {
   f16vec4 total_color = f16vec4(0.0hf);
   float16_t gaussian_integral = 0.0hf;
 
+  // Step by 2.0 as a performance optimization, relying on bilinear filtering in
+  // the sampler to blend the texels. Typically the space between pixels is
+  // calculated so their blended amounts match the gaussian coefficients. This
+  // just uses 0.5 as an optimization until the gaussian coefficients are
+  // calculated and passed in from the cpu.
   for (float16_t i = -blur_info.blur_radius; i <= blur_info.blur_radius;
        i += 2.0hf) {
     // Use the 32 bit Gaussian function because the 16 bit variation results in
