@@ -4,16 +4,30 @@
 
 #pragma once
 
-#include <functional>
 #include <memory>
-#include <vector>
 
-#include "flutter/fml/macros.h"
-#include "flutter/impeller/core/texture.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/entity.h"
 
 namespace impeller {
+
+enum class BlendSelectValues {
+  kScreen = 0,
+  kOverlay,
+  kDarken,
+  kLighten,
+  kColorDodge,
+  kColorBurn,
+  kHardLight,
+  kSoftLight,
+  kDifference,
+  kExclusion,
+  kMultiply,
+  kHue,
+  kSaturation,
+  kColor,
+  kLuminosity,
+};
 
 class FramebufferBlendContents final : public ColorSourceContents {
  public:

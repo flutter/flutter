@@ -180,8 +180,6 @@ static std::optional<Entity> AdvancedBlend(
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    blend_info.supports_decal_sampler_address_mode =
-        renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode();
     auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
         dst_sampler_descriptor);
     FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
@@ -354,8 +352,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    blend_info.supports_decal_sampler_address_mode =
-        renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode();
     auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
         dst_sampler_descriptor);
     FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
@@ -478,8 +474,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    frag_info.supports_decal_sampler_address_mode =
-        renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode();
     auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
         dst_sampler_descriptor);
     FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
