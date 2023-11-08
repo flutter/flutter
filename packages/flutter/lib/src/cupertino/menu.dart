@@ -1,20 +1,28 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // ignore_for_file: unused_element
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'icons.dart';
 import 'localizations.dart';
 import 'menu_item.dart';
 import 'scrollbar.dart';
 import 'theme.dart';
+
+// TODO(davidhicks980): Shuffle the classes to make the file more readable.
 
 /// Signature used by [CupertinoMenuButton] to lazily construct menu items shown
 /// when a [CupertinoMenu] is constructed
@@ -104,7 +112,7 @@ class CupertinoMenuController extends CupertinoMenuControlMixin {
   }
 }
 
-// TODO(davidhicks980) Document the dartpad example.
+
 
 /// A button that displays a Cupertino-style menu when pressed.
 ///
@@ -118,8 +126,9 @@ class CupertinoMenuController extends CupertinoMenuControlMixin {
 /// [controller.rebuild] is called.
 ///
 /// The menu anchor is a [CupertinoButton] whose body can be customized using
-/// the [child] parameter. If [child] is null, [Icons.adaptive.more] will be
-/// used as the button's child.
+/// the [child] parameter. If [child] is null, [CupertinoIcons.ellipsis] will be
+/// used as the button's child. A [focusNode] can be provided to control the
+/// focus behavior of the menu button.
 ///
 /// If [enableFeedback] is true, [Feedback.forTap] will be called when the menu
 /// is opened.
@@ -152,8 +161,8 @@ class CupertinoMenuController extends CupertinoMenuControlMixin {
 /// This occurs because [BackdropFilter] is applied to the entire screen, and
 /// not just the menu. Afterwards, the blurred screen is clipped to the menu's
 /// bounds. Save layers are expensive, so this option should only be used if
-///
 /// absolutely necessary.
+///
 /// {@tool dartpad}
 /// ** See code in examples/api/lib/cupertino/menu/cupertino_menu.0.dart **
 /// {@end-tool}
@@ -171,6 +180,7 @@ class CupertinoMenuController extends CupertinoMenuControlMixin {
 ///   actions.
 /// * [CupertinoNestedMenu], a menu item that expands to show a nested menu.
 /// * [showCupertinoMenu], an alternative way of displaying a [CupertinoMenu].
+// TODO(davidhicks980): Document the cupertino_menu.0.dart dartpad example.
 class CupertinoMenuButton<T> extends StatefulWidget {
   /// Creates a [CupertinoButton] that shows a [CupertinoMenu] when pressed.
   const CupertinoMenuButton({
@@ -192,6 +202,7 @@ class CupertinoMenuButton<T> extends StatefulWidget {
     this.buttonPadding,
     this.edgeInsets = const EdgeInsets.all(CupertinoMenu.defaultEdgeInsets),
     this.clip = Clip.antiAlias,
+    this.focusNode,
   });
 
   /// Called when building the menu items and when a new itemBuilder is provided.
@@ -268,6 +279,9 @@ class CupertinoMenuButton<T> extends StatefulWidget {
   /// {@macro CupertinoMenuController}
   final CupertinoMenuController? controller;
 
+  /// A focus node that can be used to focus this menu button.
+  final FocusNode? focusNode;
+
   /// The clip behavior to use for the menu's surface.
   ///
   /// In most cases, the default value of [Clip.antiAlias] should be used.
@@ -277,7 +291,7 @@ class CupertinoMenuButton<T> extends StatefulWidget {
   /// not just the menu. Afterwards, the blurred screen is clipped to the menu's
   /// bounds. Save layers are expensive, so this option should only be used if
   /// absolutely necessary.
-  // TODO(davidhicks980): Determine whether this is a good explanation.
+  // TODO(davidhicks980): Does this Clip.antiAliasWithSaveLayer description make sense?
   final Clip clip;
 
   /// Whether to push the menu to the root navigator.
@@ -296,6 +310,10 @@ class CupertinoMenuButton<T> extends StatefulWidget {
 class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
       implements CupertinoMenuControlMixin {
   final ValueNotifier<int> _rebuildSignal = ValueNotifier<int>(0);
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _simulateTap),
+    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _simulateTap),
+  };
   CupertinoMenuController? _controller;
 
   @override
@@ -365,10 +383,14 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
     }
   }
 
+  void _simulateTap(Intent intent){
+    showMenu();
+  }
+
   /// Shows a [CupertinoMenu] in the current navigator
   void showMenu() {
     if (widget.enableFeedback) {
-      Feedback.forTap(context);
+      HapticFeedback.lightImpact();
     }
 
     final RenderBox anchor = context.findRenderObject()! as RenderBox;
@@ -433,10 +455,13 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
     };
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      canRequestFocus: _canRequestFocus,
+    return FocusableActionDetector(
+      focusNode: widget.focusNode,
+      enabled: _canRequestFocus,
+      actions: _actionMap,
       child: CupertinoButton(
         pressedOpacity: widget.child != null ? 1 : 0.4,
         onPressed: widget.enabled ? showMenu : null,
@@ -444,9 +469,9 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
         padding: widget.buttonPadding,
         child: IconTheme.merge(
           data: IconTheme.of(context),
-          child: widget.child ?? Icon(Icons.adaptive.more),
+          child: widget.child ?? const Icon(CupertinoIcons.ellipsis),
         ),
-      ),
+      )
     );
   }
 }
@@ -600,11 +625,6 @@ Future<T?> showCupertinoMenu<T>({
 
 
 String _getLocalizedBarrierLabel(BuildContext context) {
-  // Use this instead of `MaterialLocalizations.of(context)` because
-  // [MaterialLocalizations] might be null in some cases.
-  final MaterialLocalizations? materialLocalizations =
-      Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
-
   // Use this instead of `CupertinoLocalizations.of(context)` because
   // [CupertinoLocalizations] might be null in some cases.
   final CupertinoLocalizations? cupertinoLocalizations =
@@ -613,8 +633,8 @@ String _getLocalizedBarrierLabel(BuildContext context) {
   // If both localizations are null, fallback to
   // [DefaultMaterialLocalizations().modalBarrierDismissLabel].
   return cupertinoLocalizations?.modalBarrierDismissLabel
-         ?? materialLocalizations?.modalBarrierDismissLabel
-         ?? const DefaultMaterialLocalizations().modalBarrierDismissLabel;
+         ?? const DefaultCupertinoLocalizations().modalBarrierDismissLabel;
+
 }
 
 
@@ -961,9 +981,9 @@ class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
   // If the top layer has closed by at least 30%, the underlying layer is made
   // interactive.
   //
-  // TODO(davidhicks980): Because setEquals calls identical, it appears a new
-  // set must be created to update the setEquals result. Determine if this is
-  // true.
+  // TODO(davidhicks980): Determine the behavior of setEquals.
+  // As far as I can tell, because setEquals calls identical, it appears a new
+  // Set must be created to update the setEquals result.
   void _updateInteractiveLayers() {
     final double value = _nestingAnimation!.value;
     final CupertinoMenuTreeCoordinates layer =
@@ -1344,8 +1364,7 @@ class CupertinoMenuLayerModel extends InheritedWidget {
 /// the pattern `${path.join(".")}-$depth-$row-$column`.
 /// {@endtemplate}
 ///
-/// {@template CupertinoMenuTreeCoordinates.diagram}
-/// ```
+/// ```dart
 ///                            //  row  column  depth  path
 /// CupertinoMenuActionItem    //  0    0       0      [0]
 /// CupertinoMenuActionItem    //  0    1       0      [0]
@@ -1368,7 +1387,7 @@ class CupertinoMenuLayerModel extends InheritedWidget {
 ///  // 1                          3    0       1      [0]
 ///  // 2                          3    0       2      [0.3]
 /// ```
-/// {@endtemplate}
+// TODO(davidhicks980): Format the tree diagram for dartdoc.
 @immutable
 class CupertinoMenuTreeCoordinates {
   /// Constructs [CupertinoMenuTreeCoordinates] from the anchor
@@ -1532,7 +1551,6 @@ class ScopedMenuTreeCoordinates extends InheritedWidget
 /// To constrain the final size of the menu, [BoxConstraints] can be passed to
 /// the [constraints] parameter.
 class CupertinoMenu<T> extends StatefulWidget {
-
   /// Creates a [CupertinoMenu] that displays a list of [CupertinoMenuEntry]s
   const CupertinoMenu({
     super.key,
@@ -1704,7 +1722,7 @@ class CupertinoMenu<T> extends StatefulWidget {
   /// 2. Menu items are wrapped by [ScopedMenuTreeCoordinates] to provide location
   ///    information to the menu items
   ///
-  // TODO(davidhicks980): Consider moving this logic to [_MenuBody]
+  // TODO(davidhicks980): Consider moving this logic to _MenuBody
   static List<ScopedMenuTreeCoordinates> wrapMenuItems<T>({
     required List<CupertinoMenuEntry<T>> items,
     required int depth,

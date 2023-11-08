@@ -64,8 +64,7 @@ mixin CupertinoMenuEntry<T> on Widget {
   /// Default opaque color for [CupertinoMenuDivider]s and
   /// [CupertinoVerticalMenuDivider]s on a [CupertinoMenuButton].
   ///
-  // The following colors were measured from the iOS simulator, and opacity was
-  // extrapolated:
+  // The following colors were measured from the iOS simulator:
   // Dark mode on white       Color.fromRGBO(97, 97, 97)
   // Dark mode on black       Color.fromRGBO(51, 51, 51)
   // Light mode on black      Color.fromRGBO(147, 147, 147)
@@ -940,18 +939,20 @@ class CupertinoMenuLargeDivider extends StatelessWidget
   });
 
   /// Color for a transparent [CupertinoMenuLargeDivider].
-  ///
-  // The following colors were measured from the iOS simulator and opacity was extrapolated:
-  // ```dart
-  // // Dark mode on white:
+  // The following colors were measured from the iOS simulator and opacity was
+  // extrapolated:
+  // ---------------------------
+  // Dark mode on white:
   // Color.fromRGBO(70, 70, 70, 1)
-  // // Dark mode on black:
+  //
+  // Dark mode on black:
   // Color.fromRGBO(26, 26, 26, 1)
-  // // Light mode on black:
+  //
+  // Light mode on black:
   // Color.fromRGBO(181, 181, 181, 1)
-  // // Light mode on white:
+  //
+  // Light mode on white:
   // Color.fromRGBO(226, 226, 226, 1)
-  // ```
   static const CupertinoDynamicColor transparentColor =
     CupertinoDynamicColor.withBrightness(
       color: Color.fromRGBO(0, 0, 0, 0.08),
@@ -959,17 +960,6 @@ class CupertinoMenuLargeDivider extends StatelessWidget
     );
 
   /// Color for an opaque [CupertinoMenuLargeDivider].
-  // The following colors were measured from the iOS simulator and opacity was extrapolated:
-  // ```dart
-  // // Dark mode on white:
-  // Color.fromRGBO(70, 70, 70, 1)
-  // // Dark mode on black:
-  // Color.fromRGBO(26, 26, 26, 1)
-  // // Light mode on black:
-  // Color.fromRGBO(181, 181, 181, 1)
-  // // Light mode on white:
-  // Color.fromRGBO(226, 226, 226, 1)
-  // ```
   static const CupertinoDynamicColor opaqueColor =
     CupertinoDynamicColor.withBrightness(
       color: Color.fromRGBO(226, 226, 226, 1),
