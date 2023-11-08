@@ -67,4 +67,21 @@ id CreateMockFlutterEngine(NSString* pasteboardString) {
   }
 }
 
+MockFlutterEngineTest::MockFlutterEngineTest() = default;
+
+void MockFlutterEngineTest::SetUp() {
+  engine_mock_ = CreateMockFlutterEngine(@"");
+}
+
+void MockFlutterEngineTest::TearDown() {
+  [engine_mock_ shutDownEngine];
+  [engine_mock_ stopMocking];
+  engine_mock_ = nil;
+}
+
+void MockFlutterEngineTest::ShutDownEngine() {
+  [engine_mock_ shutDownEngine];
+  engine_mock_ = nil;
+}
+
 }  // namespace flutter::testing
