@@ -64,10 +64,6 @@ class Capabilities {
   ///         command subgroups.
   virtual bool SupportsComputeSubgroups() const = 0;
 
-  /// @brief  Whether the context backend supports binding the on-screen surface
-  ///         texture for shader reading.
-  virtual bool SupportsReadFromOnscreenTexture() const = 0;
-
   /// @brief  Whether the context backend supports binding the current
   ///         `RenderPass` attachments. This is supported if the backend can
   ///         guarantee that attachment textures will not be mutated until the
@@ -136,8 +132,6 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsComputeSubgroups(bool value);
 
-  CapabilitiesBuilder& SetSupportsReadFromOnscreenTexture(bool value);
-
   CapabilitiesBuilder& SetSupportsReadFromResolve(bool value);
 
   CapabilitiesBuilder& SetDefaultColorFormat(PixelFormat value);
@@ -160,7 +154,6 @@ class CapabilitiesBuilder {
   bool supports_framebuffer_fetch_ = false;
   bool supports_compute_ = false;
   bool supports_compute_subgroups_ = false;
-  bool supports_read_from_onscreen_texture_ = false;
   bool supports_read_from_resolve_ = false;
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;

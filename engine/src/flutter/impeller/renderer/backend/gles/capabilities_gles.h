@@ -98,9 +98,6 @@ class CapabilitiesGLES final
   bool SupportsComputeSubgroups() const override;
 
   // |Capabilities|
-  bool SupportsReadFromOnscreenTexture() const override;
-
-  // |Capabilities|
   bool SupportsReadFromResolve() const override;
 
   // |Capabilities|

@@ -451,11 +451,6 @@ bool CapabilitiesVK::SupportsReadFromResolve() const {
   return false;
 }
 
-// |Capabilities|
-bool CapabilitiesVK::SupportsReadFromOnscreenTexture() const {
-  return false;
-}
-
 bool CapabilitiesVK::SupportsDecalSamplerAddressMode() const {
   return true;
 }

@@ -333,16 +333,11 @@ bool EntityPass::Render(ContentContext& renderer,
       .coverage = Rect::MakeSize(root_render_target.GetRenderTargetSize()),
       .clip_depth = 0}};
 
-  bool supports_onscreen_backdrop_reads =
-      renderer.GetDeviceCapabilities().SupportsReadFromOnscreenTexture() &&
-      // If the backend doesn't have `SupportsReadFromResolve`, we need to flip
-      // between two textures when restoring a previous MSAA pass.
-      renderer.GetDeviceCapabilities().SupportsReadFromResolve();
   bool reads_from_onscreen_backdrop = GetTotalPassReads(renderer) > 0;
   // In this branch path, we need to render everything to an offscreen texture
   // and then blit the results onto the onscreen texture. If using this branch,
   // there's no need to set up a stencil attachment on the root render target.
-  if (!supports_onscreen_backdrop_reads && reads_from_onscreen_backdrop) {
+  if (reads_from_onscreen_backdrop) {
     auto offscreen_target =
         CreateRenderTarget(renderer, root_render_target.GetRenderTargetSize(),
                            GetClearColor(render_target.GetRenderTargetSize()));
