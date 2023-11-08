@@ -233,7 +233,7 @@ public class FlutterView extends FrameLayout
       renderSurface = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
-          String.format("RenderMode not supported with this constructor: %s", renderMode));
+          "RenderMode not supported with this constructor: " + renderMode);
     }
 
     init();
@@ -327,7 +327,7 @@ public class FlutterView extends FrameLayout
       renderSurface = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
-          String.format("RenderMode not supported with this constructor: %s", renderMode));
+          "RenderMode not supported with this constructor: " + renderMode);
     }
 
     init();
