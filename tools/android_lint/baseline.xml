@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 7.2.0" type="baseline" client="" dependencies="true" name="" variant="all" version="7.2.0">
+<issues format="6" by="lint 8.1.0 [10406996] " type="baseline" client="" dependencies="true" name="" variant="all" version="8.1.0 [10406996] ">
 
     <issue
         id="InlinedApi"
@@ -8,7 +8,7 @@
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
-            line="267"
+            line="274"
             column="16"/>
     </issue>
 
@@ -19,7 +19,7 @@
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
-            line="271"
+            line="278"
             column="16"/>
     </issue>
 
@@ -30,7 +30,7 @@
         errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java"
-            line="275"
+            line="282"
             column="16"/>
     </issue>
 
@@ -41,7 +41,7 @@
         errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
-            line="661"
+            line="991"
             column="25"/>
     </issue>
 
@@ -52,7 +52,7 @@
         errorLine2="                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
-            line="661"
+            line="991"
             column="67"/>
     </issue>
 
@@ -68,13 +68,24 @@
     </issue>
 
     <issue
+        id="Recycle"
+        message="This `AssetFileDescriptor` should be freed up after use with `#close()`"
+        errorLine1="          activity.getContentResolver().openTypedAssetFileDescriptor(item.getUri(), &quot;text/*&quot;, null);"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java"
+            line="522"
+            column="41"/>
+    </issue>
+
+    <issue
         id="ClickableViewAccessibility"
         message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
         errorLine1="  public boolean onTouchEvent(MotionEvent event) {"
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
-            line="436"
+            line="445"
             column="18"/>
     </issue>
 
@@ -85,19 +96,8 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
-            line="911"
+            line="928"
             column="18"/>
     </issue>
-
-    <issue
-        id="UseSparseArrays"
-        message="Use `new SparseArray&lt;VirtualDisplayController>(...)` instead for better performance"
-        errorLine1="        vdControllers = new HashMap&lt;>();"
-        errorLine2="                        ~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java"
-            line="61"
-            column="25"/>
-</issue>
 
 </issues>
