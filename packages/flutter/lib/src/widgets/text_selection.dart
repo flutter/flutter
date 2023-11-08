@@ -2277,7 +2277,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onUserTap].
   ///
-  /// By default, it services as placeholder to enable subclass override.
+  /// By default, it serves as placeholder to enable subclass override.
   ///
   /// See also:
   ///
@@ -2392,7 +2392,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapCancel].
   ///
-  /// By default, it services as placeholder to enable subclass override.
+  /// By default, it serves as placeholder to enable subclass override.
   ///
   /// See also:
   ///
