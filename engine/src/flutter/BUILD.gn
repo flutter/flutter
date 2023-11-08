@@ -196,6 +196,7 @@ group("unittests") {
     if (is_mac) {
       public_deps += [
         "//flutter/impeller/golden_tests:impeller_golden_tests",
+        "//flutter/shell/gpu:gpu_surface_metal_unittests",
         "//flutter/shell/platform/darwin/common:framework_common_unittests",
         "//flutter/third_party/spring_animation:spring_animation_unittests",
       ]
