@@ -201,13 +201,7 @@ PathBuilder& PathBuilder::AddCircle(const Point& c, Scalar r) {
 
 PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Scalar radius) {
   return radius <= 0.0 ? AddRect(rect)
-                       : AddRoundedRect(rect, RoundingRadii(radius));
-}
-
-PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Point radii) {
-  return radii.x <= 0 || radii.y <= 0
-             ? AddRect(rect)
-             : AddRoundedRect(rect, RoundingRadii(radii));
+                       : AddRoundedRect(rect, {radius, radius, radius, radius});
 }
 
 PathBuilder& PathBuilder::AddRoundedRect(Rect rect, RoundingRadii radii) {

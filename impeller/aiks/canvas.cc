@@ -246,14 +246,13 @@ void Canvas::DrawRect(Rect rect, const Paint& paint) {
   GetCurrentPass().AddEntity(entity);
 }
 
-void Canvas::DrawRRect(Rect rect, Point corner_radii, const Paint& paint) {
-  if (corner_radii.x == corner_radii.y &&
-      AttemptDrawBlurredRRect(rect, corner_radii.x, paint)) {
+void Canvas::DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint) {
+  if (AttemptDrawBlurredRRect(rect, corner_radius, paint)) {
     return;
   }
   auto path = PathBuilder{}
                   .SetConvexity(Convexity::kConvex)
-                  .AddRoundedRect(rect, corner_radii)
+                  .AddRoundedRect(rect, corner_radius)
                   .SetBounds(rect)
                   .TakePath();
   if (paint.style == Paint::Style::kFill) {
@@ -319,20 +318,20 @@ void Canvas::ClipRect(const Rect& rect, Entity::ClipOperation clip_op) {
 }
 
 void Canvas::ClipRRect(const Rect& rect,
-                       Point corner_radii,
+                       Scalar corner_radius,
                        Entity::ClipOperation clip_op) {
   auto path = PathBuilder{}
                   .SetConvexity(Convexity::kConvex)
-                  .AddRoundedRect(rect, corner_radii)
+                  .AddRoundedRect(rect, corner_radius)
                   .SetBounds(rect)
                   .TakePath();
 
   auto size = rect.GetSize();
   // Does the rounded rect have a flat part on the top/bottom or left/right?
-  bool flat_on_TB = corner_radii.x * 2 < size.width;
-  bool flat_on_LR = corner_radii.y * 2 < size.height;
+  bool flat_on_TB = corner_radius * 2 < size.width;
+  bool flat_on_LR = corner_radius * 2 < size.height;
   std::optional<Rect> inner_rect = (flat_on_LR && flat_on_TB)
-                                       ? rect.Expand(-corner_radii)
+                                       ? rect.Expand(-corner_radius)
                                        : std::make_optional<Rect>();
   auto geometry = Geometry::MakeFillPath(path, inner_rect);
   auto& cull_rect = xformation_stack_.back().cull_rect;
@@ -349,7 +348,7 @@ void Canvas::ClipRRect(const Rect& rect,
       IntersectCulling(rect);
       break;
     case Entity::ClipOperation::kDifference:
-      if (corner_radii.x <= 0.0 || corner_radii.y <= 0) {
+      if (corner_radius <= 0) {
         SubtractCulling(rect);
       } else {
         // We subtract the inner "tall" and "wide" rectangle pieces
@@ -358,10 +357,14 @@ void Canvas::ClipRRect(const Rect& rect,
         // Since this is a subtract operation, we can subtract each
         // rectangle piece individually without fear of interference.
         if (flat_on_TB) {
-          SubtractCulling(rect.Expand({-corner_radii.x, 0.0}));
+          SubtractCulling(Rect::MakeLTRB(
+              rect.GetLeft() + corner_radius, rect.GetTop(),
+              rect.GetRight() - corner_radius, rect.GetBottom()));
         }
         if (flat_on_LR) {
-          SubtractCulling(rect.Expand({0.0, -corner_radii.y}));
+          SubtractCulling(Rect::MakeLTRB(
+              rect.GetLeft(), rect.GetTop() + corner_radius,  //
+              rect.GetRight(), rect.GetBottom() - corner_radius));
         }
       }
       break;
