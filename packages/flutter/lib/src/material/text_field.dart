@@ -646,9 +646,6 @@ class TextField extends StatefulWidget {
   /// {@template flutter.material.textfield.onTap}
   /// Called for the first tap in a series of taps.
   ///
-  /// If [onTapAlwaysCalled] is enabled, this will also be called for consecutive
-  /// taps.
-  ///
   /// The text field builds a [GestureDetector] to handle input events like tap,
   /// to trigger focus requests, to move the caret, adjust the selection, etc.
   /// Handling some of those events by wrapping the text field with a competing
@@ -666,6 +663,9 @@ class TextField extends StatefulWidget {
   /// To listen to arbitrary pointer events without competing with the
   /// text field's internal gesture detector, use a [Listener].
   /// {@endtemplate}
+  ///
+  /// If [onTapAlwaysCalled] is enabled, this will also be called for consecutive
+  /// taps.
   final GestureTapCallback? onTap;
 
   /// Whether [onTap] should be called for every tap.
