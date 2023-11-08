@@ -24,6 +24,10 @@ class PlaygroundImplVK final : public PlaygroundImpl {
   using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
 
+  // A global Vulkan instance which ensures that the Vulkan library will remain
+  // loaded throughout the lifetime of the process.
+  static vk::UniqueInstance global_instance_;
+
   // |PlaygroundImpl|
   std::shared_ptr<Context> GetContext() const override;
 
@@ -37,6 +41,8 @@ class PlaygroundImplVK final : public PlaygroundImpl {
   PlaygroundImplVK(const PlaygroundImplVK&) = delete;
 
   PlaygroundImplVK& operator=(const PlaygroundImplVK&) = delete;
+
+  static void InitGlobalVulkanInstance();
 };
 
 }  // namespace impeller
