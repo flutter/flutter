@@ -160,7 +160,7 @@ TEST(CanvasRecorder, DrawRect) {
 
 TEST(CanvasRecorder, DrawRRect) {
   CanvasRecorder<Serializer> recorder;
-  recorder.DrawRRect(Rect(), 0, Paint());
+  recorder.DrawRRect(Rect(), {}, Paint());
   ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawRRect);
 }
 
@@ -202,7 +202,7 @@ TEST(CanvasRecorder, ClipRect) {
 
 TEST(CanvasRecorder, ClipRRect) {
   CanvasRecorder<Serializer> recorder;
-  recorder.ClipRRect({}, 0);
+  recorder.ClipRRect({}, {});
   ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::ClipRRect);
 }
 
