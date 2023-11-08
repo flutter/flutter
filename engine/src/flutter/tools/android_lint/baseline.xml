@@ -57,17 +57,6 @@
     </issue>
 
     <issue
-        id="OldTargetApi"
-        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
-        errorLine1="    &lt;uses-sdk android:minSdkVersion=&quot;16&quot; android:targetSdkVersion=&quot;31&quot; />"
-        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/AndroidManifest.xml"
-            line="8"
-            column="42"/>
-    </issue>
-
-    <issue
         id="HardcodedDebugMode"
         message="Avoid hardcoding the debug mode; leaving it out allows debug and release builds to automatically assign one"
         errorLine1="    &lt;application android:label=&quot;Flutter Shell&quot; android:name=&quot;FlutterApplication&quot; android:debuggable=&quot;true&quot;>"
