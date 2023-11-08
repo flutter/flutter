@@ -130,23 +130,20 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     EngineFlutterDisplay.instance,
   ];
 
+  /// Adds [view] to the platform dispatcher's registry of [views].
+  void registerView(EngineFlutterView view) {
+    viewData[view.viewId] = view;
+  }
+
   /// The current list of windows.
   @override
   Iterable<EngineFlutterView> get views => viewData.values;
   final Map<int, EngineFlutterView> viewData = <int, EngineFlutterView>{};
 
-  /// Returns the [FlutterView] with the provided ID if one exists, or null
+  /// Returns the [EngineFlutterView] with the provided ID if one exists, or null
   /// otherwise.
   @override
   EngineFlutterView? view({required int id}) => viewData[id];
-
-  /// A map of opaque platform window identifiers to window configurations.
-  ///
-  /// This should be considered a protected member, only to be used by
-  /// [PlatformDispatcher] subclasses.
-  Map<Object, ViewConfiguration> get windowConfigurations => _windowConfigurations;
-  final Map<Object, ViewConfiguration> _windowConfigurations =
-      <Object, ViewConfiguration>{};
 
   /// The [FlutterView] provided by the engine if the platform is unable to
   /// create windows, or, for backwards compatibility.
