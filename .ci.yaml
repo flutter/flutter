@@ -2453,7 +2453,6 @@ targets:
   # Samsung A02, Skia
   - name: Linux_samsung_a02 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -3729,6 +3728,7 @@ targets:
       task_name: hello_world_android__compile
 
   - name: Mac_android hot_mode_dev_cycle__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/138072
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3940,18 +3940,18 @@ targets:
         }
     bringup: true
 
+  # TODO(vashworth): Stop running in presubmit after macOS 13 upgrade is complete (https://github.com/flutter/flutter/issues/134737)
   - name: Mac_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__compile
 
+  # TODO(vashworth): Stop running in presubmit after macOS 13 upgrade is complete (https://github.com/flutter/flutter/issues/134737)
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
