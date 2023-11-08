@@ -745,66 +745,11 @@ class TestFlutterView implements FlutterView {
     platformDispatcher.onMetricsChanged?.call();
   }
 
-  /// The physical geometry to use for this test.
-  ///
-  /// Defaults to the value provided by [FlutterView.physicalGeometry]. This
-  /// can only be set in a test environment to emulate different view
-  /// configurations. A standard [FlutterView] is not mutable from the framework.
-  ///
-  /// This property and [physicalSize] are dependent on one another. If both
-  /// properties are set through their test setters, the final result will be
-  /// that [physicalGeometry] determines the location and [physicalSize]
-  /// determines the size of the [physicalGeometry] [Rect]. If only
-  /// [physicalSize] is set, the final result is that the default value of
-  /// [physicalGeometry] determines the location and [physicalSize] determines
-  /// the size of the [physicalGeometry] [Rect]. If only [physicalGeometry]
-  /// is set, it will determine both the location and size of the
-  /// [physicalGeometry] [Rect].
-  ///
-  /// See also:
-  ///
-  ///   * [FlutterView.physicalGeometry] for the standard implementation
-  ///   * [resetPhysicalGeometry] to reset this value specifically
-  ///   * [reset] to reset all test values for this view
-  @override
-  Rect get physicalGeometry {
-    Rect value = _physicalGeometry ?? _view.physicalGeometry;
-    if (_physicalSize != null) {
-      value = value.topLeft & _physicalSize!;
-    }
-    return value;
-  }
-  Rect? _physicalGeometry;
-  set physicalGeometry(Rect value) {
-    _physicalGeometry = value;
-    platformDispatcher.onMetricsChanged?.call();
-  }
-
-  /// Resets [physicalGeometry] to the default value for this view.
-  ///
-  /// This will also reset [physicalSize] as the values are dependent
-  /// on one another.
-  void resetPhysicalGeometry() {
-    _physicalGeometry = null;
-    _physicalSize = null;
-    platformDispatcher.onMetricsChanged?.call();
-  }
-
   /// The physical size to use for this test.
   ///
   /// Defaults to the value provided by [FlutterView.physicalSize]. This
   /// can only be set in a test environment to emulate different view
   /// configurations. A standard [FlutterView] is not mutable from the framework.
-  ///
-  /// This property and [physicalGeometry] are dependent on one another. If both
-  /// properties are set through their test setters, the final result will be
-  /// that [physicalGeometry] determines the location and [physicalSize]
-  /// determines the size of the [physicalGeometry] [Rect]. If only
-  /// [physicalSize] is set, the final result is that the default value of
-  /// [physicalGeometry] determines the location and [physicalSize] determines
-  /// the size of the [physicalGeometry] [Rect]. If only [physicalGeometry]
-  /// is set, it will determine both the location and size of the
-  /// [physicalGeometry] [Rect].
   ///
   /// See also:
   ///
@@ -812,12 +757,7 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPhysicalSize] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  Size get physicalSize {
-    // This has to be able to default to `_view.physicalSize` as web_ui handles
-    // `physicalSize` and `physicalGeometry` differently than dart:ui, where
-    // the values are both based off of `physicalGeometry`.
-    return _physicalSize ?? _physicalGeometry?.size ?? _view.physicalSize;
-  }
+  Size get physicalSize => _physicalSize ?? _view.physicalSize;
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
@@ -825,11 +765,9 @@ class TestFlutterView implements FlutterView {
   }
 
   /// Resets [physicalSize] to the default value for this view.
-  ///
-  /// This will also reset [physicalGeometry] as the values are dependent
-  /// on one another.
   void resetPhysicalSize() {
-    resetPhysicalGeometry();
+    _physicalSize = null;
+    platformDispatcher.onMetricsChanged?.call();
   }
 
   /// The system gesture insets to use for this test.
@@ -952,7 +890,6 @@ class TestFlutterView implements FlutterView {
   ///   * [resetDevicePixelRatio] to reset [devicePixelRatio] specifically
   ///   * [resetDisplayFeatures]  to reset [displayFeatures] specifically
   ///   * [resetPadding] to reset [padding] specifically
-  ///   * [resetPhysicalGeometry] to reset [physicalGeometry] specifically
   ///   * [resetPhysicalSize] to reset [physicalSize] specifically
   ///   * [resetSystemGestureInsets] to reset [systemGestureInsets] specifically
   ///   * [resetViewInsets] to reset [viewInsets] specifically
@@ -962,8 +899,7 @@ class TestFlutterView implements FlutterView {
     resetDevicePixelRatio();
     resetDisplayFeatures();
     resetPadding();
-    resetPhysicalGeometry();
-    // Skipping resetPhysicalSize because resetPhysicalGeometry resets both values.
+    resetPhysicalSize();
     resetSystemGestureInsets();
     resetViewInsets();
     resetViewPadding();
@@ -1878,14 +1814,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   FrameData get frameData => platformDispatcher.frameData;
-
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.physicalGeometry instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  Rect get physicalGeometry => _view.physicalGeometry;
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.systemFontFamily instead. '
