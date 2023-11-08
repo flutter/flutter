@@ -51,6 +51,11 @@ source_set("testing") {
 
   sources = [ "run_all_unittests.cc" ]
 
+  if (is_linux) {
+    # So that we can call gtk_init in main().
+    configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+  }
+
   public_deps = [ ":testing_lib" ]
   public_configs = [ ":dynamic_symbols" ]
 }

@@ -247,8 +247,6 @@ static void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
   g_clear_object(&self->scrolling_manager);
   init_keyboard(self);
   init_scrolling(self);
-  self->window_state =
-      gdk_window_get_state(gtk_widget_get_window(GTK_WIDGET(self)));
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -556,6 +554,8 @@ static void realize_cb(GtkWidget* widget) {
   self->window_state_cb_id =
       g_signal_connect(toplevel_window, "window-state-event",
                        G_CALLBACK(window_state_event_cb), self);
+  self->window_state =
+      gdk_window_get_state(gtk_widget_get_window(toplevel_window));
 
   g_signal_connect(toplevel_window, "delete-event",
                    G_CALLBACK(window_delete_event_cb), self);
@@ -760,8 +760,6 @@ static void fl_view_class_init(FlViewClass* klass) {
 
 static void fl_view_init(FlView* self) {
   gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
-  self->window_state = gdk_window_get_state(
-      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self))));
 }
 
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
