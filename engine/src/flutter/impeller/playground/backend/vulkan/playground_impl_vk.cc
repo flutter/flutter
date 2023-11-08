@@ -45,6 +45,8 @@ ShaderLibraryMappingsForPlayground() {
   };
 }
 
+vk::UniqueInstance PlaygroundImplVK::global_instance_;
+
 void PlaygroundImplVK::DestroyWindowHandle(WindowHandle handle) {
   if (!handle) {
     return;
@@ -66,6 +68,8 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
 #endif
     return;
   }
+
+  InitGlobalVulkanInstance();
 
   ::glfwDefaultWindowHints();
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -143,6 +147,35 @@ std::unique_ptr<Surface> PlaygroundImplVK::AcquireSurfaceFrame(
   SurfaceContextVK* surface_context_vk =
       reinterpret_cast<SurfaceContextVK*>(context_.get());
   return surface_context_vk->AcquireNextSurface();
+}
+
+// Create a global instance of Vulkan in order to prevent unloading of the
+// Vulkan library.
+// A test suite may repeatedly create and destroy PlaygroundImplVK instances,
+// and if the PlaygroundImplVK's Vulkan instance is the only one in the
+// process then the Vulkan library will be unloaded when the instance is
+// destroyed.  Repeated loading and unloading of SwiftShader was leaking
+// resources, so this will work around that leak.
+// (see https://github.com/flutter/flutter/issues/138028)
+void PlaygroundImplVK::InitGlobalVulkanInstance() {
+  if (global_instance_) {
+    return;
+  }
+
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(::glfwGetInstanceProcAddress);
+
+  vk::ApplicationInfo application_info;
+  application_info.setApplicationVersion(VK_API_VERSION_1_0);
+  application_info.setApiVersion(VK_API_VERSION_1_1);
+  application_info.setEngineVersion(VK_API_VERSION_1_0);
+  application_info.setPEngineName("PlaygroundImplVK");
+  application_info.setPApplicationName("PlaygroundImplVK");
+
+  auto instance_result =
+      vk::createInstanceUnique(vk::InstanceCreateInfo({}, &application_info));
+  FML_CHECK(instance_result.result == vk::Result::eSuccess)
+      << "Unable to initialize global Vulkan instance";
+  global_instance_ = std::move(instance_result.value);
 }
 
 }  // namespace impeller
