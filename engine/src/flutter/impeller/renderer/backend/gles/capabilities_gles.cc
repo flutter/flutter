@@ -169,10 +169,6 @@ bool CapabilitiesGLES::SupportsComputeSubgroups() const {
   return false;
 }
 
-bool CapabilitiesGLES::SupportsReadFromOnscreenTexture() const {
-  return false;
-}
-
 bool CapabilitiesGLES::SupportsReadFromResolve() const {
   return false;
 }

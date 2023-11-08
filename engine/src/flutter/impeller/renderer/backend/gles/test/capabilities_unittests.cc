@@ -22,7 +22,6 @@ TEST(CapabilitiesGLES, CanInitializeWithDefaults) {
   EXPECT_FALSE(capabilities->SupportsFramebufferFetch());
   EXPECT_FALSE(capabilities->SupportsCompute());
   EXPECT_FALSE(capabilities->SupportsComputeSubgroups());
-  EXPECT_FALSE(capabilities->SupportsReadFromOnscreenTexture());
   EXPECT_FALSE(capabilities->SupportsReadFromResolve());
   EXPECT_FALSE(capabilities->SupportsDecalSamplerAddressMode());
   EXPECT_FALSE(capabilities->SupportsDeviceTransientTextures());
