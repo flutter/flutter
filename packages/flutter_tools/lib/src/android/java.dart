@@ -17,7 +17,6 @@ const String _javaExecutable = 'java';
 
 /// Represents an installation of Java.
 class Java {
-
   Java({
     required this.javaHome,
     required this.binaryPath,
