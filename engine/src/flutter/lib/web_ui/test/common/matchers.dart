@@ -227,23 +227,23 @@ enum HtmlComparisonMode {
 
 /// Rewrites [htmlContent] by removing irrelevant style attributes.
 ///
-/// If [throwOnUnusedAttributes] is `true`, throws instead of rewriting. Set
-/// [throwOnUnusedAttributes] to `true` to check that expected HTML strings do
+/// If [throwOnUnusedStyleProperties] is `true`, throws instead of rewriting. Set
+/// [throwOnUnusedStyleProperties] to `true` to check that expected HTML strings do
 /// not contain irrelevant attributes. It is ok for actual HTML to contain all
 /// kinds of attributes. They only need to be filtered out before testing.
 String canonicalizeHtml(
   String htmlContent, {
   HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly,
-  bool throwOnUnusedAttributes = false,
-  List<String>? ignoredAttributes,
+  bool throwOnUnusedStyleProperties = false,
+  List<String>? ignoredStyleProperties,
 }) {
   if (htmlContent.trim().isEmpty) {
     return '';
   }
 
-  String? unusedAttribute(String name) {
-    if (throwOnUnusedAttributes) {
-      fail('Provided HTML contains style attribute "$name" which '
+  String? unusedStyleProperty(String name) {
+    if (throwOnUnusedStyleProperties) {
+      fail('Provided HTML contains style property "$name" which '
           'is not used for comparison in the test. The HTML was:\n\n$htmlContent');
     }
 
@@ -293,17 +293,23 @@ String canonicalizeHtml(
         html_package.Element.tag(replacementTag);
 
     if (mode != HtmlComparisonMode.noAttributes) {
-      original.attributes.forEach((dynamic name, String value) {
-        if (name is! String) {
-          throw ArgumentError('"$name" should be String but was ${name.runtimeType}.');
-        }
+      // Sort the attributes so tests are not sensitive to their order, which
+      // does not matter in terms of functionality.
+      final List<String> attributeNames = original.attributes.keys.cast<String>().toList();
+      attributeNames.sort();
+      for (final String name in attributeNames) {
+        final String value = original.attributes[name]!;
         if (name == 'style') {
-          return;
+          // The style attribute is handled separately because it contains substructure.
+          continue;
         }
-        if (name.startsWith('aria-')) {
+
+        // These are the only attributes we're interested in testing. This list
+        // can change over time.
+        if (name.startsWith('aria-') || name.startsWith('flt-') || name == 'role') {
           replacement.attributes[name] = value;
         }
-      });
+      }
 
       if (original.attributes.containsKey('style')) {
         final String styleValue = original.attributes['style']!;
@@ -323,7 +329,7 @@ String canonicalizeHtml(
                 if (parts.length == 2) {
                   final String name = parts.first;
 
-                  if (ignoredAttributes != null && ignoredAttributes.contains(name)) {
+                  if (ignoredStyleProperties != null && ignoredStyleProperties.contains(name)) {
                     return null;
                   }
 
@@ -337,7 +343,7 @@ String canonicalizeHtml(
                   ].contains(name);
 
                   if (isStaticAttribute) {
-                    return unusedAttribute(name);
+                    return unusedStyleProperty(name);
                   }
 
                   // Whether the attribute is set by the layout system.
@@ -357,7 +363,7 @@ String canonicalizeHtml(
 
                   if (forLayout && !isLayoutAttribute ||
                       !forLayout && isLayoutAttribute) {
-                    return unusedAttribute(name);
+                    return unusedStyleProperty(name);
                   }
                 }
               }
@@ -372,7 +378,7 @@ String canonicalizeHtml(
           replacement.attributes['style'] = processedAttributes;
         }
       }
-    } else if (throwOnUnusedAttributes && original.attributes.isNotEmpty) {
+    } else if (throwOnUnusedStyleProperties && original.attributes.isNotEmpty) {
       fail('Provided HTML contains attributes. However, the comparison mode '
           'is $mode. The HTML was:\n\n$htmlContent');
     }
@@ -408,7 +414,7 @@ String canonicalizeHtml(
 void expectHtml(DomElement element, String expectedHtml,
     {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly}) {
   expectedHtml =
-      canonicalizeHtml(expectedHtml, mode: mode, throwOnUnusedAttributes: true);
+      canonicalizeHtml(expectedHtml, mode: mode, throwOnUnusedStyleProperties: true);
   final String actualHtml = canonicalizeHtml(element.outerHTML!, mode: mode);
   expect(actualHtml, expectedHtml);
 }

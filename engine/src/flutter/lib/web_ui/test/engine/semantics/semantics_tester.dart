@@ -353,9 +353,9 @@ class SemanticsTester {
 
 /// Verifies the HTML structure of the current semantics tree.
 void expectSemanticsTree(String semanticsHtml) {
-  const List<String> ignoredAttributes = <String>['pointer-events'];
+  const List<String> ignoredStyleProperties = <String>['pointer-events'];
   expect(
-    canonicalizeHtml(rootElement.querySelector('flt-semantics')!.outerHTML!, ignoredAttributes: ignoredAttributes),
+    canonicalizeHtml(rootElement.querySelector('flt-semantics')!.outerHTML!, ignoredStyleProperties: ignoredStyleProperties),
     canonicalizeHtml(semanticsHtml),
   );
 }
