@@ -123,7 +123,7 @@ namespace flutter::testing {
 TEST_F(FlutterEngineTest, CanLaunch) {
   FlutterEngine* engine = GetFlutterEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
-  EXPECT_TRUE(engine.running);
+  ASSERT_TRUE(engine.running);
 }
 
 TEST_F(FlutterEngineTest, HasNonNullExecutableName) {
@@ -195,7 +195,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
   // Launch the test entrypoint.
   FlutterEngine* engine = GetFlutterEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"canLogToStdout"]);
-  EXPECT_TRUE(engine.running);
+  ASSERT_TRUE(engine.running);
 
   latch.Wait();
 
@@ -224,7 +224,7 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
 
   // Launch the test entrypoint.
   EXPECT_TRUE([engine runWithEntrypoint:@"backgroundTest"]);
-  EXPECT_TRUE(engine.running);
+  ASSERT_TRUE(engine.running);
 
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
@@ -254,7 +254,7 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
 
   // Launch the test entrypoint.
   EXPECT_TRUE([engine runWithEntrypoint:@"backgroundTest"]);
-  EXPECT_TRUE(engine.running);
+  ASSERT_TRUE(engine.running);
 
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
@@ -476,7 +476,7 @@ TEST_F(FlutterEngineTest, NativeCallbacks) {
 
   FlutterEngine* engine = GetFlutterEngine();
   EXPECT_TRUE([engine runWithEntrypoint:@"nativeCallback"]);
-  EXPECT_TRUE(engine.running);
+  ASSERT_TRUE(engine.running);
 
   latch.Wait();
   ASSERT_TRUE(latch_called);
