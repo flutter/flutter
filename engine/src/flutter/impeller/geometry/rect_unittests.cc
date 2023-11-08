@@ -30,14 +30,14 @@ TEST(RectTest, RectMakeSize) {
     Size s(100, 200);
     Rect r = Rect::MakeSize(s);
     Rect expected = Rect::MakeLTRB(0, 0, 100, 200);
-    ASSERT_RECT_NEAR(r, expected);
+    EXPECT_RECT_NEAR(r, expected);
   }
 
   {
     ISize s(100, 200);
     Rect r = Rect::MakeSize(s);
     Rect expected = Rect::MakeLTRB(0, 0, 100, 200);
-    ASSERT_RECT_NEAR(r, expected);
+    EXPECT_RECT_NEAR(r, expected);
   }
 
   {
