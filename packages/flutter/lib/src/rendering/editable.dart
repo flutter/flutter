@@ -364,7 +364,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior,
-       _hasFocus = hasFocus ?? false {
+       _hasFocus = hasFocus ?? false,
+       _disposeShowCursor = showCursor == null {
     assert(!_showCursor.value || cursorColor != null);
 
     _selectionPainter.highlightColor = selectionColor;
@@ -405,6 +406,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionPainter.dispose();
     _caretPainter.dispose();
     _textPainter.dispose();
+    if (_disposeShowCursor) {
+      _showCursor.dispose();
+      _disposeShowCursor = false;
+    }
     super.dispose();
   }
 
@@ -879,6 +884,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _caretPainter.backgroundCursorColor = value;
   }
 
+  bool _disposeShowCursor;
+
   /// Whether to paint the cursor.
   ValueNotifier<bool> get showCursor => _showCursor;
   ValueNotifier<bool> _showCursor;
@@ -888,6 +895,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (attached) {
       _showCursor.removeListener(_showHideCursor);
+    }
+    if (_disposeShowCursor) {
+      _showCursor.dispose();
+      _disposeShowCursor = false;
     }
     _showCursor = value;
     if (attached) {
