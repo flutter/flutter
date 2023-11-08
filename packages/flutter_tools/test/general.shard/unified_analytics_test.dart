@@ -8,11 +8,12 @@ import 'package:flutter_tools/src/reporting/unified_analytics.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
   const String userBranch = 'abc123';
-  const String? clientIde = null;
+  const String clientIde = 'VSCode';
 
   late FileSystem fs;
   late FakeAnalytics analyticsOverride;
@@ -25,6 +26,7 @@ void main() {
       fakeFlutterVersion: FakeFlutterVersion(
         branch: userBranch,
       ),
+      clientIde: clientIde,
     );
   });
 
@@ -101,7 +103,7 @@ void main() {
 
     testWithoutContext('NoOp instance when suppressing via env variable', () {
       final Analytics analytics = getAnalytics(
-        runningOnBot: true,
+        runningOnBot: false,
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
         analyticsOverride: analyticsOverride,
@@ -126,6 +128,19 @@ void main() {
       analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
 
       expect(analyticsOverride.sentEvents, hasLength(1));
+    });
+
+    testUsingContext('Client IDE is passed and found in events', () {
+      final Analytics analytics = getAnalytics(
+        runningOnBot: false,
+        flutterVersion: FakeFlutterVersion(),
+        environment: const <String, String>{},
+        analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
+      );
+      analytics as FakeAnalytics;
+
+      expect(analytics.userProperty.clientIde, 'VSCode');
     });
   });
 }
