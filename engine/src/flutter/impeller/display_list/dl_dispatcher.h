@@ -226,6 +226,10 @@ class DlDispatcher final : public flutter::DlOpReceiver {
   CanvasType canvas_;
   Matrix initial_matrix_;
 
+  static void SimplifyOrDrawPath(CanvasType& canvas,
+                                 const SkPath& path,
+                                 const Paint& paint);
+
   DlDispatcher(const DlDispatcher&) = delete;
 
   DlDispatcher& operator=(const DlDispatcher&) = delete;
