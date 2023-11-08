@@ -645,7 +645,7 @@ class TextField extends StatefulWidget {
 
   /// {@template flutter.material.textfield.onTap}
   /// Called for the first tap in a series of taps.
-  /// 
+  ///
   /// If [onTapAlwaysCalled] is enabled, this will also be called for consecutive
   /// taps.
   ///
