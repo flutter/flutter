@@ -330,9 +330,12 @@ void main() {
       );
 
       expect(
-        artifacts.getArtifactPath(Artifact.flutterPreviewDevice),
-        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
-          'snapshots', 'frontend_server_aot.dart.snapshot')
+        artifacts.getArtifactPath(
+          Artifact.flutterPreviewDevice,
+          platform: TargetPlatform.windows_x64,
+        ),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts',
+          'flutter_preview', 'flutter_preview.exe'),
       );
 
       fileSystem.file(fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'))
