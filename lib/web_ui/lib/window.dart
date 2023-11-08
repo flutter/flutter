@@ -29,118 +29,84 @@ abstract class FlutterView {
 }
 
 abstract class SingletonFlutterWindow extends FlutterView {
-  VoidCallback? get onMetricsChanged => platformDispatcher.onMetricsChanged;
-  set onMetricsChanged(VoidCallback? callback) {
-    platformDispatcher.onMetricsChanged = callback;
-  }
+  VoidCallback? get onMetricsChanged;
+  set onMetricsChanged(VoidCallback? callback);
 
-  Locale get locale => platformDispatcher.locale;
-  List<Locale> get locales => platformDispatcher.locales;
+  Locale get locale;
+  List<Locale> get locales;
 
-  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
-    return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
-  }
+  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales);
 
-  VoidCallback? get onLocaleChanged => platformDispatcher.onLocaleChanged;
-  set onLocaleChanged(VoidCallback? callback) {
-    platformDispatcher.onLocaleChanged = callback;
-  }
+  VoidCallback? get onLocaleChanged;
+  set onLocaleChanged(VoidCallback? callback);
 
-  String get initialLifecycleState => platformDispatcher.initialLifecycleState;
+  String get initialLifecycleState;
 
-  double get textScaleFactor => platformDispatcher.textScaleFactor;
+  double get textScaleFactor;
 
-  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+  bool get nativeSpellCheckServiceDefined;
 
-  bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
+  bool get brieflyShowPassword;
 
-  bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
+  bool get alwaysUse24HourFormat;
 
-  VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
-  set onTextScaleFactorChanged(VoidCallback? callback) {
-    platformDispatcher.onTextScaleFactorChanged = callback;
-  }
+  VoidCallback? get onTextScaleFactorChanged;
+  set onTextScaleFactorChanged(VoidCallback? callback);
 
-  Brightness get platformBrightness => platformDispatcher.platformBrightness;
+  Brightness get platformBrightness;
 
-  VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
-  set onPlatformBrightnessChanged(VoidCallback? callback) {
-    platformDispatcher.onPlatformBrightnessChanged = callback;
-  }
+  VoidCallback? get onPlatformBrightnessChanged;
+  set onPlatformBrightnessChanged(VoidCallback? callback);
 
-  String? get systemFontFamily => platformDispatcher.systemFontFamily;
+  String? get systemFontFamily;
 
-  VoidCallback? get onSystemFontFamilyChanged => platformDispatcher.onSystemFontFamilyChanged;
-  set onSystemFontFamilyChanged(VoidCallback? callback) {
-    platformDispatcher.onSystemFontFamilyChanged = callback;
-  }
+  VoidCallback? get onSystemFontFamilyChanged;
+  set onSystemFontFamilyChanged(VoidCallback? callback);
 
-  FrameCallback? get onBeginFrame => platformDispatcher.onBeginFrame;
-  set onBeginFrame(FrameCallback? callback) {
-    platformDispatcher.onBeginFrame = callback;
-  }
+  FrameCallback? get onBeginFrame;
+  set onBeginFrame(FrameCallback? callback);
 
-  VoidCallback? get onDrawFrame => platformDispatcher.onDrawFrame;
-  set onDrawFrame(VoidCallback? callback) {
-    platformDispatcher.onDrawFrame = callback;
-  }
+  VoidCallback? get onDrawFrame;
+  set onDrawFrame(VoidCallback? callback);
 
-  TimingsCallback? get onReportTimings => platformDispatcher.onReportTimings;
-  set onReportTimings(TimingsCallback? callback) {
-    platformDispatcher.onReportTimings = callback;
-  }
+  TimingsCallback? get onReportTimings;
+  set onReportTimings(TimingsCallback? callback);
 
-  PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
-  set onPointerDataPacket(PointerDataPacketCallback? callback) {
-    platformDispatcher.onPointerDataPacket = callback;
-  }
+  PointerDataPacketCallback? get onPointerDataPacket;
+  set onPointerDataPacket(PointerDataPacketCallback? callback);
 
-  KeyDataCallback? get onKeyData => platformDispatcher.onKeyData;
-  set onKeyData(KeyDataCallback? callback) {
-    platformDispatcher.onKeyData = callback;
-  }
+  KeyDataCallback? get onKeyData;
+  set onKeyData(KeyDataCallback? callback);
 
-  String get defaultRouteName => platformDispatcher.defaultRouteName;
+  String get defaultRouteName;
 
-  void scheduleFrame() => platformDispatcher.scheduleFrame();
+  void scheduleFrame();
 
-  @override
-  void render(Scene scene) => platformDispatcher.render(scene, this);
+  bool get semanticsEnabled;
 
-  bool get semanticsEnabled => platformDispatcher.semanticsEnabled;
+  VoidCallback? get onSemanticsEnabledChanged;
+  set onSemanticsEnabledChanged(VoidCallback? callback);
 
-  VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
-  set onSemanticsEnabledChanged(VoidCallback? callback) {
-    platformDispatcher.onSemanticsEnabledChanged = callback;
-  }
+  FrameData get frameData;
 
-  FrameData get frameData => const FrameData._();
+  VoidCallback? get onFrameDataChanged;
+  set onFrameDataChanged(VoidCallback? callback);
 
-  VoidCallback? get onFrameDataChanged => null;
-  set onFrameDataChanged(VoidCallback? callback) {}
+  AccessibilityFeatures get accessibilityFeatures;
 
-  AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
-
-  VoidCallback? get onAccessibilityFeaturesChanged =>
-      platformDispatcher.onAccessibilityFeaturesChanged;
-  set onAccessibilityFeaturesChanged(VoidCallback? callback) {
-    platformDispatcher.onAccessibilityFeaturesChanged = callback;
-  }
+  VoidCallback? get onAccessibilityFeaturesChanged;
+  set onAccessibilityFeaturesChanged(VoidCallback? callback);
 
   void sendPlatformMessage(
     String name,
     ByteData? data,
     PlatformMessageResponseCallback? callback,
-  ) {
-    platformDispatcher.sendPlatformMessage(name, data, callback);
-  }
+  );
 
-  PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    platformDispatcher.onPlatformMessage = callback;
-  }
+  PlatformMessageCallback? get onPlatformMessage;
+  set onPlatformMessage(PlatformMessageCallback? callback);
 
-  void setIsolateDebugName(String name) => PlatformDispatcher.instance.setIsolateDebugName(name);
+  void setIsolateDebugName(String name);
 }
 
 abstract class AccessibilityFeatures {
@@ -203,8 +169,6 @@ abstract final class IsolateNameServer {
 SingletonFlutterWindow get window => engine.window;
 
 class FrameData {
-  const FrameData._();
-
   const FrameData.webOnly();
 
   int get frameNumber => -1;
