@@ -17,9 +17,10 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 
 import '../src/common.dart';
-import 'test_utils.dart' show fileSystem, platform;
+import 'test_utils.dart' show ProcessResultMatcher, fileSystem, platform;
 import 'transition_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
@@ -56,11 +57,9 @@ const String packageName = 'package_with_native_assets';
 
 const String exampleAppName = '${packageName}_example';
 
-const String dylibName = 'lib$packageName.dylib';
-
 void main() {
-  if (!platform.isMacOS) {
-    // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
+  if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
+    // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
   }
 
@@ -147,6 +146,10 @@ void main() {
 
           if (device == 'macos') {
             expectDylibIsBundledMacOS(exampleDirectory, buildMode);
+          } else if (device == 'linux') {
+            expectDylibIsBundledLinux(exampleDirectory, buildMode);
+          } else if (device == 'windows') {
+            expectDylibIsBundledWindows(exampleDirectory, buildMode);
           }
           if (device == hostOs) {
             expectCCompilerIsConfigured(exampleDirectory);
@@ -201,6 +204,10 @@ void main() {
             expectDylibIsBundledMacOS(exampleDirectory, buildMode);
           } else if (buildSubcommand == 'ios') {
             expectDylibIsBundledIos(exampleDirectory, buildMode);
+          } else if (buildSubcommand == 'linux') {
+            expectDylibIsBundledLinux(exampleDirectory, buildMode);
+          } else if (buildSubcommand == 'windows') {
+            expectDylibIsBundledWindows(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
@@ -235,11 +242,15 @@ void main() {
             'build',
             buildSubcommand,
             if (buildSubcommand == 'ios') '--no-codesign',
+            if (buildSubcommand == 'windows') '-v' // Requires verbose mode for error.
           ],
           workingDirectory: exampleDirectory.path,
         );
         expect(result.exitCode, isNot(0));
-        expect(result.stderr, contains('link mode set to static, but this is not yet supported'));
+        expect(
+          (result.stdout as String) + (result.stderr as String),
+          contains('link mode set to static, but this is not yet supported'),
+        );
       });
     });
   }
@@ -278,7 +289,7 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory dylibsFolder = appBundle.childDirectory('Contents/Frameworks');
   expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(dylibName);
+  final File dylib = dylibsFolder.childFile(OS.macOS.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -287,7 +298,43 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory dylibsFolder = appBundle.childDirectory('Frameworks');
   expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(dylibName);
+  final File dylib = dylibsFolder.childFile(OS.iOS.dylibFileName(packageName));
+  expect(dylib, exists);
+}
+
+/// Checks that dylibs are bundled.
+///
+/// Sample path: build/linux/x64/release/bundle/lib/libmy_package.so
+void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
+  // Linux does not support cross compilation, so always only check current architecture.
+  final String architecture = Architecture.current.dartPlatform;
+  final Directory appBundle = appDirectory
+      .childDirectory('build')
+      .childDirectory(hostOs)
+      .childDirectory(architecture)
+      .childDirectory(buildMode)
+      .childDirectory('bundle');
+  expect(appBundle, exists);
+  final Directory dylibsFolder = appBundle.childDirectory('lib');
+  expect(dylibsFolder, exists);
+  final File dylib = dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
+  expect(dylib, exists);
+}
+
+/// Checks that dylibs are bundled.
+///
+/// Sample path: build\windows\x64\runner\Debug\my_package_example.exe
+void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
+  // Linux does not support cross compilation, so always only check current architecture.
+  final String architecture = Architecture.current.dartPlatform;
+  final Directory appBundle = appDirectory
+      .childDirectory('build')
+      .childDirectory(hostOs)
+      .childDirectory(architecture)
+      .childDirectory('runner')
+      .childDirectory(buildMode.upperCaseFirst());
+  expect(appBundle, exists);
+  final File dylib = appBundle.childFile(OS.windows.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -296,7 +343,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
-  final File dylib = frameworksFolder.childFile(dylibName);
+  final File dylib = frameworksFolder.childFile(OS.macOS.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -328,14 +375,16 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
     <String>[
       flutterBin,
       'create',
+      '--no-pub',
       '--template=package_ffi',
       packageName,
     ],
     workingDirectory: tempDirectory.path,
   );
-
   if (result.exitCode != 0) {
-    throw Exception('flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+    throw Exception(
+      'flutter create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+    );
   }
 
   final Directory packageDirectory = tempDirectory.childDirectory(packageName);
@@ -347,7 +396,29 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   expect(packageDirectory.childDirectory('macos/'), isNot(exists));
   expect(packageDirectory.childDirectory('windows/'), isNot(exists));
 
+  await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
+  await pinDependencies(
+      packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
+
+  final ProcessResult result2 = await processManager.run(
+    <String>[
+      flutterBin,
+      'pub',
+      'get',
+    ],
+    workingDirectory: packageDirectory.path,
+  );
+  expect(result2, const ProcessResultMatcher());
+
   return packageDirectory;
+}
+
+Future<void> pinDependencies(File pubspecFile) async {
+  expect(pubspecFile, exists);
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = oldPubspec.replaceAll(RegExp(r':\s*\^'), ': ');
+  expect(newPubspec, isNot(oldPubspec));
+  await pubspecFile.writeAsString(newPubspec);
 }
 
 Future<void> inTempDir(Future<void> Function(Directory tempDirectory) fun) async {

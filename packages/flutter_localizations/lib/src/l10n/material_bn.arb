@@ -142,7 +142,7 @@
   "expandedHint": "আড়াল করা হয়েছে",
   "collapsedHint": "বড় করা হয়েছে",
   "menuDismissLabel": "বাতিল করার মেনু",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "লুক-আপ",
+  "searchWebButtonLabel": "ওয়েবে সার্চ করুন",
+  "shareButtonLabel": "শেয়ার করুন..."
 }

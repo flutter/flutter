@@ -51,7 +51,6 @@
   "reorderItemRight": "ផ្លាស់ទីទៅ​ស្តាំ",
   "expandedIconTapHint": "បង្រួម",
   "collapsedIconTapHint": "ពង្រីក",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "នៅសល់​ 1 តួ​ទៀត",
   "remainingTextFieldCharacterCountOther": "នៅសល់ $remainingCount តួ​ទៀត",
   "refreshIndicatorSemanticLabel": "ផ្ទុកឡើងវិញ",
@@ -144,6 +143,6 @@
   "collapsedHint": "បាន​ពង្រីក",
   "menuDismissLabel": "ច្រានចោល​ម៉ឺនុយ",
   "lookUpButtonLabel": "រកមើល",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "ស្វែងរក​លើបណ្ដាញ",
+  "shareButtonLabel": "ចែករំលែក..."
 }

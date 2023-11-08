@@ -426,7 +426,7 @@ class BottomNavigationBar extends StatefulWidget {
   ///    bottom navigation bar defaults for an entire application.
   ///  * [BottomNavigationBarTheme] - which can be used to specify
   ///    bottom navigation bar defaults for a widget subtree.
-  ///  * [MediaQuery.of] - which can be used to determine the current
+  ///  * [MediaQuery.orientationOf] - which can be used to determine the current
   ///    orientation.
   final BottomNavigationBarLandscapeLayout? landscapeLayout;
 

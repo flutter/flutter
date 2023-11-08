@@ -31,11 +31,6 @@ void main() {
         .run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
       );
-
-      await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
-        .run(<String>['screenshot', '--type=rasterizer', '--vm-service-url=http://localhost:8181']),
-        throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
-      );
     });
 
 
@@ -43,11 +38,6 @@ void main() {
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
         .run(<String>['screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia')
-      );
-
-      await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
-        .run(<String>['screenshot', '--type=rasterizer',]),
-        throwsToolExit(message: 'VM Service URI must be specified for screenshot type rasterizer'),
       );
     });
 

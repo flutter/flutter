@@ -867,6 +867,7 @@ void main() {
       length: 3,
       vsync: vsync,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(

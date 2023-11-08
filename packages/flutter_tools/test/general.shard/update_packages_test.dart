@@ -107,6 +107,9 @@ void main() {
         'video_player',
         'material_color_utilities',
         'archive',
+        'leak_tracker',
+        'leak_tracker_testing',
+        'leak_tracker_flutter_testing',
       ]),
     );
   });

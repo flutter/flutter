@@ -97,7 +97,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            showBottomSheet<void>(
+            showBottomSheet(
               context: context,
               builder: (BuildContext context) => Container(),
             );

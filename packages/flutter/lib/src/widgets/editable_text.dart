@@ -2390,7 +2390,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
     clipboardStatus.update();
@@ -2430,7 +2430,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
   }
@@ -2818,7 +2818,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _flagInternalFocus();
           FocusScope.of(context).autofocus(widget.focusNode);
         }
-      });
+      }, debugLabel: 'EditableText.autofocus');
     }
 
     // Restart or stop the blinking cursor when TickerMode changes.
@@ -2889,7 +2889,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // See https://github.com/flutter/flutter/issues/126312
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _openInputConnection();
-      });
+      }, debugLabel: 'EditableText.openInputConnection');
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -3488,11 +3488,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
-      if (kIsWeb) {
-        _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
-      } else {
-        widget.focusNode.unfocus();
-      }
+      widget.focusNode.unfocus();
     }
   }
 
@@ -3725,7 +3721,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           rect: caretPadding.inflateRect(rectToReveal),
         );
       }
-    });
+    }, debugLabel: 'EditableText.showCaret');
   }
 
   late double _lastBottomViewInset;
@@ -3739,7 +3735,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_lastBottomViewInset != view.viewInsets.bottom) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
-      });
+      }, debugLabel: 'EditableText.updateForScroll');
       if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
@@ -4042,7 +4038,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateSelectionRects();
     _updateComposingRectIfNeeded();
     _updateCaretRectIfNeeded();
-    SchedulerBinding.instance.addPostFrameCallback(_schedulePeriodicPostFrameCallbacks);
+    SchedulerBinding.instance.addPostFrameCallback(
+      _schedulePeriodicPostFrameCallbacks,
+      debugLabel: 'EditableText.postFrameCallbacks'
+    );
   }
   _ScribbleCacheKey? _scribbleCacheKey;
 
@@ -4116,11 +4115,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setSelectionRects(rects);
   }
 
-  // Sends the current composing rect to the iOS text input plugin via the text
-  // input channel. We need to keep sending the information even if no text is
-  // currently marked, as the information usually lags behind. The text input
-  // plugin needs to estimate the composing rect based on the latest caret rect,
-  // when the composing rect info didn't arrive in time.
+  // Sends the current composing rect to the embedder's text input plugin.
+  //
+  // In cases where the composing rect hasn't been updated in the embedder due
+  // to the lag of asynchronous messages over the channel, the position of the
+  // current caret rect is used instead.
+  //
+  // See: [_updateCaretRectIfNeeded]
   void _updateComposingRectIfNeeded() {
     final TextRange composingRange = _value.composing;
     assert(mounted);
@@ -4134,12 +4135,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setComposingRect(composingRect);
   }
 
+  // Sends the current caret rect to the embedder's text input plugin.
+  //
+  // The position of the caret rect is updated periodically such that if the
+  // user initiates composing input, the current cursor rect can be used for
+  // the first character until the composing rect can be sent.
+  //
+  // On selection changes, the start of the selection is used. This ensures
+  // that regardless of the direction the selection was created, the cursor is
+  // set to the position where next text input occurs. This position is used to
+  // position the IME's candidate selection menu.
+  //
+  // See: [_updateComposingRectIfNeeded]
   void _updateCaretRectIfNeeded() {
     final TextSelection? selection = renderEditable.selection;
-    if (selection == null || !selection.isValid || !selection.isCollapsed) {
+    if (selection == null || !selection.isValid) {
       return;
     }
-    final TextPosition currentTextPosition = TextPosition(offset: selection.baseOffset);
+    final TextPosition currentTextPosition = TextPosition(offset: selection.start);
     final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
     _textInputConnection!.setCaretRect(caretRect);
   }
@@ -4771,7 +4784,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
-        onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
+        onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(
           cursor: widget.mouseCursor ?? SystemMouseCursors.text,

@@ -21,6 +21,13 @@ import 'text_field.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+/// A callback function that returns the index of the item that matches the
+/// current contents of a text field.
+///
+/// If a match doesn't exist then null must be returned.
+///
+/// Used by [DropdownMenu.searchCallback].
+typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, String query);
 
 // Navigation shortcuts to move the selected menu items up or down.
 Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
@@ -150,6 +157,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.onSelected,
     this.requestFocusOnTap,
     this.expandedInsets,
+    this.searchCallback,
     required this.dropdownMenuEntries,
   });
 
@@ -303,6 +311,34 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
 
+  /// When  [DropdownMenu.enableSearch] is true, this callback is used to compute
+  /// the index of the search result to be highlighted.
+  ///
+  /// {@tool snippet}
+  ///
+  /// In this example the `searchCallback` returns the index of the search result
+  /// that exactly matches the query.
+  ///
+  /// ```dart
+  /// DropdownMenu<Text>(
+  ///   searchCallback: (List<DropdownMenuEntry<Text>> entries, String query) {
+  ///     if (query.isEmpty) {
+  ///       return null;
+  ///     }
+  ///     final int index = entries.indexWhere((DropdownMenuEntry<Text> entry) => entry.label == query);
+  ///
+  ///     return index != -1 ? index : null;
+  ///   },
+  ///   dropdownMenuEntries: const <DropdownMenuEntry<Text>>[],
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to null. If this is null and [DropdownMenu.enableSearch] is true,
+  /// the default function will return the index of the first matching result
+  /// which contains the contents of the text input field.
+  final SearchCallback<T>? searchCallback;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -387,7 +423,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
-    });
+    }, debugLabel: 'DropdownMenu.refreshLeadingPadding');
   }
 
   void scrollToHighlight() {
@@ -396,7 +432,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       if (highlightContext != null) {
         Scrollable.ensureVisible(highlightContext);
       }
-    });
+    }, debugLabel: 'DropdownMenu.scrollToHighlight');
   }
 
   double? getWidth(GlobalKey key) {
@@ -432,21 +468,28 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
     final List<Widget> result = <Widget>[];
-    final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
-    final ButtonStyle defaultStyle;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
-        );
-      case TextDirection.ltr:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
-        );
-    }
-
     for (int i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
+
+      // By default, when the text field has a leading icon but a menu entry doesn't
+      // have one, the label of the entry should have extra padding to be aligned
+      // with the text in the text input field. When both the text field and the
+      // menu entry have leading icons, the menu entry should remove the extra
+      // paddings so its leading icon will be aligned with the leading icon of
+      // the text field.
+      final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
+      final ButtonStyle defaultStyle;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
+          );
+        case TextDirection.ltr:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
+          );
+      }
+
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;
@@ -557,7 +600,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     }
 
     if (widget.enableSearch) {
-      currentHighlight = search(filteredEntries, _textEditingController);
+      if (widget.searchCallback != null) {
+        currentHighlight = widget.searchCallback!.call(filteredEntries, _textEditingController.text);
+      } else {
+        currentHighlight = search(filteredEntries, _textEditingController);
+      }
       if (currentHighlight != null) {
         scrollToHighlight();
       }
