@@ -2,7 +2,7 @@
 <!-- WILL AUTOMATICALLY FIND ALL .java FILES AND INCLUDE THEM HERE       -->
 <project>
   <sdk dir="../../../third_party/android_tools/sdk" />
-  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-T">
+  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-U">
   <manifest file="../../../flutter/shell/platform/android/AndroidManifest.xml" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/util/KeyCodes.java" />
     <src file="../../../flutter/shell/platform/android/test/io/flutter/util/FakeKeyEvent.java" />
@@ -53,6 +53,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/SurfaceTextureWrapper.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/mutatorsstack/FlutterMutatorsStack.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/mutatorsstack/FlutterMutatorView.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineGroupCache.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/PluginRegistry.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/util/GeneratedPluginRegister.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/activity/ActivityPluginBinding.java" />
@@ -84,6 +85,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterApplicationInfo.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/loader/ResourceExtractor.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SettingsChannel.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/ProcessTextChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformViewsChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/NavigationChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LocalizationChannel.java" />
@@ -93,6 +95,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/KeyEventChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SpellCheckChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/PlatformChannel.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/KeyboardChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/SystemChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/DeferredComponentChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/MouseCursorChannel.java" />
@@ -102,7 +105,9 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineGroup.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineGroupCache.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/SurfaceTexturePlatformViewRenderTarget.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRenderTarget.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/ImageReaderPlatformViewRenderTarget.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewRegistry.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/VirtualDisplayController.java" />
@@ -110,11 +115,11 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewFactory.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/AccessibilityEventsDelegate.java" />
-    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformOverlayView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewWrapper.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformOverlayView.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/common/BasicMessageChannel.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMethodCodec.java" />
@@ -141,6 +146,7 @@
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/editing/FlutterTextUtils.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/editing/ImeSyncDeferringInsetsCallback.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/editing/SpellCheckPlugin.java" />
+    <src file="../../../flutter/shell/platform/android/io/flutter/plugin/text/ProcessTextPlugin.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/FlutterInjector.java" />
     <src file="../../../flutter/shell/platform/android/io/flutter/Log.java" />
