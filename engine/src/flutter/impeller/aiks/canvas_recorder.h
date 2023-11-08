@@ -182,9 +182,9 @@ class CanvasRecorder {
                                paint);
   }
 
-  void DrawRRect(Rect rect, Point corner_radii, const Paint& paint) {
+  void DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawRRect), rect,
-                               corner_radii, paint);
+                               corner_radius, paint);
   }
 
   void DrawCircle(Point center, Scalar radius, const Paint& paint) {
@@ -233,10 +233,10 @@ class CanvasRecorder {
 
   void ClipRRect(
       const Rect& rect,
-      Point corner_radii,
+      Scalar corner_radius,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(ClipRRect), rect,
-                               corner_radii, clip_op);
+                               corner_radius, clip_op);
   }
 
   void DrawPicture(const Picture& picture) {
