@@ -996,10 +996,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _hasError => widget.decoration?.errorText != null || widget.decoration?.error != null || _hasIntrinsicError;
 
-  bool _widgetHasError(TextField widget) {
-    return widget.decoration?.errorText != null || _hasIntrinsicError;
-  }
-
   Color get _errorColor => widget.cursorErrorColor ?? widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
 
   bool? _hadError;
