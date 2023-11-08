@@ -86,9 +86,6 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsReadFromResolve() const override;
 
   // |Capabilities|
-  bool SupportsReadFromOnscreenTexture() const override;
-
-  // |Capabilities|
   bool SupportsDecalSamplerAddressMode() const override;
 
   // |Capabilities|
