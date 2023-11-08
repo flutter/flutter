@@ -283,7 +283,7 @@ class FadeInImage extends StatefulWidget {
   /// See also:
   ///
   ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
-  ///  * [placeholderColorBlendMode], The color blend mode which applies to the [placeholder].
+  ///  * [placeholderColorBlendMode], the color blend mode which applies to the [placeholder].
   final BlendMode? colorBlendMode;
 
   /// If non-null, this color is blended with each placeholder image pixel using [placeholderColorBlendMode].
