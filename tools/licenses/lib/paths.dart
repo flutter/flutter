@@ -96,11 +96,15 @@ final Set<String> skippedPaths = <String>{
   r'third_party/dart/pkg', // packages that don't become part of the binary (e.g. the analyzer)
   r'third_party/dart/runtime/bin/ffi_test',
   r'third_party/dart/runtime/docs',
-  r'third_party/dart/runtime/third_party/binary_size', // not linked in either
-  r'third_party/dart/runtime/third_party/d3', // Siva says "that is the charting library used by the binary size tool"
+  // TODO(aam): remove as a dup
+  r'third_party/dart/runtime/third_party/binary_size',
+  // TODO(aam): remove as a dup
+  r'third_party/dart/runtime/third_party/d3',
   r'third_party/dart/runtime/vm/service',
   r'third_party/dart/sdk/lib/html/doc',
+  r'third_party/dart/third_party/binary_size', // not linked in
   r'third_party/dart/third_party/binaryen', // not linked in
+  r'third_party/dart/third_party/d3', // Siva says "that is the charting library used by the binary size tool"
   r'third_party/dart/third_party/d8', // testing tool for dart2js
   r'third_party/dart/third_party/devtools', // not linked in
   r'third_party/dart/third_party/firefox_jsshell', // testing tool for dart2js
