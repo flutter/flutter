@@ -105,7 +105,7 @@ class Canvas {
 
   void DrawRect(Rect rect, const Paint& paint);
 
-  void DrawRRect(Rect rect, Point corner_radii, const Paint& paint);
+  void DrawRRect(Rect rect, Scalar corner_radius, const Paint& paint);
 
   void DrawCircle(Point center, Scalar radius, const Paint& paint);
 
@@ -135,7 +135,7 @@ class Canvas {
 
   void ClipRRect(
       const Rect& rect,
-      Point corner_radii,
+      Scalar corner_radius,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
   void DrawPicture(const Picture& picture);
