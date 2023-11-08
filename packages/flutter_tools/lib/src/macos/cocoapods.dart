@@ -402,13 +402,19 @@ class CocoaPods {
         // pod as failing.)
         if (podInfo.failingPod == podInfo.sourcePlugin) {
           final Directory symlinksDir;
-          final String platformString;
+          final String podPlatformString;
+          final String platformName;
+          final String docsLink;
           if (xcodeProject is IosProject) {
             symlinksDir = xcodeProject.symlinks;
-            platformString = 'ios';
+            podPlatformString = 'ios';
+            platformName = 'iOS';
+            docsLink = 'https://docs.flutter.dev/deployment/ios';
           } else if (xcodeProject is MacOSProject) {
             symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
-            platformString = 'osx';
+            podPlatformString = 'osx';
+            platformName = 'macOS';
+            docsLink = 'https://docs.flutter.dev/deployment/macos';
           } else {
             return;
           }
@@ -419,15 +425,14 @@ class CocoaPods {
               .childFile('$sourcePlugin.podspec');
           final String? minDeploymentVersion = _findPodspecMinDeploymentVersion(
             podspec,
-            platformString
+            podPlatformString
           );
           if (minDeploymentVersion != null) {
             _logger.printError(
-            'Error: The plugin "$sourcePlugin" requires a higher minimum iOS '
-            'deployment version than your application is targetting.\n'
-            "To build, increase your application's deployment target to at "
-            'least $minDeploymentVersion as described at '
-            'https://docs.flutter.dev/deployment/ios',
+              'Error: The plugin "$sourcePlugin" requires a higher minimum '
+              '$platformName deployment version than your application is targetting.\n'
+              "To build, increase your application's deployment target to at "
+              'least $minDeploymentVersion as described at $docsLink',
               emphasis: true,
             );
           } else {
@@ -436,13 +441,13 @@ class CocoaPods {
             // but also requests filing a Flutter issue so the parsing in
             // _findPodspecMinDeploymentVersion can be improved.
             _logger.printError(
-            'Error: The plugin "$sourcePlugin" requires a higher minimum iOS '
-            'deployment version than your application is targetting.\n'
-            "To build, increase your application's deployment target as "
-            'described at https://docs.flutter.dev/deployment/ios\n\n'
-            'The minimum required version for "$sourcePlugin" could not be '
-            'determined. Please file an issue at '
-            'https://github.com/flutter/flutter/issues about this error message.',
+              'Error: The plugin "$sourcePlugin" requires a higher minimum '
+              '$platformName deployment version than your application is targetting.\n'
+              "To build, increase your application's deployment target as "
+              'described at $docsLink\n\n'
+              'The minimum required version for "$sourcePlugin" could not be '
+              'determined. Please file an issue at '
+              'https://github.com/flutter/flutter/issues about this error message.',
               emphasis: true,
             );
           }
@@ -457,7 +462,7 @@ class CocoaPods {
             '"$sourcePlugin" requires a higher minimum iOS deployment version '
             "than the plugin's reported minimum version.\n"
             'To build, remove the plugin "$sourcePlugin", or contact the plugin\'s '
-            'developers for assistance.\n',
+            'developers for assistance.',
             emphasis: true,
           );
         }
