@@ -437,6 +437,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         make_test('accessibility_unittests'),
         make_test('framework_common_unittests'),
         make_test('spring_animation_unittests'),
+        make_test('gpu_surface_metal_unittests'),
     ]
 
   if is_linux():

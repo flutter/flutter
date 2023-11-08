@@ -256,6 +256,7 @@
 ../../../flutter/shell/common/switches_unittests.cc
 ../../../flutter/shell/common/variable_refresh_rate_display_unittests.cc
 ../../../flutter/shell/common/vsync_waiter_unittests.cc
+../../../flutter/shell/gpu/gpu_surface_metal_impeller_unittests.mm
 ../../../flutter/shell/platform/android/.gitignore
 ../../../flutter/shell/platform/android/android_context_gl_impeller_unittests.cc
 ../../../flutter/shell/platform/android/android_context_gl_unittests.cc
