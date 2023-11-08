@@ -463,16 +463,23 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         make_test('flow_unittests', flags=repeat_flags + flow_flags),
     ]
 
-  for test, flags, extra_env in unittests:
-    run_engine_executable(
-        build_dir,
-        test,
-        executable_filter,
-        flags,
-        coverage=coverage,
-        extra_env=extra_env,
-        gtest=True
-    )
+  build_name = os.path.basename(build_dir)
+  try:
+    if is_linux():
+      xvfb.start_virtual_x(build_name, build_dir)
+    for test, flags, extra_env in unittests:
+      run_engine_executable(
+          build_dir,
+          test,
+          executable_filter,
+          flags,
+          coverage=coverage,
+          extra_env=extra_env,
+          gtest=True
+      )
+  finally:
+    if is_linux():
+      xvfb.stop_virtual_x(build_name)
 
   if is_mac():
     # flutter_desktop_darwin_unittests uses global state that isn't handled
