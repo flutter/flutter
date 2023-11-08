@@ -12,7 +12,7 @@
 #include <sstream>
 
 #include "flutter/fml/string_conversion.h"
-#include "third_party/dart/runtime/third_party/double-conversion/src/double-conversion.h"
+#include "third_party/dart/third_party/double-conversion/src/double-conversion.h"
 
 #include "no_destructor.h"
 
