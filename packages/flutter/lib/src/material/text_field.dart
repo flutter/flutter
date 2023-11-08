@@ -644,7 +644,10 @@ class TextField extends StatefulWidget {
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.material.textfield.onTap}
-  /// Called for each distinct tap except for every second tap of a double tap.
+  /// Called for the first tap in a series of taps.
+  /// 
+  /// If [onTapAlwaysCalled] is enabled, this will also be called for consecutive
+  /// taps.
   ///
   /// The text field builds a [GestureDetector] to handle input events like tap,
   /// to trigger focus requests, to move the caret, adjust the selection, etc.

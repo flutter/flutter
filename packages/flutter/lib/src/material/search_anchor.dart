@@ -707,7 +707,6 @@ class _ViewContentState extends State<_ViewContent> {
   late Rect _viewRect;
   late final SearchController _controller;
   Iterable<Widget> result = <Widget>[];
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -744,7 +743,6 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -863,7 +861,6 @@ class _ViewContentState extends State<_ViewContent> {
                           child: SearchBar(
                             autoFocus: true,
                             constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
-                            focusNode: _focusNode,
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -1330,9 +1327,7 @@ class _SearchBarState extends State<SearchBar> {
                     padding: effectivePadding,
                     child: TextField(
                       autofocus: widget.autoFocus,
-                      onTap: () {
-                        widget.onTap?.call();
-                      },
+                      onTap: widget.onTap,
                       onTapAlwaysCalled: true,
                       focusNode: _focusNode,
                       onChanged: widget.onChanged,

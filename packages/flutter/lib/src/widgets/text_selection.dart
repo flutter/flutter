@@ -2268,12 +2268,16 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
-  /// Whether the user provided [onUserTap] callback should be dispatched on every
+  /// Whether the provided [onUserTap] callback should be dispatched on every
   /// tap or only non-consecutive taps.
+  ///
+  /// Defaults to false.
   @protected
   bool get onUserTapAlwaysCalled => false;
 
   /// Handler for [TextSelectionGestureDetector.onUserTap].
+  ///
+  /// By default, it services as placeholder to enable subclass override.
   ///
   /// See also:
   ///
@@ -2388,7 +2392,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapCancel].
   ///
-  /// By default, it services as place holder to enable subclass override.
+  /// By default, it services as placeholder to enable subclass override.
   ///
   /// See also:
   ///
@@ -3105,9 +3109,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
   final GestureCancelCallback? onSingleTapCancel;
 
   /// Called for the first tap in a series of taps when [onUserTapAlwaysCalled] is
-  /// disabled.
+  /// disabled, which is the default behavior.
   ///
-  /// When [onUserTapAlwaysCalled] is enabled, this will be called for every tap,
+  /// When [onUserTapAlwaysCalled] is enabled, this is called for every tap,
   /// including consecutive taps.
   final GestureTapCallback? onUserTap;
 
@@ -3139,12 +3143,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called when a mouse that was previously dragging is released.
   final GestureTapDragEndCallback? onDragSelectionEnd;
 
-  /// Whether [onUserTap] should always be called.
+  /// Whether [onUserTap] will be called for all taps including consecutive taps.
   ///
-  /// When disabled [onUserTap] will only be called for the first tap in a
-  /// a series of taps.
-  ///
-  /// When enabled [onUserTap] will be called for consecutive taps.
+  /// Defaults to false, so [onUserTap] is only called for each distinct tap.
   final bool onUserTapAlwaysCalled;
 
   /// How this gesture detector should behave during hit testing.
