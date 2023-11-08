@@ -15,7 +15,6 @@ late final String _test2TrackingOffLeaks;
 late final String _test3TrackingOnLeaks;
 late final String _test4TrackingOnWithCreationStackTrace;
 late final String _test5TrackingOnWithDisposalStackTrace;
-late final String _test6TrackingOnWithPath;
 
 void main() {
   late final Leaks reportedLeaks;
@@ -73,16 +72,31 @@ void main() {
     },
   );
 
-  testWidgets(
-    _test6TrackingOnWithPath = 'test6, tracking-on, with path',
-  experimentalLeakTesting: LeakTesting.settings.withRetainingPath(),
-    (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
-      expect(LeakTracking.phase.name, _test6TrackingOnWithPath);
-      expect(LeakTracking.phase.ignoreLeaks, false);
-      await widgetTester.pumpWidget(StatelessLeakingWidget());
-    },
-  );
+  // TODO(polina-c): add this test to leak_tracker after merging this code.
+  // It cannot be added here, because it requires flag --enable-vmservice for `flutter test`.
+  // testWidgets(
+  //   _test6TrackingOnWithPath = 'test6, tracking-on, with path',
+  // experimentalLeakTesting: LeakTesting.settings.withRetainingPath(),
+  //   (WidgetTester widgetTester) async {
+  //     expect(LeakTracking.isStarted, true);
+  //     expect(LeakTracking.phase.name, _test6TrackingOnWithPath);
+  //     expect(LeakTracking.phase.ignoreLeaks, false);
+  //     await widgetTester.pumpWidget(StatelessLeakingWidget());
+  //   },
+  // );
+  //
+  // Validation in tear down should be:
+  //
+  // _verifyLeaks(
+  //    reportedLeaks,
+  //    _test6TrackingOnWithPath,
+  //    notDisposed: 1,
+  //    notGCed: 1,
+  //    expectedContextKeys: <LeakType, List<String>>{
+  //      LeakType.notGCed: <String>['path'],
+  //      LeakType.notDisposed: <String>[],
+  //    },
+  // );
 
   tearDownAll(() {
     try {
@@ -98,7 +112,6 @@ void main() {
       expect(e.message, contains('test: $_test3TrackingOnLeaks'));
       expect(e.message, contains('test: $_test4TrackingOnWithCreationStackTrace'));
       expect(e.message, contains('test: $_test5TrackingOnWithDisposalStackTrace'));
-      expect(e.message, contains('test: $_test6TrackingOnWithPath'));
     }
 
     _verifyLeaks(
@@ -128,16 +141,6 @@ void main() {
       notGCed: 1,
       expectedContextKeys: <LeakType, List<String>>{
         LeakType.notGCed: <String>['disposal'],
-        LeakType.notDisposed: <String>[],
-      },
-    );
-    _verifyLeaks(
-      reportedLeaks,
-      _test6TrackingOnWithPath,
-      notDisposed: 1,
-      notGCed: 1,
-      expectedContextKeys: <LeakType, List<String>>{
-        LeakType.notGCed: <String>['path'],
         LeakType.notDisposed: <String>[],
       },
     );
