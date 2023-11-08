@@ -1092,10 +1092,18 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
+  void _updateMaterialErrorState() {
+    if (_hasError != _hadError) {
+      _statesController.update(MaterialState.error, _hasError);
+      _hadError = _hasError;
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
+    _updateMaterialErrorState();
   }
 
   @override
@@ -1122,24 +1130,22 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       }
     }
 
-    if (widget.statesController != oldWidget.statesController) {
+    if (widget.statesController == oldWidget.statesController) {
+      final bool isOldWidgetEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
+
+      if (_isEnabled != isOldWidgetEnabled) {
+        _statesController.update(MaterialState.disabled, !_isEnabled);
+      }
+
+      _updateMaterialErrorState();
+    } else {
       oldWidget.statesController?.removeListener(_handleStatesControllerChange);
       if (widget.statesController != null) {
         _internalStatesController?.dispose();
         _internalStatesController = null;
       }
       _initStatesController();
-    }
-
-    final bool isOldWidgetEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
-
-    if (_isEnabled != isOldWidgetEnabled) {
-      _statesController.update(MaterialState.disabled, !_isEnabled);
-    }
-
-    if (_hasError != _hadError) {
-      _statesController.update(MaterialState.error, _hasError);
-      _hadError = _hasError;
+      _updateMaterialErrorState();
     }
   }
 
@@ -1287,8 +1293,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _internalStatesController = MaterialStatesController();
     }
     _statesController.update(MaterialState.disabled, !_isEnabled);
-    _statesController.update(MaterialState.error, _hasError);
-    _hadError = _hasError;
+    _statesController.update(MaterialState.hovered, _isHovering);
+    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
     _statesController.addListener(_handleStatesControllerChange);
   }
 
