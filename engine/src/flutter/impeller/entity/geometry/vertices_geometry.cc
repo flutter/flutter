@@ -227,8 +227,8 @@ GeometryResult VerticesGeometry::GetPositionUVBuffer(
 
   auto index_count = indices_.size();
   auto vertex_count = vertices_.size();
-  auto size = texture_coverage.size;
-  auto origin = texture_coverage.origin;
+  auto uv_transform =
+      texture_coverage.GetNormalizingTransform() * effect_transform;
   auto has_texture_coordinates = HasTextureCoordinates();
   std::vector<VS::PerVertexData> vertex_data(vertex_count);
   {
@@ -236,9 +236,7 @@ GeometryResult VerticesGeometry::GetPositionUVBuffer(
       auto vertex = vertices_[i];
       auto texture_coord =
           has_texture_coordinates ? texture_coordinates_[i] : vertices_[i];
-      auto uv =
-          effect_transform * Point((texture_coord.x - origin.x) / size.width,
-                                   (texture_coord.y - origin.y) / size.height);
+      auto uv = uv_transform * texture_coord;
       // From experimentation we need to clamp these values to < 1.0 or else
       // there can be flickering.
       vertex_data[i] = {
