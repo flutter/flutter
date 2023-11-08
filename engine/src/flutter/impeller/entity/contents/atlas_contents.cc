@@ -262,8 +262,6 @@ bool AtlasContents::Render(const ContentContext& renderer,
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    frag_info.supports_decal_sampler_address_mode =
-        renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode();
     auto dst_sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler(
         dst_sampler_descriptor);
     FS::BindTextureSamplerDst(cmd, texture_, dst_sampler);

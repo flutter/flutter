@@ -27,7 +27,7 @@ class PipelineLibraryMTL final : public PipelineLibrary {
   PipelineMap pipelines_;
   ComputePipelineMap compute_pipelines_;
 
-  PipelineLibraryMTL(id<MTLDevice> device);
+  explicit PipelineLibraryMTL(id<MTLDevice> device);
 
   // |PipelineLibrary|
   bool IsValid() const override;
