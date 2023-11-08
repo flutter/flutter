@@ -156,7 +156,6 @@ void testWidgets(
 
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-
   for (final dynamic value in variant.values) {
     _plannedTests ++;
     final String variationDescription = variant.describeValue(value);
@@ -177,7 +176,7 @@ void testWidgets(
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
-        final Future<void> result = binding.runTest(
+        return binding.runTest(
           () async {
             binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
@@ -185,8 +184,8 @@ void testWidgets(
             try {
               memento = await variant.setUp(value);
               await callback(tester);
-              _executedTests ++;
             } finally {
+              _executedTests ++;
               await variant.tearDown(value, memento);
             }
             semanticsHandle?.dispose();
@@ -194,7 +193,6 @@ void testWidgets(
           tester._endOfTestVerifications,
           description: combinedDescription,
         );
-        return result;
       },
       skip: skip,
       timeout: timeout ?? binding.defaultTestTimeout,
@@ -209,7 +207,7 @@ WidgetTesterCallback _wrapWithLeakTracking(
   WidgetTesterCallback callback,
   LeakTesting? leakTesting,
 ) {
-  // This cannot be done just once, because, if the test file starts with a group,
+  // This cannot be done just once, because, if a test file starts with a group,
   // the tear down will happen after group, not after all tests.
   tearDown(() async {
     await _mayBeFinalizeLeakTracking();
@@ -238,7 +236,7 @@ WidgetTesterCallback _wrapWithLeakTracking(
     );
 
     if (!LeakTracking.isStarted) {
-      _setUpTestingWithLeakTracking();
+      _setUpLeakTracking();
     }
 
     LeakTracking.phase = phase;
@@ -266,7 +264,7 @@ void _dispatchFlutterEventToLeakTracker(ObjectEvent event) {
   return LeakTracking.dispatchObjectEvent(event.toMap());
 }
 
-void _setUpTestingWithLeakTracking() {
+void _setUpLeakTracking() {
   LeakTracking.phase = const PhaseSettings.ignored();
   LeakTracking.start(config: LeakTrackingConfig.passive());
   MemoryAllocations.instance.addListener(_dispatchFlutterEventToLeakTracker);
