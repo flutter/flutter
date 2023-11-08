@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:native_assets_builder/native_assets_builder.dart'
-    show BuildResult;
+    show BuildResult, DryRunResult;
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
@@ -45,13 +45,14 @@ Future<Iterable<Asset>> dryRunNativeAssetsAndroidInternal(
   const OS targetOS = OS.android;
 
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  final List<Asset> nativeAssets = (await buildRunner.dryRun(
+  final DryRunResult dryRunResult = await buildRunner.dryRun(
     linkModePreference: LinkModePreference.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
-  ))
-      .assets;
+  );
+  ensureNativeAssetsBuildSucceed(dryRunResult);
+  final List<Asset> nativeAssets = dryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Map<Asset, Asset> assetTargetLocations =
@@ -102,6 +103,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
       cCompilerConfig: await buildRunner.ndkCCompilerConfig,
       targetAndroidNdkApi: targetAndroidNdkApi,
     );
+    ensureNativeAssetsBuildSucceed(result);
     nativeAssets.addAll(result.assets);
     dependencies.addAll(result.dependencies);
   }
