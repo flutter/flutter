@@ -42,6 +42,8 @@ class FadeInImageElements {
   double get opacity => rawImage.opacity?.value ?? 1.0;
   BoxFit? get fit => rawImage.fit;
   FilterQuality? get filterQuality => rawImage.filterQuality;
+  Color? get color => rawImage.color;
+  BlendMode? get colorBlendMode => rawImage.colorBlendMode;
 }
 
 class LoadTestImageProvider extends ImageProvider<Object> {
@@ -376,6 +378,29 @@ void main() {
       await tester.pump(animationDuration);
       expect(findFadeInImage(tester).placeholder!.opacity, moreOrLessEquals(0));
       expect(findFadeInImage(tester).target.opacity, moreOrLessEquals(1));
+    });
+
+    testWidgetsWithLeakTracking('Image color and colorBlend parameters', (WidgetTester tester) async {
+      final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+      final TestImageProvider imageProvider = TestImageProvider(targetImage);
+
+      await tester.pumpWidget(FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+        color: const Color(0xFF00FF00),
+        colorBlendMode: BlendMode.clear,
+        placeholderColor: const Color(0xFF0000FF),
+        placeholderColorBlendMode: BlendMode.modulate,
+        fadeOutDuration: animationDuration,
+        fadeInDuration: animationDuration,
+        excludeFromSemantics: true,
+      ));
+
+      expect(findFadeInImage(tester).placeholder?.color, const Color(0xFF0000FF));
+      expect(findFadeInImage(tester).placeholder?.colorBlendMode, BlendMode.modulate);
+      await tester.pump(animationDuration);
+      expect(findFadeInImage(tester).target.color, const Color(0xFF00FF00));
+      expect(findFadeInImage(tester).target.colorBlendMode, BlendMode.clear);
     });
 
     group('ImageProvider', () {
