@@ -52,6 +52,6 @@ source_set("base") {
     "numerics",
     "//flutter/fml:string_conversion",
     "//flutter/third_party/accessibility/ax_build",
-    "//third_party/dart/runtime/third_party/double-conversion/src:libdouble_conversion",
+    "//third_party/dart/third_party/double-conversion/src:libdouble_conversion",
   ]
 }
