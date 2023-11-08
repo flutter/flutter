@@ -177,7 +177,7 @@ void testWidgets(
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
-        final result = binding.runTest(
+        final Future<void> result = binding.runTest(
           () async {
             binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
@@ -209,12 +209,14 @@ WidgetTesterCallback _wrapWithLeakTracking(
   WidgetTesterCallback callback,
   LeakTesting? leakTesting,
 ) {
+  // This cannot be done just once, because, if the test file starts with a group,
+  // the tear down will happen after group, not after all tests.
   tearDown(() async {
     await _mayBeFinalizeLeakTracking();
   });
 
   Future<void> wrappedCallBack(WidgetTester tester) async {
-    final settings = leakTesting ?? LeakTesting.settings;
+    final LeakTesting settings = leakTesting ?? LeakTesting.settings;
 
     if (settings.ignore) {
       await callback(tester);
@@ -227,7 +229,7 @@ WidgetTesterCallback _wrapWithLeakTracking(
       return;
     }
 
-    final phase = PhaseSettings(
+    final PhaseSettings phase = PhaseSettings(
       name: description,
       leakDiagnosticConfig: settings.leakDiagnosticConfig,
       ignoredLeaks: settings.ignoredLeaks,
@@ -235,7 +237,9 @@ WidgetTesterCallback _wrapWithLeakTracking(
       ignoreLeaks: settings.ignore,
     );
 
-    if (!LeakTracking.isStarted) _setUpTestingWithLeakTracking();
+    if (!LeakTracking.isStarted) {
+      _setUpTestingWithLeakTracking();
+    }
 
     LeakTracking.phase = phase;
     await callback(tester);
@@ -271,8 +275,9 @@ void _setUpTestingWithLeakTracking() {
 int _plannedTests = 0;
 int _executedTests = 0;
 Future<void> _mayBeFinalizeLeakTracking() async {
-  if (_plannedTests > _executedTests) return;
-  print('finalizing leak tracking');
+  if (_plannedTests > _executedTests) {
+    return;
+  }
   MemoryAllocations.instance.removeListener(_dispatchFlutterEventToLeakTracker);
 
   LeakTracking.declareNotDisposedObjectsAsLeaks();
@@ -280,10 +285,17 @@ Future<void> _mayBeFinalizeLeakTracking() async {
   final Leaks leaks = await LeakTracking.collectLeaks();
   LeakTracking.stop();
 
-  if (leaks.total == 0) return;
+  if (leaks.total == 0) {
+    return;
+  }
   experimentalCollectedLeaksReporter(leaks);
 }
 
+/// Hendler for memory leaks found by `testWidgets`.
+///
+/// Set it to analyse the leaks programmatically.
+/// The handler is invoked on tear down of the test run.
+/// The default reporter fails in case of found leaks.
 LeaksCallback experimentalCollectedLeaksReporter = (Leaks leaks) => expect(leaks, isLeakFree);
 
 /// An abstract base class for describing test environment variants.

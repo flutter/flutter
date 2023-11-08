@@ -14,14 +14,14 @@ class LeakTrackedClass {
     );
   }
 
-  static const library = 'package:my_package/lib/src/my_lib.dart';
+  static const String library = 'package:my_package/lib/src/my_lib.dart';
 
   void dispose() {
     LeakTracking.dispatchObjectDisposed(object: this);
   }
 }
 
-final _notGCedObjects = <LeakTrackedClass>[];
+final List<LeakTrackedClass> _notGCedObjects = <LeakTrackedClass>[];
 
 class LeakingClass {
   LeakingClass() {
@@ -40,7 +40,7 @@ class StatelessLeakingWidget extends StatelessWidget {
     }
     if (notDisposed) {
       // ignore: unused_local_variable
-      final notDisposedObject = LeakTrackedClass();
+      final LeakTrackedClass notDisposedObject = LeakTrackedClass();
     }
   }
 

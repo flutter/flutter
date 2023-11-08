@@ -13,9 +13,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker/leak_tracker.dart';
 import 'package:matcher/expect.dart' as matcher;
-import 'package:matcher/src/expect/async_matcher.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
 void main() {
   group('expectLater', () {
@@ -488,54 +487,6 @@ void main() {
         );
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
-  });
-
-  group('Leak testing', () {
-    final List<Leaks> collectedLeaks = <Leaks>[];
-
-    late final LeakTesting originalLeakTesting;
-    late final LeakTesting trackAll =
-      LeakTesting.settings.copyWith(ignoredLeaks: const IgnoredLeaks(), ignore: false,
-      // failOnLeaksCollected: false,
-      // onLeaks: (Leaks leaks){
-      //   print('leaks collected');
-      //   collectedLeaks.add(leaks);
-      // },
-    );
-
-    late String testNoLeaks;
-    late String testWithLeaks;
-
-    setUpAll(() {
-      originalLeakTesting = LeakTesting.settings;
-      LeakTesting.settings = trackAll;
-    });
-
-    print('> tearDownAll 0');
-    tearDownAll(() async {
-      print('!!!!');
-      print(collectedLeaks.length);
-      LeakTesting.settings = originalLeakTesting;
-
-      // final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      // await binding.runTest(() async {
-      //   throw 'test error';
-      // }, () {});
-
-      //print(flutterErrorDetails == null ? 'null!!!' : 'got it!');
-      //binding.postTest();
-      //reportTestException = originalExceptionReporter;
-
-    });
-
-    group('tests', () {
-      testWidgets(testNoLeaks = 'no leaks', (_) async {});
-
-      // testWidgets(testWithLeaks = 'with leaks', (_) async {
-      //   StatelessLeakingWidget();
-      // });
-    });
-
   });
 
   group('TargetPlatformVariant', () {
