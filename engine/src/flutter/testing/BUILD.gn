@@ -25,6 +25,8 @@ source_set("testing_lib") {
     "mock_canvas.h",
     "post_task_sync.cc",
     "post_task_sync.h",
+    "stream_capture.cc",
+    "stream_capture.h",
     "test_args.cc",
     "test_args.h",
     "test_timeout_listener.cc",

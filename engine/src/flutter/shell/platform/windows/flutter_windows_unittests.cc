@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/testing/windows_test_config_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test_context.h"
+#include "flutter/testing/stream_capture.h"
 #include "gtest/gtest.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
@@ -45,27 +46,20 @@ TEST_F(WindowsTest, LaunchMain) {
 // Verify there is no unexpected output from launching main.
 TEST_F(WindowsTest, LaunchMainHasNoOutput) {
   // Replace stdout & stderr stream buffers with our own.
-  std::stringstream cout_buffer;
-  std::stringstream cerr_buffer;
-  std::streambuf* old_cout_buffer = std::cout.rdbuf();
-  std::streambuf* old_cerr_buffer = std::cerr.rdbuf();
-  std::cout.rdbuf(cout_buffer.rdbuf());
-  std::cerr.rdbuf(cerr_buffer.rdbuf());
+  StreamCapture stdout_capture(&std::cout);
+  StreamCapture stderr_capture(&std::cerr);
 
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
-  // Restore original stdout & stderr stream buffer.
-  std::cout.rdbuf(old_cout_buffer);
-  std::cerr.rdbuf(old_cerr_buffer);
+  stdout_capture.Stop();
+  stderr_capture.Stop();
 
   // Verify stdout & stderr have no output.
-  std::string cout = cout_buffer.str();
-  std::string cerr = cerr_buffer.str();
-  EXPECT_TRUE(cout.empty());
-  EXPECT_TRUE(cerr.empty());
+  EXPECT_TRUE(stdout_capture.GetOutput().empty());
+  EXPECT_TRUE(stderr_capture.GetOutput().empty());
 }
 
 // Verify we can successfully launch a custom entry point.

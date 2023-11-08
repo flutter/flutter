@@ -25,6 +25,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/testing/stream_capture.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "gtest/gtest.h"
 
@@ -189,9 +190,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
                     CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
 
   // Replace stdout stream buffer with our own.
-  std::stringstream buffer;
-  std::streambuf* old_buffer = std::cout.rdbuf();
-  std::cout.rdbuf(buffer.rdbuf());
+  StreamCapture stdout_capture(&std::cout);
 
   // Launch the test entrypoint.
   FlutterEngine* engine = GetFlutterEngine();
@@ -200,12 +199,10 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
 
   latch.Wait();
 
-  // Restore old stdout stream buffer.
-  std::cout.rdbuf(old_buffer);
+  stdout_capture.Stop();
 
   // Verify hello world was written to stdout.
-  std::string logs = buffer.str();
-  EXPECT_TRUE(logs.find("Hello logging") != std::string::npos);
+  EXPECT_TRUE(stdout_capture.GetOutput().find("Hello logging") != std::string::npos);
 }
 
 // TODO(cbracken): Needs deflaking. https://github.com/flutter/flutter/issues/124677
