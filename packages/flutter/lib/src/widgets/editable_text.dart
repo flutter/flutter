@@ -5643,16 +5643,14 @@ class _DoNothingOnEditableTextAction extends ContextAction<DoNothingAndStopPropa
 
   @override
   Object? invoke(DoNothingAndStopPropagationEditableTextIntent intent, [BuildContext? context]) {
-    if (!isEditable) {
-      return Actions.invoke(
-        context!,
-        intent.fallbackIntent,
-      );
+    if (isEditable) {
+      return null;
     }
+    return Actions.invoke(
+      context!,
+      intent.fallbackIntent,
+    );
   }
-
-  @override
-  bool get isActionEnabled => true;
 }
 
 /// The start and end glyph heights of some range of text.
