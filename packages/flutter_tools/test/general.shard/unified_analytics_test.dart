@@ -12,6 +12,7 @@ import '../src/fakes.dart';
 
 void main() {
   const String userBranch = 'abc123';
+  const String? clientIde = null;
 
   late FileSystem fs;
   late FakeAnalytics analyticsOverride;
@@ -34,6 +35,7 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(analytics.clientId, isNot(NoOpAnalytics.staticClientId),
@@ -50,6 +52,7 @@ void main() {
         ),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
@@ -68,6 +71,7 @@ void main() {
         ),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
@@ -84,6 +88,7 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
@@ -100,6 +105,7 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
