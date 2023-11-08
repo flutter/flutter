@@ -16,16 +16,16 @@ android {
         // The others are irrelevant for a test application.
         disable 'UnpackedNativeCode','MissingApplicationIcon','GoogleAppIndexingApiWarning','GoogleAppIndexingWarning','GradleDependency','NewerVersionAvailable'
     }
-    buildToolsVersion = '34.0.0'
-    compileSdkVersion 34
+    buildToolsVersion = '33.0.0'
+    compileSdkVersion 33
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
     defaultConfig {
         applicationId 'dev.flutter.android_background_image'
-        minSdkVersion 19
-        targetSdkVersion 34
+        minSdkVersion 16
+        targetSdkVersion 33
         versionCode 1
         versionName '1.0'
     }

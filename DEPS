@@ -267,7 +267,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '44ca359ea6fada2fa1bb007b81994fa4dc8ce2ec',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '5ced4367fee2721f6eda34802dc28b1335637c63',
 
   'src/flutter/third_party/rapidjson':
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
@@ -766,7 +766,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/sdk/all/${{platform}}',
-        'version': 'version:34v3'
+        'version': 'version:33v6'
        }
      ],
      'condition': 'download_android_deps',
@@ -798,7 +798,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/java/openjdk/${{platform}}',
-        'version': 'version:17'
+        'version': 'version:11'
        }
      ],
      'condition': 'download_android_deps',

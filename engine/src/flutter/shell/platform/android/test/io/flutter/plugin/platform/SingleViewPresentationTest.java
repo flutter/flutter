@@ -4,7 +4,7 @@
 
 package io.flutter.plugin.platform;
 
-import static android.os.Build.VERSION_CODES.KITKAT;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.R;
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ import org.robolectric.annotation.Config;
 @TargetApi(P)
 public class SingleViewPresentationTest {
   @Test
-  @Config(minSdk = KITKAT, maxSdk = R)
+  @Config(minSdk = JELLY_BEAN_MR1, maxSdk = R)
   public void returnsOuterContextInputMethodManager() {
     // There's a bug in Android Q caused by the IMM being instanced per display.
     // https://github.com/flutter/flutter/issues/38375. We need the context returned by
@@ -59,7 +59,7 @@ public class SingleViewPresentationTest {
   }
 
   @Test
-  @Config(minSdk = KITKAT, maxSdk = R)
+  @Config(minSdk = JELLY_BEAN_MR1, maxSdk = R)
   public void returnsOuterContextInputMethodManager_createDisplayContext() {
     // The IMM should also persist across display contexts created from the base context.
 
