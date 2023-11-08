@@ -1027,12 +1027,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     coords.orientation = (float) (double) coordsList.get(0);
     coords.pressure = (float) (double) coordsList.get(1);
     coords.size = (float) (double) coordsList.get(2);
-    coords.toolMajor = (float) (double) coordsList.get(3) * density;
-    coords.toolMinor = (float) (double) coordsList.get(4) * density;
-    coords.touchMajor = (float) (double) coordsList.get(5) * density;
-    coords.touchMinor = (float) (double) coordsList.get(6) * density;
-    coords.x = (float) (double) coordsList.get(7) * density;
-    coords.y = (float) (double) coordsList.get(8) * density;
+    coords.toolMajor = (float) ((double) coordsList.get(3) * density);
+    coords.toolMinor = (float) ((double) coordsList.get(4) * density);
+    coords.touchMajor = (float) ((double) coordsList.get(5) * density);
+    coords.touchMinor = (float) ((double) coordsList.get(6) * density);
+    coords.x = (float) ((double) coordsList.get(7) * density);
+    coords.y = (float) ((double) coordsList.get(8) * density);
     return coords;
   }
 
