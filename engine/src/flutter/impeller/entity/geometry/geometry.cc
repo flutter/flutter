@@ -75,12 +75,13 @@ GeometryResult ComputeUVGeometryForRect(Rect source_rect,
                                         RenderPass& pass) {
   auto& host_buffer = pass.GetTransientsBuffer();
 
+  auto uv_transform =
+      texture_coverage.GetNormalizingTransform() * effect_transform;
   std::vector<Point> data(8);
   auto points = source_rect.GetPoints();
   for (auto i = 0u, j = 0u; i < 8; i += 2, j++) {
     data[i] = points[j];
-    data[i + 1] = effect_transform * (points[j] - texture_coverage.origin) /
-                  texture_coverage.size;
+    data[i + 1] = uv_transform * points[j];
   }
 
   return GeometryResult{
