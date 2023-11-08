@@ -1,4 +1,4 @@
-Signature: 32b97c00d73ce5eb0f10ea1b54d06da2
+Signature: 2164bc8c41e9404a3cf70628df9305ef
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8642,6 +8642,8 @@ ORIGIN: ../../../third_party/skia/src/encode/SkJpegGainmapEncoder.cpp + ../../..
 ORIGIN: ../../../third_party/skia/src/gpu/dawn/DawnUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSamplerYcbcrConversion.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSamplerYcbcrConversion.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/SkTypeface_fontations.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/SkTypeface_fontations_priv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp + ../../../third_party/skia/LICENSE
@@ -8690,6 +8692,8 @@ FILE: ../../../third_party/skia/src/encode/SkJpegGainmapEncoder.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/DawnUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSamplerYcbcrConversion.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSamplerYcbcrConversion.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_fontations.cpp
 FILE: ../../../third_party/skia/src/ports/SkTypeface_fontations_priv.h
 FILE: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp
@@ -8963,6 +8967,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.cpp + ../
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/vk/VulkanUtilsPriv.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImageGeneratorPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_AndroidFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_Base.cpp + ../../../third_party/skia/LICENSE
@@ -9241,6 +9246,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.h
+FILE: ../../../third_party/skia/src/gpu/vk/VulkanUtilsPriv.cpp
 FILE: ../../../third_party/skia/src/image/SkImageGeneratorPriv.h
 FILE: ../../../third_party/skia/src/image/SkImage_AndroidFactories.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_Base.cpp
