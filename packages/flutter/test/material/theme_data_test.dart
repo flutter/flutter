@@ -724,6 +724,7 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: const <Type, Adaptation<Object>>{},
       applyElevationOverlayColor: false,
       cupertinoOverrideTheme: null,
       extensions: const <Object, ThemeExtension<dynamic>>{},
@@ -836,6 +837,9 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: const <Type, Adaptation<Object>>{
+        SwitchThemeData: SwitchThemeAdaptation(),
+      },
       applyElevationOverlayColor: true,
       cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
       extensions: const <Object, ThemeExtension<dynamic>>{
@@ -941,6 +945,7 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptations: otherTheme.adaptationMap.values,
       applyElevationOverlayColor: otherTheme.applyElevationOverlayColor,
       cupertinoOverrideTheme: otherTheme.cupertinoOverrideTheme,
       extensions: otherTheme.extensions.values,
@@ -1041,6 +1046,7 @@ void main() {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    expect(themeDataCopy.adaptationMap, equals(otherTheme.adaptationMap));
     expect(themeDataCopy.applyElevationOverlayColor, equals(otherTheme.applyElevationOverlayColor));
     expect(themeDataCopy.cupertinoOverrideTheme, equals(otherTheme.cupertinoOverrideTheme));
     expect(themeDataCopy.extensions, equals(otherTheme.extensions));
@@ -1178,6 +1184,7 @@ void main() {
     // List of properties must match the properties in ThemeData.hashCode()
     final Set<String> expectedPropertyNames = <String>{
       // GENERAL CONFIGURATION
+      'adaptations',
       'applyElevationOverlayColor',
       'cupertinoOverrideTheme',
       'extensions',
@@ -1284,6 +1291,141 @@ void main() {
     // Ensure they are all there.
     expect(propertyNames, expectedPropertyNames);
   });
+
+  group('Theme adaptationMap', () {
+    const Key containerKey = Key('container');
+
+    testWidgetsWithLeakTracking('can be obtained', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            adaptations: const <Adaptation<Object>>[
+              StringAdaptation(),
+              SwitchThemeAdaptation()
+            ],
+          ),
+          home: Container(key: containerKey),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byKey(containerKey)),
+      );
+      final String adaptiveString = theme.getAdaptation<String>()!.adapt(theme, 'Default theme');
+      final SwitchThemeData adaptiveSwitchTheme = theme.getAdaptation<SwitchThemeData>()!
+        .adapt(theme, theme.switchTheme);
+
+      expect(adaptiveString, 'Adaptive theme.');
+      expect(adaptiveSwitchTheme.thumbColor?.resolve(<MaterialState>{}),
+        isSameColorAs(Colors.brown));
+    });
+
+    testWidgetsWithLeakTracking('should return null on extension not found', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        adaptations: const <Adaptation<Object>>[
+          StringAdaptation(),
+        ],
+      );
+
+      expect(theme.extension<SwitchThemeAdaptation>(), isNull);
+    });
+  });
+
+  testWidgetsWithLeakTracking(
+    'ThemeData.brightness not matching ColorScheme.brightness throws a helpful error message', (WidgetTester tester) async {
+    AssertionError? error;
+
+    // Test `ColorScheme.light()` and `ThemeData.brightness == Brightness.dark`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(),
+            brightness: Brightness.dark,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
+
+    // Test `ColorScheme.dark()` and `ThemeData.brightness == Brightness.light`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: const ColorScheme.dark(),
+            brightness: Brightness.light,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
+
+    // Test `ColorScheme.fromSeed()` and `ThemeData.brightness == Brightness.dark`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xffff0000)),
+            brightness: Brightness.dark,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
+
+    // Test `ColorScheme.fromSeed()` using `Brightness.dark` and `ThemeData.brightness == Brightness.light`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xffff0000),
+              brightness: Brightness.dark,
+            ),
+            brightness: Brightness.light,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
+  });
 }
 
 @immutable
@@ -1340,4 +1482,20 @@ class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
       textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
     );
   }
+}
+
+class SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
+  const SwitchThemeAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData(
+    thumbColor: MaterialStatePropertyAll<Color>(Colors.brown),
+  );
+}
+
+class StringAdaptation extends Adaptation<String> {
+  const StringAdaptation();
+
+  @override
+  String adapt(ThemeData theme, String defaultValue) => 'Adaptive theme.';
 }
