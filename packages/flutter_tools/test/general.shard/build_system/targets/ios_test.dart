@@ -72,6 +72,10 @@ void main() {
     expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
+  testWithoutContext('Default kIosArchs value', () {
+    expect(environment.defines[kIosArchs], 'arm64');
+  });
+
   testUsingContext('DebugUniversalFramework creates simulator binary', () async {
     environment.defines[kIosArchs] = 'x86_64';
     environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
