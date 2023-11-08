@@ -248,6 +248,8 @@ class ExpansionTile extends StatefulWidget {
     this.clipBehavior,
     this.controlAffinity,
     this.controller,
+    this.expansionDuration,
+    this.expansionTween,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -491,6 +493,14 @@ class ExpansionTile extends StatefulWidget {
   /// than supplying a controller.
   final ExpansionTileController? controller;
 
+  /// If provided will decide the duration it takes to expand or collapse tiles.
+  /// 
+  /// Defaults to [_kExpand].
+  final Duration? expansionDuration;
+
+  /// If provided will be used to drive the expansion animation.
+  final Animatable<double>? expansionTween;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -519,8 +529,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: _kExpand, vsync: this);
-    _heightFactor = _animationController.drive(_easeInTween);
+    _animationController = AnimationController(duration: widget.expansionDuration ?? _kExpand, vsync: this);
+    _heightFactor = _animationController.drive(widget.expansionTween ?? _easeInTween);
     _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
     _border = _animationController.drive(_borderTween.chain(_easeOutTween));
     _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));

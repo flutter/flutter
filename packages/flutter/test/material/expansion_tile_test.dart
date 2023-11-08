@@ -1198,4 +1198,42 @@ void main() {
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
   });
+
+  testWidgetsWithLeakTracking('ExpansionTile custom animation parameters', (WidgetTester tester) async {
+    final ExpansionTileController fastController = ExpansionTileController();
+    final ExpansionTileController slowController = ExpansionTileController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              ExpansionTile(
+                controller: fastController,
+                title: const Text('Title'),
+                subtitle: const Text('Subtitle'),
+                expansionDuration: const Duration(milliseconds: 10),
+                children: const <Widget>[ListTile(title: Text('0'))],
+              ),
+              ExpansionTile(
+                controller: slowController,
+                title: const Text('Title'),
+                subtitle: const Text('Subtitle'),
+                expansionDuration: const Duration(milliseconds: 20),
+                children: const <Widget>[ListTile(title: Text('0'))],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    fastController.expand();
+    final int fastPumps = await tester.pumpAndSettle(const Duration(milliseconds: 10));
+    
+    slowController.expand();
+    final int slowPumps = await tester.pumpAndSettle(const Duration(milliseconds: 10));
+
+    expect(fastPumps < slowPumps, true);
+  });
 }
