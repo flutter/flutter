@@ -54,7 +54,7 @@ def run_firebase_test(apk, results_dir):
           '--results-dir',
           results_dir,
           '--device',
-          'model=panther,version=33',
+          'model=shiba,version=34',
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.STDOUT,
