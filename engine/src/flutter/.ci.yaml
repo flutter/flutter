@@ -27,7 +27,7 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "gradle_cache", "version": "none"}
         ]
       device_type: none
@@ -49,7 +49,7 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:17"}
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       device_type: none
       cpu: x86
@@ -76,7 +76,7 @@ platform_properties:
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:17"}
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       device_type: none
       os: Windows-10

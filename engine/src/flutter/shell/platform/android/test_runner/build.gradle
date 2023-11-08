@@ -32,10 +32,10 @@ println "AVAILABLE PROCESSORS: $availableProcessors"
 println "=========================================="
 
 android {
-  compileSdkVersion 34
+  compileSdkVersion 33
 
   defaultConfig {
-    minSdkVersion 19
+    minSdkVersion 16
   }
 
   compileOptions {
