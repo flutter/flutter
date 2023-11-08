@@ -159,7 +159,6 @@ targets:
     timeout: 60
 
   - name: Linux Fuchsia
-    bringup: true
     recipe: engine/engine
     properties:
       build_fuchsia: "true"
@@ -217,6 +216,7 @@ targets:
       - web_sdk/**
 
   - name: Linux linux_fuchsia
+    bringup: true
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
