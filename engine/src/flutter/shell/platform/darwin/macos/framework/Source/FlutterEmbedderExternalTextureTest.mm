@@ -108,15 +108,14 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestTextureResolution) {
     EXPECT_TRUE(w == width);
     EXPECT_TRUE(h == height);
 
-    FlutterMetalExternalTexture* texture = new FlutterMetalExternalTexture();
+    auto texture = std::make_unique<FlutterMetalExternalTexture>();
     texture->struct_size = sizeof(FlutterMetalExternalTexture);
     texture->num_textures = 1;
     texture->height = h;
     texture->width = w;
     texture->pixel_format = FlutterMetalExternalTexturePixelFormat::kRGBA;
     texture->textures = textures.data();
-
-    return std::unique_ptr<FlutterMetalExternalTexture>(texture);
+    return texture;
   };
 
   // Render the texture.
@@ -164,14 +163,13 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTexture) {
     EXPECT_TRUE(w == width);
     EXPECT_TRUE(h == height);
 
-    FlutterMetalExternalTexture* texture = new FlutterMetalExternalTexture();
-    [textureHolder populateTexture:texture];
+    auto texture = std::make_unique<FlutterMetalExternalTexture>();
+    [textureHolder populateTexture:texture.get()];
 
     EXPECT_TRUE(texture->num_textures == 1);
     EXPECT_TRUE(texture->textures != nullptr);
     EXPECT_TRUE(texture->pixel_format == FlutterMetalExternalTexturePixelFormat::kRGBA);
-
-    return std::unique_ptr<FlutterMetalExternalTexture>(texture);
+    return texture;
   };
 
   // Render the texture.
@@ -217,16 +215,15 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA) {
     EXPECT_TRUE(w == width);
     EXPECT_TRUE(h == height);
 
-    FlutterMetalExternalTexture* texture = new FlutterMetalExternalTexture();
-    [textureHolder populateTexture:texture];
+    auto texture = std::make_unique<FlutterMetalExternalTexture>();
+    [textureHolder populateTexture:texture.get()];
 
     EXPECT_TRUE(texture->num_textures == 2);
     EXPECT_TRUE(texture->textures != nullptr);
     EXPECT_TRUE(texture->pixel_format == FlutterMetalExternalTexturePixelFormat::kYUVA);
     EXPECT_TRUE(texture->yuv_color_space ==
                 FlutterMetalExternalTextureYUVColorSpace::kBT601LimitedRange);
-
-    return std::unique_ptr<FlutterMetalExternalTexture>(texture);
+    return texture;
   };
 
   // Render the texture.
@@ -272,16 +269,15 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA2) {
     EXPECT_TRUE(w == width);
     EXPECT_TRUE(h == height);
 
-    FlutterMetalExternalTexture* texture = new FlutterMetalExternalTexture();
-    [textureHolder populateTexture:texture];
+    auto texture = std::make_unique<FlutterMetalExternalTexture>();
+    [textureHolder populateTexture:texture.get()];
 
     EXPECT_TRUE(texture->num_textures == 2);
     EXPECT_TRUE(texture->textures != nullptr);
     EXPECT_TRUE(texture->pixel_format == FlutterMetalExternalTexturePixelFormat::kYUVA);
     EXPECT_TRUE(texture->yuv_color_space ==
                 FlutterMetalExternalTextureYUVColorSpace::kBT601FullRange);
-
-    return std::unique_ptr<FlutterMetalExternalTexture>(texture);
+    return texture;
   };
 
   // Render the texture.
