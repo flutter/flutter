@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
   expect(boundaries.first, 0);
@@ -1525,6 +1526,13 @@ void main() {
         expect(metrics, hasLength(1));
     }
   }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
+
+  test('TextPainter dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => TextPainter().dispose(), TextPainter),
+      areCreateAndDispose,
+    );
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {
