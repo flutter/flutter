@@ -1294,7 +1294,9 @@ class PopupMenuButton<T> extends StatefulWidget {
   final Clip clipBehavior;
 
   /// Used to determine whether to push the menu to the [Navigator] furthest
-  /// from or nearest to the given `context`. Defaults to false.
+  /// from or nearest to the given `context`.
+  /// 
+  /// Defaults to false.
   final bool useRootNavigator;
 
   @override
