@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -1377,7 +1378,14 @@ abstract class FlutterCommand extends Command<void> {
           final DateTime endTime = globals.systemClock.now();
           globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
+            _sendPostUsage(
+              commandPath,
+              commandResult,
+              startTime,
+              endTime,
+              globals.analytics,
+              globals.processInfo,
+            );
           }
           if (_usesFatalWarnings) {
             globals.logger.checkForFatalLogs();
@@ -1580,6 +1588,8 @@ abstract class FlutterCommand extends Command<void> {
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
         globals.systemClock.now(),
+        globals.analytics,
+        globals.processInfo,
       );
     }
     globals.signals.addHandler(io.ProcessSignal.sigterm, handler);
@@ -1595,13 +1605,16 @@ abstract class FlutterCommand extends Command<void> {
     FlutterCommandResult commandResult,
     DateTime startTime,
     DateTime endTime,
+    Analytics analytics,
+    ProcessInfo processInfo,
   ) {
     // Send command result.
-    CommandResultEvent(commandPath, commandResult.toString()).send();
-    globals.analytics.send(Event.flutterCommandResult(
+    final int? maxRss = getMaxRss(processInfo);
+    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
+    analytics.send(Event.flutterCommandResult(
       commandPath: commandPath,
       result: commandResult.toString(),
-      maxRss: getMaxRss(globals.processInfo),
+      maxRss: maxRss,
     ));
 
     // Send timing.
