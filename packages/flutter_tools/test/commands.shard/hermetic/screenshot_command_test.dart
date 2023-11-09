@@ -2,15 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -116,4 +123,65 @@ void main() {
               message: 'It appears the output file contains an error message, not valid output.'));
     });
   });
+
+  group('Screenshot for devices unsupported for project', () {
+    late _TestDeviceManager testDeviceManager;
+
+    setUp(() {
+      testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
+    });
+
+    testUsingContext('should not throw', () async {
+      final ScreenshotCommand command = ScreenshotCommand(fs: MemoryFileSystem.test());
+
+      final _ScreenshotDevice deviceUnsupportedForProject = _ScreenshotDevice(isSupportedForProject: false);
+
+      testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
+
+      expect(() => createTestCommandRunner(command).run(<String>['screenshot']), returnsNormally);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => testDeviceManager,
+    });
+  });
+}
+
+class _ScreenshotDevice extends Fake implements Device {
+  _ScreenshotDevice({required bool isSupportedForProject}) : _isSupportedForProject = isSupportedForProject;
+
+  final bool _isSupportedForProject;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
+
+  @override
+  bool supportsScreenshot = true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool ephemeral = true;
+
+  @override
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
+  Future<void> takeScreenshot(File outputFile) async {
+    outputFile.writeAsBytesSync(<int>[1, 2, 3, 4]);
+  }
+}
+
+class _TestDeviceManager extends DeviceManager {
+  _TestDeviceManager({required super.logger});
+  List<Device> devices = <Device>[];
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
+  }
 }

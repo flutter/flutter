@@ -120,6 +120,15 @@ class ScreenshotCommand extends FlutterCommand {
                    : FlutterCommandResult.fail();
   }
 
+  @override
+  Future<Device?> findTargetDevice({
+    bool includeDevicesUnsupportedByProject = false,
+  }) async {
+    return super.findTargetDevice(
+      includeDevicesUnsupportedByProject: true,
+    );
+  }
+
   Future<void> runScreenshot(File? outputFile) async {
     outputFile ??= globals.fsUtils.getUniqueFile(
       fs.currentDirectory,
