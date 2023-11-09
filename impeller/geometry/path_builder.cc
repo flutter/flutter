@@ -76,38 +76,6 @@ PathBuilder& PathBuilder::QuadraticCurveTo(Point controlPoint,
   return *this;
 }
 
-Point PathBuilder::ReflectedQuadraticControlPoint1() const {
-  /*
-   *  If there is no previous command or if the previous command was not a
-   *  quadratic, assume the control point is coincident with the current point.
-   */
-  if (prototype_.GetComponentCount() == 0) {
-    return current_;
-  }
-
-  QuadraticPathComponent quad;
-  if (!prototype_.GetQuadraticComponentAtIndex(
-          prototype_.GetComponentCount() - 1, quad)) {
-    return current_;
-  }
-
-  /*
-   *  The control point is assumed to be the reflection of the control point on
-   *  the previous command relative to the current point.
-   */
-  return (current_ * 2.0) - quad.cp;
-}
-
-PathBuilder& PathBuilder::SmoothQuadraticCurveTo(Point point, bool relative) {
-  point = relative ? current_ + point : point;
-  /*
-   *  The reflected control point is absolute and we made the endpoint absolute
-   *  too. So there the last argument is always false (i.e, not relative).
-   */
-  QuadraticCurveTo(point, ReflectedQuadraticControlPoint1(), false);
-  return *this;
-}
-
 PathBuilder& PathBuilder::SetConvexity(Convexity value) {
   convexity_ = value;
   return *this;
@@ -122,44 +90,6 @@ PathBuilder& PathBuilder::CubicCurveTo(Point controlPoint1,
   point = relative ? current_ + point : point;
   prototype_.AddCubicComponent(current_, controlPoint1, controlPoint2, point);
   current_ = point;
-  return *this;
-}
-
-Point PathBuilder::ReflectedCubicControlPoint1() const {
-  /*
-   *  If there is no previous command or if the previous command was not a
-   *  cubic, assume the first control point is coincident with the current
-   *  point.
-   */
-  if (prototype_.GetComponentCount() == 0) {
-    return current_;
-  }
-
-  CubicPathComponent cubic;
-  if (!prototype_.GetCubicComponentAtIndex(prototype_.GetComponentCount() - 1,
-                                           cubic)) {
-    return current_;
-  }
-
-  /*
-   *  The first control point is assumed to be the reflection of the second
-   *  control point on the previous command relative to the current point.
-   */
-  return (current_ * 2.0) - cubic.cp2;
-}
-
-PathBuilder& PathBuilder::SmoothCubicCurveTo(Point controlPoint2,
-                                             Point point,
-                                             bool relative) {
-  auto controlPoint1 = ReflectedCubicControlPoint1();
-  controlPoint2 = relative ? current_ + controlPoint2 : controlPoint2;
-  auto endpoint = relative ? current_ + point : point;
-
-  CubicCurveTo(endpoint,       // endpoint
-               controlPoint1,  // control point 1
-               controlPoint2,  // control point 2
-               false           // relative since all points are already absolute
-  );
   return *this;
 }
 
