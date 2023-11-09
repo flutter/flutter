@@ -138,25 +138,6 @@ class FlutterView {
   ///    The value here is equal to the value exposed on [display].
   double get devicePixelRatio => _viewConfiguration.devicePixelRatio;
 
-  /// The dimensions and location of the rectangle into which the scene rendered
-  /// in this view will be drawn on the screen, in physical pixels.
-  ///
-  /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
-  ///
-  /// At startup, the size and location of the view may not be known before Dart
-  /// code runs. If this value is observed early in the application lifecycle,
-  /// it may report [Rect.zero].
-  ///
-  /// This value does not take into account any on-screen keyboards or other
-  /// system UI. The [padding] and [viewInsets] properties provide a view into
-  /// how much of each side of the view may be obscured by system UI.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
-  ///    observe when this value changes.
-  Rect get physicalGeometry => _viewConfiguration.geometry;
-
   /// The dimensions of the rectangle into which the scene rendered in this view
   /// will be drawn on the screen, in physical pixels.
   ///
@@ -175,15 +156,11 @@ class FlutterView {
   /// system UI. The [padding] and [viewInsets] properties provide information
   /// about how much of each side of the view may be obscured by system UI.
   ///
-  /// This value is the same as the `size` member of [physicalGeometry].
-  ///
   /// See also:
   ///
-  ///  * [physicalGeometry], which reports the location of the view as well as
-  ///    its size.
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  Size get physicalSize => _viewConfiguration.geometry.size;
+  Size get physicalSize => _viewConfiguration.size;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but over which the operating system will likely

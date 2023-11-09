@@ -135,7 +135,7 @@ _ViewConfiguration _buildViewConfiguration(
 ) {
   return _ViewConfiguration(
     devicePixelRatio: devicePixelRatio,
-    geometry: Rect.fromLTWH(0.0, 0.0, width, height),
+    size: Size(width, height),
     viewPadding: ViewPadding._(
       top: viewPaddingTop,
       right: viewPaddingRight,
