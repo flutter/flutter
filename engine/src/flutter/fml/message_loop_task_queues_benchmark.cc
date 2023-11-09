@@ -32,12 +32,12 @@ static void BM_RegisterAndGetTasks(benchmark::State& state) {  // NOLINT
     CountDownLatch tasks_registered(num_task_queues);
     CountDownLatch tasks_done(num_task_queues);
 
+    threads.reserve(num_task_queues);
     for (int i = 0; i < num_task_queues; i++) {
       threads.emplace_back([task_runner_id = i, &task_queue, past, &tasks_done,
                             &tasks_registered]() {
         for (int j = 0; j < num_tasks_per_queue; j++) {
-          task_queue->RegisterTask(
-              TaskQueueId(task_runner_id), [] {}, past);
+          task_queue->RegisterTask(TaskQueueId(task_runner_id), [] {}, past);
         }
         tasks_registered.CountDown();
         tasks_registered.Wait();

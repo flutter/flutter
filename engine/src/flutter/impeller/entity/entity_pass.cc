@@ -323,7 +323,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
   IterateAllEntities([lazy_glyph_atlas =
                           renderer.GetLazyGlyphAtlas()](const Entity& entity) {
-    if (auto contents = entity.GetContents()) {
+    if (const auto& contents = entity.GetContents()) {
       contents->PopulateGlyphAtlas(lazy_glyph_atlas, entity.DeriveTextScale());
     }
     return true;

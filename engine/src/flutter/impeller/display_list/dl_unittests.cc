@@ -1357,7 +1357,7 @@ TEST_P(DisplayListTest, MaskBlursApplyCorrectlyToColorSources) {
           stops.data(), flutter::DlTileMode::kClamp)};
 
   int offset = 100;
-  for (auto color_source : color_sources) {
+  for (const auto& color_source : color_sources) {
     flutter::DlPaint paint;
     paint.setColorSource(color_source);
     paint.setMaskFilter(blur_filter);

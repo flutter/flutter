@@ -204,7 +204,7 @@ const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
   // For each metadata member, look up the binding location and record
   // it in the binding map.
   auto& locations = binding_map_[metadata->name] = {};
-  for (const auto member : metadata->members) {
+  for (const auto& member : metadata->members) {
     if (member.type == ShaderType::kVoid) {
       // Void types are used for padding. We are obviously not going to find
       // mappings for these. Keep going.

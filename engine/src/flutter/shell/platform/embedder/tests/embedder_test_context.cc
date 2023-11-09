@@ -111,7 +111,7 @@ VoidCallback EmbedderTestContext::GetIsolateCreateCallbackHook() {
 }
 
 void EmbedderTestContext::FireIsolateCreateCallbacks() {
-  for (auto closure : isolate_create_callbacks_) {
+  for (const auto& closure : isolate_create_callbacks_) {
     closure();
   }
 }

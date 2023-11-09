@@ -48,10 +48,11 @@ TEST(PoolTest, Overload) {
   Pool<Foobar> pool(1'000);
   {
     std::vector<std::shared_ptr<Foobar>> values;
+    values.reserve(20);
     for (int i = 0; i < 20; i++) {
       values.push_back(pool.Grab());
     }
-    for (auto value : values) {
+    for (const auto& value : values) {
       value->SetSize(100);
       pool.Recycle(value);
     }

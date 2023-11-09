@@ -3162,7 +3162,7 @@ TEST_F(ShellTest, AssetManagerMulti) {
       "bad1",
   };
 
-  for (auto filename : filenames) {
+  for (const auto& filename : filenames) {
     bool success = fml::WriteAtomically(asset_dir_fd, filename.c_str(),
                                         fml::DataMapping(filename));
     ASSERT_TRUE(success);
