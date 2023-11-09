@@ -18,7 +18,7 @@ class DoNothingAndStopPropagationTextIntent extends Intent {
 
 /// An [Intent] to send the event straight to the engine when the receiver
 /// is editable text.
-/// 
+///
 /// When the receiver is not an editable text, then the `fallbackIntent` will
 /// be invoked.
 ///
