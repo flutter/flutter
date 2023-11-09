@@ -766,13 +766,13 @@ class AssetsEntry {
       return false;
     }
 
-    if (uri != other.uri) {
+    if (uri != other.uri || flavor != other.flavor) {
         return false;
-      }
+    }
 
     return true;
   }
 
   @override
-  int get hashCode => uri.hashCode;
+  int get hashCode => Object.hash(uri.hashCode, flavor.hashCode);
 }
