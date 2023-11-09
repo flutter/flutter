@@ -238,7 +238,7 @@ public class LocalizationPluginTest {
   // Tests the legacy pre API 24 algorithm.
   @Test
   @Config(
-      minSdk = Build.VERSION_CODES.JELLY_BEAN,
+      minSdk = Build.VERSION_CODES.KITKAT,
       maxSdk = Build.VERSION_CODES.M,
       qualifiers = "es-rMX")
   public void computePlatformResolvedLocale_emptySupportedLocales_beforeAndroidN() {
@@ -252,7 +252,7 @@ public class LocalizationPluginTest {
   }
 
   @Test
-  @Config(minSdk = Build.VERSION_CODES.JELLY_BEAN, maxSdk = Build.VERSION_CODES.M, qualifiers = "")
+  @Config(minSdk = Build.VERSION_CODES.KITKAT, maxSdk = Build.VERSION_CODES.M, qualifiers = "")
   public void computePlatformResolvedLocale_selectFirstLocaleWhenNoUserSetting_beforeAndroidN() {
     FlutterJNI flutterJNI = new FlutterJNI();
     DartExecutor dartExecutor = mock(DartExecutor.class);
@@ -273,7 +273,7 @@ public class LocalizationPluginTest {
 
   @Test
   @Config(
-      minSdk = Build.VERSION_CODES.JELLY_BEAN,
+      minSdk = Build.VERSION_CODES.KITKAT,
       maxSdk = Build.VERSION_CODES.M,
       qualifiers = "fr-rCH")
   public void computePlatformResolvedLocale_selectFirstLocaleWhenNoExactMatch_beforeAndroidN() {
@@ -299,7 +299,7 @@ public class LocalizationPluginTest {
 
   @Test
   @Config(
-      minSdk = Build.VERSION_CODES.JELLY_BEAN,
+      minSdk = Build.VERSION_CODES.KITKAT,
       maxSdk = Build.VERSION_CODES.M,
       qualifiers = "it-rIT")
   public void computePlatformResolvedLocale_selectExactMatchLocale_beforeAndroidN() {
@@ -325,7 +325,7 @@ public class LocalizationPluginTest {
 
   @Test
   @Config(
-      minSdk = Build.VERSION_CODES.JELLY_BEAN,
+      minSdk = Build.VERSION_CODES.KITKAT,
       maxSdk = Build.VERSION_CODES.M,
       qualifiers = "fr-rCH")
   public void computePlatformResolvedLocale_selectOnlyLanguageLocale_beforeAndroidN() {
@@ -351,35 +351,35 @@ public class LocalizationPluginTest {
   }
 
   // Tests the legacy pre API 21 algorithm.
-  @Config(sdk = 16)
+  @Config(sdk = Build.VERSION_CODES.KITKAT)
   @Test
   public void localeFromString_languageOnly() {
     Locale locale = LocalizationPlugin.localeFromString("en");
     assertEquals(locale, new Locale("en"));
   }
 
-  @Config(sdk = 16)
+  @Config(sdk = Build.VERSION_CODES.KITKAT)
   @Test
   public void localeFromString_languageAndCountry() {
     Locale locale = LocalizationPlugin.localeFromString("en-US");
     assertEquals(locale, new Locale("en", "US"));
   }
 
-  @Config(sdk = 16)
+  @Config(sdk = Build.VERSION_CODES.KITKAT)
   @Test
   public void localeFromString_languageCountryAndVariant() {
     Locale locale = LocalizationPlugin.localeFromString("zh-Hans-CN");
     assertEquals(locale, new Locale("zh", "CN", "Hans"));
   }
 
-  @Config(sdk = 16)
+  @Config(sdk = Build.VERSION_CODES.KITKAT)
   @Test
   public void localeFromString_underscore() {
     Locale locale = LocalizationPlugin.localeFromString("zh_Hans_CN");
     assertEquals(locale, new Locale("zh", "CN", "Hans"));
   }
 
-  @Config(sdk = 16)
+  @Config(sdk = Build.VERSION_CODES.KITKAT)
   @Test
   public void localeFromString_additionalVariantsAreIgnored() {
     Locale locale = LocalizationPlugin.localeFromString("de-DE-u-co-phonebk");
