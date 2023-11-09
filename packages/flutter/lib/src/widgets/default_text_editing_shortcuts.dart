@@ -400,6 +400,16 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
         SingleActivator(LogicalKeyboardKey.delete, meta: true, shift: pressShift): const DoNothingAndStopPropagationTextIntent(),
       },
     ..._commonDisablingTextShortcuts,
+    SingleActivator(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.keyX, control: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.keyX, meta: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): const DoNothingAndStopPropagationTextIntent(),
@@ -411,22 +421,12 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   };
 
   static const Map<ShortcutActivator, Intent> _commonDisablingTextShortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): DoNothingAndStopPropagationTextIntent(),
+    SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.space): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.enter): DoNothingAndStopPropagationTextIntent(),
   };
@@ -466,6 +466,36 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     ),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const DoNothingAndStopPropagationEditableTextIntent(
       fallbackIntent: ExpandSelectionToLineBreakIntent(forward: true),
+    ),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionByCharacterIntent(forward: false, collapseSelection: true),
+    ),
+    const SingleActivator(LogicalKeyboardKey.arrowRight): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: true),
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: true),
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExpandSelectionToLineBreakIntent(forward: false),
+    ),
+    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExpandSelectionToLineBreakIntent(forward: true),
+    ),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionToNextParagraphBoundaryIntent(forward: true, collapseSelection: true),
+    ),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): const DoNothingAndStopPropagationEditableTextIntent(
+      fallbackIntent: ExtendSelectionToNextParagraphBoundaryIntent(forward: false, collapseSelection: true),
     ),
   };
 
