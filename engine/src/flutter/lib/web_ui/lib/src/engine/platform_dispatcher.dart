@@ -601,7 +601,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
         const StandardMessageCodec codec = StandardMessageCodec();
-        flutterViewEmbedder.accessibilityAnnouncements.handleMessage(codec, data);
+        // TODO(yjbanov): Dispatch the announcement to the correct view?
+        //                https://github.com/flutter/flutter/issues/137445
+        implicitView!.accessibilityAnnouncements.handleMessage(codec, data);
         replyToPlatformMessage(callback, codec.encodeMessage(true));
         return;
 

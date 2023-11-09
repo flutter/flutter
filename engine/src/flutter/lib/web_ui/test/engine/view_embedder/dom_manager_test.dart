@@ -22,6 +22,7 @@ void doTests() {
       expect(domManager.platformViewsHost, embedder.glassPaneElementDEPRECATED);
       expect(domManager.textEditingHost, embedder.textEditingHostNodeDEPRECATED);
       expect(domManager.semanticsHost, embedder.semanticsHostElementDEPRECATED);
+      expect(domManager.announcementsHost, embedder.announcementsHostDEPRECATED);
     });
   });
 }

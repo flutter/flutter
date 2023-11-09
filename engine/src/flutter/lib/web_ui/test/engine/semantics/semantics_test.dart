@@ -2331,6 +2331,10 @@ class MockAccessibilityAnnouncements implements AccessibilityAnnouncements {
 }
 
 void _testLiveRegion() {
+  tearDown(() {
+    LiveRegion.debugOverrideAccessibilityAnnouncements(null);
+  });
+
   test('announces the label after an update', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -2338,7 +2342,7 @@ void _testLiveRegion() {
 
     final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
-    flutterViewEmbedder.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
+    LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
@@ -2361,7 +2365,7 @@ void _testLiveRegion() {
 
     final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
-    flutterViewEmbedder.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
+    LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
@@ -2383,7 +2387,7 @@ void _testLiveRegion() {
 
     final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
-    flutterViewEmbedder.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
+    LiveRegion.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(

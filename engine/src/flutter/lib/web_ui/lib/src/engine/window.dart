@@ -22,6 +22,7 @@ import 'mouse/cursor.dart';
 import 'navigation/history.dart';
 import 'platform_dispatcher.dart';
 import 'platform_views/message_handler.dart';
+import 'semantics/accessibility.dart';
 import 'services.dart';
 import 'util.dart';
 import 'view_embedder/dom_manager.dart';
@@ -62,6 +63,11 @@ base class EngineFlutterView implements ui.FlutterView {
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
+
+  // TODO(yjbanov): How should this look like for multi-view?
+  //                https://github.com/flutter/flutter/issues/137445
+  late final AccessibilityAnnouncements accessibilityAnnouncements =
+      AccessibilityAnnouncements(hostElement: dom.announcementsHost);
 
   late final MouseCursor mouseCursor = MouseCursor(dom.rootElement);
 
