@@ -401,6 +401,7 @@ class Context {
       '-dTargetPlatform=ios',
       '-dTargetFile=$targetPath',
       '-dBuildMode=$buildMode',
+      if (environment['FLAVOR'] != null) '-dFlavor=${environment['FLAVOR']}',
       '-dIosArchs=${environment['ARCHS'] ?? ''}',
       '-dSdkRoot=${environment['SDKROOT'] ?? ''}',
       '-dSplitDebugInfo=${environment['SPLIT_DEBUG_INFO'] ?? ''}',
@@ -413,10 +414,6 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
     ]);
-
-    if (environment['FLAVOR'] != null) {
-      flutterArgs.add('-dFlavor=${environment['FLAVOR']}');
-    }
 
     if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null && environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
       flutterArgs.add('--performance-measurement-file=${environment['PERFORMANCE_MEASUREMENT_FILE']}');

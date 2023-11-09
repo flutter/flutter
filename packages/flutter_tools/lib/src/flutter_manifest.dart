@@ -485,7 +485,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           errors.add('Expected "$yamlKey" to be a bool, but got $yamlValue (${yamlValue.runtimeType}).');
         }
       case 'assets':
-        _validateAssets(yamlValue, errors);
+        errors.addAll(_validateAssets(yamlValue));
       case 'shaders':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -596,15 +596,15 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         }
       }
       if (valueMap.containsKey('assets')) {
-        _validateAssets(valueMap['assets'], errors);
+        errors.addAll(_validateAssets(valueMap['assets']));
       }
     }
   }
 }
 
-bool _validateAssets(Object? yaml, List<String> errors) {
+List<String> _validateAssets(Object? yaml) {
   final (_, List<String> errors) = _computeAssetsSafe(yaml);
-  return errors.isEmpty;
+  return errors;
 }
 
 (List<AssetsEntry>, List<String> errors) _computeAssetsSafe(Object? yaml) {
@@ -612,7 +612,7 @@ bool _validateAssets(Object? yaml, List<String> errors) {
     return (const <AssetsEntry>[], const <String>[]);
   }
   if (yaml is! YamlList) {
-    final String error = 'Expected "assets" to be a list, but got $yaml (${yaml.runtimeType})';
+    final String error = 'Expected "assets" to be a list, but got $yaml (${yaml.runtimeType}).';
     return (const <AssetsEntry>[], <String>[error]);
   }
   final List<AssetsEntry> results = <AssetsEntry>[];
