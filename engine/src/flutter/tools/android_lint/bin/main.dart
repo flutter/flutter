@@ -73,7 +73,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 <!-- WILL AUTOMATICALLY FIND ALL .java FILES AND INCLUDE THEM HERE       -->
 <project>
   <sdk dir="${androidSdkDir.path}" />
-  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-T">
+  <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-U">
   <manifest file="${path.join(androidDir.path, 'AndroidManifest.xml')}" />
 ''');
   for (final FileSystemEntity entity in androidDir.listSync(recursive: true)) {
@@ -95,7 +95,7 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   final List<String> lintArgs = <String>[
     path.join(androidSdkDir.path, 'cmdline-tools', 'latest', 'bin', 'lint'),
     '--project', projectXmlPath,
-    '--compile-sdk-version', '33',
+    '--compile-sdk-version', '34',
     '--showall',
     '--exitcode', // Set non-zero exit code on errors
     '-Wall',
