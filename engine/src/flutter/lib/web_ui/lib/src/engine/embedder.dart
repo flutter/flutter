@@ -133,8 +133,8 @@ class FlutterViewEmbedder {
   DomElement get textEditingHostNodeDEPRECATED => _textEditingHostNode;
   late DomElement _textEditingHostNode;
 
-  AccessibilityAnnouncements get accessibilityAnnouncements => _accessibilityAnnouncements;
-  late AccessibilityAnnouncements _accessibilityAnnouncements;
+  DomElement get announcementsHostDEPRECATED => _announcementsHost;
+  late DomElement _announcementsHost;
 
   static const String defaultFontStyle = 'normal';
   static const String defaultFontWeight = 'normal';
@@ -214,12 +214,11 @@ class FlutterViewEmbedder {
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
-    final DomElement announcementsElement = createDomElement('flt-announcement-host');
-    _accessibilityAnnouncements = AccessibilityAnnouncements(hostElement: announcementsElement);
+    _announcementsHost = createDomElement('flt-announcement-host');
 
     shadowRoot.append(accessibilityPlaceholder);
     shadowRoot.append(_sceneHostElement);
-    shadowRoot.append(announcementsElement);
+    shadowRoot.append(_announcementsHost);
 
     // The semantic host goes last because hit-test order-wise it must be
     // first. If semantics goes under the scene host, platform views will
@@ -246,11 +245,6 @@ class FlutterViewEmbedder {
     );
 
     window.onResize.listen(_metricsDidChange);
-  }
-
-  /// For tests only.
-  void debugOverrideAccessibilityAnnouncements(AccessibilityAnnouncements override) {
-    _accessibilityAnnouncements = override;
   }
 
   /// The framework specifies semantics in physical pixels, but CSS uses

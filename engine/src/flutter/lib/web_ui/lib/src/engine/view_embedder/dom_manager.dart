@@ -23,7 +23,7 @@ import '../embedder.dart';
 ///   |    |    |    |
 ///   |    |    |    +- <flt-scene>
 ///   |    |    |
-///   |    |    +- <flt-announcement-host>
+///   |    |    +- [announcementsHost] <flt-announcement-host>
 ///   |    |
 ///   |    +- ...platform views
 ///   |
@@ -63,4 +63,7 @@ class DomManager {
   /// Otherwise, the phone will disable focusing by touch, only by tabbing
   /// around the UI.
   DomElement get semanticsHost => _embedder.semanticsHostElementDEPRECATED;
+
+  /// This is where accessibility announcements are inserted.
+  DomElement get announcementsHost => _embedder.announcementsHostDEPRECATED;
 }
