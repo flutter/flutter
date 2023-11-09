@@ -80,9 +80,6 @@ base class EngineFlutterView implements ui.FlutterView {
       PlatformViewMessageHandler(platformViewsContainer: dom.platformViewsHost);
 
   @override
-  ui.Rect get physicalGeometry => _viewConfiguration.geometry;
-
-  @override
   ui.Size get physicalSize {
     if (_physicalSize == null) {
       computePhysicalSize();

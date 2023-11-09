@@ -1462,7 +1462,7 @@ class _PlatformConfiguration {
 class _ViewConfiguration {
   const _ViewConfiguration({
     this.devicePixelRatio = 1.0,
-    this.geometry = Rect.zero,
+    this.size = Size.zero,
     this.viewInsets = ViewPadding.zero,
     this.viewPadding = ViewPadding.zero,
     this.systemGestureInsets = ViewPadding.zero,
@@ -1479,9 +1479,8 @@ class _ViewConfiguration {
   /// The pixel density of the output surface.
   final double devicePixelRatio;
 
-  /// The geometry requested for the view on the screen or within its parent
-  /// window, in logical pixels.
-  final Rect geometry;
+  /// The size requested for the view in logical pixels.
+  final Size size;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the view can render, but over which the operating system will likely
@@ -1551,7 +1550,7 @@ class _ViewConfiguration {
 
   @override
   String toString() {
-    return '$runtimeType[geometry: $geometry]';
+    return '$runtimeType[size: $size]';
   }
 }
 

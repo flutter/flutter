@@ -15,7 +15,6 @@ abstract class FlutterView {
   PlatformDispatcher get platformDispatcher;
   int get viewId;
   double get devicePixelRatio;
-  Rect get physicalGeometry;
   Size get physicalSize;
   ViewPadding get viewInsets;
   ViewPadding get viewPadding;
