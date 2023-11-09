@@ -34,7 +34,7 @@ struct ImageMetaData {
 } __attribute__((packed));
 
 sk_sp<SkData> SerializeImageWithoutData(SkImage* image, void* ctx) {
-  auto info = image->imageInfo();
+  const auto& info = image->imageInfo();
   SkDynamicMemoryWStream stream;
 
   ImageMetaData metadata = {info.width(), info.height(),

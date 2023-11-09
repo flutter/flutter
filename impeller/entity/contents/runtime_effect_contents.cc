@@ -171,7 +171,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   size_t minimum_sampler_index = 100000000;
   size_t buffer_index = 0;
   size_t buffer_offset = 0;
-  for (auto uniform : runtime_stage_->GetUniforms()) {
+  for (const auto& uniform : runtime_stage_->GetUniforms()) {
     // TODO(113715): Populate this metadata once GLES is able to handle
     //               non-struct uniform names.
     std::shared_ptr<ShaderMetadata> metadata =
@@ -225,7 +225,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   }
 
   size_t sampler_index = 0;
-  for (auto uniform : runtime_stage_->GetUniforms()) {
+  for (const auto& uniform : runtime_stage_->GetUniforms()) {
     // TODO(113715): Populate this metadata once GLES is able to handle
     //               non-struct uniform names.
     ShaderMetadata metadata;

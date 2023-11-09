@@ -33,7 +33,7 @@ void AccessibilityBridgeMac::OnAccessibilityEvent(
   ui::AXNode* ax_node = targeted_event.node;
   std::vector<AccessibilityBridgeMac::NSAccessibilityEvent> events =
       MacOSEventsFromAXEvent(targeted_event.event_params.event, *ax_node);
-  for (AccessibilityBridgeMac::NSAccessibilityEvent event : events) {
+  for (const AccessibilityBridgeMac::NSAccessibilityEvent& event : events) {
     if (event.user_info != nil) {
       DispatchMacOSNotificationWithUserInfo(event.target, event.name, event.user_info);
     } else {

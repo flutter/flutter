@@ -91,7 +91,7 @@ void AccessibilityBridge::CommitUpdates() {
   }
 
   for (size_t i = results.size(); i > 0; i--) {
-    for (SemanticsNode node : results[i - 1]) {
+    for (const SemanticsNode& node : results[i - 1]) {
       ConvertFlutterUpdate(node, update);
     }
   }
@@ -203,7 +203,7 @@ std::optional<ui::AXTreeUpdate>
 AccessibilityBridge::CreateRemoveReparentedNodesUpdate() {
   std::unordered_map<int32_t, ui::AXNodeData> updates;
 
-  for (auto node_update : pending_semantics_node_updates_) {
+  for (const auto& node_update : pending_semantics_node_updates_) {
     for (int32_t child_id : node_update.second.children_in_traversal_order) {
       // Skip nodes that don't exist or have a parent in the current tree.
       ui::AXNode* child = tree_->GetFromId(child_id);

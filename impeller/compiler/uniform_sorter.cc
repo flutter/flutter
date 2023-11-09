@@ -20,7 +20,7 @@ std::vector<spirv_cross::ID> SortUniforms(
         if (var.storage != spv::StorageClassUniformConstant) {
           return;
         }
-        const auto type = compiler->get_type(var.basetype);
+        const auto& type = compiler->get_type(var.basetype);
         if (!type_filter.has_value() ||
             (include && type_filter.value() == type.basetype) ||
             (!include && type_filter.value() != type.basetype)) {

@@ -27,7 +27,7 @@ void CanvasPathMeasure::Create(Dart_Handle wrapper,
   fml::RefPtr<CanvasPathMeasure> pathMeasure =
       fml::MakeRefCounted<CanvasPathMeasure>();
   if (path) {
-    const SkPath skPath = path->path();
+    const SkPath& skPath = path->path();
     SkScalar resScale = 1;
     pathMeasure->path_measure_ =
         std::make_unique<SkContourMeasureIter>(skPath, forceClosed, resScale);
