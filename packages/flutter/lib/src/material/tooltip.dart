@@ -291,7 +291,7 @@ class Tooltip extends StatefulWidget {
   /// for mouse pointer exits the widget.
   final Duration? showDuration;
 
-  /// Whether the tooltip should be dismissed by tap.
+  /// Whether the tooltip can be dismissed by tap.
   ///
   /// The default value is true.
   final bool enableTapToDismiss;
