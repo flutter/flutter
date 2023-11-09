@@ -608,8 +608,15 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectable?.getSelectedContent()?.plainText) {
       _lastSelectedContent = _selectable?.getSelectedContent();
       final TextSelection? textSelection = _selectable?.getLocalTextSelection();
-      widget.onSelectionChanged
-          ?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
+      final Map<int, Rect>? rectsForSelection;
+      if (textSelection != null) {
+        rectsForSelection = _selectable?.getRectsForSelection(textSelection);
+      } else {
+        rectsForSelection = null;
+      }
+
+      widget.onSelectionChanged?.call(_lastSelectedContent?.copyWith(
+          textSelection: textSelection, highlightedRects: rectsForSelection));
     }
   }
 
@@ -1948,12 +1955,55 @@ abstract class MultiSelectableSelectionContainerDelegate
     if (numSelected == 0) {
       return null;
     }
+
     end = numSelected + start;
     // Return a TextSelection that represents the selected range of text.
     return TextSelection(
       baseOffset: start,
       extentOffset: end,
     );
+  }
+
+  @override
+  Map<int, Rect> getRects({TextSelection? selection}) {
+    final Map<int, Rect> rects = <int, Rect>{};
+    int globalStart = 0;
+    for (final Selectable selectable in selectables) {
+      final int localStart = globalStart;
+      final int localEnd = localStart + (selectable.getContentLength() ?? 0);
+      // If a selection is provided, skip selectables outside of the selection range.
+      if (selection != null &&
+          (localEnd <= selection.baseOffset ||
+              localStart > selection.extentOffset)) {
+        globalStart += selectable.getContentLength() ?? 0;
+        continue;
+      }
+      // Adjust the local selection to fit within the current selectable.
+      final int adjustedStart =
+          selection != null ? max(selection.baseOffset - localStart, 0) : 0;
+      final int adjustedEnd = selection != null
+          ? min(selection.extentOffset - localStart, localEnd - localStart)
+          : localEnd - localStart;
+      final Map<int, Rect> selectableRects = selectable.getRects(
+          selection: selection != null
+              ? TextSelection(
+                  baseOffset: adjustedStart, extentOffset: adjustedEnd)
+              : null);
+      for (final int key in selectableRects.keys) {
+        rects[localStart + key] = selectableRects[key]!;
+      }
+      globalStart = localEnd;
+    }
+    return rects;
+  }
+
+  @override
+  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
+    if (selection == null) {
+      return const <int, Rect>{};
+    }
+    // Use the modified getRects to compute only the rectangles within the selection.
+    return getRects(selection: selection);
   }
 
   /// Called when this delegate finishes updating the selectables.
@@ -2279,6 +2329,7 @@ abstract class MultiSelectableSelectionContainerDelegate
     for (final SelectedContent selection in selections) {
       buffer.write(selection.plainText);
     }
+
     return SelectedContent(
       plainText: buffer.toString(),
     );

@@ -186,12 +186,36 @@ class _SelectionContainerState extends State<SelectionContainer>
     return widget.delegate!.getLocalTextSelection();
   }
 
- @override
+  @override
   int? getContentLength() {
     assert(!widget._disabled);
     return widget.delegate!.getContentLength();
   }
 
+  @override
+  Map<int, Rect> getRects({TextSelection? selection}) {
+    assert(!widget._disabled);
+    return widget.delegate!.getRects(selection: selection);
+  }
+
+  @override
+  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
+    assert(!widget._disabled);
+    if (selection == null) {
+      return const <int, Rect>{};
+    }
+
+    final Map<int, Rect> rects = <int, Rect>{};
+    final Map<int, Rect> allRects = widget.delegate!.getRects();
+
+    // return a map of rects that are within the selection
+    for (final int key in allRects.keys) {
+      if (key >= selection.baseOffset && key <= selection.extentOffset) {
+        rects[key] = allRects[key]!;
+      }
+    }
+    return rects;
+  }
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {

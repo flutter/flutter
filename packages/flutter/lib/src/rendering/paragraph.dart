@@ -1482,6 +1482,48 @@ class _SelectableFragment
   }
 
   @override
+  Map<int, Rect> getRects({TextSelection? selection}) {
+    final int? textLength = getContentLength();
+    if (textLength == null) {
+      return const <int, Rect>{};
+    }
+
+    final Map<int, Rect> output = <int, Rect>{};
+    final int start = selection?.baseOffset ?? 0;
+    final int end = selection?.extentOffset ?? textLength;
+
+    for (int i = start; i < end; i++) {
+      final TextSelection currentSelection =
+          TextSelection(baseOffset: i, extentOffset: i + 1);
+
+      final Rect? localRect = paragraph
+          .getBoxesForSelection(currentSelection)
+          .firstOrNull
+          ?.toRect();
+
+      if (localRect != null) {
+        final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()
+          ..invert();
+
+        output[i] =
+            MatrixUtils.transformRect(paragraphToFragmentTransform, localRect);
+      }
+    }
+
+    return output;
+  }
+
+  @override
+  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
+    if (selection == null) {
+      return const <int, Rect>{};
+    }
+
+    // If selection is not null, get rects for the given range.
+    return getRects(selection: selection);
+  }
+
+  @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;

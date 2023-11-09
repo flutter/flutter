@@ -175,15 +175,19 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  TextSelection? getLocalTextSelection() {
-    return value.hasSelection ? const TextSelection.collapsed(offset: 0) : null;
-  }
-
- @override
   int? getContentLength() {
     return 0;
   }
 
+  @override
+  Map<int, Rect> getRects({TextSelection? selection}) {
+    return const <int, Rect>{};
+  }
+
+  @override
+  Map<int, Rect> getRectsForSelection(TextSelection selection) {
+    return const <int, Rect>{};
+  }
 
   @override
   final SelectionGeometry value = const SelectionGeometry(

@@ -607,7 +607,8 @@ void main() {
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
 
-group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
+  group('Selection Offsets are correctly gathered for disjoint Text Widgets',
+      () {
     const List<String> texts = <String>[
       'How are you',
       'you doing on this',
@@ -629,10 +630,12 @@ group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Column(
-              children:  List<Widget>.from( texts.map((String text) => Text(text)).toList())
+              children: List<Widget>.from(
+                  texts.map((String text) => Text(text)).toList())
                 ..insert(
                   2,
-                  const SizedBox(height: 20), // Spacer after the second Text widget
+                  const SizedBox(
+                      height: 20), // Spacer after the second Text widget
                 ),
             ),
           ),
@@ -643,7 +646,8 @@ group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
             .renderObjectList<RenderParagraph>(find.byType(RichText))
             .toList();
 
-        expect(paragraphs.length, texts.length, reason: 'Should have a paragraph for each text');
+        expect(paragraphs.length, texts.length,
+            reason: 'Should have a paragraph for each text');
 
         final TestGesture gesture = await tester.startGesture(
           textOffsetToPosition(paragraphs.first, 0),
@@ -662,7 +666,8 @@ group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
           expect(currentSelection, isNotNull);
           expect(
             currentSelection,
-            TextSelection(baseOffset: 0, extentOffset: runningOffset + textLength - 1),
+            TextSelection(
+                baseOffset: 0, extentOffset: runningOffset + textLength - 1),
             reason: 'Selection should span the entire current Text widget',
           );
 
@@ -693,10 +698,12 @@ group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Column(
-              children: List<Widget>.from( texts.map((String text) => Text(text)).toList())
+              children: List<Widget>.from(
+                  texts.map((String text) => Text(text)).toList())
                 ..insert(
                   2,
-                  const SizedBox(height: 20), // Spacer after the second Text widget
+                  const SizedBox(
+                      height: 20), // Spacer after the second Text widget
                 ),
             ),
           ),
@@ -707,7 +714,8 @@ group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
             .renderObjectList<RenderParagraph>(find.byType(RichText))
             .toList();
 
-        expect(paragraphs.length, texts.length, reason: 'Should have a paragraph for each text');
+        expect(paragraphs.length, texts.length,
+            reason: 'Should have a paragraph for each text');
 
         final TestGesture gesture = await tester.startGesture(
           textOffsetToPosition(paragraphs.first, expectedStart),
@@ -720,8 +728,10 @@ group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
         expect(currentSelection, isNotNull);
         expect(
           currentSelection,
-          const TextSelection(baseOffset: expectedStart, extentOffset: expectedEnd),
-          reason: 'Selection should span from middle of first to middle of last Text widget',
+          const TextSelection(
+              baseOffset: expectedStart, extentOffset: expectedEnd),
+          reason:
+              'Selection should span from middle of first to middle of last Text widget',
         );
 
         await gesture.up();
@@ -4405,16 +4415,19 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  TextSelection? getLocalTextSelection() {
-    return const TextSelection(baseOffset: 0, extentOffset: 0);
-  }
-
-   @override
   int? getContentLength() {
     return 0;
   }
 
+  @override
+  Map<int, Rect> getRects({TextSelection? selection}) {
+    return const <int, Rect>{};
+  }
 
+  @override
+  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
+    return const <int, Rect>{};
+  }
 
   @override
   final SelectionGeometry value = const SelectionGeometry(
@@ -4501,9 +4514,19 @@ class RenderSelectAll extends RenderProxyBox
     return const TextSelection(baseOffset: 0, extentOffset: 0);
   }
 
-    @override
+  @override
   int? getContentLength() {
     return 0;
+  }
+
+  @override
+  Map<int, Rect> getRects({TextSelection? selection}) {
+    return <int, Rect>{};
+  }
+
+  @override
+  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
+    return const <int, Rect>{};
   }
 
   @override
