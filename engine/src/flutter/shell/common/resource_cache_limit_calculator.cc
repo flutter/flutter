@@ -12,7 +12,7 @@ size_t ResourceCacheLimitCalculator::GetResourceCacheMaxBytes() {
                                    ? max_bytes_threshold_
                                    : std::numeric_limits<size_t>::max();
   std::vector<fml::WeakPtr<ResourceCacheLimitItem>> live_items;
-  for (auto item : items_) {
+  for (const auto& item : items_) {
     if (item) {
       live_items.push_back(item);
       max_bytes += item->GetResourceCacheLimit();

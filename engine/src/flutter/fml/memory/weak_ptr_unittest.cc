@@ -28,7 +28,7 @@ TEST(WeakPtrTest, CopyConstruction) {
   int data = 0;
   WeakPtrFactory<int> factory(&data);
   WeakPtr<int> ptr = factory.GetWeakPtr();
-  WeakPtr<int> ptr2(ptr);
+  const WeakPtr<int>& ptr2(ptr);
   EXPECT_EQ(&data, ptr.get());
   EXPECT_EQ(&data, ptr2.get());
 }

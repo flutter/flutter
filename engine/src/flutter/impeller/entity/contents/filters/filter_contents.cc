@@ -240,7 +240,7 @@ std::optional<Rect> FilterContents::GetSourceCoverage(
   }
 
   std::optional<Rect> inputs_coverage;
-  for (auto input : inputs_) {
+  for (const auto& input : inputs_) {
     auto input_coverage = input->GetSourceCoverage(
         effect_transform, filter_input_coverage.value());
     if (!input_coverage.has_value()) {

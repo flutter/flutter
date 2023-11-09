@@ -307,7 +307,7 @@ TEST(DisplayListRTree, Region) {
     rect[i] = SkRect::MakeXYWH(i * 10, i * 10, 20, 20);
   }
   DlRTree rtree(rect, 9);
-  auto region = rtree.region();
+  const auto& region = rtree.region();
   auto rects = region.getRects(true);
   std::vector<SkIRect> expected_rects{
       SkIRect::MakeLTRB(0, 0, 20, 10),    SkIRect::MakeLTRB(0, 10, 30, 20),

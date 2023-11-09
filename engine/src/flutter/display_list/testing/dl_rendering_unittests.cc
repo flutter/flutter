@@ -2829,7 +2829,7 @@ class DisplayListRenderingTestBase : public BaseT,
       FML_LOG(INFO) << CanvasCompareTester::ImpellerFailureImages.size()
                     << " images saved in "
                     << CanvasCompareTester::ImpellerFailureImageDirectory;
-      for (auto filename : CanvasCompareTester::ImpellerFailureImages) {
+      for (const auto& filename : CanvasCompareTester::ImpellerFailureImages) {
         FML_LOG(INFO) << "  " << filename;
       }
       FML_LOG(INFO);

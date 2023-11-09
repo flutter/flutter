@@ -2219,6 +2219,7 @@ void Shell::OnDisplayUpdates(std::vector<std::unique_ptr<Display>> displays) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
   std::vector<DisplayData> display_data;
+  display_data.reserve(displays.size());
   for (const auto& display : displays) {
     display_data.push_back(display->GetDisplayData());
   }

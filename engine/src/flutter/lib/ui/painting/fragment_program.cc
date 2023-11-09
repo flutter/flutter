@@ -59,7 +59,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
     runtime_effect_ = DlRuntimeEffect::MakeImpeller(
         std::make_unique<impeller::RuntimeStage>(std::move(runtime_stage)));
   } else {
-    auto code_mapping = runtime_stage.GetSkSLMapping();
+    const auto& code_mapping = runtime_stage.GetSkSLMapping();
     auto code_size = code_mapping->GetSize();
     const char* sksl =
         reinterpret_cast<const char*>(code_mapping->GetMapping());

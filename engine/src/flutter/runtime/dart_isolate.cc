@@ -627,6 +627,7 @@ bool DartIsolate::LoadKernel(const std::shared_ptr<const fml::Mapping>& mapping,
 [[nodiscard]] bool DartIsolate::PrepareForRunningFromKernels(
     std::vector<std::unique_ptr<const fml::Mapping>> kernels) {
   std::vector<std::shared_ptr<const fml::Mapping>> shared_kernels;
+  shared_kernels.reserve(kernels.size());
   for (auto& kernel : kernels) {
     shared_kernels.emplace_back(std::move(kernel));
   }

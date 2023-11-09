@@ -34,6 +34,7 @@ void ApplyFlutterLayer(FlutterMutatorView* view,
   flutterPlatformView.identifier = 0;
 
   std::vector<const FlutterPlatformViewMutation*> mutationPointers;
+  mutationPointers.reserve(mutations.size());
   for (auto& mutation : mutations) {
     mutationPointers.push_back(&mutation);
   }

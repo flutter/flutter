@@ -491,7 +491,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
                                   &all_dart_flags)) {
     // Assume that individual flags are comma separated.
     std::vector<std::string> flags = ParseCommaDelimited(all_dart_flags);
-    for (auto flag : flags) {
+    for (const auto& flag : flags) {
       if (!IsAllowedDartVMFlag(flag)) {
         FML_LOG(FATAL) << "Encountered disallowed Dart VM flag: " << flag;
       }

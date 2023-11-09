@@ -268,6 +268,7 @@ bool ServiceProtocol::HandleListViewsMethod(
     rapidjson::Document* response) const {
   fml::SharedLock lock(*handlers_mutex_);
   std::vector<std::pair<intptr_t, Handler::Description>> descriptions;
+  descriptions.reserve(handlers_.size());
   for (const auto& handler : handlers_) {
     descriptions.emplace_back(reinterpret_cast<intptr_t>(handler.first),
                               handler.second.Load());
