@@ -56,6 +56,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kTargetPlatform: 'ios',
+        kIosArchs: 'arm64',
       },
       inputs: <String, String>{},
       processManager: processManager,
@@ -72,8 +73,11 @@ void main() {
     expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
-  testWithoutContext('Default kIosArchs value', () {
+  testWithoutContext('kIosArchs value', () {
     expect(environment.defines[kIosArchs], 'arm64');
+
+    environment.defines[kIosArchs] = 'x86_64';
+    expect(environment.defines[kIosArchs], 'x86_64');
   });
 
   testUsingContext('DebugUniversalFramework creates simulator binary', () async {
