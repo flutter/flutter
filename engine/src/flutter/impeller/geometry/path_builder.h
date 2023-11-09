@@ -55,8 +55,6 @@ class PathBuilder {
                                 Point point,
                                 bool relative = false);
 
-  PathBuilder& SmoothQuadraticCurveTo(Point point, bool relative = false);
-
   /// @brief Insert a cubic curve from the curren position to `point` using the
   /// control points `controlPoint1` and `controlPoint2`.
   ///
@@ -66,10 +64,6 @@ class PathBuilder {
                             Point controlPoint2,
                             Point point,
                             bool relative = false);
-
-  PathBuilder& SmoothCubicCurveTo(Point controlPoint2,
-                                  Point point,
-                                  bool relative = false);
 
   PathBuilder& AddRect(Rect rect);
 
@@ -164,10 +158,6 @@ class PathBuilder {
   PathBuilder& AddRoundedRectBottomRight(Rect rect, RoundingRadii radii);
 
   PathBuilder& AddRoundedRectBottomLeft(Rect rect, RoundingRadii radii);
-
-  Point ReflectedQuadraticControlPoint1() const;
-
-  Point ReflectedCubicControlPoint1() const;
 
   PathBuilder(const PathBuilder&) = delete;
   PathBuilder& operator=(const PathBuilder&&) = delete;

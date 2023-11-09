@@ -173,17 +173,6 @@ class Path {
 
   void Shift(Point shift);
 
-  bool UpdateLinearComponentAtIndex(size_t index,
-                                    const LinearPathComponent& linear);
-
-  bool UpdateQuadraticComponentAtIndex(size_t index,
-                                       const QuadraticPathComponent& quadratic);
-
-  bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
-
-  bool UpdateContourComponentAtIndex(size_t index,
-                                     const ContourComponent& contour);
-
   struct ComponentIndexPair {
     ComponentType type = ComponentType::kLinear;
     size_t index = 0;
