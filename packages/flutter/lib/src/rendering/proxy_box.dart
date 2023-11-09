@@ -4356,6 +4356,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.image != null) {
       config.isImage = _properties.image!;
     }
+    //if (_properties.identifier != null) {
+      // Why would it be conditional? Somebody may want to unset it.
+      config.identifier = _properties.identifier;
+    //}
     if (_attributedLabel != null) {
       config.attributedLabel = _attributedLabel!;
     }
