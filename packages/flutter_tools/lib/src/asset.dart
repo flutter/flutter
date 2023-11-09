@@ -636,10 +636,6 @@ class ManifestAssetBundle implements AssetBundle {
       final _AssetDirectoryCache cache = _AssetDirectoryCache(_fileSystem);
       final Map<_Asset, List<_Asset>> componentAssets = <_Asset, List<_Asset>>{};
       for (final AssetsEntry assetsEntry in component.assets) {
-        if (assetsEntry.flavor != null && assetsEntry.flavor != flavor) {
-          _logger.printTrace('Skipping assets entry "${assetsEntry.uri.path}" since its configured flavor, "${assetsEntry.flavor}", did not match the provided flavor (if any).');
-          continue;
-        }
         if (assetsEntry.uri.path.endsWith('/')) {
           wildcardDirectories.add(assetsEntry.uri);
           _parseAssetsFromFolder(
@@ -660,14 +656,16 @@ class ManifestAssetBundle implements AssetBundle {
             assetsEntry.uri,
           );
         }
-
-        for (final _Asset assetsEntry in componentAssets.keys) {
-          if (assetsEntry.flavor != null && assetsEntry.flavor != flavor) {
-            _logger.printTrace('Skipping assets entry "${assetsEntry.entryUri.path}" since its configured flavor, "${assetsEntry.flavor}", did not match the provided flavor (if any).');
-            componentAssets.remove(assetsEntry);
-          }
-        }
       }
+
+      componentAssets.removeWhere((_Asset asset, List<_Asset> variants) {
+        if (asset.flavor != null && asset.flavor != flavor) {
+          _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
+          return true;
+        }
+        return false;
+      });
+
       deferredComponentsAssetVariants[component.name] = componentAssets;
     }
     return deferredComponentsAssetVariants;
