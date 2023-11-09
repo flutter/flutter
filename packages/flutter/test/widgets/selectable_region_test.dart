@@ -607,6 +607,71 @@ void main() {
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
 
+  group('Rects are properly found for TextSelection in a SelectableRegion', () {
+    testWidgetsWithLeakTracking(
+        'Rects are properly found for TextSelection in a SelectableRegion',
+        (WidgetTester tester) async {
+      const String text = 'How are you?';
+      final FocusNode focusNode = FocusNode();
+      SelectedContent? selectedContent;
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            onSelectionChanged: (SelectedContent? content) {
+              selectedContent = content;
+            },
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Text(text),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(
+              of: find.text(text), matching: find.byType(RichText)));
+
+      final Map<int, Rect> output = <int, Rect>{};
+
+      for (int i = 0; i < text.length; i++) {
+        final TextSelection selection = TextSelection(
+          baseOffset: i,
+          extentOffset: i + 1,
+        );
+        final Rect? rect =
+            paragraph.getBoxesForSelection(selection).firstOrNull?.toRect();
+
+        // if there's not a rect, we're not going to be able to test anything else and
+        // we should fail the test
+        expect(rect, isNotNull,
+            reason: 'Paragraph should have a rect for selection $selection');
+
+        output[i] = rect!;
+      }
+
+      // gather rects via getRects()
+
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 0),
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, text.length - 1));
+
+      expect(selectedContent, isNotNull);
+      expect(
+        selectedContent!.highlightedRects,
+        output,
+        reason:
+            'Rects should be the same for getRects() and getBoxesForSelection()',
+      );
+    });
+  });
+
   group('Selection Offsets are correctly gathered for disjoint Text Widgets',
       () {
     const List<String> texts = <String>[
@@ -615,7 +680,7 @@ void main() {
       'fine day?'
     ];
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'iteratively gather offsets 0 through the last character of each Text widget',
       (WidgetTester tester) async {
         TextSelection? currentSelection;
@@ -679,7 +744,7 @@ void main() {
       variant: TargetPlatformVariant.all(),
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'Test collecting offsets from the middle of the first Text widget through the middle of the last Text widget',
       (WidgetTester tester) async {
         TextSelection? currentSelection;
