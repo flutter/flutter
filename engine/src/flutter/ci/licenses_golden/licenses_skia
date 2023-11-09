@@ -1,4 +1,4 @@
-Signature: 5727bc30fd5725c8889bdcb8e1664e5a
+Signature: f15ab5c34e5ac93c7f07b0f0f91b86a1
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8618,6 +8618,7 @@ ORIGIN: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp + ../../..
 ORIGIN: ../../../third_party/skia/modules/skshaper/src/SkShaper_skunicode.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu4x.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkExif.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegConstants.h + ../../../third_party/skia/LICENSE
@@ -8667,6 +8668,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_skunicode.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.h
+FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu4x.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h
 FILE: ../../../third_party/skia/src/codec/SkExif.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegConstants.h
