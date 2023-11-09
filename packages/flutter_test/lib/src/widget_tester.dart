@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' as test_package;
@@ -145,6 +146,12 @@ void testWidgets(
 }) {
   // TODO(polina-c): enable leak tracking and update doc comment for `experimentalLeakTesting`.
   // https://github.com/flutter/flutter/issues/135856
+  // TODO(polina-c): remove stub usage of leak_tracking_testing.
+  // https://github.com/flutter/flutter/issues/135856
+  // This is stub usage of leak_tracking_testing, to create dependency in G3 for future use.
+  const matcher_expect.Matcher matcher = isLeakFree;
+  assert(matcher.runtimeType == matcher_expect.Matcher);
+
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
