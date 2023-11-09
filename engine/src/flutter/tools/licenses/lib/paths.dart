@@ -96,10 +96,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/dart/pkg', // packages that don't become part of the binary (e.g. the analyzer)
   r'third_party/dart/runtime/bin/ffi_test',
   r'third_party/dart/runtime/docs',
-  // TODO(aam): remove as a dup
-  r'third_party/dart/runtime/third_party/binary_size',
-  // TODO(aam): remove as a dup
-  r'third_party/dart/runtime/third_party/d3',
   r'third_party/dart/runtime/vm/service',
   r'third_party/dart/sdk/lib/html/doc',
   r'third_party/dart/third_party/binary_size', // not linked in
