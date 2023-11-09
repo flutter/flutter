@@ -212,63 +212,6 @@ bool Path::GetContourComponentAtIndex(size_t index,
   return true;
 }
 
-bool Path::UpdateLinearComponentAtIndex(size_t index,
-                                        const LinearPathComponent& linear) {
-  if (index >= components_.size()) {
-    return false;
-  }
-
-  if (components_[index].type != ComponentType::kLinear) {
-    return false;
-  }
-
-  linears_[components_[index].index] = linear;
-  return true;
-}
-
-bool Path::UpdateQuadraticComponentAtIndex(
-    size_t index,
-    const QuadraticPathComponent& quadratic) {
-  if (index >= components_.size()) {
-    return false;
-  }
-
-  if (components_[index].type != ComponentType::kQuadratic) {
-    return false;
-  }
-
-  quads_[components_[index].index] = quadratic;
-  return true;
-}
-
-bool Path::UpdateCubicComponentAtIndex(size_t index,
-                                       CubicPathComponent& cubic) {
-  if (index >= components_.size()) {
-    return false;
-  }
-
-  if (components_[index].type != ComponentType::kCubic) {
-    return false;
-  }
-
-  cubics_[components_[index].index] = cubic;
-  return true;
-}
-
-bool Path::UpdateContourComponentAtIndex(size_t index,
-                                         const ContourComponent& move) {
-  if (index >= components_.size()) {
-    return false;
-  }
-
-  if (components_[index].type != ComponentType::kContour) {
-    return false;
-  }
-
-  contours_[components_[index].index] = move;
-  return true;
-}
-
 Path::Polyline Path::CreatePolyline(Scalar scale) const {
   Polyline polyline;
 
