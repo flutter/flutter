@@ -530,7 +530,7 @@ List<int> getCurrentViewWidths() {
   final List<int> result = <int>[];
   for (final FlutterView view in PlatformDispatcher.instance.views) {
     result.add(view.viewId);
-    result.add(view.physicalSize.width.round());
+    result.add(view.physicalGeometry.width.round());
   }
   return result;
 }
