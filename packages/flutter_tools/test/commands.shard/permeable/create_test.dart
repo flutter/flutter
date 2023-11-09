@@ -2865,7 +2865,7 @@ void main() {
 
     final String buildContent = await globals.fs.file('${projectDir.path}/android/app/build.gradle').readAsString();
 
-    expect(buildContent.contains('compileSdkVersion flutter.compileSdkVersion'), true);
+    expect(buildContent.contains('compileSdk flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
     expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
   });
