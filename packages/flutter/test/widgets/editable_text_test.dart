@@ -7405,6 +7405,748 @@ void main() {
     }
   }
 
+  Future<void> testStaticTextShortcuts(WidgetTester tester, {required TargetPlatform targetPlatform}) async {
+    final String targetPlatformString = targetPlatform.toString();
+    final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
+    controller.text = testText;
+    controller.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 0,
+      affinity: TextAffinity.upstream,
+    );
+    late TextSelection selection;
+    late SelectionChangedCause cause;
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 400,
+          child: EditableText(
+            maxLines: 10,
+            controller: controller,
+            showSelectionHandles: true,
+            autofocus: true,
+            focusNode: focusNode,
+            style: Typography.material2018().black.titleMedium!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+            onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? newCause) {
+              selection = newSelection;
+              cause = newCause!;
+            },
+            readOnly: true,
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump(); // Wait for autofocus to take effect.
+
+    // Select a few characters using shift right arrow
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(cause, equals(SelectionChangedCause.keyboard), reason: 'on $platform');
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 3,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select fewer characters using shift left arrow
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Try to select before the first character, nothing should change.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select the first two words.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 6,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Unselect the second word.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 4,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select the next line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 20,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 20,
+          extentOffset: 20,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select the next line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 20,
+          extentOffset: 39,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to the end of the string by going down.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 20,
+          extentOffset: testText.length,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Go back up one line to set selection up to part of the last line.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 20,
+          extentOffset: 39,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to the end of the selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 20,
+          extentOffset: 54,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      lineModifier: true,
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // These platforms extend by line.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 20,
+              extentOffset: 36,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+
+      // Mac and iOS expand by line.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 20,
+              extentOffset: 54,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+    }
+
+    // Select All
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyA,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Jump to beginning of selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move forward a few letters
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection.collapsed(
+          offset: 3,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to end.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 3,
+          extentOffset: testText.length,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select to start, which extends the selection.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      lineModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    switch (defaultTargetPlatform) {
+      // Extend selection.
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 3,
+              extentOffset: 0,
+              affinity: TextAffinity.upstream,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+      // On macOS/iOS expand selection.
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(
+          selection,
+          equals(
+            const TextSelection(
+              baseOffset: 72,
+              extentOffset: 0,
+            ),
+          ),
+          reason: 'on $platform',
+        );
+    }
+
+    // Jump forward three words.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.arrowRight,
+      ],
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 10,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select some characters backward.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 7,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Select a word backward.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowLeft,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 4,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+
+    final bool platformIsApple = defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
+    // Move down one paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+        if (platformIsApple)
+          LogicalKeyboardKey.arrowDown
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 20,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move down another paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 36,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move down another paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 55,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up a paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 36,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up a paragraph.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 20,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up. This will collapse the selection to the origin on Apple platforms, and
+    // extend to the previous paragraph boundary on other platforms.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformIsApple ? 10 : 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move up, extending the selection backwards to the previous paragraph on Apple platforms.
+    // On other platforms this does nothing since our extent is already at 0 from the previous
+    // set of keys sent.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowUp,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 10,
+          extentOffset: 0,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Move down, collapsing the selection to the origin on Apple platforms.
+    // On other platforms this moves the selection's extent to the next paragraph boundary.
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.arrowDown,
+      ],
+      shift: true,
+      wordModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        TextSelection(
+          baseOffset: 10,
+          extentOffset: platformIsApple ? 10 : 20,
+          affinity: platformIsApple ? TextAffinity.upstream : TextAffinity.downstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+
+    // Copy All
+    await sendKeys(
+      tester,
+      <LogicalKeyboardKey>[
+        LogicalKeyboardKey.keyA,
+        LogicalKeyboardKey.keyC,
+      ],
+      shortcutModifier: true,
+      targetPlatform: defaultTargetPlatform,
+    );
+
+    expect(
+      selection,
+      equals(
+        const TextSelection(
+          baseOffset: 0,
+          extentOffset: testText.length,
+          affinity: TextAffinity.upstream,
+        ),
+      ),
+      reason: 'on $platform',
+    );
+    expect(controller.text, equals(testText), reason: 'on $platform');
+    expect((await Clipboard.getData(Clipboard.kTextPlain))!.text, equals(testText));
+  }
+
+  testWidgetsWithLeakTracking('keyboard text selection works for readOnly text', (WidgetTester tester) async {
+    await testStaticTextShortcuts(tester, targetPlatform: defaultTargetPlatform);
+  }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
+
   testWidgetsWithLeakTracking('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
