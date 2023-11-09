@@ -973,37 +973,13 @@ class ManifestAssetBundle implements AssetBundle {
       flavor: flavor,
     );
 
-    final bool hasMoreSpecificDeclarationWithFlavor = ((){
-      final _Asset? preExistingAsset = result.keys
-        .where((_Asset other) => other.entryUri == asset.entryUri)
-        .firstOrNull;
-      if (preExistingAsset == null) {
-        return false;
-      }
 
-      if (flavor != null && flavor != preExistingAsset.flavor ) {
-        if (assetUri.path.endsWith('/') == preExistingAsset.originUri.path.endsWith('/')) {
-          throwToolExit('Asset "${assetUri.path}" belongs to multiple flavors.\n'
-            'An entry with the path "${preExistingAsset.originUri.path}" gives it a flavor of "${preExistingAsset.flavor}".\n'
-            'An entry with the path "${assetUri.path}" gives it a flavor of "$flavor".'
-          );
-        }
-        if (assetUri.path.endsWith('/') && !preExistingAsset.originUri.path.endsWith('/')) {
-          return true;
-        }
-        else if (!assetUri.path.endsWith('/') && preExistingAsset.originUri.path.endsWith('/')) {
-          _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
-          result.remove(preExistingAsset);
-        }
-      }
-
-      return false;
-    })();
-
-    if (hasMoreSpecificDeclarationWithFlavor) {
+    if (asset.flavor != null && asset.flavor != flavor) {
       _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
       return;
     }
+
+    _checkForFlavorConflicts(asset, result.keys.toList());
 
     final List<_Asset> variants = <_Asset>[];
     final File assetFile = asset.lookupAssetFile(_fileSystem);
@@ -1028,6 +1004,64 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     result[asset] = variants;
+  }
+
+  // Since it is not clear how overlapping asset declarations should work in the
+  // presence of conditions such as `flavor`, we throw an Error.
+  //
+  // To be more specific, it is not clear if conditions should be combined with
+  // or-logic or and-logic, or if it should depend on the specificity of the
+  // declarations (file versus directory). If you would like examples, consider these:
+  //
+  // ```yaml
+  // # Should assets/free.mp3 always be included since "assets/" has no flavor?
+  // assets:
+  //   - assets/
+  //   - path: assets/free.mp3
+  //     flavor: free
+  //
+  // # Should "assets/paid/pip.mp3" be included for both the "paid" and "free" flavors?
+  // # Or, since "assets/paid/pip.mp3" is more specific than "assets/paid/"", should
+  // # it take precedence over the latter (included only in "free" flavor)?
+  // assets:
+  //   - path: assets/paid/
+  //     flavor: paid
+  //   - path: assets/paid/pip.mp3
+  //     flavor: free
+  //   - asset
+  // ```
+  //
+  // Since it is not obvious what logic (if any) would be intuitive and preferable
+  // to the vast majority of users (if any), we play it safe by throwing a `ToolExit`
+  // in any of these situations. We can always loosen up this restriction later
+  // without breaking anyone.
+  void _checkForFlavorConflicts(_Asset newAsset, List<_Asset> previouslyParsedAssets) {
+    bool cameFromDirectoryEntry(_Asset asset) {
+      return asset.originUri.path.endsWith('/');
+    }
+
+    final _Asset? preExistingAsset = previouslyParsedAssets
+        .where((_Asset other) => other.entryUri == newAsset.entryUri)
+        .firstOrNull;
+
+    if (preExistingAsset == null || preExistingAsset.flavor == newAsset.flavor) {
+      return;
+    }
+
+    String errorMessage =
+      'Multiple assets entries include the file '
+      '"${newAsset.entryUri.path}", but they do not have the same flavor.\n'
+      'An entry with the path "${preExistingAsset.originUri}" specifies a '
+      'flavor of "${preExistingAsset.flavor}".\n'
+      'An entry with the path "${newAsset.originUri}" specifies a flavor '
+      'of "${newAsset.flavor}".';
+
+    if (cameFromDirectoryEntry(newAsset)|| cameFromDirectoryEntry(preExistingAsset)) {
+      errorMessage += '\n\nConsider organizing assets with different flavors '
+        'into different directories.';
+    }
+
+    throwToolExit(errorMessage);
   }
 
   _Asset _resolveAsset(
