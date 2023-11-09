@@ -1115,10 +1115,10 @@ void main() {
     final RenderBox boxC = tester.renderObject(find.text('C'));
     final RenderBox boxD = tester.renderObject(find.text('D'));
 
-    // boxC and boxD must be the same height, even though boxB is higher than boxA initially.
+    // boxC and boxD must be the same height, even though boxD is higher than boxC initially.
     expect(boxC.size.height, equals(boxD.size.height));
 
-    // boxD (300.0h) should be higher than boxA (100.0h).
+    // boxD (300.0h) should be higher than boxA (200.0h) which has the same height of boxB.
     expect(boxD.size.height, greaterThan(boxA.size.height));
   });
 
