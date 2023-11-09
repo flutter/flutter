@@ -127,6 +127,8 @@ class SearchAnchor extends StatefulWidget {
     this.dividerColor,
     this.viewConstraints,
     this.textCapitalization,
+    this.viewOnChanged,
+    this.viewOnSubmitted,
     required this.builder,
     required this.suggestionsBuilder,
   });
@@ -147,6 +149,8 @@ class SearchAnchor extends StatefulWidget {
     Iterable<Widget>? barTrailing,
     String? barHintText,
     GestureTapCallback? onTap,
+    ValueChanged<String>? onSubmitted,
+    ValueChanged<String>? onChanged,
     MaterialStateProperty<double?>? barElevation,
     MaterialStateProperty<Color?>? barBackgroundColor,
     MaterialStateProperty<Color?>? barOverlayColor,
@@ -289,6 +293,24 @@ class SearchAnchor extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// Called each time the user modifies the search view's text field.
+  ///
+  /// See also:
+  ///
+  ///  * [viewOnSubmitted], which is called when the user indicates that they
+  ///  are done editing the search view's text field.
+  final ValueChanged<String>? viewOnChanged;
+
+  /// Called when the user indicates that they are done editing the text in the
+  /// text field of a search view. Typically this is called when the user presses
+  /// the enter key.
+  ///
+  /// See also:
+  ///
+  /// * [viewOnChanged], which is called when the user modifies the text field
+  /// of the search view.
+  final ValueChanged<String>? viewOnSubmitted;
+
   /// Called to create a widget which can open a search view route when it is tapped.
   ///
   /// The widget returned by this builder is faded out when it is tapped.
@@ -351,6 +373,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
   void _openView() {
     final NavigatorState navigator = Navigator.of(context);
     navigator.push(_SearchViewRoute(
+      viewOnChanged: widget.viewOnChanged,
+      viewOnSubmitted: widget.viewOnSubmitted,
       viewLeading: widget.viewLeading,
       viewTrailing: widget.viewTrailing,
       viewHintText: widget.viewHintText,
@@ -422,6 +446,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
 class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   _SearchViewRoute({
+    this.viewOnChanged,
+    this.viewOnSubmitted,
     this.toggleVisibility,
     this.textDirection,
     this.viewBuilder,
@@ -445,6 +471,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     required this.capturedThemes,
   });
 
+  final ValueChanged<String>? viewOnChanged;
+  final ValueChanged<String>? viewOnSubmitted;
   final ValueGetter<bool>? toggleVisibility;
   final TextDirection? textDirection;
   final ViewBuilder? viewBuilder;
@@ -587,6 +615,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
             ),
             child: capturedThemes.wrap(
               _ViewContent(
+                viewOnChanged: viewOnChanged,
+                viewOnSubmitted: viewOnSubmitted,
                 viewLeading: viewLeading,
                 viewTrailing: viewTrailing,
                 viewHintText: viewHintText,
@@ -621,6 +651,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
 class _ViewContent extends StatefulWidget {
   const _ViewContent({
+    this.viewOnChanged,
+    this.viewOnSubmitted,
     this.viewBuilder,
     this.viewLeading,
     this.viewTrailing,
@@ -643,6 +675,8 @@ class _ViewContent extends StatefulWidget {
     required this.suggestionsBuilder,
   });
 
+  final ValueChanged<String>? viewOnChanged;
+  final ValueChanged<String>? viewOnSubmitted;
   final ViewBuilder? viewBuilder;
   final Widget? viewLeading;
   final Iterable<Widget>? viewTrailing;
@@ -842,9 +876,11 @@ class _ViewContentState extends State<_ViewContent> {
                             textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
                             hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
                             controller: _controller,
-                            onChanged: (_) {
+                            onChanged: (String value) {
+                              widget.viewOnChanged?.call(value);
                               updateSuggestions();
                             },
+                            onSubmitted: widget.viewOnSubmitted,
                             textCapitalization: widget.textCapitalization,
                           ),
                         ),
@@ -907,11 +943,15 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
     required super.suggestionsBuilder
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
+    viewOnSubmitted: onSubmitted,
+    viewOnChanged: onChanged,
     builder: (BuildContext context, SearchController controller) {
       return SearchBar(
         constraints: constraints,
@@ -920,9 +960,10 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
           controller.openView();
           onTap?.call();
         },
-        onChanged: (_) {
+        onChanged: (String value) {
           controller.openView();
         },
+        onSubmitted: onSubmitted,
         hintText: barHintText,
         hintStyle: barHintStyle,
         textStyle: barTextStyle,
