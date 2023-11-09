@@ -1,4 +1,4 @@
-Signature: 8f469f6331b1c71bfc5a13cb720b1c25
+Signature: c99db7aaf49731e722ed8bff8b9b023f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8613,7 +8613,6 @@ ORIGIN: ../../../third_party/skia/include/private/SkGainmapShader.h + ../../../t
 ORIGIN: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkXmp.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skcms/skcms.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skcms/skcms_internal.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/include/SlotManager.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skshaper/src/SkShaper_skunicode.cpp + ../../../third_party/skia/LICENSE
@@ -8663,7 +8662,6 @@ FILE: ../../../third_party/skia/include/private/SkGainmapShader.h
 FILE: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h
 FILE: ../../../third_party/skia/include/private/SkXmp.h
 FILE: ../../../third_party/skia/modules/skcms/skcms.h
-FILE: ../../../third_party/skia/modules/skcms/skcms_internal.h
 FILE: ../../../third_party/skia/modules/skottie/include/SlotManager.h
 FILE: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_skunicode.cpp
