@@ -338,7 +338,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/snack_bar/snack_bar.0_test.dart',
   'examples/api/test/material/snack_bar/snack_bar.2_test.dart',
   'examples/api/test/material/snack_bar/snack_bar.1_test.dart',
-  'examples/api/test/material/bottom_navigation_bar/bottom_navigation_bar.0_test.dart',
   'examples/api/test/material/outlined_button/outlined_button.0_test.dart',
   'examples/api/test/material/icon_button/icon_button.2_test.dart',
   'examples/api/test/material/icon_button/icon_button.3_test.dart',
