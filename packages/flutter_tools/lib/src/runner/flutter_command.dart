@@ -216,6 +216,8 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
+  ProcessInfo get processInfo => globals.processInfo;
+
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
   /// extended amount of time and refresh the device cache with the results.
@@ -1383,8 +1385,6 @@ abstract class FlutterCommand extends Command<void> {
               commandResult,
               startTime,
               endTime,
-              globals.analytics,
-              globals.processInfo,
             );
           }
           if (_usesFatalWarnings) {
@@ -1588,8 +1588,6 @@ abstract class FlutterCommand extends Command<void> {
         const FlutterCommandResult(ExitStatus.killed),
         startTime,
         globals.systemClock.now(),
-        globals.analytics,
-        globals.processInfo,
       );
     }
     globals.signals.addHandler(io.ProcessSignal.sigterm, handler);
@@ -1605,8 +1603,6 @@ abstract class FlutterCommand extends Command<void> {
     FlutterCommandResult commandResult,
     DateTime startTime,
     DateTime endTime,
-    Analytics analytics,
-    ProcessInfo processInfo,
   ) {
     // Send command result.
     final int? maxRss = getMaxRss(processInfo);
