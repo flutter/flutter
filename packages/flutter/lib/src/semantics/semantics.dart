@@ -901,6 +901,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.liveRegion,
     this.maxValueLength,
     this.currentValueLength,
+    this.identifier,
     this.label,
     this.attributedLabel,
     this.value,
@@ -1164,6 +1165,14 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This should only be set when [textField] is true. Must be set when
   /// [maxValueLength] is set.
   final int? currentValueLength;
+
+  /// Provides an identifier for UI testing. This value is not exposed to the
+  /// user.
+  ///
+  /// On Android, this will become the node's `resource-id`.
+  ///
+  /// On iOS, this will become the node's `accessibilityIdentifier`.
+  final String? identifier;
 
   /// Provides a textual description of the widget.
   ///
@@ -1632,6 +1641,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
     properties.add(StringProperty('value', value, defaultValue: null));
@@ -4199,6 +4209,15 @@ class SemanticsConfiguration {
     if (callback != null) {
       callback();
     }
+  }
+
+  /// An identifier of the owning [RenderObject] used for UI testing. This value
+  /// is not exposed to the user.
+  String? get identifier => _identifier;
+  String? _identifier;
+  set identifier(String? identifier) {
+    _identifier = identifier;
+    _hasBeenAnnotated = true;
   }
 
   /// A textual description of the owning [RenderObject].
