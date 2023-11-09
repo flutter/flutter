@@ -1482,45 +1482,29 @@ class _SelectableFragment
   }
 
   @override
-  Map<int, Rect> getRects({TextSelection? selection}) {
+  List<Rect> getRects({TextSelection? selection}) {
     final int? textLength = getContentLength();
     if (textLength == null) {
-      return const <int, Rect>{};
+      return const <Rect>[];
     }
-
-    final Map<int, Rect> output = <int, Rect>{};
     final int start = selection?.baseOffset ?? 0;
     final int end = selection?.extentOffset ?? textLength;
 
-    for (int i = start; i < end; i++) {
-      final TextSelection currentSelection =
-          TextSelection(baseOffset: i, extentOffset: i + 1);
+    final TextSelection currentSelection =
+        TextSelection(baseOffset: start, extentOffset: end);
 
-      final Rect? localRect = paragraph
-          .getBoxesForSelection(currentSelection)
-          .firstOrNull
-          ?.toRect();
+    // rects who have not been transformed to fragment coordinates.
+    final List<Rect> rawRects = paragraph
+        .getBoxesForSelection(currentSelection)
+        .map((e) => e.toRect())
+        .toList();
 
-      if (localRect != null) {
-        final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()
-          ..invert();
+    final Matrix4 paragraphToFragmentTransform = getTransformToParagraph();
 
-        output[i] =
-            MatrixUtils.transformRect(paragraphToFragmentTransform, localRect);
-      }
-    }
-
-    return output;
-  }
-
-  @override
-  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
-    if (selection == null) {
-      return const <int, Rect>{};
-    }
-
-    // If selection is not null, get rects for the given range.
-    return getRects(selection: selection);
+    return rawRects
+        .map((Rect e) =>
+            MatrixUtils.transformRect(paragraphToFragmentTransform, e))
+        .toList();
   }
 
   @override

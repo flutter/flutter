@@ -180,13 +180,8 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  Map<int, Rect> getRects({TextSelection? selection}) {
-    return const <int, Rect>{};
-  }
-
-  @override
-  Map<int, Rect> getRectsForSelection(TextSelection selection) {
-    return const <int, Rect>{};
+  List<Rect> getRects({TextSelection? selection}) {
+    return const <Rect>[];
   }
 
   @override

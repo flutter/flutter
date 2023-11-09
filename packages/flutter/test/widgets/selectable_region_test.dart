@@ -633,26 +633,16 @@ void main() {
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
           find.descendant(
               of: find.text(text), matching: find.byType(RichText)));
+      const TextSelection selection =
+          TextSelection(baseOffset: 0, extentOffset: text.length - 1);
 
-      final Map<int, Rect> output = <int, Rect>{};
+      final List<Rect> correctRects = paragraph
+          .getBoxesForSelection(selection)
+          .map((TextBox e) => e.toRect())
+          .toList();
 
-      for (int i = 0; i < text.length; i++) {
-        final TextSelection selection = TextSelection(
-          baseOffset: i,
-          extentOffset: i + 1,
-        );
-        final Rect? rect =
-            paragraph.getBoxesForSelection(selection).firstOrNull?.toRect();
-
-        // if there's not a rect, we're not going to be able to test anything else and
-        // we should fail the test
-        expect(rect, isNotNull,
-            reason: 'Paragraph should have a rect for selection $selection');
-
-        output[i] = rect!;
-      }
-
-      // gather rects via getRects()
+      expect(correctRects, isNotNull,
+          reason: 'Paragraph should have a rect for selection $selection');
 
       final TestGesture gesture = await tester.startGesture(
         textOffsetToPosition(paragraph, 0),
@@ -665,7 +655,7 @@ void main() {
       expect(selectedContent, isNotNull);
       expect(
         selectedContent!.highlightedRects,
-        output,
+        correctRects,
         reason:
             'Rects should be the same for getRects() and getBoxesForSelection()',
       );
@@ -4485,13 +4475,8 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  Map<int, Rect> getRects({TextSelection? selection}) {
-    return const <int, Rect>{};
-  }
-
-  @override
-  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
-    return const <int, Rect>{};
+  List<Rect> getRects({TextSelection? selection}) {
+    return <Rect>[];
   }
 
   @override
@@ -4585,13 +4570,8 @@ class RenderSelectAll extends RenderProxyBox
   }
 
   @override
-  Map<int, Rect> getRects({TextSelection? selection}) {
-    return <int, Rect>{};
-  }
-
-  @override
-  Map<int, Rect> getRectsForSelection(TextSelection? selection) {
-    return const <int, Rect>{};
+  List<Rect> getRects({TextSelection? selection}) {
+    return <Rect>[];
   }
 
   @override

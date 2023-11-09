@@ -135,12 +135,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// Map<int, Rect> rects = getRectsForSelection(selection);
   ///
   /// ```
-  Map<int, Rect> getRects({TextSelection? selection});
-
-  /// Retrieves a map of rectangles for the current selection.
-  ///
-  /// A convenience method that calls [getRects] with the current selection.
-  Map<int, Rect> getRectsForSelection(TextSelection selection);
+  List<Rect> getRects({TextSelection? selection});
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
@@ -159,9 +154,8 @@ class SelectedContent {
   /// The selected content in [TextSelection] format.
   final TextSelection? textSelection;
 
-  /// The rects pertaining to the selected content, given
-  /// in a map that maps the index of the character to the rect
-  final Map<int, Rect>? highlightedRects;
+  /// The rects pertaining to the selected content
+  final List<Rect>? highlightedRects;
 
   /// Copy with constructor
   ///
@@ -169,7 +163,7 @@ class SelectedContent {
   SelectedContent copyWith({
     String? plainText,
     TextSelection? textSelection,
-    Map<int, Rect>? highlightedRects,
+    List<Rect>? highlightedRects,
   }) {
     return SelectedContent(
       plainText: plainText ?? this.plainText,
