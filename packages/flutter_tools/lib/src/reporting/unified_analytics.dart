@@ -4,6 +4,8 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../base/io.dart';
+import '../globals.dart' as globals;
 import '../version.dart';
 
 /// This function is called from within the context runner to perform
@@ -49,4 +51,14 @@ Analytics getAnalytics({
     dartVersion: flutterVersion.dartSdkVersion,
     enableAsserts: enableAsserts,
   );
+}
+
+/// Function to safely grab the max rss from [ProcessInfo].
+int? getMaxRss(ProcessInfo processInfo) {
+  try {
+    return globals.processInfo.maxRss;
+  } on Exception catch (error) {
+    globals.printTrace('Querying maxRss failed with error: $error');
+  }
+  return null;
 }

@@ -30,6 +30,7 @@ import '../globals.dart' as globals;
 import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../reporting/unified_analytics.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
@@ -1597,6 +1598,11 @@ abstract class FlutterCommand extends Command<void> {
   ) {
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
+    globals.analytics.send(Event.flutterCommandResult(
+      commandPath: commandPath,
+      result: commandResult.toString(),
+      maxRss: getMaxRss(globals.processInfo),
+    ));
 
     // Send timing.
     final List<String?> labels = <String?>[
