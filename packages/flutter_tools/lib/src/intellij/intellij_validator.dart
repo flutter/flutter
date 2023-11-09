@@ -367,7 +367,6 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     required UserMessages userMessages,
     required PlistParser plistParser,
     required String? homeDirPath,
-
   }) : _plistParser = plistParser,
        _homeDirPath = homeDirPath,
        super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
