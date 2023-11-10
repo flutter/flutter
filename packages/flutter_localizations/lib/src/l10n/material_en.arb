@@ -73,7 +73,7 @@
 
   "scrimLabel": "Scrim",
   "@scrimLabel": {
-    "description": "The label for the scrim rendered underneath the content of a modal route."
+    "description": "The label for the scrim rendered underneath the content of a bottom sheet (used as the 'modalRouteContentName' of the 'scrimOnTapHint' message)."
   },
 
   "bottomSheetLabel": "Bottom Sheet",
@@ -83,7 +83,7 @@
 
   "scrimOnTapHint": "Close $modalRouteContentName",
   "@scrimOnTapHint": {
-    "description": "The onTapHint for the scrim rendered underneath the content of a modal route which users can tap to dismiss the content",
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route (especially a bottom sheet) which users can tap to dismiss the content.",
     "parameters": "modalRouteContentName"
   },
 
@@ -197,6 +197,21 @@
     "description": "The label for scan text buttons and menu items for starting the insertion of text via OCR."
   },
 
+  "lookUpButtonLabel": "Look Up",
+  "@lookUpButtonLabel": {
+    "description": "The label for the Look Up button and menu items on iOS."
+  },
+
+  "searchWebButtonLabel": "Search Web",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items on iOS."
+  },
+
+  "shareButtonLabel": "Share...",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items on iOS."
+  },
+
   "okButtonLabel": "OK",
   "@okButtonLabel": {
     "description": "The label for OK buttons and menu items."
@@ -240,6 +255,11 @@
   "modalBarrierDismissLabel": "Dismiss",
   "@modalBarrierDismissLabel": {
     "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can for example be found behind a alert or popup to block user interaction with elements behind it."
+  },
+
+  "menuDismissLabel": "Dismiss menu",
+  "@menuDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a menu to indicate that a tap dismisses the menu."
   },
 
   "dateSeparator": "/",

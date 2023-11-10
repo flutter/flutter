@@ -5,22 +5,22 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
-import 'package:flutter/src/services/dom.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:web/web.dart' as web;
 
 import '../image_data.dart';
 import '_test_http_request.dart';
-
 void runTests() {
   tearDown(() {
     debugRestoreHttpRequestFactory();
   });
 
-  testWidgets('loads an image from the network with headers',
+  testWidgetsWithLeakTracking('loads an image from the network with headers',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))
+      ..mockEvent = MockEvent('load', web.Event('test error'))
       ..response = (Uint8List.fromList(kTransparentImage)).buffer;
 
     httpRequestFactory = () {
@@ -42,11 +42,11 @@ void runTests() {
     assert(mapEquals(testHttpRequest.responseHeaders, headers), true);
   });
 
-  testWidgets('loads an image from the network with unsuccessful HTTP code',
+  testWidgetsWithLeakTracking('loads an image from the network with unsuccessful HTTP code',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
-      ..mockEvent = MockEvent('error', createDomEvent('Event', 'test error'));
+      ..mockEvent = MockEvent('error', web.Event('test error'));
 
 
     httpRequestFactory = () {
@@ -64,14 +64,14 @@ void runTests() {
     );
 
     await tester.pumpWidget(image);
-    expect((tester.takeException() as DomProgressEvent).type, 'test error');
+    expect((tester.takeException() as web.ProgressEvent).type, 'test error');
   });
 
-  testWidgets('loads an image from the network with empty response',
+  testWidgetsWithLeakTracking('loads an image from the network with empty response',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
-      ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))
+      ..mockEvent = MockEvent('load', web.Event('test error'))
       ..response = (Uint8List.fromList(<int>[])).buffer;
 
     httpRequestFactory = () {

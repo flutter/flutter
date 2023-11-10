@@ -19,11 +19,13 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
+import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:test/fake.dart';
 
@@ -42,6 +44,8 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late FileSystem fileSystem;
+    late IOSCoreDeviceControl coreDeviceControl;
+    late XcodeDebug xcodeDebug;
 
     setUp(() {
       final Artifacts artifacts = Artifacts.test();
@@ -61,6 +65,8 @@ void main() {
         logger: logger,
         processManager: FakeProcessManager.any(),
       );
+      coreDeviceControl = FakeIOSCoreDeviceControl();
+      xcodeDebug = FakeXcodeDebug();
     });
 
     testWithoutContext('successfully instantiates on Mac OS', () {
@@ -72,12 +78,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       );
       expect(device.isSupported(), isTrue);
     });
@@ -91,11 +100,14 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.armv7,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       );
       expect(device.isSupported(), isFalse);
     });
@@ -109,12 +121,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).majorSdkVersion, 1);
       expect(IOSDevice(
         'device-123',
@@ -124,12 +139,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).majorSdkVersion, 13);
       expect(IOSDevice(
         'device-123',
@@ -139,12 +157,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).majorSdkVersion, 10);
       expect(IOSDevice(
         'device-123',
@@ -154,12 +175,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).majorSdkVersion, 0);
       expect(IOSDevice(
         'device-123',
@@ -169,12 +193,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).majorSdkVersion, 0);
     });
 
@@ -187,12 +214,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.3.1',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).sdkVersion;
       Version expectedVersion = Version(13, 3, 1, text: '13.3.1');
       expect(sdkVersion, isNotNull);
@@ -207,12 +237,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.3.1 (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -227,12 +260,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '16.4.1(a) (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -247,12 +283,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
       expect(sdkVersion, isNotNull);
@@ -267,11 +306,14 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).sdkVersion;
       expect(sdkVersion, isNull);
 
@@ -283,12 +325,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       ).sdkVersion;
       expect(sdkVersion, isNull);
     });
@@ -302,12 +347,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3 17C54',
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       );
 
       expect(await device.sdkNameAndVersion,'iOS 13.3 17C54');
@@ -322,12 +370,15 @@ void main() {
         platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -348,12 +399,15 @@ void main() {
               platform: platform,
               iosDeploy: iosDeploy,
               iMobileDevice: iMobileDevice,
+              coreDeviceControl: coreDeviceControl,
+              xcodeDebug: xcodeDebug,
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
               connectionInterface: DeviceConnectionInterface.attached,
               isConnected: true,
               devModeEnabled: true,
+              isCoreDevice: false,
             );
           },
           throwsAssertionError,
@@ -440,12 +494,15 @@ void main() {
           platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
+          coreDeviceControl: coreDeviceControl,
+          xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
           devModeEnabled: true,
+          isCoreDevice: false,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -471,6 +528,8 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late IOSWorkflow iosWorkflow;
+    late IOSCoreDeviceControl coreDeviceControl;
+    late XcodeDebug xcodeDebug;
     late IOSDevice device1;
     late IOSDevice device2;
 
@@ -494,6 +553,8 @@ void main() {
         processManager: fakeProcessManager,
         logger: logger,
       );
+      coreDeviceControl = FakeIOSCoreDeviceControl();
+      xcodeDebug = FakeXcodeDebug();
 
       device1 = IOSDevice(
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
@@ -503,12 +564,15 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       );
 
       device2 = IOSDevice(
@@ -519,12 +583,15 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         devModeEnabled: true,
+        isCoreDevice: false,
       );
     });
 
@@ -781,6 +848,8 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late IOSWorkflow iosWorkflow;
+    late IOSCoreDeviceControl coreDeviceControl;
+    late XcodeDebug xcodeDebug;
     late IOSDevice notConnected1;
 
     setUp(() {
@@ -803,6 +872,8 @@ void main() {
         processManager: fakeProcessManager,
         logger: logger,
       );
+      coreDeviceControl = FakeIOSCoreDeviceControl();
+      xcodeDebug = FakeXcodeDebug();
       notConnected1 = IOSDevice(
         '00000001-0000000000000000',
         name: 'iPad',
@@ -811,12 +882,15 @@ void main() {
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
+        coreDeviceControl: coreDeviceControl,
+        xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
         fileSystem: MemoryFileSystem.test(),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: false,
         devModeEnabled: true,
+        isCoreDevice: false,
       );
     });
 
@@ -965,3 +1039,10 @@ class FakeProcess extends Fake implements Process {
     return true;
   }
 }
+
+class FakeXcodeDebug extends Fake implements XcodeDebug {
+  @override
+  bool get debugStarted => false;
+}
+
+class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}

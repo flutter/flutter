@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
+import '../widgets/navigator_utils.dart';
 
 late List<int> selectedTabs;
 
@@ -49,7 +51,7 @@ void main() {
     );
   }
 
-  testWidgets('Tab switching', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab switching', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
@@ -103,7 +105,7 @@ void main() {
     expect(selectedTabs, const <int>[1, 0]);
   });
 
-  testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
 
     await tester.pumpWidget(
@@ -138,12 +140,15 @@ void main() {
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
   });
 
-  testWidgets('Last tab gets focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
     final List<FocusNode> focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
     ];
+    for (final FocusNode focusNode in focusNodes) {
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -174,13 +179,16 @@ void main() {
     expect(focusNodes[1].hasFocus, isFalse);
   });
 
-  testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not affect focus order in the route', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
       FocusNode(debugLabel: 'Node 3'),
       FocusNode(debugLabel: 'Node 4'),
     ];
+    for (final FocusNode focusNode in focusNodes) {
+      addTearDown(focusNode.dispose);
+    }
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -237,8 +245,9 @@ void main() {
     );
   });
 
-  testWidgets('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    addTearDown(controller.dispose);
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
@@ -275,7 +284,7 @@ void main() {
     expect(selectedTabs, const <int>[1]);
   });
 
-  testWidgets('Programmatic tab switching by passing in a new controller', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Programmatic tab switching by passing in a new controller', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
@@ -296,11 +305,13 @@ void main() {
 
     expect(tabsPainted, const <int>[0]);
 
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(initialIndex: 1), // Programmatically change the tab now.
+          controller: controller, // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
@@ -325,7 +336,7 @@ void main() {
     expect(selectedTabs, const <int>[0]);
   });
 
-  testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab bar respects themes', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -383,7 +394,7 @@ void main() {
     expect(tab2.text.style!.color, isSameColorAs(CupertinoColors.systemRed.darkColor));
   });
 
-  testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab contents are padded when there are view insets', (WidgetTester tester) async {
     late BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -409,7 +420,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     late BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -436,7 +447,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
   });
 
-  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
     final Widget child = Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -484,7 +495,7 @@ void main() {
     expect(initialPoint, finalPoint);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Opaque tab bar consumes bottom padding while non opaque tab bar does not',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/43581.
@@ -516,7 +527,7 @@ void main() {
     },
   );
 
-  testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
     late BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -546,7 +557,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
 
     await tester.pumpWidget(
@@ -616,9 +627,10 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
-  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adding new tabs does not crash the app', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
     final CupertinoTabController controller = CupertinoTabController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -670,13 +682,14 @@ void main() {
     expect(tabsPainted, const <int>[0, 0, 18]);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'If a controller is initially provided then the parent stops doing so for rebuilds, '
     'a new instance of CupertinoTabController should be created and used by the widget, '
     "while preserving the previous controller's tab index",
     (WidgetTester tester) async {
       final List<int> tabsPainted = <int>[];
       final CupertinoTabController oldController = CupertinoTabController();
+      addTearDown(oldController.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -734,11 +747,12 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Do not call dispose on a controller that we do not own '
     'but do remove from its listeners when done listening to it',
     (WidgetTester tester) async {
       final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
+      addTearDown(mockController.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -771,7 +785,7 @@ void main() {
     },
   );
 
-  testWidgets('The owner can dispose the old controller', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The owner can dispose the old controller', (WidgetTester tester) async {
     CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
 
     await tester.pumpWidget(
@@ -791,6 +805,7 @@ void main() {
 
     controller.dispose();
     controller = CupertinoTabController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -809,7 +824,7 @@ void main() {
     expect(find.text('Tab 3'), findsNothing);
   });
 
-  testWidgets('A controller can control more than one CupertinoTabScaffold, '
+  testWidgetsWithLeakTracking('A controller can control more than one CupertinoTabScaffold, '
     'removal of listeners does not break the controller',
     (WidgetTester tester) async {
       final List<int> tabsPainted0 = <int>[];
@@ -892,7 +907,9 @@ void main() {
       expect(controller.numOfListeners, 1);
 
       // Replacing controller works.
+      controller.dispose();
       controller = MockCupertinoTabController(initialIndex: 2);
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoPageScaffold(
@@ -922,8 +939,9 @@ void main() {
     },
   );
 
-  testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    addTearDown(controller.dispose);
 
     try {
       await tester.pumpWidget(
@@ -963,10 +981,16 @@ void main() {
     expect(message, contains('with 3 tabs'));
   });
 
-  testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+    addTearDown(controller.dispose);
 
-    final List<FocusScopeNode> scopes = List<FocusScopeNode>.filled(5, FocusScopeNode());
+    final List<FocusScopeNode> scopes = <FocusScopeNode>[];
+    for (int i = 0; i < 5; i++) {
+      final FocusScopeNode scope = FocusScopeNode();
+      addTearDown(scope.dispose);
+      scopes.add(scope);
+    }
     await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoTabScaffold(
@@ -1012,7 +1036,7 @@ void main() {
     expect(scopes.sublist(0, 3), equals(newScopes.sublist(0, 3)));
   });
 
-  testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
     void expectAssertionError(VoidCallback callback, String errorMessage) {
       try {
         callback();
@@ -1024,11 +1048,12 @@ void main() {
     expectAssertionError(() => CupertinoTabController(initialIndex: -1), '>= 0');
 
     final CupertinoTabController controller = CupertinoTabController();
+    addTearDown(controller.dispose);
 
     expectAssertionError(() => controller.index = -1, '>= 0');
   });
 
-  testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not lose state when focusing on text input', (WidgetTester tester) async {
     // Regression testing for https://github.com/flutter/flutter/issues/28457.
 
     await tester.pumpWidget(
@@ -1070,7 +1095,7 @@ void main() {
     expect(find.text("don't lose me"), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
@@ -1106,13 +1131,13 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems, isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
   });
 
-  testWidgets('state restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('state restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',
@@ -1167,7 +1192,7 @@ void main() {
     expect(find.text('Content 3'), findsNothing);
   });
 
-  testWidgets('switch from internal to external controller with state restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('switch from internal to external controller with state restoration', (WidgetTester tester) async {
     Widget buildWidget({CupertinoTabController? controller}) {
       return CupertinoApp(
         restorationScopeId: 'app',
@@ -1201,6 +1226,7 @@ void main() {
     expect(find.text('Content 3'), findsNothing);
 
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 3);
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildWidget(controller: controller));
 
     expect(find.text('Content 0'), findsNothing);
@@ -1214,6 +1240,133 @@ void main() {
     expect(find.text('Content 1'), findsNothing);
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
+  });
+
+  group('Android Predictive Back', () {
+    bool? lastFrameworkHandlesBack;
+    setUp(() async {
+      lastFrameworkHandlesBack = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+          if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
+            expect(methodCall.arguments, isA<bool>());
+            lastFrameworkHandlesBack = methodCall.arguments as bool;
+          }
+          return;
+        });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            'flutter/lifecycle',
+            const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+            (ByteData? data) {},
+          );
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    testWidgetsWithLeakTracking('System back navigation inside of tabs', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: 200),
+            ),
+            child: CupertinoTabScaffold(
+              tabBar: _buildTabBar(),
+              tabBuilder: (BuildContext context, int index) {
+                return CupertinoTabView(
+                  builder: (BuildContext context) {
+                    return CupertinoPageScaffold(
+                      navigationBar: CupertinoNavigationBar(
+                        middle: Text('Page 1 of tab ${index + 1}'),
+                      ),
+                      child: Center(
+                        child: CupertinoButton(
+                          child: const Text('Next page'),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              CupertinoPageRoute<void>(
+                                builder: (BuildContext context) {
+                                  return CupertinoPageScaffold(
+                                    navigationBar: CupertinoNavigationBar(
+                                      middle: Text('Page 2 of tab ${index + 1}'),
+                                    ),
+                                    child: Center(
+                                      child: CupertinoButton(
+                                        child: const Text('Back'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Page 1 of tab 1'), findsOneWidget);
+      expect(find.text('Page 2 of tab 1'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Next page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsNothing);
+      expect(find.text('Page 2 of tab 1'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsOneWidget);
+      expect(find.text('Page 2 of tab 1'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Next page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsNothing);
+      expect(find.text('Page 2 of tab 1'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Tab 2'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 2'), findsOneWidget);
+      expect(find.text('Page 2 of tab 2'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Tab 1'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsNothing);
+      expect(find.text('Page 2 of tab 1'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsOneWidget);
+      expect(find.text('Page 2 of tab 1'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Tab 2'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 2'), findsOneWidget);
+      expect(find.text('Page 2 of tab 2'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
+    );
   });
 }
 

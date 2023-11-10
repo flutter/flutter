@@ -244,10 +244,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 
   /// {@template flutter.widgets.RawAutocomplete.onSelected}
   /// Called when an option is selected by the user.
-  ///
-  /// Any [TextEditingController] listeners will not be called when the user
-  /// selects an option, even though the field will update with the selected
-  /// value, so use this to be informed of selection.
   /// {@endtemplate}
   final AutocompleteOnSelected<T>? onSelected;
 
@@ -444,12 +440,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
           _floatingOptionsUpdateScheduled = false;
           _updateOverlay();
-        });
+        }, debugLabel: 'RawAutoComplete.updateOverlay');
       }
       return;
     }
 
     _floatingOptions?.remove();
+    _floatingOptions?.dispose();
     if (_shouldShowOptions) {
       final OverlayEntry newFloatingOptions = OverlayEntry(
         builder: (BuildContext context) {
@@ -566,7 +563,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _focusNode.dispose();
     }
     _floatingOptions?.remove();
+    _floatingOptions?.dispose();
     _floatingOptions = null;
+    _highlightedOptionIndex.dispose();
     super.dispose();
   }
 

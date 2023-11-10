@@ -10,10 +10,10 @@
 /// the same length, and contain the same members. Returns false otherwise.
 /// Order is not compared.
 ///
-/// If the elements are maps, lists, sets, or other collections/composite objects,
-/// then the contents of those elements are not compared element by element unless their
-/// equality operators ([Object.==]) do so.
-/// For checking deep equality, consider using [DeepCollectionEquality] class.
+/// If the elements are maps, lists, sets, or other collections/composite
+/// objects, then the contents of those elements are not compared element by
+/// element unless their equality operators ([Object.==]) do so. For checking
+/// deep equality, consider using the [DeepCollectionEquality] class.
 ///
 /// See also:
 ///
@@ -43,10 +43,10 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
 /// the same length, and contain the same members in the same order. Returns
 /// false otherwise.
 ///
-/// If the elements are maps, lists, sets, or other collections/composite objects,
-/// then the contents of those elements are not compared element by element unless their
-/// equality operators ([Object.==]) do so.
-/// For checking deep equality, consider using [DeepCollectionEquality] class.
+/// If the elements are maps, lists, sets, or other collections/composite
+/// objects, then the contents of those elements are not compared element by
+/// element unless their equality operators ([Object.==]) do so. For checking
+/// deep equality, consider using the [DeepCollectionEquality] class.
 ///
 /// See also:
 ///
@@ -76,10 +76,10 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
 /// the same length, and contain the same keys associated with the same values.
 /// Returns false otherwise.
 ///
-/// If the elements are maps, lists, sets, or other collections/composite objects,
-/// then the contents of those elements are not compared element by element unless their
-/// equality operators ([Object.==]) do so.
-/// For checking deep equality, consider using [DeepCollectionEquality] class.
+/// If the elements are maps, lists, sets, or other collections/composite
+/// objects, then the contents of those elements are not compared element by
+/// element unless their equality operators ([Object.==]) do so. For checking
+/// deep equality, consider using the [DeepCollectionEquality] class.
 ///
 /// See also:
 ///
@@ -102,7 +102,6 @@ bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
   }
   return true;
 }
-
 
 /// Returns the position of `value` in the `sortedList`, if it exists.
 ///

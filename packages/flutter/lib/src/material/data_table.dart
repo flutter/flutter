@@ -36,8 +36,6 @@ typedef DataColumnSortCallback = void Function(int columnIndex, bool ascending);
 @immutable
 class DataColumn {
   /// Creates the configuration for a column of a [DataTable].
-  ///
-  /// The [label] argument must not be null.
   const DataColumn({
     required this.label,
     this.tooltip,
@@ -112,8 +110,6 @@ class DataColumn {
 @immutable
 class DataRow {
   /// Creates the configuration for a row of a [DataTable].
-  ///
-  /// The [cells] argument must not be null.
   const DataRow({
     this.key,
     this.selected = false,
@@ -126,8 +122,6 @@ class DataRow {
 
   /// Creates the configuration for a row of a [DataTable], deriving
   /// the key from a row index.
-  ///
-  /// The [cells] argument must not be null.
   DataRow.byIndex({
     int? index,
     this.selected = false,
@@ -248,8 +242,7 @@ class DataCell {
   /// Creates an object to hold the data for a cell in a [DataTable].
   ///
   /// The first argument is the widget to show for the cell, typically
-  /// a [Text] or [DropdownButton] widget; this becomes the [child]
-  /// property and must not be null.
+  /// a [Text] or [DropdownButton] widget.
   ///
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and then the [placeholder]
@@ -357,6 +350,13 @@ class DataCell {
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
 ///
+/// ## Performance considerations when wrapping [DataTable] with [SingleChildScrollView]
+///
+/// Wrapping a [DataTable] with [SingleChildScrollView] is expensive as [SingleChildScrollView]
+/// mounts and paints the entire [DataTable] even when only some rows are visible. If scrolling in
+/// one direction is necessary, then consider using a [CustomScrollView], otherwise use [PaginatedDataTable]
+/// to split the data into smaller pages.
+///
 /// {@tool dartpad}
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
 /// role. The columns are defined by three [DataColumn] objects. The table
@@ -395,7 +395,7 @@ class DataTable extends StatelessWidget {
   /// The [columns] argument must be a list of as many [DataColumn]
   /// objects as the table is to have columns, ignoring the leading
   /// checkbox column if any. The [columns] argument must have a
-  /// length greater than zero and must not be null.
+  /// length greater than zero.
   ///
   /// The [rows] argument must be a list of as many [DataRow] objects
   /// as the table is to have rows, ignoring the leading heading row
@@ -444,7 +444,7 @@ class DataTable extends StatelessWidget {
     this.clipBehavior = Clip.none,
   }) : assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
+       assert(!rows.any((DataRow row) => row.cells.length != columns.length), 'All rows must have the same number of cells as there are header cells (${columns.length})'),
        assert(dividerThickness == null || dividerThickness >= 0),
        assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
@@ -467,6 +467,8 @@ class DataTable extends StatelessWidget {
   ///
   /// When this is null, it implies that the table's sort order does
   /// not correspond to any of the columns.
+  ///
+  /// The direction of the sort is specified using [sortAscending].
   final int? sortColumnIndex;
 
   /// Whether the column mentioned in [sortColumnIndex], if any, is sorted
@@ -479,6 +481,8 @@ class DataTable extends StatelessWidget {
   /// If false, the order is descending (meaning the rows with the
   /// smallest values for the current sort column are last in the
   /// table).
+  ///
+  /// Ascending order is represented by an upwards-facing arrow.
   final bool sortAscending;
 
   /// Invoked when the user selects or unselects every row, using the
@@ -665,7 +669,7 @@ class DataTable extends StatelessWidget {
   /// The data to show in each row (excluding the row that contains
   /// the column headings).
   ///
-  /// Must be non-null, but may be empty.
+  /// The list may be empty.
   final List<DataRow> rows;
 
   /// {@template flutter.material.dataTable.dividerThickness}
@@ -701,7 +705,7 @@ class DataTable extends StatelessWidget {
   ///
   /// This can be used to clip the content within the border of the [DataTable].
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   // Set by the constructor to the index of the only Column that is
@@ -853,7 +857,7 @@ class DataTable extends StatelessWidget {
       height: effectiveHeadingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
-        style: effectiveHeadingTextStyle,
+        style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
         softWrap: false,
         duration: _sortArrowAnimationDuration,
         child: label,
@@ -922,9 +926,9 @@ class DataTable extends StatelessWidget {
       constraints: BoxConstraints(minHeight: effectiveDataRowMinHeight, maxHeight: effectiveDataRowMaxHeight),
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
-        style: effectiveDataTextStyle.copyWith(
-          color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
-        ),
+        style: DefaultTextStyle.of(context).style
+          .merge(effectiveDataTextStyle)
+          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
         child: DropdownButtonHideUnderline(child: label),
       ),
     );

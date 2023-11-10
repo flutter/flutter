@@ -23,7 +23,19 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  LeakTrackingTestConfig.warnForNonSupportedPlatforms = false;
+  LeakTracking.warnForUnsupportedPlatforms = false;
+
+  // TODO(polina-c): clean up leaks and stop ignoring them.
+  // https://github.com/flutter/flutter/issues/137311
+  LeakTesting.settings = LeakTesting
+    .settings
+    .withTrackedAll()
+    .withIgnored(
+      allNotGCed: true,
+      notDisposed: <String, int?>{
+        'OverlayEntry': null,
+      },
+    );
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);

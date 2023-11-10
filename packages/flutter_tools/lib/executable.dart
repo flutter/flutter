@@ -124,6 +124,14 @@ Future<void> main(List<String> args) async {
           windows: globals.platform.isWindows,
         );
       },
+      Terminal: () {
+        return AnsiTerminal(
+          stdio: globals.stdio,
+          platform: globals.platform,
+          now: DateTime.now(),
+          isCliAnimationEnabled: featureFlags.isCliAnimationEnabled,
+        );
+      },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
     shutdownHooks: globals.shutdownHooks,
@@ -156,7 +164,6 @@ List<FlutterCommand> generateCommands({
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: globals.buildSystem),
   AttachCommand(
     verboseHelp: verboseHelp,
-    artifacts: globals.artifacts,
     stdio: globals.stdio,
     logger: globals.logger,
     terminal: globals.terminal,
@@ -166,9 +173,11 @@ List<FlutterCommand> generateCommands({
     fileSystem: globals.fs,
   ),
   BuildCommand(
+    artifacts: globals.artifacts!,
     fileSystem: globals.fs,
     buildSystem: globals.buildSystem,
     osUtils: globals.os,
+    processUtils: globals.processUtils,
     verboseHelp: verboseHelp,
     androidSdk: globals.androidSdk,
     logger: globals.logger,

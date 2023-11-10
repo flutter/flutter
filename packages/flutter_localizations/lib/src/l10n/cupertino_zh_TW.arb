@@ -1,4 +1,9 @@
 {
+  "lookUpButtonLabel": "查詢",
+  "searchWebButtonLabel": "在網路上搜尋",
+  "shareButtonLabel": "分享…",
+  "noSpellCheckReplacementsLabel": "找不到替代文字",
+  "menuDismissLabel": "關閉選單",
   "searchTextFieldPlaceholderLabel": "搜尋",
   "tabSemanticsLabel": "第 $tabIndex 個分頁標籤，共 $tabCount 個",
   "datePickerHourSemanticsLabelOne": "$hour 點",

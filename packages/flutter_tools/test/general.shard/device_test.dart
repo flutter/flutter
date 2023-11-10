@@ -234,7 +234,6 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
       pollingDeviceDiscovery.startPolling();
-      time.elapse(const Duration(milliseconds: 4001));
 
       // First check should use the default polling timeout
       // to quickly populate the list.
@@ -815,6 +814,7 @@ void main() {
         traceAllowlist: 'foo',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
@@ -847,6 +847,7 @@ void main() {
           '--verify-entry-points',
           '--enable-software-rendering',
           '--trace-systrace',
+          '--trace-to-file="path/to/trace.binpb"',
           '--skia-deterministic-rendering',
           '--trace-skia',
           '--trace-allowlist="foo"',
@@ -881,6 +882,26 @@ void main() {
           '--enable-dart-profiling',
           '--enable-checked-mode',
           '--verify-entry-points',
+        ].join(' '),
+      );
+    });
+
+    testWithoutContext('Get launch arguments for physical CoreDevice with debugging enabled with no launch arguments', () {
+      final DebuggingOptions original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+      );
+
+      final List<String> launchArguments = original.getIOSLaunchArguments(
+        EnvironmentType.physical,
+        null,
+        <String, Object?>{},
+        isCoreDevice: true,
+      );
+
+      expect(
+        launchArguments.join(' '),
+        <String>[
+          '--enable-dart-profiling',
         ].join(' '),
       );
     });
@@ -975,6 +996,7 @@ void main() {
         traceAllowlist: 'foo',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
@@ -1007,6 +1029,7 @@ void main() {
           '--verify-entry-points',
           '--enable-software-rendering',
           '--trace-systrace',
+          '--trace-to-file="path/to/trace.binpb"',
           '--skia-deterministic-rendering',
           '--trace-skia',
           '--trace-allowlist="foo"',

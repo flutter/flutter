@@ -1,4 +1,15 @@
 {
+  "searchWebButtonLabel": "Buscar en la Web",
+  "shareButtonLabel": "Compartir…",
+  "scanTextButtonLabel": "Analizar texto",
+  "lookUpButtonLabel": "Mirar hacia arriba",
+  "menuDismissLabel": "Descartar menú",
+  "expansionTileExpandedHint": "presiona dos veces para contraer",
+  "expansionTileCollapsedHint": "presiona dos veces para expandir",
+  "expansionTileExpandedTapHint": "Contraer",
+  "expansionTileCollapsedTapHint": "Expandir para ver más detalles",
+  "expandedHint": "Contraído",
+  "collapsedHint": "Expandido",
   "scrimLabel": "Lámina",
   "bottomSheetLabel": "Hoja inferior",
   "scrimOnTapHint": "Cerrar $modalRouteContentName",
@@ -130,7 +141,6 @@
   "reorderItemRight": "Mover hacia la derecha",
   "expandedIconTapHint": "Contraer",
   "collapsedIconTapHint": "Expandir",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
   "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
   "refreshIndicatorSemanticLabel": "Actualizar"

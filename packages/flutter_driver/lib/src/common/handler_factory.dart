@@ -187,11 +187,20 @@ mixin CommandHandlerFactory {
   Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
 
   Future<LayerTree> _getLayerTree(Command command) async {
-    return LayerTree(RendererBinding.instance.renderView.debugLayer?.toStringDeep());
+    final String trees = <String>[
+      for (final RenderView renderView in RendererBinding.instance.renderViews)
+        if (renderView.debugLayer != null)
+          renderView.debugLayer!.toStringDeep(),
+    ].join('\n\n');
+    return LayerTree(trees.isNotEmpty ? trees : null);
   }
 
   Future<RenderTree> _getRenderTree(Command command) async {
-    return RenderTree(RendererBinding.instance.renderView.toStringDeep());
+    final String trees = <String>[
+      for (final RenderView renderView in RendererBinding.instance.renderViews)
+        renderView.toStringDeep(),
+    ].join('\n\n');
+    return RenderTree(trees.isNotEmpty ? trees : null);
   }
 
   Future<Result> _enterText(Command command) async {

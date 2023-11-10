@@ -36,7 +36,7 @@ enum ProfileType {
 /// Summarizes [TimelineEvents]s corresponding to [kProfilingEvents] category.
 ///
 /// A sample event (some fields have been omitted for brevity):
-/// ```
+/// ```json
 ///     {
 ///      "category": "embedder",
 ///      "name": "CpuUsage",
