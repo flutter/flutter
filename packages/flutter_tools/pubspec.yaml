@@ -50,7 +50,6 @@ dependencies:
   async: 2.11.0
   unified_analytics: 5.3.0
 
-
   cli_config: 0.1.2
   graphs: 2.3.1
   native_assets_builder: 0.3.0
