@@ -1496,7 +1496,7 @@ class _SelectableFragment
     // rects who have not been transformed to fragment coordinates.
     final List<Rect> rawRects = paragraph
         .getBoxesForSelection(currentSelection)
-        .map((e) => e.toRect())
+        .map((ui.TextBox e) => e.toRect())
         .toList();
 
     final Matrix4 paragraphToFragmentTransform = getTransformToParagraph();

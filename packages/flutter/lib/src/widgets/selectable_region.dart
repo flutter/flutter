@@ -1983,8 +1983,8 @@ abstract class MultiSelectableSelectionContainerDelegate
       globalEnd += contentLength;
 
       // Calculate the intersection of the selectable's range with the selection range.
-      int intersectStart = max(globalStart, start);
-      int intersectEnd = min(globalEnd, end);
+      final int intersectStart = max(globalStart, start);
+      final int intersectEnd = min(globalEnd, end);
 
       // Skip this selectable if there is no intersection.
       if (intersectEnd <= intersectStart) {
@@ -2018,7 +2018,7 @@ abstract class MultiSelectableSelectionContainerDelegate
     }
 
 // Sort the rectangles by their 'top' property before coalescing.
-    unCoallesedRects.sort((a, b) => a.top.compareTo(b.top));
+    unCoallesedRects.sort((Rect a, Rect b) => a.top.compareTo(b.top));
 
 // Coalesce adjacent rectangles.
     final List<Rect> coalescedRects = <Rect>[];
