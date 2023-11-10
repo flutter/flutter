@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
-import groovy.json.JsonSlurper
 import groovy.json.JsonGenerator
 import groovy.xml.QName
 import java.nio.file.Paths
@@ -28,6 +27,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
+import NativePluginLoader
 
 /**
  * For apps only. Provides the flutter extension used in app/build.gradle.
@@ -623,26 +623,10 @@ class FlutterPlugin implements Plugin<Project> {
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        Map meta = getDependenciesMetadata()
         List androidPlugins = []
-        if (meta == null) {
-            return androidPlugins
-        }
-        assert meta.plugins instanceof Map
-        assert meta.plugins.android instanceof List
-
-        // This logic must be kept in sync with the logic in app_plugin_loader.groovy.
-        meta.plugins.android.each { androidPlugin ->
-            assert androidPlugin.name instanceof String
-            assert androidPlugin.path instanceof String
-            // Skip plugins that have no native build (such as a Dart-only implementation
-            // of a federated plugin).
-            def needsBuild = androidPlugin.containsKey('native_build') ? androidPlugin['native_build'] : true
-            if (!needsBuild) {
-                return
-            }
+        NativePluginLoader.forEachNativePlugin(getFlutterSourceDirectory(), { androidPlugin ->
             androidPlugins.add(androidPlugin)
-        }
+        })
         return androidPlugins
     }
 
@@ -677,25 +661,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
         assert meta.dependencyGraph instanceof List
         return meta.dependencyGraph as List
-    }
-
-    private Map parsedFlutterPluginsDependencies
-
-    /**
-     * Parses <project-src>/.flutter-plugins-dependencies
-     */
-    private Map getDependenciesMetadata() {
-        if (parsedFlutterPluginsDependencies) {
-            return parsedFlutterPluginsDependencies
-        }
-        File pluginsDependencyFile = new File(getFlutterSourceDirectory(), '.flutter-plugins-dependencies')
-        if (pluginsDependencyFile.exists()) {
-            def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
-            assert object instanceof Map
-            parsedFlutterPluginsDependencies = object
-            return object
-        }
-        return null
     }
 
     private static String toCamelCase(List<String> parts) {
