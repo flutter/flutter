@@ -8,6 +8,7 @@
 
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/fill_path_geometry.h"
+#include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
@@ -111,6 +112,13 @@ std::unique_ptr<Geometry> Geometry::MakeCover() {
 
 std::unique_ptr<Geometry> Geometry::MakeRect(Rect rect) {
   return std::make_unique<RectGeometry>(rect);
+}
+
+std::unique_ptr<Geometry> Geometry::MakeLine(Point p0,
+                                             Point p1,
+                                             Scalar width,
+                                             Cap cap) {
+  return std::make_unique<LineGeometry>(p0, p1, width, cap);
 }
 
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {

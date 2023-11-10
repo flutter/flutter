@@ -103,6 +103,8 @@ class Canvas {
 
   void DrawPaint(const Paint& paint);
 
+  void DrawLine(const Point& p0, const Point& p1, const Paint& paint);
+
   void DrawRect(Rect rect, const Paint& paint);
 
   void DrawRRect(Rect rect, Point corner_radii, const Paint& paint);
