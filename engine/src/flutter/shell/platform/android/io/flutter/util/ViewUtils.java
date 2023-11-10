@@ -7,6 +7,7 @@ package io.flutter.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
@@ -67,7 +68,10 @@ public final class ViewUtils {
    * @return the view id.
    */
   public static int generateViewId(int fallbackId) {
-    return View.generateViewId();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+      return View.generateViewId();
+    }
+    return fallbackId;
   }
 
   /**
