@@ -64,7 +64,6 @@ export 'engine/font_fallback_data.dart';
 export 'engine/font_fallbacks.dart';
 export 'engine/fonts.dart';
 export 'engine/frame_reference.dart';
-export 'engine/global_styles.dart';
 export 'engine/html/backdrop_filter.dart';
 export 'engine/html/bitmap_canvas.dart';
 export 'engine/html/canvas.dart';
@@ -192,4 +191,5 @@ export 'engine/view_embedder/embedding_strategy/custom_element_embedding_strateg
 export 'engine/view_embedder/embedding_strategy/embedding_strategy.dart';
 export 'engine/view_embedder/embedding_strategy/full_page_embedding_strategy.dart';
 export 'engine/view_embedder/hot_restart_cache_handler.dart';
+export 'engine/view_embedder/style_manager.dart';
 export 'engine/window.dart';

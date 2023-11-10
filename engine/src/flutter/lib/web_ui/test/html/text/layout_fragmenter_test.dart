@@ -10,8 +10,8 @@ import 'package:ui/ui.dart';
 import '../paragraph/helper.dart';
 
 final EngineTextStyle defaultStyle = EngineTextStyle.only(
-  fontFamily: FlutterViewEmbedder.defaultFontFamily,
-  fontSize: FlutterViewEmbedder.defaultFontSize,
+  fontFamily: StyleManager.defaultFontFamily,
+  fontSize: StyleManager.defaultFontSize,
 );
 final EngineTextStyle style1 = defaultStyle.copyWith(fontSize: 20);
 final EngineTextStyle style2 = defaultStyle.copyWith(color: blue);

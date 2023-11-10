@@ -9,8 +9,8 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../browser_detection.dart';
 import '../dom.dart';
-import '../embedder.dart';
 import '../util.dart';
+import '../view_embedder/style_manager.dart';
 import 'canvas_paragraph.dart';
 import 'layout_fragmenter.dart';
 import 'ruler.dart';
@@ -469,7 +469,7 @@ class EngineTextStyle implements ui.TextStyle {
 
   static final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
   String get effectiveFontFamily {
-    final String fontFamily = this.fontFamily.isEmpty ? FlutterViewEmbedder.defaultFontFamily : this.fontFamily;
+    final String fontFamily = this.fontFamily.isEmpty ? StyleManager.defaultFontFamily : this.fontFamily;
     // In the flutter tester environment, we use predictable-size test fonts.
     // This makes widget tests predictable and less flaky.
     String result = fontFamily;
@@ -501,7 +501,7 @@ class EngineTextStyle implements ui.TextStyle {
   TextHeightStyle _createHeightStyle() {
     return TextHeightStyle(
       fontFamily: effectiveFontFamily,
-      fontSize: fontSize ?? FlutterViewEmbedder.defaultFontSize,
+      fontSize: fontSize ?? StyleManager.defaultFontSize,
       height: height,
       // TODO(mdebbar): Pass the actual value when font features become supported
       //                https://github.com/flutter/flutter/issues/64595
@@ -738,12 +738,18 @@ class ParagraphPlaceholder {
   final ui.TextBaseline baseline;
 }
 
-/// Converts [fontWeight] to its CSS equivalent value.
-String? fontWeightToCss(ui.FontWeight? fontWeight) {
-  if (fontWeight == null) {
-    return null;
+extension FontStyleExtension on ui.FontStyle {
+  /// Converts a [ui.FontStyle] value to its CSS equivalent.
+  String toCssString() {
+    return this == ui.FontStyle.normal ? 'normal' : 'italic';
   }
-  return fontWeightIndexToCss(fontWeightIndex: fontWeight.index);
+}
+
+extension FontWeightExtension on ui.FontWeight {
+  /// Converts a [ui.FontWeight] value to its CSS equivalent.
+  String toCssString() {
+    return fontWeightIndexToCss(fontWeightIndex: index);
+  }
 }
 
 String fontWeightIndexToCss({int fontWeightIndex = 3}) {
@@ -813,11 +819,10 @@ void applyTextStyleToElement({
     cssStyle.fontSize = '${fontSize.floor()}px';
   }
   if (style.fontWeight != null) {
-    cssStyle.fontWeight = fontWeightToCss(style.fontWeight)!;
+    cssStyle.fontWeight = style.fontWeight!.toCssString();
   }
   if (style.fontStyle != null) {
-    cssStyle.fontStyle =
-        style.fontStyle == ui.FontStyle.normal ? 'normal' : 'italic';
+    cssStyle.fontStyle = style.fontStyle!.toCssString();
   }
   // For test environment use effectiveFontFamily since we need to
   // consistently use the correct test font.
