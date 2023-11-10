@@ -684,6 +684,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               textColor: _headerColor.value,
               child: ListTile(
                 onTap: _handleTap,
+                dense: widget.dense,
+                visualDensity: widget.visualDensity,
+                enableFeedback: widget.enableFeedback,
                 contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
                 leading: widget.leading ?? _buildLeadingIcon(context),
                 title: widget.title,
