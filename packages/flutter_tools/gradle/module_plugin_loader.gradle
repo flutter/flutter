@@ -8,8 +8,7 @@ import NativePluginLoader
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
-def object = null;
-String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
+def object = null
 NativePluginLoader.forEachNativePlugin(moduleProjectRoot, { androidPlugin ->
     def pluginDirectory = new File(androidPlugin.path, 'android')
     assert pluginDirectory.exists()
@@ -17,6 +16,7 @@ NativePluginLoader.forEachNativePlugin(moduleProjectRoot, { androidPlugin ->
     project(":${androidPlugin.name}").projectDir = pluginDirectory
 })
 
+String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
         p.subprojects { subproject ->
