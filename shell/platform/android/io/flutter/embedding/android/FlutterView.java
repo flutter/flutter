@@ -290,6 +290,7 @@ public class FlutterView extends FrameLayout
    * <p>{@code FlutterView} requires an {@code Activity} instead of a generic {@code Context} to be
    * compatible with {@link PlatformViewsController}.
    */
+  @TargetApi(19)
   public FlutterView(@NonNull Context context, @NonNull FlutterImageView flutterImageView) {
     this(context, null, flutterImageView);
   }
@@ -356,6 +357,7 @@ public class FlutterView extends FrameLayout
     init();
   }
 
+  @TargetApi(19)
   private FlutterView(
       @NonNull Context context,
       @Nullable AttributeSet attrs,
