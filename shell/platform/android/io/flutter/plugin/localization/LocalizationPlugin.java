@@ -7,7 +7,6 @@ package io.flutter.plugin.localization;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import androidx.annotation.NonNull;
@@ -40,18 +39,9 @@ public class LocalizationPlugin {
             Locale locale = localeFromString(localeString);
 
             // setLocale and createConfigurationContext is only available on API >= 17
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-              Configuration config = new Configuration(context.getResources().getConfiguration());
-              config.setLocale(locale);
-              localContext = context.createConfigurationContext(config);
-            } else {
-              // In API < 17, we have to update the locale in Configuration.
-              Resources resources = context.getResources();
-              Configuration config = resources.getConfiguration();
-              savedLocale = config.locale;
-              config.locale = locale;
-              resources.updateConfiguration(config, null);
-            }
+            Configuration config = new Configuration(context.getResources().getConfiguration());
+            config.setLocale(locale);
+            localContext = context.createConfigurationContext(config);
           }
 
           String packageName = context.getPackageName();
@@ -59,14 +49,6 @@ public class LocalizationPlugin {
           if (resId != 0) {
             // 0 means the resource is not found.
             stringToReturn = localContext.getResources().getString(resId);
-          }
-
-          // In API < 17, we had to restore the original locale after using.
-          if (localeString != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            Resources resources = context.getResources();
-            Configuration config = resources.getConfiguration();
-            config.locale = savedLocale;
-            resources.updateConfiguration(config, null);
           }
 
           return stringToReturn;

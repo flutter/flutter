@@ -64,7 +64,6 @@ import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
-@TargetApi(19)
 public class AccessibilityBridgeTest {
 
   @Test
