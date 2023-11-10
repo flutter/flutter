@@ -8,8 +8,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
-import 'test_data/basic_project.dart';
-import 'test_data/legacy_settings_gradle_project.dart';
+import 'test_data/plugin_each_settings_gradle_project.dart';
+import 'test_data/plugin_project.dart';
 import 'test_data/project.dart';
 import 'test_utils.dart';
 
@@ -97,7 +97,7 @@ flutter:
   }
 
   test('skip plugin if it does not support the Android platform', () async {
-    final Project project = UnsupportedAndroidPluginProject();
+    final Project project = PluginUnsupportedAndroidProject();
     final ProcessResult buildApkResult = await testPlugin(project: project);
     expect(buildApkResult.exitCode, equals(0),
         reason:
@@ -108,7 +108,7 @@ flutter:
   test(
       'skip plugin if it does not support the Android platform with legacy settings.gradle',
       () async {
-    final Project project = LegacyUnsupportedAndroidPluginProject();
+    final Project project = PluginEachUnsupportedAndroidProject();
     final ProcessResult buildApkResult = await testPlugin(project: project);
     expect(
       buildApkResult.stderr,
@@ -121,7 +121,7 @@ flutter:
   });
 }
 
-class UnsupportedAndroidPluginProject extends BasicProject {
+class PluginUnsupportedAndroidProject extends PluginProject {
   @override
   String get pubspec => r'''
 name: test_plugin_example
@@ -137,8 +137,8 @@ dependencies:
 }
 
 // This class can be removed, when https://github.com/flutter/flutter/issues/54566 is resolved.
-class LegacyUnsupportedAndroidPluginProject
-    extends LegacySettingsGradleProject {
+class PluginEachUnsupportedAndroidProject
+    extends PluginEachSettingsGradleProject {
   @override
   String get pubspec => r'''
 name: test_plugin_example
