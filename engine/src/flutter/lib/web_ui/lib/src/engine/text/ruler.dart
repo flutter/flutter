@@ -7,8 +7,8 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../browser_detection.dart';
 import '../dom.dart';
-import '../embedder.dart';
 import '../util.dart';
+import '../view_embedder/style_manager.dart';
 import 'measurement.dart';
 import 'paragraph.dart';
 
@@ -18,33 +18,12 @@ String buildCssFontString({
   required double? fontSize,
   required String fontFamily,
 }) {
-  final StringBuffer result = StringBuffer();
+  final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
+  final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
+  final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
+  final String cssFontFamily = canonicalizeFontFamily(fontFamily)!;
 
-  // Font style
-  if (fontStyle != null) {
-    result.write(fontStyle == ui.FontStyle.normal ? 'normal' : 'italic');
-  } else {
-    result.write(FlutterViewEmbedder.defaultFontStyle);
-  }
-  result.write(' ');
-
-  // Font weight.
-  if (fontWeight != null) {
-    result.write(fontWeightToCss(fontWeight));
-  } else {
-    result.write(FlutterViewEmbedder.defaultFontWeight);
-  }
-  result.write(' ');
-
-  if (fontSize != null) {
-    result.write(fontSize.floor());
-  } else {
-    result.write(FlutterViewEmbedder.defaultFontSize);
-  }
-  result.write('px ');
-  result.write(canonicalizeFontFamily(fontFamily));
-
-  return result.toString();
+  return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
 }
 
 /// Contains all styles that have an effect on the height of text.

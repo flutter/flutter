@@ -38,6 +38,21 @@ import '../embedder.dart';
 class DomManager {
   DomManager.fromFlutterViewEmbedderDEPRECATED(this._embedder);
 
+  /// The tag name for the Flutter View root element.
+  static const String flutterViewTagName = 'flutter-view';
+
+  /// The tag name for the glass-pane.
+  static const String glassPaneTagName = 'flt-glass-pane';
+
+  /// The tag name for the scene host.
+  static const String sceneHostTagName = 'flt-scene-host';
+
+  /// The tag name for the semantics host.
+  static const String semanticsHostTagName = 'flt-semantics-host';
+
+  /// The tag name for the accessibility announcements host.
+  static const String announcementsHostTagName = 'flt-announcement-host';
+
   final FlutterViewEmbedder _embedder;
 
   /// The root DOM element for the entire Flutter View.

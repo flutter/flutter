@@ -5,9 +5,9 @@
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
-import '../embedder.dart';
 import '../html/bitmap_canvas.dart';
 import '../profiler.dart';
+import '../view_embedder/style_manager.dart';
 import 'layout_fragmenter.dart';
 import 'layout_service.dart';
 import 'paint_service.dart';
@@ -539,7 +539,7 @@ class RootStyleNode extends StyleNode {
   ui.TextBaseline? get _textBaseline => null;
 
   @override
-  String get _fontFamily => paragraphStyle.fontFamily ?? FlutterViewEmbedder.defaultFontFamily;
+  String get _fontFamily => paragraphStyle.fontFamily ?? StyleManager.defaultFontFamily;
 
   @override
   List<String>? get _fontFamilyFallback => null;
@@ -551,7 +551,7 @@ class RootStyleNode extends StyleNode {
   List<ui.FontVariation>? get _fontVariations => null;
 
   @override
-  double get _fontSize => paragraphStyle.fontSize ?? FlutterViewEmbedder.defaultFontSize;
+  double get _fontSize => paragraphStyle.fontSize ?? StyleManager.defaultFontSize;
 
   @override
   double? get _letterSpacing => null;

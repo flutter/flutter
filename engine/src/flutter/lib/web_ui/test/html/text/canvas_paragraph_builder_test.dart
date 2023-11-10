@@ -529,8 +529,8 @@ String spanStyle({
 }
 
 TextStyle styleWithDefaults({
-  String fontFamily = FlutterViewEmbedder.defaultFontFamily,
-  double fontSize = FlutterViewEmbedder.defaultFontSize,
+  String fontFamily = StyleManager.defaultFontFamily,
+  double fontSize = StyleManager.defaultFontSize,
   FontWeight? fontWeight,
   FontStyle? fontStyle,
   double? height,

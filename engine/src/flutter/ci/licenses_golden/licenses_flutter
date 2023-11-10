@@ -3838,7 +3838,6 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/font_fallback_data.dart + ../
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/font_fallbacks.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/fonts.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/global_styles.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/html/backdrop_filter.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/html/bitmap_canvas.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/html/canvas.dart + ../../../flutter/LICENSE
@@ -4008,6 +4007,7 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/embedding_strat
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/embedding_strategy/embedding_strategy.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/embedding_strategy/full_page_embedding_strategy.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/hot_restart_cache_handler.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/style_manager.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/window.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/text.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/tile_mode.dart + ../../../flutter/LICENSE
@@ -6600,7 +6600,6 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_fallback_data.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_fallbacks.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/global_styles.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/backdrop_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/bitmap_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/canvas.dart
@@ -6770,6 +6769,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/embedding_strateg
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/embedding_strategy/embedding_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/embedding_strategy/full_page_embedding_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/hot_restart_cache_handler.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/view_embedder/style_manager.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/window.dart
 FILE: ../../../flutter/lib/web_ui/lib/text.dart
 FILE: ../../../flutter/lib/web_ui/lib/tile_mode.dart
