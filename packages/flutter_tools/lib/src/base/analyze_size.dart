@@ -92,7 +92,7 @@ class SizeAnalyzer {
 
     assert(_appFilename != null);
     CodeSizeEvent(type, flutterUsage: _flutterUsage).send();
-    _analytics.send(Event.codeSizeAnalysis(kind: type));
+    _analytics.send(Event.codeSizeAnalysis(platform: type));
     return apkAnalysisJson;
   }
 
@@ -146,7 +146,7 @@ class SizeAnalyzer {
       precompilerTrace: json.decode(precompilerTrace.readAsStringSync()) as Map<String, Object?>? ?? <String, Object?>{},
     );
     CodeSizeEvent(kind, flutterUsage: _flutterUsage).send();
-    _analytics.send(Event.codeSizeAnalysis(kind: kind));
+    _analytics.send(Event.codeSizeAnalysis(platform: kind));
     return apkAnalysisJson;
   }
 

@@ -544,7 +544,7 @@ void main() {
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
     expect(fakeAnalytics.sentEvents, contains(
-      Event.codeSizeAnalysis(kind: 'ios')
+      Event.codeSizeAnalysis(platform: 'ios')
     ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
