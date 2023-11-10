@@ -185,6 +185,7 @@ class Tooltip extends StatefulWidget {
     this.textAlign,
     this.waitDuration,
     this.showDuration,
+    this.enableTapToDismiss = true,
     this.triggerMode,
     this.enableFeedback,
     this.onTriggered,
@@ -306,6 +307,11 @@ class Tooltip extends StatefulWidget {
   /// Defaults to 1.5 seconds for long press and tap released or 0.1 seconds
   /// for mouse pointer exits the widget.
   final Duration? showDuration;
+
+  /// Whether the tooltip can be dismissed by tap.
+  ///
+  /// The default value is true.
+  final bool enableTapToDismiss;
 
   /// The [TooltipTriggerMode] that will show the tooltip.
   ///
@@ -581,6 +587,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // The primary pointer is not part of a "trigger" gesture so the tooltip
   // should be dismissed.
   void _handleTapToDismiss() {
+    if (!widget.enableTapToDismiss) {
+      return ;
+    }
     _scheduleDismissTooltip(withDelay: Duration.zero);
     _activeHoveringPointerDevices.clear();
   }

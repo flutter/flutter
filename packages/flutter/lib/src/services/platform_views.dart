@@ -653,11 +653,30 @@ class _AndroidMotionEventConverter {
       yPrecision: 1.0,
       deviceId: 0,
       edgeFlags: 0,
-      source: 0,
+      source: _AndroidMotionEventConverter.sourceFor(event),
       flags: 0,
       motionEventId: event.embedderId,
     );
   }
+
+  static int sourceFor(PointerEvent event) {
+    int source = AndroidViewController.kInputDeviceSourceUnknown;
+    switch (event.kind) {
+      case PointerDeviceKind.touch:
+        source = AndroidViewController.kInputDeviceSourceTouchScreen;
+      case PointerDeviceKind.trackpad:
+        source = AndroidViewController.kInputDeviceSourceTouchPad;
+      case PointerDeviceKind.mouse:
+        source = AndroidViewController.kInputDeviceSourceMouse;
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+        source = AndroidViewController.kInputDeviceSourceStylus;
+      case PointerDeviceKind.unknown:
+        source = AndroidViewController.kInputDeviceSourceUnknown;
+    }
+    return source;
+  }
+
 
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
     int toolType = AndroidPointerProperties.kToolTypeUnknown;
@@ -738,6 +757,21 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Android's [View.LAYOUT_DIRECTION_RTL](https://developer.android.com/reference/android/view/View.html#LAYOUT_DIRECTION_RTL) value.
   static const int kAndroidLayoutDirectionRtl = 1;
+
+  /// Android's [InputDevice.SOURCE_UNKNOWN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_UNKNOWN)
+  static const int kInputDeviceSourceUnknown = 0;
+
+  /// Android's [InputDevice.SOURCE_TOUCHSCREEN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHSCREEN)
+  static const int kInputDeviceSourceTouchScreen = 4098;
+
+  /// Android's [InputDevice.SOURCE_MOUSE](https://developer.android.com/reference/android/view/InputDevice#SOURCE_MOUSE)
+  static const int kInputDeviceSourceMouse = 8194;
+
+  /// Android's [InputDevice.SOURCE_STYLUS](https://developer.android.com/reference/android/view/InputDevice#SOURCE_STYLUS)
+  static const int kInputDeviceSourceStylus = 16386;
+
+  /// Android's [InputDevice.SOURCE_TOUCHPAD](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHPAD)
+  static const int kInputDeviceSourceTouchPad = 1048584;
 
   /// The unique identifier of the Android view controlled by this controller.
   @override
