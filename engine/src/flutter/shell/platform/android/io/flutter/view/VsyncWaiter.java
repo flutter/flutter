@@ -4,7 +4,6 @@
 
 package io.flutter.view;
 
-import android.annotation.TargetApi;
 import android.hardware.display.DisplayManager;
 import android.view.Choreographer;
 import android.view.Display;
@@ -14,7 +13,6 @@ import io.flutter.embedding.engine.FlutterJNI;
 
 // TODO(mattcarroll): add javadoc.
 public class VsyncWaiter {
-  @TargetApi(17)
   class DisplayListener implements DisplayManager.DisplayListener {
     DisplayListener(DisplayManager displayManager) {
       this.displayManager = displayManager;
@@ -59,7 +57,6 @@ public class VsyncWaiter {
     return instance;
   }
 
-  @TargetApi(17)
   @NonNull
   public static VsyncWaiter getInstance(
       @NonNull DisplayManager displayManager, @NonNull FlutterJNI flutterJNI) {
