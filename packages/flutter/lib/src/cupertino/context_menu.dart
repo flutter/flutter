@@ -685,6 +685,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
   @override
   void dispose() {
+    _tapGestureRecognizer.dispose();
     _openController.dispose();
     super.dispose();
   }

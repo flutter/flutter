@@ -3650,6 +3650,7 @@ void main() {
     double value = 0.0;
     final ValueNotifier<bool> shouldShowSliderListenable =
         ValueNotifier<bool>(true);
+    addTearDown(shouldShowSliderListenable.dispose);
 
     await tester.pumpWidget(
       MaterialApp(

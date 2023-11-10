@@ -1568,6 +1568,7 @@ void main() {
             ),
           );
         },
+        buildDefaultDragHandles: false,
         itemCount: items.length,
         onReorder: handleReorder,
       ),
@@ -1634,6 +1635,7 @@ void main() {
             ),
           );
         },
+        buildDefaultDragHandles: false,
         itemCount: items.length,
         onReorder: handleReorder,
         onReorderStart: (int index) {
