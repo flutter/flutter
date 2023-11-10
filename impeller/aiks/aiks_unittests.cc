@@ -1978,6 +1978,70 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, DrawLinesRenderCorrectly) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  Paint paint;
+  paint.color = Color::Blue();
+  paint.stroke_width = 10;
+
+  auto draw = [&canvas](Paint& paint) {
+    for (auto cap : {Cap::kButt, Cap::kSquare, Cap::kRound}) {
+      paint.stroke_cap = cap;
+      Point origin = {100, 100};
+      Point p0 = {50, 0};
+      Point p1 = {150, 0};
+      canvas.DrawLine({150, 100}, {250, 100}, paint);
+      for (int d = 15; d < 90; d += 15) {
+        Matrix m = Matrix::MakeRotationZ(Degrees(d));
+        canvas.DrawLine(origin + m * p0, origin + m * p1, paint);
+      }
+      canvas.DrawLine({100, 150}, {100, 250}, paint);
+      canvas.DrawCircle({origin}, 35, paint);
+
+      canvas.DrawLine({250, 250}, {250, 250}, paint);
+
+      canvas.Translate({250, 0});
+    }
+    canvas.Translate({-750, 250});
+  };
+
+  std::vector<Color> colors = {
+      Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+      Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+      Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+      Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+      Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+  std::vector<Scalar> stops = {
+      0.0,
+      (1.0 / 6.0) * 1,
+      (1.0 / 6.0) * 2,
+      (1.0 / 6.0) * 3,
+      (1.0 / 6.0) * 4,
+      (1.0 / 6.0) * 5,
+      1.0,
+  };
+
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  draw(paint);
+
+  paint.color_source = ColorSource::MakeRadialGradient(
+      {100, 100}, 200, std::move(colors), std::move(stops),
+      Entity::TileMode::kMirror, {});
+  draw(paint);
+
+  paint.color_source = ColorSource::MakeImage(
+      texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {},
+      Matrix::MakeTranslation({-150, 75}));
+  draw(paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
