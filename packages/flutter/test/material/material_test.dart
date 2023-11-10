@@ -1120,6 +1120,31 @@ void main() {
     // Force a repaint again. This time, it gets repainted because it is onstage.
     materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(layer2, Rect.largest), Offset.zero);
     expect(tracker.paintCount, 2);
+
+    tracker.dispose();
+  });
+
+  testWidgetsWithLeakTracking('$InkFeature dispatches memory events', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Material(
+        child: SizedBox(width: 20, height: 20),
+      ),
+    );
+
+    final Element element = tester.element(find.byType(SizedBox));
+    final MaterialInkController controller = Material.of(element);
+    final RenderBox referenceBox = element.findRenderObject()! as RenderBox;
+
+    await expectLater(
+      await memoryEvents(
+        () => _InkFeature(
+          controller: controller,
+          referenceBox: referenceBox,
+        ).dispose(),
+        _InkFeature,
+      ),
+      areCreateAndDispose,
+    );
   });
 
   group('LookupBoundary', () {
@@ -1226,4 +1251,16 @@ class TrackPaintInkFeature extends InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     paintCount += 1;
   }
+}
+
+class _InkFeature extends InkFeature {
+  _InkFeature({
+    required super.controller,
+    required super.referenceBox,
+  }) {
+    controller.addInkFeature(this);
+  }
+
+  @override
+  void paintFeature(Canvas canvas, Matrix4 transform) {}
 }
