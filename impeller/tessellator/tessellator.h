@@ -30,7 +30,8 @@ enum class WindingOrder {
 /// @brief      A utility that generates triangles of the specified fill type
 ///             given a polyline. This happens on the CPU.
 ///
-/// @bug        This should just be called a triangulator.
+///             This object is not thread safe, and its methods must not be
+///             called from multiple threads.
 ///
 class Tessellator {
  public:
@@ -58,20 +59,41 @@ class Tessellator {
                                              size_t indices_count)>;
 
   //----------------------------------------------------------------------------
-  /// @brief      Generates filled triangles from the polyline. A callback is
+  /// @brief      Generates filled triangles from the path. A callback is
   ///             invoked once for the entire tessellation.
   ///
-  /// @param[in]  fill_type The fill rule to use when filling.
-  /// @param[in]  polyline  The polyline
+  /// @param[in]  path  The path to tessellate.
+  /// @param[in]  tolerance  The tolerance value for conversion of the path to
+  ///                        a polyline. This value is often derived from the
+  ///                        Matrix::GetMaxBasisLength of the CTM applied to the
+  ///                        path for rendering.
   /// @param[in]  callback  The callback, return false to indicate failure.
   ///
   /// @return The result status of the tessellation.
   ///
-  Tessellator::Result Tessellate(FillType fill_type,
-                                 const Path::Polyline& polyline,
-                                 const BuilderCallback& callback) const;
+  Tessellator::Result Tessellate(const Path& path,
+                                 Scalar tolerance,
+                                 const BuilderCallback& callback);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Given a convex path, create a triangle fan structure.
+  ///
+  /// @param[in]  path  The path to tessellate.
+  /// @param[in]  tolerance  The tolerance value for conversion of the path to
+  ///                        a polyline. This value is often derived from the
+  ///                        Matrix::GetMaxBasisLength of the CTM applied to the
+  ///                        path for rendering.
+  ///
+  /// @return A point vector containing the vertices and a vector of indices
+  ///         into the point vector.
+  ///
+  std::pair<std::vector<Point>, std::vector<uint16_t>> TessellateConvex(
+      const Path& path,
+      Scalar tolerance);
 
  private:
+  /// Used for polyline generation.
+  std::unique_ptr<std::vector<Point>> point_buffer_;
   CTessellator c_tessellator_;
 
   Tessellator(const Tessellator&) = delete;

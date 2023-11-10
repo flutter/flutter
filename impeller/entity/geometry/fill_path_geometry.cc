@@ -22,8 +22,8 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
 
   if (path_.GetFillType() == FillType::kNonZero &&  //
       path_.IsConvex()) {
-    auto [points, indices] = TessellateConvex(
-        path_.CreatePolyline(entity.GetTransformation().GetMaxBasisLength()));
+    auto [points, indices] = renderer.GetTessellator()->TessellateConvex(
+        path_, entity.GetTransformation().GetMaxBasisLength());
 
     vertex_buffer.vertex_buffer = host_buffer.Emplace(
         points.data(), points.size() * sizeof(Point), alignof(Point));
@@ -42,8 +42,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
   }
 
   auto tesselation_result = renderer.GetTessellator()->Tessellate(
-      path_.GetFillType(),
-      path_.CreatePolyline(entity.GetTransformation().GetMaxBasisLength()),
+      path_, entity.GetTransformation().GetMaxBasisLength(),
       [&vertex_buffer, &host_buffer](
           const float* vertices, size_t vertices_count, const uint16_t* indices,
           size_t indices_count) {
@@ -87,8 +86,8 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
 
   if (path_.GetFillType() == FillType::kNonZero &&  //
       path_.IsConvex()) {
-    auto [points, indices] = TessellateConvex(
-        path_.CreatePolyline(entity.GetTransformation().GetMaxBasisLength()));
+    auto [points, indices] = renderer.GetTessellator()->TessellateConvex(
+        path_, entity.GetTransformation().GetMaxBasisLength());
 
     VertexBufferBuilder<VS::PerVertexData> vertex_builder;
     vertex_builder.Reserve(points.size());
@@ -115,8 +114,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   auto tesselation_result = renderer.GetTessellator()->Tessellate(
-      path_.GetFillType(),
-      path_.CreatePolyline(entity.GetTransformation().GetMaxBasisLength()),
+      path_, entity.GetTransformation().GetMaxBasisLength(),
       [&vertex_builder, &uv_transform](
           const float* vertices, size_t vertices_count, const uint16_t* indices,
           size_t indices_count) {
