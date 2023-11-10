@@ -410,7 +410,7 @@ class FlutterPlugin implements Plugin<Project> {
     //      2) includes the plugin successfully as a valid android plugin directory exists, even if the surrounding
     //         flutter package does not support the android platform (see e.g. apple_maps_flutter: 1.0.1). 
     //         So as it's included successfully it expects to be added as API. This is only possible by taking all 
-    //         plugins into account, which only appear on the `dependencyGraph` and under the `plugins`.
+    //         plugins into account, which only appear on the `dependencyGraph` and in the `.flutter-plugins` file.
     //  So in summary the plugins are currently selected from the `dependencyGraph` and filtered then with the
     //  [doesSupportAndroidPlatform] method instead of just using the `plugins.android` list.
     private configureLegacyPluginProjects() {
