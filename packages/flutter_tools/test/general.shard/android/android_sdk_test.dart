@@ -359,7 +359,7 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       extension = '';
     }
-    testUsingContext('ndk executables', () {
+    testUsingContext('ndk executables $operatingSystem', () {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
@@ -384,6 +384,75 @@ void main() {
         ld = binDir.childFile('ld.lld$extension')..createSync();
       }
       // Check the last NDK version is used.
+      expect(sdk.getNdkClangPath(), clang.path);
+      expect(sdk.getNdkArPath(), ar.path);
+      expect(sdk.getNdkLdPath(), ld.path);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: operatingSystem),
+      Config: () => config,
+    });
+
+    for (final String envVar in [
+      kAndroidNdkHome,
+      kAndroidNdkPath,
+      kAndroidNdkRoot,
+    ]) {
+      final Directory ndkDir = fileSystem.systemTempDirectory
+          .createTempSync('flutter_mock_android_ndk.');
+      testUsingContext('ndk executables with $operatingSystem $envVar', () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final Directory binDir = ndkDir
+            .childDirectory('toolchains')
+            .childDirectory('llvm')
+            .childDirectory('prebuilt')
+            .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+            .childDirectory('bin')
+          ..createSync(recursive: true);
+        final File clang = binDir.childFile('clang$extension')..createSync();
+        final File ar = binDir.childFile('llvm-ar$extension')..createSync();
+        final File ld = binDir.childFile('ld.lld$extension')..createSync();
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        expect(sdk.getNdkClangPath(), clang.path);
+        expect(sdk.getNdkArPath(), ar.path);
+        expect(sdk.getNdkLdPath(), ld.path);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(
+              operatingSystem: operatingSystem,
+              environment: <String, String>{
+                envVar: ndkDir.path,
+              },
+            ),
+        Config: () => config,
+      });
+    }
+
+    testUsingContext('ndk executables with config override $operatingSystem',
+        () {
+      final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+      final Directory ndkDir = fileSystem.systemTempDirectory
+          .createTempSync('flutter_mock_android_ndk.');
+      config.setValue('android-sdk', sdkDir.path);
+      config.setValue('android-ndk', ndkDir.path);
+
+      final Directory binDir = ndkDir
+          .childDirectory('toolchains')
+          .childDirectory('llvm')
+          .childDirectory('prebuilt')
+          .childDirectory(llvmHostDirectoryName[operatingSystem]!)
+          .childDirectory('bin')
+        ..createSync(recursive: true);
+      final File clang = binDir.childFile('clang$extension')..createSync();
+      final File ar = binDir.childFile('llvm-ar$extension')..createSync();
+      final File ld = binDir.childFile('ld.lld$extension')..createSync();
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
       expect(sdk.getNdkClangPath(), clang.path);
       expect(sdk.getNdkArPath(), ar.path);
       expect(sdk.getNdkLdPath(), ld.path);

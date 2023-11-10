@@ -372,7 +372,7 @@ class AndroidSdk {
       if (ndkVersions.isEmpty) {
         return null;
       }
-      return ndk.childDirectory(ndkVersions.last.toString());
+      return ndk.childDirectory(ndkVersions.first.toString());
     }
 
     final Directory? androidNdkHomeDir = findAndroidNdkHomeDir();
