@@ -251,7 +251,6 @@ class ExpansionTile extends StatefulWidget {
     this.controller,
     this.dense,
     this.visualDensity,
-    this.reverse = false,
     this.enableFeedback = true,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
@@ -515,12 +514,6 @@ class ExpansionTile extends StatefulWidget {
   ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// Defines the order of rendering the tile and its children
-  ///
-  /// If set to true then [children] will be on top of the tile otherwise the [children]
-  /// will be rendered beneath the tile
-  final bool reverse;
-
   /// {@template flutter.material.ListTile.enableFeedback}
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -651,7 +644,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final ListTileThemeData listTileTheme = ListTileTheme.of(context);
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
             top: BorderSide(color: Colors.transparent),
             bottom: BorderSide(color: Colors.transparent),
@@ -675,37 +667,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         break;
     }
 
-    final List<Widget> children = <Widget>[
-      Semantics(
-        hint: semanticsHint,
-        onTapHint: onTapHint,
-        child: ListTileTheme.merge(
-          iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
-          textColor: _headerColor.value,
-          child: ListTile(
-            onTap: _handleTap,
-            contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
-            leading: widget.leading ?? _buildLeadingIcon(context),
-            title: widget.title,
-            subtitle: widget.subtitle,
-            trailing: widget.trailing ?? _buildTrailingIcon(context),
-            dense: widget.dense ?? listTileTheme.dense,
-            visualDensity: widget.visualDensity ?? listTileTheme.visualDensity,
-            enableFeedback: widget.enableFeedback ?? listTileTheme.enableFeedback,
-          ),
-        ),
-      ),
-      ClipRect(
-        child: Align(
-          alignment: widget.expandedAlignment
-            ?? expansionTileTheme.expandedAlignment
-            ?? Alignment.center,
-          heightFactor: _heightFactor.value,
-          child: child,
-        ),
-      ),
-    ];
-
     return Container(
       clipBehavior: clipBehavior,
       decoration: ShapeDecoration(
@@ -714,7 +675,33 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: widget.reverse ? children.reversed.toList() : children,
+        children: <Widget>[
+          Semantics(
+            hint: semanticsHint,
+            onTapHint: onTapHint,
+            child: ListTileTheme.merge(
+              iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
+              textColor: _headerColor.value,
+              child: ListTile(
+                onTap: _handleTap,
+                contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
+                leading: widget.leading ?? _buildLeadingIcon(context),
+                title: widget.title,
+                subtitle: widget.subtitle,
+                trailing: widget.trailing ?? _buildTrailingIcon(context),
+              ),
+            ),
+          ),
+          ClipRect(
+            child: Align(
+              alignment: widget.expandedAlignment
+                ?? expansionTileTheme.expandedAlignment
+                ?? Alignment.center,
+              heightFactor: _heightFactor.value,
+              child: child,
+            ),
+          ),
+        ],
       ),
     );
   }
