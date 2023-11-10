@@ -61,12 +61,15 @@ zip_and_upload_xcresult_to_luci () {
 echo "Running simulator tests with Skia"
 echo ""
 
+# TODO(vashworth): Stop skipping testMultiplePlatformViewsWithOverlays once
+# https://github.com/flutter/flutter/issues/138193 is resolved
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
   -resultBundlePath "$RESULT_BUNDLE_PATH/ios_scenario.xcresult" \
   -destination 'platform=iOS Simulator,OS=16.2,name=iPhone SE (3rd generation)' \
   clean test \
-  FLUTTER_ENGINE="$FLUTTER_ENGINE"; then
+  FLUTTER_ENGINE="$FLUTTER_ENGINE" \
+  -skip-testing ScenariosUITests/UnobstructedPlatformViewTests/testMultiplePlatformViewsWithOverlays; then
   echo "test success."
 else
   echo "test failed."
