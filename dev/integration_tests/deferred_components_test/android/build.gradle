@@ -30,6 +30,10 @@ allprojects {
     }
 }
 
+project.getTasks().withType(JavaCompile){
+    options.compilerArgs << "-Xlint:all" << "-Werror"
+}
+
 rootProject.buildDir = '../build'
 
 subprojects {
