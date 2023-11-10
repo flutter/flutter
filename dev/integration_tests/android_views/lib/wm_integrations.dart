@@ -137,11 +137,11 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     await Future<void>.delayed(const Duration(seconds: 1));
 
     // Dispatch a tap event on the child view inside the platform view.
-    //
+    
     // Android mutates `MotionEvent` instances, so in this case *do not* dispatch
     // new instances as it won't cover the `MotionEventTracker` class in the embedding
     // which tracks events.
-    //
+    
     // See the issue this prevents: https://github.com/flutter/flutter/issues/61169
     await Process.run('input', const <String>['tap', '250', '550']);
   }
