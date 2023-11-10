@@ -1315,6 +1315,7 @@ void main() {
       );
 
       testWidgetsWithLeakTracking('RenderViewportBase.showOnScreen twice almost instantly', (WidgetTester tester) async{
+        // Regression test for https://github.com/flutter/flutter/issues/137901
         await tester.pumpWidget(
           buildList(
             floatingHeader: SliverPersistentHeader(
@@ -1338,7 +1339,6 @@ void main() {
           // leads to a different result.
           // When the animation has forward status and the second showOnScreen
           // is called, the new animation won't start.
-          // https://github.com/flutter/flutter/issues/137901
           rect: Offset.zero & const Size(150, 150),
           duration: const Duration(seconds: 3),
         );
