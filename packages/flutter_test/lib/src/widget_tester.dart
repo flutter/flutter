@@ -119,7 +119,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// the `test` package.
 ///
 /// The argument [experimentalLeakTesting] is experimental and is not recommended
-/// for use outside of Flutter Framework.
+/// for use outside of the Flutter framework.
 /// When [experimentalLeakTesting] is set, it is used for leak tracking.
 /// Otherwise [LeakTesting.settings] is used.
 /// You can adjust [LeakTesting.settings] in flutter_test_config.dart for your
