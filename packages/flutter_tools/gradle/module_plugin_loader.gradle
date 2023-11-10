@@ -4,12 +4,11 @@
 
 // This file is included from `<module>/.android/include_flutter.groovy`,
 // so it can be versioned with the Flutter SDK.
-import NativePluginLoader
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
 def object = null
-NativePluginLoader.forEachNativePlugin(moduleProjectRoot, { androidPlugin ->
+NativePluginLoader.forEachPlugin(moduleProjectRoot, { androidPlugin ->
     def pluginDirectory = new File(androidPlugin.path, 'android')
     assert pluginDirectory.exists()
     include ":${androidPlugin.name}"

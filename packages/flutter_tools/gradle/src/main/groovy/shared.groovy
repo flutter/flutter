@@ -6,7 +6,7 @@ class NativePluginLoader {
     static final String nativeBuildKey = 'native_build'
     static final String flutterPluginsDependenciesFile = '.flutter-plugins-dependencies'
 
-    static void forEachNativePlugin(File flutterSourceDirectory, Closure<Object> callback) {
+    static void forEachPlugin(File flutterSourceDirectory, Closure<Object> callback) {
         def meta = getDependenciesMetadata(flutterSourceDirectory)
         if (meta == null) {
             return

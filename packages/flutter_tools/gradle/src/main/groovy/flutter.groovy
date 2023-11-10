@@ -27,7 +27,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
-import NativePluginLoader
 
 /**
  * For apps only. Provides the flutter extension used in app/build.gradle.
@@ -624,7 +623,7 @@ class FlutterPlugin implements Plugin<Project> {
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
         List androidPlugins = []
-        NativePluginLoader.forEachNativePlugin(getFlutterSourceDirectory(), { androidPlugin ->
+        NativePluginLoader.forEachPlugin(getFlutterSourceDirectory(), { androidPlugin ->
             androidPlugins.add(androidPlugin)
         })
         return androidPlugins
