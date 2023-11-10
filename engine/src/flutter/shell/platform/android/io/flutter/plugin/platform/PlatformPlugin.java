@@ -282,7 +282,8 @@ public class PlatformPlugin {
               | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
               | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_FULLSCREEN;
-    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE) {
+    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE
+        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       // IMMERSIVE
       // Available starting at 19
       // Should not show overlays, swipe from edges to reveal overlays, needs onChange callback
@@ -297,7 +298,8 @@ public class PlatformPlugin {
               | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
               | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_FULLSCREEN;
-    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE_STICKY) {
+    } else if (systemUiMode == PlatformChannel.SystemUiMode.IMMERSIVE_STICKY
+        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       // STICKY IMMERSIVE
       // Available starting at 19
       // Should not show overlays, swipe from edges to reveal overlays. The app will also receive
@@ -344,7 +346,7 @@ public class PlatformPlugin {
     // The SYSTEM_UI_FLAG_IMMERSIVE_STICKY flag was introduced in API 19, so we
     // apply it
     // if desired, and if the current Android version is 19 or greater.
-    if (overlaysToShow.size() == 0) {
+    if (overlaysToShow.size() == 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
     }
 

@@ -230,16 +230,20 @@ class AccessibilityViewEmbedder {
     output.setText(input.getText());
     output.setVisibleToUser(input.isVisibleToUser());
 
-    output.setEditable(input.isEditable());
-    output.setCanOpenPopup(input.canOpenPopup());
-    output.setCollectionInfo(input.getCollectionInfo());
-    output.setCollectionItemInfo(input.getCollectionItemInfo());
-    output.setContentInvalid(input.isContentInvalid());
-    output.setDismissable(input.isDismissable());
-    output.setInputType(input.getInputType());
-    output.setLiveRegion(input.getLiveRegion());
-    output.setMultiLine(input.isMultiLine());
-    output.setRangeInfo(input.getRangeInfo());
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+      output.setEditable(input.isEditable());
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      output.setCanOpenPopup(input.canOpenPopup());
+      output.setCollectionInfo(input.getCollectionInfo());
+      output.setCollectionItemInfo(input.getCollectionItemInfo());
+      output.setContentInvalid(input.isContentInvalid());
+      output.setDismissable(input.isDismissable());
+      output.setInputType(input.getInputType());
+      output.setLiveRegion(input.getLiveRegion());
+      output.setMultiLine(input.isMultiLine());
+      output.setRangeInfo(input.getRangeInfo());
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       output.setError(input.getError());
       output.setMaxTextLength(input.getMaxTextLength());
