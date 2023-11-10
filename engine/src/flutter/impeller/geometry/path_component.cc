@@ -59,8 +59,11 @@ Point LinearPathComponent::Solve(Scalar time) const {
   };
 }
 
-std::vector<Point> LinearPathComponent::CreatePolyline() const {
-  return {p2};
+void LinearPathComponent::AppendPolylinePoints(
+    std::vector<Point>& points) const {
+  if (points.size() == 0 || points.back() != p2) {
+    points.push_back(p2);
+  }
 }
 
 std::vector<Point> LinearPathComponent::Extrema() const {
@@ -100,14 +103,9 @@ static Scalar ApproximateParabolaIntegral(Scalar x) {
   return x / (1.0 - d + sqrt(sqrt(pow(d, 4) + 0.25 * x * x)));
 }
 
-std::vector<Point> QuadraticPathComponent::CreatePolyline(Scalar scale) const {
-  std::vector<Point> points;
-  FillPointsForPolyline(points, scale);
-  return points;
-}
-
-void QuadraticPathComponent::FillPointsForPolyline(std::vector<Point>& points,
-                                                   Scalar scale_factor) const {
+void QuadraticPathComponent::AppendPolylinePoints(
+    Scalar scale_factor,
+    std::vector<Point>& points) const {
   auto tolerance = kDefaultCurveTolerance / scale_factor;
   auto sqrt_tolerance = sqrt(tolerance);
 
@@ -187,13 +185,13 @@ Point CubicPathComponent::SolveDerivative(Scalar time) const {
   };
 }
 
-std::vector<Point> CubicPathComponent::CreatePolyline(Scalar scale) const {
+void CubicPathComponent::AppendPolylinePoints(
+    Scalar scale,
+    std::vector<Point>& points) const {
   auto quads = ToQuadraticPathComponents(.1);
-  std::vector<Point> points;
   for (const auto& quad : quads) {
-    quad.FillPointsForPolyline(points, scale);
+    quad.AppendPolylinePoints(scale, points);
   }
-  return points;
 }
 
 inline QuadraticPathComponent CubicPathComponent::Lower() const {
@@ -231,7 +229,7 @@ CubicPathComponent::ToQuadraticPathComponents(Scalar accuracy) const {
   auto p = p2x2 - p1x2;
   auto err = p.Dot(p);
   auto quad_count = std::max(1., ceil(pow(err / max_hypot2, 1. / 6.0)));
-
+  quads.reserve(quad_count);
   for (size_t i = 0; i < quad_count; i++) {
     auto t0 = i / quad_count;
     auto t1 = (i + 1) / quad_count;

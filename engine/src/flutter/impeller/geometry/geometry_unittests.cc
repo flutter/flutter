@@ -600,7 +600,7 @@ TEST(GeometryTest, EmptyPath) {
   ASSERT_POINT_NEAR(c.destination, Point());
 
   Path::Polyline polyline = path.CreatePolyline(1.0f);
-  ASSERT_TRUE(polyline.points.empty());
+  ASSERT_TRUE(polyline.points->empty());
   ASSERT_TRUE(polyline.contours.empty());
 }
 
@@ -2099,7 +2099,8 @@ TEST(GeometryTest, RectRoundOut) {
 
 TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
   CubicPathComponent component({10, 10}, {20, 35}, {35, 20}, {40, 40});
-  auto polyline = component.CreatePolyline(1.0f);
+  std::vector<Point> polyline;
+  component.AppendPolylinePoints(1.0f, polyline);
   ASSERT_NE(polyline.front().x, 10);
   ASSERT_NE(polyline.front().y, 10);
   ASSERT_EQ(polyline.back().x, 40);
@@ -2117,12 +2118,12 @@ TEST(GeometryTest, PathCreatePolyLineDoesNotDuplicatePoints) {
   auto polyline = builder.TakePath().CreatePolyline(1.0f);
 
   ASSERT_EQ(polyline.contours.size(), 2u);
-  ASSERT_EQ(polyline.points.size(), 5u);
-  ASSERT_EQ(polyline.points[0].x, 10);
-  ASSERT_EQ(polyline.points[1].x, 20);
-  ASSERT_EQ(polyline.points[2].x, 30);
-  ASSERT_EQ(polyline.points[3].x, 40);
-  ASSERT_EQ(polyline.points[4].x, 50);
+  ASSERT_EQ(polyline.points->size(), 5u);
+  ASSERT_EQ(polyline.GetPoint(0).x, 10);
+  ASSERT_EQ(polyline.GetPoint(1).x, 20);
+  ASSERT_EQ(polyline.GetPoint(2).x, 30);
+  ASSERT_EQ(polyline.GetPoint(3).x, 40);
+  ASSERT_EQ(polyline.GetPoint(4).x, 50);
 }
 
 TEST(GeometryTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
@@ -2204,7 +2205,7 @@ TEST(GeometryTest, PathCreatePolylineGeneratesCorrectContourData) {
                                 .Close()
                                 .TakePath()
                                 .CreatePolyline(1.0f);
-  ASSERT_EQ(polyline.points.size(), 6u);
+  ASSERT_EQ(polyline.points->size(), 6u);
   ASSERT_EQ(polyline.contours.size(), 2u);
   ASSERT_EQ(polyline.contours[0].is_closed, false);
   ASSERT_EQ(polyline.contours[0].start_index, 0u);
@@ -2238,12 +2239,12 @@ TEST(GeometryTest, PathAddRectPolylineHasCorrectContourData) {
   ASSERT_EQ(polyline.contours.size(), 1u);
   ASSERT_TRUE(polyline.contours[0].is_closed);
   ASSERT_EQ(polyline.contours[0].start_index, 0u);
-  ASSERT_EQ(polyline.points.size(), 5u);
-  ASSERT_EQ(polyline.points[0], Point(50, 60));
-  ASSERT_EQ(polyline.points[1], Point(70, 60));
-  ASSERT_EQ(polyline.points[2], Point(70, 80));
-  ASSERT_EQ(polyline.points[3], Point(50, 80));
-  ASSERT_EQ(polyline.points[4], Point(50, 60));
+  ASSERT_EQ(polyline.points->size(), 5u);
+  ASSERT_EQ(polyline.GetPoint(0), Point(50, 60));
+  ASSERT_EQ(polyline.GetPoint(1), Point(70, 60));
+  ASSERT_EQ(polyline.GetPoint(2), Point(70, 80));
+  ASSERT_EQ(polyline.GetPoint(3), Point(50, 80));
+  ASSERT_EQ(polyline.GetPoint(4), Point(50, 60));
 }
 
 TEST(GeometryTest, PathPolylineDuplicatesAreRemovedForSameContour) {
@@ -2265,14 +2266,41 @@ TEST(GeometryTest, PathPolylineDuplicatesAreRemovedForSameContour) {
   ASSERT_TRUE(polyline.contours[0].is_closed);
   ASSERT_EQ(polyline.contours[1].start_index, 4u);
   ASSERT_FALSE(polyline.contours[1].is_closed);
-  ASSERT_EQ(polyline.points.size(), 7u);
-  ASSERT_EQ(polyline.points[0], Point(50, 50));
-  ASSERT_EQ(polyline.points[1], Point(100, 50));
-  ASSERT_EQ(polyline.points[2], Point(100, 100));
-  ASSERT_EQ(polyline.points[3], Point(50, 50));
-  ASSERT_EQ(polyline.points[4], Point(50, 50));
-  ASSERT_EQ(polyline.points[5], Point(0, 50));
-  ASSERT_EQ(polyline.points[6], Point(0, 100));
+  ASSERT_EQ(polyline.points->size(), 7u);
+  ASSERT_EQ(polyline.GetPoint(0), Point(50, 50));
+  ASSERT_EQ(polyline.GetPoint(1), Point(100, 50));
+  ASSERT_EQ(polyline.GetPoint(2), Point(100, 100));
+  ASSERT_EQ(polyline.GetPoint(3), Point(50, 50));
+  ASSERT_EQ(polyline.GetPoint(4), Point(50, 50));
+  ASSERT_EQ(polyline.GetPoint(5), Point(0, 50));
+  ASSERT_EQ(polyline.GetPoint(6), Point(0, 100));
+}
+
+TEST(GeometryTest, PolylineBufferReuse) {
+  auto point_buffer = std::make_unique<std::vector<Point>>();
+  auto point_buffer_address = reinterpret_cast<uintptr_t>(point_buffer.get());
+  Path::Polyline polyline =
+      PathBuilder{}
+          .MoveTo({50, 50})
+          .LineTo({100, 100})
+          .TakePath()
+          .CreatePolyline(
+              1.0f, std::move(point_buffer),
+              [point_buffer_address](
+                  Path::Polyline::PointBufferPtr point_buffer) {
+                ASSERT_EQ(point_buffer->size(), 0u);
+                ASSERT_EQ(point_buffer_address,
+                          reinterpret_cast<uintptr_t>(point_buffer.get()));
+              });
+}
+
+TEST(GeometryTest, PolylineFailsWithNullptrBuffer) {
+  EXPECT_DEATH_IF_SUPPORTED(PathBuilder{}
+                                .MoveTo({50, 50})
+                                .LineTo({100, 100})
+                                .TakePath()
+                                .CreatePolyline(1.0f, nullptr),
+                            "");
 }
 
 TEST(GeometryTest, MatrixPrinting) {

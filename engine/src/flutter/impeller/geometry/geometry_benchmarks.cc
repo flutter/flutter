@@ -28,15 +28,34 @@ static void BM_Polyline(benchmark::State& state, Args&&... args) {
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;
+  auto points = std::make_unique<std::vector<Point>>();
+  points->reserve(2048);
   while (state.KeepRunning()) {
-    auto polyline = path.CreatePolyline(1.0f);
-    single_point_count = polyline.points.size();
-    point_count += single_point_count;
     if (tessellate) {
-      tess.Tessellate(
-          FillType::kNonZero, polyline,
-          [](const float* vertices, size_t vertices_count,
-             const uint16_t* indices, size_t indices_count) { return true; });
+      tess.Tessellate(path, 1.0f,
+                      [&point_count, &single_point_count](
+                          const float* vertices, size_t vertices_count,
+                          const uint16_t* indices, size_t indices_count) {
+                        if (indices_count > 0) {
+                          single_point_count = indices_count;
+                          point_count += indices_count;
+                        } else {
+                          single_point_count = vertices_count;
+                          point_count += vertices_count;
+                        }
+                        return true;
+                      });
+    } else {
+      auto polyline = path.CreatePolyline(
+          // Clang-tidy doesn't know that the points get moved back before
+          // getting moved again in this loop.
+          // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
+          1.0f, std::move(points),
+          [&points](Path::Polyline::PointBufferPtr reclaimed) {
+            points = std::move(reclaimed);
+          });
+      single_point_count = polyline.points->size();
+      point_count += single_point_count;
     }
   }
   state.counters["SinglePointCount"] = single_point_count;

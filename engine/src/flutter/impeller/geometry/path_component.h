@@ -14,9 +14,9 @@
 
 namespace impeller {
 
-// The default tolerance value for QuadraticCurveComponent::CreatePolyline and
-// CubicCurveComponent::CreatePolyline. It also impacts the number of quadratics
-// created when flattening a cubic curve to a polyline.
+// The default tolerance value for QuadraticCurveComponent::AppendPolylinePoints
+// and CubicCurveComponent::AppendPolylinePoints. It also impacts the number of
+// quadratics created when flattening a cubic curve to a polyline.
 //
 // Smaller numbers mean more points. This number seems suitable for particularly
 // curvy curves at scales close to 1.0. As the scale increases, this number
@@ -34,7 +34,7 @@ struct LinearPathComponent {
 
   Point Solve(Scalar time) const;
 
-  std::vector<Point> CreatePolyline() const;
+  void AppendPolylinePoints(std::vector<Point>& points) const;
 
   std::vector<Point> Extrema() const;
 
@@ -75,10 +75,8 @@ struct QuadraticPathComponent {
   //   making it trivially parallelizable.
   //
   // See also the implementation in kurbo: https://github.com/linebender/kurbo.
-  std::vector<Point> CreatePolyline(Scalar scale) const;
-
-  void FillPointsForPolyline(std::vector<Point>& points,
-                             Scalar scale_factor) const;
+  void AppendPolylinePoints(Scalar scale_factor,
+                            std::vector<Point>& points) const;
 
   std::vector<Point> Extrema() const;
 
@@ -120,8 +118,9 @@ struct CubicPathComponent {
   // This method approximates the cubic component with quadratics, and then
   // generates a polyline from those quadratics.
   //
-  // See the note on QuadraticPathComponent::CreatePolyline for references.
-  std::vector<Point> CreatePolyline(Scalar scale) const;
+  // See the note on QuadraticPathComponent::AppendPolylinePoints for
+  // references.
+  void AppendPolylinePoints(Scalar scale, std::vector<Point>& points) const;
 
   std::vector<Point> Extrema() const;
 

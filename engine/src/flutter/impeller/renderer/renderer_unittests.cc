@@ -399,11 +399,10 @@ TEST_P(RendererTest, CanRenderInstanced) {
 
   ASSERT_EQ(Tessellator::Result::kSuccess,
             Tessellator{}.Tessellate(
-                FillType::kPositive,
                 PathBuilder{}
                     .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
-                    .TakePath()
-                    .CreatePolyline(1.0f),
+                    .TakePath(FillType::kPositive),
+                1.0f,
                 [&builder](const float* vertices, size_t vertices_count,
                            const uint16_t* indices, size_t indices_count) {
                   for (auto i = 0u; i < vertices_count * 2; i += 2) {
