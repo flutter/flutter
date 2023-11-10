@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
@@ -19,7 +21,7 @@ class SkwasmImageDecoder extends BrowserImageDecoder {
     final int height = frame.codedHeight.toInt();
     final SkwasmSurface surface = (renderer as SkwasmRenderer).surface;
     return SkwasmImage(imageCreateFromTextureSource(
-      frame,
+      frame as JSObject,
       width,
       height,
       surface.handle,

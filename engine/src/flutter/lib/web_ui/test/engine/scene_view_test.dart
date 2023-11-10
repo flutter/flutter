@@ -27,7 +27,7 @@ class StubPictureRenderer implements PictureRenderer {
     renderedPictures.add(picture);
     final ui.Rect cullRect = picture.cullRect;
     final DomImageBitmap bitmap = (await createImageBitmap(
-      scratchCanvasElement,
+      scratchCanvasElement as JSObject,
       (x: 0, y: 0, width: cullRect.width.toInt(), height: cullRect.height.toInt())
     ).toDart)! as DomImageBitmap;
     return bitmap;

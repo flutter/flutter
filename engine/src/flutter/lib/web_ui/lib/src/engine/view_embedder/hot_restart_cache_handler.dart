@@ -53,7 +53,7 @@ class HotRestartCacheHandler {
   /// Registers a [DomElement] to be removed after hot-restart.
   @visibleForTesting
   void registerElement(DomElement element) {
-    _jsHotRestartStore!.push(element);
+    _jsHotRestartStore!.push(element as JSObject);
   }
 }
 

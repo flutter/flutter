@@ -250,7 +250,7 @@ extension CanvasKitExtension on CanvasKit {
     DomImageBitmap imageBitmap,
     bool hasPremultipliedAlpha,
   ) => _MakeLazyImageFromTextureSource3(
-    imageBitmap,
+    imageBitmap as JSObject,
     0.toJS,
     hasPremultipliedAlpha.toJS,
   );

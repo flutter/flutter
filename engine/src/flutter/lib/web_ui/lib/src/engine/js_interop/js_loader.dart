@@ -57,8 +57,8 @@ abstract class FlutterEngineInitializer{
     required InitializeEngineFn initializeEngine,
     required ImmediateRunAppFn autoStart,
   }) => FlutterEngineInitializer._(
-      initializeEngine: (([JsFlutterConfiguration? config]) => futureToPromise(initializeEngine(config))).toJS,
-      autoStart: (() => futureToPromise(autoStart())).toJS,
+      initializeEngine: (([JsFlutterConfiguration? config]) => futureToPromise(initializeEngine(config) as Future<JSObject>)).toJS,
+      autoStart: (() => futureToPromise(autoStart() as Future<JSObject>)).toJS,
     );
   external factory FlutterEngineInitializer._({
     required JSFunction initializeEngine,
@@ -73,9 +73,9 @@ abstract class FlutterEngineInitializer{
 @JS()
 @anonymous
 @staticInterop
-abstract class FlutterAppRunner implements JSObject {
+abstract class FlutterAppRunner {
   factory FlutterAppRunner({required RunAppFn runApp,}) => FlutterAppRunner._(
-    runApp: (([RunAppFnParameters? args]) => futureToPromise(runApp(args))).toJS
+    runApp: (([RunAppFnParameters? args]) => futureToPromise(runApp(args) as Future<JSObject>)).toJS
   );
 
   /// Runs a flutter app
@@ -101,7 +101,7 @@ typedef RunAppFn = Future<FlutterApp> Function([RunAppFnParameters?]);
 @JS()
 @anonymous
 @staticInterop
-abstract class FlutterApp implements JSObject {
+abstract class FlutterApp {
   /// Cleans a Flutter app
   external factory FlutterApp();
 }
