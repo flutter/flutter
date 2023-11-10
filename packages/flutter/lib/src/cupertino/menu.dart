@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: unused_element
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -111,8 +110,6 @@ class CupertinoMenuController extends CupertinoMenuControlMixin {
     }
   }
 }
-
-
 
 /// A button that displays a Cupertino-style menu when pressed.
 ///
@@ -455,7 +452,6 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
     };
   }
 
-
   @override
   Widget build(BuildContext context) {
     return FocusableActionDetector(
@@ -475,7 +471,6 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
     );
   }
 }
-
 
 /// Shows a Cupertino-style menu with items built by [itemBuilder] at
 /// [anchorPosition].
@@ -499,9 +494,9 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
 ///
 /// The [constraints] parameter describes the [BoxConstraints] to apply to this
 /// menu layer. By default, the menu will expand to fit the lesser of the total
-/// height of the menu items and the bounds of the screen. The [edgeInsets]
-/// can be used to avoid screen edges when positioning the menu. By default,
-/// the menu will ignore [MediaQuery] padding.
+/// height of the menu items and the bounds of the screen. The [edgeInsets] can
+/// be used to avoid screen edges when positioning the menu. The menu will
+/// ignore [MediaQuery] padding.
 ///
 /// The [physics] parameter describes the [ScrollPhysics] to use for the menu's
 /// scrollable. If the menu's contents are not larger than its constraints, the
@@ -524,7 +519,6 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
 /// * [CupertinoNestedMenu], a menu item that can be expanded to show a nested
 ///   menu.
 // TODO(davidhicks980): Determine a default value for semanticLabel.
-
 Future<T?> showCupertinoMenu<T>({
   required BuildContext context,
   required RelativeRect anchorPosition,
@@ -558,10 +552,7 @@ Future<T?> showCupertinoMenu<T>({
                            ?? MediaQuery.sizeOf(context);
   final Size anchorSize = anchorPosition.toSize(overlaySize);
 
-  return Navigator.of(
-    context,
-    rootNavigator: useRootNavigator,
-  ).push<T>(
+  return navigator.push<T>(
     _CupertinoMenuRoute<T>(
       curve: const ElasticOutCurve(1.65),
       reverseCurve: Curves.easeIn,
@@ -634,7 +625,6 @@ String _getLocalizedBarrierLabel(BuildContext context) {
   // [DefaultMaterialLocalizations().modalBarrierDismissLabel].
   return cupertinoLocalizations?.modalBarrierDismissLabel
          ?? const DefaultCupertinoLocalizations().modalBarrierDismissLabel;
-
 }
 
 
@@ -652,10 +642,10 @@ String _getLocalizedBarrierLabel(BuildContext context) {
 /// The [anchorOffset] property describes the offset of this layer's anchor from
 ///
 @immutable
-class CupertinoMenuLayerDescription {
+class _CupertinoMenuLayerDescription {
   /// Creates a menu layer description, which will be used to position and display
   /// the menu layer.
-  const CupertinoMenuLayerDescription({
+  const _CupertinoMenuLayerDescription({
     required this.height,
     required this.anchorOffset,
     required this.coordinates,
@@ -680,7 +670,7 @@ class CupertinoMenuLayerDescription {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is CupertinoMenuLayerDescription &&
+    return other is _CupertinoMenuLayerDescription &&
            other.height == height &&
            other.menu == menu &&
            other.coordinates == coordinates &&
@@ -706,11 +696,12 @@ enum _MenuModelAspect {
 /// See also:
 /// * [CupertinoMenuLayer], which provides information about a single menu
 ///   layer
-class CupertinoMenuModel extends InheritedModel<_MenuModelAspect> {
-  /// Creates a [CupertinoMenuModel] -- an [InheritedModel] that shares
+class _CupertinoMenuModel extends InheritedModel<_MenuModelAspect> {
+  /// Creates a [_CupertinoMenuModel] -- an [InheritedModel] that shares
   /// information regarding the layers of a [CupertinoMenu].with it's
   /// descendants.
-  const CupertinoMenuModel({
+  const _CupertinoMenuModel({
+    // ignore: unused_element
     super.key,
     required super.child,
     required this.edgeInsets,
@@ -727,9 +718,9 @@ class CupertinoMenuModel extends InheritedModel<_MenuModelAspect> {
   /// The menu layers that are currently visible.
   ///
   /// Along with containing the build menu layer, the
-  /// [CupertinoMenuLayerDescription] provides information about the layer's
+  /// [_CupertinoMenuLayerDescription] provides information about the layer's
   /// position and size.
-  final List<CupertinoMenuLayerDescription> layers;
+  final List<_CupertinoMenuLayerDescription> layers;
 
   /// The position of the root menu's anchor relative to the screen.
   final RelativeRect anchorPosition;
@@ -754,7 +745,7 @@ class CupertinoMenuModel extends InheritedModel<_MenuModelAspect> {
   final Set<CupertinoMenuTreeCoordinates> interactiveLayers;
 
   @override
-  bool updateShouldNotify(CupertinoMenuModel oldWidget) {
+  bool updateShouldNotify(_CupertinoMenuModel oldWidget) {
     return oldWidget.edgeInsets != edgeInsets
         || oldWidget.anchorPosition != anchorPosition
         || oldWidget.growthDirection != growthDirection
@@ -765,7 +756,7 @@ class CupertinoMenuModel extends InheritedModel<_MenuModelAspect> {
 
   @override
   bool updateShouldNotifyDependent(
-    CupertinoMenuModel oldWidget,
+    _CupertinoMenuModel oldWidget,
     // ignore: library_private_types_in_public_api
     Set<_MenuModelAspect> dependencies,
   ) {
@@ -1141,21 +1132,6 @@ class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
     }
   }
 
-  void _animateToTopMenuLayer() {
-    if (_depth >= _nestingAnimation!.value) {
-      // measured using ffmpeg on simulator with frame milliseconds overlayed
-      _nestingAnimation!.animateTo(
-        _depth.toDouble(),
-        duration: const Duration(milliseconds: 550),
-      );
-    } else {
-      _nestingAnimation!.animateBack(
-        _depth.toDouble(),
-        duration: const Duration(milliseconds: 800),
-      );
-    }
-  }
-
   void _attachMenuControl(CupertinoNestedMenuControlMixin control) {
     final String id = control.coordinates!.layerId;
     final _AnimationControllerWithStatusOverride animationController =
@@ -1220,9 +1196,9 @@ class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
     _closingController = null;
   }
 
-  CupertinoMenuLayerDescription _buildLayerDescription(CupertinoMenuTreeCoordinates coordinates) {
+  _CupertinoMenuLayerDescription _buildLayerDescription(CupertinoMenuTreeCoordinates coordinates) {
     final String id = coordinates.layerId;
-    return CupertinoMenuLayerDescription(
+    return _CupertinoMenuLayerDescription(
         height: _layerIdToHeight[id] ?? 0,
         anchorOffset: _layerIdToAnchorOffset[id] ?? 0,
         coordinates: coordinates,
@@ -1234,7 +1210,7 @@ class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoMenuModel(
+    return _CupertinoMenuModel(
       edgeInsets: widget.edgeInsets,
       interactiveLayers: _interactiveLayers,
       nestingAnimation: _nestingAnimation!,
@@ -1326,8 +1302,6 @@ class CupertinoMenuLayerModel extends InheritedWidget {
         || controller       != oldWidget.controller;
   }
 }
-
-
 
 /// {@template CupertinoMenuTreeCoordinates.description}
 /// [CupertinoMenuTreeCoordinates] describe the 3-dimensional position (row,
@@ -1619,19 +1593,18 @@ class CupertinoMenu<T> extends StatefulWidget {
   static Set<CupertinoMenuTreeCoordinates> interactiveLayersOf(
     BuildContext context,
   ) {
-    return InheritedModel.inheritFrom<CupertinoMenuModel>(
+    return InheritedModel.inheritFrom<_CupertinoMenuModel>(
       context,
       aspect: _MenuModelAspect.interactiveLayers,
     )!.interactiveLayers;
   }
-
 
   /// Returns the growth direction of the menu from the provided [BuildContext].
   ///
   /// The growth direction describes the [VerticalDirection] in which the menu
   /// grows, relative to the anchor it is attached to.
   static VerticalDirection growthDirectionOf(BuildContext context) {
-    return InheritedModel.inheritFrom<CupertinoMenuModel>(
+    return InheritedModel.inheritFrom<_CupertinoMenuModel>(
       context,
       aspect: _MenuModelAspect.growthDirection,
     )!.growthDirection;
@@ -1640,19 +1613,12 @@ class CupertinoMenu<T> extends StatefulWidget {
 
   /// Returns the insets to avoid when positioning the menu.
   static EdgeInsets edgeInsetsOf(BuildContext context) {
-    return InheritedModel.inheritFrom<CupertinoMenuModel>(
+    return InheritedModel.inheritFrom<_CupertinoMenuModel>(
       context,
       aspect: _MenuModelAspect.edgeInsets,
     )!.edgeInsets;
   }
 
-  /// Returns an ancestor [CupertinoMenuModel] from the provided [BuildContext].
-  ///
-  /// The [CupertinoMenuModel] provides information about the size,
-  /// position, and animation of layers within this menu.
-  static CupertinoMenuModel of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<CupertinoMenuModel>()!;
-  }
 
   /// Pops the topmost menu layer from the menu. Returns whether or not the
   /// layer was successfully popped.
@@ -1682,37 +1648,37 @@ class CupertinoMenu<T> extends StatefulWidget {
     damping: (4 * math.pi * 10) / 0.2,
   );
 
-    /// The default transparent [CupertinoMenu] background color.
-    //
-    // Background colors are based on the following:
-    //
-    // Dark mode on white background => rgb(83, 83, 83)
-    // Dark mode on black => rgb(31, 31, 31)
-    // Light mode on black background => rgb(197,197,197)
-    // Light mode on white => rgb(246, 246, 246)
-    static const CupertinoDynamicColor background =
-        CupertinoDynamicColor.withBrightness(
-      color: Color.fromRGBO(250, 251, 250, 0.78),
-      darkColor: Color.fromRGBO(34, 34, 34, 0.75),
-    );
+  /// The default transparent [CupertinoMenu] background color.
+  //
+  // Background colors are based on the following:
+  //
+  // Dark mode on white background => rgb(83, 83, 83)
+  // Dark mode on black => rgb(31, 31, 31)
+  // Light mode on black background => rgb(197,197,197)
+  // Light mode on white => rgb(246, 246, 246)
+  static const CupertinoDynamicColor background =
+      CupertinoDynamicColor.withBrightness(
+    color: Color.fromRGBO(250, 251, 250, 0.78),
+    darkColor: Color.fromRGBO(34, 34, 34, 0.75),
+  );
 
-    /// The default opaque [CupertinoMenu] background color.
-    static const CupertinoDynamicColor opaqueBackground =
-        CupertinoDynamicColor.withBrightness(
-      color: Color.fromRGBO(246, 246, 246, 1),
-      darkColor: Color.fromRGBO(31, 31, 31, 1),
-    );
+  /// The default opaque [CupertinoMenu] background color.
+  static const CupertinoDynamicColor opaqueBackground =
+      CupertinoDynamicColor.withBrightness(
+    color: Color.fromRGBO(246, 246, 246, 1),
+    darkColor: Color.fromRGBO(31, 31, 31, 1),
+  );
 
-    /// The [CupertinoMenuTreeCoordinates] of the root menu layer.
-    ///
-    /// {@macro flutter.cupertino.CupertinoMenuTreeCoordinates.description}
-    static const CupertinoMenuTreeCoordinates rootMenuCoordinates =
-      CupertinoMenuTreeCoordinates.fromLayerCoordinates(
-        path: <int>[],
-        row: 0,
-        column: 0,
-        depth: 0,
-      );
+  /// The [CupertinoMenuTreeCoordinates] of the root menu layer.
+  ///
+  /// {@macro flutter.cupertino.CupertinoMenuTreeCoordinates.description}
+  static const CupertinoMenuTreeCoordinates rootMenuCoordinates =
+    CupertinoMenuTreeCoordinates.fromLayerCoordinates(
+      path: <int>[],
+      row: 0,
+      column: 0,
+      depth: 0,
+    );
 
   /// Wraps [CupertinoMenuEntry]s with contextual information
   ///
@@ -2021,7 +1987,8 @@ class _CupertinoMenuState<T> extends State<CupertinoMenu<T>>
                     child: Center(
                       child: Builder(
                         builder: (BuildContext context) {
-                          final CupertinoMenuModel model = CupertinoMenu.of(context);
+                          final _CupertinoMenuModel model =
+                              InheritedModel.inheritFrom<_CupertinoMenuModel>(context)!;
                           _updateRepaintListenable(model.nestingAnimation);
                           return Flow(
                             clipBehavior: Clip.none,
@@ -2043,7 +2010,7 @@ class _CupertinoMenuState<T> extends State<CupertinoMenu<T>>
                               padding: model.edgeInsets,
                             ),
                             children: model.layers
-                                .map((CupertinoMenuLayerDescription layer) => layer.menu)
+                                .map((_CupertinoMenuLayerDescription layer) => layer.menu)
                                 .toList(),
                           );
                         },
@@ -2093,13 +2060,34 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
   final Alignment alignment;
   final ValueChanged<List<Matrix4>>? onPainted;
   final List<Matrix4>? overrideTransforms;
-  final List<CupertinoMenuLayerDescription> layers;
+  final List<_CupertinoMenuLayerDescription> layers;
   final ValueNotifier<Rect?> rootMenuRectNotifier;
   final ValueNotifier<Offset?> pointerPositionNotifier;
   final EdgeInsets padding;
   Offset? get pointerPosition => pointerPositionNotifier.value;
   Rect get rootMenuRect => rootMenuRectNotifier.value ?? Rect.zero;
-  static const double defaultShift = 24;
+  static const double defaultShift = 16;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    final List<Matrix4> transforms =
+          overrideTransforms
+          ?? List<Matrix4>.generate(
+              context.childCount,
+              (int int) => Matrix4.identity(),
+              growable: false,
+            );
+
+    if (overrideTransforms == null) {
+      _applyTransforms(context, transforms);
+    }
+
+    for (int i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, transform: transforms[i]);
+    }
+
+    onPainted?.call(transforms);
+  }
 
   _CupertinoMenuVerticalOffset _positionChild({
     required Size size,
@@ -2183,28 +2171,7 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
     );
   }
 
-  @override
-  void paintChildren(FlowPaintingContext context) {
-    final List<Matrix4> transforms =
-          overrideTransforms
-          ?? List<Matrix4>.generate(
-              context.childCount,
-              (int int) => Matrix4.identity(),
-              growable: false,
-            );
-
-    if (overrideTransforms == null) {
-      applyTransforms(context, transforms);
-    }
-
-    for (int i = 0; i < context.childCount; ++i) {
-      context.paintChild(i, transform: transforms[i]);
-    }
-
-    onPainted?.call(transforms);
-  }
-
-  void applyTransforms(
+  void _applyTransforms(
     FlowPaintingContext context,
     List<Matrix4> transforms,
   ) {
@@ -2375,13 +2342,15 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
       return false;
     }
 
-    return oldDelegate.alignment != alignment
-        || oldDelegate.routeAnimation != routeAnimation
+    return oldDelegate.padding != padding
+        || oldDelegate.alignment != alignment
+        || oldDelegate.onPainted != onPainted
         || oldDelegate.growthDirection != growthDirection
         || oldDelegate.nestingAnimation != nestingAnimation
-        || oldDelegate.rootMenuRectNotifier != rootMenuRectNotifier
-        || oldDelegate.rootAnchorPosition != rootAnchorPosition
+        || oldDelegate.routeAnimation != routeAnimation
         || oldDelegate.rootAnchorSize != rootAnchorSize
+        || oldDelegate.rootAnchorPosition != rootAnchorPosition
+        || oldDelegate.rootMenuRectNotifier != rootMenuRectNotifier
         || oldDelegate.pointerPositionNotifier != pointerPositionNotifier
         || !listEquals(oldDelegate.layers, layers)
         || !listEquals(oldDelegate.overrideTransforms, overrideTransforms);
@@ -2502,22 +2471,21 @@ mixin CupertinoNestedMenuControlMixin<T, U extends StatefulWidget>
   }
 
   void _handleAnimationStatusChange(AnimationStatus status) {
-    final bool wasOpen = isOpen;
     setState(() {
-      _status = switch (status) {
-        AnimationStatus.completed => CupertinoMenuStatus.open,
-        AnimationStatus.forward   => CupertinoMenuStatus.opening,
-        AnimationStatus.dismissed => CupertinoMenuStatus.closed,
-        AnimationStatus.reverse   => CupertinoMenuStatus.closing,
-      };
+      switch (status) {
+          case AnimationStatus.completed:
+            _status = CupertinoMenuStatus.open;
+          case AnimationStatus.dismissed:
+            _status = CupertinoMenuStatus.closed;
+          case AnimationStatus.reverse:
+            _status = CupertinoMenuStatus.closing;
+            didCloseMenu();
+          case AnimationStatus.forward:
+            _status = CupertinoMenuStatus.opening;
+            didOpenMenu();
+        };
     });
-    if (wasOpen != isOpen) {
-      if (isOpen) {
-        didOpenMenu();
-      } else {
-        didCloseMenu();
-      }
-    }
+
   }
 
   // ignore: use_setters_to_change_properties
@@ -2537,14 +2505,37 @@ mixin CupertinoNestedMenuControlMixin<T, U extends StatefulWidget>
 /// A [CupertinoMenuEntry] that expands to show a new layer of menu items.
 ///
 /// While a [CupertinoNestedMenu] can contain any [CupertinoMenuEntry], nesting
-/// more than one [CupertinoNestedMenu] is not recommended because it can
-/// lead to poor user experience.
+/// more than one [CupertinoNestedMenu] is not recommended because it can lead
+/// to poor user experience.
 ///
 /// The [itemBuilder] is called when the user triggers expansion and whenever a
-/// rebuild signal is sent to the root menu. If the [itemBuilder] returns items,
-/// the [onOpen] callback will be called when the menu expansion starts.
+/// rebuild signal is sent to the root menu. If provided, the [onTap] callback
+/// will be called whenever the menu anchor is triggered by the user, regardless
+/// of whether the [itemBuilder] returns items. In contrast, the [onOpen]
+/// callback will only be called when the [itemBuilder] returns items, and will
+/// be called regardless of whether the menu is programmatically or manually
+/// opened. If the menu closing animation is interrupted by an opening
+/// animation, [onOpen] **will** be called again. Similarly, [onClose] is called
+/// regardless of whether the menu is programmatically or manually closed, and
+/// will be called again if an opening animation is interrupted by a closing
+/// animation.
 ///
-/// **See also**:
+/// The [constraints] parameter can be used to constrain the size of the nested
+/// menu layer. If null, the nested menu layer will expand to fit its contents.
+///
+/// A [controller] can be used to programmatically open or close the nested menu
+/// layer. If null, an internal controller will be created.
+///
+/// The [clip] parameter can be used to clip the menu's surface. In most cases,
+/// the default value of [Clip.antiAlias] should be used. However,
+/// [Clip.antiAliasWithSaveLayer] may be used if elements of the screen that are
+/// not under the menu surface bleed onto the menu's backdrop. This occurs
+/// because [BackdropFilter] is applied to the entire screen, and not just the
+/// menu. Afterwards, the blurred screen is clipped to the menu's bounds. Save
+/// layers are expensive, so this option should only be used if absolutely
+/// necessary.
+///
+/// See also:
 ///
 /// * [CupertinoMenuItem], a simple menu item with a trailing widget slot.
 /// * [CupertinoCheckedMenuItem], a menu item that displays a leading checkmark
@@ -2575,13 +2566,20 @@ class CupertinoNestedMenu<T> extends StatefulWidget with CupertinoMenuEntry<T> {
     this.clip = Clip.none,
   });
 
-  /// A key that can be used to refer to the nested menu anchor while the menu is open, opening, or closing.
+  /// A key that can be used to refer to the nested menu anchor while the menu
+  /// is open, opening, or closing.
+  // TODO(davidhicks980): This is only used for testing. Consider removing.
   final Key? expandedMenuAnchorKey;
 
-  /// A key that can be used to refer to the nested menu anchor when it is fully closed.
+  /// A key that can be used to refer to the nested menu anchor when it is fully
+  /// closed.
+  // TODO(davidhicks980): This is only used for testing. Consider removing.
   final Key? collapsedMenuAnchorKey;
 
   /// A label displayed in the center of the nested menu anchor
+  // This is a TextSpan instead of a Widget because the title is duplicated
+  // for the collapsed menu anchor and the nested menu anchor. If users were
+  // to supply a GlobalKey, a duplicate key error would be thrown.
   final TextSpan title;
 
   /// A widget displayed below the [title] in the nested menu anchor
@@ -2597,15 +2595,21 @@ class CupertinoNestedMenu<T> extends StatefulWidget with CupertinoMenuEntry<T> {
   /// focusable and [onTap] will not be called when pressed.
   final bool enabled;
 
-  /// Called when the menu has started opening. Unlike [onTap], this callback is
+  /// Called when the menu begins opening. Unlike [onTap], this callback is
   /// called regardless of whether the menu is programmatically or manually
-  /// opened.
+  /// opened. If a closing animation is interrupted by an opening animation,
+  /// this callback **will** be called again.
+  //  TODO(davidhicks980): Should onOpen only be called when the menu is first opened?
   final VoidCallback? onOpen;
 
   /// A callback dispatched when the menu item is tapped
   final void Function()? onTap;
 
-  /// Called when the menu has started closing.
+  /// Called when the menu begins closing. Unlike [onTap], this callback is
+  /// called regardless of whether the menu is programmatically or manually
+  /// closed. If an opening animation is interrupted by an closing animation,
+  /// this callback **will** be called again.
+  //  TODO(davidhicks980): Should onClose only be called when the menu is first closed?
   final FutureOr<void> Function()? onClose;
 
   /// Constraints to apply to the nested menu layer. If null, the nested menu
@@ -2685,8 +2689,10 @@ class _CupertinoNestedMenuState<T>
       //
       // Because each menu layer is built in a separate frame, there is a
       // considerable delay between the user tapping a stateful menu item (e.g.
-      // a checked menu item) and the menu layer rebuilding. I'd like to hear
-      // suggestions on how to improve this.
+      // a checked menu item) and the menu layer rebuilding for deeply nested
+      // menus. Currently, [CupertinoNestedMenu.rebuild] is called on the
+      // deepest menu layer when a menu item is tapped, which triggers and
+      // immediate rebuild for the closest menu layer.
       SchedulerBinding.instance.addPostFrameCallback((_) {
         rebuild();
       });
@@ -2746,7 +2752,7 @@ class _CupertinoNestedMenuState<T>
                 animation: animation.drive(_clampedAnimatable),
                 visible: status != CupertinoMenuStatus.closed,
                 onTap: widget.enabled ? _handleTap : null,
-                semanticsHint: 'Tap to collapse',
+                expanded: true,
                 enabled: widget.enabled,
                 title: widget.title,
               ),
@@ -2771,12 +2777,8 @@ class _CupertinoNestedMenuState<T>
               animation: animation,
               depth: coordinates!.depth,
               anchorBorderRadius: _buildMenuRadius(context),
-              menu: Builder(
-                builder: (BuildContext context) {
-                  return _MenuBody<T>(
-                    children: wrappedItems,
-                  );
-                },
+              menu: _MenuBody<T>(
+                children: wrappedItems,
               ),
             ),
           ),
@@ -2802,7 +2804,7 @@ class _CupertinoNestedMenuState<T>
       key: widget.collapsedMenuAnchorKey,
       onTap: widget.enabled ? _handleTap : null,
       animation: kAlwaysDismissedAnimation,
-      semanticsHint: 'Tap to expand',
+      expanded: false,
       visible: status == CupertinoMenuStatus.closed,
       subtitle: widget.subtitle,
       trailing: widget.trailing,
@@ -2838,7 +2840,7 @@ class _CupertinoNestedMenuState<T>
 ///
 /// See also:
 ///
-/// * [CupertinoMenuModel], which provides information about all menu layers
+/// * [_CupertinoMenuModel], which provides information about all menu layers
 class CupertinoMenuLayer extends StatefulWidget {
   /// Creates a widget that shares information about a menu layer with its descendants.
   const CupertinoMenuLayer({
@@ -3281,7 +3283,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
     super.didChangeDependencies();
     final Animation<double>? routeAnimation = ModalRoute.of(context)?.animation;
     final Animation<double> nestingAnimation =
-        InheritedModel.inheritFrom<CupertinoMenuModel>(
+        InheritedModel.inheritFrom<_CupertinoMenuModel>(
           context,
           aspect: _MenuModelAspect.nestingAnimation,
         )!.nestingAnimation;
@@ -3985,6 +3987,7 @@ class _RenderSizeChangedWithCallback extends RenderProxyBox {
 
 class _SliverClippedInsets extends SingleChildRenderObjectWidget {
   const _SliverClippedInsets({
+    // ignore: unused_element
     super.key,
     required this.insets,
     required super.child,
@@ -4063,10 +4066,15 @@ class _RenderSliverClippedInsets extends RenderProxySliver {
 // simulations so as to properly trigger status listeners.
 class _AnimationControllerWithStatusOverride extends AnimationController {
   _AnimationControllerWithStatusOverride.unbounded({
+    // ignore: unused_element
     super.value = 0.0,
+    // ignore: unused_element
     super.duration,
+    // ignore: unused_element
     super.reverseDuration,
+    // ignore: unused_element
     super.debugLabel,
+    // ignore: unused_element
     super.animationBehavior,
     required super.vsync,
   }) : super.unbounded();

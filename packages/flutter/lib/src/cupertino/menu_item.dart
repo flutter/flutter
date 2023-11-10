@@ -12,6 +12,8 @@ import 'constants.dart';
 import 'icons.dart';
 import 'menu.dart';
 
+// TODO(davidhicks980): Add fill properties.
+
 /// A mixin that specifies that a widget can be used in a [CupertinoMenu] or a
 /// [CupertinoNestedMenu].
 mixin CupertinoMenuEntry<T> on Widget {
@@ -25,7 +27,6 @@ mixin CupertinoMenuEntry<T> on Widget {
   // TODO(davidhicks980): Determine whether measuring menu items is necessary.
   // Or whether height could be calculated at runtime.
   double get height => kMinInteractiveDimensionCupertino;
-
 
   /// The color of a [CupertinoInteractiveMenuItem] when pressed.
   // Pressed colors were sampled from the iOS simulator and are based on the
@@ -86,8 +87,6 @@ mixin CupertinoMenuEntry<T> on Widget {
 
 /// A widget that provides the default styling, semantics, and interactivity
 /// for menu items in a [CupertinoMenu] or [CupertinoNestedMenu].
-///
-///
 class CupertinoInteractiveMenuItem<T> extends StatefulWidget
       with CupertinoMenuEntry<T> {
   /// Creates a [CupertinoInteractiveMenuItem], a widget that provides the
@@ -203,7 +202,7 @@ class CupertinoInteractiveMenuItem<T> extends StatefulWidget
 }
 
 class _CupertinoInteractiveMenuItemState<T>
-    extends State<CupertinoInteractiveMenuItem<T>> {
+      extends State<CupertinoInteractiveMenuItem<T>> {
   /// The handler for when the user selects the menu item.
   ///
   /// Along with calling [CupertinoInteractiveMenuItem.widget.onTap], it uses [Navigator.pop]
@@ -236,8 +235,9 @@ class _CupertinoInteractiveMenuItemState<T>
       );
     }
 
-    final Color resolvedColor =
-        CupertinoInteractiveMenuItem.defaultTextColor.resolveFrom(context);
+    final Color resolvedColor = CupertinoInteractiveMenuItem
+                                    .defaultTextColor
+                                    .resolveFrom(context);
 
     if (widget.isDefaultAction) {
       return CupertinoInteractiveMenuItem.defaultTextStyle.copyWith(
@@ -1445,31 +1445,29 @@ class _CupertinoNestedMenuChevron extends StatelessWidget {
 
 /// A [CupertinoMenuEntry] that is used as an anchor for a nested menu.
 ///
+/// The [title] widget is required and specifies the main label contents of the
+/// menu item. The [subtitle] is a widget displayed underneath the [title]. Both
+/// are typically [Text] widgets. The [trailing] widget is displayed at the
+/// trailing edge of the anchor, and is typically a [CupertinoIcon].
 ///
- /// The [title] widget is required and specifies the main label contents of the
- /// menu item. The [subtitle] is a widget displayed underneath the [title].
- /// Both are typically [Text] widgets. The [trailing] widget is displayed at
- /// the trailing edge of the anchor, and is typically a [CupertinoIcon].
- ///
- /// A [CupertinoIcons.chevronRight] is used as a leading widget. The leading
- /// chevron rotates when the nested menu is open, which is controlled by an
- /// [animation]. Along with controlling the rotation of the chevron, the
- /// [animation] is responsible for fading the [title] while the menu is opening
- /// or closing.
- ///
- /// The [onTap] callback is called when the anchor is tapped.
- ///
-  /// [CupertinoNestedMenu]s contain two anchors: one on the nested menu's
-  /// parent and one on the nested menu. When the nested menu is open, the
-  /// parent anchor has it's [visible] parameter set to false while the nested
-  /// anchor's [visible] parameter is set to true. The underlying anchor is
-  /// hidden using a [Visibility] widget.
- ///
- /// A [semanticsHint] can be provided to customize the semantics read out by
- /// screen readers.
+/// A [CupertinoIcons.chevronRight] is used as a leading widget. The leading
+/// chevron rotates when the nested menu is open, which is controlled by an
+/// [animation]. Along with controlling the rotation of the chevron, the
+/// [animation] is responsible for fading the [title] while the menu is opening
+/// or closing.
+///
+/// The [onTap] callback is called when the anchor is tapped.
+///
+/// [CupertinoNestedMenu]s contain two anchors: one on the nested menu's parent
+/// and one on the nested menu. When the nested menu is open, the parent anchor
+/// has it's [visible] parameter set to false while the nested anchor's
+/// [visible] parameter is set to true. The underlying anchor is hidden using a
+/// [Visibility] widget.
+///
+/// The [expanded] property communicates to screen readers whether the nested
+/// menu is open (true) or closed (false).
 class CupertinoNestedMenuItemAnchor<T> extends StatefulWidget
       with CupertinoMenuEntry<Never> {
-
   /// Creates a [CupertinoNestedMenuItemAnchor].
   const CupertinoNestedMenuItemAnchor({
     super.key,
@@ -1478,7 +1476,7 @@ class CupertinoNestedMenuItemAnchor<T> extends StatefulWidget
     required this.onTap,
     required this.animation,
     required this.visible,
-    required this.semanticsHint,
+    required this.expanded,
     this.enabled = true,
     this.trailing,
   });
@@ -1503,8 +1501,8 @@ class CupertinoNestedMenuItemAnchor<T> extends StatefulWidget
   /// Whether the anchor is visible.
   final bool visible;
 
-  /// A semantic hint for the anchor that will be read out by screen readers.
-  final String semanticsHint;
+  /// Whether the anchor is expanded. Used by the semantics layer.
+  final bool expanded;
 
   /// Whether the anchor can be opened.
   final bool enabled;
@@ -1561,7 +1559,7 @@ class _CupertinoNestedMenuItemAnchorState<T>
       Tween<double>(begin: 0, end: 0.25),
     );
 
-    // Bottom text fades out
+    // Bottom text fades out when opening.
     _bottomTextAnimation = widget.animation
         .drive(CurveTween(curve: bottomTextInterval))
         .drive(TextStyleTween(
@@ -1593,6 +1591,7 @@ class _CupertinoNestedMenuItemAnchorState<T>
     if(widget.subtitle == null){
       return null;
     }
+
     return DefaultTextStyle.merge(
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -1642,14 +1641,13 @@ class _CupertinoNestedMenuItemAnchorState<T>
     // When the top anchor is shown, we hide the anchor item's contents but
     // maintain the size of the item. Otherwise, the parent menu will shrink
     // when the nested menu is opened.
-
     return Visibility(
       visible: widget.visible,
       maintainAnimation: true,
       maintainState: true,
       maintainSize: true,
       child: Semantics(
-        hint: widget.semanticsHint,
+        expanded: widget.expanded,
         child: CupertinoBaseMenuItem<T>(
           swipePressActivationDelay: const Duration(milliseconds: 500),
           shouldPopMenuOnPressed: false,
@@ -1743,7 +1741,6 @@ class CupertinoPanListener<T extends PanTarget<StatefulWidget>>
   /// The [position] describes the global position of the pointer.
   final CupertinoPanEndCallback? onPanEnd;
 
-
   /// Called when the user starts panning.
   ///
   /// The [position] describes the global position of the pointer.
@@ -1752,14 +1749,12 @@ class CupertinoPanListener<T extends PanTarget<StatefulWidget>>
   /// The menu layer to wrap.
   final Widget child;
 
-
   /// Creates a [ImmediateMultiDragGestureRecognizer] to recognize the start of
   /// a pan gesture.
   ImmediateMultiDragGestureRecognizer createRecognizer(
     CupertinoPanStartCallback onStart,
   ) {
-    return ImmediateMultiDragGestureRecognizer()
-           ..onStart = onStart;
+    return ImmediateMultiDragGestureRecognizer()..onStart = onStart;
   }
 
   @override
@@ -1880,12 +1875,12 @@ class _PanHandler<T extends PanTarget<StatefulWidget>> extends Drag {
 
   @override
   void end(DragEndDetails details) {
-    finishDrag(pointerUp: true);
+    _finishDrag(pointerUp: true);
   }
 
   @override
   void cancel() {
-    finishDrag();
+    _finishDrag();
   }
 
   void updateDrag(Offset globalPosition) {
@@ -1931,9 +1926,7 @@ class _PanHandler<T extends PanTarget<StatefulWidget>> extends Drag {
     }
   }
 
-  Iterable<T> _getDragTargets(
-    Iterable<HitTestEntry> path,
-  ) {
+  Iterable<T> _getDragTargets(Iterable<HitTestEntry> path) {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
     final List<T> targets = <T>[];
@@ -1953,7 +1946,7 @@ class _PanHandler<T extends PanTarget<StatefulWidget>> extends Drag {
     _enteredTargets.clear();
   }
 
-  void finishDrag({bool pointerUp = false}) {
+  void _finishDrag({bool pointerUp = false}) {
     _leaveAllEntered(pointerUp: pointerUp);
     onPanEnd?.call(_position);
   }
