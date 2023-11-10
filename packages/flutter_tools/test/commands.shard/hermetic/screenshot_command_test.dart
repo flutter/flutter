@@ -131,14 +131,14 @@ void main() {
       testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
     });
 
-    testUsingContext('should not throw', () async {
+    testUsingContext('should not throw for a single device', () async {
       final ScreenshotCommand command = ScreenshotCommand(fs: MemoryFileSystem.test());
 
       final _ScreenshotDevice deviceUnsupportedForProject = _ScreenshotDevice(isSupportedForProject: false);
 
       testDeviceManager.devices = <Device>[deviceUnsupportedForProject];
 
-      expect(() => createTestCommandRunner(command).run(<String>['screenshot']), returnsNormally);
+      await createTestCommandRunner(command).run(<String>['screenshot']);
     }, overrides: <Type, Generator>{
       DeviceManager: () => testDeviceManager,
     });
