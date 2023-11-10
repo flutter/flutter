@@ -19,6 +19,7 @@ Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
   required Map<String, String> environment,
+  required String? clientIde,
   bool enableAsserts = false,
   FakeAnalytics? analyticsOverride,
 }) {
@@ -48,5 +49,6 @@ Analytics getAnalytics({
     flutterVersion: flutterVersion.frameworkVersion,
     dartVersion: flutterVersion.dartSdkVersion,
     enableAsserts: enableAsserts,
+    clientIde: clientIde,
   );
 }
