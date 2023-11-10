@@ -139,7 +139,6 @@ String generateTestBootstrap({
   final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
       : 'ws://[${host.address}]';
-  final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
 
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
@@ -213,7 +212,7 @@ void catchIsolateErrors() {
 
 void main() {
   String serverPort = Platform.environment['SERVER_PORT'] ?? '';
-  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
+  String server = Uri.decodeComponent('$websocketUrl:\$serverPort');
   StreamChannel<dynamic> testChannel = serializeSuite(() {
     catchIsolateErrors();
 ''');
