@@ -3124,6 +3124,8 @@ ORIGIN: ../../../flutter/impeller/entity/geometry/fill_path_geometry.cc + ../../
 ORIGIN: ../../../flutter/impeller/entity/geometry/fill_path_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/geometry.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/geometry.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/geometry/line_geometry.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/geometry/line_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/point_field_geometry.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/point_field_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/rect_geometry.cc + ../../../flutter/LICENSE
@@ -5881,6 +5883,8 @@ FILE: ../../../flutter/impeller/entity/geometry/fill_path_geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry/fill_path_geometry.h
 FILE: ../../../flutter/impeller/entity/geometry/geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry/geometry.h
+FILE: ../../../flutter/impeller/entity/geometry/line_geometry.cc
+FILE: ../../../flutter/impeller/entity/geometry/line_geometry.h
 FILE: ../../../flutter/impeller/entity/geometry/point_field_geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry/point_field_geometry.h
 FILE: ../../../flutter/impeller/entity/geometry/rect_geometry.cc

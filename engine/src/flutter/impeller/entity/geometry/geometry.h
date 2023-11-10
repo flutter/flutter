@@ -67,6 +67,11 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeRect(Rect rect);
 
+  static std::unique_ptr<Geometry> MakeLine(Point p0,
+                                            Point p1,
+                                            Scalar width,
+                                            Cap cap);
+
   static std::unique_ptr<Geometry> MakePointField(std::vector<Point> points,
                                                   Scalar radius,
                                                   bool round);
