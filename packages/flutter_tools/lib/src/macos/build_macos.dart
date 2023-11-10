@@ -27,9 +27,27 @@ import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 /// Filter out xcodebuild logging unrelated to macOS builds:
 /// ```
 /// xcodebuild[2096:1927385] Requested but did not find extension point with identifier Xcode.IDEKit.ExtensionPointIdentifierToBundleIdentifier for extension Xcode.DebuggerFoundation.AppExtensionToBundleIdentifierMap.watchOS of plug-in com.apple.dt.IDEWatchSupportCore
+///
 /// note: Using new build system
+///
+/// xcodebuild[61115:1017566] [MT] DVTAssertions: Warning in /System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot11/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/IDEFrameworks/IDEFrameworks-22267/IDEFoundation/Provisioning/Capabilities Infrastructure/IDECapabilityQuerySelection.swift:103
+/// Details:  createItemModels creation requirements should not create capability item model for a capability item model that already exists.
+/// Function: createItemModels(for:itemModelSource:)
+/// Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
+/// Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+
 /// ```
-final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extension point with identifier|note\:).)*$');
+final RegExp _filteredOutput = RegExp(
+  r'^((?!'
+  r'Requested but did not find extension point with identifier|'
+  r'note\:|'
+  r'\[MT\] DVTAssertions: Warning in /System/Volumes/Data/SWE/|'
+  r'Details\:  createItemModels|'
+  r'Function\: createItemModels|'
+  r'Thread\:   <_NSMainThread\:|'
+  r'Please file a bug at https\://feedbackassistant\.apple\.'
+  r').)*$'
+  );
 
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
