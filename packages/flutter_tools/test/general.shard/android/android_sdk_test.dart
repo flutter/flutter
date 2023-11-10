@@ -394,7 +394,7 @@ void main() {
       Config: () => config,
     });
 
-    for (final String envVar in [
+    for (final String envVar in <String>[
       kAndroidNdkHome,
       kAndroidNdkPath,
       kAndroidNdkRoot,
