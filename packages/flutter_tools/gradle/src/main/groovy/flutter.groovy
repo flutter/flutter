@@ -432,7 +432,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // TODO(gustl22): Can remove this check, once #54566 is resolved.
+    // TODO(#54566): Can remove this function and its call sites once resolved.
     /**
      * Returns `true` if the given path contains an `android/build.gradle` file.
      */
