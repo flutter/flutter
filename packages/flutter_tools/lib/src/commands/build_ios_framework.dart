@@ -71,7 +71,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag('plugins',
         defaultsTo: true,
         help: 'Whether to produce frameworks for the plugins. '
-              'Consider using "--no-plugins" if plugin frameworks are not required.',
+              'This is intended for cases where plugins are already being built separately.',
       )
       ..addFlag('static',
         help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
@@ -139,6 +139,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
     if ((await getBuildInfos()).isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
+    }
+
+    if (!boolArg('plugins') && boolArg('static')) {
+      throwToolExit('--static cannot be used with the --no-plugins flag');
     }
   }
 
@@ -313,7 +317,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
     globals.printStatus('Frameworks written to ${outputDirectory.path}.');
 
-    if (!project.isModule && boolArg('plugins') && hasPlugins(project)) {
+    if (!project.isModule && hasPlugins(project)) {
       // Apps do not generate a FlutterPluginRegistrant.framework. Users will need
       // to copy the GeneratedPluginRegistrant class to their project manually.
       final File pluginRegistrantHeader = project.ios.pluginRegistrantHeader;
