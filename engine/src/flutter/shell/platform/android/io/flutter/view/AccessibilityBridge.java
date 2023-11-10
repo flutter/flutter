@@ -379,7 +379,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Listener that is notified when accessibility touch exploration is turned on/off.
   // This is guarded at instantiation time.
-  @TargetApi(19)
   @RequiresApi(19)
   private final AccessibilityManager.TouchExplorationStateChangeListener
       touchExplorationStateChangeListener;
@@ -400,10 +399,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           }
           // Retrieve the current value of TRANSITION_ANIMATION_SCALE from the OS.
           String value =
-              Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1
-                  ? null
-                  : Settings.Global.getString(
-                      contentResolver, Settings.Global.TRANSITION_ANIMATION_SCALE);
+              Settings.Global.getString(
+                  contentResolver, Settings.Global.TRANSITION_ANIMATION_SCALE);
 
           boolean shouldAnimationsBeDisabled = value != null && value.equals("0");
           if (shouldAnimationsBeDisabled) {
@@ -451,40 +448,34 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Tell Flutter whether touch exploration is initially active or not. Then register a listener
     // to be notified of changes in the future.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      touchExplorationStateChangeListener =
-          new AccessibilityManager.TouchExplorationStateChangeListener() {
-            @Override
-            public void onTouchExplorationStateChanged(boolean isTouchExplorationEnabled) {
-              if (isReleased) {
-                return;
-              }
-              if (!isTouchExplorationEnabled) {
-                setAccessibleNavigation(false);
-                onTouchExplorationExit();
-              }
-
-              if (onAccessibilityChangeListener != null) {
-                onAccessibilityChangeListener.onAccessibilityChanged(
-                    accessibilityManager.isEnabled(), isTouchExplorationEnabled);
-              }
+    touchExplorationStateChangeListener =
+        new AccessibilityManager.TouchExplorationStateChangeListener() {
+          @Override
+          public void onTouchExplorationStateChanged(boolean isTouchExplorationEnabled) {
+            if (isReleased) {
+              return;
             }
-          };
-      touchExplorationStateChangeListener.onTouchExplorationStateChanged(
-          accessibilityManager.isTouchExplorationEnabled());
-      this.accessibilityManager.addTouchExplorationStateChangeListener(
-          touchExplorationStateChangeListener);
-    } else {
-      touchExplorationStateChangeListener = null;
-    }
+            if (!isTouchExplorationEnabled) {
+              setAccessibleNavigation(false);
+              onTouchExplorationExit();
+            }
+
+            if (onAccessibilityChangeListener != null) {
+              onAccessibilityChangeListener.onAccessibilityChanged(
+                  accessibilityManager.isEnabled(), isTouchExplorationEnabled);
+            }
+          }
+        };
+    touchExplorationStateChangeListener.onTouchExplorationStateChanged(
+        accessibilityManager.isTouchExplorationEnabled());
+    this.accessibilityManager.addTouchExplorationStateChangeListener(
+        touchExplorationStateChangeListener);
 
     // Tell Flutter whether animations should initially be enabled or disabled. Then register a
     // listener to be notified of changes in the future.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      animationScaleObserver.onChange(false);
-      Uri transitionUri = Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE);
-      this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
-    }
+    animationScaleObserver.onChange(false);
+    Uri transitionUri = Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE);
+    this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
 
     // Tells Flutter whether the text should be bolded or not. If the user changes bold text
     // setting, the configuration will change and trigger a re-build of the accesibiltyBridge.
@@ -507,10 +498,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     platformViewsAccessibilityDelegate.detachAccessibilityBridge();
     setOnAccessibilityChangeListener(null);
     accessibilityManager.removeAccessibilityStateChangeListener(accessibilityStateChangeListener);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      accessibilityManager.removeTouchExplorationStateChangeListener(
-          touchExplorationStateChangeListener);
-    }
+    accessibilityManager.removeTouchExplorationStateChangeListener(
+        touchExplorationStateChangeListener);
     contentResolver.unregisterContentObserver(animationScaleObserver);
     accessibilityChannel.setAccessibilityMessageHandler(null);
   }
@@ -669,9 +658,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     // Work around for https://github.com/flutter/flutter/issues/2101
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      result.setViewIdResourceName("");
-    }
+    result.setViewIdResourceName("");
     result.setPackageName(rootAccessibilityView.getContext().getPackageName());
     result.setClassName("android.view.View");
     result.setSource(rootAccessibilityView, virtualViewId);
@@ -689,20 +676,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (!semanticsNode.hasFlag(Flag.IS_READ_ONLY)) {
         result.setClassName("android.widget.EditText");
       }
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-        result.setEditable(!semanticsNode.hasFlag(Flag.IS_READ_ONLY));
-        if (semanticsNode.textSelectionBase != -1 && semanticsNode.textSelectionExtent != -1) {
-          result.setTextSelection(
-              semanticsNode.textSelectionBase, semanticsNode.textSelectionExtent);
-        }
-        // Text fields will always be created as a live region when they have input focus,
-        // so that updates to the label trigger polite announcements. This makes it easy to
-        // follow a11y guidelines for text fields on Android.
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2
-            && accessibilityFocusedSemanticsNode != null
-            && accessibilityFocusedSemanticsNode.id == virtualViewId) {
-          result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        }
+      result.setEditable(!semanticsNode.hasFlag(Flag.IS_READ_ONLY));
+      if (semanticsNode.textSelectionBase != -1 && semanticsNode.textSelectionExtent != -1) {
+        result.setTextSelection(semanticsNode.textSelectionBase, semanticsNode.textSelectionExtent);
+      }
+      // Text fields will always be created as a live region when they have input focus,
+      // so that updates to the label trigger polite announcements. This makes it easy to
+      // follow a11y guidelines for text fields on Android.
+      if (accessibilityFocusedSemanticsNode != null
+          && accessibilityFocusedSemanticsNode.id == virtualViewId) {
+        result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
       }
 
       // Cursor movements
@@ -737,19 +720,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // These are non-ops on older devices. Attempting to interact with the text will cause Talkback
     // to read the contents of the text box instead.
-    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      if (semanticsNode.hasAction(Action.SET_SELECTION)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
-      }
-      if (semanticsNode.hasAction(Action.COPY)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_COPY);
-      }
-      if (semanticsNode.hasAction(Action.CUT)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_CUT);
-      }
-      if (semanticsNode.hasAction(Action.PASTE)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_PASTE);
-      }
+    if (semanticsNode.hasAction(Action.SET_SELECTION)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+    }
+    if (semanticsNode.hasAction(Action.COPY)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_COPY);
+    }
+    if (semanticsNode.hasAction(Action.CUT)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_CUT);
+    }
+    if (semanticsNode.hasAction(Action.PASTE)) {
+      result.addAction(AccessibilityNodeInfo.ACTION_PASTE);
     }
 
     // Set text API isn't available until API 21.
@@ -767,8 +748,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // TODO(jonahwilliams): Figure out a way conform to the expected id from TalkBack's
       // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
     }
-    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2
-        && semanticsNode.hasAction(Action.DISMISS)) {
+    if (semanticsNode.hasAction(Action.DISMISS)) {
       result.setDismissable(true);
       result.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
     }
@@ -862,8 +842,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             result.setClassName("android.widget.HorizontalScrollView");
           }
         } else {
-          if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2
-              && shouldSetCollectionInfo(semanticsNode)) {
+          if (shouldSetCollectionInfo(semanticsNode)) {
             result.setCollectionInfo(
                 AccessibilityNodeInfo.CollectionInfo.obtain(
                     semanticsNode.scrollChildren, // rows
@@ -898,8 +877,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
       }
     }
-    if (semanticsNode.hasFlag(Flag.IS_LIVE_REGION)
-        && Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+    if (semanticsNode.hasFlag(Flag.IS_LIVE_REGION)) {
       result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
@@ -1111,26 +1089,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
       case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY:
         {
-          // Text selection APIs aren't available until API 18. We can't handle the case here so
-          // return false
-          // instead. It's extremely unlikely that this case would ever be triggered in the first
-          // place in API <
-          // 18.
-          if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            return false;
-          }
           return performCursorMoveAction(semanticsNode, virtualViewId, arguments, false);
         }
       case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY:
         {
-          // Text selection APIs aren't available until API 18. We can't handle the case here so
-          // return false
-          // instead. It's extremely unlikely that this case would ever be triggered in the first
-          // place in API <
-          // 18.
-          if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            return false;
-          }
           return performCursorMoveAction(semanticsNode, virtualViewId, arguments, true);
         }
       case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS:
@@ -1183,14 +1145,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
       case AccessibilityNodeInfo.ACTION_SET_SELECTION:
         {
-          // Text selection APIs aren't available until API 18. We can't handle the case here so
-          // return false
-          // instead. It's extremely unlikely that this case would ever be triggered in the first
-          // place in API <
-          // 18.
-          if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            return false;
-          }
           final Map<String, Integer> selection = new HashMap<>();
           final boolean hasSelection =
               arguments != null
@@ -1266,7 +1220,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * Handles the responsibilities of {@link #performAction(int, int, Bundle)} for the specific
    * scenario of cursor movement.
    */
-  @TargetApi(18)
   @RequiresApi(18)
   private boolean performCursorMoveAction(
       @NonNull SemanticsNode semanticsNode,
@@ -1996,9 +1949,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private void sendWindowContentChangeEvent(int virtualViewId) {
     AccessibilityEvent event =
         obtainAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
-    }
+    event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
     sendAccessibilityEvent(event);
   }
 
@@ -2049,7 +2000,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * Hook called just before a {@link SemanticsNode} is removed from the Android cache of Flutter's
    * semantics tree.
    */
-  @TargetApi(19)
   @RequiresApi(19)
   private void willRemoveSemanticsNode(SemanticsNode semanticsNodeToBeRemoved) {
     if (BuildConfig.DEBUG) {

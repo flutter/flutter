@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -172,16 +171,14 @@ public class FlutterFragment extends Fragment
 
   @RequiresApi(18)
   private final OnWindowFocusChangeListener onWindowFocusChangeListener =
-      Build.VERSION.SDK_INT >= 18
-          ? new OnWindowFocusChangeListener() {
-            @Override
-            public void onWindowFocusChanged(boolean hasFocus) {
-              if (stillAttachedForEvent("onWindowFocusChanged")) {
-                delegate.onWindowFocusChanged(hasFocus);
-              }
-            }
+      new OnWindowFocusChangeListener() {
+        @Override
+        public void onWindowFocusChanged(boolean hasFocus) {
+          if (stillAttachedForEvent("onWindowFocusChanged")) {
+            delegate.onWindowFocusChanged(hasFocus);
           }
-          : null;
+        }
+      };
 
   /**
    * Creates a {@code FlutterFragment} with a default configuration.
@@ -1128,20 +1125,16 @@ public class FlutterFragment extends Fragment
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    if (Build.VERSION.SDK_INT >= 18) {
-      view.getViewTreeObserver().addOnWindowFocusChangeListener(onWindowFocusChangeListener);
-    }
+    view.getViewTreeObserver().addOnWindowFocusChangeListener(onWindowFocusChangeListener);
   }
 
   @Override
   public void onDestroyView() {
     super.onDestroyView();
-    if (Build.VERSION.SDK_INT >= 18) {
-      // onWindowFocusChangeListener is API 18+ only.
-      requireView()
-          .getViewTreeObserver()
-          .removeOnWindowFocusChangeListener(onWindowFocusChangeListener);
-    }
+    // onWindowFocusChangeListener is API 18+ only.
+    requireView()
+        .getViewTreeObserver()
+        .removeOnWindowFocusChangeListener(onWindowFocusChangeListener);
     if (stillAttachedForEvent("onDestroyView")) {
       delegate.onDestroyView();
     }

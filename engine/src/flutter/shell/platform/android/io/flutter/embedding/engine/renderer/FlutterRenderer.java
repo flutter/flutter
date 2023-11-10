@@ -355,7 +355,6 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(19)
     public void release() {
       if (released) {
         return;
@@ -369,7 +368,6 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(19)
     public void pushImage(Image image) {
       if (released) {
         return;
@@ -433,7 +431,6 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
-    @TargetApi(19)
     protected void finalize() throws Throwable {
       try {
         if (released) {
