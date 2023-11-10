@@ -18,12 +18,12 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
+import '../../src/fakes.dart';
 
 const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
 
@@ -317,13 +317,24 @@ void main() {
   });
 
   group('unified_analytics', () {
+    late FakeAnalytics fakeAnalytics;
+    late MemoryFileSystem fs;
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+    });
+
     testUsingContext(
       'runner disable telemetry with flag',
       () async {
         io.setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
-        expect(globals.analytics.shouldShowMessage, true);
 
         await runner.run(
           <String>['--disable-analytics'],
@@ -336,7 +347,7 @@ void main() {
         expect(globals.analytics.telemetryEnabled, false);
       },
       overrides: <Type, Generator>{
-        Analytics: () => FakeAnalytics(),
+        Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -347,8 +358,17 @@ void main() {
       () async {
         io.setExitFunctionForTests((int exitCode) {});
 
+        expect(globals.analytics.telemetryEnabled, true);
+
+        await runner.run(
+          <String>['--disable-analytics'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
         expect(globals.analytics.telemetryEnabled, false);
-        expect(globals.analytics.shouldShowMessage, false);
 
         await runner.run(
           <String>['--enable-analytics'],
@@ -361,7 +381,7 @@ void main() {
         expect(globals.analytics.telemetryEnabled, true);
       },
       overrides: <Type, Generator>{
-        Analytics: () => FakeAnalytics(fakeTelemetryStatusOverride: false),
+        Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -373,7 +393,6 @@ void main() {
         io.setExitFunctionForTests((int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
-        expect(globals.analytics.shouldShowMessage, true);
 
         final int exitCode = await runner.run(
           <String>[
@@ -392,7 +411,7 @@ void main() {
             reason: 'Should not have changed from initialization');
       },
       overrides: <Type, Generator>{
-        Analytics: () => FakeAnalytics(),
+        Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -535,39 +554,4 @@ class WaitingCrashReporter implements CrashReporter {
     _details = details;
     return _future;
   }
-}
-
-/// A fake [Analytics] that will be used to test
-/// the --disable-analytics flag
-class FakeAnalytics extends Fake implements Analytics {
-
-  FakeAnalytics({bool fakeTelemetryStatusOverride = true})
-      : _fakeTelemetryStatus = fakeTelemetryStatusOverride,
-        _fakeShowMessage = fakeTelemetryStatusOverride;
-
-  // Both of the members below can be initialized with [fakeTelemetryStatusOverride]
-  // because if we pass in false for the status, that means we can also
-  // assume the message has been shown before
-  bool _fakeTelemetryStatus;
-  bool _fakeShowMessage;
-
-  @override
-  String get getConsentMessage => 'message';
-
-  @override
-  bool get shouldShowMessage => _fakeShowMessage;
-
-  @override
-  void clientShowedMessage() {
-    _fakeShowMessage = false;
-  }
-
-  @override
-  Future<void> setTelemetry(bool reportingBool) {
-    _fakeTelemetryStatus = reportingBool;
-    return Future<void>.value();
-  }
-
-  @override
-  bool get telemetryEnabled => _fakeTelemetryStatus;
 }

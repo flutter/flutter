@@ -275,7 +275,7 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String>? libraryNames, 
   @visibleForTesting bool forceSequential = false,
   @visibleForTesting FlutterVmService? serviceOverride,
   bool branchCoverage = false,
-  required Map<String, Set<int>> coverableLineCache,
+  Map<String, Set<int>>? coverableLineCache,
 }) {
   return coverage.collect(
     serviceUri, false, false, false, libraryNames,

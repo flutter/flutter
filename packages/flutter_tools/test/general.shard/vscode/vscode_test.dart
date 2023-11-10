@@ -45,7 +45,7 @@ void main() {
     const String home = '/home/me';
     final Platform platform = FakePlatform(environment: <String, String>{'HOME': home});
 
-    fileSystem.directory(fileSystem.path.join('/snap/code/current/', '.vscode')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('/snap/code/current/usr/share/code', '.vscode')).createSync(recursive: true);
     fileSystem.directory(fileSystem.path.join('/snap/code-insiders/current/usr/share/code-insiders', '.vscode-insiders')).createSync(recursive: true);
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
