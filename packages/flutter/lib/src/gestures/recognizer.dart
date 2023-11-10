@@ -80,7 +80,17 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     this.debugOwner,
     this.supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
-  }) : _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
+  }) : _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/gestures.dart',
+        className: '$GestureRecognizer',
+        object: this,
+      );
+    }
+  }
 
   /// The recognizer's owner.
   ///
@@ -242,7 +252,13 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// recognizer is being unregistered from a [GestureDetector], the
   /// GestureDetector widget calls this method).
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+  }
 
   /// Returns a very short pretty description of the gesture that the
   /// recognizer looks for, like 'tap' or 'horizontal drag'.

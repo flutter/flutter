@@ -1573,6 +1573,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
     await tester.pumpWidget(
       overlay(
         child: SelectableText.rich(
@@ -1581,8 +1584,7 @@ void main() {
               const TextSpan(text: 'text'),
               TextSpan(
                 text: 'link',
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () { },
+                recognizer: recognizer..onTap = () { },
               ),
             ],
           ),
@@ -2467,6 +2469,8 @@ void main() {
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2478,7 +2482,7 @@ void main() {
                 const TextSpan(text: onScreenText),
                 TextSpan(
                   text: offScreenText,
-                  recognizer: TapGestureRecognizer()..onTap = () { },
+                  recognizer: recognizer..onTap = () { },
                 ),
               ],
               style: textStyle,
@@ -4640,6 +4644,8 @@ void main() {
       ..onTap = () {
         spyTaps += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4690,6 +4696,8 @@ void main() {
       ..onLongPress = () {
         spyLongPress += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

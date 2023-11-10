@@ -441,6 +441,12 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
     _gestureRecognizer!.reset();
     super.detach();
   }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
+  }
 }
 
 /// A render object for a macOS platform view.
@@ -809,5 +815,11 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
   }
 }

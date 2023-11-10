@@ -638,7 +638,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -684,7 +686,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -727,7 +731,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -853,7 +859,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -893,7 +903,11 @@ void main() {
           viewType: 'webview',
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(
-              () => EagerGestureRecognizer(),
+              () {
+                final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                addTearDown(recognizer.dispose);
+                return recognizer;
+              },
             ),
           },
           layoutDirection: TextDirection.ltr,
@@ -912,7 +926,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -1728,7 +1744,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1772,7 +1790,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1814,7 +1834,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1937,7 +1959,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -2052,7 +2078,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -2653,7 +2681,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2697,7 +2727,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2739,7 +2771,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2862,7 +2896,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -2977,7 +3015,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -3241,7 +3281,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -3353,7 +3395,11 @@ void main() {
                 hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
               ),
@@ -3382,7 +3428,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       final PlatformViewSurface platformViewSurface = PlatformViewSurface(
@@ -3406,7 +3454,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
