@@ -116,14 +116,14 @@ class Surface {
 
     DomImageBitmap bitmap;
     if (Surface.offscreenCanvasSupported) {
-      bitmap = (await createImageBitmap(_offscreenCanvas!, (
+      bitmap = (await createImageBitmap(_offscreenCanvas! as JSObject, (
         x: 0,
         y: _pixelHeight - frameSize.height.toInt(),
         width: frameSize.width.toInt(),
         height: frameSize.height.toInt(),
       )).toDart)! as DomImageBitmap;
     } else {
-      bitmap = (await createImageBitmap(_canvasElement!, (
+      bitmap = (await createImageBitmap(_canvasElement! as JSObject, (
         x: 0,
         y: _pixelHeight - frameSize.height.toInt(),
         width: frameSize.width.toInt(),
