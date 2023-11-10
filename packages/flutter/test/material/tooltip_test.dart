@@ -2189,13 +2189,15 @@ void main() {
 
   testWidgetsWithLeakTracking('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {
     bool isTapped = false;
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Tooltip(
           richMessage: TextSpan(
             text: tooltipText,
-            recognizer: TapGestureRecognizer()..onTap = () {
+            recognizer: recognizer..onTap = () {
               isTapped = true;
             }
           ),
