@@ -830,7 +830,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
   await _testStaticAndNoPlugins(projectDir);
 }
 
-Future<void> _testBuildFrameworksWithoutPlugins(Directory projectDir, { required String platform, bool isModule = false}) async {
+Future<void> _testBuildFrameworksWithoutPlugins(Directory projectDir, { required String platform}) async {
   const String noPluginsOutputDir = 'flutter-frameworks-no-plugins';
 
   await inDirectory(projectDir, () async {
@@ -858,13 +858,6 @@ Future<void> _testBuildFrameworksWithoutPlugins(Directory projectDir, { required
       mode,
       'App.xcframework',
     ));
-    if (isModule) {
-      checkDirectoryExists(path.join(
-        noPluginsOutputPath,
-        mode,
-        'FlutterPluginRegistrant.xcframework',
-      ));
-    }
 
     checkDirectoryNotExists(path.join(
       noPluginsOutputPath,
