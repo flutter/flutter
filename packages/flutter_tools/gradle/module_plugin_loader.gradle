@@ -12,7 +12,7 @@ apply from: "$pathToThisDirectory/src/main/groovy/shared.groovy"
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
 def object = null
-nativePluginLoader.forEachPlugin(moduleProjectRoot, { androidPlugin ->
+nativePluginLoader2.forEachPlugin(moduleProjectRoot, { androidPlugin ->
     def pluginDirectory = new File(androidPlugin.path, 'android')
     assert pluginDirectory.exists()
     include ":${androidPlugin.name}"
