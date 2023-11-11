@@ -39,7 +39,7 @@ class StatelessLeakingWidget extends StatelessWidget {
       _notGCedObjects.add(LeakTrackedClass()..dispose());
     }
     if (notDisposed) {
-      // ignore: unused_local_variable
+      // ignore: unused_local_variable, it is unused intentionally, to illustrate not disposed object.
       final LeakTrackedClass notDisposedObject = LeakTrackedClass();
     }
   }

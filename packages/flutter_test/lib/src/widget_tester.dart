@@ -122,9 +122,9 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// for use outside of Flutter Framework.
 /// When [experimentalLeakTesting] is set, it is used for leak tracking.
 /// Otherwise [LeakTesting.settings] is used.
-/// You can adjust [LeakTesting.settings] in flutter_test_config.dart for your
-/// package or folders, or in `setUpAll` for a test file or group.
-/// If you set it for a group, remember the original value to a local variable
+/// Adjust [LeakTesting.settings] in flutter_test_config.dart (see [../flutter_test])
+/// for the entire package or folder, or in `setUpAll` for a test file or group.
+/// To adjust settings for a group, store the original value to a local variable
 /// and restore it in `tearDownAll` for the group.
 /// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
 /// `LeakTrackingForTests.ignore()`.
@@ -157,7 +157,7 @@ void testWidgets(
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   for (final dynamic value in variant.values) {
-    _plannedTests ++;
+    _plannedTests += 1;
     final String variationDescription = variant.describeValue(value);
     // IDEs may make assumptions about the format of this suffix in order to
     // support running tests directly from the editor (where they may have
@@ -175,7 +175,11 @@ void testWidgets(
         if (semanticsEnabled) {
           semanticsHandle = tester.ensureSemantics();
         }
+
+        // This tear down happens after in-test `addTearDown`, but before
+        // separate `tearDown` in the test file.
         test_package.addTearDown(binding.postTest);
+
         return binding.runTest(
           () async {
             binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
@@ -185,7 +189,7 @@ void testWidgets(
               memento = await variant.setUp(value);
               await callback(tester);
             } finally {
-              _executedTests ++;
+              _executedTests += 1;
               await variant.tearDown(value, memento);
             }
             semanticsHandle?.dispose();
@@ -209,7 +213,12 @@ WidgetTesterCallback _wrapWithLeakTracking(
 ) {
   // This cannot be done just once, because, if a test file starts with a group,
   // the tear down will happen after group, not after all tests.
-  tearDown(() async {
+  // It cannot be done in `tearDown`, because user defined tear down, tha may do disposal
+  // will happen after `tearDown` defined here.
+  // This is done unconditionally, even if settings.ignore is true,
+  // because settings.ignore may be different for different tests
+  // and it is not known at this point if there are tests with leak tracking enabled.
+  tearDownAll(() async {
     await _mayBeFinalizeLeakTracking();
   });
 
@@ -222,7 +231,7 @@ WidgetTesterCallback _wrapWithLeakTracking(
     }
 
     if (!_isPlatformSupported) {
-      _mayBePrintPlatformWarning();
+      _maybePrintPlatformWarning();
       await callback(tester);
       return;
     }
@@ -249,7 +258,7 @@ WidgetTesterCallback _wrapWithLeakTracking(
 
 bool _notSupportedWarningPrinted = false;
 bool get _isPlatformSupported => !kIsWeb;
-void _mayBePrintPlatformWarning() {
+void _maybePrintPlatformWarning() {
   if (!LeakTracking.warnForUnsupportedPlatforms || _isPlatformSupported || _notSupportedWarningPrinted) {
     return;
   }
@@ -289,11 +298,13 @@ Future<void> _mayBeFinalizeLeakTracking() async {
   experimentalCollectedLeaksReporter(leaks);
 }
 
-/// Hendler for memory leaks found by `testWidgets`.
+/// Handler for memory leaks found by `testWidgets`.
 ///
 /// Set it to analyse the leaks programmatically.
 /// The handler is invoked on tear down of the test run.
 /// The default reporter fails in case of found leaks.
+///
+/// Used to test leak tracking functionality of `testWidgets`.
 LeaksCallback experimentalCollectedLeaksReporter = (Leaks leaks) => expect(leaks, isLeakFree);
 
 /// An abstract base class for describing test environment variants.

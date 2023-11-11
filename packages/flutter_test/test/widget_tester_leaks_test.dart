@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
-import 'utils/leaking_classes.dart'; // ignore: implementation_imports
+import 'utils/leaking_classes.dart';
 
 late final String _test1TrackingOnNoLeaks;
 late final String _test2TrackingOffLeaks;
@@ -34,8 +34,9 @@ void main() {
     await widgetTester.pumpWidget(Container());
   });
 
-  testWidgets(_test2TrackingOffLeaks = 'test2, tracking-off, leaks',
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  testWidgets(
+    _test2TrackingOffLeaks = 'test2, tracking-off, leaks',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, null);
@@ -51,9 +52,9 @@ void main() {
   });
 
   testWidgets(
-  _test4TrackingOnWithCreationStackTrace = 'test4, tracking-on, with creation stack trace',
-  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
-    (WidgetTester widgetTester) async {
+    _test4TrackingOnWithCreationStackTrace = 'test4, tracking-on, with creation stack trace',
+    experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester widgetTester) async {
       expect(LeakTracking.isStarted, true);
       expect(LeakTracking.phase.name, _test4TrackingOnWithCreationStackTrace);
       expect(LeakTracking.phase.ignoreLeaks, false);
@@ -62,7 +63,7 @@ void main() {
   );
 
   testWidgets(
-  _test5TrackingOnWithDisposalStackTrace = 'test5, tracking-on, with disposal stack trace',
+    _test5TrackingOnWithDisposalStackTrace = 'test5, tracking-on, with disposal stack trace',
   experimentalLeakTesting: LeakTesting.settings.withDisposalStackTrace(),
     (WidgetTester widgetTester) async {
       expect(LeakTracking.isStarted, true);
@@ -72,31 +73,9 @@ void main() {
     },
   );
 
-  // TODO(polina-c): add this test to leak_tracker after merging this code.
-  // It cannot be added here, because it requires flag --enable-vmservice for `flutter test`.
-  // testWidgets(
-  //   _test6TrackingOnWithPath = 'test6, tracking-on, with path',
-  // experimentalLeakTesting: LeakTesting.settings.withRetainingPath(),
-  //   (WidgetTester widgetTester) async {
-  //     expect(LeakTracking.isStarted, true);
-  //     expect(LeakTracking.phase.name, _test6TrackingOnWithPath);
-  //     expect(LeakTracking.phase.ignoreLeaks, false);
-  //     await widgetTester.pumpWidget(StatelessLeakingWidget());
-  //   },
-  // );
-  //
-  // Validation in tear down should be:
-  //
-  // _verifyLeaks(
-  //    reportedLeaks,
-  //    _test6TrackingOnWithPath,
-  //    notDisposed: 1,
-  //    notGCed: 1,
-  //    expectedContextKeys: <LeakType, List<String>>{
-  //      LeakType.notGCed: <String>['path'],
-  //      LeakType.notDisposed: <String>[],
-  //    },
-  // );
+  // `withRetainingPath` is tested in leak tracker, because it requires a flag to enable vm.
+  // TODO(polina-c): link the test in leak_tracker
+  // https://github.com/flutter/flutter/issues/135856#issuecomment-1806560080
 
   tearDownAll(() {
     try {
