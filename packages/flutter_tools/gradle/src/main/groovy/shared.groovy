@@ -36,7 +36,7 @@ class NativePluginLoader {
     /**
      * Parses <project-src>/.flutter-plugins-dependencies
      */
-    private Map getDependenciesMetadata(File flutterSourceDirectory) {
+    Map getDependenciesMetadata(File flutterSourceDirectory) {
         if (parsedFlutterPluginsDependencies) {
             return parsedFlutterPluginsDependencies
         }

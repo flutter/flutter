@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'deferred_components_config.dart';
-import 'deferred_components_project.dart';
 import 'plugin_project.dart';
 
 class PluginEachSettingsGradleProject extends PluginProject {
@@ -13,7 +12,7 @@ class PluginEachSettingsGradleProject extends PluginProject {
 }
 
 class PluginEachSettingsGradleDeferredComponentsConfig
-    extends BasicDeferredComponentsConfig {
+    extends PluginDeferredComponentsConfig {
   @override
   String get androidSettings => r'''
 include ':app'
