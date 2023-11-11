@@ -632,6 +632,10 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
   }
 
   void _reportRouteInformation(Duration timestamp) {
+    if (!mounted) {
+      return;
+    }
+
     assert(_routeInformationReportingTaskScheduled);
     _routeInformationReportingTaskScheduled = false;
 
@@ -726,6 +730,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
 
   @override
   void dispose() {
+    _routeInformation.dispose();
     widget.routeInformationProvider?.removeListener(_handleRouteInformationProviderNotification);
     widget.backButtonDispatcher?.removeCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.removeListener(_handleRouterDelegateNotification);

@@ -886,6 +886,7 @@ class StartupTest {
              '-v',
             '--profile',
             '--target=$target',
+            if (deviceOperatingSystem == DeviceOperatingSystem.ios) '--no-publish-port',
           ]);
           final String buildRoot = path.join(testDirectory, 'build');
           applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
@@ -1286,6 +1287,22 @@ class PerfTest {
         );
       }
 
+      final bool recordGPU;
+      switch (deviceOperatingSystem) {
+        case DeviceOperatingSystem.ios:
+          recordGPU = true;
+        case DeviceOperatingSystem.android:
+        case DeviceOperatingSystem.androidArm:
+        case DeviceOperatingSystem.androidArm64:
+          recordGPU = enableImpeller ?? false;
+        case DeviceOperatingSystem.fake:
+        case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.linux:
+        case DeviceOperatingSystem.macos:
+        case DeviceOperatingSystem.windows:
+          recordGPU = false;
+      }
+
       // TODO(liyuqian): Remove isAndroid restriction once
       // https://github.com/flutter/flutter/issues/61567 is fixed.
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
@@ -1321,6 +1338,12 @@ class PerfTest {
           if (data['90hz_frame_percentage'] != null) '90hz_frame_percentage',
           if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
           if (data['illegal_refresh_rate_frame_count'] != null) 'illegal_refresh_rate_frame_count',
+          if (recordGPU) ...<String>[
+            if (data['average_gpu_frame_time'] != null) 'average_gpu_frame_time',
+            if (data['90th_percentile_gpu_frame_time'] != null) '90th_percentile_gpu_frame_time',
+            if (data['99th_percentile_gpu_frame_time'] != null) '99th_percentile_gpu_frame_time',
+            if (data['worst_gpu_frame_time'] != null) 'worst_gpu_frame_time',
+          ]
         ],
       );
     });

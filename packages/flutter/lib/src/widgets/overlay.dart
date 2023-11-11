@@ -384,6 +384,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
 ///
+/// For widgets drawn in an [OverlayEntry], do not assume that the size of the
+/// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
+/// have different sizes.
+///
 /// {@tool dartpad}
 /// This example shows how to use the [Overlay] to highlight the [NavigationBar]
 /// destination.
@@ -1410,7 +1414,7 @@ class OverlayPortalController {
       : _zOrderIndex != null;
   }
 
-  /// Conventience method for toggling the current [isShowing] status.
+  /// Convenience method for toggling the current [isShowing] status.
   ///
   /// This method should typically not be called while the widget tree is being
   /// rebuilt.
