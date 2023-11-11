@@ -124,7 +124,7 @@ flutter:
 class PluginUnsupportedAndroidProject extends PluginProject {
   @override
   String get pubspec => r'''
-name: test_plugin_example
+name: test
 environment:
   sdk: '>=3.2.0-0 <4.0.0'
 dependencies:
@@ -141,7 +141,7 @@ class PluginEachUnsupportedAndroidProject
     extends PluginEachSettingsGradleProject {
   @override
   String get pubspec => r'''
-name: test_plugin_example
+name: test
 environment:
   sdk: '>=3.2.0-0 <4.0.0'
 dependencies:
