@@ -773,6 +773,7 @@ void main() {
               children: <Widget>[
                 const Text('Outside'),
                 TextFormField(
+                  autofocus: true,
                   onTapOutside: (PointerEvent event) {
                     tapOutsideCount += 1;
                   },
@@ -791,6 +792,37 @@ void main() {
     await tester.tap(find.text('Outside'));
     await tester.tap(find.text('Outside'));
     expect(tapOutsideCount, 3);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/134341.
+  testWidgetsWithLeakTracking('onTapOutside is not called upon tap outside when field is not focused', (WidgetTester tester) async {
+    int tapOutsideCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                TextFormField(
+                  onTapOutside: (PointerEvent event) {
+                    tapOutsideCount += 1;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tapOutsideCount, 0);
+    await tester.tap(find.byType(TextFormField));
+    await tester.tap(find.text('Outside'));
+    await tester.tap(find.text('Outside'));
+    await tester.tap(find.text('Outside'));
+    expect(tapOutsideCount, 0);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
@@ -1481,27 +1513,64 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Error color for cursor while validating', (WidgetTester tester) async {
-    const Color errorColor = Color(0xff123456);
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        colorScheme: const ColorScheme.light(error: errorColor),
-      ),
-      home: Material(
-        child: Center(
-          child: TextFormField(
-            enabled: true,
-            autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
-              return 'Please enter value';
-            },
+    const Color themeErrorColor = Color(0xff111111);
+    const Color errorStyleColor = Color(0xff777777);
+    const Color cursorErrorColor = Color(0xffbbbbbb);
+
+    Widget buildWidget({Color? errorStyleColor, Color? cursorErrorColor}) {
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: const ColorScheme.light(error: themeErrorColor),
+        ),
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              enabled: true,
+              autovalidateMode: AutovalidateMode.always,
+              decoration: InputDecoration(
+                errorStyle: TextStyle(
+                  color: errorStyleColor,
+                ),
+              ),
+              cursorErrorColor: cursorErrorColor,
+              validator: (String? value) {
+                return 'Please enter value';
+              },
+            ),
           ),
         ),
+      );
+    }
+
+    Future<void> runTest(Widget widget, {required Color expectedColor}) async {
+      await tester.pumpWidget(widget);
+      await tester.enterText(find.byType(TextField), 'a');
+      final EditableText textField = tester.widget(
+        find.byType(EditableText).first,
+      );
+      await tester.pump();
+      expect(textField.cursorColor, expectedColor);
+    }
+
+    await runTest(
+      buildWidget(),
+      expectedColor: themeErrorColor,
+    );
+    await runTest(
+      buildWidget(errorStyleColor: errorStyleColor),
+      expectedColor: errorStyleColor,
+    );
+    await runTest(
+      buildWidget(cursorErrorColor: cursorErrorColor),
+      expectedColor: cursorErrorColor,
+    );
+    await runTest(
+      buildWidget(
+        errorStyleColor: errorStyleColor,
+        cursorErrorColor: cursorErrorColor,
       ),
-    ));
-    await tester.enterText(find.byType(TextField), 'a');
-    final EditableText textField = tester.widget(find.byType(EditableText).first);
-    await tester.pump();
-    expect(textField.cursorColor, errorColor);
+      expectedColor: cursorErrorColor,
+    );
   });
 
   testWidgetsWithLeakTracking('TextFormField onChanged is called when the form is reset', (WidgetTester tester) async {

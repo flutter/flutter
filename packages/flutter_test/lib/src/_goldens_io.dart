@@ -299,6 +299,16 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Future<void> update(double width, double height, Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
+
+  @override
+  Future<bool> compareBytes(Uint8List bytes, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<void> updateBytes(Uint8List bytes, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
 }
 
 /// Reads the red value out of a 32 bit rgba pixel.

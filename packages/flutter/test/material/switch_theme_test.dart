@@ -717,6 +717,7 @@ void main() {
         ..rrect()
         ..rrect()
         ..rrect()
+        ..rrect()
         ..rrect(color: defaultThumbColor)
     );
 
@@ -727,6 +728,7 @@ void main() {
       _getSwitchMaterial(tester),
       paints
         ..rrect(color: selectedTrackColor)
+        ..rrect()
         ..rrect()
         ..rrect()
         ..rrect()
