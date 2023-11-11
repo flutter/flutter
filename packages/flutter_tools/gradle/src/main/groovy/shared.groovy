@@ -1,17 +1,19 @@
 import groovy.json.JsonSlurper
 
 class NativePluginLoader {
+    NativePluginLoader() {}
+
     // This string must match _kFlutterPluginsHasNativeBuildKey defined in
     // packages/flutter_tools/lib/src/flutter_plugins.dart.
     static final String nativeBuildKey = 'native_build'
     static final String flutterPluginsDependenciesFile = '.flutter-plugins-dependencies'
 
-    static void forEachPlugin(File flutterSourceDirectory, Closure<Object> callback) {
+    void forEachPlugin(File flutterSourceDirectory, Closure<Object> callback) {
         def meta = getDependenciesMetadata(flutterSourceDirectory)
         if (meta == null) {
             return
         }
-        
+
         assert meta.plugins instanceof Map
         assert meta.plugins.android instanceof List
         // Includes the Flutter plugins that support the Android platform.
@@ -29,12 +31,12 @@ class NativePluginLoader {
     }
 
 
-    static private Map parsedFlutterPluginsDependencies
+    private Map parsedFlutterPluginsDependencies
 
     /**
      * Parses <project-src>/.flutter-plugins-dependencies
      */
-    static private Map getDependenciesMetadata(File flutterSourceDirectory) {
+    private Map getDependenciesMetadata(File flutterSourceDirectory) {
         if (parsedFlutterPluginsDependencies) {
             return parsedFlutterPluginsDependencies
         }
@@ -47,4 +49,8 @@ class NativePluginLoader {
         }
         return null
     }
+}
+
+ext {
+    nativePluginLoader = new NativePluginLoader()
 }

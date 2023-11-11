@@ -28,6 +28,9 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
+def pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: "$pathToThisDirectory/shared.groovy"
+
 /**
  * For apps only. Provides the flutter extension used in app/build.gradle.
  *
@@ -625,7 +628,7 @@ class FlutterPlugin implements Plugin<Project> {
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
         List androidPlugins = []
-        NativePluginLoader.forEachPlugin(getFlutterSourceDirectory(), { androidPlugin ->
+        project.ext.nativePluginLoader.forEachPlugin(getFlutterSourceDirectory(), { androidPlugin ->
             androidPlugins.add(androidPlugin)
         })
         return androidPlugins
