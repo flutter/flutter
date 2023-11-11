@@ -79,7 +79,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
@@ -94,7 +94,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
       cpu: arm64
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -112,7 +112,7 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-12|Mac-13
+      os: Mac-12
       tags: >
         ["devicelab", "hostonly", "mac"]
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -128,7 +128,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
       cpu: x86
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -145,7 +145,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
       cpu: x86
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -4441,14 +4441,15 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
-    presubmit: false
+    # TODO(vashworth): Take out of bringup once https://github.com/flutter/flutter/issues/138194 is resolved.
+    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-12|Mac-13", "cpu=x86"]
+        ["device_os=iOS-16","os=Mac-12", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
