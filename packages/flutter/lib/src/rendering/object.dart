@@ -822,6 +822,16 @@ typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
 class _LocalSemanticsHandle implements SemanticsHandle {
   _LocalSemanticsHandle._(PipelineOwner owner, this.listener)
       : _owner = owner {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/rendering.dart',
+        className: '$_LocalSemanticsHandle',
+        object: this,
+      );
+    }
+
     if (listener != null) {
       _owner.semanticsOwner!.addListener(listener!);
     }
@@ -834,6 +844,12 @@ class _LocalSemanticsHandle implements SemanticsHandle {
 
   @override
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
     if (listener != null) {
       _owner.semanticsOwner!.removeListener(listener!);
     }

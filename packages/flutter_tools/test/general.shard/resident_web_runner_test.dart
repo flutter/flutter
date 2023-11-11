@@ -34,6 +34,7 @@ import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
@@ -41,6 +42,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart' as test_fakes;
 
 const List<VmServiceExpectation> kAttachLogExpectations =
     <VmServiceExpectation>[
@@ -161,6 +163,7 @@ void main() {
   late FileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage testUsage;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() {
     testUsage = TestUsage();
@@ -180,6 +183,10 @@ void main() {
       ..device = mockDevice
       ..generator = residentCompiler;
     fileSystem.file('.packages').writeAsStringSync('\n');
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: test_fakes.FakeFlutterVersion(),
+    );
   });
 
   void setupMocks() {
@@ -214,6 +221,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -246,6 +254,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -265,6 +274,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -278,6 +288,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -411,6 +422,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -437,6 +449,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -637,6 +650,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
     fakeVmServiceHost =
@@ -722,11 +736,25 @@ void main() {
             'cd48': 'false'
           })),
     ]);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.hotRunnerInfo(
+          label: 'restart',
+          targetPlatform: 'web-javascript',
+          sdkName: '',
+          emulator: false,
+          fullRestart: true,
+          overallTimeInMs: 0,
+        ),
+      ),
+    );
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
     ]);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -795,11 +823,25 @@ void main() {
             'cd48': 'false'
           })),
     ]);
+    expect(
+      fakeAnalytics.sentEvents,
+      contains(
+        Event.hotRunnerInfo(
+          label: 'restart',
+          targetPlatform: 'web-javascript',
+          sdkName: '',
+          emulator: false,
+          fullRestart: true,
+          overallTimeInMs: 0,
+        ),
+      ),
+    );
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
     ]);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -836,9 +878,11 @@ void main() {
 
     // web-server device does not send restart analytics
     expect(testUsage.events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
     expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -868,9 +912,11 @@ void main() {
 
     expect(await residentWebRunner.run(), 1);
     expect(testUsage.events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
     expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -935,9 +981,11 @@ void main() {
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
     expect(testUsage.events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
     expect(testUsage.timings, isEmpty);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
+    Analytics: () => fakeAnalytics,
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
@@ -1123,6 +1171,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -1171,6 +1220,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -1213,6 +1263,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       systemClock: globals.systemClock,
     );
 
@@ -1413,6 +1464,7 @@ ResidentRunner setUpResidentRunner(
         debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
     ipv6: true,
     usage: globals.flutterUsage,
+    analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
