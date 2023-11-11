@@ -422,7 +422,6 @@ class FlutterPlugin implements Plugin<Project> {
         if(!settingsGradle.exists() || !settingsGradle.text.contains("'.flutter-plugins'")) {
             return
         }
-        project.logger.error("Your app uses an outdated version of `settings.gradle`. Please update.")
         List deps = getPluginDependencies()
         List plugins = getPluginList().collect { it.name }
         deps.removeIf { plugins.contains(it.name) }

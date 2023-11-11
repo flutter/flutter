@@ -110,11 +110,6 @@ flutter:
       () async {
     final Project project = PluginEachUnsupportedAndroidProject();
     final ProcessResult buildApkResult = await testPlugin(project: project);
-    expect(
-      buildApkResult.stderr,
-      contains(
-          'Your app uses an outdated version of `settings.gradle`. Please update.'),
-    );
     expect(buildApkResult.exitCode, equals(0),
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
