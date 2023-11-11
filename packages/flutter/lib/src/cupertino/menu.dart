@@ -537,7 +537,7 @@ Future<T?> showCupertinoMenu<T>({
   bool useRootNavigator = false,
 }) async {
   // Build items initially so that we know whether we need to push the menu on
-  // the navigation stack.
+  // the navigation stack. If the menu is empty, we don't need to push it.
   List<CupertinoMenuEntry<T>>? initialMenuItems = itemBuilder(context);
   if (initialMenuItems.isEmpty) {
     return null;
@@ -551,7 +551,11 @@ Future<T?> showCupertinoMenu<T>({
   final Size overlaySize = navigator.overlay?.context.size
                            ?? MediaQuery.sizeOf(context);
   final Size anchorSize = anchorPosition.toSize(overlaySize);
-
+  final CapturedThemes inheritedTheme = InheritedTheme.capture(
+    from: context,
+    to: navigator.context,
+  );
+  Alignment? menuAlignment = alignment;
   return navigator.push<T>(
     _CupertinoMenuRoute<T>(
       curve: const ElasticOutCurve(1.65),
@@ -566,47 +570,52 @@ Future<T?> showCupertinoMenu<T>({
         Animation<double> animation,
         Animation<double> secondaryAnimation,
       ) {
-        if(alignment == null){
+        if(menuAlignment == null){
           final Offset anchorCenter = Offset(
             anchorPosition.left + anchorSize.width / 2,
             anchorPosition.top + anchorSize.height / 2,
           );
-          alignment = Alignment(
+          menuAlignment = Alignment(
             (anchorCenter.dx / overlaySize.width) * 2 - 1,
             (anchorCenter.dy / overlaySize.height) * 2 - 1,
           );
         }
-        return InheritedTheme.capture(
-          from: context,
-          to: Navigator.of(childContext).context,
-        ).wrap(
-          ValueListenableBuilder<int>(
-            valueListenable: rebuildSignal,
-            builder:(BuildContext context, int value, Widget? child) {
-              final List<CupertinoMenuEntry<T>> menuItems;
-              if (value == 0) {
-                menuItems = initialMenuItems ?? itemBuilder(context);
-                initialMenuItems = null;
-              } else {
-                menuItems = itemBuilder(context);
-              }
-              return CupertinoMenu<T>(
-                brightness: brightness,
-                alignment: alignment!,
-                offset: offset,
-                animation: animation,
-                anchorPosition: anchorPosition,
-                anchorSize: anchorSize,
-                hasLeadingWidget: menuItems.any(
-                  (CupertinoMenuEntry<T> item) => item.hasLeading
-                ),
-                constraints: constraints,
-                physics: physics,
-                clip: clip,
-                edgeInsets: edgeInsets,
-                children: menuItems,
-              );
-            },
+
+        return MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          removeBottom: true,
+          removeLeft: true,
+          removeRight: true,
+          child: inheritedTheme.wrap(
+            ValueListenableBuilder<int>(
+              valueListenable: rebuildSignal,
+              builder:(BuildContext context, int value, Widget? child) {
+                final List<CupertinoMenuEntry<T>> menuItems;
+                if (value == 0) {
+                  menuItems = initialMenuItems ?? itemBuilder(context);
+                  initialMenuItems = null;
+                } else {
+                  menuItems = itemBuilder(context);
+                }
+                return CupertinoMenu<T>(
+                  brightness: brightness,
+                  alignment: menuAlignment!,
+                  offset: offset,
+                  animation: animation,
+                  anchorPosition: anchorPosition,
+                  anchorSize: anchorSize,
+                  hasLeadingWidget: menuItems.any(
+                    (CupertinoMenuEntry<T> item) => item.hasLeading
+                  ),
+                  constraints: constraints,
+                  physics: physics,
+                  clip: clip,
+                  edgeInsets: edgeInsets,
+                  children: menuItems,
+                );
+              },
+            ),
           ),
         );
       },
@@ -625,6 +634,63 @@ String _getLocalizedBarrierLabel(BuildContext context) {
   // [DefaultMaterialLocalizations().modalBarrierDismissLabel].
   return cupertinoLocalizations?.modalBarrierDismissLabel
          ?? const DefaultCupertinoLocalizations().modalBarrierDismissLabel;
+}
+
+class _CupertinoMenuRoute<T> extends PopupRoute<T> {
+  _CupertinoMenuRoute({
+    required this.barrierLabel,
+    required this.pageBuilder,
+    required this.curve,
+    required this.reverseCurve,
+    required this.transitionDuration,
+    required this.reverseTransitionDuration,
+    super.settings,
+  }) : super(traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop);
+
+  final Curve curve;
+  final Curve reverseCurve;
+  final Widget Function(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) pageBuilder;
+
+  @override
+  final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
+
+  @override
+  final String barrierLabel;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return pageBuilder(
+             context,
+             animation,
+             secondaryAnimation,
+           );
+  }
+
+  @override
+  Animation<double> createAnimation() {
+    return CurvedAnimation(
+             parent: super.createAnimation(),
+             curve: curve,
+             reverseCurve: reverseCurve,
+           );
+  }
 }
 
 
@@ -2483,7 +2549,7 @@ mixin CupertinoNestedMenuControlMixin<T, U extends StatefulWidget>
           case AnimationStatus.forward:
             _status = CupertinoMenuStatus.opening;
             didOpenMenu();
-        };
+        }
     });
 
   }
@@ -2742,6 +2808,8 @@ class _CupertinoNestedMenuState<T>
           'once the menu has opened.',
         );
 
+        final ui.Size anchorSize = (context.findRenderObject()! as RenderBox).size;
+
         final List<ScopedMenuTreeCoordinates> wrappedItems =
           CupertinoMenu.wrapMenuItems(
             items: <CupertinoMenuEntry<T>>[
@@ -2755,6 +2823,7 @@ class _CupertinoNestedMenuState<T>
                 expanded: true,
                 enabled: widget.enabled,
                 title: widget.title,
+                height: anchorSize.height,
               ),
               ...items,
             ],
@@ -2810,6 +2879,7 @@ class _CupertinoNestedMenuState<T>
       trailing: widget.trailing,
       enabled: widget.enabled,
       title: widget.title,
+      height: widget.height,
     );
   }
 }
@@ -2978,64 +3048,6 @@ class _CupertinoMenuLayerState extends State<CupertinoMenuLayer> {
     );
   }
 }
-
-class _CupertinoMenuRoute<T> extends PopupRoute<T> {
-  _CupertinoMenuRoute({
-    required this.barrierLabel,
-    required this.pageBuilder,
-    required this.curve,
-    required this.reverseCurve,
-    required this.transitionDuration,
-    required this.reverseTransitionDuration,
-    super.settings,
-  }) : super(traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop);
-
-  final Curve curve;
-  final Curve reverseCurve;
-  final Widget Function(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) pageBuilder;
-
-  @override
-  final Duration transitionDuration;
-
-  @override
-  final Duration reverseTransitionDuration;
-
-  @override
-  final String barrierLabel;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return pageBuilder(
-             context,
-             animation,
-             secondaryAnimation,
-           );
-  }
-
-  @override
-  Animation<double> createAnimation() {
-    return CurvedAnimation(
-             parent: super.createAnimation(),
-             curve: curve,
-             reverseCurve: reverseCurve,
-           );
-  }
-}
-
 
 // A layout delegate that positions the root menu relative to its anchor.
 class _RootMenuLayout extends SingleChildLayoutDelegate {
@@ -3369,7 +3381,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   // separately from the _MenuSurface widget.
   CustomPaint _buildShadow(BuildContext context, Widget child) {
     return CustomPaint(
-      painter: _MenuLayerShadowPainter(
+      painter: _ShadowPainter(
         brightness: CupertinoTheme.brightnessOf(context),
         depth: widget.depth,
         radius: CupertinoMenu.radius,
@@ -3403,7 +3415,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
       child: ListenableBuilder(
         listenable: _snapshotController,
         builder: _buildAbsorbPointer,
-        child: _MenuSurface(
+        child: _AnimatedSurface(
           shadow: _buildShadow,
           depth: widget.depth,
           borderRadiusTween: _borderRadiusTween,
@@ -3421,8 +3433,8 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   }
 }
 
-class _MenuLayerShadowPainter extends CustomPainter {
-  const _MenuLayerShadowPainter({
+class _ShadowPainter extends CustomPainter {
+  const _ShadowPainter({
     required this.depth,
     required this.radius,
     required this.brightness,
@@ -3510,14 +3522,14 @@ class _MenuLayerShadowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_MenuLayerShadowPainter oldDelegate) {
+  bool shouldRepaint(_ShadowPainter oldDelegate) {
     return oldDelegate.radius != radius
         || oldDelegate.depth != depth
         || oldDelegate.shadowOpacity != shadowOpacity;
   }
 
   @override
-  bool shouldRebuildSemantics(_MenuLayerShadowPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(_ShadowPainter oldDelegate) => false;
 }
 
 // The animated surface of a [CupertinoMenu].
@@ -3536,8 +3548,8 @@ class _MenuLayerShadowPainter extends CustomPainter {
 //
 // The [nestingAnimation] property describes the animation that reveals
 // individual menu layers.
-class _MenuSurface extends AnimatedWidget {
- const  _MenuSurface({
+class _AnimatedSurface extends AnimatedWidget {
+ const  _AnimatedSurface({
     required this.child,
     required this.borderRadiusTween,
     required int depth,
@@ -3586,7 +3598,7 @@ class _MenuSurface extends AnimatedWidget {
               // Padding prevents blur from extending beyond the menu's bounds
               child: Padding(
                   padding: const EdgeInsets.all(0.5),
-                  child: _BlurredMenuBackdrop(
+                  child: _BlurredSurface(
                     strength: _blurInterval.transform(clampedValue),
                     lightness: clampedValue * 20,
                     saturation: 1 + value,
@@ -3619,8 +3631,8 @@ class _MenuSurface extends AnimatedWidget {
 // background is transparent. The backdrop is applied as a separate layer
 // because opacity transitions applied to a backdrop filter have some visual
 // artifacts. See https://github.com/flutter/flutter/issues/31706.
-class _BlurredMenuBackdrop extends StatelessWidget {
-  const _BlurredMenuBackdrop({
+class _BlurredSurface extends StatelessWidget {
+  const _BlurredSurface({
     required this.strength,
     required this.lightness,
     required this.saturation,
@@ -3683,9 +3695,9 @@ class _BlurredMenuBackdrop extends StatelessWidget {
 
 
 
-class _CupertinoPersistentMenuHeaderDelegate
+class _StickyMenuHeaderDelegate
   extends SliverPersistentHeaderDelegate {
-  const _CupertinoPersistentMenuHeaderDelegate({
+  const _StickyMenuHeaderDelegate({
     required this.child,
     required this.height,
   });
@@ -3714,7 +3726,7 @@ class _CupertinoPersistentMenuHeaderDelegate
   double get minExtent => height;
 
   @override
-  bool shouldRebuild(_CupertinoPersistentMenuHeaderDelegate oldDelegate) {
+  bool shouldRebuild(_StickyMenuHeaderDelegate oldDelegate) {
     return oldDelegate.height != height || oldDelegate.child != child;
   }
 }
@@ -3729,6 +3741,11 @@ class _MenuBody<T> extends StatefulWidget {
   final ScrollPhysics? physics;
 
   @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return children.map<DiagnosticsNode>((Widget child) => child.toDiagnosticsNode()).toList();
+  }
+
+  @override
   State<_MenuBody<T>> createState() => _MenuBodyState<T>();
 }
 
@@ -3737,9 +3754,9 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
   late List<double> _offsets;
   bool _isTopLayer = false;
   double _height = 0.0;
-  ScrollPhysics? _physics;
   // The height occupied by a [CupertinoStickyMenuHeader], if one is provided.
   double _headerOffset = 0.0;
+  bool get hasStickyHeader => _headerOffset > 0;
 
   @override
   void initState() {
@@ -3796,21 +3813,27 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
             context
               ..findAncestorStateOfType<_CupertinoMenuLayerState>()!._setLayerHeight(_height)
               ..findAncestorStateOfType<_MenuScopeState>()
-                  !._setNestedLayerHeight(
-                    height: _height,
-                    coordinates: coordinates,
-                  );
+                !._setNestedLayerHeight(
+                  height: _height,
+                  coordinates: coordinates,
+                );
           }
         },
       );
     }
   }
 
-  ScrollPhysics? _updateScrollPhysics() {
+  // Returns the [ScrollPhysics] that should be used for this menu layer. If the
+  // menu layer is the top layer and is the same size as the scroll area, then
+  // the menu layer should use the user-specified physics. Otherwise, the menu
+  // layer should not be scrollable.
+  ScrollPhysics? get scrollPhysics {
     if (
       _isTopLayer &&
       _controller.hasClients &&
-      _controller.position.extentTotal != CupertinoMenuLayer.of(context).constraintsTween.end?.maxHeight
+      CupertinoMenu.interactiveLayersOf(context).length == 1 &&
+      // 2 pixel tolerance, just in case.
+      _controller.position.extentAfter + _controller.position.extentBefore < 2
     ) {
       return widget.physics;
     } else {
@@ -3820,9 +3843,10 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
 
   List<Widget> _buildChildren() {
     final List<Widget> children = <Widget>[];
-    for (int i = 0; i < widget.children.length; i++) {
+    for (int i = hasStickyHeader ? 1 : 0; i < widget.children.length; i++) {
       if (
         i != 0 &&
+        !(i == 1 && hasStickyHeader) &&
         widget.children[i].child.hasSeparator &&
         widget.children[i - 1].child is! CupertinoMenuLargeDivider &&
         widget.children[i - 1].child is! CupertinoStickyMenuHeader
@@ -3835,9 +3859,7 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
       // a placeholder
       children.add(
         _ParentDataInterceptor<ListBodyParentData, ListBody>(
-          child: i == 0 && _headerOffset > 0
-              ? const SizedBox()
-              : widget.children[i],
+          child: widget.children[i],
           onParentData: (ListBodyParentData? data) {
             SchedulerBinding.instance.addPostFrameCallback(
               (Duration timeStamp) {
@@ -3865,21 +3887,46 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
     final CupertinoMenuLayerModel layerScope = CupertinoMenuLayer.of(context);
     final int depth = layerScope.coordinates.depth;
     _isTopLayer = depth == topLayer;
-    _physics = _updateScrollPhysics();
-    RelativeRect sliverInsets = RelativeRect.fill;
-    if (
-      widget.children.firstOrNull
-        case ScopedMenuTreeCoordinates(
-          child: CupertinoStickyMenuHeader(
-            height: final double height,
+    Widget? stickyHeader;
+    switch(widget.children.first){
+      case ScopedMenuTreeCoordinates(
+        child: final CupertinoStickyMenuHeader child,
+      ):
+        _headerOffset = child.getScaledHeight(MediaQuery.textScalerOf(context));
+        stickyHeader = DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: CupertinoMenuLargeDivider
+                          .transparentColor
+                          .resolveFrom(context),
+                width: 8.0
+              )
+            ),
           ),
-        )
-    ) {
-      _headerOffset = MediaQuery.textScalerOf(context).scale(height);
-      sliverInsets = RelativeRect.fromLTRB(0, _headerOffset, 0, 0);
-    } else {
-      _headerOffset = 0.0;
+          child:child
+        );
+      case ScopedMenuTreeCoordinates(
+        child: final CupertinoNestedMenuItemAnchor<T> child,
+      ):
+        _headerOffset = child.height;
+        stickyHeader = DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: CupertinoMenuDivider
+                          .dividerColor
+                          .resolveFrom(context),
+                width: 0.0
+              )
+            ),
+          ),
+          child: child
+        );
+      default:
+        _headerOffset = 0.0;
     }
+
 
     return Semantics(
       scopesRoute: true,
@@ -3892,26 +3939,29 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
         skipTraversal: !_isTopLayer,
         child: CupertinoScrollbar(
           controller: _controller,
+          thumbVisibility: false,
           child: CustomScrollView(
             clipBehavior: Clip.none,
             controller: _controller,
-            physics: _physics,
+            physics: scrollPhysics,
             slivers: <Widget>[
-              if (_headerOffset > 0)
+              if (hasStickyHeader)
                 SliverPersistentHeader(
                   pinned: true,
-                  delegate: _CupertinoPersistentMenuHeaderDelegate(
+                  delegate: _StickyMenuHeaderDelegate(
                     height: _headerOffset,
                     child: RepaintBoundary(
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: widget.children[0],
-                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          stickyHeader!,
+                        ],
+                      )
                     ),
                   ),
                 ),
               _SliverClippedInsets(
-                insets: sliverInsets,
+                insets: RelativeRect.fromLTRB(0, _headerOffset, 0, 0),
                 child: SliverToBoxAdapter(
                   child: _UnsafeSizeChangedLayoutNotifier(
                     onLayoutChanged: _handleLayoutChanged,
