@@ -189,15 +189,9 @@ abstract class SearchDelegate<T> {
   Widget? buildLeading(BuildContext context);
 
   /// {@macro flutter.material.appbar.automaticallyImplyLeading}
-  ///
-  /// This property is used to configure an [AppBar].
   bool? automaticallyImplyLeading;
 
-  /// {@template flutter.material.appbar.leadingWidth}
-  /// Defines the width of [leading] widget.
-  ///  
-  /// By default, the value of [leadingWidth] is 56.0.
-  /// {@endtemplate}
+  /// {@macro flutter.material.appbar.leadingWidth}
   double? leadingWidth;
 
   /// Widgets to display after the search query in the [AppBar].
