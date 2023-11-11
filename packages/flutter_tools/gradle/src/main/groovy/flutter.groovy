@@ -659,7 +659,7 @@ class FlutterPlugin implements Plugin<Project> {
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        Map meta = project.ext.nativePluginLoader.getDependenciesMetadata()
+        Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
         if (meta == null) {
             return []
         }
