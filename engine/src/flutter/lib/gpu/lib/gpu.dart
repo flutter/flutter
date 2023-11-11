@@ -11,7 +11,12 @@
 ///  * [Flutter GPU Wiki page](https://github.com/flutter/flutter/wiki/Flutter-GPU).
 library flutter_gpu;
 
+import 'dart:ffi';
+import 'dart:nativewrappers';
+import 'dart:typed_data';
+
 export 'src/smoketest.dart';
 
-export 'src/context.dart';
-export 'src/buffer.dart';
+part 'src/formats.dart';
+part 'src/context.dart';
+part 'src/buffer.dart';
