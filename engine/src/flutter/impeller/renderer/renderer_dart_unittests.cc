@@ -111,19 +111,28 @@ TEST_P(RendererDartTest, CanInstantiateFlutterGPUContext) {
   ASSERT_TRUE(result);
 }
 
-TEST_P(RendererDartTest, CanEmplaceHostBuffer) {
-  auto isolate = GetIsolate();
-  bool result = isolate->RunInIsolateScope([]() -> bool {
-    if (tonic::CheckAndHandleError(
-            ::Dart_Invoke(Dart_RootLibrary(),
-                          tonic::ToDart("canEmplaceHostBuffer"), 0, nullptr))) {
-      return false;
-    }
-    return true;
-  });
+#define DART_TEST_CASE(name)                                            \
+  TEST_P(RendererDartTest, name) {                                      \
+    auto isolate = GetIsolate();                                        \
+    bool result = isolate->RunInIsolateScope([]() -> bool {             \
+      if (tonic::CheckAndHandleError(::Dart_Invoke(                     \
+              Dart_RootLibrary(), tonic::ToDart(#name), 0, nullptr))) { \
+        return false;                                                   \
+      }                                                                 \
+      return true;                                                      \
+    });                                                                 \
+    ASSERT_TRUE(result);                                                \
+  }
 
-  ASSERT_TRUE(result);
-}
+/// These test entries correspond to Dart functions located in
+/// `flutter/impeller/fixtures/dart_tests.dart`
+
+DART_TEST_CASE(canEmplaceHostBuffer);
+DART_TEST_CASE(canCreateDeviceBuffer);
+
+DART_TEST_CASE(canOverwriteDeviceBuffer);
+DART_TEST_CASE(deviceBufferOverwriteFailsWhenOutOfBounds);
+DART_TEST_CASE(deviceBufferOverwriteThrowsForNegativeDestinationOffset);
 
 }  // namespace testing
 }  // namespace impeller

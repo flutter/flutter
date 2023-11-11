@@ -73,6 +73,7 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
                    << " would exceed max supported size of " << max_size << ".";
     return;
   }
+
   is_valid_ = true;
 }
 
