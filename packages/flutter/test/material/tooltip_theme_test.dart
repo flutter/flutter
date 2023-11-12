@@ -1118,7 +1118,6 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-
   testWidgetsWithLeakTracking('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
     const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
     await tester.pumpWidget(
