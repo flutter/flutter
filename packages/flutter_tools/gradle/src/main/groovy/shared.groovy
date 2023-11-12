@@ -8,16 +8,18 @@ class NativePluginLoader {
     static final String nativeBuildKey = 'native_build'
     static final String flutterPluginsDependenciesFile = '.flutter-plugins-dependencies'
 
-    void forEachPlugin(File flutterSourceDirectory, Closure<Map<String, Object>> callback) {
+    List<Map<String, Object>> getPlugins(File flutterSourceDirectory) {
+        List<Map<String, Object>> nativePlugins = []
         def meta = getDependenciesMetadata(flutterSourceDirectory)
         if (meta == null) {
-            return
+            return nativePlugins
         }
 
         assert meta.plugins instanceof Map<String, Object>
-        assert meta.plugins.android instanceof List<Map<String, Object>>
+        def androidPlugins = meta.plugins.android
+        assert androidPlugins instanceof List<Map<String, Object>>
         // Includes the Flutter plugins that support the Android platform.
-        meta.plugins.android.each { androidPlugin ->
+        androidPlugins.each { androidPlugin ->
             // The property types can be found in _filterPluginsByPlatform defined in
             // packages/flutter_tools/lib/src/flutter_plugins.dart.
             assert androidPlugin.name instanceof String
@@ -25,11 +27,11 @@ class NativePluginLoader {
             // Skip plugins that have no native build (such as a Dart-only implementation
             // of a federated plugin).
             def needsBuild = androidPlugin.containsKey(nativeBuildKey) ? androidPlugin[nativeBuildKey] : true
-            if (!needsBuild) {
-                return
+            if (needsBuild) {
+                nativePlugins.add(androidPlugin)
             }
-            callback(androidPlugin)
         }
+        return nativePlugins
     }
 
 

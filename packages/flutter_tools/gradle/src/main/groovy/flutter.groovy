@@ -626,11 +626,7 @@ class FlutterPlugin implements Plugin<Project> {
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        List<Map<String, Object>> androidPlugins = []
-        project.ext.nativePluginLoader.forEachPlugin(getFlutterSourceDirectory(), { Map<String, Object> androidPlugin ->
-            androidPlugins.add(androidPlugin)
-        })
-        return androidPlugins
+        return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
     }
 
     // TODO(#54566, #48918): Remove in favor of [getPluginList] only, see also

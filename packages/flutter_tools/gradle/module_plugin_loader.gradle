@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -5,26 +7,27 @@
 // This file is included from `<module>/.android/include_flutter.groovy`,
 // so it can be versioned with the Flutter SDK.
 
-// TODO: test if it's working
-def pathToThisDirectory = buildscript.sourceFile.parentFile
-apply from: "$pathToThisDirectory/src/main/groovy/shared.groovy"
+def flutterSdkPath = properties.getProperty("flutter.sdk")
+assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+assert flutterSdkPath instanceof String
+
+apply from: Paths.get(flutterSdkPath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "shared.groovy")
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
-def object = null
-nativePluginLoader2.forEachPlugin(moduleProjectRoot, { Map<String, Object> androidPlugin ->
+List<Map<String, Object>> nativePlugins = nativePluginLoader.getPlugins(moduleProjectRoot)
+nativePlugins.each { androidPlugin ->
     def pluginDirectory = new File(androidPlugin.path as String, 'android')
     assert pluginDirectory.exists()
     include ":${androidPlugin.name}"
     project(":${androidPlugin.name}").projectDir = pluginDirectory
-})
+}
 
 String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
 gradle.getGradle().projectsLoaded { g ->
     g.rootProject.beforeEvaluate { p ->
         p.subprojects { subproject ->
-            if (object != null && object.plugins != null && object.plugins.android != null
-                    && object.plugins.android.name.contains(subproject.name)) {
+            if (nativePlugins.name.contains(subproject.name)) {
                 File androidPluginBuildOutputDir = new File(flutterModulePath + File.separator
                         + "plugins_build_output" + File.separator + subproject.name);
                 if (!androidPluginBuildOutputDir.exists()) {
