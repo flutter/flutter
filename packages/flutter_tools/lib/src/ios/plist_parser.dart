@@ -31,6 +31,7 @@ class PlistParser {
   static const String kCFBundleVersionKey = 'CFBundleVersion';
   static const String kCFBundleDisplayNameKey = 'CFBundleDisplayName';
   static const String kCFBundleNameKey = 'CFBundleName';
+  static const String kFLTEnableImpellerKey = 'FLTEnableImpeller';
   static const String kMinimumOSVersionKey = 'MinimumOSVersion';
   static const String kNSPrincipalClassKey = 'NSPrincipalClass';
 

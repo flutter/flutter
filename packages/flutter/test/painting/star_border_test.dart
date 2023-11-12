@@ -7,6 +7,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   Future<void> testBorder(WidgetTester tester, String name, StarBorder border,
@@ -114,12 +115,12 @@ void main() {
     expect(copy, isNot(equals(copy.copyWith(squash: 0.0))));
   });
 
-  testWidgets('StarBorder basic geometry', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StarBorder basic geometry', (WidgetTester tester) async {
     await testBorder(tester, 'basic_star', const StarBorder());
     await testBorder(tester, 'basic_polygon', const StarBorder.polygon());
   });
 
-  testWidgets('StarBorder parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StarBorder parameters', (WidgetTester tester) async {
     await testBorder(tester, 'points_6', const StarBorder(points: 6));
     await testBorder(tester, 'points_2', const StarBorder(points: 2));
     await testBorder(tester, 'inner_radius_0', const StarBorder(innerRadiusRatio: 0.0));
@@ -144,7 +145,7 @@ void main() {
     await testBorder(tester, 'side_align_outside', const StarBorder(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
-  testWidgets('StarBorder.polygon parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StarBorder.polygon parameters', (WidgetTester tester) async {
     await testBorder(tester, 'poly_sides_6', const StarBorder.polygon(sides: 6));
     await testBorder(tester, 'poly_sides_2', const StarBorder.polygon(sides: 2));
     await testBorder(tester, 'poly_point_rounding_20', const StarBorder.polygon(pointRounding: 0.2));
@@ -163,7 +164,7 @@ void main() {
     await testBorder(tester, 'poly_side_align_outside', const StarBorder.polygon(side: BorderSide(color: Color(0xffff0000), strokeAlign: BorderSide.strokeAlignOutside)));
   });
 
-  testWidgets("StarBorder doesn't try to scale an infinite scale matrix", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("StarBorder doesn't try to scale an infinite scale matrix", (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -191,7 +192,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('StarBorder lerped with StarBorder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StarBorder lerped with StarBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
     const ShapeBorder otherBorder = StarBorder(
       points: 6,
@@ -208,7 +209,7 @@ void main() {
     await testBorder(tester, 'from_star_border_100', from, lerpFrom: otherBorder, lerpAmount: 1.0);
   });
 
-  testWidgets('StarBorder lerped with CircleBorder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StarBorder lerped with CircleBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
     const ShapeBorder otherBorder = CircleBorder();
     const ShapeBorder eccentricCircle = CircleBorder(eccentricity: 0.6);
@@ -226,7 +227,7 @@ void main() {
     await testBorder(tester, 'from_eccentric_circle_border_100', from, lerpFrom: eccentricCircle, lerpAmount: 1.0);
   });
 
-  testWidgets('StarBorder lerped with RoundedRectangleBorder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StarBorder lerped with RoundedRectangleBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
     const RoundedRectangleBorder rectangleBorder = RoundedRectangleBorder();
     await testBorder(tester, 'to_rect_border_20', from, lerpTo: rectangleBorder, lerpAmount: 0.2);
@@ -250,7 +251,7 @@ void main() {
     await testBorder(tester, 'from_rrect_border_100', from, lerpFrom: roundedRectBorder, lerpAmount: 1.0);
   });
 
-  testWidgets('StarBorder lerped with StadiumBorder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('StarBorder lerped with StadiumBorder', (WidgetTester tester) async {
     const StarBorder from = StarBorder();
     const StadiumBorder stadiumBorder = StadiumBorder();
 

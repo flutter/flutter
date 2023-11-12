@@ -10,6 +10,7 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'icons.dart';
 import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -56,6 +57,7 @@ enum _ChipVariant { flat, elevated }
 class FilterChip extends StatelessWidget
     implements
         ChipAttributes,
+        DeletableChipAttributes,
         SelectableChipAttributes,
         CheckmarkableChipAttributes,
         DisabledChipAttributes {
@@ -72,6 +74,10 @@ class FilterChip extends StatelessWidget
     this.labelPadding,
     this.selected = false,
     required this.onSelected,
+    this.deleteIcon,
+    this.onDeleted,
+    this.deleteIconColor,
+    this.deleteButtonTooltipMessage,
     this.pressElevation,
     this.disabledColor,
     this.selectedColor,
@@ -111,6 +117,10 @@ class FilterChip extends StatelessWidget
     this.labelPadding,
     this.selected = false,
     required this.onSelected,
+    this.deleteIcon,
+    this.onDeleted,
+    this.deleteIconColor,
+    this.deleteButtonTooltipMessage,
     this.pressElevation,
     this.disabledColor,
     this.selectedColor,
@@ -149,6 +159,14 @@ class FilterChip extends StatelessWidget
   final bool selected;
   @override
   final ValueChanged<bool>? onSelected;
+  @override
+  final Widget? deleteIcon;
+  @override
+  final VoidCallback? onDeleted;
+  @override
+  final Color? deleteIconColor;
+  @override
+  final String? deleteButtonTooltipMessage;
   @override
   final double? pressElevation;
   @override
@@ -205,6 +223,8 @@ class FilterChip extends StatelessWidget
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
       ? _FilterChipDefaultsM3(context, isEnabled, selected, _chipVariant)
       : null;
+    final Widget? resolvedDeleteIcon = deleteIcon
+      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -212,6 +232,10 @@ class FilterChip extends StatelessWidget
       labelStyle: labelStyle,
       labelPadding: labelPadding,
       onSelected: onSelected,
+      deleteIcon: resolvedDeleteIcon,
+      onDeleted: onDeleted,
+      deleteIconColor: deleteIconColor,
+      deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       pressElevation: pressElevation,
       selected: selected,
       tooltip: tooltip,
@@ -235,6 +259,7 @@ class FilterChip extends StatelessWidget
       showCheckmark: showCheckmark,
       checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
     );
   }
 }

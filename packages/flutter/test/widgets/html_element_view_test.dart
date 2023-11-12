@@ -15,6 +15,7 @@ import 'package:flutter/src/widgets/_html_element_view_web.dart'
     show debugOverridePlatformViewRegistry;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
 final Object _mockHtmlElement = Object();
@@ -42,7 +43,7 @@ void main() {
   });
 
   group('HtmlElementView', () {
-    testWidgets('Create HTML view', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Create HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
@@ -64,7 +65,7 @@ void main() {
       );
     });
 
-    testWidgets('Create HTML view with PlatformViewCreatedCallback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Create HTML view with PlatformViewCreatedCallback', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
@@ -97,7 +98,7 @@ void main() {
       );
     });
 
-    testWidgets('Create HTML view with creation params', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Create HTML view with creation params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       await tester.pumpWidget(
@@ -132,7 +133,7 @@ void main() {
       );
     });
 
-    testWidgets('Resize HTML view', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Resize HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       await tester.pumpWidget(
@@ -168,7 +169,7 @@ void main() {
       );
     });
 
-    testWidgets('Change HTML view type', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Change HTML view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       fakePlatformViewRegistry.registerViewFactory('maps', _mockViewFactory);
@@ -200,7 +201,7 @@ void main() {
       );
     });
 
-    testWidgets('Dispose HTML view', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dispose HTML view', (WidgetTester tester) async {
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       await tester.pumpWidget(
         const Center(
@@ -227,7 +228,7 @@ void main() {
       );
     });
 
-    testWidgets('HTML view survives widget tree change', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('HTML view survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       final GlobalKey key = GlobalKey();
@@ -259,7 +260,7 @@ void main() {
       );
     });
 
-    testWidgets('HtmlElementView has correct semantics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('HtmlElementView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
@@ -306,7 +307,7 @@ void main() {
       debugOverridePlatformViewRegistry = null;
     });
 
-    testWidgets('Create platform view from tagName', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Create platform view from tagName', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
       await tester.pumpWidget(
@@ -331,7 +332,7 @@ void main() {
       expect(htmlElement.tagName, equalsIgnoringCase('div'));
     });
 
-    testWidgets('Create invisible platform view', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Create invisible platform view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
       await tester.pumpWidget(
@@ -357,7 +358,7 @@ void main() {
       expect(htmlElement.tagName, equalsIgnoringCase('script'));
     });
 
-    testWidgets('onElementCreated', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('onElementCreated', (WidgetTester tester) async {
       final List<Object> createdElements = <Object>[];
       void onElementCreated(Object element) {
         createdElements.add(element);

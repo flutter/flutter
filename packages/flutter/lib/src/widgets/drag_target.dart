@@ -164,8 +164,7 @@ Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext conte
 class Draggable<T extends Object> extends StatefulWidget {
   /// Creates a widget that can be dragged to a [DragTarget].
   ///
-  /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
+  /// If [maxSimultaneousDrags] is non-null, it must be non-negative.
   const Draggable({
     super.key,
     required this.child,
@@ -394,8 +393,7 @@ class Draggable<T extends Object> extends StatefulWidget {
 class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Creates a widget that can be dragged starting from long press.
   ///
-  /// The [child] and [feedback] arguments must not be null. If
-  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
+  /// If [maxSimultaneousDrags] is non-null, it must be non-negative.
   const LongPressDraggable({
     super.key,
     required super.child,
@@ -586,8 +584,6 @@ class DraggableDetails {
 /// Represents the details when a pointer event occurred on the [DragTarget].
 class DragTargetDetails<T> {
   /// Creates details for a [DragTarget] callback.
-  ///
-  /// The [offset] must not be null.
   DragTargetDetails({required this.data, required this.offset});
 
   /// The data that was dropped onto this [DragTarget].
@@ -612,13 +608,21 @@ class DragTargetDetails<T> {
 ///  * [LongPressDraggable]
 class DragTarget<T extends Object> extends StatefulWidget {
   /// Creates a widget that receives drags.
-  ///
-  /// The [builder] argument must not be null.
   const DragTarget({
     super.key,
     required this.builder,
+    @Deprecated(
+      'Use onWillAcceptWithDetails instead. '
+      'This callback is similar to onWillAcceptWithDetails but does not provide drag details. '
+      'This feature was deprecated after v3.14.0-0.2.pre.'
+    )
     this.onWillAccept,
     this.onWillAcceptWithDetails,
+    @Deprecated(
+      'Use onAcceptWithDetails instead. '
+      'This callback is similar to onAcceptWithDetails but does not provide drag details. '
+      'This feature was deprecated after v3.14.0-0.2.pre.'
+    )
     this.onAccept,
     this.onAcceptWithDetails,
     this.onLeave,
@@ -642,6 +646,11 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// Equivalent to [onWillAcceptWithDetails], but only includes the data.
   ///
   /// Must not be provided if [onWillAcceptWithDetails] is provided.
+  @Deprecated(
+    'Use onWillAcceptWithDetails instead. '
+    'This callback is similar to onWillAcceptWithDetails but does not provide drag details. '
+    'This feature was deprecated after v3.14.0-0.2.pre.'
+  )
   final DragTargetWillAccept<T>? onWillAccept;
 
   /// Called to determine whether this widget is interested in receiving a given
@@ -658,11 +667,18 @@ class DragTarget<T extends Object> extends StatefulWidget {
   final DragTargetWillAcceptWithDetails<T>? onWillAcceptWithDetails;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
+  /// It will not be called if `data` is `null`.
   ///
   /// Equivalent to [onAcceptWithDetails], but only includes the data.
+  @Deprecated(
+    'Use onAcceptWithDetails instead. '
+    'This callback is similar to onAcceptWithDetails but does not provide drag details. '
+    'This feature was deprecated after v3.14.0-0.2.pre.'
+  )
   final DragTargetAccept<T>? onAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
+  /// It will not be called if `data` is `null`.
   ///
   /// Equivalent to [onAccept], but with information, including the data, in a
   /// [DragTargetDetails].
@@ -672,7 +688,8 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// the target.
   final DragTargetLeave<T>? onLeave;
 
-  /// Called when a [Draggable] moves within this [DragTarget].
+  /// Called when a [Draggable] moves within this [DragTarget]. It will not be
+  /// called if `data` is `null`.
   ///
   /// This includes entering and leaving the target.
   final DragTargetMove<T>? onMove;
@@ -713,6 +730,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
                                     (widget.onWillAccept != null &&
                                     widget.onWillAccept!(avatar.data as T?)) ||
                                     (widget.onWillAcceptWithDetails != null &&
+                                    avatar.data != null &&
                                     widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
     if (resolvedWillAccept) {
       setState(() {
@@ -747,12 +765,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    widget.onAccept?.call(avatar.data! as T);
-    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    if (avatar.data != null)  {
+      widget.onAccept?.call(avatar.data! as T);
+      widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    }
   }
 
   void didMove(_DragAvatar<Object> avatar) {
-    if (!mounted) {
+    if (!mounted || avatar.data == null) {
       return;
     }
     widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));

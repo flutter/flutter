@@ -202,8 +202,6 @@ class CupertinoSlider extends StatefulWidget {
 
   /// The color to use for the thumb of the slider.
   ///
-  /// Thumb color must not be null.
-  ///
   /// Defaults to [CupertinoColors.white].
   final Color thumbColor;
 
@@ -599,4 +597,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   @override
   bool get validForMouseTracker => false;
+
+  @override
+  void dispose() {
+    _drag.dispose();
+    _position.dispose();
+    super.dispose();
+  }
 }

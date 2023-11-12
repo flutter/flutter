@@ -29,7 +29,7 @@
   "searchTextFieldPlaceholderLabel": "Pretraživanje",
   "noSpellCheckReplacementsLabel": "Nije pronađena nijedna zamjena",
   "menuDismissLabel": "Odbacivanje menija",
-  "lookUpButtonLabel": "Pogled prema gore",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Pogled nagore",
+  "searchWebButtonLabel": "Pretraži Web",
+  "shareButtonLabel": "Dijeli..."
 }

@@ -164,16 +164,10 @@ void main() {
 
   // Analyze in the current directory - no arguments
   testWithoutContext('working directory with errors', () async {
-    // Break the code to produce the "Avoid empty else" hint
-    // that is upgraded to a warning in package:flutter/analysis_options_user.yaml
-    // to assert that we are using the default Flutter analysis options.
+    // Break the code to produce an error and a warning.
     // Also insert a statement that should not trigger a lint here
     // but will trigger a lint later on when an analysis_options.yaml is added.
     String source = await libMain.readAsString();
-    source = source.replaceFirst(
-      'return MaterialApp(',
-      'if (debugPrintRebuildDirtyWidgets) {} else ; return MaterialApp(',
-    );
     source = source.replaceFirst(
       'onPressed: _incrementCounter,',
       '// onPressed: _incrementCounter,',
@@ -189,12 +183,12 @@ void main() {
       arguments: <String>['analyze', '--no-pub'],
       statusTextContains: <String>[
         'Analyzing',
-        'avoid_empty_else',
-        'empty_statements',
         'unused_element',
         'missing_required_param',
       ],
-      exitMessageContains: '4 issues found.',
+      // TODO(srawlins): Assert with `exitMessageContains: '2 issues found.',` after
+      // https://github.com/dart-lang/sdk/commit/c033718da0502ed92609f8c6cee2f6a59ccc058e
+      // rolls into this repo.
       exitCode: 1,
     );
   });
