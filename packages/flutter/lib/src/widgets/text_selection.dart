@@ -412,7 +412,6 @@ class TextSelectionOverlay {
 
   final ValueNotifier<bool> _effectiveStartHandleVisibility = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _effectiveEndHandleVisibility = ValueNotifier<bool>(false);
-  // On mobile devices the toolbar will stay up as long as any portion of the selection is visible.
   final ValueNotifier<bool> _effectiveToolbarVisibility = ValueNotifier<bool>(false);
 
   void _updateTextSelectionOverlayVisibilities() {
