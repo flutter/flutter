@@ -124,7 +124,7 @@ void main() {
           child: Center(
             child: Icon(
               null,
-              considerTextScale: true,
+              applyTextScaling: true,
             ),
           ),
         ),
@@ -147,7 +147,7 @@ void main() {
             child: Icon(
               null,
               size: 96.0,
-              considerTextScale: true,
+              applyTextScaling: true,
             ),
           ),
         ),
@@ -170,7 +170,7 @@ void main() {
             child: IconTheme(
               data: IconThemeData(
                 size: 36.0,
-                considerTextScale: true,
+                applyTextScaling: true,
               ),
               child: Icon(null),
             ),
@@ -195,12 +195,12 @@ void main() {
             child: IconTheme(
               data: IconThemeData(
                 size: 36.0,
-                considerTextScale: true,
+                applyTextScaling: true,
               ),
               child: Icon(
                 null,
                 size: 48.0,
-                considerTextScale: false,
+                applyTextScaling: false,
               ),
             ),
           ),

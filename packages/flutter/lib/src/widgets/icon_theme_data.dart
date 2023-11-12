@@ -31,7 +31,7 @@ class IconThemeData with Diagnosticable {
     this.color,
     double? opacity,
     this.shadows,
-    this.considerTextScale,
+    this.applyTextScaling,
   }) : _opacity = opacity,
        assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
@@ -50,7 +50,7 @@ class IconThemeData with Diagnosticable {
         color = const Color(0xFF000000),
         _opacity = 1.0,
         shadows = null,
-        considerTextScale = false;
+        applyTextScaling = false;
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
@@ -63,7 +63,7 @@ class IconThemeData with Diagnosticable {
     Color? color,
     double? opacity,
     List<Shadow>? shadows,
-    bool? considerTextScale,
+    bool? applyTextScaling,
   }) {
     return IconThemeData(
       size: size ?? this.size,
@@ -74,7 +74,7 @@ class IconThemeData with Diagnosticable {
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
       shadows: shadows ?? this.shadows,
-      considerTextScale: considerTextScale ?? this.considerTextScale,
+      applyTextScaling: applyTextScaling ?? this.applyTextScaling,
     );
   }
 
@@ -167,8 +167,8 @@ class IconThemeData with Diagnosticable {
   /// The default for [Icon.shadows].
   final List<Shadow>? shadows;
 
-  /// The default for [Icon.considerTextScale].
-  final bool? considerTextScale;
+  /// The default for [Icon.applyTextScaling].
+  final bool? applyTextScaling;
 
   /// Linearly interpolate between two icon theme data objects.
   ///
@@ -203,7 +203,7 @@ class IconThemeData with Diagnosticable {
         && other.color == color
         && other.opacity == opacity
         && listEquals(other.shadows, shadows)
-        && other.considerTextScale == considerTextScale;
+        && other.applyTextScaling == applyTextScaling;
   }
 
   @override
@@ -216,7 +216,7 @@ class IconThemeData with Diagnosticable {
     color,
     opacity,
     shadows == null ? null : Object.hashAll(shadows!),
-    considerTextScale,
+    applyTextScaling,
   );
 
   @override
@@ -230,6 +230,6 @@ class IconThemeData with Diagnosticable {
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('considerTextScale', considerTextScale, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null));
   }
 }

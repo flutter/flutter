@@ -81,7 +81,7 @@ class Icon extends StatelessWidget {
     this.shadows,
     this.semanticLabel,
     this.textDirection,
-    this.considerTextScale,
+    this.applyTextScaling,
   }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
@@ -233,14 +233,15 @@ class Icon extends StatelessWidget {
   /// specified, either directly using this property or using [Directionality].
   final TextDirection? textDirection;
 
-  /// Whether the size is affected by the context's text scaler.
+  /// Whether to scale the size of this widget using the ambient [MediaQuery]'s [TextScaler].
   ///
-  /// If true, the icon size is going to be scaled by the [TextScaler] of the
-  /// context's [MediaQuery].
+  /// This is specially useful when you have an icon associated with a text, as
+  /// scaling the text without scaling the icon would result in a confusing
+  /// interface.
   ///
   /// Defaults to the nearest [IconTheme]'s
-  /// [IconThemeData.considerTextScale].
-  final bool? considerTextScale;
+  /// [IconThemeData.applyTextScaling].
+  final bool? applyTextScaling;
 
   @override
   Widget build(BuildContext context) {
@@ -249,11 +250,11 @@ class Icon extends StatelessWidget {
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
-    final bool? considerTextScale = this.considerTextScale ?? iconTheme.considerTextScale;
+    final bool? applyTextScaling = this.applyTextScaling ?? iconTheme.applyTextScaling;
 
     final double? tentativeIconSize = size ?? iconTheme.size;
 
-    final double? iconSize = switch ((tentativeIconSize, considerTextScale)) {
+    final double? iconSize = switch ((tentativeIconSize, applyTextScaling)) {
       (final double tentativeIconSize, true) => MediaQuery.textScalerOf(context).scale(tentativeIconSize),
       _ => tentativeIconSize,
     };
@@ -350,6 +351,6 @@ class Icon extends StatelessWidget {
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('considerTextScale', considerTextScale, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null));
   }
 }
