@@ -2513,7 +2513,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// of the screen. A value of 1 indicates the highest level of structural
   /// hierarchy. A value of 2 indicates the next level, and so on.
   int get headingLevel => _headingLevel;
-  int _headingLevel;
+  int _headingLevel = -1;
 
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
@@ -4659,11 +4659,11 @@ class SemanticsConfiguration {
   /// Indicates the heading level in the document structure.
   ///
   /// This is only used for web semantics, and is ignored on other platforms.
-  int get headingLevel => _headingLevel;
-  int _headingLevel;
+  int? get headingLevel => _headingLevel;
+  int? _headingLevel;
 
   set headingLevel(int value) {
-    if (value < 1 || value > 6) {
+    if (value != 1 && (value < 1 || value > 6)) {
       throw ArgumentError('Heading level must be between 1 and 6');
     }
     if (value == headingLevel) {
