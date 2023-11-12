@@ -11843,6 +11843,211 @@ void main() {
   );
 
   testWidgets(
+    'Toolbar hides on scroll start and re-appears on scroll end on Android and iOS',
+    (WidgetTester tester) async {
+      final TextEditingController controller = _textEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      final RenderEditable renderEditable = state.renderEditable;
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pumpAndSettle();
+
+      // Long press should select word at position and show toolbar.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+
+      // Scroll to the left, the toolbar should be hidden since we are scrolling.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(TextField)));
+      await tester.pump();
+      await gesture.moveTo(tester.getBottomLeft(find.byType(TextField)));
+      await tester.pumpAndSettle();
+      expect(contextMenuButtonFinder, findsNothing);
+
+      // Scroll back to center, the toolbar should still be hidden since
+      // we are still scrolling.
+      await gesture.moveTo(tester.getCenter(find.byType(TextField)));
+      await tester.pumpAndSettle();
+      expect(contextMenuButtonFinder, findsNothing);
+
+      // Release finger to end scroll, toolbar should now be visible.
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+      expect(renderEditable.selectionStartInViewport.value, true);
+      expect(renderEditable.selectionEndInViewport.value, true);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+  );
+
+  testWidgets(
+    'Toolbar can re-appear after being scrolled out of view on Android and iOS',
+    (WidgetTester tester) async {
+      final TextEditingController controller = _textEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
+      );
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                scrollController: scrollController,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      final RenderEditable renderEditable = state.renderEditable;
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      expect(renderEditable.selectionStartInViewport.value, false);
+      expect(renderEditable.selectionEndInViewport.value, false);
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pumpAndSettle();
+
+      // Long press should select word at position and show toolbar.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+      expect(renderEditable.selectionStartInViewport.value, true);
+      expect(renderEditable.selectionEndInViewport.value, true);
+
+      // Scroll to the end so the selection is no longer visible. This should
+      // hide the toolbar, but schedule it to be shown once the selection is
+      // visible again.
+      scrollController.animateTo(
+        500.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+      expect(contextMenuButtonFinder, findsNothing);
+      expect(renderEditable.selectionStartInViewport.value, false);
+      expect(renderEditable.selectionEndInViewport.value, false);
+
+      // Scroll to the beginning where the selection is in view
+      // and the toolbar should show again.
+      scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+      expect(renderEditable.selectionStartInViewport.value, true);
+      expect(renderEditable.selectionEndInViewport.value, true);
+
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      await gesture.up();
+      await gesture.down(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Double tap should select word at position and show toolbar.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+      expect(renderEditable.selectionStartInViewport.value, true);
+      expect(renderEditable.selectionEndInViewport.value, true);
+
+      // Scroll to the end so the selection is no longer visible. This should
+      // hide the toolbar, but schedule it to be shown once the selection is
+      // visible again.
+      scrollController.animateTo(
+        500.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+      expect(contextMenuButtonFinder, findsNothing);
+      expect(renderEditable.selectionStartInViewport.value, false);
+      expect(renderEditable.selectionEndInViewport.value, false);
+
+      // Tap to change the selection. This will invalidate the scheduled
+      // toolbar.
+      await gesture.down(tester.getCenter(find.byType(TextField)));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Scroll to the beginning where the selection was previously
+      // and the toolbar should not show because it was invalidated.
+      scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+      expect(contextMenuButtonFinder, findsNothing);
+      expect(renderEditable.selectionStartInViewport.value, false);
+      expect(renderEditable.selectionEndInViewport.value, false);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+  );
+
+  testWidgets(
     'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(

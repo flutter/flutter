@@ -30,8 +30,10 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
+import 'notification_listener.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
@@ -2157,6 +2159,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
   TextSelectionOverlay? _selectionOverlay;
+  bool _toolbarVisibleAtScrollStart = false;
+  bool _showToolbarOnScreenScheduled = false;
+  TextEditingValue? _valueWhenShowToolbarOnScreenScheduled;
 
   final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
@@ -4943,37 +4948,85 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 focusNode: widget.focusNode,
                 includeSemantics: false,
                 debugLabel: kReleaseMode ? null : 'EditableText',
-                child: Scrollable(
-                  key: _scrollableKey,
-                  excludeFromSemantics: true,
-                  axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-                  controller: _scrollController,
-                  physics: widget.scrollPhysics,
-                  dragStartBehavior: widget.dragStartBehavior,
-                  restorationId: widget.restorationId,
-                  // If a ScrollBehavior is not provided, only apply scrollbars when
-                  // multiline. The overscroll indicator should not be applied in
-                  // either case, glowing or stretching.
-                  scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-                    scrollbars: _isMultiline,
-                    overscroll: false,
-                  ),
-                  viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                    return CompositedTransformTarget(
-                      link: _toolbarLayerLink,
-                      child: Semantics(
-                        onCopy: _semanticsOnCopy(controls),
-                        onCut: _semanticsOnCut(controls),
-                        onPaste: _semanticsOnPaste(controls),
-                        child: _ScribbleFocusable(
-                          focusNode: widget.focusNode,
-                          editableKey: _editableKey,
-                          enabled: widget.scribbleEnabled,
-                          updateSelectionRects: () {
-                            _openInputConnection();
-                            _updateSelectionRects(force: true);
-                          },
-                          child: SizeChangedLayoutNotifier(
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification notification) {
+                    final bool platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
+                      TargetPlatform.android => true,
+                      TargetPlatform.iOS => true,
+                      _ => false,
+                    };
+                    final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
+                    if (!platformSupportsFadeOnScroll || webContextMenuEnabled) {
+                      return true;
+                    }
+                    // When the scroll begins and the toolbar is visible, hide it
+                    // until scrolling ends.
+                    //
+                    // When scrolling ends and the toolbar was present at the
+                    // beginning of the scroll we should re-show the toolbar only
+                    // if the selection endpoints are within the viewport at the
+                    // end of the scroll. If not then we should schedule the
+                    // toolbar to be shown when we scroll the selection back into
+                    // view.
+                    //
+                    // A scheduled toolbar will only be shown if the editing state
+                    // did not change between the time the toolbar was first
+                    // scheduled to be shown to when it is ready to be shown.
+                    if (notification is ScrollStartNotification) {
+                      _toolbarVisibleAtScrollStart = _selectionOverlay != null && _selectionOverlay!.toolbarIsVisible;
+                      if (_toolbarVisibleAtScrollStart) {
+                        _selectionOverlay?.hideToolbar();
+                      }
+                    } else if (notification is ScrollEndNotification) {
+                      final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
+                      if ((_toolbarVisibleAtScrollStart || _showToolbarOnScreenScheduled) && selectionIsVisible) {
+                        _toolbarVisibleAtScrollStart = false;
+                        if (_showToolbarOnScreenScheduled) {
+                          _showToolbarOnScreenScheduled = false;
+                          if (_valueWhenShowToolbarOnScreenScheduled == _value) {
+                            _selectionOverlay?.showToolbar();
+                          }
+                          _valueWhenShowToolbarOnScreenScheduled = null;
+                        } else {
+                          _selectionOverlay?.showToolbar();
+                        }
+                      } else if (_toolbarVisibleAtScrollStart) {
+                        _showToolbarOnScreenScheduled = true;
+                        _valueWhenShowToolbarOnScreenScheduled = _value;
+                      }
+                    }
+                    return true;
+                  },
+                  child: Scrollable(
+                    key: _scrollableKey,
+                    excludeFromSemantics: true,
+                    axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                    controller: _scrollController,
+                    physics: widget.scrollPhysics,
+                    dragStartBehavior: widget.dragStartBehavior,
+                    restorationId: widget.restorationId,
+                    // If a ScrollBehavior is not provided, only apply scrollbars when
+                    // multiline. The overscroll indicator should not be applied in
+                    // either case, glowing or stretching.
+                    scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                      scrollbars: _isMultiline,
+                      overscroll: false,
+                    ),
+                    viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                      return CompositedTransformTarget(
+                        link: _toolbarLayerLink,
+                        child: Semantics(
+                          onCopy: _semanticsOnCopy(controls),
+                          onCut: _semanticsOnCut(controls),
+                          onPaste: _semanticsOnPaste(controls),
+                          child: _ScribbleFocusable(
+                            focusNode: widget.focusNode,
+                            editableKey: _editableKey,
+                            enabled: widget.scribbleEnabled,
+                            updateSelectionRects: () {
+                              _openInputConnection();
+                              _updateSelectionRects(force: true);
+                            },
                             child: _Editable(
                               key: _editableKey,
                               startHandleLayerLink: _startHandleLayerLink,
@@ -5019,9 +5072,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
