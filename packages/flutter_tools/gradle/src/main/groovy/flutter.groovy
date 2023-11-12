@@ -633,7 +633,7 @@ class FlutterPlugin implements Plugin<Project> {
         return androidPlugins
     }
 
-    // TODO(gustl22): Remove in favor of [getPluginList] only, see #54566 and #48918 and 
+    // TODO(#54566, #48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List getPluginDependencies() {
