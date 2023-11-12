@@ -21,8 +21,8 @@ class FlutterAppPluginLoaderPlugin implements Plugin<Settings> {
         // Load shared gradle functions
         settings.apply from: Paths.get(settings.ext.flutterSdkPath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "shared.groovy")
 
-        settings.ext.nativePluginLoader.forEachPlugin(flutterProjectRoot, { androidPlugin ->
-            def pluginDirectory = new File(androidPlugin.path, 'android')
+        settings.ext.nativePluginLoader.forEachPlugin(flutterProjectRoot, { Map<String, Object> androidPlugin ->
+            def pluginDirectory = new File(androidPlugin.path as String, 'android')
             assert pluginDirectory.exists()
             settings.include(":${androidPlugin.name}")
             settings.project(":${androidPlugin.name}").projectDir = pluginDirectory

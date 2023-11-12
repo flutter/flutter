@@ -8,14 +8,14 @@ class NativePluginLoader {
     static final String nativeBuildKey = 'native_build'
     static final String flutterPluginsDependenciesFile = '.flutter-plugins-dependencies'
 
-    void forEachPlugin(File flutterSourceDirectory, Closure<Object> callback) {
+    void forEachPlugin(File flutterSourceDirectory, Closure<Map<String, Object>> callback) {
         def meta = getDependenciesMetadata(flutterSourceDirectory)
         if (meta == null) {
             return
         }
 
-        assert meta.plugins instanceof Map
-        assert meta.plugins.android instanceof List
+        assert meta.plugins instanceof Map<String, Object>
+        assert meta.plugins.android instanceof List<Map<String, Object>>
         // Includes the Flutter plugins that support the Android platform.
         meta.plugins.android.each { androidPlugin ->
             // The properties are written to the file here:
@@ -33,19 +33,19 @@ class NativePluginLoader {
     }
 
 
-    private Map parsedFlutterPluginsDependencies
+    private Map<String, Object> parsedFlutterPluginsDependencies
 
     /**
      * Parses <project-src>/.flutter-plugins-dependencies
      */
-    Map getDependenciesMetadata(File flutterSourceDirectory) {
+    Map<String, Object> getDependenciesMetadata(File flutterSourceDirectory) {
         if (parsedFlutterPluginsDependencies) {
             return parsedFlutterPluginsDependencies
         }
         File pluginsDependencyFile = new File(flutterSourceDirectory, flutterPluginsDependenciesFile)
         if (pluginsDependencyFile.exists()) {
             def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
-            assert object instanceof Map
+            assert object instanceof Map<String, Object>
             parsedFlutterPluginsDependencies = object
             return object
         }

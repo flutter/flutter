@@ -422,13 +422,13 @@ class FlutterPlugin implements Plugin<Project> {
         if(!settingsGradle.exists() || !settingsGradle.text.contains("'.flutter-plugins'")) {
             return
         }
-        List deps = getPluginDependencies()
-        List plugins = getPluginList().collect { it.name }
+        List<Map<String, Object>> deps = getPluginDependencies()
+        List<String> plugins = getPluginList().collect { it.name as String }
         deps.removeIf { plugins.contains(it.name) }
         deps.each {
             Project pluginProject = project.rootProject.findProject(":${it.name}")
             if (pluginProject != null &&
-                    doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
+                    doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
                 configurePluginProject(it)
             } else {
                 project.logger.error("Plugin project :${pluginObject.name} included, but not found. Please fix your settings.gradle.")
@@ -446,7 +446,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /** Adds the plugin project dependency to the app project. */
-    private void configurePluginProject(Object pluginObject) {
+    private void configurePluginProject(Map<String, Object> pluginObject) {
         assert pluginObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
         if (pluginProject == null) {
@@ -571,7 +571,7 @@ class FlutterPlugin implements Plugin<Project> {
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
      * making the Gradle plugin project A depend on the Gradle plugin project B.
      */
-    private void configurePluginDependencies(Object pluginObject) {
+    private void configurePluginDependencies(Map<String, Object> pluginObject) {
         assert pluginObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
         if (pluginProject == null) {
@@ -597,7 +597,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /** Gets the list of plugins that support the Android platform. */
-    private List getPluginList() {
+    private List<Map<String, Object>> getPluginList() {
         // Consider a `.flutter-plugins-dependencies` file with the following content:
         // {
         //     "plugins": {
@@ -626,8 +626,8 @@ class FlutterPlugin implements Plugin<Project> {
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
         // `plugin-b` depends on `plugin-c`.
         // `plugin-c` doesn't depend on anything.
-        List androidPlugins = []
-        project.ext.nativePluginLoader.forEachPlugin(getFlutterSourceDirectory(), { androidPlugin ->
+        List<Map<String, Object>> androidPlugins = []
+        project.ext.nativePluginLoader.forEachPlugin(getFlutterSourceDirectory(), { Map<String, Object> androidPlugin ->
             androidPlugins.add(androidPlugin)
         })
         return androidPlugins
@@ -636,7 +636,7 @@ class FlutterPlugin implements Plugin<Project> {
     // TODO(#54566, #48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    private List getPluginDependencies() {
+    private List<Map<String, Object>> getPluginDependencies() {
         // Consider a `.flutter-plugins-dependencies` file with the following content:
         // {
         //     "dependencyGraph": [
@@ -662,8 +662,8 @@ class FlutterPlugin implements Plugin<Project> {
         if (meta == null) {
             return []
         }
-        assert meta.dependencyGraph instanceof List
-        return meta.dependencyGraph as List
+        assert meta.dependencyGraph instanceof List<Map<String, Object>>
+        return meta.dependencyGraph as List<Map<String, Object>>
     }
 
     private static String toCamelCase(List<String> parts) {
