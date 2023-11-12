@@ -941,7 +941,7 @@ class RenderCustomPaint extends RenderProxyBox {
       config.isHeader = properties.header!;
     }
     if (properties.headingLevel != null) {
-      config.headingLevel = properties.headingLevel;
+      config.headingLevel = properties.headingLevel!;
     }
     if (properties.scopesRoute != null) {
       config.scopesRoute = properties.scopesRoute!;
