@@ -1359,7 +1359,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// with aria-level="1", usually indicates the main heading of a page,
   /// a level 2 heading, defined with aria-level="2" the first subsection,
   /// a level 3 is a subsection of that, and so on.
-  final int headingLevel;
+  final int? headingLevel;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
