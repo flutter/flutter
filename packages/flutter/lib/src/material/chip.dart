@@ -1585,9 +1585,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     markNeedsLayout();
   }
 
-  TextDirection? get textDirection => _textDirection;
-  TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
     if (_textDirection == value) {
       return;
     }
@@ -1672,7 +1672,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return label!.getDistanceToActualBaseline(baseline);
   }
 
-  Size _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  (Size, BoxConstraints) _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+    final BoxConstraints labelConstraints;
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
     if (contentConstraints.maxWidth.isFinite) {
@@ -1683,34 +1684,21 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         - theme.labelPadding.horizontal
         - theme.padding.horizontal,
       );
-      final Size updatedSize = layoutChild(
-        label!,
-        BoxConstraints(
-          maxWidth: maxWidth,
-          minHeight: rawSize.height,
-          maxHeight: size.height,
-        ),
+      labelConstraints = BoxConstraints(
+        maxWidth: maxWidth,
+        minHeight: rawSize.height,
+        maxHeight: size.height,
       );
-
-      return Size(
-        updatedSize.width + theme.labelPadding.horizontal,
-        updatedSize.height + theme.labelPadding.vertical,
-      );
-    }
-
-    final Size updatedSize = layoutChild(
-      label!,
-      BoxConstraints(
+    } else {
+      labelConstraints = BoxConstraints(
         minHeight: rawSize.height,
         maxHeight: size.height,
         maxWidth: size.width,
-      ),
-    );
+      );
+    }
 
-    return Size(
-      updatedSize.width + theme.labelPadding.horizontal,
-      updatedSize.height + theme.labelPadding.vertical,
-    );
+    final Size updatedSize = layoutChild(label!, labelConstraints);
+    return (theme.labelPadding.inflateSize(updatedSize), labelConstraints);
   }
 
   Size _layoutAvatar(BoxConstraints contentConstraints, double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
@@ -1762,7 +1750,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       tapPosition: position,
       chipSize: size,
       deleteButtonSize: deleteIcon!.size,
-      textDirection: textDirection!,
+      textDirection: textDirection,
     );
     final RenderBox? hitTestChild = hitIsOnDeleteIcon
         ? (deleteIcon ?? label ?? avatar)
@@ -1787,6 +1775,18 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild).size;
   }
 
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final _ChipSizes sizes = _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild);
+    final double? labelBaseline = label?.getDryBaseline(sizes.labelConstraints, baseline);
+    if (labelBaseline == null) {
+      return null;
+    }
+    return labelBaseline
+         + (sizes.content - sizes.label.height + sizes.densityAdjustment.dy) / 2
+         + theme.padding.top + theme.labelPadding.top;
+  }
+
   _ChipSizes _computeSizes(BoxConstraints constraints, ChildLayouter layoutChild) {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
@@ -1798,7 +1798,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     );
     final Size avatarSize = _layoutAvatar(contentConstraints, contentSize, layoutChild);
     final Size deleteIconSize = _layoutDeleteIcon(contentConstraints, contentSize, layoutChild);
-    final Size labelSize = _layoutLabel(
+    final (Size labelSize, BoxConstraints labelConstraints) = _layoutLabel(
       contentConstraints,
       avatarSize.width + deleteIconSize.width,
       Size(rawLabelSize.width, contentSize),
@@ -1823,6 +1823,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       content: contentSize,
       densityAdjustment: densityAdjustment,
       avatar: avatarSize,
+      labelConstraints: labelConstraints,
       label: labelSize,
       deleteIcon: deleteIconSize,
     );
@@ -1839,7 +1840,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
     Offset centerLayout(Size boxSize, double x) {
       assert(sizes.content >= boxSize.height);
-      switch (textDirection!) {
+      switch (textDirection) {
         case TextDirection.rtl:
           return Offset(x - boxSize.width, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
         case TextDirection.ltr:
@@ -1853,7 +1854,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     Offset avatarOffset = Offset.zero;
     Offset labelOffset = Offset.zero;
     Offset deleteIconOffset = Offset.zero;
-    switch (textDirection!) {
+    switch (textDirection) {
       case TextDirection.rtl:
         double start = right;
         if (theme.showCheckmark || theme.showAvatar) {
@@ -2149,6 +2150,7 @@ class _ChipSizes {
     required this.overall,
     required this.content,
     required this.avatar,
+    required this.labelConstraints,
     required this.label,
     required this.deleteIcon,
     required this.densityAdjustment,
@@ -2157,6 +2159,7 @@ class _ChipSizes {
   final Size overall;
   final double content;
   final Size avatar;
+  final BoxConstraints labelConstraints;
   final Size label;
   final Size deleteIcon;
   final Offset densityAdjustment;

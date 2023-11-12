@@ -933,24 +933,123 @@ class BoxParentData extends ParentData {
 /// the relevant type arguments.
 abstract class ContainerBoxParentData<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
-enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
+sealed class _IntrinsicsCacheType<Input extends Object, Output> {
+  static const _DryLayoutCache dryLayout = _DryLayoutCache();
+  static const _DryBaselineCache baseline = _DryBaselineCache();
 
-@immutable
-class _IntrinsicDimensionsCacheEntry {
-  const _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
+  Output getOrCompute(_BoxIntrinsicsCache cache, Input input, Output Function(Input) computer);
+}
 
-  final _IntrinsicDimension dimension;
-  final double argument;
+final class _DryLayoutCache implements _IntrinsicsCacheType<BoxConstraints, Size> {
+  const _DryLayoutCache();
 
   @override
-  bool operator ==(Object other) {
-    return other is _IntrinsicDimensionsCacheEntry
-        && other.dimension == dimension
-        && other.argument == argument;
+  Size getOrCompute(_BoxIntrinsicsCache cache, BoxConstraints input, Size Function(BoxConstraints) computer) {
+    return (cache._cachedDryLayoutSizes ??= <BoxConstraints, Size>{})
+      .putIfAbsent(input, () => computer(input));
+  }
+}
+
+final class _DryBaselineCache implements _IntrinsicsCacheType<(BoxConstraints, TextBaseline), double?> {
+  const _DryBaselineCache();
+
+  @override
+  double? getOrCompute(_BoxIntrinsicsCache cache, (BoxConstraints, TextBaseline) input, double? Function((BoxConstraints, TextBaseline)) computer) {
+    return switch (input.$2) {
+      TextBaseline.alphabetic => cache._cachedDryAlphabeticBaseline ??= <BoxConstraints, double?>{},
+      TextBaseline.ideographic => cache._cachedDryIdeoBaseline ??= <BoxConstraints, double?>{},
+    }.putIfAbsent(input.$1, () => computer(input));
+  }
+}
+
+enum _IntrinsicDimension implements _IntrinsicsCacheType<double, double> {
+  minWidth, maxWidth, minHeight, maxHeight;
+
+  @override
+  double getOrCompute(_BoxIntrinsicsCache cache, double input, double Function(double) computer) {
+    return (cache._cachedIntrinsicDimensions ??= <(_IntrinsicDimension, double), double>{})
+      .putIfAbsent((this, input), () => computer(input));
+  }
+}
+
+final class _BoxIntrinsicsCache {
+  _BoxIntrinsicsCache(this.debugRenderBox);
+
+  static int _debugIntrinsicsDepth = 0;
+
+  final RenderBox debugRenderBox;
+
+  Map<(_IntrinsicDimension, double), double>? _cachedIntrinsicDimensions;
+  Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
+  Map<BoxConstraints, double?>? _cachedDryAlphabeticBaseline;
+  Map<BoxConstraints, double?>? _cachedDryIdeoBaseline;
+
+  bool clear() {
+    final bool hasCache = (_cachedDryLayoutSizes?.isNotEmpty ?? false)
+                       || (_cachedIntrinsicDimensions?.isNotEmpty ?? false)
+                       || (_cachedDryAlphabeticBaseline?.isNotEmpty ?? false)
+                       || (_cachedDryIdeoBaseline?.isNotEmpty ?? false);
+
+    if (hasCache) {
+      _cachedDryLayoutSizes?.clear();
+      _cachedIntrinsicDimensions?.clear();
+      _cachedDryAlphabeticBaseline?.clear();
+      _cachedDryIdeoBaseline?.clear();
+    }
+    return hasCache;
   }
 
-  @override
-  int get hashCode => Object.hash(dimension, argument);
+  Output getOrCompute<Input extends Object, Output>(
+    _IntrinsicsCacheType<Input, Output> type,
+    Input input,
+    Output Function(Input argument) computer,
+  ) {
+    assert(RenderObject.debugCheckingIntrinsics || !debugRenderBox.debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
+    bool shouldCache = true;
+    assert(() {
+      // we don't want the checked-mode intrinsic tests to affect
+      // who gets marked dirty, etc.
+      shouldCache = !RenderObject.debugCheckingIntrinsics;
+      return true;
+    }());
+    if (!shouldCache) {
+      return computer(input);
+    }
+    Map<String, String>? debugTimelineArguments;
+    assert(() {
+      final Map<String, String> arguments = debugEnhanceLayoutTimelineArguments
+        ? debugRenderBox.toDiagnosticsNode().toTimelineArguments()!
+        : <String, String>{};
+
+      debugTimelineArguments = switch (type) {
+        final _IntrinsicDimension dimension => arguments
+            ..['intrinsics dimension'] = dimension.name
+            ..['intrinsics argument'] = '$input',
+        _DryLayoutCache() => arguments..['getDryLayout constraints'] = '$input',
+        _DryBaselineCache() => arguments..['getDryBaseline constraints'] = '$input',
+      };
+      return true;
+    }());
+    if (!kReleaseMode) {
+      if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+        final String eventLabel = switch (type) {
+          _IntrinsicDimension() => '${debugRenderBox.runtimeType} intrinsics',
+          _DryLayoutCache() => '${debugRenderBox.runtimeType}.getDryLayout',
+          _DryBaselineCache() => '${debugRenderBox.runtimeType}.getDryBaseline',
+        };
+        FlutterTimeline.startSync(eventLabel, arguments: debugTimelineArguments);
+      }
+      _debugIntrinsicsDepth += 1;
+    }
+    final Output result = type.getOrCompute(this, input, computer);
+    if (!kReleaseMode) {
+      _debugIntrinsicsDepth -= 1;
+      if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
+        FlutterTimeline.finishSync();
+      }
+    }
+    return result;
+  }
 }
 
 /// A render object in a 2D Cartesian coordinate system.
@@ -1374,56 +1473,12 @@ abstract class RenderBox extends RenderObject {
     }
   }
 
-  Map<_IntrinsicDimensionsCacheEntry, double>? _cachedIntrinsicDimensions;
-  static int _debugIntrinsicsDepth = 0;
-
-  double _computeIntrinsicDimension(_IntrinsicDimension dimension, double argument, double Function(double argument) computer) {
-    assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
-    bool shouldCache = true;
-    assert(() {
-      // we don't want the checked-mode intrinsic tests to affect
-      // who gets marked dirty, etc.
-      if (RenderObject.debugCheckingIntrinsics) {
-        shouldCache = false;
-      }
-      return true;
-    }());
-    if (shouldCache) {
-      Map<String, String>? debugTimelineArguments;
-      assert(() {
-        if (debugEnhanceLayoutTimelineArguments) {
-          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
-        } else {
-          debugTimelineArguments = <String, String>{};
-        }
-        debugTimelineArguments!['intrinsics dimension'] = dimension.name;
-        debugTimelineArguments!['intrinsics argument'] = '$argument';
-        return true;
-      }());
-      if (!kReleaseMode) {
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.startSync(
-            '$runtimeType intrinsics',
-            arguments: debugTimelineArguments,
-          );
-        }
-        _debugIntrinsicsDepth += 1;
-      }
-      _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
-      final double result = _cachedIntrinsicDimensions!.putIfAbsent(
-        _IntrinsicDimensionsCacheEntry(dimension, argument),
-        () => computer(argument),
-      );
-      if (!kReleaseMode) {
-        _debugIntrinsicsDepth -= 1;
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.finishSync();
-        }
-      }
-      return result;
-    }
-    return computer(argument);
-  }
+  // Cache storage for this RenderBox's intrinsic dimensions and "dry" layout
+  // values.
+  //
+  // The cache is typically cleared when the internal states of this RenderBox
+  // change, in [markNeedsLayout].
+  late final _BoxIntrinsicsCache _intrinsicsCache = _BoxIntrinsicsCache(this);
 
   /// Returns the minimum width that this box could be without failing to
   /// correctly paint its contents within itself, without clipping.
@@ -1456,7 +1511,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    return _computeIntrinsicDimension(_IntrinsicDimension.minWidth, height, computeMinIntrinsicWidth);
+    return _intrinsicsCache.getOrCompute(_IntrinsicDimension.minWidth, height, computeMinIntrinsicWidth);
   }
 
   /// Computes the value returned by [getMinIntrinsicWidth]. Do not call this
@@ -1598,7 +1653,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    return _computeIntrinsicDimension(_IntrinsicDimension.maxWidth, height, computeMaxIntrinsicWidth);
+    return _intrinsicsCache.getOrCompute(_IntrinsicDimension.maxWidth, height, computeMaxIntrinsicWidth);
   }
 
   /// Computes the value returned by [getMaxIntrinsicWidth]. Do not call this
@@ -1674,7 +1729,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    return _computeIntrinsicDimension(_IntrinsicDimension.minHeight, width, computeMinIntrinsicHeight);
+    return _intrinsicsCache.getOrCompute(_IntrinsicDimension.minHeight, width, computeMinIntrinsicHeight);
   }
 
   /// Computes the value returned by [getMinIntrinsicHeight]. Do not call this
@@ -1749,7 +1804,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    return _computeIntrinsicDimension(_IntrinsicDimension.maxHeight, width, computeMaxIntrinsicHeight);
+    return _intrinsicsCache.getOrCompute(_IntrinsicDimension.maxHeight, width, computeMaxIntrinsicHeight);
   }
 
   /// Computes the value returned by [getMaxIntrinsicHeight]. Do not call this
@@ -1793,8 +1848,8 @@ abstract class RenderBox extends RenderObject {
     return 0.0;
   }
 
-  Map<BoxConstraints, Size>? _cachedDryLayoutSizes;
   bool _computingThisDryLayout = false;
+  bool _computingThisDryBaseline = false;
 
   /// Returns the [Size] that this [RenderBox] would like to be given the
   /// provided [BoxConstraints].
@@ -1815,47 +1870,25 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Do not override this method. Instead, implement [computeDryLayout].
   @mustCallSuper
-  Size getDryLayout(BoxConstraints constraints) {
-    bool shouldCache = true;
-    assert(() {
-      // we don't want the checked-mode intrinsic tests to affect
-      // who gets marked dirty, etc.
-      if (RenderObject.debugCheckingIntrinsics) {
-        shouldCache = false;
-      }
-      return true;
-    }());
-    if (shouldCache) {
-      Map<String, String>? debugTimelineArguments;
-      assert(() {
-        if (debugEnhanceLayoutTimelineArguments) {
-          debugTimelineArguments = toDiagnosticsNode().toTimelineArguments();
-        } else {
-          debugTimelineArguments = <String, String>{};
-        }
-        debugTimelineArguments!['getDryLayout constraints'] = '$constraints';
-        return true;
-      }());
-      if (!kReleaseMode) {
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.startSync(
-            '$runtimeType.getDryLayout',
-            arguments: debugTimelineArguments,
-          );
-        }
-        _debugIntrinsicsDepth += 1;
-      }
-      _cachedDryLayoutSizes ??= <BoxConstraints, Size>{};
-      final Size result = _cachedDryLayoutSizes!.putIfAbsent(constraints, () => _computeDryLayout(constraints));
-      if (!kReleaseMode) {
-        _debugIntrinsicsDepth -= 1;
-        if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          FlutterTimeline.finishSync();
-        }
-      }
-      return result;
-    }
-    return _computeDryLayout(constraints);
+  Size getDryLayout(covariant BoxConstraints constraints) => _intrinsicsCache.getOrCompute(_IntrinsicsCacheType.dryLayout, constraints, _computeDryLayout);
+
+  /// Returns the distance from the top of the box to the first baseline of the
+  /// box's contents, given the input [constraints] to this [RenderBox], or null
+  /// if the [RenderBox] does not have any baselines.
+  ///
+  /// This method is typically called by intrinsic methods
+  /// ([computeMinIntrinsicHeight], for example) and [computeDryLayout]
+  /// implementations, when the intrinsic dimension of a [RenderBox] depends on
+  /// the baseline offset of one or more child of the [RenderBox].
+  ///
+  /// This method calls [computeDryBaseline] under the hood and caches the result.
+  /// When the input constraints equal to the constraints given to this
+  /// [RenderBox] by the parent, the returned baseline offset value is guaranteed
+  /// to be consistent with the value returned by [getDistanceToBaseline]. It's
+  /// also guaranteed that calling this method does not alter the current layout
+  /// of this [RenderBox] in any way.
+  double? getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return _intrinsicsCache.getOrCompute(_IntrinsicsCacheType.baseline, (constraints, baseline), _computeDryBaseline);
   }
 
   Size _computeDryLayout(BoxConstraints constraints) {
@@ -1868,6 +1901,21 @@ abstract class RenderBox extends RenderObject {
     assert(() {
       assert(_computingThisDryLayout);
       _computingThisDryLayout = false;
+      return true;
+    }());
+    return result;
+  }
+
+  double? _computeDryBaseline((BoxConstraints, TextBaseline) pair) {
+    assert(() {
+      assert(!_computingThisDryBaseline);
+      _computingThisDryBaseline = true;
+      return true;
+    }());
+    final double? result = computeDryBaseline(pair.$1, pair.$2);
+    assert(() {
+      assert(_computingThisDryBaseline);
+      _computingThisDryBaseline = false;
       return true;
     }());
     return result;
@@ -1895,11 +1943,11 @@ abstract class RenderBox extends RenderObject {
   /// ### When the size cannot be known
   ///
   /// There are cases where render objects do not have an efficient way to
-  /// compute their size without doing a full layout. For example, the size
-  /// may depend on the baseline of a child (which is not available without
-  /// doing a full layout), it may be computed by a callback about which the
-  /// render object cannot reason, or the layout is so complex that it
-  /// is impractical to calculate the size in an efficient way.
+  /// compute their size without affecting the current layout. For example,
+  /// a [LayoutBuilder] changes its live render subtree based on the incoming
+  /// constraints, so currently there is no easy way to compute its size
+  /// speculatively given arbitrary constraints, for that alters the [RenderBox]'s
+  /// current layout.
   ///
   /// In such cases, it may be impossible (or at least impractical) to actually
   /// return a valid answer. In such cases, the function should call
@@ -1917,6 +1965,31 @@ abstract class RenderBox extends RenderObject {
       ]),
     ));
     return Size.zero;
+  }
+
+  /// Computes the value returned by [getDryBaseline].
+  ///
+  /// This method is for overriding only and shouldn't be called directly.
+  /// Instead, call [getDryLayout] to get the speculative baseline location.
+  ///
+  /// The implementation must return the distance from the top of the box to the
+  /// first baseline of the box's contents, or null if the box does not have any
+  /// baselines.
+  ///
+  /// Changing the current layout (for instance, modifying the size or the paint
+  /// offset of any RenderBox in the render tree) in the implementation is
+  /// prohibited. Failing to fulfill this contract could result in incorrect
+  /// layout (which could happen, for instance, if this method is called when the
+  /// layout of this render object is already finalized).
+  ///
+  /// Accessing the current layout of this [RenderBox] or child [RenderBoxes]
+  /// (including accessing [size] or `child.size`) usually indicates a bug in the
+  /// implementaion, as the current layout is typically calculated using a set of
+  /// [BoxConstraints] that's different from the `constraints` given as the first
+  /// parameter.
+  @protected
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return null;
   }
 
   static bool _dryLayoutCalculationValid = true;
@@ -1940,7 +2013,7 @@ abstract class RenderBox extends RenderObject {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
         if (reason != null) {
-          assert(error ==null);
+          assert(error == null);
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not support dry layout.'),
             if (reason.isNotEmpty) ErrorDescription(reason),
@@ -2115,7 +2188,6 @@ abstract class RenderBox extends RenderObject {
     size = size; // ignore: no_self_assignments
   }
 
-  Map<TextBaseline, double?>? _cachedBaselines;
   static bool _debugDoingBaseline = false;
   static bool _debugSetDoingBaseline(bool value) {
     _debugDoingBaseline = value;
@@ -2141,16 +2213,9 @@ abstract class RenderBox extends RenderObject {
   double? getDistanceToBaseline(TextBaseline baseline, { bool onlyReal = false }) {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
-    assert(() {
-      if (owner!.debugDoingLayout) {
-        return (RenderObject.debugActiveLayout == parent) && parent!.debugDoingThisLayout;
-      }
-      if (owner!.debugDoingPaint) {
-        return ((RenderObject.debugActivePaint == parent) && parent!.debugDoingThisPaint) ||
-               ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
-      }
-      return false;
-    }());
+    assert(owner!.debugDoingLayout || owner!.debugDoingPaint);
+    assert(!owner!.debugDoingLayout || (RenderObject.debugActiveLayout == parent && parent!.debugDoingThisLayout));
+    assert(!owner!.debugDoingPaint || (RenderObject.debugActivePaint == parent) && parent!.debugDoingThisPaint || (RenderObject.debugActivePaint == this && debugDoingThisPaint));
     assert(_debugSetDoingBaseline(true));
     final double? result;
     try {
@@ -2170,11 +2235,13 @@ abstract class RenderBox extends RenderObject {
   /// [computeDistanceToActualBaseline]. Do not call this function directly from
   /// outside those two methods.
   @protected
-  @mustCallSuper
   double? getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
-    _cachedBaselines ??= <TextBaseline, double?>{};
-    return _cachedBaselines!.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
+    return _intrinsicsCache.getOrCompute(
+      _IntrinsicsCacheType.baseline,
+      (constraints, baseline),
+      ((BoxConstraints, TextBaseline) pair) => computeDistanceToActualBaseline(pair.$2),
+    );
   }
 
   /// Returns the distance from the y-coordinate of the position of the box to
@@ -2353,40 +2420,18 @@ abstract class RenderBox extends RenderObject {
     }());
   }
 
-  bool _clearCachedData() {
-    if ((_cachedBaselines != null && _cachedBaselines!.isNotEmpty) ||
-        (_cachedIntrinsicDimensions != null && _cachedIntrinsicDimensions!.isNotEmpty) ||
-        (_cachedDryLayoutSizes != null && _cachedDryLayoutSizes!.isNotEmpty)) {
-      // If we have cached data, then someone must have used our data.
-      // Since the parent will shortly be marked dirty, we can forget that they
-      // used the baseline and/or intrinsic dimensions. If they use them again,
-      // then we'll fill the cache again, and if we get dirty again, we'll
-      // notify them again.
-      _cachedBaselines?.clear();
-      _cachedIntrinsicDimensions?.clear();
-      _cachedDryLayoutSizes?.clear();
-      return true;
-    }
-    return false;
-  }
-
   @override
   void markNeedsLayout() {
-    if (_clearCachedData() && parent is RenderObject) {
+    // A render object's performLayout implementation may depend on the baseline
+    // location or the intrinsic dimensions of a descendant, even when there are
+    // relayout boundaries between them. The cache being non-null implies that
+    // the parent depended on this RenderBox's baseline location / intrinsic
+    // sizes thus needs relayout (even if this is a relayout boundary).
+    if (parent != null && _intrinsicsCache.clear()) {
       markParentNeedsLayout();
       return;
     }
     super.markNeedsLayout();
-  }
-
-  @override
-  void layout(Constraints constraints, {bool parentUsesSize = false}) {
-    if (hasSize && constraints != this.constraints &&
-        _cachedBaselines != null && _cachedBaselines!.isNotEmpty) {
-      // The cached baselines data may need update if the constraints change.
-      _cachedBaselines?.clear();
-    }
-    super.layout(constraints, parentUsesSize: parentUsesSize);
   }
 
   /// {@macro flutter.rendering.RenderObject.performResize}
@@ -2805,12 +2850,12 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     assert(!debugNeedsLayout);
     ChildType? child = firstChild;
     while (child != null) {
-      final ParentDataType? childParentData = child.parentData as ParentDataType?;
+      final ParentDataType childParentData = child.parentData! as ParentDataType;
       final double? result = child.getDistanceToActualBaseline(baseline);
       if (result != null) {
-        return result + childParentData!.offset.dy;
+        return result + childParentData.offset.dy;
       }
-      child = childParentData!.nextSibling;
+      child = childParentData.nextSibling;
     }
     return null;
   }

@@ -999,10 +999,12 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (child != null) {
-      return child!.getDistanceToActualBaseline(baseline);
-    }
-    return super.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline)
+        ?? super.computeDistanceToActualBaseline(baseline);
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
   }
 
   @override

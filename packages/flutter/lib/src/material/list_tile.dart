@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1261,6 +1262,15 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     return parentData.offset.dy + title!.getDistanceToActualBaseline(baseline)!;
   }
 
+  BoxConstraints get maxIconHeightConstraint => BoxConstraints(
+    // One-line trailing and leading widget heights do not follow
+    // Material specifications, but this sizing is required to adhere
+    // to accessibility requirements for smallest tappable widget.
+    // Two- and three-line trailing widget heights are constrained
+    // properly according to the Material spec.
+    maxHeight: (isDense ? 48.0 : 56.0) + visualDensity.baseSizeAdjustment.dy,
+  );
+
   static double? _boxBaseline(RenderBox box, TextBaseline baseline) {
     return box.getDistanceToBaseline(baseline);
   }
@@ -1279,6 +1289,48 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final BoxConstraints looseConstraints = constraints.loosen();
+    final double tileWidth = looseConstraints.maxWidth;
+    final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
+    final RenderBox? leading = this.leading;
+    final RenderBox? trailing = this.trailing;
+    final RenderBox? title = this.title;
+    final RenderBox? subtitle = this.subtitle;
+    final double titleStart = leading == null
+      ? 0.0
+      : math.max(_minLeadingWidth, leading.getDryLayout(iconConstraints).width) + _effectiveHorizontalTitleGap;
+
+    final double adjustedTrailingWidth = trailing == null
+      ? 0.0
+      : math.max(trailing.getDryLayout(iconConstraints).width + _effectiveHorizontalTitleGap, 32.0);
+
+    final BoxConstraints textConstraints = looseConstraints.tighten(
+      width: tileWidth - titleStart - adjustedTrailingWidth,
+    );
+
+    if (title == null) {
+      return null;
+    }
+    final double defaultTileHeight = _defaultTileHeight;
+    final double titleHeight = title.getDryLayout(textConstraints).height;
+    final double titleBaseline = title.getDryBaseline(textConstraints, baseline)!;
+    if (subtitle == null) {
+      final double tileHeight = math.max(defaultTileHeight, titleHeight + 2 * _minVerticalPadding);
+      return (tileHeight - titleHeight) / 2.0 + titleBaseline;
+    }
+    final double subtitleHeight = subtitle.getDryLayout(textConstraints).height;
+
+    final double tileHeight = math.max(defaultTileHeight, 2 * _minVerticalPadding + titleHeight + subtitleHeight);
+    final double idealTitleBaseline = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0);
+    return clampDouble(
+      idealTitleBaseline,
+      titleBaseline + _minVerticalPadding,
+      tileHeight - _minVerticalPadding - subtitleHeight - titleHeight + titleBaseline,
+    );
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.',
@@ -1294,18 +1346,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     final bool hasLeading = leading != null;
     final bool hasSubtitle = subtitle != null;
     final bool hasTrailing = trailing != null;
-    final bool isTwoLine = !isThreeLine && hasSubtitle;
-    final bool isOneLine = !isThreeLine && !hasSubtitle;
-    final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
 
-    final BoxConstraints maxIconHeightConstraint = BoxConstraints(
-      // One-line trailing and leading widget heights do not follow
-      // Material specifications, but this sizing is required to adhere
-      // to accessibility requirements for smallest tappable widget.
-      // Two- and three-line trailing widget heights are constrained
-      // properly according to the Material spec.
-      maxHeight: (isDense ? 48.0 : 56.0) + densityAdjustment.dy,
-    );
     final BoxConstraints looseConstraints = constraints.loosen();
     final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
 
@@ -1329,58 +1370,38 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       ? math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap
       : 0.0;
     final double adjustedTrailingWidth = hasTrailing
-        ? math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0)
-        : 0.0;
+      ? math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0)
+      : 0.0;
     final BoxConstraints textConstraints = looseConstraints.tighten(
       width: tileWidth - titleStart - adjustedTrailingWidth,
     );
     final Size titleSize = _layoutBox(title, textConstraints);
     final Size subtitleSize = _layoutBox(subtitle, textConstraints);
 
-    double? titleBaseline;
-    double? subtitleBaseline;
-    if (isTwoLine) {
-      titleBaseline = isDense ? 28.0 : 32.0;
-      subtitleBaseline = isDense ? 48.0 : 52.0;
-    } else if (isThreeLine) {
-      titleBaseline = isDense ? 22.0 : 28.0;
-      subtitleBaseline = isDense ? 42.0 : 48.0;
-    } else {
-      assert(isOneLine);
-    }
-
+    final double idealTitleBaseline = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0);
+    final double idealSubtitleBaseline = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0;
     final double defaultTileHeight = _defaultTileHeight;
 
-    double tileHeight;
-    double titleY;
-    double? subtitleY;
+    final double tileHeight = math.max(defaultTileHeight, 2 * _minVerticalPadding + titleSize.height + subtitleSize.height);
+    final double titleY;
+    final double? subtitleY;
     if (!hasSubtitle) {
-      tileHeight = math.max(defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
       titleY = (tileHeight - titleSize.height) / 2.0;
+      subtitleY = null;
     } else {
+      // Move the title's baseline as close to the ideal baseline as possible,
+      // at the same time maintain the required vertical paddings.
+      titleY = clampDouble(
+        idealTitleBaseline - _boxBaseline(title!, titleBaselineType)!,
+        _minVerticalPadding,
+        tileHeight - _minVerticalPadding - subtitleSize.height - titleSize.height,
+      );
       assert(subtitleBaselineType != null);
-      titleY = titleBaseline! - _boxBaseline(title!, titleBaselineType)!;
-      subtitleY = subtitleBaseline! - _boxBaseline(subtitle!, subtitleBaselineType!)! + visualDensity.vertical * 2.0;
-      tileHeight = defaultTileHeight;
-
-      // If the title and subtitle overlap, move the title upwards by half
-      // the overlap and the subtitle down by the same amount, and adjust
-      // tileHeight so that both titles fit.
-      final double titleOverlap = titleY + titleSize.height - subtitleY;
-      if (titleOverlap > 0.0) {
-        titleY -= titleOverlap / 2.0;
-        subtitleY += titleOverlap / 2.0;
-      }
-
-      // If the title or subtitle overflow tileHeight then punt: title
-      // and subtitle are arranged in a column, tileHeight = column height plus
-      // _minVerticalPadding on top and bottom.
-      if (titleY < _minVerticalPadding ||
-          (subtitleY + subtitleSize.height + _minVerticalPadding) > tileHeight) {
-        tileHeight = titleSize.height + subtitleSize.height + 2.0 * _minVerticalPadding;
-        titleY = _minVerticalPadding;
-        subtitleY = titleSize.height + _minVerticalPadding;
-      }
+      subtitleY = clampDouble(
+        idealSubtitleBaseline - _boxBaseline(subtitle!, subtitleBaselineType!)!,
+        titleY + titleSize.height,
+        tileHeight - _minVerticalPadding - subtitleSize.height,
+      );
     }
 
     final double leadingY;

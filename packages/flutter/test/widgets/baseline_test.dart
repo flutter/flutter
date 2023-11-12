@@ -160,6 +160,10 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     return constraints.smallest;
   }

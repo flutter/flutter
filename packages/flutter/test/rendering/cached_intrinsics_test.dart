@@ -35,6 +35,10 @@ class RenderTestBox extends RenderBox {
     calls += 1;
     return boxSize.height / 2.0;
   }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+  }
 }
 
 void main() {

@@ -1024,6 +1024,35 @@ class RenderTable extends RenderBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (rows * columns == 0) {
+      return null;
+    }
+    final List<double> widths = _computeColumnWidths(constraints);
+    double? baselineOffset;
+    for (int col = 0; col < columns; col += 1) {
+      final RenderBox? child = _children[col];
+      final BoxConstraints childConstraints = BoxConstraints.tightFor(width: widths[col]);
+      if (child == null) {
+        continue;
+      }
+      final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+      switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
+        case TableCellVerticalAlignment.baseline:
+          final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+          if (childBaseline != null && (baselineOffset == null || baselineOffset < childBaseline)) {
+            baselineOffset = childBaseline;
+          }
+          case TableCellVerticalAlignment.top:
+          case TableCellVerticalAlignment.middle:
+          case TableCellVerticalAlignment.bottom:
+          case TableCellVerticalAlignment.fill:
+      }
+    }
+    return null;
+  }
+
+  @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     if (rows * columns == 0) {

@@ -458,6 +458,49 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final BoxConstraints childConstraints = constraints.loosen();
+
+    final (RenderBox? Function(RenderBox) next, RenderBox? startChild) = switch (overflowDirection) {
+      VerticalDirection.down => (childAfter, firstChild),
+      VerticalDirection.up => (childBefore, lastChild),
+    };
+    double maxChildHeight = 0.0;
+    double? minHorizontalBaseline;
+    double? verticalBaseline;
+    double y = 0.0;
+    double childrenWidth = 0.0;
+    RenderBox? child = startChild;
+
+    while (child != null) {
+      final Size childSize = child.getDryLayout(childConstraints);
+      final double heightDiff = childSize.height - maxChildHeight;
+      if (heightDiff > 0) {
+        if (minHorizontalBaseline != null) {
+          minHorizontalBaseline += heightDiff / 2;
+        }
+        maxChildHeight = childSize.height;
+      }
+
+      final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
+      if (baselineOffset != null) {
+        verticalBaseline ??= y + baselineOffset;
+        final double horizontalBaselineOffset = baselineOffset + maxChildHeight - childSize.height;
+        minHorizontalBaseline = minHorizontalBaseline == null
+          ? horizontalBaselineOffset
+          : math.min(horizontalBaselineOffset, minHorizontalBaseline);
+      }
+      y += childSize.height + overflowSpacing;
+      childrenWidth += childSize.width;
+      child = next(child);
+    }
+    assert((verticalBaseline == null) == (minHorizontalBaseline == null));
+    return childrenWidth + spacing * (childCount - 1) > constraints.maxWidth
+      ? verticalBaseline
+      : minHorizontalBaseline;
+  }
+
+  @override
   void performLayout() {
     RenderBox? child = firstChild;
     if (child == null) {
@@ -509,7 +552,7 @@ class _RenderOverflowBar extends RenderBox
       final double overallWidth = alignment == null ? actualWidth : constraints.maxWidth;
       size = constraints.constrain(Size(overallWidth, maxChildHeight));
 
-      late double x; // initial value: origin of the first child
+      double x; // initial value: origin of the first child
       double layoutSpacing = spacing; // space between children
       switch (alignment) {
         case null:

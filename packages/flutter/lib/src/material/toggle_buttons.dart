@@ -1143,19 +1143,19 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   static double _maxHeight(RenderBox? box, double width) {
-    return box == null ? 0.0 : box.getMaxIntrinsicHeight(width);
+    return box?.getMaxIntrinsicHeight(width) ?? 0.0;
   }
 
   static double _minHeight(RenderBox? box, double width) {
-    return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
+    return box?.getMinIntrinsicHeight(width) ?? 0.0;
   }
 
   static double _minWidth(RenderBox? box, double height) {
-    return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
+    return box?.getMinIntrinsicWidth(height) ?? 0.0;
   }
 
   static double _maxWidth(RenderBox? box, double height) {
-    return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
+    return box?.getMaxIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
@@ -1192,6 +1192,17 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     return direction == Axis.horizontal
       ? leadingBorderSide.width + _minWidth(child, height) + trailingBorderSide.width
       : borderSide.width * 2.0 + _minWidth(child, height);
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final double? childBaseline = child?.getDryBaseline(constraints, baseline);
+    return childBaseline == null
+      ? null
+      : childBaseline + switch (direction) {
+          Axis.horizontal => borderSide.width,
+          Axis.vertical => leadingBorderSide.width,
+        };
   }
 
   @override

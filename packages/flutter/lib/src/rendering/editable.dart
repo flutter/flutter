@@ -1834,6 +1834,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textPainter.setPlaceholderDimensions(layoutInlineChildren(
       double.infinity,
       (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+      isDryLayout: true,
     ));
     _layoutText();
     return _textPainter.minIntrinsicWidth;
@@ -1849,6 +1850,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line. Therefore, using 0.0 as a dummy for the height.
       (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+      isDryLayout: true,
     ));
     _layoutText();
     return _textPainter.maxIntrinsicWidth + _caretMargin;
@@ -1924,7 +1926,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (!_canComputeIntrinsics) {
       return 0.0;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, isDryLayout: true));
     return _preferredHeight(width);
   }
 
@@ -2282,6 +2284,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       );
   }
 
+  @override
+  double computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    // Like other intrinsic methods, the implementation WILL destory the current
+    // TextPainter layout. Methods that relies on the current text layout
+    // (paint, getOffsetForCaret, to name a few) must not assume the TextPainter
+    // is laid out with the correct constraints. These methods should typically
+    // call _layoutTextWithConstraints before querying the TextPainter, to make
+    // sure the TextPainter is laid out using the right constraints.
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, isDryLayout: true));
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
+  }
+
   bool _canComputeDryLayoutForInlineWidgets() {
     return text?.visitChildren((InlineSpan span) {
       return (span is! PlaceholderSpan) || switch (span.alignment) {
@@ -2307,10 +2322,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       ));
       return Size.zero;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, isDryLayout: true));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-    final double width = forceLine ? constraints.maxWidth : constraints
-        .constrainWidth(_textPainter.size.width + _caretMargin);
+    final double width = forceLine
+      ? constraints.maxWidth
+      : constraints.constrainWidth(_textPainter.size.width + _caretMargin);
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
 

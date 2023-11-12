@@ -1160,6 +1160,32 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    RenderBox? child = _firstOnstageChild;
+    double? baselineOffset;
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+    final Alignment alignment = theater._resolvedAlignment;
+    final Size size = computeDryLayout(constraints);
+    while (child != null) {
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final double? childBaseline;
+      if (!childParentData.isPositioned) {
+        childBaseline = switch (child.getDryBaseline(nonPositionedChildConstraints, baseline)) {
+          null => null,
+          final double baseline => baseline + alignment.alongOffset(size - child.getDryLayout(nonPositionedChildConstraints) as Offset).dy,
+        };
+      } else {
+        childBaseline = RenderStack.baselineForPositionedChild(child, childParentData, size, alignment, baseline);
+      }
+      if (childBaseline != null && (baselineOffset == null || baselineOffset > childBaseline)) {
+        baselineOffset = childBaseline;
+      }
+      child = childAfter(child);
+    }
+    return baselineOffset;
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     assert(constraints.biggest.isFinite);
     return constraints.biggest;

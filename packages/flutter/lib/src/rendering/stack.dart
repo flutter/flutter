@@ -546,6 +546,62 @@ class RenderStack extends RenderBox
     return hasVisualOverflow;
   }
 
+  static double? baselineForPositionedChild(RenderBox child, StackParentData childParentData, Size size, Alignment alignment, TextBaseline baseline) {
+    assert(childParentData.isPositioned);
+    assert(child.parentData == childParentData);
+
+    BoxConstraints childConstraints = const BoxConstraints();
+
+    if (childParentData.left != null && childParentData.right != null) {
+      childConstraints = childConstraints.tighten(width: size.width - childParentData.right! - childParentData.left!);
+    } else if (childParentData.width != null) {
+      childConstraints = childConstraints.tighten(width: childParentData.width);
+    }
+
+    if (childParentData.top != null && childParentData.bottom != null) {
+      childConstraints = childConstraints.tighten(height: size.height - childParentData.bottom! - childParentData.top!);
+    } else if (childParentData.height != null) {
+      childConstraints = childConstraints.tighten(height: childParentData.height);
+    }
+
+    final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
+    if (baselineOffset == null) {
+      return null;
+    }
+    final double y = switch (childParentData) {
+      StackParentData(:final double top?) => top,
+      StackParentData(:final double bottom?) => size.height - bottom - child.getDryLayout(childConstraints).height,
+      _ => alignment.alongOffset(size - child.getDryLayout(childConstraints) as Offset).dy,
+    };
+    return baselineOffset + y;
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    RenderBox? child = firstChild;
+    double? baselineOffset;
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+    final Alignment alignment = _resolvedAlignment!;
+    final Size size = computeDryLayout(constraints);
+    while (child != null) {
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final double? childBaseline;
+      if (!childParentData.isPositioned) {
+        childBaseline = switch (child.getDryBaseline(nonPositionedChildConstraints, baseline)) {
+          null => null,
+          final double baseline => baseline + alignment.alongOffset(size - child.getDryLayout(nonPositionedChildConstraints) as Offset).dy,
+        };
+      } else {
+        childBaseline = RenderStack.baselineForPositionedChild(child, childParentData, size, alignment, baseline);
+      }
+      if (childBaseline != null && (baselineOffset == null || baselineOffset > childBaseline)) {
+        baselineOffset = childBaseline;
+      }
+      child = childAfter(child);
+    }
+    return baselineOffset;
+  }
+
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {

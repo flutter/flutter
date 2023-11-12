@@ -96,6 +96,12 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
 
   @override
   @protected
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.computeDryBaseline(constraints, baseline);
+  }
+
+  @override
+  @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     return child?.getDryLayout(constraints) ?? computeSizeForNoChild(constraints);
   }
@@ -856,9 +862,10 @@ class RenderIgnoreBaseline extends RenderProxyBox {
   }) : super(child);
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return null;
-  }
+  Null computeDistanceToActualBaseline(TextBaseline baseline) => null;
+
+  @override
+  Null computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) => null;
 }
 
 /// Makes its child partially transparent.
@@ -3704,6 +3711,11 @@ class RenderOffstage extends RenderProxyBox {
 
   @override
   bool get sizedByParent => offstage;
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return offstage ? null : super.computeDryBaseline(constraints, baseline);
+  }
 
   @override
   @protected
