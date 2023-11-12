@@ -221,7 +221,7 @@ void main() {
         body: NestedScrollView(
           key: outer,
           physics: const BouncingScrollPhysics(),
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => [
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
             SliverToBoxAdapter(
               child: Container(color: Colors.green, height: 300),
             ),
