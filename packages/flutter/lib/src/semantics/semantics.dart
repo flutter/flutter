@@ -2618,7 +2618,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int? platformViewId = _platformViewId;
     int? maxValueLength = _maxValueLength;
     int? currentValueLength = _currentValueLength;
-    final int headingLevel = _headingLevel;
+    int? headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -2813,7 +2813,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
-      headingLevel: data.headingLevel,
+      headingLevel: data.headingLevel != null ? data.headingLevel! : -1,
     );
     _dirty = false;
   }
@@ -4660,7 +4660,7 @@ class SemanticsConfiguration {
   ///
   /// This is only used for web semantics, and is ignored on other platforms.
   int get headingLevel => _headingLevel;
-  int _headingLevel = -1;
+  int _headingLevel;
 
   set headingLevel(int value) {
     if (value < 1 || value > 6) {
