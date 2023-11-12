@@ -212,6 +212,54 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('Outer scrollable always scrolls first with BouncingScrollPhysics; fix for (#136199)', (WidgetTester tester) async {
+    final Key inner = UniqueKey();
+    final Key outer = UniqueKey();
+
+    Widget build() {
+      return Scaffold(
+        body: NestedScrollView(
+          key: outer,
+          physics: const BouncingScrollPhysics(),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => [
+            SliverToBoxAdapter(
+              child: Container(color: Colors.green, height: 300),
+            ),
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              sliver: SliverToBoxAdapter(
+                child: Container(
+                  color: Colors.blue,
+                  height: 64,
+                ),
+              ),
+            ),
+          ],
+          body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Container(
+              key: inner,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <ui.Color>[Colors.black, Colors.blue],
+                  stops: <double>[0, 1],
+                ),
+              ),
+              height: 800,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Build the widget.
+    await tester.pumpWidget(build());
+
+    // TODO Write the actual test (fling inner scrollable, outer scrollable should not move)
+  });
+
   testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
