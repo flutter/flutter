@@ -19,7 +19,7 @@ void main() {
 
     final File settingsDotGradleFile = fileSystem.file(
         fileSystem.path.join(workingDirectory, 'android', 'settings.gradle'));
-    const String settingsDotGradle = r"""
+    const String expectedSettingsDotGradle = r"""
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -48,7 +48,7 @@ plugins.each { name, path ->
 
     expect(
       settingsDotGradleFile.readAsStringSync().trim().replaceAll('\r', ''),
-      equals(settingsDotGradle.trim()),
+      equals(expectedSettingsDotGradle.trim()),
     );
 
     final ProcessResult result = await processManager.run(<String>[
