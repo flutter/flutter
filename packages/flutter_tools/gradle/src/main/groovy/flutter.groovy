@@ -28,9 +28,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
-def pathToThisDirectory = buildscript.sourceFile.parentFile
-apply from: "$pathToThisDirectory/shared.groovy"
-
 /**
  * For apps only. Provides the flutter extension used in app/build.gradle.
  *
@@ -223,6 +220,9 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
+        
+        // Load shared gradle functions
+        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "shared.groovy")
 
         project.extensions.create("flutter", FlutterExtension)
         this.addFlutterTasks(project)
