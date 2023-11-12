@@ -430,6 +430,8 @@ class FlutterPlugin implements Plugin<Project> {
             if (pluginProject != null &&
                     doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
                 configurePluginProject(it)
+            } else {
+                project.logger.error("Plugin project :${pluginObject.name} included, but not found. Please fix your settings.gradle.")
             }
         }
     }
@@ -447,9 +449,7 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePluginProject(Object pluginObject) {
         assert pluginObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-
         if (pluginProject == null) {
-            project.logger.error("Plugin project :${pluginObject.name} not found. Please update settings.gradle.")
             return
         }
         // Add plugin dependency to the app project.
