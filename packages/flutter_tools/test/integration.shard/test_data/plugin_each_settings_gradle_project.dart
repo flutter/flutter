@@ -1,10 +1,13 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// TODO(#54566): Remove this file when issue is resolved.
 
 import 'deferred_components_config.dart';
 import 'plugin_project.dart';
 
+/// Project to test the legacy `settings.gradle` which uses the
+/// `.flutter-plugins` file to load EACH plugin.
 class PluginEachSettingsGradleProject extends PluginProject {
   @override
   DeferredComponentsConfig get deferredComponents =>

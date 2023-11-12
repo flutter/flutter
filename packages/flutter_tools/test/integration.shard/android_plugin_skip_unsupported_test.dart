@@ -97,18 +97,20 @@ flutter:
   }
 
   test('skip plugin if it does not support the Android platform', () async {
-    final Project project = PluginUnsupportedAndroidProject();
+    final Project project = PluginWithPathAndroidProject();
     final ProcessResult buildApkResult = await testPlugin(project: project);
     expect(buildApkResult.exitCode, equals(0),
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
-
-  // This test can be removed, when https://github.com/flutter/flutter/issues/54566 is resolved.
+  
+  // TODO(#54566): Remove test when issue is resolved.
+  /// Test with [PluginEachSettingsGradleProject] with a legacy settings.gradle
+  /// which uses the `.flutter-plugins` file to load EACH plugin.
   test(
-      'skip plugin if it does not support the Android platform with legacy settings.gradle',
+      'skip plugin if it does not support the Android platform with a _plugin.each_ settings.gradle',
       () async {
-    final Project project = PluginEachUnsupportedAndroidProject();
+    final Project project = PluginEachWithPathAndroidProject();
     final ProcessResult buildApkResult = await testPlugin(project: project);
     expect(buildApkResult.exitCode, equals(0),
         reason:
@@ -116,7 +118,8 @@ flutter:
   });
 }
 
-class PluginUnsupportedAndroidProject extends PluginProject {
+/// Project that load's a plugin from the specified path.
+class PluginWithPathAndroidProject extends PluginProject {
   @override
   String get pubspec => r'''
 name: test
@@ -131,8 +134,10 @@ dependencies:
   ''';
 }
 
-// This class can be removed, when https://github.com/flutter/flutter/issues/54566 is resolved.
-class PluginEachUnsupportedAndroidProject
+// TODO(#54566): Remove class when issue is resolved.
+/// [PluginEachSettingsGradleProject] that load's a plugin from the specified
+/// path.
+class PluginEachWithPathAndroidProject
     extends PluginEachSettingsGradleProject {
   @override
   String get pubspec => r'''
