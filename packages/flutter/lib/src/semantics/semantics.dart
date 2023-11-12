@@ -426,6 +426,7 @@ class SemanticsData with Diagnosticable {
   SemanticsData({
     required this.flags,
     required this.actions,
+    required this.identifier,
     required this.attributedLabel,
     required this.attributedValue,
     required this.attributedIncreasedValue,
@@ -460,6 +461,10 @@ class SemanticsData with Diagnosticable {
 
   /// A bit field of [SemanticsAction]s that apply to this node.
   final int actions;
+
+  /// A description used for identifying this node during UI automation testing.
+  /// Not visible to the user.
+  final String identifier;
 
   /// A textual description for the current label of the node.
   ///
@@ -696,6 +701,7 @@ class SemanticsData with Diagnosticable {
           flag.name,
     ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
+    properties.add(StringProperty('identifier', identifier));
     properties.add(AttributedStringProperty('label', attributedLabel));
     properties.add(AttributedStringProperty('value', attributedValue));
     properties.add(AttributedStringProperty('increasedValue', attributedIncreasedValue));
@@ -721,6 +727,7 @@ class SemanticsData with Diagnosticable {
     return other is SemanticsData
         && other.flags == flags
         && other.actions == actions
+        && other.identifier == identifier
         && other.attributedLabel == attributedLabel
         && other.attributedValue == attributedValue
         && other.attributedIncreasedValue == attributedIncreasedValue
@@ -749,6 +756,7 @@ class SemanticsData with Diagnosticable {
   int get hashCode => Object.hash(
     flags,
     actions,
+    identifier,
     attributedLabel,
     attributedValue,
     attributedIncreasedValue,
@@ -765,8 +773,8 @@ class SemanticsData with Diagnosticable {
     scrollExtentMax,
     scrollExtentMin,
     platformViewId,
-    maxValueLength,
     Object.hash(
+      maxValueLength,
       currentValueLength,
       transform,
       elevation,
@@ -2220,6 +2228,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Whether this node currently has a given [SemanticsFlag].
   bool hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
 
+  /// A description used for identifying this node during UI automation testing.
+  /// Not visible to the user.
+  String get identifier => _identifier;
+  String _identifier = _kEmptyConfig.identifier;
+
   /// A textual description of this node.
   ///
   /// The reading direction is given by [textDirection].
@@ -2524,6 +2537,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     final bool mergeAllDescendantsIntoThisNodeValueChanged = _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
 
+    _identifier = config.identifier;
     _attributedLabel = config.attributedLabel;
     _attributedValue = config.attributedValue;
     _attributedIncreasedValue = config.attributedIncreasedValue;
@@ -2579,6 +2593,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // Can't use _effectiveActionsAsBits here. The filtering of action bits
     // must be done after the merging the its descendants.
     int actions = _actionsAsBits;
+    String identifier = _identifier;
     AttributedString attributedLabel = _attributedLabel;
     AttributedString attributedValue = _attributedValue;
     AttributedString attributedIncreasedValue = _attributedIncreasedValue;
@@ -2635,6 +2650,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
+        if (identifier == '') {
+          identifier = node._identifier;
+        }
         if (attributedValue.string == '') {
           attributedValue = node._attributedValue;
         }
@@ -2692,6 +2710,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return SemanticsData(
       flags: flags,
       actions: _areUserActionsBlocked ? actions & _kUnblockedUserActions : actions,
+      identifier: identifier,
       attributedLabel: attributedLabel,
       attributedValue: attributedValue,
       attributedIncreasedValue: attributedIncreasedValue,
@@ -2760,6 +2779,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       flags: data.flags,
       actions: data.actions,
       rect: data.rect,
+      identifier: data.identifier,
       label: data.attributedLabel.string,
       labelAttributes: data.attributedLabel.attributes,
       value: data.attributedValue.string,
@@ -4213,9 +4233,9 @@ class SemanticsConfiguration {
 
   /// An identifier of the owning [RenderObject] used for UI testing. This value
   /// is not exposed to the user.
-  String? get identifier => _identifier;
-  String? _identifier;
-  set identifier(String? identifier) {
+  String get identifier => _identifier;
+  String _identifier = '';
+  set identifier(String identifier) {
     _identifier = identifier;
     _hasBeenAnnotated = true;
   }
@@ -4917,6 +4937,9 @@ class SemanticsConfiguration {
 
     textDirection ??= child.textDirection;
     _sortKey ??= child._sortKey;
+    if (_identifier != '') {
+      _identifier = child._identifier;
+    }
     _attributedLabel = _concatAttributedString(
       thisAttributedString: _attributedLabel,
       thisTextDirection: textDirection,
@@ -4957,6 +4980,7 @@ class SemanticsConfiguration {
       .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
       .._sortKey = _sortKey
+      .._identifier = _identifier
       .._attributedLabel = _attributedLabel
       .._attributedIncreasedValue = _attributedIncreasedValue
       .._attributedValue = _attributedValue
