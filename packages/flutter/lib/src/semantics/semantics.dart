@@ -545,7 +545,7 @@ class SemanticsData with Diagnosticable {
   /// The reading direction is given by [textDirection].
   final String tooltip;
 
-  /// If non-null, indicates that this subtree represents a heading.
+  /// Indicates that this subtree represents a heading.
   ///
   /// The value should be a number between 1 and 6, indicating the hierarchical
   /// level as a heading.
@@ -2513,7 +2513,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// of the screen. A value of 1 indicates the highest level of structural
   /// hierarchy. A value of 2 indicates the next level, and so on.
   int get headingLevel => _headingLevel;
-  int _headingLevel;
+  int _headingLevel = _kEmptyConfig._headingLevel;
 
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
@@ -2618,7 +2618,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int? platformViewId = _platformViewId;
     int? maxValueLength = _maxValueLength;
     int? currentValueLength = _currentValueLength;
-    final int headingLevel = _headingLevel;
+    int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -2658,6 +2658,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
+        headingLevel = node._headingLevel;
 
         if (attributedValue.string == '') {
           attributedValue = node._attributedValue;
