@@ -915,7 +915,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(customWaitDuration);
+    await tester.pump(const Duration(milliseconds: 100)); // Should disappear after default exitDuration
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -958,7 +958,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(customWaitDuration); // Should disappear after customWaitDuration
+    await tester.pump(const Duration(milliseconds: 100)); // Should disappear after default exitDuration
     expect(find.text(tooltipText), findsNothing);
   });
 
