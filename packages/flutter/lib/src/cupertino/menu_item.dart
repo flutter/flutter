@@ -43,13 +43,11 @@ mixin CupertinoMenuEntry<T> on Widget {
       darkColor: Color.fromRGBO(255, 255, 255, 0.15),
     );
 
-
   /// The default constraints for a [CupertinoMenuEntry], corresponding to a
   /// minHeight of [kMinInteractiveDimensionCupertino].
   static const BoxConstraints defaultMenuItemConstraints = BoxConstraints(
     minHeight:  kMinInteractiveDimensionCupertino,
   );
-
 
   /// Whether this menu item has a leading widget. If it does, the menu
   /// items without a leading widget space will have leading space added to align
