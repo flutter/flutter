@@ -51,7 +51,7 @@ class BlockHashes {
       blockSize: obj['blockSize']! as int,
       totalSize: obj['totalSize']! as int,
       adler32: Uint32List.view(base64.decode(obj['adler32']! as String).buffer),
-      md5: (obj['md5']! as List<Object>).cast<String>(),
+      md5: (obj['md5']! as List<Object?>).cast<String>(),
       fileMd5: obj['fileMd5']! as String,
     );
   }

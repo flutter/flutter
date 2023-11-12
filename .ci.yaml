@@ -79,11 +79,14 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e300c"
+          "sdk_version": "14e300c",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
   mac_arm64:
     properties:
@@ -91,12 +94,15 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
       cpu: arm64
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e300c"
+          "sdk_version": "14e300c",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
   mac_benchmark:
     properties:
@@ -106,12 +112,15 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-12|Mac-13
+      os: Mac-12
       tags: >
         ["devicelab", "hostonly", "mac"]
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e300c"
+          "sdk_version": "14e300c",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
   mac_x64:
     properties:
@@ -119,12 +128,15 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
       cpu: x86
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e300c"
+          "sdk_version": "14e300c",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
   mac_build_test:
     properties:
@@ -133,12 +145,15 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12|Mac-13
+      os: Mac-12
       device_type: none
       cpu: x86
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e300c"
+          "sdk_version": "14e300c",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
   mac_android:
     properties:
@@ -171,9 +186,12 @@ platform_properties:
       os: Mac-12|Mac-13
       cpu: x86
       device_os: iOS-16
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e300c"
+          "sdk_version": "14e300c",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
   mac_arm64_ios:
     properties:
@@ -185,9 +203,12 @@ platform_properties:
       os: Mac-12|Mac-13
       cpu: arm64
       device_os: iOS-16
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14e300c"
+          "sdk_version": "14e300c",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
   windows:
     properties:
@@ -2453,7 +2474,6 @@ targets:
   # Samsung A02, Skia
   - name: Linux_samsung_a02 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -3729,6 +3749,7 @@ targets:
       task_name: hello_world_android__compile
 
   - name: Mac_android hot_mode_dev_cycle__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/138072
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3934,24 +3955,27 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flavors_test_ios_xcode_debug
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "14c18",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
     bringup: true
 
+  # TODO(vashworth): Stop running in presubmit after macOS 13 upgrade is complete (https://github.com/flutter/flutter/issues/134737)
   - name: Mac_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__compile
 
+  # TODO(vashworth): Stop running in presubmit after macOS 13 upgrade is complete (https://github.com/flutter/flutter/issues/134737)
   - name: Mac_arm64_ios flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3975,9 +3999,12 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up_xcode_debug
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "14c18",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
     bringup: true
 
@@ -4064,9 +4091,12 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver_xcode_debug
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "14c18",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
     bringup: true
 
@@ -4212,9 +4242,12 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios_xcode_debug
+      # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18"
+          "sdk_version": "14c18",
+          "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
+          "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
     bringup: true
 
@@ -4408,14 +4441,15 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
-    presubmit: false
+    # TODO(vashworth): Take out of bringup once https://github.com/flutter/flutter/issues/138194 is resolved.
+    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-12|Mac-13", "cpu=x86"]
+        ["device_os=iOS-16","os=Mac-12", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
