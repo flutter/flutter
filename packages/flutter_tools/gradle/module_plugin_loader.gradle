@@ -7,8 +7,8 @@
 
 import java.nio.file.Paths
 
-def pathToThisDirectory = buildscript.sourceFile.parentFile
-apply from: Paths.get(pathToThisDirectory, "src", "main", "groovy", "shared.groovy")
+File pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "groovy", "shared.groovy")
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
