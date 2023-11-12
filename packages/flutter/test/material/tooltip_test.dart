@@ -2083,6 +2083,104 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  testWidgetsWithLeakTracking('Hovered tooltips with showDuration set do dismiss when hovering elswhere', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    const Duration showDuration = Duration(seconds: 1);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            showDuration: showDuration,
+            triggerMode: TooltipTriggerMode.longPress,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(tooltipText), findsOneWidget, reason: 'Tooltip should be visible when hovered.');
+
+    await gesture.moveTo(Offset.zero);
+    // Set a duration equal to the default exit
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing,
+      reason: 'Tooltip should not wait for showDuration before it hides itself.');
+  });
+
+  testWidgetsWithLeakTracking('Hovered tooltips hide after stopping the hover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(tooltipText), findsOneWidget, reason: 'Tooltip should be visible when hovered.');
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing, reason: 'Tooltip should be hidden when no longer hovered.');
+  });
+
+  testWidgetsWithLeakTracking('Hovered tooltips hide after stopping the hover and exitDuration expires', (WidgetTester tester) async {
+    const Duration exitDuration = Duration(seconds: 1);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              exitDuration: exitDuration,
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(tooltipText), findsOneWidget, reason: 'Tooltip should be visible when hovered.');
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget,
+      reason: 'Tooltip should be wait before exitDuration expires before being hidden');
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing, reason: 'Tooltip should be hidden when no longer hovered.');
+  });
+
   testWidgetsWithLeakTracking('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
