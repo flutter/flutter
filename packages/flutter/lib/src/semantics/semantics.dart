@@ -445,7 +445,8 @@ class SemanticsData with Diagnosticable {
        assert(attributedValue.string == '' || textDirection != null, 'A SemanticsData object with value "${attributedValue.string}" had a null textDirection.'),
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
-       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.');
+       assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
+       assert(headingLevel >= 1 && headingLevel <= 6, 'Heading level must be between 1 and 6');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
@@ -539,7 +540,7 @@ class SemanticsData with Diagnosticable {
   ///
   /// The value should be a number between 1 and 6, indicating the hierarchical
   /// level as a heading.
-  final int? headingLevel;
+  final int headingLevel;
 
   /// The reading direction for the text in [label], [value],
   /// [increasedValue], [decreasedValue], and [hint].
@@ -712,7 +713,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
-    properties.add(IntProperty('headingLevel', headingLevel, defaultValue: null));
+    properties.add(IntProperty('headingLevel', headingLevel, defaultValue: -1));
   }
 
   @override
@@ -1349,7 +1350,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// with aria-level="1", usually indicates the main heading of a page,
   /// a level 2 heading, defined with aria-level="2" the first subsection,
   /// a level 3 is a subsection of that, and so on.
-  final int? headingLevel;
+  final int headingLevel;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -2483,8 +2484,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// The level of the widget as a heading within the structural hierarchy
   /// of the screen. A value of 1 indicates the highest level of structural
   /// hierarchy. A value of 2 indicates the next level, and so on.
-  int? get headingLevel => _headingLevel;
-  int? _headingLevel;
+  int get headingLevel => _headingLevel;
+  int _headingLevel;
 
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
@@ -2583,7 +2584,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int? platformViewId = _platformViewId;
     int? maxValueLength = _maxValueLength;
     int? currentValueLength = _currentValueLength;
-    int? headingLevel = _headingLevel;
+    final int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -2623,7 +2624,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
-        headingLevel ??= node._headingLevel;
+
         if (attributedValue.string == '') {
           attributedValue = node._attributedValue;
         }
@@ -2778,7 +2779,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
-      headingLevel: data.headingLevel ?? -1,
+      headingLevel: data.headingLevel,
     );
     _dirty = false;
   }
@@ -4566,10 +4567,13 @@ class SemanticsConfiguration {
   /// Indicates the heading level in the document structure.
   ///
   /// This is only used for web semantics, and is ignored on other platforms.
-  int? get headingLevel => _headingLevel;
-  int? _headingLevel;
+  int get headingLevel => _headingLevel;
+  int _headingLevel = -1;
 
-  set headingLevel(int? value) {
+  set headingLevel(int value) {
+    if (value < 1 || value > 6) {
+      throw ArgumentError('Heading level must be between 1 and 6');
+    }
     if (value == headingLevel) {
       return;
     }
