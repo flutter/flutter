@@ -2513,7 +2513,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// of the screen. A value of 1 indicates the highest level of structural
   /// hierarchy. A value of 2 indicates the next level, and so on.
   int get headingLevel => _headingLevel;
-  int _headingLevel = -1;
+  int _headingLevel;
 
   bool _canPerformAction(SemanticsAction action) =>
       _actions.containsKey(action);
@@ -2618,7 +2618,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int? platformViewId = _platformViewId;
     int? maxValueLength = _maxValueLength;
     int? currentValueLength = _currentValueLength;
-    int? headingLevel = _headingLevel;
+    final int headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -2813,7 +2813,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
-      headingLevel: data.headingLevel != null ? data.headingLevel! : -1,
+      headingLevel: data.headingLevel,
     );
     _dirty = false;
   }
@@ -4659,13 +4659,11 @@ class SemanticsConfiguration {
   /// Indicates the heading level in the document structure.
   ///
   /// This is only used for web semantics, and is ignored on other platforms.
-  int? get headingLevel => _headingLevel;
-  int? _headingLevel;
+  int get headingLevel => _headingLevel;
+  int _headingLevel = -1;
 
   set headingLevel(int value) {
-    if (value != 1 && (value < 1 || value > 6)) {
-      throw ArgumentError('Heading level must be between 1 and 6');
-    }
+    assert(value == -1 || (value >= 1 && value <= 6));
     if (value == headingLevel) {
       return;
     }
