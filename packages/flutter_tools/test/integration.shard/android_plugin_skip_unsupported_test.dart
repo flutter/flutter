@@ -49,30 +49,23 @@ void main() {
 
     // Override pubspec to drop support for the Android implementation.
     final File pubspecFile = pluginAppDir.childFile('pubspec.yaml');
-    const String pubspecYamlSrc = r'''
-name: test_plugin
-version: 0.0.1
-
-environment:
-  sdk: '>=3.3.0-71.0.dev <4.0.0'
-  flutter: '>=3.3.0'
-
-dependencies:
-  flutter:
-    sdk: flutter
-  plugin_platform_interface: ^2.0.2
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
-
-flutter:
-  plugin:
-    platforms:
-      ios:
+    String pubspecYamlSrc =
+        pubspecFile.readAsStringSync().replaceAll('\r\n', '\n');
+    pubspecYamlSrc = pubspecYamlSrc
+        .replaceFirst(
+      RegExp(r'name:.*\n'),
+      'name: test_plugin\n',
+    )
+        .replaceFirst('''
+      android:
+        package: com.example.test_plugin
         pluginClass: TestPlugin
-''';
+''', '''
+#      android:
+#        package: com.example.test_plugin
+#        pluginClass: TestPlugin
+''');
+
     pubspecFile.writeAsStringSync(pubspecYamlSrc);
 
     // Check the android directory and the build.gradle file within.
@@ -103,7 +96,7 @@ flutter:
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
-  
+
   // TODO(#54566): Remove test when issue is resolved.
   /// Test with [PluginEachSettingsGradleProject] with a legacy settings.gradle
   /// which uses the `.flutter-plugins` file to load EACH plugin.
@@ -137,8 +130,7 @@ dependencies:
 // TODO(#54566): Remove class when issue is resolved.
 /// [PluginEachSettingsGradleProject] that load's a plugin from the specified
 /// path.
-class PluginEachWithPathAndroidProject
-    extends PluginEachSettingsGradleProject {
+class PluginEachWithPathAndroidProject extends PluginEachSettingsGradleProject {
   @override
   String get pubspec => r'''
 name: test
