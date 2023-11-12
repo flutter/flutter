@@ -6,9 +6,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Shows prefix', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shows prefix', (WidgetTester tester) async {
     const Widget prefix = Text('Enter Value');
 
     await tester.pumpWidget(
@@ -25,7 +26,7 @@ void main() {
     expect(prefix, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shows child', (WidgetTester tester) async {
     const Widget child = CupertinoTextField();
 
     await tester.pumpWidget(
@@ -41,7 +42,7 @@ void main() {
     expect(child, tester.widget(find.byType(CupertinoTextField)));
   });
 
-  testWidgets('RTL puts prefix after child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RTL puts prefix after child', (WidgetTester tester) async {
     const Widget prefix = Text('Enter Value');
     const Widget child = CupertinoTextField();
 
@@ -62,7 +63,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, true);
   });
 
-  testWidgets('LTR puts child after prefix', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LTR puts child after prefix', (WidgetTester tester) async {
     const Widget prefix = Text('Enter Value');
     const Widget child = CupertinoTextField();
 
@@ -83,7 +84,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, false);
   });
 
-  testWidgets('Shows error widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shows error widget', (WidgetTester tester) async {
     const Widget error = Text('Error');
 
     await tester.pumpWidget(
@@ -100,7 +101,7 @@ void main() {
     expect(error, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows helper widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shows helper widget', (WidgetTester tester) async {
     const Widget helper = Text('Helper');
 
     await tester.pumpWidget(
@@ -117,7 +118,7 @@ void main() {
     expect(helper, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows helper text above error text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shows helper text above error text', (WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = CupertinoActivityIndicator();
 
@@ -139,7 +140,7 @@ void main() {
     );
   });
 
-  testWidgets('Shows helper in label color and error text in red color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shows helper in label color and error text in red color', (WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = Text('Error');
 
@@ -166,7 +167,7 @@ void main() {
     expect(errorTextStyle.style.color, CupertinoColors.destructiveRed);
   });
 
-  testWidgets('CupertinoFormRow adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoFormRow adapts to MaterialApp dark mode', (WidgetTester tester) async {
     const Widget prefix = Text('Prefix');
     const Widget helper = Text('Helper');
 

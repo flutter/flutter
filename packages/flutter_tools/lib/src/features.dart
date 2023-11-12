@@ -53,6 +53,9 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled => false;
 
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isPreviewDeviceEnabled => true;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -72,6 +75,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterWebWasm,
   cliAnimation,
   nativeAssets,
+  previewDevice,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -168,6 +172,19 @@ const Feature nativeAssets = Feature(
   configSetting: 'enable-native-assets',
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
   master: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
+/// Enable Flutter preview prebuilt device.
+const Feature previewDevice = Feature(
+  name: 'Flutter preview prebuilt device',
+  configSetting: 'enable-flutter-preview',
+  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+  beta: FeatureChannelSetting(
     available: true,
   ),
 );

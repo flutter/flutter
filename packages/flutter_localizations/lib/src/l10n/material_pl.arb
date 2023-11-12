@@ -57,7 +57,6 @@
   "reorderItemRight": "Przenieś w prawo",
   "expandedIconTapHint": "Zwiń",
   "collapsedIconTapHint": "Rozwiń",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Jeszcze 1 znak",
   "remainingTextFieldCharacterCountOther": "Pozostało $remainingCount znaków",
   "refreshIndicatorSemanticLabel": "Odśwież",
@@ -150,6 +149,6 @@
   "collapsedHint": "Rozwinięto",
   "menuDismissLabel": "Zamknij menu",
   "lookUpButtonLabel": "Sprawdź",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Szukaj w internecie",
+  "shareButtonLabel": "Udostępnij…"
 }

@@ -102,9 +102,8 @@ typedef AsyncValueGetter<T> = Future<T> Function();
 /// also applies to any iterables derived from this one, e.g. as
 /// returned by `where`.
 class CachingIterable<E> extends IterableBase<E> {
-  /// Creates a CachingIterable using the given [Iterator] as the
-  /// source of data. The iterator must be non-null and must not throw
-  /// exceptions.
+  /// Creates a [CachingIterable] using the given [Iterator] as the source of
+  /// data. The iterator must not throw exceptions.
   ///
   /// Since the argument is an [Iterator], not an [Iterable], it is
   /// guaranteed that the underlying data set will only be walked
@@ -229,8 +228,6 @@ class _LazyListIterator<E> implements Iterator<E> {
 /// A factory interface that also reports the type of the created objects.
 class Factory<T> {
   /// Creates a new factory.
-  ///
-  /// The `constructor` parameter must not be null.
   const Factory(this.constructor);
 
   /// Creates a new object of type T.

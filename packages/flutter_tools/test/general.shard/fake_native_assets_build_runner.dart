@@ -49,7 +49,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
   Future<native_assets_builder.DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
-    required OS targetOs,
+    required OS targetOS,
     required Uri workingDirectory,
   }) async {
     dryRunInvocations++;

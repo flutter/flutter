@@ -30,6 +30,13 @@ const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
+// The default duration for hint fade in/out transitions.
+//
+// Animating hint is not mentioned in the Material specification.
+// The animation is kept for backard compatibility and a short duration
+// is used to mitigate the UX impact.
+const Duration _kHintFadeTransitionDuration = Duration(milliseconds: 20);
+
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
 class _InputBorderGap extends ChangeNotifier {
@@ -1797,8 +1804,6 @@ class InputDecorator extends StatefulWidget {
   ///
   /// Null [InputDecoration] properties are initialized with the corresponding
   /// values from [ThemeData.inputDecorationTheme].
-  ///
-  /// Must not be null.
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -2194,7 +2199,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final String? hintText = decoration.hintText;
     final Widget? hint = hintText == null ? null : AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
-      duration: _kTransitionDuration,
+      duration: decoration.hintFadeDuration ?? _kHintFadeTransitionDuration,
       curve: _kTransitionCurve,
       child: Text(
         hintText,
@@ -2556,8 +2561,6 @@ class InputDecoration {
   /// an instance of [UnderlineInputBorder]. If [border] is [InputBorder.none]
   /// then no border is drawn.
   ///
-  /// The [enabled] argument must not be null.
-  ///
   /// Only one of [prefix] and [prefixText] can be specified.
   ///
   /// Similarly, only one of [suffix] and [suffixText] can be specified.
@@ -2575,6 +2578,7 @@ class InputDecoration {
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
+    this.hintFadeDuration,
     this.error,
     this.errorText,
     this.errorStyle,
@@ -2645,6 +2649,7 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
+       hintFadeDuration = null,
        error = null,
        errorText = null,
        errorStyle = null,
@@ -2858,6 +2863,12 @@ class InputDecoration {
   /// used to handle the overflow when it is limited to single line.
   final int? hintMaxLines;
 
+  /// The duration of the [hintText] fade in and fade out animations.
+  ///
+  /// If null, defaults to [InputDecorationTheme.hintFadeDuration].
+  /// If [InputDecorationTheme.hintFadeDuration] is null defaults to 20ms.
+  final Duration? hintFadeDuration;
+
   /// Optional widget that appears below the [InputDecorator.child] and the border.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is not shown.
@@ -2891,7 +2902,6 @@ class InputDecoration {
   /// styles.
   /// {@endtemplate}
   final TextStyle? errorStyle;
-
 
   /// The maximum number of lines the [errorText] can occupy.
   ///
@@ -3511,6 +3521,7 @@ class InputDecoration {
     String? hintText,
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
+    Duration? hintFadeDuration,
     int? hintMaxLines,
     Widget? error,
     String? errorText,
@@ -3565,6 +3576,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
+      hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
       error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
@@ -3618,6 +3630,7 @@ class InputDecoration {
       helperStyle: helperStyle ?? theme.helperStyle,
       helperMaxLines : helperMaxLines ?? theme.helperMaxLines,
       hintStyle: hintStyle ?? theme.hintStyle,
+      hintFadeDuration: hintFadeDuration ?? theme.hintFadeDuration,
       errorStyle: errorStyle ?? theme.errorStyle,
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
@@ -3668,6 +3681,7 @@ class InputDecoration {
         && other.hintStyle == hintStyle
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
+        && other.hintFadeDuration == hintFadeDuration
         && other.error == error
         && other.errorText == errorText
         && other.errorStyle == errorStyle
@@ -3724,6 +3738,7 @@ class InputDecoration {
       hintStyle,
       hintTextDirection,
       hintMaxLines,
+      hintFadeDuration,
       error,
       errorText,
       errorStyle,
@@ -3778,6 +3793,7 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
+      if (hintFadeDuration != null) 'hintFadeDuration: "$hintFadeDuration"',
       if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
@@ -3834,15 +3850,13 @@ class InputDecoration {
 class InputDecorationTheme with Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
-  ///
-  /// The values of [isDense], [isCollapsed], [filled], [floatingLabelAlignment],
-  /// and [border] must not be null.
   const InputDecorationTheme({
     this.labelStyle,
     this.floatingLabelStyle,
     this.helperStyle,
     this.helperMaxLines,
     this.hintStyle,
+    this.hintFadeDuration,
     this.errorStyle,
     this.errorMaxLines,
     this.floatingLabelBehavior = FloatingLabelBehavior.auto,
@@ -3912,6 +3926,9 @@ class InputDecorationTheme with Diagnosticable {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle? hintStyle;
+
+  /// The duration of the [InputDecoration.hintText] fade in and fade out animations.
+  final Duration? hintFadeDuration;
 
   /// {@macro flutter.material.inputDecoration.errorStyle}
   final TextStyle? errorStyle;
@@ -4250,6 +4267,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? helperStyle,
     int? helperMaxLines,
     TextStyle? hintStyle,
+    Duration? hintFadeDuration,
     TextStyle? errorStyle,
     int? errorMaxLines,
     FloatingLabelBehavior? floatingLabelBehavior,
@@ -4284,6 +4302,7 @@ class InputDecorationTheme with Diagnosticable {
       helperStyle: helperStyle ?? this.helperStyle,
       helperMaxLines: helperMaxLines ?? this.helperMaxLines,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintFadeDuration: hintFadeDuration ?? this.hintFadeDuration,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? this.floatingLabelBehavior,
@@ -4333,6 +4352,7 @@ class InputDecorationTheme with Diagnosticable {
       helperStyle: helperStyle ?? inputDecorationTheme.helperStyle,
       helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
       hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
+      hintFadeDuration: hintFadeDuration ?? inputDecorationTheme.hintFadeDuration,
       errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
       errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
       contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
@@ -4392,6 +4412,7 @@ class InputDecorationTheme with Diagnosticable {
       border,
       alignLabelWithHint,
       constraints,
+      hintFadeDuration,
     ),
   );
 
@@ -4409,6 +4430,7 @@ class InputDecorationTheme with Diagnosticable {
         && other.helperStyle == helperStyle
         && other.helperMaxLines == helperMaxLines
         && other.hintStyle == hintStyle
+        && other.hintFadeDuration == hintFadeDuration
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
         && other.isDense == isDense
@@ -4448,6 +4470,7 @@ class InputDecorationTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(IntProperty('helperMaxLines', helperMaxLines, defaultValue: defaultTheme.helperMaxLines));
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
+    properties.add(DiagnosticsProperty<Duration>('hintFadeDuration', hintFadeDuration, defaultValue: defaultTheme.hintFadeDuration));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(DiagnosticsProperty<FloatingLabelBehavior>('floatingLabelBehavior', floatingLabelBehavior, defaultValue: defaultTheme.floatingLabelBehavior));

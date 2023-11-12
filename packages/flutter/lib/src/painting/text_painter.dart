@@ -56,8 +56,6 @@ enum TextOverflow {
 /// Placeholders specify an empty space in the text layout, which is used
 /// to later render arbitrary inline widgets into defined by a [WidgetSpan].
 ///
-/// The [size] and [alignment] properties are required and cannot be null.
-///
 /// See also:
 ///
 ///  * [WidgetSpan], a subclass of [InlineSpan] and [PlaceholderSpan] that
@@ -440,6 +438,8 @@ final class _EmptyLineCaretMetrics implements _CaretMetrics {
   final double lineVerticalOffset;
 }
 
+const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
+
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -469,8 +469,6 @@ class TextPainter {
   ///
   /// The `text` and `textDirection` arguments are optional but [text] and
   /// [textDirection] must be non-null before calling [layout].
-  ///
-  /// The [textAlign] property must not be null.
   ///
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
@@ -502,7 +500,17 @@ class TextPainter {
        _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior;
+       _textHeightBehavior = textHeightBehavior {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterPaintingLibrary,
+        className: '$TextPainter',
+        object: this,
+      );
+    }
+  }
 
   /// Computes the width of a configured [TextPainter].
   ///
@@ -707,7 +715,7 @@ class TextPainter {
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   ///
-  /// The [textAlign] property must not be null. It defaults to [TextAlign.start].
+  /// The [textAlign] property defaults to [TextAlign.start].
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
   set textAlign(TextAlign value) {
@@ -1602,6 +1610,11 @@ class TextPainter {
       _disposed = true;
       return true;
     }());
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();
