@@ -18,8 +18,8 @@ class NativePluginLoader {
         assert meta.plugins.android instanceof List<Map<String, Object>>
         // Includes the Flutter plugins that support the Android platform.
         meta.plugins.android.each { androidPlugin ->
-            // The properties are written to the file here:
-            // https://github.com/flutter/flutter/blob/e33d4b86270e3c012ba13d68d6e90f2eabc4912b/packages/flutter_tools/lib/src/flutter_plugins.dart#L116
+            // The property types can be found in _filterPluginsByPlatform defined in
+            // packages/flutter_tools/lib/src/flutter_plugins.dart.
             assert androidPlugin.name instanceof String
             assert androidPlugin.path instanceof String
             // Skip plugins that have no native build (such as a Dart-only implementation
