@@ -365,6 +365,67 @@ void main() {
     );
   });
 
+
+
+  testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => dryRunNativeAssetsMacOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          dryRunResult: const FakeNativeAssetsBuilderResult(
+            success: false,
+          ),
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
+    );
+  });
+
+  testUsingContext('Native assets build error', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => buildNativeAssetsMacOS(
+        darwinArchs: <DarwinArch>[DarwinArch.arm64],
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        yamlParentDirectory: environment.buildDir.uri,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildResult: const FakeNativeAssetsBuilderResult(
+            success: false,
+          ),
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
+    );
+  });
+
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
