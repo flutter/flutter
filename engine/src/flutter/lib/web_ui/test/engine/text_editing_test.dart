@@ -2551,6 +2551,46 @@ Future<void> testMain() async {
       expect(autofillForm.formElement.style.pointerEvents, 'none');
     }, skip: !isSafari);
 
+    test(
+        'the focused element within a form should explicitly set pointer events on Safari',
+        () {
+      final List<dynamic> fields = createFieldValues(<String>[
+        'email',
+        'username',
+        'password',
+      ], <String>[
+        'field1',
+        'field2',
+        'field3'
+      ]);
+      final EngineAutofillForm autofillForm =
+          EngineAutofillForm.fromFrameworkMessage(
+              createAutofillInfo('email', 'field1'), fields)!;
+
+      final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
+      testInputElement.name = 'email';
+      autofillForm.placeForm(testInputElement);
+
+      final List<DomHTMLInputElement> formChildNodes =
+          autofillForm.formElement.childNodes.toList()
+              as List<DomHTMLInputElement>;
+      final DomHTMLInputElement email = formChildNodes[0];
+      final DomHTMLInputElement username = formChildNodes[1];
+      final DomHTMLInputElement password = formChildNodes[2];
+
+      expect(email.name, 'email');
+      expect(username.name, 'username');
+      expect(password.name, 'current-password');
+
+      // pointer events are none on the form and all non-focused elements
+      expect(autofillForm.formElement.style.pointerEvents, 'none');
+      expect(username.style.pointerEvents, 'none');
+      expect(password.style.pointerEvents, 'none');
+
+      // pointer events are set to all on the activeDomElement
+      expect(email.style.pointerEvents, 'all');
+    }, skip: !isSafari);
+
     tearDown(() {
       clearForms();
     });

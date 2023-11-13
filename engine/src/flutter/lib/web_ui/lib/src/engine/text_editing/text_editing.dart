@@ -321,6 +321,14 @@ class EngineAutofillForm {
   }
 
   void placeForm(DomHTMLElement mainTextEditingElement) {
+    // Since we're disabling pointer events on the form to fix Safari autofill,
+    // we need to explicitly set pointer events on the active input element in
+    // order to calculate the correct pointer event offsets.
+    // See: https://github.com/flutter/flutter/issues/136006
+    if(textEditing.strategy is SafariDesktopTextEditingStrategy) {
+      mainTextEditingElement.style.pointerEvents = 'all';
+    }
+
     formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
     defaultTextEditingRoot.append(formElement);
   }
