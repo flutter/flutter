@@ -85,6 +85,8 @@ Map<String, Object>? getNullSafetyAnalysisInfo({
     if (package.name == currentPackage) {
       languageVersion = packageLanguageVersion;
     }
+    // TODO: (eliasyishak) this logic is copied from "lib/src/reporting/events.dart"
+    //  but is this correct, this would fail if comparing 3.1 to 2.12
     if (packageLanguageVersion != null &&
         packageLanguageVersion.major >= nullSafeVersion.major &&
         packageLanguageVersion.minor >= nullSafeVersion.minor) {

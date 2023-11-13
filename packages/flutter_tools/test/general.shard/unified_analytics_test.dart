@@ -4,11 +4,13 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/reporting/unified_analytics.dart';
+import 'package:package_config/package_config.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -130,7 +132,7 @@ void main() {
       expect(analyticsOverride.sentEvents, hasLength(1));
     });
 
-    testUsingContext('Client IDE is passed and found in events', () {
+    testWithoutContext('Client IDE is passed and found in events', () {
       final Analytics analytics = getAnalytics(
         runningOnBot: false,
         flutterVersion: FakeFlutterVersion(),
@@ -142,5 +144,119 @@ void main() {
 
       expect(analytics.userProperty.clientIde, 'VSCode');
     });
+
+    testWithoutContext('getNullSafetyAnalysisInfo returns null correctly', () {
+      final FakePackageConfig fakePackageConfig = FakePackageConfig(
+        providedPackages: <Package>[],
+      );
+      const NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
+      const String currentPackage = 'my-package';
+
+      final Map<String, Object>? analysisInfo = getNullSafetyAnalysisInfo(
+        packageConfig: fakePackageConfig,
+        nullSafetyMode: nullSafetyMode,
+        currentPackage: currentPackage,
+      );
+
+      expect(analysisInfo, isNull);
+    });
+
+    testWithoutContext('getNullSafetyAnalysisInfo returns map correctly', () {
+      final FakePackage fakePackage = FakePackage(
+        name: 'my-package',
+        languageVersion: LanguageVersion(2, 15),
+      );
+
+      final FakePackageConfig fakePackageConfig = FakePackageConfig(
+        providedPackages: <Package>[fakePackage],
+      );
+      const NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
+      const String currentPackage = 'my-package';
+
+      final Map<String, Object>? analysisInfo = getNullSafetyAnalysisInfo(
+        packageConfig: fakePackageConfig,
+        nullSafetyMode: nullSafetyMode,
+        currentPackage: currentPackage,
+      );
+
+      expect(analysisInfo, isNotNull);
+      expect(analysisInfo!['runtimeMode'], 'NullSafetyMode.sound');
+      expect(analysisInfo['nullSafeMigratedLibraries'], 1);
+      expect(analysisInfo['nullSafeTotalLibraries'], 1);
+      expect(analysisInfo['languageVersion'], '2.15');
+    });
+
+    testWithoutContext('getNullSafetyAnalysisInfo returns map correctly when package name is different', () {
+      final FakePackage fakePackage = FakePackage(
+        name: 'my-different-package', // Different package name from [currentPackage]
+        languageVersion: LanguageVersion(2, 15),
+      );
+
+      final FakePackageConfig fakePackageConfig = FakePackageConfig(
+        providedPackages: <Package>[fakePackage],
+      );
+      const NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
+      const String currentPackage = 'my-package';
+
+      final Map<String, Object>? analysisInfo = getNullSafetyAnalysisInfo(
+        packageConfig: fakePackageConfig,
+        nullSafetyMode: nullSafetyMode,
+        currentPackage: currentPackage,
+      );
+
+      expect(analysisInfo, isNotNull);
+      expect(analysisInfo!['runtimeMode'], 'NullSafetyMode.sound');
+      expect(analysisInfo['nullSafeMigratedLibraries'], 1);
+      expect(analysisInfo['nullSafeTotalLibraries'], 1);
+      expect(analysisInfo['languageVersion'], isNull);
+    });
+
+    testWithoutContext('getNullSafetyAnalysisInfo returns correctly identifies non-migrated packages', () {
+      final FakePackage fakePackage = FakePackage(
+        name: 'my-package',
+        languageVersion: LanguageVersion(2, 10),
+      );
+
+      final FakePackageConfig fakePackageConfig = FakePackageConfig(
+        providedPackages: <Package>[fakePackage],
+      );
+      const NullSafetyMode nullSafetyMode = NullSafetyMode.sound;
+      const String currentPackage = 'my-package';
+
+      final Map<String, Object>? analysisInfo = getNullSafetyAnalysisInfo(
+        packageConfig: fakePackageConfig,
+        nullSafetyMode: nullSafetyMode,
+        currentPackage: currentPackage,
+      );
+
+      expect(analysisInfo, isNotNull);
+      expect(analysisInfo!['runtimeMode'], 'NullSafetyMode.sound');
+      expect(analysisInfo['nullSafeMigratedLibraries'], 0);
+      expect(analysisInfo['nullSafeTotalLibraries'], 1);
+      expect(analysisInfo['languageVersion'], '2.10');
+    });
   });
+}
+
+class FakePackageConfig extends Fake implements PackageConfig {
+
+  FakePackageConfig({required Iterable<Package> providedPackages,}): _packages = providedPackages;
+  
+  @override
+  Iterable<Package> get packages => _packages;
+
+  final Iterable<Package> _packages;
+}
+
+class FakePackage extends Fake implements Package {
+  FakePackage({
+    required this.name,
+    required this.languageVersion,
+  });
+
+  @override
+  final String name;
+
+  @override
+  final LanguageVersion languageVersion;
 }
