@@ -113,12 +113,24 @@ void main() {
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
+
+  // TODO(54566): Remove test when issue is resolved.
+  /// Test with [PluginEachSettingsGradleProject] with a compromised legacy settings.gradle
+  /// which uses the `.flutter-plugins` file to load EACH plugin.
+  test(
+      'skip plugin if it does not support the Android platform with a compromised _plugin.each_ settings.gradle',
+      () async {
+    final Project project = PluginCompromisedEachWithPathAndroidProject();
+    final ProcessResult buildApkResult = await testPlugin(project: project);
+    expect(buildApkResult.stderr.toString(),
+        contains('Please fix your settings.gradle.'));
+    expect(buildApkResult.exitCode, equals(0),
+        reason:
+            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+  });
 }
 
-/// Project that load's a plugin from the specified path.
-class PluginWithPathAndroidProject extends PluginProject {
-  @override
-  String get pubspec => r'''
+const String pubspecWithPluginPath = r'''
 name: test
 environment:
   sdk: '>=3.2.0-0 <4.0.0'
@@ -128,7 +140,12 @@ dependencies:
 
   test_plugin:
     path: ../
-  ''';
+''';
+
+/// Project that load's a plugin from the specified path.
+class PluginWithPathAndroidProject extends PluginProject {
+  @override
+  String get pubspec => pubspecWithPluginPath;
 }
 
 // TODO(54566): Remove class when issue is resolved.
@@ -136,15 +153,14 @@ dependencies:
 /// path.
 class PluginEachWithPathAndroidProject extends PluginEachSettingsGradleProject {
   @override
-  String get pubspec => r'''
-name: test
-environment:
-  sdk: '>=3.2.0-0 <4.0.0'
-dependencies:
-  flutter:
-    sdk: flutter
+  String get pubspec => pubspecWithPluginPath;
+}
 
-  test_plugin:
-    path: ../
-  ''';
+// TODO(54566): Remove class when issue is resolved.
+/// [PluginCompromisedEachSettingsGradleProject] that load's a plugin from the
+/// specified path.
+class PluginCompromisedEachWithPathAndroidProject
+    extends PluginCompromisedEachSettingsGradleProject {
+  @override
+  String get pubspec => pubspecWithPluginPath;
 }

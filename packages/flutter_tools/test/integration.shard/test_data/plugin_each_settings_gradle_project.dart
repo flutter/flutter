@@ -32,3 +32,26 @@ plugins.each { name, path ->
 }
   ''';
 }
+
+/// Project to test the legacy `settings.gradle` which uses the
+/// `.flutter-plugins` file to include EACH plugin,
+/// but does not set the plugins project directory.
+class PluginCompromisedEachSettingsGradleProject extends PluginProject {
+  @override
+  DeferredComponentsConfig get deferredComponents =>
+      PluginCompromisedEachSettingsGradleDeferredComponentsConfig();
+}
+
+class PluginCompromisedEachSettingsGradleDeferredComponentsConfig
+    extends PluginDeferredComponentsConfig {
+  @override
+  String get androidSettings => r'''
+include ':app'
+def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
+def plugins = new Properties()
+def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
+if (pluginsFile.exists()) {
+    pluginsFile.withReader('UTF-8') { reader -> plugins.load(reader) }
+}
+  ''';
+}
