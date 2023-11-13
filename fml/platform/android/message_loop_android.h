@@ -29,7 +29,7 @@ class MessageLoopAndroid : public MessageLoopImpl {
  private:
   fml::UniqueObject<ALooper*, UniqueLooperTraits> looper_;
   fml::UniqueFD timer_fd_;
-  bool running_;
+  bool running_ = false;
 
   MessageLoopAndroid();
 
