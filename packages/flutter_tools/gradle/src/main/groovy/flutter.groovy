@@ -431,7 +431,7 @@ class FlutterPlugin implements Plugin<Project> {
                     doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
                 configurePluginProject(it)
             } else {
-                project.logger.error("Plugin project :${pluginObject.name} included, but not found. Please fix your settings.gradle.")
+                project.logger.error("Plugin project :${it.name} included, but not found. Please fix your settings.gradle.")
             }
         }
     }
