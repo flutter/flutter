@@ -368,24 +368,23 @@ void main() {
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    Object? e;
-    try {
-      painter.paint(MockCanvas(), Offset.zero);
-    } catch (exception) {
-      e = exception;
-    }
+
     expect(
-      e.toString(),
-      contains('TextPainter.paint called when text geometry was not yet calculated'),
+      () => painter.paint(MockCanvas(), Offset.zero),
+      throwsA(isA<StateError>().having(
+        (StateError error) => error.message,
+        'message',
+        contains('TextPainter.paint called when text geometry was not yet calculated'),
+      )),
     );
     painter.dispose();
   });
 
   test('TextPainter requires textDirection', () {
     final TextPainter painter1 = TextPainter(text: const TextSpan(text: ''));
-    expect(() { painter1.layout(); }, throwsAssertionError);
+    expect(painter1.layout, throwsStateError);
     final TextPainter painter2 = TextPainter(text: const TextSpan(text: ''), textDirection: TextDirection.rtl);
-    expect(() { painter2.layout(); }, isNot(throwsException));
+    expect(painter2.layout, isNot(throwsStateError));
   });
 
   test('TextPainter size test', () {
@@ -1254,34 +1253,34 @@ void main() {
       ..text = const TextSpan(text: 'TEXT')
       ..textDirection = TextDirection.ltr;
 
-    FlutterError? exception;
-    try {
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
-    expect(exception?.message, contains('The TextPainter has never been laid out.'));
-    exception = null;
+    expect(
+      () => painter.getPositionForOffset(Offset.zero),
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('The TextPainter has never been laid out.'),
+      )),
+    );
 
-    try {
-      painter.layout();
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
+    expect(
+      () {
+        painter.layout();
+        painter.getPositionForOffset(Offset.zero);
+      },
+      returnsNormally,
+    );
 
-    expect(exception, isNull);
-    exception = null;
-
-    try {
-      painter.markNeedsLayout();
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
-
-    expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
-    exception = null;
+    expect(
+      () {
+        painter.markNeedsLayout();
+        painter.getPositionForOffset(Offset.zero);
+      },
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('The calls that first invalidated the text layout were:'),
+      )),
+    );
     painter.dispose();
   });
 
@@ -1310,15 +1309,13 @@ void main() {
       PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
     ]);
 
-    Object? e;
-    try {
-      painter.paint(MockCanvas(), Offset.zero);
-    } catch (exception) {
-      e = exception;
-    }
     expect(
-      e.toString(),
-      contains('TextPainter.paint called when text geometry was not yet calculated'),
+      () => painter.paint(MockCanvas(), Offset.zero),
+      throwsA(isA<StateError>().having(
+        (StateError error) => error.message,
+        'message',
+        contains('TextPainter.paint called when text geometry was not yet calculated'),
+      )),
     );
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
@@ -1348,16 +1345,14 @@ void main() {
       PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
     ]);
 
-    Object? e;
-    try {
-      painter.paint(MockCanvas(), Offset.zero);
-    } catch (exception) {
-      e = exception;
-    }
     // In tests, paint() will throw an UnimplementedError due to missing drawParagraph method.
     expect(
-      e.toString(),
-      isNot(contains('TextPainter.paint called when text geometry was not yet calculated')),
+      () => painter.paint(MockCanvas(), Offset.zero),
+      isNot(throwsA(isA<StateError>().having(
+        (StateError error) => error.message,
+        'message',
+        contains('TextPainter.paint called when text geometry was not yet calculated'),
+      ))),
     );
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
@@ -1462,8 +1457,88 @@ void main() {
 
     painter.dispose();
   });
+
+  test('TextPainter infinite width - centered', () {
+    final TextPainter painter = TextPainter()
+      ..textAlign = TextAlign.center
+      ..textDirection = TextDirection.ltr;
+    painter.text = const TextSpan(text: 'A', style: TextStyle(fontSize: 10));
+    MockCanvasWithDrawParagraph mockCanvas = MockCanvasWithDrawParagraph();
+
+    painter.layout(minWidth: double.infinity);
+    expect(painter.width, double.infinity);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.centerX, isNull);
+
+    painter.layout();
+    expect(painter.width, 10);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.centerX, 5);
+
+    painter.layout(minWidth: 100);
+    expect(painter.width, 100);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.centerX, 50);
+
+    painter.dispose();
+  });
+
+  test('TextPainter infinite width - LTR justified', () {
+    final TextPainter painter = TextPainter()
+      ..textAlign = TextAlign.justify
+      ..textDirection = TextDirection.ltr;
+    painter.text = const TextSpan(text: 'A', style: TextStyle(fontSize: 10));
+    MockCanvasWithDrawParagraph mockCanvas = MockCanvasWithDrawParagraph();
+
+    painter.layout(minWidth: double.infinity);
+    expect(painter.width, double.infinity);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.offsetX, 0);
+
+    painter.layout();
+    expect(painter.width, 10);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.offsetX, 0);
+
+    painter.layout(minWidth: 100);
+    expect(painter.width, 100);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.offsetX, 0);
+
+    painter.dispose();
+  });
+
+  test('TextPainter line breaking does not round to integers', () {
+    if (! const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')) {
+      return;
+    }
+    const double fontSize = 1.25;
+    const String text = '12345';
+    assert((fontSize * text.length).truncate() != fontSize * text.length);
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+    )..layout(maxWidth: text.length * fontSize);
+
+    expect(painter.maxIntrinsicWidth, text.length * fontSize);
+    switch (painter.computeLineMetrics()) {
+      case [ui.LineMetrics(width: final double width)]:
+        expect(width, text.length * fontSize);
+      case final List<ui.LineMetrics> metrics:
+        expect(metrics, hasLength(1));
+    }
+  }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
 }
 
 class MockCanvas extends Fake implements Canvas {
+}
 
+class MockCanvasWithDrawParagraph extends Fake implements Canvas {
+  double? centerX;
+  double? offsetX;
+  @override
+  void drawParagraph(ui.Paragraph paragraph, Offset offset) {
+    offsetX = offset.dx;
+    centerX = offset.dx + paragraph.width / 2;
+  }
 }

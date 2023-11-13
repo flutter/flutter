@@ -778,9 +778,4 @@ enum TestMenu {
   final String acceleratorLabel;
   // Strip the accelerator markers.
   String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
-  int get acceleratorIndex {
-    int index = -1;
-    MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel, setIndex: (int i) => index = i);
-    return index;
-  }
 }

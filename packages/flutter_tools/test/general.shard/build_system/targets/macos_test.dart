@@ -106,6 +106,51 @@ void main() {
     ProcessManager: () => processManager,
   });
 
+  testUsingContext('deletes entitlements.txt and without_entitlements.txt files after copying', () async {
+    binary.createSync(recursive: true);
+    final File entitlements = environment.outputDir.childFile('entitlements.txt');
+    final File withoutEntitlements = environment.outputDir.childFile('without_entitlements.txt');
+    final File nestedEntitlements = environment
+        .outputDir
+        .childDirectory('first_level')
+        .childDirectory('second_level')
+        .childFile('entitlements.txt')
+        ..createSync(recursive: true);
+
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          'rsync',
+          '-av',
+          '--delete',
+          '--filter',
+          '- .DS_Store/',
+          // source
+          'Artifact.flutterMacOSFramework.debug',
+          // destination
+          environment.outputDir.path,
+        ],
+        onRun: () {
+          entitlements.writeAsStringSync('foo');
+          withoutEntitlements.writeAsStringSync('bar');
+          nestedEntitlements.writeAsStringSync('somefile.bin');
+        },
+      ),
+      lipoInfoNonFatCommand,
+      lipoVerifyX86_64Command,
+    ]);
+
+    await const DebugUnpackMacOS().build(environment);
+    expect(entitlements.existsSync(), isFalse);
+    expect(withoutEntitlements.existsSync(), isFalse);
+    expect(nestedEntitlements.existsSync(), isFalse);
+
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   testUsingContext('thinning fails when framework missing', () async {
     processManager.addCommand(copyFrameworkCommand);
     await expectLater(

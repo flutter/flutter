@@ -43,6 +43,6 @@ void main() {
         <dynamic>[],
       ) as WebElement?;
       expect(fltSemantics, isNotNull);
-    }, skip: true); // https://github.com/flutter/flutter/issues/124174
+    });
   });
 }

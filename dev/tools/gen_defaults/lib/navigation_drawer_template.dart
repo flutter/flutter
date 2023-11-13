@@ -16,9 +16,9 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(
         elevation: ${elevation("md.comp.navigation-drawer.modal.container")},
-        tileHeight: ${tokens["md.comp.navigation-drawer.active-indicator.height"]},
+        tileHeight: ${getToken("md.comp.navigation-drawer.active-indicator.height")},
         indicatorShape: ${shape("md.comp.navigation-drawer.active-indicator")},
-        indicatorSize: const Size(${tokens["md.comp.navigation-drawer.active-indicator.width"]}, ${tokens["md.comp.navigation-drawer.active-indicator.height"]}),
+        indicatorSize: const Size(${getToken("md.comp.navigation-drawer.active-indicator.width")}, ${getToken("md.comp.navigation-drawer.active-indicator.height")}),
       );
 
   final BuildContext context;
@@ -41,9 +41,9 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
-        size: ${tokens["md.comp.navigation-drawer.icon.size"]},
+        size: ${getToken("md.comp.navigation-drawer.icon.size")},
         color: states.contains(MaterialState.selected)
-            ? ${componentColor("md.comp.navigation-drawer.active.icon.")}
+            ? ${componentColor("md.comp.navigation-drawer.active.icon")}
             : ${componentColor("md.comp.navigation-drawer.inactive.icon")},
       );
     });

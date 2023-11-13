@@ -50,7 +50,7 @@ void main() {
 
   testWithoutContext('compile expression fails if not previously compiled', () async {
     final CompilerOutput? result = await generator.compileExpression(
-        '2+2', null, null, null, null, false);
+        '2+2', null, null, null, null, null, null, null, null, false);
 
     expect(result, isNull);
   });
@@ -93,7 +93,7 @@ void main() {
               'result def\nline1\nline2\ndef\ndef /path/to/main.dart.dill.incremental 0\n'
           )));
       generator.compileExpression(
-          '2+2', null, null, null, null, false).then(
+          '2+2', null, null, null, null, null, null, null, null, false).then(
               (CompilerOutput? outputExpression) {
                 expect(outputExpression, isNotNull);
                 expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
@@ -142,7 +142,8 @@ void main() {
     // The test manages timing via completers.
     final Completer<bool> lastExpressionCompleted = Completer<bool>();
     unawaited(
-      generator.compileExpression('0+1', null, null, null, null, false).then(
+      generator.compileExpression('0+1', null, null, null, null, null, null,
+          null, null, false).then(
         (CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression!.expressionData, <int>[0, 1, 2, 3]);
@@ -159,7 +160,8 @@ void main() {
 
     // The test manages timing via completers.
     unawaited(
-      generator.compileExpression('1+1', null, null, null, null, false).then(
+      generator.compileExpression('1+1', null, null, null, null, null, null,
+          null, null, false).then(
         (CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression!.expressionData, <int>[4, 5, 6, 7]);

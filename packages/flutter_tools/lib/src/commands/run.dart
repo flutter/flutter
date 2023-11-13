@@ -26,6 +26,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../vmservice.dart';
 import '../web/web_runner.dart';
@@ -247,6 +248,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        usingCISystem: usingCISystem,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -298,6 +300,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        usingCISystem: usingCISystem,
       );
     }
   }
@@ -427,7 +430,7 @@ class RunCommand extends RunCommandBase {
     bool isEmulator;
     bool anyAndroidDevices = false;
     bool anyIOSDevices = false;
-    bool anyIOSNetworkDevices = false;
+    bool anyWirelessIOSDevices = false;
 
     if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
@@ -439,7 +442,7 @@ class RunCommand extends RunCommandBase {
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
       if (device is IOSDevice && device.isWirelesslyConnected) {
-        anyIOSNetworkDevices = true;
+        anyWirelessIOSDevices = true;
       }
       deviceType = getNameForTargetPlatform(platform);
       deviceOsVersion = await device.sdkNameAndVersion;
@@ -453,7 +456,7 @@ class RunCommand extends RunCommandBase {
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
         if (device is IOSDevice && device.isWirelesslyConnected) {
-          anyIOSNetworkDevices = true;
+          anyWirelessIOSDevices = true;
         }
         if (anyAndroidDevices && anyIOSDevices) {
           break;
@@ -463,7 +466,7 @@ class RunCommand extends RunCommandBase {
 
     String? iOSInterfaceType;
     if (anyIOSDevices) {
-      iOSInterfaceType = anyIOSNetworkDevices ? 'wireless' : 'usb';
+      iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
     }
 
     String? androidEmbeddingVersion;
@@ -643,7 +646,7 @@ class RunCommand extends RunCommandBase {
               : globals.fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: stringArg('project-root'),
-          packagesFilePath: globalResults!['packages'] as String?,
+          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6 ?? false,
           multidexEnabled: boolArg('multidex'),
@@ -774,7 +777,7 @@ class RunCommand extends RunCommandBase {
       ExitStatus.success,
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
-        getModeName(getBuildMode()),
+        getBuildMode().cliName,
         if (devices!.length == 1)
           getNameForTargetPlatform(await devices![0].targetPlatform)
         else

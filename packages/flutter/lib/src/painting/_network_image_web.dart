@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:js_interop';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:js/js.dart';
 
 import '../services/dom.dart';
 import 'image_provider.dart' as image_provider;
@@ -18,7 +17,7 @@ typedef HttpRequestFactory = DomXMLHttpRequest Function();
 
 /// Default HTTP client.
 DomXMLHttpRequest _httpClient() {
-  return createDomXMLHttpRequest();
+  return DomXMLHttpRequest();
 }
 
 /// Creates an overridable factory function.
@@ -148,7 +147,7 @@ class NetworkImage
         });
       }
 
-      request.addEventListener('load', allowInterop((DomEvent e) {
+      request.addEventListener('load', createDomEventListener((DomEvent e) {
         final int? status = request.status;
         final bool accepted = status! >= 200 && status < 300;
         final bool fileUri = status == 0; // file:// URIs have status of 0.
@@ -166,13 +165,14 @@ class NetworkImage
         }
       }));
 
-      request.addEventListener('error', allowInterop(completer.completeError));
+      request.addEventListener('error',
+          createDomEventListener(completer.completeError));
 
       request.send();
 
       await completer.future;
 
-      final Uint8List bytes = (request.response as ByteBuffer).asUint8List();
+      final Uint8List bytes = (request.response! as JSArrayBuffer).toDart.asUint8List();
 
       if (bytes.lengthInBytes == 0) {
         throw image_provider.NetworkImageLoadException(

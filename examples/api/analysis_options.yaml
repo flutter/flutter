@@ -6,3 +6,5 @@ linter:
   rules:
     # Samples want to print things pretty often.
     avoid_print: false
+    # Samples are sometimes incomplete and don't show usage of everything.
+    unreachable_from_main: false

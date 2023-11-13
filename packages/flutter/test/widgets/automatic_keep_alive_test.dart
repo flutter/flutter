@@ -600,23 +600,7 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
   }
 }
 
-class RenderBoxKeepAlive extends RenderBox {
-  State<StatefulWidget> createState() => AlwaysKeepAliveRenderBoxState();
-}
-
-class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return const SizedBox(
-      height: 48.0,
-      child: Text('keep me alive'),
-    );
-  }
-}
+class RenderBoxKeepAlive extends RenderBox { }
 
 mixin KeepAliveParentDataMixinAlt implements KeepAliveParentDataMixin {
   @override
@@ -630,14 +614,6 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
     KeepAliveParentDataMixinAlt,
     RenderSliverHelpers,
     RenderSliverWithKeepAliveMixin {
-
-  RenderSliverMultiBoxAdaptorAlt({
-    RenderSliverBoxChildManager? childManager,
-  }) : _childManager = childManager;
-
-  @protected
-  RenderSliverBoxChildManager? get childManager => _childManager;
-  final RenderSliverBoxChildManager? _childManager;
 
   final List<RenderBox> children = <RenderBox>[];
 

@@ -139,7 +139,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
           .childDirectory(component.name)
           .childDirectory('intermediates')
           .childDirectory('flutter')
-          .childDirectory(androidBuildInfo.buildInfo.mode.name)
+          .childDirectory(androidBuildInfo.buildInfo.mode.cliName)
           .childDirectory('deferred_libs');
         if (deferredLibsIntermediate.existsSync()) {
           deferredLibsIntermediate.deleteSync(recursive: true);

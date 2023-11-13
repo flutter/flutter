@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show platform;
+import 'package:flutter_tools/src/globals.dart' as globals show fs, platform;
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -186,6 +186,30 @@ void main() {
         expect(adapter.dapToFlutterRequests, isNot(contains('app.stop')));
       });
 
+      test('does not call "app.restart" before app has been started', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+          simulateAppStarted: false,
+        );
+
+        final Completer<void> launchCompleter = Completer<void>();
+         final FlutterLaunchRequestArguments launchArgs = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+        final Completer<void> restartCompleter = Completer<void>();
+        final RestartArguments restartArgs = RestartArguments();
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), launchArgs, launchCompleter.complete);
+        await launchCompleter.future;
+        await adapter.restartRequest(MockRequest(), restartArgs, restartCompleter.complete);
+        await restartCompleter.future;
+
+        expect(adapter.dapToFlutterRequests, isNot(contains('app.restart')));
+      });
+
       test('includes Dart Debug extension progress update', () async {
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
@@ -272,6 +296,107 @@ void main() {
               '--machine',
               '--target',
               'program/main.dart'
+            ]));
+      });
+
+      test('runs "flutter attach" with --debug-uri if vmServiceUri is passed', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterAttachRequestArguments args =
+            FlutterAttachRequestArguments(
+          cwd: '/project',
+          program: 'program/main.dart',
+          vmServiceUri: 'ws://1.2.3.4/ws'
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.attachRequest(
+            MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(
+            adapter.processArgs,
+            containsAllInOrder(<String>[
+              'attach',
+              '--machine',
+              '--debug-uri',
+              'ws://1.2.3.4/ws',
+              '--target',
+              'program/main.dart',
+            ]));
+      });
+
+      test('runs "flutter attach" with --debug-uri if vmServiceInfoFile exists', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+        final File serviceInfoFile = globals.fs.systemTempDirectory.createTempSync('dap_flutter_attach_vmServiceInfoFile').childFile('vmServiceInfo.json');
+
+        final FlutterAttachRequestArguments args =
+            FlutterAttachRequestArguments(
+          cwd: '/project',
+          program: 'program/main.dart',
+          vmServiceInfoFile: serviceInfoFile.path,
+        );
+
+        // Write the service info file before trying to attach:
+        serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.attachRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(
+            adapter.processArgs,
+            containsAllInOrder(<String>[
+              'attach',
+              '--machine',
+              '--debug-uri',
+              'ws://1.2.3.4/ws',
+              '--target',
+              'program/main.dart',
+            ]));
+      });
+
+      test('runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+        final File serviceInfoFile = globals.fs.systemTempDirectory.createTempSync('dap_flutter_attach_vmServiceInfoFile').childFile('vmServiceInfo.json');
+
+        final FlutterAttachRequestArguments args =
+            FlutterAttachRequestArguments(
+          cwd: '/project',
+          program: 'program/main.dart',
+          vmServiceInfoFile: serviceInfoFile.path,
+        );
+
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        final Future<void> attachResponseFuture = adapter.attachRequest(MockRequest(), args, responseCompleter.complete);
+        // Write the service info file a little later to ensure we detect it:
+        await pumpEventQueue(times:5000);
+        serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
+        await attachResponseFuture;
+        await responseCompleter.future;
+
+        expect(
+            adapter.processArgs,
+            containsAllInOrder(<String>[
+              'attach',
+              '--machine',
+              '--debug-uri',
+              'ws://1.2.3.4/ws',
+              '--target',
+              'program/main.dart',
             ]));
       });
 

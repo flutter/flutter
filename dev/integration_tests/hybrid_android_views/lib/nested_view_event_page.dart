@@ -145,7 +145,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       setState(() {
         _lastTestStatus = _LastTestStatus.success;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';
@@ -165,7 +165,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
       setState(() {
         nestedViewClickCount++;
       });
-    } catch(e) {
+    } catch (e) {
       setState(() {
         _lastTestStatus = _LastTestStatus.error;
         lastError = '$e';

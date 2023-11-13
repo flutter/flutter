@@ -33,7 +33,19 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
 
   @override
-  Color? get backgroundColor => ${componentColor("$tokenGroup$variant.container")};
+  MaterialStateProperty<Color?>? get color =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return ${componentColor("$tokenGroup$variant.disabled.selected.container")};
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return ${componentColor("$tokenGroup$variant.disabled.container")};
+      }
+      if (states.contains(MaterialState.selected)) {
+        return ${componentColor("$tokenGroup$variant.selected.container")};
+      }
+      return ${componentColor("$tokenGroup$variant.container")};
+    });
 
   @override
   Color? get shadowColor => ${colorOrTransparent("$tokenGroup.container.shadow-color")};
@@ -42,15 +54,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => ${colorOrTransparent("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  Color? get selectedColor => isEnabled
-    ? ${componentColor("$tokenGroup$variant.selected.container")}
-    : ${componentColor("$tokenGroup$variant.disabled.selected.container")};
-
-  @override
   Color? get checkmarkColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
-
-  @override
-  Color? get disabledColor => ${componentColor("$tokenGroup$variant.disabled.container")};
 
   @override
   Color? get deleteIconColor => ${color("$tokenGroup.with-trailing-icon.selected.trailing-icon.color")};
@@ -67,7 +71,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
     color: isEnabled
       ? ${color("$tokenGroup.with-leading-icon.leading-icon.color")}
       : ${color("$tokenGroup.with-leading-icon.disabled.leading-icon.color")},
-    size: ${tokens["$tokenGroup.with-leading-icon.leading-icon.size"]},
+    size: ${getToken("$tokenGroup.with-leading-icon.leading-icon.size")},
   );
 
   @override

@@ -25,6 +25,7 @@
   "continueButtonLabel": "Folytatás",
   "copyButtonLabel": "Másolás",
   "cutButtonLabel": "Kivágás",
+  "scanTextButtonLabel": "Szöveg beolvasása",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Beillesztés",
   "selectAllButtonLabel": "Összes kijelölése",
@@ -134,5 +135,11 @@
   "scrimLabel": "Borítás",
   "bottomSheetLabel": "Alsó lap",
   "scrimOnTapHint": "$modalRouteContentName bezárása",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

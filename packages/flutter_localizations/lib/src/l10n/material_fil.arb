@@ -25,6 +25,7 @@
   "continueButtonLabel": "Magpatuloy",
   "copyButtonLabel": "Kopyahin",
   "cutButtonLabel": "I-cut",
+  "scanTextButtonLabel": "I-scan ang text",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "I-paste",
   "selectAllButtonLabel": "Piliin lahat",
@@ -134,5 +135,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Isara ang $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

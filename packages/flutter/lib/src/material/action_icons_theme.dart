@@ -55,10 +55,10 @@ class ActionIconThemeData with Diagnosticable {
     WidgetBuilder? endDrawerButtonIconBuilder,
   }) {
     return ActionIconThemeData(
-      backButtonIconBuilder: backButtonIconBuilder ?? backButtonIconBuilder,
-      closeButtonIconBuilder: closeButtonIconBuilder ?? closeButtonIconBuilder,
-      drawerButtonIconBuilder: drawerButtonIconBuilder ?? drawerButtonIconBuilder,
-      endDrawerButtonIconBuilder: endDrawerButtonIconBuilder ?? endDrawerButtonIconBuilder,
+      backButtonIconBuilder: backButtonIconBuilder ?? this.backButtonIconBuilder,
+      closeButtonIconBuilder: closeButtonIconBuilder ?? this.closeButtonIconBuilder,
+      drawerButtonIconBuilder: drawerButtonIconBuilder ?? this.drawerButtonIconBuilder,
+      endDrawerButtonIconBuilder: endDrawerButtonIconBuilder ?? this.endDrawerButtonIconBuilder,
     );
   }
 

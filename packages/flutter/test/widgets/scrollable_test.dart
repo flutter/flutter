@@ -366,7 +366,7 @@ void main() {
     await pumpTest(tester, TargetPlatform.fuchsia, controller: controller);
 
     controller.addListener(() {
-      if(controller.position.userScrollDirection != ScrollDirection.idle) {
+      if (controller.position.userScrollDirection != ScrollDirection.idle) {
         lastUserScrollingDirection = controller.position.userScrollDirection;
       }
     });
@@ -947,6 +947,7 @@ void main() {
     final ScrollController outerController = ScrollController();
     final ScrollController innerController = ScrollController();
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: SingleChildScrollView(
           controller: outerController,

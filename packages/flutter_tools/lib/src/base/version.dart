@@ -4,13 +4,20 @@
 
 import 'package:meta/meta.dart';
 
-// TODO(reidbaker): Investigate using pub_semver instead of this class.
+/// Represents the version of some piece of software.
+///
+/// While a [Version] object has fields resembling semver, it does not
+/// necessarily represent a semver version.
 @immutable
 class Version implements Comparable<Version> {
   /// Creates a new [Version] object.
-  factory Version(int? major, int? minor, int? patch, {String? text}) {
+  ///
+  /// A null [minor] or [patch] version is logically equivalent to 0. Using null
+  /// for these parameters only affects the generation of [text], if no value
+  /// for it is provided.
+  factory Version(int major, int? minor, int? patch, {String? text}) {
     if (text == null) {
-      text = major == null ? '0' : '$major';
+      text = '$major';
       if (minor != null) {
         text = '$text.$minor';
       }
@@ -19,7 +26,7 @@ class Version implements Comparable<Version> {
       }
     }
 
-    return Version._(major ?? 0, minor ?? 0, patch ?? 0, text);
+    return Version._(major, minor ?? 0, patch ?? 0, text);
   }
 
   /// Public constant constructor when all fields are non-null, without default value fallbacks.
@@ -66,9 +73,6 @@ class Version implements Comparable<Version> {
     }
     return primary;
   }
-
-
-  static Version get unknown => Version(0, 0, 0, text: 'unknown');
 
   /// The major version number: "1" in "1.2.3".
   final int major;

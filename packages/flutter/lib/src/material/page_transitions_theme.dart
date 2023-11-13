@@ -202,7 +202,7 @@ class _ZoomPageTransition extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [TransitionRoute.allowSnapshotting], which defines wether the route
+  ///  * [TransitionRoute.allowSnapshotting], which defines whether the route
   ///    transition will prefer to animate a snapshot of the entering and exiting
   ///    routes.
   final bool allowSnapshotting;
@@ -297,7 +297,7 @@ class _ZoomEnterTransition extends StatefulWidget {
   State<_ZoomEnterTransition> createState() => _ZoomEnterTransitionState();
 }
 
-class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase {
+class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTransitionBase<_ZoomEnterTransition> {
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
   // support this functionality and the canvaskit backend uses a single thread for UI and raster
   // work which diminishes the impact of this performance improvement.
@@ -406,7 +406,7 @@ class _ZoomExitTransition extends StatefulWidget {
   State<_ZoomExitTransition> createState() => _ZoomExitTransitionState();
 }
 
-class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase {
+class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTransitionBase<_ZoomExitTransition> {
   late _ZoomExitTransitionPainter delegate;
 
   // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
@@ -830,7 +830,7 @@ void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
   transform.translate(-dx, -dy);
 }
 
-mixin _ZoomTransitionBase {
+mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {
   bool get useSnapshot;
 
   // Don't rasterize if:
@@ -862,6 +862,12 @@ mixin _ZoomTransitionBase {
       case AnimationStatus.reverse:
         controller.allowSnapshotting = useSnapshot;
     }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
 

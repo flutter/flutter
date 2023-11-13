@@ -26,12 +26,29 @@ String camelCase(String str) {
   return str;
 }
 
+/// Convert `fooBar` to `foo-bar`.
+String kebabCase(String str) {
+  return snakeCase(str, '-');
+}
+
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
 String snakeCase(String str, [ String sep = '_' ]) {
   return str.replaceAllMapped(_upperRegex,
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
+}
+
+abstract interface class CliEnum implements Enum {
+  String get cliName;
+  String get helpText;
+
+  static Map<String, String> allowedHelp<T extends CliEnum>(List<T> values) =>
+      Map<String, String>.fromEntries(
+        values.map(
+          (T e) => MapEntry<String, String>(e.cliName, e.helpText),
+        ),
+      );
 }
 
 /// Converts `fooBar` to `FooBar`.
@@ -42,7 +59,8 @@ String sentenceCase(String str, [String? locale]) {
   if (str.isEmpty) {
     return str;
   }
-  return toBeginningOfSentenceCase(str, locale)!;
+  // TODO(christopherfujino): Remove this check after the next release of intl
+  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
 }
 
 /// Converts `foo_bar` to `Foo Bar`.
@@ -52,13 +70,6 @@ String snakeCaseToTitleCase(String snakeCaseString) {
 
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : '${word}s';
-
-/// Return the name of an enum item.
-String getEnumName(dynamic enumItem) {
-  final String name = '$enumItem';
-  final int index = name.indexOf('.');
-  return index == -1 ? name : name.substring(index + 1);
-}
 
 String toPrettyJson(Object jsonable) {
   final String value = const JsonEncoder.withIndent('  ').convert(jsonable);

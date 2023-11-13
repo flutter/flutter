@@ -4,7 +4,10 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('SliverReorderableList works well when having gestureSettings', (WidgetTester tester) async {
@@ -62,6 +65,104 @@ void main() {
 
     expect(onReorderCallCount, 1);
     expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+  });
+
+  testWidgets('SliverReorderableList item has correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const int itemCount = 5;
+    int onReorderCallCount = 0;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorder(int fromIndex, int toIndex) {
+      onReorderCallCount += 1;
+      if (toIndex > fromIndex) {
+        toIndex -= 1;
+      }
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+    // The list has five elements of height 100
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: itemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorder: handleReorder,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'item 0',
+        actions: <SemanticsAction>[SemanticsAction.customAction],
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.text('item 0'));
+
+    // perform custom action 'move down'.
+    final int customActionId = CustomSemanticsAction.getIdentifier(const CustomSemanticsAction(label: 'Move down'));
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.customAction, customActionId);
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 1);
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverReorderableList custom semantics action has correct label', (WidgetTester tester) async {
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+    // The list has five elements of height 100
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 8.0)),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: itemCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorder: (int _, int __) { },
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.text('item 0'));
+    final SemanticsData data = node.getSemanticsData();
+    expect(data.customSemanticsActionIds!.length, 2);
+    final CustomSemanticsAction action1 = CustomSemanticsAction.getAction(data.customSemanticsActionIds![0])!;
+    expect(action1.label, 'Move down');
+    final CustomSemanticsAction action2 = CustomSemanticsAction.getAction(data.customSemanticsActionIds![1])!;
+    expect(action2.label, 'Move to the end');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
@@ -1123,6 +1224,91 @@ void main() {
 
     expect(item0, findsNothing);
   });
+
+  testWidgets('SliverReorderableList auto scrolls speed is configurable', (WidgetTester tester) async {
+    Future<void> pumpFor({
+      required Duration duration,
+      Duration interval = const Duration(milliseconds: 50),
+    }) async {
+      await tester.pump();
+
+      int times = (duration.inMilliseconds / interval.inMilliseconds).ceil();
+      while (times > 0) {
+        await tester.pump(interval + const Duration(milliseconds: 1));
+        await tester.idle();
+        times--;
+      }
+    }
+
+    Future<double> pumpListAndDrag({required double autoScrollerVelocityScalar}) async {
+      final List<int> items = List<int>.generate(10, (int index) => index);
+      final ScrollController scrollController = ScrollController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    color: items[index].isOdd ? Colors.red : Colors.green,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text('item ${items[index]}'),
+                          const Icon(Icons.drag_handle),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                itemCount: items.length,
+                onReorder: (int fromIndex, int toIndex) {},
+                autoScrollerVelocityScalar: autoScrollerVelocityScalar,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0);
+
+      final Finder item = find.text('item 0');
+      final TestGesture drag = await tester.startGesture(tester.getCenter(item));
+
+      // Drag just enough to touch the edge but not surpass it, so the
+      // auto scroller is not yet triggered
+      await drag.moveBy(const Offset(0, 500));
+      await pumpFor(duration: const Duration(milliseconds: 200));
+
+      expect(scrollController.offset, 0);
+
+      // Now drag a little bit more so the auto scroller triggers
+      await drag.moveBy(const Offset(0, 50));
+      await pumpFor(
+        duration: const Duration(milliseconds: 600),
+        interval: Duration(milliseconds: (1000 / autoScrollerVelocityScalar).round()),
+      );
+
+      return scrollController.offset;
+    }
+
+    const double fastVelocityScalar = 20;
+    final double offsetForFastScroller = await pumpListAndDrag(autoScrollerVelocityScalar: fastVelocityScalar);
+
+    // Reset widget tree
+    await tester.pumpWidget(const SizedBox());
+
+    const double slowVelocityScalar = 5;
+    final double offsetForSlowScroller = await pumpListAndDrag(autoScrollerVelocityScalar: slowVelocityScalar);
+
+    expect(offsetForFastScroller / offsetForSlowScroller, fastVelocityScalar / slowVelocityScalar);
+  });
 }
 
 class TestList extends StatelessWidget {
@@ -1135,6 +1321,7 @@ class TestList extends StatelessWidget {
     this.reverse = false,
     this.onReorderStart,
     this.onReorderEnd,
+    this.autoScrollerVelocityScalar,
   });
 
   final List<int> items;
@@ -1143,6 +1330,7 @@ class TestList extends StatelessWidget {
   final ReorderItemProxyDecorator? proxyDecorator;
   final bool reverse;
   final void Function(int)? onReorderStart, onReorderEnd;
+  final double? autoScrollerVelocityScalar;
 
   @override
   Widget build(BuildContext context) {
@@ -1188,6 +1376,7 @@ class TestList extends StatelessWidget {
                       proxyDecorator: proxyDecorator,
                       onReorderStart: onReorderStart,
                       onReorderEnd: onReorderEnd,
+                      autoScrollerVelocityScalar: autoScrollerVelocityScalar,
                     ),
                   ],
                 );

@@ -125,7 +125,7 @@ class BuildAarCommand extends BuildSubCommand {
         androidBuildInfo.add(
           AndroidBuildInfo(
             await getBuildInfo(
-              forcedBuildMode: BuildMode.fromName(buildMode),
+              forcedBuildMode: BuildMode.fromCliName(buildMode),
               forcedTargetFile: targetFile,
             ),
             targetArchs: targetArchitectures,

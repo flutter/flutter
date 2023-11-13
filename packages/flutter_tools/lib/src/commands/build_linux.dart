@@ -62,8 +62,8 @@ class BuildLinuxCommand extends BuildSubCommand {
     final TargetPlatform targetPlatform =
         getTargetPlatformForName(stringArg('target-platform')!);
     final bool needCrossBuild =
-        getNameForHostPlatformArch(_operatingSystemUtils.hostPlatform)
-            != getNameForTargetPlatformArch(targetPlatform);
+        _operatingSystemUtils.hostPlatform.platformName
+            != targetPlatform.simpleName;
 
     if (!featureFlags.isLinuxEnabled) {
       throwToolExit('"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".');

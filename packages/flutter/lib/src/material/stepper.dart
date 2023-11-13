@@ -202,6 +202,7 @@ class Stepper extends StatefulWidget {
   const Stepper({
     super.key,
     required this.steps,
+    this.controller,
     this.physics,
     this.type = StepperType.vertical,
     this.currentStep = 0,
@@ -211,6 +212,8 @@ class Stepper extends StatefulWidget {
     this.controlsBuilder,
     this.elevation,
     this.margin,
+    this.connectorColor,
+    this.connectorThickness,
     this.stepIconBuilder,
   }) : assert(0 <= currentStep && currentStep < steps.length);
 
@@ -227,6 +230,13 @@ class Stepper extends StatefulWidget {
   /// If the stepper is contained within another scrollable it
   /// can be helpful to set this property to [ClampingScrollPhysics].
   final ScrollPhysics? physics;
+
+  /// An object that can be used to control the position to which this scroll
+  /// view is scrolled.
+  ///
+  /// To control the initial scroll offset of the scroll view, provide a
+  /// [controller] with its [ScrollController.initialScrollOffset] property set.
+  final ScrollController? controller;
 
   /// The type of stepper that determines the layout. In the case of
   /// [StepperType.horizontal], the content of the current step is displayed
@@ -311,6 +321,19 @@ class Stepper extends StatefulWidget {
   /// Custom margin on vertical stepper.
   final EdgeInsetsGeometry? margin;
 
+  /// Customize connected lines colors.
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If not set then the widget will use default colors, primary for selected state
+  /// and grey.shade400 for disabled state.
+  final MaterialStateProperty<Color>? connectorColor;
+
+  /// The thickness of the connecting lines.
+  final double? connectorThickness;
+
   /// Callback for creating custom icons for the [steps].
   ///
   /// When overriding icon for [StepState.error], please return
@@ -375,11 +398,23 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return false;
   }
 
-  Widget _buildLine(bool visible) {
+  Color _connectorColor(bool isActive) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Set<MaterialState> states = <MaterialState>{
+      if (isActive) MaterialState.selected else MaterialState.disabled,
+    };
+    final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
+    if (resolvedConnectorColor != null) {
+      return resolvedConnectorColor;
+    }
+    return isActive ? colorScheme.primary : Colors.grey.shade400;
+  }
+
+  Widget _buildLine(bool visible, bool isActive) {
     return Container(
-      width: visible ? 1.0 : 0.0,
+      width: visible ? widget.connectorThickness ?? 1.0 : 0.0,
       height: 16.0,
-      color: Colors.grey.shade400,
+      color: _connectorColor(isActive),
     );
   }
 
@@ -415,11 +450,19 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Color _circleColor(int index) {
+    final bool isActive = widget.steps[index].isActive;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Set<MaterialState> states = <MaterialState>{
+      if (isActive) MaterialState.selected else MaterialState.disabled,
+    };
+    final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
+    if (resolvedConnectorColor != null) {
+      return resolvedConnectorColor;
+    }
     if (!_isDark()) {
-      return widget.steps[index].isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
+      return isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
     } else {
-      return widget.steps[index].isActive ? colorScheme.secondary : colorScheme.background;
+      return isActive ? colorScheme.secondary : colorScheme.background;
     }
   }
 
@@ -659,6 +702,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalHeader(int index) {
+    final bool isActive = widget.steps[index].isActive;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
@@ -667,9 +711,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             children: <Widget>[
               // Line parts are always added in order for the ink splash to
               // flood the tips of the connector lines.
-              _buildLine(!_isFirst(index)),
+              _buildLine(!_isFirst(index), isActive),
               _buildIcon(index),
-              _buildLine(!_isLast(index)),
+              _buildLine(!_isLast(index), isActive),
             ],
           ),
           Expanded(
@@ -694,9 +738,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             width: 24.0,
             child: Center(
               child: SizedBox(
-                width: _isLast(index) ? 0.0 : 1.0,
+                width: widget.connectorThickness ?? 1.0,
                 child: Container(
-                  color: Colors.grey.shade400,
+                  color: _connectorColor(widget.steps[index].isActive),
                 ),
               ),
             ),
@@ -729,6 +773,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Widget _buildVertical() {
     return ListView(
+      controller: widget.controller,
       shrinkWrap: true,
       physics: widget.physics,
       children: <Widget>[
@@ -789,9 +834,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         if (!_isLast(i))
           Expanded(
             child: Container(
+              key: Key('line$i'),
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: 1.0,
-              color: Colors.grey.shade400,
+              height: widget.connectorThickness ?? 1.0,
+              color: _connectorColor(widget.steps[i+1].isActive),
             ),
           ),
       ],
@@ -821,6 +867,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         ),
         Expanded(
           child: ListView(
+            controller: widget.controller,
             physics: widget.physics,
             padding: const EdgeInsets.all(24.0),
             children: <Widget>[

@@ -36,7 +36,7 @@ String getArtifactPath() {
 String? _findMatchId(List<String> idList, String idPattern) {
   String? candidate;
   idPattern = idPattern.toLowerCase();
-  for(final String id in idList) {
+  for (final String id in idList) {
     if (id.toLowerCase() == idPattern) {
       return id;
     }

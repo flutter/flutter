@@ -319,7 +319,7 @@ void main() {
     expect(binding.restorationManager.rootBucketAccessed, 1);
     expect(find.text('Hello'), findsNothing);
 
-    completer.complete(null);
+    completer.complete();
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(binding.restorationManager.rootBucketAccessed, 1);

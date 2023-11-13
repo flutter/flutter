@@ -126,7 +126,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       packagesPath: '.packages',
     );
-    stdoutHandler.compilerOutput?.complete(null);
+    stdoutHandler.compilerOutput?.complete();
     completer.complete();
 
     expect(await output, null);

@@ -70,7 +70,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
     if (_clipDetailsNotifier == newNotifier) {
       return;
     }
-    if(attached) {
+    if (attached) {
       _clipDetailsNotifier.removeListener(markNeedsSemanticsUpdate);
     }
     _clipDetailsNotifier = newNotifier;
@@ -394,7 +394,9 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
   @protected
   @override
   void handleTapUp({PointerDownEvent? down, PointerUpEvent? up}) {
-    onAnyTapUp?.call();
+    if (onAnyTapUp != null) {
+      invokeCallback('onAnyTapUp', onAnyTapUp!);
+    }
   }
 
   @protected

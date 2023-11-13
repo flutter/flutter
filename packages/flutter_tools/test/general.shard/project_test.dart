@@ -7,11 +7,11 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -407,9 +407,7 @@ void main() {
     });
 
     group('java gradle agp compatibility', () {
-      Future<FlutterProject?> configureJavaGradleAgpForTest(
-        FakeAndroidSdkWithDir androidSdk, {
-        required String javaV,
+      Future<FlutterProject?> configureGradleAgpForTest({
         required String gradleV,
         required String agpV,
       }) async {
@@ -422,7 +420,6 @@ dependencies {
 ''';
         });
         addGradleWrapperFile(project.directory, gradleV);
-        androidSdk.javaVersion = javaV;
         return project;
       }
 
@@ -431,22 +428,22 @@ dependencies {
       // especially important for filesystem.
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: Version(17, 0, 2));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
           'flamingo values are compatible',
           () async {
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: '17.0.2',
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '8.0',
               agpV: '7.4.2',
             );
@@ -454,6 +451,7 @@ dependencies {
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -461,22 +459,22 @@ dependencies {
       });
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
           'java 8 era values are compatible',
           () async {
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: '1.8.0_242',
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '6.7.1',
               agpV: '4.2.0',
             );
@@ -484,6 +482,7 @@ dependencies {
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -492,22 +491,22 @@ dependencies {
 
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
+        java = FakeJava(version: Version(11, 0, 14));
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
           'electric eel era values are compatible',
           () async {
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: '11.0.14',
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '7.3.3',
               agpV: '7.2.0',
             );
@@ -515,32 +514,35 @@ dependencies {
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
         );
       });
       group('_', () {
+        const String javaV = '17.0.2';
+        const String gradleV = '6.7.3';
+        const String agpV = '7.2.0';
+
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
+        java = FakeJava(version: Version.parse(javaV));
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
           'incompatible everything',
           () async {
-            const String javaV = '17.0.2';
-            const String gradleV = '6.7.3';
-            const String agpV = '7.2.0';
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: javaV,
+
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
             );
@@ -563,32 +565,34 @@ dependencies {
             expect(value.description, contains(RegExp(javaV)));
             expect(value.description, contains(RegExp(gradleV)));
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
         );
       });
       group('_', () {
+        const String javaV = '17.0.2';
+        const String gradleV = '6.7.3';
+        const String agpV = '4.2.0';
+
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
+        java = FakeJava(version: Version(17, 0, 2));
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
           'incompatible java/gradle only',
           () async {
-            const String javaV = '17.0.2';
-            const String gradleV = '6.7.3';
-            const String agpV = '4.2.0';
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: javaV,
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
             );
@@ -606,6 +610,7 @@ dependencies {
             expect(value.description, contains(RegExp(javaV)));
             expect(value.description, contains(RegExp(gradleV)));
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -613,25 +618,24 @@ dependencies {
       });
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: Version(11, 0, 2));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
         _testInMemory(
           'incompatible gradle/agp only',
           () async {
-            const String javaV = '11.0.2';
             const String gradleV = '7.0.3';
             const String agpV = '7.1.0';
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: javaV,
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
             );
@@ -649,6 +653,7 @@ dependencies {
             expect(value.description, contains(RegExp(gradleV)));
             expect(value.description, contains(RegExp(agpV)));
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -693,7 +698,7 @@ apply plugin: 'kotlin-android'
       });
     });
 
-    group('product bundle identifier', () {
+    group('With mocked context', () {
       late MemoryFileSystem fs;
       late FakePlistParser testPlistUtils;
       late FakeXcodeProjectInterpreter xcodeProjectInterpreter;
@@ -718,140 +723,260 @@ apply plugin: 'kotlin-android'
         });
       }
 
-      testWithMocks('null, if no build settings or plist entries', () async {
-        final FlutterProject project = await someProject();
-        expect(await project.ios.productBundleIdentifier(null), isNull);
-      });
+      group('universal link', () {
+        testWithMocks('build with flavor', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.defaultHostInfoPlist.createSync(recursive: true);
+          const String entitlementFilePath = 'myEntitlement.Entitlement';
+          project.ios.hostAppRoot.childFile(entitlementFilePath).createSync(recursive: true);
 
-      testWithMocks('from build settings, if no plist', () async {
-        final FlutterProject project = await someProject();
-        project.ios.xcodeProject.createSync();
-        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
-        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
-        };
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-
-        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
-      });
-
-      testWithMocks('from project file, if no plist or build settings', () async {
-        final FlutterProject project = await someProject();
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject');
+          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+            target: 'Runner',
+            scheme: 'Debug',
+            configuration: 'config',
+          );
+          xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+            IosProject.kTeamIdKey: 'ABC',
+            IosProject.kEntitlementFilePathKey: entitlementFilePath,
+            'SUFFIX': 'suffix',
+          };
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          testPlistUtils.setProperty(PlistParser.kCFBundleIdentifierKey, r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
+          testPlistUtils.setProperty(
+            PlistParser.kAssociatedDomainsKey,
+            <String>[
+              'applinks:example.com',
+              'applinks:example2.com',
+            ],
+          );
+          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+            target: 'Runner',
+            scheme: 'Debug',
+            configuration: 'config',
+          );
+          expect(
+            settings.associatedDomains,
+            unorderedEquals(
+              <String>[
+                'example.com',
+                'example2.com',
+              ],
+            ),
+          );
+          expect(settings.teamIdentifier, 'ABC');
+          expect(settings.bundleIdentifier, 'io.flutter.someProject.suffix');
         });
-        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
-      });
 
-      testWithMocks('from plist, if no variables', () async {
-        final FlutterProject project = await someProject();
-        project.ios.defaultHostInfoPlist.createSync(recursive: true);
-        testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
-        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
-      });
+        testWithMocks('can handle entitlement file in nested directory structure.', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.defaultHostInfoPlist.createSync(recursive: true);
+          const String entitlementFilePath = 'nested/somewhere/myEntitlement.Entitlement';
+          project.ios.hostAppRoot.childFile(entitlementFilePath).createSync(recursive: true);
 
-      testWithMocks('from build settings and plist, if default variable', () async {
-        final FlutterProject project = await someProject();
-        project.ios.xcodeProject.createSync();
-        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
-        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
-        };
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-        testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
-
-        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
-      });
-
-      testWithMocks('from build settings and plist, by substitution', () async {
-        final FlutterProject project = await someProject();
-        project.ios.xcodeProject.createSync();
-        project.ios.defaultHostInfoPlist.createSync(recursive: true);
-        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
-        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
-          'SUFFIX': 'suffix',
-        };
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-        testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
-
-        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
-      });
-
-      testWithMocks('Always pass parsing org on ios project with flavors', () async {
-        final FlutterProject project = await someProject();
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
+          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+            target: 'Runner',
+            scheme: 'Debug',
+            configuration: 'config',
+          );
+          xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+            IosProject.kTeamIdKey: 'ABC',
+            IosProject.kEntitlementFilePathKey: entitlementFilePath,
+            'SUFFIX': 'suffix',
+          };
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          testPlistUtils.setProperty(PlistParser.kCFBundleIdentifierKey, r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
+          testPlistUtils.setProperty(
+            PlistParser.kAssociatedDomainsKey,
+            <String>[
+              'applinks:example.com',
+              'applinks:example2.com',
+            ],
+          );
+          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+            target: 'Runner',
+            scheme: 'Debug',
+            configuration: 'config',
+          );
+          expect(
+            settings.associatedDomains,
+            unorderedEquals(
+              <String>[
+                'example.com',
+                'example2.com',
+              ],
+            ),
+          );
+          expect(settings.teamIdentifier, 'ABC');
+          expect(settings.bundleIdentifier, 'io.flutter.someProject.suffix');
         });
-        project.ios.xcodeProject.createSync();
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
 
-        expect(await project.organizationNames, <String>[]);
-      });
+        testWithMocks('return empty when no entitlement', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.defaultHostInfoPlist.createSync(recursive: true);
 
-      testWithMocks('fails with no flavor and defined schemes', () async {
-        final FlutterProject project = await someProject();
-        project.ios.xcodeProject.createSync();
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
-
-        await expectToolExitLater(
-          project.ios.productBundleIdentifier(null),
-          contains('You must specify a --flavor option to select one of the available schemes.')
-        );
-      });
-
-      testWithMocks('handles case insensitive flavor', () async {
-        final FlutterProject project = await someProject();
-        project.ios.xcodeProject.createSync();
-        const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Free');
-        xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
-        };
-        xcodeProjectInterpreter.xcodeProjectInfo =XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
-        const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
-
-        expect(await project.ios.productBundleIdentifier(buildInfo), 'io.flutter.someProject');
-      });
-
-      testWithMocks('fails with flavor and default schemes', () async {
-        final FlutterProject project = await someProject();
-        project.ios.xcodeProject.createSync();
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-        const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
-
-        await expectToolExitLater(
-          project.ios.productBundleIdentifier(buildInfo),
-          contains('The Xcode project does not define custom schemes. You cannot use the --flavor option.')
-        );
-      });
-
-      testWithMocks('empty surrounded by quotes', () async {
-        final FlutterProject project = await someProject();
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('', qualifier: '"');
+          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
+            target: 'Runner',
+            scheme: 'Debug',
+            configuration: 'config',
+          );
+          xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+            IosProject.kTeamIdKey: 'ABC',
+          };
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          testPlistUtils.setProperty(PlistParser.kCFBundleIdentifierKey, r'$(PRODUCT_BUNDLE_IDENTIFIER)');
+          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+            target: 'Runner',
+            scheme: 'Debug',
+            configuration: 'config',
+          );
+          expect(settings.teamIdentifier, 'ABC');
+          expect(settings.bundleIdentifier, 'io.flutter.someProject');
         });
-        expect(await project.ios.productBundleIdentifier(null), '');
       });
 
-      testWithMocks('surrounded by double quotes', () async {
-        final FlutterProject project = await someProject();
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: '"');
+      group('product bundle identifier', () {
+        testWithMocks('null, if no build settings or plist entries', () async {
+          final FlutterProject project = await someProject();
+          expect(await project.ios.productBundleIdentifier(null), isNull);
         });
-        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
-      });
 
-      testWithMocks('surrounded by single quotes', () async {
-        final FlutterProject project = await someProject();
-        xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
+        testWithMocks('from build settings, if no plist', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+          xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] =
+          <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+
+          expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
         });
-        expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
+
+        testWithMocks('from project file, if no plist or build settings', () async {
+          final FlutterProject project = await someProject();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+
+          addIosProjectFile(project.directory, projectFileContent: () {
+            return projectFileWithBundleId('io.flutter.someProject');
+          });
+          expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
+        });
+
+        testWithMocks('from plist, if no variables', () async {
+          final FlutterProject project = await someProject();
+          project.ios.defaultHostInfoPlist.createSync(recursive: true);
+          testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
+          expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
+        });
+
+        testWithMocks('from build settings and plist, if default variable', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+          xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
+
+          expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
+        });
+
+        testWithMocks('from build settings and plist, by substitution', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.defaultHostInfoPlist.createSync(recursive: true);
+          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
+          xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+            'SUFFIX': 'suffix',
+          };
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          testPlistUtils.setProperty('CFBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
+
+          expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject.suffix');
+        });
+
+        testWithMocks('Always pass parsing org on ios project with flavors', () async {
+          final FlutterProject project = await someProject();
+          addIosProjectFile(project.directory, projectFileContent: () {
+            return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
+          });
+          project.ios.xcodeProject.createSync();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
+
+          expect(await project.organizationNames, <String>[]);
+        });
+
+        testWithMocks('fails with no flavor and defined schemes', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['free', 'paid'], logger);
+
+          await expectToolExitLater(
+            project.ios.productBundleIdentifier(null),
+            contains('You must specify a --flavor option to select one of the available schemes.'),
+          );
+        });
+
+        testWithMocks('handles case insensitive flavor', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Free');
+          xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
+            IosProject.kProductBundleIdKey: 'io.flutter.someProject',
+          };
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Free'], logger);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+
+          expect(await project.ios.productBundleIdentifier(buildInfo), 'io.flutter.someProject');
+        });
+
+        testWithMocks('fails with flavor and default schemes', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false);
+
+          await expectToolExitLater(
+            project.ios.productBundleIdentifier(buildInfo),
+            contains('The Xcode project does not define custom schemes. You cannot use the --flavor option.'),
+          );
+        });
+
+        testWithMocks('empty surrounded by quotes', () async {
+          final FlutterProject project = await someProject();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          addIosProjectFile(project.directory, projectFileContent: () {
+            return projectFileWithBundleId('', qualifier: '"');
+          });
+          expect(await project.ios.productBundleIdentifier(null), '');
+        });
+
+        testWithMocks('surrounded by double quotes', () async {
+          final FlutterProject project = await someProject();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          addIosProjectFile(project.directory, projectFileContent: () {
+            return projectFileWithBundleId('io.flutter.someProject', qualifier: '"');
+          });
+          expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
+        });
+
+        testWithMocks('surrounded by single quotes', () async {
+          final FlutterProject project = await someProject();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
+          addIosProjectFile(project.directory, projectFileContent: () {
+            return projectFileWithBundleId('io.flutter.someProject', qualifier: "'");
+          });
+          expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
+        });
       });
     });
 
@@ -999,7 +1124,7 @@ apply plugin: 'kotlin-android'
       setUp(() {
         const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(scheme: 'Runner');
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+          IosProject.kProductBundleIdKey: 'io.flutter.someProject',
         };
         mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>['Runner', 'WatchTarget'], <String>[], <String>['Runner', 'WatchScheme'], logger);
       });
@@ -1093,7 +1218,7 @@ apply plugin: 'kotlin-android'
           deviceId: '123',
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+          IosProject.kProductBundleIdKey: 'io.flutter.someProject',
         };
         project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
         testPlistParser.setProperty('WKCompanionAppBundleIdentifier', r'$(PRODUCT_BUNDLE_IDENTIFIER)');
@@ -1127,7 +1252,7 @@ apply plugin: 'kotlin-android'
           deviceId: '123',
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+          IosProject.kProductBundleIdKey: 'io.flutter.someProject',
         };
 
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
@@ -1167,7 +1292,7 @@ apply plugin: 'kotlin-android'
           deviceId: '123'
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+          IosProject.kProductBundleIdKey: 'io.flutter.someProject',
         };
 
         const XcodeProjectBuildContext watchBuildContext = XcodeProjectBuildContext(
@@ -1176,7 +1301,7 @@ apply plugin: 'kotlin-android'
           isWatch: true,
         );
         mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] = <String, String>{
-          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+          IosProject.kProductBundleIdKey: 'io.flutter.someProject',
           'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': r'$(PRODUCT_BUNDLE_IDENTIFIER)',
         };
 
@@ -1284,6 +1409,7 @@ void _testInMemory(
   String description,
   Future<void> Function() testMethod, {
   FileSystem? fileSystem,
+  Java? java,
   AndroidStudio? androidStudio,
   ProcessManager? processManager,
   AndroidSdk? androidSdk,
@@ -1346,6 +1472,7 @@ void _testInMemory(
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => processManager ?? FakeProcessManager.any(),
+      Java : () => java,
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
       // Intentionlly null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
@@ -1547,37 +1674,10 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
-  FakeAndroidSdkWithDir(this._directory, AndroidStudio _androidStudio) {
-    _javaPath = '${_androidStudio.javaPath}/bin/java';
-  }
-  late String _javaPath;
-  String? javaVersion;
+  FakeAndroidSdkWithDir(this._directory);
 
   final Directory _directory;
 
   @override
-  late bool platformToolsAvailable;
-
-  @override
-  late bool licensesAvailable;
-
-  @override
-  AndroidSdkVersion? latestVersion;
-
-  @override
   Directory get directory => _directory;
-
-  @override
-  Map<String, String> get sdkManagerEnv => <String, String>{'PATH': _javaPath};
-
-  @override
-  String? getJavaVersion({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessUtils processUtils,
-  }) {
-    return javaVersion;
-  }
 }

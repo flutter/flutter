@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -117,6 +118,41 @@ void main() {
 
     expect(log, equals(<int>[1]));
   });
+
+  testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+
+    final bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
+    expect(
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isInMutuallyExclusiveGroup,
+          SemanticsFlag.hasCheckedState,
+          SemanticsFlag.hasEnabledState,
+          SemanticsFlag.isEnabled,
+          SemanticsFlag.isFocusable,
+          SemanticsFlag.isChecked,
+          if (isApple) SemanticsFlag.isSelected,
+        ],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+        ],
+      ),
+    );
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Radio semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -313,6 +349,61 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
     expect(groupValue, equals(2));
+  });
+
+  testWidgets('Show a checkmark when useCheckmarkStyle is true', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Has no checkmark when useCheckmarkStyle is false
+    expect(
+      tester.firstRenderObject<RenderBox>(find.byType(CupertinoRadio<int>)),
+      isNot(paints..path())
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 2,
+          useCheckmarkStyle: true,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Has no checkmark when group value doesn't match the value
+    expect(
+      tester.firstRenderObject<RenderBox>(find.byType(CupertinoRadio<int>)),
+      isNot(paints..path())
+    );
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          useCheckmarkStyle: true,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Draws a path to show the checkmark when toggled on
+    expect(
+      tester.firstRenderObject<RenderBox>(find.byType(CupertinoRadio<int>)),
+      paints..path()
+    );
   });
 
   testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {

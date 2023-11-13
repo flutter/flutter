@@ -319,6 +319,9 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 
   @override
   Future<List<IOSSimulator>> getAttachedDevices() async => <IOSSimulator>[];
+
+  @override
+  Future<List<IOSSimulatorRuntime>> getAvailableIOSRuntimes() async => <IOSSimulatorRuntime>[];
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
@@ -326,13 +329,13 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 13';
+  String get versionText => 'Xcode 14';
 
   @override
-  Version get version => Version(13, null, null);
+  Version get version => Version(14, null, null);
 
   @override
-  String get build => '13C100';
+  String get build => '14A309';
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -393,7 +396,7 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 class FakeSignals implements Signals {
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    return Object();
+    return const Object();
   }
 
   @override

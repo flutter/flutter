@@ -335,10 +335,6 @@ class TestPainter extends SnapshotPainter {
     super.removeListener(listener);
   }
 
-  void notify() {
-    notifyListeners();
-  }
-
   @override
   void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
     count += 1;

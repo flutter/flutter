@@ -40,20 +40,14 @@ HttpMethod _fromMethodString(String value) {
 }
 
 String _toMethodString(HttpMethod method) {
-  switch (method) {
-    case HttpMethod.get:
-      return 'GET';
-    case HttpMethod.put:
-      return 'PUT';
-    case HttpMethod.delete:
-      return 'DELETE';
-    case HttpMethod.post:
-      return 'POST';
-    case HttpMethod.patch:
-      return 'PATCH';
-    case HttpMethod.head:
-      return 'HEAD';
-  }
+  return switch (method) {
+    HttpMethod.get => 'GET',
+    HttpMethod.put => 'PUT',
+    HttpMethod.delete => 'DELETE',
+    HttpMethod.post => 'POST',
+    HttpMethod.patch => 'PATCH',
+    HttpMethod.head => 'HEAD'
+  };
 }
 
 /// Create a fake request that configures the [FakeHttpClient] to respond

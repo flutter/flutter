@@ -77,6 +77,7 @@ void main() {
     IconTheme iconTheme;
     // Light mode test
     await tester.pumpWidget(wrap(
+      theme: ThemeData(useMaterial3: false),
       child: const ExpandIcon(onPressed: null),
     ));
     await tester.pumpAndSettle();
@@ -87,7 +88,7 @@ void main() {
     // Dark mode test
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(onPressed: null),
-      theme: ThemeData(brightness: Brightness.dark),
+      theme: ThemeData(useMaterial3: false, brightness: Brightness.dark),
     ));
     await tester.pumpAndSettle();
 
@@ -176,6 +177,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
+      theme: ThemeData(useMaterial3: false),
       child: ExpandIcon(
         isExpanded: true,
         onPressed: (bool _) { },

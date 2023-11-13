@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 
 import '../../src/common.dart';
@@ -38,7 +37,7 @@ void main() {
 
     final VsCode vsCode = VsCode.fromDirectory('', '', fileSystem: fileSystem);
 
-    expect(vsCode.version, Version.unknown);
+    expect(vsCode.version, null);
   });
 
   testWithoutContext('can locate VS Code installed via Snap', () {

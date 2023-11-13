@@ -72,7 +72,7 @@ class PlatformViewsService {
   static final PlatformViewsService _instance = PlatformViewsService._();
 
   Future<void> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'viewFocused':
         final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
@@ -1158,10 +1158,10 @@ abstract class _AndroidViewControllerInternals {
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
-      if (hybrid == true) 'hybrid': hybrid,
+      if (hybrid) 'hybrid': hybrid,
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
-      if (hybridFallback == true) 'hybridFallback': hybridFallback,
+      if (hybridFallback) 'hybridFallback': hybridFallback,
       if (position != null) 'left': position.dx,
       if (position != null) 'top': position.dy,
     };

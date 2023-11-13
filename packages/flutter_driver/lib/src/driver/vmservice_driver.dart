@@ -433,7 +433,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       } while (currentStart < endTime!);
       return Timeline.fromJson(<String, Object>{
         'traceEvents': <Object?> [
-          for (Map<String, Object?>? chunk in chunks)
+          for (final Map<String, Object?>? chunk in chunks)
             ...chunk!['traceEvents']! as List<Object?>,
         ],
       });
@@ -448,7 +448,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   Future<bool> _isPrecompiledMode() async {
     final List<Map<String, dynamic>> flags = await getVmFlags();
-    for(final Map<String, dynamic> flag in flags) {
+    for (final Map<String, dynamic> flag in flags) {
       if (flag['name'] == 'precompiled_mode') {
         return flag['valueAsString'] == 'true';
       }

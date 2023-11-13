@@ -582,7 +582,7 @@ void main() {
     );
     expect(result.exitCode, 0);
     expect(result.stderr, isEmpty);
-    expect(result.stdout, <Object>[
+    expect(result.stdout, containsAllInOrder(<Object>[
       startsWith('Launching '),
       startsWith('Syncing files to device Flutter test device...'),
       '',
@@ -626,6 +626,6 @@ void main() {
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Application finished.',
-    ]);
+    ]));
   });
 }

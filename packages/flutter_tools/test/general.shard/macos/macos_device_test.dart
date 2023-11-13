@@ -252,15 +252,11 @@ FlutterProject setUpFlutterProject(Directory directory) {
 class FakeMacOSApp extends Fake implements MacOSApp {
   @override
   String executable(BuildInfo buildInfo) {
-    switch (buildInfo) {
-      case BuildInfo.debug:
-        return 'debug/executable';
-      case BuildInfo.profile:
-        return 'profile/executable';
-      case BuildInfo.release:
-        return 'release/executable';
-      default:
-        throw StateError('');
-    }
+    return switch (buildInfo) {
+      BuildInfo.debug => 'debug/executable',
+      BuildInfo.profile => 'profile/executable',
+      BuildInfo.release => 'release/executable',
+      _ => throw StateError('')
+    };
   }
 }

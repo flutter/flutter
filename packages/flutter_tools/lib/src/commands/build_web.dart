@@ -4,8 +4,8 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/targets/web.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
@@ -13,6 +13,8 @@ import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
+import '../web/file_generators/flutter_service_worker_js.dart';
+import '../web/web_constants.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
@@ -43,22 +45,12 @@ class BuildWebCommand extends BuildSubCommand {
           'The value has to start and end with a slash "/". '
           'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
     );
-    argParser.addOption('pwa-strategy',
-      defaultsTo: kOfflineFirst,
+    argParser.addOption(
+      'pwa-strategy',
+      defaultsTo: ServiceWorkerStrategy.offlineFirst.cliName,
       help: 'The caching strategy to be used by the PWA service worker.',
-      allowed: <String>[
-        kOfflineFirst,
-        kNoneWorker,
-      ],
-      allowedHelp: <String, String>{
-        kOfflineFirst: 'Attempt to cache the application shell eagerly and '
-                       'then lazily cache all subsequent assets as they are loaded. When '
-                       'making a network request for an asset, the offline cache will be '
-                       'preferred.',
-        kNoneWorker:   'Generate a service worker with no body. This is useful for '
-                       'local testing or in cases where the service worker caching functionality '
-                       'is not desirable',
-      },
+      allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
+      allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
     usesWebRendererOption();
     usesWebResourcesCdnFlag();
@@ -97,18 +89,29 @@ class BuildWebCommand extends BuildSubCommand {
     //
     if (featureFlags.isFlutterWebWasmEnabled) {
       argParser.addSeparator('Experimental options');
-      argParser.addFlag(
-        FlutterOptions.kWebWasmFlag,
-        help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
-        negatable: false,
-      );
-    } else {
-      // Add the flag as hidden. Will give a helpful error message in [runCommand] below.
-      argParser.addFlag(
-        FlutterOptions.kWebWasmFlag,
-        hide: true,
-      );
     }
+    argParser.addFlag(
+      FlutterOptions.kWebWasmFlag,
+      help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+      negatable: false,
+      hide: !featureFlags.isFlutterWebWasmEnabled,
+    );
+    argParser.addFlag(
+      'omit-type-checks',
+      help: 'Omit type checks in Wasm output.\n'
+          'Reduces code size and improves performance, but may affect runtime correctness. Use with care.',
+      negatable: false,
+      hide: !featureFlags.isFlutterWebWasmEnabled,
+    );
+    argParser.addOption(
+      'wasm-opt',
+      help:
+          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.',
+      defaultsTo: WasmOptLevel.defaultValue.cliName,
+      allowed: WasmOptLevel.values.map<String>((WasmOptLevel e) => e.cliName),
+      allowedHelp: CliEnum.allowedHelp(WasmOptLevel.values),
+      hide: !featureFlags.isFlutterWebWasmEnabled,
+    );
   }
 
   final FileSystem _fileSystem;
@@ -139,7 +142,10 @@ class BuildWebCommand extends BuildSubCommand {
       if (!featureFlags.isFlutterWebWasmEnabled) {
         throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
       }
-      compilerConfig = const WasmCompilerConfig();
+      compilerConfig = WasmCompilerConfig(
+        omitTypeChecks: boolArg('omit-type-checks'),
+        wasmOpt: WasmOptLevel.values.byName(stringArg('wasm-opt')!),
+      );
     } else {
       compilerConfig = JsCompilerConfig(
         csp: boolArg('csp'),
@@ -183,6 +189,7 @@ class BuildWebCommand extends BuildSubCommand {
     displayNullSafetyMode(buildInfo);
     final WebBuilder webBuilder = WebBuilder(
       logger: globals.logger,
+      processManager: globals.processManager,
       buildSystem: globals.buildSystem,
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
@@ -192,7 +199,7 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      stringArg('pwa-strategy')!,
+      ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
       compilerConfig: compilerConfig,
       baseHref: baseHref,
       outputDirectoryPath: outputDirectoryPath,

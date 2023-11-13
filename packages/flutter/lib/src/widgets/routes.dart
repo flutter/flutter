@@ -84,6 +84,9 @@ abstract class OverlayRoute<T> extends Route<T> {
 
   @override
   void dispose() {
+    for (final OverlayEntry entry in _overlayEntries) {
+      entry.dispose();
+    }
     _overlayEntries.clear();
     super.dispose();
   }
@@ -704,7 +707,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
         // elements during finalizeTree. The state is locked at this moment, and
         // we can only notify state has changed in the next frame.
         SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-          changedInternalState();
+          if (isActive) {
+            changedInternalState();
+          }
         });
       } else {
         changedInternalState();
@@ -1499,7 +1504,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
-      if (await callback() != true) {
+      if (!await callback()) {
         return RoutePopDisposition.doNotPop;
       }
     }
@@ -1808,9 +1813,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ## Type arguments
 ///
-/// When using more aggressive
-/// [lints](http://dart-lang.github.io/linter/lints/), in particular lints such
-/// as `always_specify_types`, the Dart analyzer will require that certain types
+/// When using more aggressive [lints](https://dart.dev/lints),
+/// in particular lints such as `always_specify_types`,
+/// the Dart analyzer will require that certain types
 /// be given with their type arguments. Since the [Route] class and its
 /// subclasses have a type argument, this includes the arguments passed to this
 /// class. Consider using `dynamic` to specify the entire class of routes rather

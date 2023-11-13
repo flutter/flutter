@@ -329,7 +329,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), isNull);
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), isNull);
       expect(testLogger.statusText, isEmpty);
     });
 
@@ -341,7 +341,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
       expect(testLogger.statusText, isEmpty);
     });
 
@@ -353,7 +353,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), 'NSApplication');
       // Only print once.
       expect('Updating ${infoPlistFile.basename} to use NSApplication instead of FlutterApplication.'.allMatches(testLogger.statusText).length, 1);
     });
@@ -367,7 +367,7 @@ platform :osx, '10.14'
       );
       infoPlistFile.writeAsStringSync('contents'); // Just so it exists: parser is a fake.
       macOSProjectMigration.migrate();
-      expect(fakePlistParser.getStringValueFromFile(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), differentApp);
+      expect(fakePlistParser.getValueFromFile<String>(infoPlistFile.path, PlistParser.kNSPrincipalClassKey), differentApp);
       expect(testLogger.traceText, isEmpty);
     });
   });

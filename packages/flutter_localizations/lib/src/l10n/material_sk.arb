@@ -31,6 +31,7 @@
   "continueButtonLabel": "Pokračovať",
   "copyButtonLabel": "Kopírovať",
   "cutButtonLabel": "Vystrihnúť",
+  "scanTextButtonLabel": "Naskenujte text",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Prilepiť",
   "selectAllButtonLabel": "Vybrať všetko",
@@ -140,5 +141,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Dolný hárok",
   "scrimOnTapHint": "Zavrieť $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

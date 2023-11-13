@@ -68,6 +68,8 @@ import 'image_provider.dart';
 ///
 ///  * [DecoratedBox] and [Container], widgets that can be configured with
 ///    [BoxDecoration] objects.
+///  * [DecoratedSliver], a widget that can be configured with a [BoxDecoration]
+///   that is converted to render with slivers.
 ///  * [CustomPaint], a widget that lets you draw arbitrary graphics.
 ///  * [Decoration], the base class which lets you define other decorations.
 class BoxDecoration extends Decoration {

@@ -215,6 +215,7 @@ void main() {
       Color? textColor,
     }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Center(
             child: ListTileTheme(

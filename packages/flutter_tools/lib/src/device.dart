@@ -283,7 +283,7 @@ abstract class DeviceManager {
     bool includeDevicesUnsupportedByProject = false,
   }) {
     FlutterProject? flutterProject;
-    if (includeDevicesUnsupportedByProject == false) {
+    if (!includeDevicesUnsupportedByProject) {
       flutterProject = FlutterProject.current();
     }
     if (hasSpecifiedAllDevices) {
@@ -312,7 +312,7 @@ abstract class DeviceManager {
   Device? getSingleEphemeralDevice(List<Device> devices){
     if (!hasSpecifiedDeviceId) {
       try {
-        return devices.singleWhere((Device device) => device.ephemeral == true);
+        return devices.singleWhere((Device device) => device.ephemeral);
       } on StateError {
         return null;
       }
@@ -971,6 +971,7 @@ class DebuggingOptions {
     this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
+    this.usingCISystem = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -993,6 +994,7 @@ class DebuggingOptions {
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
+      this.usingCISystem = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -1069,6 +1071,7 @@ class DebuggingOptions {
     required this.serveObservatory,
     required this.enableDartProfiling,
     required this.enableEmbedderApi,
+    required this.usingCISystem,
   });
 
   final bool debuggingEnabled;
@@ -1109,6 +1112,7 @@ class DebuggingOptions {
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
+  final bool usingCISystem;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1152,6 +1156,7 @@ class DebuggingOptions {
     Map<String, Object?> platformArgs, {
     bool ipv6 = false,
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
+    bool isCoreDevice = false,
   }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
@@ -1165,7 +1170,10 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty)
         '--dart-flags=$dartVmFlags',
       if (useTestFonts) '--use-test-fonts',
-      if (debuggingEnabled) ...<String>[
+      // Core Devices (iOS 17 devices) are debugged through Xcode so don't
+      // include these flags, which are used to check if the app was launched
+      // via Flutter CLI and `ios-deploy`.
+      if (debuggingEnabled && !isCoreDevice) ...<String>[
         '--enable-checked-mode',
         '--verify-entry-points',
       ],
@@ -1243,6 +1251,7 @@ class DebuggingOptions {
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
+    'usingCISystem': usingCISystem,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1294,6 +1303,7 @@ class DebuggingOptions {
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
+      usingCISystem: (json['usingCISystem'] as bool?) ?? false,
     );
 }
 

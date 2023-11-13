@@ -371,10 +371,18 @@ mixin SchedulerBinding on BindingBase {
   /// This is set by [handleAppLifecycleStateChanged] when the
   /// [SystemChannels.lifecycle] notification is dispatched.
   ///
-  /// The preferred way to watch for changes to this value is using
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  /// The preferred ways to watch for changes to this value are using
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState], or through an
+  /// [AppLifecycleListener] object.
   AppLifecycleState? get lifecycleState => _lifecycleState;
   AppLifecycleState? _lifecycleState;
+
+  /// Allows the test framework to reset the lifecycle state back to its
+  /// initial value.
+  @visibleForTesting
+  void resetLifecycleState() {
+    _lifecycleState = null;
+  }
 
   /// Called when the application lifecycle state changes.
   ///
@@ -385,11 +393,15 @@ mixin SchedulerBinding on BindingBase {
   @protected
   @mustCallSuper
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    if (lifecycleState == state) {
+      return;
+    }
     _lifecycleState = state;
     switch (state) {
       case AppLifecycleState.resumed:
       case AppLifecycleState.inactive:
         _setFramesEnabledState(true);
+      case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         _setFramesEnabledState(false);
@@ -722,14 +734,15 @@ mixin SchedulerBinding on BindingBase {
 
   /// Schedule a callback for the end of this frame.
   ///
-  /// Does *not* request a new frame.
+  /// The provided callback is run immediately after a frame, just after the
+  /// persistent frame callbacks (which is when the main rendering pipeline has
+  /// been flushed).
   ///
-  /// This callback is run during a frame, just after the persistent
-  /// frame callbacks (which is when the main rendering pipeline has
-  /// been flushed). If a frame is in progress and post-frame
-  /// callbacks haven't been executed yet, then the registered
-  /// callback is still executed during the frame. Otherwise, the
-  /// registered callback is executed during the next frame.
+  /// This method does *not* request a new frame. If a frame is already in
+  /// progress and the execution of post-frame callbacks has not yet begun, then
+  /// the registered callback is executed at the end of the current frame.
+  /// Otherwise, the registered callback is executed after the next frame
+  /// (whenever that may be, if ever).
   ///
   /// The callbacks are executed in the order in which they have been
   /// added.

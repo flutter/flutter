@@ -756,16 +756,24 @@ class MediaQueryData {
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
 /// For example, to learn the size of the current media (e.g., the window
-/// containing your app), you can read the [MediaQueryData.size] property from
-/// the [MediaQueryData] returned by [MediaQuery.of]:
-/// `MediaQuery.of(context).size`.
+/// containing your app), you can use [MediaQuery.sizeOf]:
+/// `MediaQuery.sizeOf(context)`.
 ///
-/// Querying the current media using [MediaQuery.of] will cause your widget to
-/// rebuild automatically whenever the [MediaQueryData] changes (e.g., if the
-/// user rotates their device).
+/// Querying the current media using specific methods (for example,
+/// [MediaQuery.sizeOf] and [MediaQuery.paddingOf]) will cause your widget to
+/// rebuild automatically whenever the property you query changes.
 ///
-/// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
-/// exception. Alternatively, [MediaQuery.maybeOf] may be used, which returns
+/// On the other hand, querying using [MediaQuery.of] will cause your widget to
+/// rebuild automatically whenever any field of the [MediaQueryData] changes
+/// (e.g., if the user rotates their device). Therefore, if you are only
+/// concerned with one or a few fields of [MediaQueryData], prefer using
+/// the specific methods (for example: [MediaQuery.sizeOf] and
+/// [MediaQuery.paddingOf]).
+///
+/// If no [MediaQuery] is in scope then the series of methods like
+/// [MediaQuery.of] and [MediaQuery.sizeOf] will throw an exception.
+/// Alternatively, the "maybe-" variant methods (such as [MediaQuery.maybeOf]
+/// and [MediaQuery.maybeSizeOf]) can be used, which returns
 /// null instead of throwing if no [MediaQuery] is in scope.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}

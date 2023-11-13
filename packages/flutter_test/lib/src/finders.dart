@@ -489,6 +489,9 @@ abstract class Finder {
 
   /// Returns all the [Element]s that will be considered by this finder.
   ///
+  /// This is the internal API for the [Finder]. To obtain the elements from
+  /// a [Finder] in a test, consider [WidgetTester.elementList].
+  ///
   /// See [collectAllElementsFrom].
   @protected
   Iterable<Element> get allCandidates {
@@ -639,7 +642,8 @@ class _HitTestableFinder extends ChainedFinder {
       final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      // TODO(goderbauer): Support multiple views in flutter_test pointer event handling, https://github.com/flutter/flutter/issues/128281
+      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset); // ignore: deprecated_member_use
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;

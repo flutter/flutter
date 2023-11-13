@@ -13,7 +13,6 @@ import 'analyze_base.dart';
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
-    List<String> repoRoots,
     List<Directory> repoPackages, {
     required super.fileSystem,
     required super.logger,
@@ -24,7 +23,6 @@ class AnalyzeContinuously extends AnalyzeBase {
     required super.suppressAnalytics,
   }) : super(
         repoPackages: repoPackages,
-        repoRoots: repoRoots,
       );
 
   String? analysisTarget;
@@ -43,13 +41,10 @@ class AnalyzeContinuously extends AnalyzeBase {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
-      directories = repoRoots;
+      directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';
 
       logger.printTrace('Analyzing Flutter repository:');
-      for (final String projectPath in repoRoots) {
-        logger.printTrace('  ${fileSystem.path.relative(projectPath)}');
-      }
     } else {
       directories = <String>[fileSystem.currentDirectory.path];
       analysisTarget = fileSystem.currentDirectory.path;

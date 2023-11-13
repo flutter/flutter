@@ -44,18 +44,22 @@ void main() {
       );
 
       // Pre-cache iOS engine Flutter.xcframework artifacts.
-      processManager.runSync(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'precache',
-        '--ios',
-      ], workingDirectory: tempDir.path);
+      ProcessResult result = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'precache',
+          '--ios',
+        ],
+        workingDirectory: tempDir.path,
+      );
+      expect(result, const ProcessResultMatcher());
 
       // Pretend the SDK was on an external drive with stray "._" files in the xcframework
       hiddenFile = xcframeworkArtifact.childFile('._Info.plist')..createSync();
 
       // Test a plugin example app to allow plugins validation.
-      processManager.runSync(<String>[
+      result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
@@ -65,6 +69,7 @@ void main() {
         'plugin',
         'hello',
       ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
 
       pluginRoot = tempDir.childDirectory('hello');
       projectRoot = pluginRoot.childDirectory('example').path;
@@ -76,7 +81,7 @@ void main() {
     });
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-      group('build in ${buildMode.name} mode', () {
+      group('build in ${buildMode.cliName} mode', () {
         late Directory outputPath;
         late Directory outputApp;
         late Directory frameworkDirectory;
@@ -98,7 +103,7 @@ void main() {
             'ios',
             '--verbose',
             '--no-codesign',
-            '--${buildMode.name}',
+            '--${buildMode.cliName}',
             '--obfuscate',
             '--split-debug-info=foo debug info/',
           ], workingDirectory: projectRoot);
@@ -125,7 +130,7 @@ void main() {
             projectRoot,
             'build',
             'ios',
-            '${sentenceCase(buildMode.name)}-iphoneos',
+            '${sentenceCase(buildMode.cliName)}-iphoneos',
           ));
 
           buildAppFrameworkDsym = buildPath.childDirectory('App.framework.dSYM');

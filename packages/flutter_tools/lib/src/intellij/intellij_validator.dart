@@ -125,11 +125,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
-    // Ignore unknown versions.
-    if (minVersion == Version.unknown) {
-      return;
-    }
-
     final Version? installedVersion = Version.parse(version);
     if (installedVersion == null) {
       return;
@@ -499,7 +494,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @override
   String get version {
-    return _version ??= _plistParser.getStringValueFromFile(
+    return _version ??= _plistParser.getValueFromFile<String>(
         plistFile,
         PlistParser.kCFBundleShortVersionStringKey,
       ) ?? 'unknown';
@@ -513,7 +508,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     final String? altLocation = _plistParser
-      .getStringValueFromFile(plistFile, 'JetBrainsToolboxApp');
+      .getValueFromFile<String>(plistFile, 'JetBrainsToolboxApp');
 
     if (altLocation != null) {
       _pluginsPath = '$altLocation.plugins';

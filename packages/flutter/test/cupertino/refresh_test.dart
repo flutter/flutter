@@ -247,7 +247,7 @@ void main() {
         ),
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) matchesBuilder(
           refreshState: RefreshIndicatorMode.armed,
-          pulledExtent: moreOrLessEquals(100.44528),
+          pulledExtent: moreOrLessEquals(112.51104),
           refreshTriggerPullDistance: 100,  // default value.
           refreshIndicatorExtent: 60,  // default value.
         )
@@ -464,12 +464,7 @@ void main() {
         const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
 
-      if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-        await tester.drag(find.text('0'), const Offset(0.0, -130.0), touchSlopY: 0, warnIfMissed: false); // hits the list
-      }
-      else {
-        await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0, warnIfMissed: false); // hits the list
-      }
+      await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0, warnIfMissed: false); // hits the list
       await tester.pump();
 
       // Refresh indicator still being told to layout the same way.
@@ -484,15 +479,15 @@ void main() {
       if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
         expect(
           tester.getTopLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-          moreOrLessEquals(-40),
+          moreOrLessEquals(-210.0),
         );
         expect(
           tester.getBottomLeft(find.widgetWithText(Center, '-1', skipOffstage: false)).dy,
-          moreOrLessEquals(20),
+          moreOrLessEquals(-150.0),
         );
         expect(
           tester.getTopLeft(find.widgetWithText(Center, '0')).dy,
-          moreOrLessEquals(20),
+          moreOrLessEquals(-150.0),
         );
       }
       else {
@@ -761,7 +756,7 @@ void main() {
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           expect(mockHelper.invocations, contains(matchesBuilder(
             refreshState: RefreshIndicatorMode.done,
-            pulledExtent: 97.71721346565732,
+            pulledExtent: 118.29756539042118,
             refreshTriggerPullDistance: 100,  // default value.
             refreshIndicatorExtent: 60,  // default value.
           )));
@@ -1199,17 +1194,12 @@ void main() {
           RefreshIndicatorMode.armed,
         );
 
-        if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-          await gesture.moveBy(const Offset(0.0, -41.0)); // Overscrolling, need to move more than -40.
-        }
-        else {
-          await gesture.moveBy(const Offset(0.0, -80.0)); // Overscrolling, need to move more than -40.
-        }
+        await gesture.moveBy(const Offset(0.0, -80.0)); // Overscrolling, need to move more than -40.
         await tester.pump();
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           expect(
             tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
-            moreOrLessEquals(49), // Below 50 now.
+            moreOrLessEquals(10.0), // Below 50 now.
           );
         }
         else {
@@ -1317,7 +1307,7 @@ void main() {
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           expect(
             tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
-            moreOrLessEquals(25),
+            moreOrLessEquals(25.0),
           );
         }
         else {
@@ -1333,7 +1323,7 @@ void main() {
         );
 
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
-          await gesture.moveBy(const Offset(0.0, -15.0));
+          await gesture.moveBy(const Offset(0.0, -16.0));
         }
         else {
           await gesture.moveBy(const Offset(0.0, -35.0));
@@ -1342,7 +1332,7 @@ void main() {
         if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
           expect(
             tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
-            moreOrLessEquals(10),
+            moreOrLessEquals(9.0),
           );
         }
         else {

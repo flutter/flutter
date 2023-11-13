@@ -112,7 +112,8 @@ void main() {
   testWidgets('The width of the text field should always be the same as the menu view',
     (WidgetTester tester) async {
 
-    final ThemeData themeData = ThemeData();
+    final ThemeData themeData = ThemeData(useMaterial3: false);
+    final bool useMaterial3 = themeData.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
         theme: themeData,
@@ -128,7 +129,7 @@ void main() {
 
     final Finder textField = find.byType(TextField);
     final Size anchorSize = tester.getSize(textField);
-    expect(anchorSize, const Size(180.0, 56.0));
+    expect(anchorSize, useMaterial3 ? const Size(195.0, 60.0) : const Size(180.0, 56.0));
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -138,7 +139,7 @@ void main() {
       matching: find.byType(Material),
     );
     final Size menuSize = tester.getSize(menuMaterial);
-    expect(menuSize, const Size(180.0, 304.0));
+    expect(menuSize, useMaterial3 ? const Size(195.0, 304.0) : const Size(180.0, 304.0));
 
     // The text field should have same width as the menu
     // when the width property is not null.
@@ -146,7 +147,7 @@ void main() {
 
     final Finder anchor = find.byType(TextField);
     final Size size = tester.getSize(anchor);
-    expect(size, const Size(200.0, 56.0));
+    expect(size, useMaterial3 ? const Size(200.0, 60.0) : const Size(200.0, 56.0));
 
     await tester.tap(anchor);
     await tester.pumpAndSettle();
@@ -193,9 +194,32 @@ void main() {
     expect(buttonSize.width, customSmallWidth);
   });
 
+  testWidgets('The width property update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120567
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+
+    double customWidth = 250.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
+
+    // Update width
+    customWidth = 400.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
+  });
+
   testWidgets('The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
+    final bool material3 = themeData.useMaterial3;
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
@@ -215,7 +239,7 @@ void main() {
       matching: find.byType(Padding),
     ).first;
     final Size menuViewSize = tester.getSize(menuView);
-    expect(menuViewSize, const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
+    expect(menuViewSize, material3 ? const Size(195.0, 304.0) : const Size(180.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
 
     // Constrains the menu height.
     await tester.pumpWidget(Container());
@@ -231,7 +255,7 @@ void main() {
     ).first;
 
     final Size updatedMenuSize = tester.getSize(updatedMenu);
-    expect(updatedMenuSize, const Size(180.0, 100.0));
+    expect(updatedMenuSize, material3 ? const Size(195.0, 100.0) : const Size(180.0, 100.0));
   });
 
   testWidgets('The text in the menu button should be aligned with the text of '
@@ -403,6 +427,70 @@ void main() {
       matching: find.byType(Material),
     ).last;
     expect(menuMaterial, findsOneWidget);
+  });
+
+  testWidgets('Leading IconButton status test', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(buildTest(themeData, menuChildren, width: 100.0, menuHeight: 100.0));
+    await tester.pump();
+
+    Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up);
+    expect(iconButton, findsNothing);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+
+    await tester.tap(iconButton);
+    await tester.pump();
+
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up).first;
+    expect(iconButton, findsOneWidget);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down);
+    expect(iconButton, findsNothing);
+
+    // Tap outside
+    await tester.tapAt(const Offset(500.0, 500.0));
+    await tester.pump();
+
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up);
+    expect(iconButton, findsNothing);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+  });
+
+  testWidgets('Do not crash when resize window during menu opening', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState){
+            return DropdownMenu<TestMenu>(
+              width: MediaQuery.of(context).size.width,
+              dropdownMenuEntries: menuChildren,
+            );
+          },
+        ),
+      ),
+    ));
+
+    final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+
+    await tester.tap(iconButton);
+    await tester.pump();
+
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label),
+      matching: find.byType(Material),
+    ).last;
+    expect(menuMaterial, findsOneWidget);
+
+    // didChangeMetrics
+    tester.view.physicalSize = const Size(700.0, 700.0);
+    await tester.pump();
+
+    // Go without throw.
   });
 
   testWidgets('DropdownMenu can customize trailing icon button', (WidgetTester tester) async {
@@ -1227,6 +1315,29 @@ void main() {
     await tester.pumpWidget(buildFrame());
     expect(find.text(errorText), findsOneWidget);
   });
+
+  testWidgets('Can scroll to the highlighted item', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
+          menuHeight: 100, // Give a small number so the list can only show 2 or 3 items.
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 5').hitTestable(), findsNothing);
+    await tester.enterText(find.byType(TextField), '5');
+    await tester.pumpAndSettle();
+    // Item 5 should show up.
+    expect(find.text('Item 5').hitTestable(), findsOneWidget);
+  });
+
 }
 
 enum TestMenu {

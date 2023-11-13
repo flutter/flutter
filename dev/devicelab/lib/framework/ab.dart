@@ -49,7 +49,7 @@ class ABTest {
   static Map<String, List<double>> _convertFrom(dynamic results) {
     final Map<String, dynamic> resultMap = results as Map<String, dynamic>;
     return <String, List<double>> {
-      for (String key in resultMap.keys)
+      for (final String key in resultMap.keys)
         key: (resultMap[key] as List<dynamic>).cast<double>(),
     };
   }

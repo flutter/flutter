@@ -63,6 +63,7 @@ void main() {
       orgName: orgName,
       processManager: processManager,
       stdio: stdio,
+      githubUsername: 'flutter-pub-roller-bot',
     );
   });
 
@@ -199,13 +200,13 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Non empty array means there are open PRs by the bot with the tool label
@@ -216,7 +217,7 @@ void main() {
     await controller.stream.drain();
     await rollFuture;
     expect(processManager, hasNoRemainingExpectations);
-    expect(stdio.stdout, contains('fluttergithubbot already has open tool PRs'));
+    expect(stdio.stdout, contains('flutter-pub-roller-bot already has open tool PRs'));
     expect(stdio.stdout, contains(r'[{number: 123}]'));
   });
 
@@ -239,13 +240,13 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Returns empty array, as there are no other open roll PRs from the bot
@@ -335,13 +336,13 @@ void main() {
         'pr',
         'list',
         '--author',
-        'fluttergithubbot',
+        'flutter-pub-roller-bot',
         '--repo',
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Returns empty array, as there are no other open roll PRs from the bot
@@ -427,7 +428,7 @@ void main() {
         'commit',
         '--message',
         'roll packages',
-        '--author="fluttergithubbot <fluttergithubbot@gmail.com>"',
+        '--author="flutter-pub-roller-bot <flutter-pub-roller-bot@google.com>"',
       ]),
       const FakeCommand(command: <String>[
         'git',
@@ -475,12 +476,11 @@ void main() {
 
   group('command argument validations', () {
     const String tokenPath = '/path/to/token';
-    const String mirrorRemote = 'https://githost.com/org/project';
 
     test('validates that file exists at --token option', () async {
       await expectLater(
         () => run(
-          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          <String>['--token', tokenPath],
           fs: fileSystem,
           processManager: processManager,
         ),
@@ -499,7 +499,7 @@ void main() {
         ..writeAsStringSync('');
       await expectLater(
         () => run(
-          <String>['--token', tokenPath, '--mirror-remote', mirrorRemote],
+          <String>['--token', tokenPath],
           fs: fileSystem,
           processManager: processManager,
         ),

@@ -51,6 +51,52 @@ void main() {
   });
 
   group('RestorationScope', () {
+    testWidgets('asserts when none is found', (WidgetTester tester) async {
+      late BuildContext capturedContext;
+      await tester.pumpWidget(WidgetsApp(
+        color: const Color(0xD0FF0000),
+        builder: (_, __) {
+          return RestorationScope(
+            restorationId: 'test',
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              }
+            )
+          );
+        },
+      ));
+      expect(
+        () {
+          RestorationScope.of(capturedContext);
+        },
+        throwsA(isA<FlutterError>().having(
+          (FlutterError error) => error.message,
+          'message',
+          contains('State restoration must be enabled for a RestorationScope'),
+        )),
+      );
+
+      await tester.pumpWidget(WidgetsApp(
+        restorationScopeId: 'test scope',
+        color: const Color(0xD0FF0000),
+        builder: (_, __) {
+          return RestorationScope(
+            restorationId: 'test',
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              }
+            )
+          );
+        },
+      ));
+      final UnmanagedRestorationScope scope = tester.widget(find.byType(UnmanagedRestorationScope).last);
+      expect(RestorationScope.of(capturedContext), scope.bucket);
+    });
+
     testWidgets('makes bucket available to descendants', (WidgetTester tester) async {
       const String id = 'hello world 1234';
       final MockRestorationManager manager = MockRestorationManager();

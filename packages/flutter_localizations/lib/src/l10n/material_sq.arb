@@ -25,6 +25,7 @@
   "continueButtonLabel": "Vazhdo",
   "copyButtonLabel": "Kopjo",
   "cutButtonLabel": "Prit",
+  "scanTextButtonLabel": "Skanoni tekstin",
   "okButtonLabel": "Në rregull",
   "pasteButtonLabel": "Ngjit",
   "selectAllButtonLabel": "Zgjidh të gjitha",
@@ -133,5 +134,11 @@
   "scrimLabel": "Kanavacë",
   "bottomSheetLabel": "Fleta e poshtme",
   "scrimOnTapHint": "Mbyll $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

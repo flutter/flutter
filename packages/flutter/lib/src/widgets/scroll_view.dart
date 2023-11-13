@@ -21,6 +21,7 @@ import 'scroll_delegate.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'sliver.dart';
 import 'sliver_prototype_extent_list.dart';
 import 'viewport.dart';
@@ -39,7 +40,8 @@ enum ScrollViewKeyboardDismissBehavior {
   onDrag,
 }
 
-/// A widget that scrolls.
+/// A widget that combines a [Scrollable] and a [Viewport] to create an
+/// interactive scrolling pane of content in one dimension.
 ///
 /// Scrollable widgets consist of three pieces:
 ///
@@ -71,6 +73,8 @@ enum ScrollViewKeyboardDismissBehavior {
 ///    effects using slivers.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
+///  * [TwoDimensionalScrollView], which is a similar widget [ScrollView] that
+///    scrolls in two dimensions.
 abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
@@ -1769,7 +1773,7 @@ class ListView extends BoxScrollView {
 /// {@end-tool}
 ///
 /// By default, [GridView] will automatically pad the limits of the
-/// grids's scrollable to avoid partial obstructions indicated by
+/// grid's scrollable to avoid partial obstructions indicated by
 /// [MediaQuery]'s padding. To avoid this behavior, override with a
 /// zero [padding] property.
 ///

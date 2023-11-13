@@ -298,7 +298,9 @@ enum UnfocusDisposition {
 /// [ancestors] and [descendants] accessors.
 ///
 /// [FocusNode]s are [ChangeNotifier]s, so a listener can be registered to
-/// receive a notification when the focus changes. If the [Focus] and
+/// receive a notification when the focus changes. Listeners will also be
+/// notified when [skipTraversal], [canRequestFocus], [descendantsAreFocusable],
+/// and [descendantsAreTraversable] properties are updated. If the [Focus] and
 /// [FocusScope] widgets are being used to manage the nodes, consider
 /// establishing an [InheritedWidget] dependency on them by calling [Focus.of]
 /// or [FocusScope.of] instead. [FocusNode.hasFocus] can also be used to

@@ -25,6 +25,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -839,6 +840,9 @@ class DeviceDomain extends Domain {
     registerHandler('startApp', startApp);
     registerHandler('stopApp', stopApp);
     registerHandler('takeScreenshot', takeScreenshot);
+    registerHandler('startDartDevelopmentService', startDartDevelopmentService);
+    registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
+    registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -950,7 +954,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
     final String buildMode = _getStringArg(args, 'buildMode', required: true)!;
-    return await device.supportsRuntimeMode(getBuildModeForName(buildMode));
+    return await device.supportsRuntimeMode(BuildMode.fromCliName(buildMode));
   }
 
   /// Creates an application package from a file in the temp directory.
@@ -1057,6 +1061,50 @@ class DeviceDomain extends Domain {
     } else {
       return null;
     }
+  }
+
+  /// Starts DDS for the device.
+  Future<String?> startDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
+    final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.startDartDevelopmentService(
+      Uri.parse(vmServiceUriStr),
+      logger: globals.logger,
+      disableServiceAuthCodes: disableServiceAuthCodes,
+    );
+    unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
+    return device.dds.uri?.toString();
+  }
+
+  /// Starts DDS for the device.
+  Future<void> shutdownDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.shutdown();
+  }
+
+  Future<void> setExternalDevToolsUriForDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String uri = _getStringArg(args, 'uri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    device.dds.setExternalDevToolsUri(Uri.parse(uri));
   }
 
   @override
@@ -1202,6 +1250,7 @@ class NotifyingLogger extends DelegatingLogger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
     _sendMessage(LogMessage('warning', message));
   }
@@ -1312,6 +1361,7 @@ class EmulatorDomain extends Domain {
   EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
+    java: globals.java,
     androidSdk: globals.androidSdk,
     processManager: globals.processManager,
     androidWorkflow: androidWorkflow!,
@@ -1416,7 +1466,7 @@ class ProxyDomain extends Domain {
     }
 
     _forwardedConnections[id] = socket;
-    socket.listen((List<int> data) {
+    debounceDataStream(socket).listen((List<int> data) {
       sendEvent('proxy.data.$id', null, data);
     }, onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.

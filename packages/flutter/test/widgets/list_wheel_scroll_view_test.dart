@@ -604,6 +604,41 @@ void main() {
       // centered.
       expect(viewport.childCount, 13);
     });
+
+    testWidgets('Active children are laid out with correct offset', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/123497
+      Future<void> buildWidget(double width) async {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListWheelScrollView(
+              itemExtent: 100.0,
+              children: <Widget>[
+                SizedBox(
+                  width: width,
+                  child: const Center(child: Text('blah')),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      double getSizedBoxWidth() => tester.getSize(find.byType(SizedBox)).width;
+      double getSizedBoxCenterX() => tester.getCenter(find.byType(SizedBox)).dx;
+
+      await buildWidget(200.0);
+      expect(getSizedBoxWidth(), 200.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(100.0);
+      expect(getSizedBoxWidth(), 100.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(300.0);
+      expect(getSizedBoxWidth(), 300.0);
+      expect(getSizedBoxCenterX(), 400.0);
+    });
   });
 
   group('pre-transform viewport', () {
@@ -1607,5 +1642,79 @@ void main() {
 
       expect(pageController.page, 1.0);
     });
+
+    testWidgets('ListWheelScrollView does not crash and does not allow taps on children that were laid out, but not painted', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/126491
+
+      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final List<int> children = List<int>.generate(100, (int index) => index);
+      final List<int> paintedChildren = <int>[];
+      final Set<int> tappedChildren = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 120,
+              child: ListWheelScrollView.useDelegate(
+                controller: controller,
+                physics: const FixedExtentScrollPhysics(),
+                diameterRatio: 0.9,
+                itemExtent: 55,
+                squeeze: 1.45,
+                childDelegate: ListWheelChildListDelegate(
+                  children: children
+                    .map((int index) => GestureDetector(
+                      key: ValueKey<int>(index),
+                      onTap: () {
+                        tappedChildren.add(index);
+                      },
+                      child: SizedBox(
+                        width: 55,
+                        height: 55,
+                        child: CustomPaint(
+                          painter: TestCallbackPainter(onPaint: () {
+                            paintedChildren.add(index);
+                          }),
+                        ),
+                      ),
+                    ))
+                    .toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(paintedChildren, <int>[0, 1]);
+
+      // Expect hitting 0 and 1, which are painted
+      await tester.tap(find.byKey(const ValueKey<int>(0)));
+      expect(tappedChildren, const <int>[0]);
+
+      await tester.tap(find.byKey(const ValueKey<int>(1)));
+      expect(tappedChildren, const <int>[0, 1]);
+
+      // The third child is not painted, so is not hit
+      await tester.tap(find.byKey(const ValueKey<int>(2)), warnIfMissed: false);
+      expect(tappedChildren, const <int>[0, 1]);
+    });
+  });
+
+  testWidgets('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ListWheelScrollView(
+        overAndUnderCenterOpacity: 0.5,
+        itemExtent: 20.0,
+        children: <Widget>[
+          for (int i = 0; i < 20; i++)
+            Container(),
+        ],
+      ),
+    );
+
+    expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
   });
 }

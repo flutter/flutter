@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.ExampleWidget(),
+          body: example.CustomMultiChildLayoutApp(),
         ),
       ),
     );
@@ -24,7 +24,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.ExampleWidget(),
+          body: example.CustomMultiChildLayoutExample(),
         ),
       ),
     );
@@ -40,7 +40,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.ExampleWidget(),
+          body: example.CustomMultiChildLayoutExample(),
         ),
       ),
     );

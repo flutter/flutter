@@ -53,7 +53,7 @@ void main() {
     const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:

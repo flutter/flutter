@@ -25,6 +25,7 @@
   "continueButtonLabel": "ရှေ့ဆက်ရန်",
   "copyButtonLabel": "မိတ္တူကူးရန်",
   "cutButtonLabel": "ဖြတ်ယူရန်",
+  "scanTextButtonLabel": "စာသားကို စကင်ဖတ်ပါ။",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "ကူးထည့်ရန်",
   "selectAllButtonLabel": "အားလုံး ရွေးရန်",
@@ -133,5 +134,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "အောက်ခြေအပိုဆောင်း စာမျက်နှာ",
   "scrimOnTapHint": "$modalRouteContentName ပိတ်ရန်",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

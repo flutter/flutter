@@ -99,7 +99,7 @@ class CodesignCommand extends Command<void> {
       );
     }
 
-    if (argResults!['verify'] as bool != true) {
+    if (!(argResults!['verify'] as bool)) {
       throw ConductorException(
         'Sorry, but codesigning is not implemented yet. Please pass the '
         '--$kVerify flag to verify signatures.',

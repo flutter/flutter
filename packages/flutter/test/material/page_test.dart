@@ -252,6 +252,7 @@ void main() {
       RepaintBoundary(
         key: key,
         child: MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<void>(
               builder: (BuildContext context) {

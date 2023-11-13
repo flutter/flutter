@@ -357,6 +357,6 @@ class RenderTestConfigDelegate extends RenderProxyBox {
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    config.childConfigurationsDelegate = _delegate;
+    config.childConfigurationsDelegate = delegate;
   }
 }

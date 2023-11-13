@@ -15,7 +15,7 @@ class SliderTemplate extends TokenTemplate {
   String generate() => '''
 class _${blockName}DefaultsM3 extends SliderThemeData {
   _${blockName}DefaultsM3(this.context)
-    : super(trackHeight: ${tokens['$tokenGroup.active.track.height']});
+    : super(trackHeight: ${getToken('$tokenGroup.active.track.height')});
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -58,14 +58,14 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
 
   @override
   Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.dragged)) {
+      return ${componentColor('$tokenGroup.pressed.state-layer')};
+    }
     if (states.contains(MaterialState.hovered)) {
       return ${componentColor('$tokenGroup.hover.state-layer')};
     }
     if (states.contains(MaterialState.focused)) {
       return ${componentColor('$tokenGroup.focus.state-layer')};
-    }
-    if (states.contains(MaterialState.dragged)) {
-      return ${componentColor('$tokenGroup.pressed.state-layer')};
     }
 
     return Colors.transparent;

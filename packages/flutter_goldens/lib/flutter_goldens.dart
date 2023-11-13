@@ -477,7 +477,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       platform,
     );
 
-    if(!baseDirectory.existsSync()) {
+    if (!baseDirectory.existsSync()) {
       baseDirectory.createSync(recursive: true);
     }
 

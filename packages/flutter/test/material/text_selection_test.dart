@@ -376,7 +376,7 @@ void main() {
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(

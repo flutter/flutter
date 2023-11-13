@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
+export 'package:test/test.dart' hide isInstanceOf, test;
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand? command ]) {
   final FlutterCommandRunner runner = TestFlutterCommandRunner();

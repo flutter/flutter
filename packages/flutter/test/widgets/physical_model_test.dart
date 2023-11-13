@@ -47,20 +47,23 @@ void main() {
   testWidgets('PhysicalModel - clips when overflows and elevation is 0', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
-      const MediaQuery(
-        key: key,
-        data: MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Padding(
-            padding: EdgeInsets.all(50),
-            child: Row(
-              children: <Widget>[
-                Material(child: Text('A long long long long long long long string')),
-                Material(child: Text('A long long long long long long long string')),
-                Material(child: Text('A long long long long long long long string')),
-                Material(child: Text('A long long long long long long long string')),
-              ],
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const MediaQuery(
+          key: key,
+          data: MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Padding(
+              padding: EdgeInsets.all(50),
+              child: Row(
+                children: <Widget>[
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                ],
+              ),
             ),
           ),
         ),

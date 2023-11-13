@@ -1117,7 +1117,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   ImageStreamListener? _imageStreamListener;
   ImageStreamListener _getListener({bool recreateListener = false}) {
-    if(_imageStreamListener == null || recreateListener) {
+    if (_imageStreamListener == null || recreateListener) {
       _lastException = null;
       _lastStack = null;
       _imageStreamListener = ImageStreamListener(

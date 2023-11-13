@@ -17,13 +17,16 @@ void main() {
     bool pressed = false;
     const Color splashColor = Color(0xff00ff00);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: RawMaterialButton(
-            splashColor: splashColor,
-            onPressed: () { pressed = true; },
-            child: const Text('BUTTON'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: RawMaterialButton(
+              splashColor: splashColor,
+              onPressed: () { pressed = true; },
+              child: const Text('BUTTON'),
+            ),
           ),
         ),
       ),
@@ -45,19 +48,22 @@ void main() {
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
     const Color splashColor = Color(0xff00ff00);
     await tester.pumpWidget(
-      Shortcuts(
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-        },
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: RawMaterialButton(
-              splashColor: splashColor,
-              focusNode: focusNode,
-              onPressed: () { pressed = true; },
-              child: const Text('BUTTON'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Shortcuts(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+            SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          },
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: RawMaterialButton(
+                splashColor: splashColor,
+                focusNode: focusNode,
+                onPressed: () { pressed = true; },
+                child: const Text('BUTTON'),
+              ),
             ),
           ),
         ),
@@ -175,16 +181,19 @@ void main() {
     const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: RawMaterialButton(
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
-            fillColor: fillColor,
-            highlightColor: highlightColor,
-            splashColor: splashColor,
-            child: const SizedBox(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: RawMaterialButton(
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () { },
+              fillColor: fillColor,
+              highlightColor: highlightColor,
+              splashColor: splashColor,
+              child: const SizedBox(),
+            ),
           ),
         ),
       ),
@@ -207,16 +216,19 @@ void main() {
     const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: RawMaterialButton(
-            materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () { },
-            fillColor: fillColor,
-            highlightColor: highlightColor,
-            splashColor: splashColor,
-            child: const SizedBox(),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: RawMaterialButton(
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onPressed: () { },
+              fillColor: fillColor,
+              highlightColor: highlightColor,
+              splashColor: splashColor,
+              child: const SizedBox(),
+            ),
           ),
         ),
       ),
@@ -520,6 +532,7 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(

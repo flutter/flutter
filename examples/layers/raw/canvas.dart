@@ -96,7 +96,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   // the rectangle and smaller circle.
   canvas.drawCircle(const ui.Offset(150.0, 300.0), radius, paint);
 
-  // When we're done issuing painting commands, we end the recording an receive
+  // When we're done issuing painting commands, we end the recording and receive
   // a Picture, which is an immutable record of the commands we've issued. You
   // can draw a Picture into another canvas or include it as part of a
   // composited scene.

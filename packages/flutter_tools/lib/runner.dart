@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
@@ -31,61 +29,89 @@ import 'src/runner/flutter_command_runner.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> Function() commands, {
-    bool muteCommandLogging = false,
-    bool verbose = false,
-    bool verboseHelp = false,
-    bool? reportCrashes,
-    String? flutterVersion,
-    Map<Type, Generator>? overrides,
-    required ShutdownHooks shutdownHooks,
-  }) async {
+  bool muteCommandLogging = false,
+  bool verbose = false,
+  bool verboseHelp = false,
+  bool? reportCrashes,
+  String? flutterVersion,
+  Map<Type, Generator>? overrides,
+  required ShutdownHooks shutdownHooks,
+}) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.of(args);
-    args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
+    args.removeWhere((String option) =>
+        option == '-vv' || option == '-v' || option == '--verbose');
   }
 
   return runInContext<int>(() async {
     reportCrashes ??= !await globals.isRunningOnBot;
-    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
+    final FlutterCommandRunner runner =
+        FlutterCommandRunner(verboseHelp: verboseHelp);
     commands().forEach(runner.addCommand);
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
-      systemLocale, intl.NumberFormat.localeExists,
+      systemLocale,
+      intl.NumberFormat.localeExists,
       onFailure: (String _) => 'en_US',
     );
 
-    String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
+    String getVersion() =>
+        flutterVersion ??
+        globals.flutterVersion.getVersionString(redactUnknownBranches: true);
     Object? firstError;
     StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
+        if (args.contains('--disable-telemetry') &&
+            args.contains('--enable-telemetry')) {
+          throwToolExit(
+              'Both enable and disable telemetry commands were detected '
+              'when only one can be supplied per invocation.',
+              exitCode: 1);
+        }
+
         // Disable analytics if user passes in the `--disable-telemetry` option
         // `flutter --disable-telemetry`
         //
         // Same functionality as `flutter config --no-analytics` for disabling
         // except with the `value` hard coded as false
         if (args.contains('--disable-telemetry')) {
-          const bool value = false;
           // The tool sends the analytics event *before* toggling the flag
           // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: value).send();
-          if (!value) {
-            // Normally, the tool waits for the analytics to all send before the
-            // tool exits, but only when analytics are enabled. When reporting that
-            // analytics have been disable, the wait must be done here instead.
-            await globals.flutterUsage.ensureAnalyticsSent();
-          }
-          globals.flutterUsage.enabled = value;
+          AnalyticsConfigEvent(enabled: false).send();
+
+          // Normally, the tool waits for the analytics to all send before the
+          // tool exits, but only when analytics are enabled. When reporting that
+          // analytics have been disable, the wait must be done here instead.
+          await globals.flutterUsage.ensureAnalyticsSent();
+
+          globals.flutterUsage.enabled = false;
           globals.printStatus('Analytics reporting disabled.');
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
           //  fully transitioned to using the new package
-          await globals.analytics.setTelemetry(value);
+          await globals.analytics.setTelemetry(false);
+        }
+
+        // Enable analytics if user passes in the `--enable-telemetry` option
+        // `flutter --enable-telemetry`
+        //
+        // Same functionality as `flutter config --analytics` for enabling
+        // except with the `value` hard coded as true
+        if (args.contains('--enable-telemetry')) {
+          // The tool sends the analytics event *before* toggling the flag
+          // intentionally to be sure that opt-out events are sent correctly.
+          AnalyticsConfigEvent(enabled: true).send();
+
+          globals.flutterUsage.enabled = true;
+          globals.printStatus('Analytics reporting enabled.');
+
+          await globals.analytics.setTelemetry(true);
         }
 
         await runner.run(args);
@@ -99,19 +125,23 @@ Future<int> run(
         // We already hit some error, so don't return success. The error path
         // (which should be in progress) is responsible for calling _exit().
         return 1;
-      } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
+      } catch (error, stackTrace) {
+        // ignore: avoid_catches_without_on_clauses
         // This catches all exceptions to send to crash logging, etc.
         firstError = error;
         firstStackTrace = stackTrace;
-        return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
+        return _handleToolError(error, stackTrace, verbose, args,
+            reportCrashes!, getVersion, shutdownHooks);
       }
-    }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
+    }, onError: (Object error, StackTrace stackTrace) async {
+      // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.
       firstError ??= error;
       firstStackTrace ??= stackTrace;
-      await _handleToolError(firstError!, firstStackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
+      await _handleToolError(firstError!, firstStackTrace, verbose, args,
+          reportCrashes!, getVersion, shutdownHooks);
     });
   }, overrides: overrides);
 }
@@ -127,7 +157,8 @@ Future<int> _handleToolError(
 ) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
-    globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
+    globals.printError(
+        "Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64, shutdownHooks: shutdownHooks);
   } else if (error is ToolExit) {
@@ -196,8 +227,9 @@ Future<int> _handleToolError(
       await globals.crashReporter!.informUser(details, file);
 
       return _exit(1, shutdownHooks: shutdownHooks);
-    // This catch catches all exceptions to ensure the message below is printed.
-    } catch (error, st) { // ignore: avoid_catches_without_on_clauses
+      // This catch catches all exceptions to ensure the message below is printed.
+    } catch (error, st) {
+      // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n$st\n'
         '${globals.userMessages.flutterToolBugInstructions}\n',
@@ -288,12 +320,12 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
     // users that the two consent messages they are receiving is not a
     // bug
     if (legacyAnalyticsMessageShown) {
-      globals.logger
-          .printStatus('You have received two consent messages because '
-              'the flutter tool is migrating to a new analytics system. '
-              'Disabling analytics collection will disable both the legacy '
-              'and new analytics collection systems. '
-              'You can disable analytics reporting by running `flutter --disable-telemetry`\n');
+      globals.logger.printStatus(
+          'You have received two consent messages because '
+          'the flutter tool is migrating to a new analytics system. '
+          'Disabling analytics collection will disable both the legacy '
+          'and new analytics collection systems. '
+          'You can disable analytics reporting by running `flutter --disable-telemetry`\n');
     }
 
     // Invoking this will onboard the flutter tool onto
@@ -310,7 +342,8 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
   if (globals.flutterUsage.enabled) {
     final Stopwatch stopwatch = Stopwatch()..start();
     await globals.flutterUsage.ensureAnalyticsSent();
-    globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+    globals
+        .printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
   // Run shutdown hooks before flushing logs
@@ -324,9 +357,10 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
       globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
-    // This catches all exceptions because the error is propagated on the
-    // completer.
-    } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
+      // This catches all exceptions because the error is propagated on the
+      // completer.
+    } catch (error, stackTrace) {
+      // ignore: avoid_catches_without_on_clauses
       completer.completeError(error, stackTrace);
     }
   });

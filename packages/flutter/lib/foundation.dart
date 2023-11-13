@@ -46,4 +46,5 @@ export 'src/foundation/serialization.dart';
 export 'src/foundation/service_extensions.dart';
 export 'src/foundation/stack_frame.dart';
 export 'src/foundation/synchronous_future.dart';
+export 'src/foundation/timeline.dart';
 export 'src/foundation/unicode.dart';

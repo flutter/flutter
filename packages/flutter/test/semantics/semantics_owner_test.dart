@@ -42,6 +42,7 @@ void main() {
     tester.binding.performSemanticsAction(SemanticsActionEvent(
       type: SemanticsAction.showOnScreen,
       nodeId: nodeId,
+      viewId: tester.view.viewId,
     ));
     semantics.dispose();
   });

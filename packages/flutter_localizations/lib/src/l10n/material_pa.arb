@@ -25,6 +25,7 @@
   "continueButtonLabel": "ਜਾਰੀ ਰੱਖੋ",
   "copyButtonLabel": "ਕਾਪੀ ਕਰੋ",
   "cutButtonLabel": "ਕੱਟ ਕਰੋ",
+  "scanTextButtonLabel": "ਟੈਕਸਟ ਸਕੈਨ ਕਰੋ",
   "okButtonLabel": "ਠੀਕ ਹੈ",
   "pasteButtonLabel": "ਪੇਸਟ ਕਰੋ",
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
@@ -133,5 +134,11 @@
   "scrimLabel": "ਸਕ੍ਰਿਮ",
   "bottomSheetLabel": "ਹੇਠਲੀ ਸ਼ੀਟ",
   "scrimOnTapHint": "$modalRouteContentName ਨੂੰ ਬੰਦ ਕਰੋ",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

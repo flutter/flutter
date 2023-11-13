@@ -1060,10 +1060,10 @@ dependencies:
         const String newPluginName = 'flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());';
         const String oldPluginName = 'abcplugin1.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("abcplugin1.UseOldEmbedding"));';
         final String content = registrant.readAsStringSync();
-        for(final String plugin in <String>[newPluginName,oldPluginName]) {
+        for (final String plugin in <String>[newPluginName,oldPluginName]) {
           expect(content, contains(plugin));
           expect(content.split(plugin).first.trim().endsWith('try {'), isTrue);
-          expect(content.split(plugin).last.trim().startsWith('} catch(Exception e) {'), isTrue);
+          expect(content.split(plugin).last.trim().startsWith('} catch (Exception e) {'), isTrue);
         }
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

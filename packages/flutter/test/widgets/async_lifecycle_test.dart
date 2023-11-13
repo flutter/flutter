@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class InvalidOnInitLifecycleWidget extends StatefulWidget {
@@ -25,9 +25,9 @@ class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidg
 }
 
 class InvalidDidUpdateWidgetLifecycleWidget extends StatefulWidget {
-  const InvalidDidUpdateWidgetLifecycleWidget({super.key, required this.id});
+  const InvalidDidUpdateWidgetLifecycleWidget({super.key, required this.color});
 
-  final int id;
+  final Color color;
 
   @override
   InvalidDidUpdateWidgetLifecycleWidgetState createState() => InvalidDidUpdateWidgetLifecycleWidgetState();
@@ -41,7 +41,7 @@ class InvalidDidUpdateWidgetLifecycleWidgetState extends State<InvalidDidUpdateW
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return ColoredBox(color: widget.color);
   }
 }
 
@@ -53,8 +53,8 @@ void main() {
   });
 
   testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
-    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 1));
-    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 2));
+    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.green));
+    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.red));
 
     expect(tester.takeException(), isFlutterError);
   });
