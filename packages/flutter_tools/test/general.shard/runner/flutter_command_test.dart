@@ -591,9 +591,18 @@ void main() {
           label: '2.12',
         ),
       ]));
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.nullSafetyAnalysisResult(
+              runtimeMode: 'NullSafetyMode.sound',
+              nullSafeMigratedLibraries: 1,
+              nullSafeTotalLibraries: 1,
+              languageVersion: '2.12',
+        )
+      ));
     }, overrides: <Type, Generator>{
       Pub: () => FakePub(),
       Usage: () => usage,
+      Analytics: () => fakeAnalytics,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });

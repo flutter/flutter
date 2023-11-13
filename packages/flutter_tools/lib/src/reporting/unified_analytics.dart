@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/io.dart';
+import '../build_info.dart';
+import '../dart/language_version.dart';
 import '../globals.dart' as globals;
 import '../version.dart';
 
@@ -63,4 +66,40 @@ int? getMaxRss(ProcessInfo processInfo) {
     globals.printTrace('Querying maxRss failed with error: $error');
   }
   return null;
+}
+
+/// Get the analytics related informatin for null safety analysis within
+/// a flutter package for reporting.
+Map<String, Object>? getNullSafetyAnalysisInfo({
+  required PackageConfig packageConfig,
+  required NullSafetyMode nullSafetyMode,
+  required String currentPackage,
+}) {
+  if (packageConfig.packages.isEmpty) {
+    return null;
+  }
+  int migrated = 0;
+  LanguageVersion? languageVersion;
+  for (final Package package in packageConfig.packages) {
+    final LanguageVersion? packageLanguageVersion = package.languageVersion;
+    if (package.name == currentPackage) {
+      languageVersion = packageLanguageVersion;
+    }
+    if (packageLanguageVersion != null &&
+        packageLanguageVersion.major >= nullSafeVersion.major &&
+        packageLanguageVersion.minor >= nullSafeVersion.minor) {
+      migrated += 1;
+    }
+  }
+  final Map<String, Object> results = <String, Object>{
+    'runtimeMode': nullSafetyMode.toString(),
+    'nullSafeMigratedLibraries': migrated,
+    'nullSafeTotalLibraries': packageConfig.packages.length,
+  };
+  if (languageVersion != null) {
+    final String formattedVersion = '${languageVersion.major}.${languageVersion.minor}';
+    results['languageVersion'] = formattedVersion;
+  }
+
+  return results;
 }

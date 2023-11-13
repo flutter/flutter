@@ -1742,6 +1742,22 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       project.manifest.appName,
       globals.flutterUsage,
     ).send();
+
+    final Map<String, Object>? analysisInfo = getNullSafetyAnalysisInfo(
+      packageConfig: buildInfo.packageConfig,
+      nullSafetyMode: buildInfo.nullSafetyMode,
+      currentPackage: project.manifest.appName,
+    );
+    if (analysisInfo != null) {
+      analytics.send(Event.nullSafetyAnalysisResult(
+        runtimeMode: analysisInfo['runtimeMode']! as String,
+        nullSafeMigratedLibraries: analysisInfo['nullSafeMigratedLibraries']! as int,
+        nullSafeTotalLibraries: analysisInfo['nullSafeTotalLibraries']! as int,
+        languageVersion: analysisInfo.containsKey('languageVersion')
+            ? analysisInfo['languageVersion']! as String
+            : null,
+      ));
+    }
   }
 
   /// The set of development artifacts required for this command.
