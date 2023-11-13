@@ -78,7 +78,7 @@ class Semaphore {
   void Signal();
 
  private:
-  std::unique_ptr<PlatformSemaphore> _impl;
+  std::unique_ptr<PlatformSemaphore> impl_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Semaphore);
 };
