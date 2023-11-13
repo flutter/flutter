@@ -751,7 +751,6 @@ end''');
       fileSystem.file(fileSystem.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
-      const String fakePluginName = 'some_plugin';
 
       fakeProcessManager.addCommand(
         const FakeCommand(
