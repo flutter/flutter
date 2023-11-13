@@ -17,9 +17,9 @@ class NativePluginLoader {
 
         assert meta.plugins instanceof Map<String, Object>
         def androidPlugins = meta.plugins.android
-        assert androidPlugins instanceof List<Map<String, Object>>
+        assert androidPlugins instanceof List<Map>
         // Includes the Flutter plugins that support the Android platform.
-        androidPlugins.each { androidPlugin ->
+        androidPlugins.each { Map<String, Object> androidPlugin ->
             // The property types can be found in _filterPluginsByPlatform defined in
             // packages/flutter_tools/lib/src/flutter_plugins.dart.
             assert androidPlugin.name instanceof String

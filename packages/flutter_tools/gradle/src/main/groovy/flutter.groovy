@@ -577,9 +577,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null) {
             return
         }
-        assert pluginObject.dependencies instanceof List
-        pluginObject.dependencies.each { pluginDependencyName ->
-            assert pluginDependencyName instanceof String
+        def dependencies = pluginObject.dependencies
+        assert dependencies instanceof List<String>
+        dependencies.each { pluginDependencyName ->
             if (pluginDependencyName.empty) {
                 return
             }
@@ -658,7 +658,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (meta == null) {
             return []
         }
-        assert meta.dependencyGraph instanceof List<Map<String, Object>>
+        assert meta.dependencyGraph instanceof List<Map>
         return meta.dependencyGraph as List<Map<String, Object>>
     }
 
