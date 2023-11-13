@@ -64,6 +64,7 @@ plugins.each { name, path ->
     printOnFailure(result.stdout.toString());
     printOnFailure(result.stderr.toString());
 
+    expect(result.stderr.toString(), isEmpty);
     expect(result.exitCode, 0);
 
     final String apkPath = fileSystem.path.join(
