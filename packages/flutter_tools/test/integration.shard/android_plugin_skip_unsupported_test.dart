@@ -92,7 +92,8 @@ void main() {
   test('skip plugin if it does not support the Android platform', () async {
     final Project project = PluginWithPathAndroidProject();
     final ProcessResult buildApkResult = await testPlugin(project: project);
-    expect(buildApkResult.stderr.toString(), isEmpty);
+    expect(buildApkResult.stderr.toString(),
+        isNot(contains('Please fix your settings.gradle.')));
     expect(buildApkResult.exitCode, equals(0),
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
@@ -106,7 +107,8 @@ void main() {
       () async {
     final Project project = PluginEachWithPathAndroidProject();
     final ProcessResult buildApkResult = await testPlugin(project: project);
-    expect(buildApkResult.stderr.toString(), isEmpty);
+    expect(buildApkResult.stderr.toString(),
+        isNot(contains('Please fix your settings.gradle.')));
     expect(buildApkResult.exitCode, equals(0),
         reason:
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');

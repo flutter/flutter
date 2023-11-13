@@ -427,11 +427,12 @@ class FlutterPlugin implements Plugin<Project> {
         deps.removeIf { plugins.contains(it.name) }
         deps.each {
             Project pluginProject = project.rootProject.findProject(":${it.name}")
-            if (pluginProject != null &&
-                    doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
-                configurePluginProject(it)
-            } else {
+            if (pluginProject == null) {
                 project.logger.error("Plugin project :${it.name} included, but not found. Please fix your settings.gradle.")
+            } else {
+                if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
+                    configurePluginProject(it)
+                }
             }
         }
     }
