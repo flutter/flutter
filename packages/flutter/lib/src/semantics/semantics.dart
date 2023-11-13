@@ -455,7 +455,7 @@ class SemanticsData with Diagnosticable {
        assert(attributedDecreasedValue.string == '' || textDirection != null, 'A SemanticsData object with decreasedValue "${attributedDecreasedValue.string}" had a null textDirection.'),
        assert(attributedIncreasedValue.string == '' || textDirection != null, 'A SemanticsData object with increasedValue "${attributedIncreasedValue.string}" had a null textDirection.'),
        assert(attributedHint.string == '' || textDirection != null, 'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.'),
-       assert(headingLevel >= 1 && headingLevel <= 6, 'Heading level must be between 1 and 6');
+       assert(headingLevel == -1 || (headingLevel >= 1 && headingLevel <= 6), 'Heading level must be between 1 and 6');
 
   /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
