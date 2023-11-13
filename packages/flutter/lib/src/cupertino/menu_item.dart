@@ -992,9 +992,9 @@ class CupertinoMenuDivider extends StatelessWidget
     return CustomPaint(
         foregroundPainter: _AliasedBorderPainter(
           // Antialiasing is disabled to match the iOS native menu divider, but
-          // is enabled on devices with a device pixel ratio > 1.0 to ensure the
-          // divider is visible.
-          isAntiAlias: (MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0) >= 1.0,
+          // is enabled on devices with a device pixel ratio < 1.0 to ensure the
+          // divider is visible on low resolution devices.
+          isAntiAlias: (MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0) < 1.0,
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.topEnd,
           border: BorderSide(
