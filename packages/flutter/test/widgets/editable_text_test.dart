@@ -6149,17 +6149,16 @@ void main() {
     scrollable.controller!.jumpTo(50.0);
     await tester.pumpAndSettle();
 
-    // Find the toolbar fade transition after the toolbar has been hidden.
+    // Try to find the toolbar fade transition after the toolbar has been hidden
+    // as a result of a scroll. This removes the toolbar overlay entry so no fade
+    // transition should be found.
     final List<FadeTransition> transitionsAfter = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionToolbarWrapper'),
       matching: find.byType(FadeTransition),
     ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-
-    expect(transitionsAfter.length, 1);
-
-    final FadeTransition toolbarAfter = transitionsAfter[0];
-
-    expect(toolbarAfter.opacity.value, 0.0);
+    expect(transitionsAfter.length, 0);
+    expect(state.selectionOverlay, isNotNull);
+    expect(state.selectionOverlay!.toolbarIsVisible, false);
 
     // On web, we don't show the Flutter toolbar and instead rely on the browser
     // toolbar. Until we change that, this test should remain skipped.
