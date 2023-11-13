@@ -16,6 +16,8 @@ namespace {
 Path CreateCubic();
 /// Similar to the path above, but with all cubics replaced by quadratics.
 Path CreateQuadratic();
+/// Create a rounded rect.
+Path CreateRRect();
 }  // namespace
 
 static Tessellator tess;
@@ -62,12 +64,38 @@ static void BM_Polyline(benchmark::State& state, Args&&... args) {
   state.counters["TotalPointCount"] = point_count;
 }
 
+template <class... Args>
+static void BM_Convex(benchmark::State& state, Args&&... args) {
+  auto args_tuple = std::make_tuple(std::move(args)...);
+  auto path = std::get<Path>(args_tuple);
+
+  size_t point_count = 0u;
+  size_t single_point_count = 0u;
+  auto points = std::make_unique<std::vector<Point>>();
+  points->reserve(2048);
+  while (state.KeepRunning()) {
+    auto [points, index] = tess.TessellateConvex(path, 1.0f);
+    single_point_count = index.size();
+    point_count += index.size();
+  }
+  state.counters["SinglePointCount"] = single_point_count;
+  state.counters["TotalPointCount"] = point_count;
+}
+
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(), false);
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline_tess, CreateCubic(), true);
 BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(), false);
 BENCHMARK_CAPTURE(BM_Polyline, quad_polyline_tess, CreateQuadratic(), true);
+BENCHMARK_CAPTURE(BM_Convex, rrect_convex, CreateRRect(), true);
 
 namespace {
+
+Path CreateRRect() {
+  return PathBuilder{}
+      .AddRoundedRect(Rect::MakeLTRB(0, 0, 400, 400), 16)
+      .TakePath();
+}
+
 Path CreateCubic() {
   return PathBuilder{}
       .MoveTo({359.934, 96.6335})
