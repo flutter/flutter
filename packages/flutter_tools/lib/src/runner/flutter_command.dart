@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -30,6 +31,7 @@ import '../globals.dart' as globals;
 import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../reporting/unified_analytics.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
@@ -213,6 +215,8 @@ abstract class FlutterCommand extends Command<void> {
   bool get shouldUpdateCache => true;
 
   bool get deprecated => false;
+
+  ProcessInfo get processInfo => globals.processInfo;
 
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
@@ -1376,7 +1380,12 @@ abstract class FlutterCommand extends Command<void> {
           final DateTime endTime = globals.systemClock.now();
           globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
+            _sendPostUsage(
+              commandPath,
+              commandResult,
+              startTime,
+              endTime,
+            );
           }
           if (_usesFatalWarnings) {
             globals.logger.checkForFatalLogs();
@@ -1596,7 +1605,13 @@ abstract class FlutterCommand extends Command<void> {
     DateTime endTime,
   ) {
     // Send command result.
-    CommandResultEvent(commandPath, commandResult.toString()).send();
+    final int? maxRss = getMaxRss(processInfo);
+    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
+    analytics.send(Event.flutterCommandResult(
+      commandPath: commandPath,
+      result: commandResult.toString(),
+      maxRss: maxRss,
+    ));
 
     // Send timing.
     final List<String?> labels = <String?>[
