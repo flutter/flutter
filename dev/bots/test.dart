@@ -843,7 +843,7 @@ Future<void> _runFrameworkTests() async {
       );
     }
     for (final FileSystemEntity entity in Directory(path.join(flutterRoot, 'examples')).listSync()) {
-      if (entity is! Directory) {
+      if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
       }
       await _runFlutterTest(entity.path);
