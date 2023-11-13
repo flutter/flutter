@@ -4975,7 +4975,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                     if (notification is ScrollStartNotification) {
                       _toolbarVisibleAtScrollStart = _selectionOverlay != null && _selectionOverlay!.toolbarIsVisible;
                       if (_toolbarVisibleAtScrollStart) {
-                        _selectionOverlay?.hideToolbar();
+                        hideToolbar(false);
                       }
                     } else if (notification is ScrollEndNotification) {
                       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
@@ -4984,11 +4984,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         if (_showToolbarOnScreenScheduled) {
                           _showToolbarOnScreenScheduled = false;
                           if (_valueWhenShowToolbarOnScreenScheduled == _value) {
-                            _selectionOverlay?.showToolbar();
+                            showToolbar();
                           }
                           _valueWhenShowToolbarOnScreenScheduled = null;
                         } else {
-                          _selectionOverlay?.showToolbar();
+                          showToolbar();
                         }
                       } else if (_toolbarVisibleAtScrollStart) {
                         _showToolbarOnScreenScheduled = true;
