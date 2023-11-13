@@ -55,6 +55,7 @@ class NativePluginLoader {
     }
 }
 
+// TODO(135392): Remove and use declarative form when migrated
 ext {
     nativePluginLoader = new NativePluginLoader()
 }
