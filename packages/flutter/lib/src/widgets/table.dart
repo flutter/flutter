@@ -398,7 +398,7 @@ class _TableElement extends RenderObjectElement {
 /// [TableRow]s, [StatelessWidget]s, or [StatefulWidget]s (not
 /// other kinds of widgets, like [RenderObjectWidget]s).
 ///
-/// To create an empty [TableCell], provide a [Container] or [SizedBox.shrink]
+/// To create an empty [TableCell], provide a [SizedBox.shrink]
 /// as the [child].
 class TableCell extends ParentDataWidget<TableCellParentData> {
   /// Creates a widget that controls how a child of a [Table] is aligned.
