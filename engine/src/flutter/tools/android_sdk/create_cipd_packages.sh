@@ -115,6 +115,17 @@ for platform in "${platforms[@]}"; do
     done
   done
 
+  # Special treatment for NDK to move to expected directory.
+  # Instead of the ndk being in `sdk/ndk/<major>.<minor>.<patch>/`, it will be
+  # in `ndk/`.
+  # This simplifies the build scripts, and enables version difference between
+  # the Dart and Flutter build while reusing the same build rules.
+  mv $upload_dir/sdk/ndk $upload_dir/ndk-bundle
+  ndk_sub_paths=`find $upload_dir/ndk-bundle -maxdepth 1 -type d`
+  ndk_sub_paths_arr=($ndk_sub_paths)
+  mv ${ndk_sub_paths_arr[1]} $upload_dir/ndk
+  rm -rf $upload_dir/ndk-bundle
+
   # Accept all licenses to ensure they are generated and uploaded.
   yes "y" | $sdkmanager_path --licenses --sdk_root=$sdk_root
   cp -r "$sdk_root/licenses" "$upload_dir/sdk"
