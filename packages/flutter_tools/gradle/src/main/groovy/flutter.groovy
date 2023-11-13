@@ -401,7 +401,7 @@ class FlutterPlugin implements Plugin<Project> {
         getPluginList().each this.&configurePluginDependencies
     }
 
-    // TODO(#54566, #48918): Can remove once the issues are resolved.
+    // TODO(54566, 48918): Can remove once the issues are resolved.
     //  This means all references to `.flutter-plugins` are then removed and apps only depend exclusively on the
     //  `plugins` property in `.flutter-plugins-dependencies`.
     /**
@@ -436,7 +436,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // TODO(#54566): Can remove this function and its call sites once resolved.
+    // TODO(54566): Can remove this function and its call sites once resolved.
     /**
      * Returns `true` if the given path contains an `android/build.gradle` file.
      */
@@ -629,7 +629,7 @@ class FlutterPlugin implements Plugin<Project> {
         return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
     }
 
-    // TODO(#54566, #48918): Remove in favor of [getPluginList] only, see also
+    // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies() {
