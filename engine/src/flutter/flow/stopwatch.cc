@@ -57,7 +57,7 @@ size_t Stopwatch::GetCurrentSample() const {
 }
 
 double StopwatchVisualizer::UnitFrameInterval(double raster_time_ms) const {
-  return raster_time_ms / stopwatch_.GetFrameBudget().count();
+  return raster_time_ms / frame_budget_.count();
 }
 
 double StopwatchVisualizer::UnitHeight(double raster_time_ms,
