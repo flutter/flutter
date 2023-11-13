@@ -488,7 +488,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)} or lower.")
+                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)} or higher.")
                 project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
 
