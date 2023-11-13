@@ -30,7 +30,7 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   auto const bottom = rect.bottom();
 
   // Scale the graph to show time frames up to those that are 3x the frame time.
-  auto const one_frame_ms = stopwatch_.GetFrameBudget().count();
+  auto const one_frame_ms = GetFrameBudget().count();
   auto const max_interval = one_frame_ms * 3.0;
   auto const max_unit_interval = UnitFrameInterval(max_interval);
   auto const sample_unit_width = (1.0 / kMaxSamples);

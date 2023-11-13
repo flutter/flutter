@@ -93,7 +93,12 @@ class FixedRefreshRateStopwatch : public Stopwatch {
 class StopwatchVisualizer {
  public:
   explicit StopwatchVisualizer(const Stopwatch& stopwatch)
-      : stopwatch_(stopwatch) {}
+      : stopwatch_(stopwatch) {
+    // Looking up the frame budget from the stopwatch delegate class may call
+    // into JNI or make platform calls which are slow. This value is safe to
+    // cache since the StopwatchVisualizer is recreated on each frame.
+    frame_budget_ = stopwatch_.GetFrameBudget();
+  }
 
   virtual ~StopwatchVisualizer() = default;
 
@@ -112,7 +117,10 @@ class StopwatchVisualizer {
   /// @brief      Converts a raster time to a unit height.
   double UnitHeight(double time_ms, double max_height) const;
 
+  fml::Milliseconds GetFrameBudget() const { return frame_budget_; }
+
   const Stopwatch& stopwatch_;
+  fml::Milliseconds frame_budget_;
 };
 
 }  // namespace flutter

@@ -47,7 +47,7 @@ void SkStopwatchVisualizer::InitVisualizeSurface(SkISize size) const {
 
   // Scale the graph to show frame times up to those that are 3 times the frame
   // time.
-  const double one_frame_ms = stopwatch_.GetFrameBudget().count();
+  const double one_frame_ms = GetFrameBudget().count();
   const double max_interval = one_frame_ms * 3.0;
   const double max_unit_interval = UnitFrameInterval(max_interval);
 
@@ -101,7 +101,7 @@ void SkStopwatchVisualizer::Visualize(DlCanvas* canvas,
 
   // Scale the graph to show frame times up to those that are 3 times the frame
   // time.
-  const double one_frame_ms = stopwatch_.GetFrameBudget().count();
+  const double one_frame_ms = GetFrameBudget().count();
   const double max_interval = one_frame_ms * 3.0;
   const double max_unit_interval = UnitFrameInterval(max_interval);
 
