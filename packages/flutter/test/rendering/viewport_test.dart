@@ -48,13 +48,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 }
 
 void main() {
-  setUpAll((){
-    // TODO(polina-c): replace with better signature after merge of https://github.com/dart-lang/leak_tracker/pull/176.
-    // This line stops ignoring notGCed leaks, that are ignored at the root.
-    LeakTesting.settings = LeakTesting.settings.copyWith(
-      ignoredLeaks: IgnoredLeaks(notDisposed: LeakTesting.settings.ignoredLeaks.notDisposed),
-    );
-  });
+  LeakTesting.settings = LeakTesting.settings.withTracked(allNotGCed: true);
 
   testWidgetsWithLeakTracking('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -1644,9 +1638,7 @@ void main() {
       expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 34.0 * 2);
     });
 
-    testWidgetsWithLeakTracking('will not assert on mismatched axis',
-    leakTesting: LeakTesting.settings.withIgnored(allNotGCed: true), // The test holds instances.
-    (WidgetTester tester) async {
+    testWidgets('will not assert on mismatched axis', (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
@@ -1658,8 +1650,7 @@ void main() {
   testWidgetsWithLeakTracking('RenderViewportBase.showOnScreen reports the correct targetRect',
   leakTesting: LeakTesting.settings.withRetainingPath(),
   (WidgetTester tester) async {
-    print(LeakTracking.phase.ignoredLeaks.notGCed.ignoreAll);
-
+    print(LeakTracking.phase.ignoreLeaks);
     final ScrollController innerController = ScrollController();
     final ScrollController outerController = ScrollController();
     addTearDown(innerController.dispose);
@@ -2201,10 +2192,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Handles infinite constraints when TargetPlatform is iOS or macOS',
-  // leakTesting: LeakTesting.settings.withRetainingPath(),
-  (WidgetTester tester) async {
-    print(LeakTracking.phase.ignoredLeaks.notGCed.ignoreAll);
+  testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/45866
     await tester.pumpWidget(
       Directionality(
