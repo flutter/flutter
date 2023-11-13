@@ -538,7 +538,7 @@ end''');
         logger.errorText,
         contains(
           'The plugin "$fakePluginName" requires a higher minimum iOS '
-          'deployment version than your application is targetting.'
+          'deployment version than your application is targeting.'
         ),
       );
       // The error should contain specific instructions for fixing the build
@@ -598,7 +598,7 @@ end''');
         logger.errorText,
         contains(
           'The plugin "$fakePluginName" requires a higher minimum iOS '
-          'deployment version than your application is targetting.'
+          'deployment version than your application is targeting.'
         ),
       );
       // The error should contain specific instructions for fixing the build
@@ -659,7 +659,7 @@ end''');
         logger.errorText,
         contains(
           'The plugin "$fakePluginName" requires a higher minimum iOS '
-          'deployment version than your application is targetting.'
+          'deployment version than your application is targeting.'
         ),
       );
       // The error should contain specific instructions for fixing the build
@@ -723,7 +723,7 @@ end''');
         logger.errorText,
         contains(
           'The plugin "$fakePluginName" requires a higher minimum iOS '
-          'deployment version than your application is targetting.'
+          'deployment version than your application is targeting.'
         ),
       );
       // The error should contain non-specific instructions for fixing the build
@@ -860,7 +860,7 @@ end''');
         logger.errorText,
         contains(
           'The plugin "$fakePluginName" requires a higher minimum macOS '
-          'deployment version than your application is targetting.'
+          'deployment version than your application is targeting.'
         ),
       );
       // The error should contain specific instructions for fixing the build
@@ -921,7 +921,7 @@ end''');
         logger.errorText,
         contains(
           'The plugin "$fakePluginName" requires a higher minimum macOS '
-          'deployment version than your application is targetting.'
+          'deployment version than your application is targeting.'
         ),
       );
       // The error should contain specific instructions for fixing the build

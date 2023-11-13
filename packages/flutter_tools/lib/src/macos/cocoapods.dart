@@ -430,7 +430,7 @@ class CocoaPods {
           if (minDeploymentVersion != null) {
             _logger.printError(
               'Error: The plugin "$sourcePlugin" requires a higher minimum '
-              '$platformName deployment version than your application is targetting.\n'
+              '$platformName deployment version than your application is targeting.\n'
               "To build, increase your application's deployment target to at "
               'least $minDeploymentVersion as described at $docsLink',
               emphasis: true,
@@ -442,7 +442,7 @@ class CocoaPods {
             // _findPodspecMinDeploymentVersion can be improved.
             _logger.printError(
               'Error: The plugin "$sourcePlugin" requires a higher minimum '
-              '$platformName deployment version than your application is targetting.\n'
+              '$platformName deployment version than your application is targeting.\n'
               "To build, increase your application's deployment target as "
               'described at $docsLink\n\n'
               'The minimum required version for "$sourcePlugin" could not be '
@@ -488,6 +488,9 @@ class CocoaPods {
   }
 
   String? _findPodspecMinDeploymentVersion(File podspec, String platformString) {
+    if (!podspec.existsSync()) {
+      return null;
+    }
     // There are two ways the deployment target can be specified; see
     // https://guides.cocoapods.org/syntax/podspec.html#group_platform
     final RegExp platformPattern = RegExp(
