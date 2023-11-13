@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/stopwatch.h"
+#include "fml/time/time_delta.h"
 #include "gmock/gmock.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 
@@ -11,9 +12,14 @@ using testing::Return;
 namespace flutter {
 namespace testing {
 
-class MockRefreshRateUpdater : public Stopwatch::RefreshRateUpdater {
+class FakeRefreshRateUpdater : public Stopwatch::RefreshRateUpdater {
  public:
-  MOCK_METHOD(fml::Milliseconds, GetFrameBudget, (), (const, override));
+  fml::Milliseconds GetFrameBudget() const override { return budget_; }
+
+  void SetFrameBudget(fml::Milliseconds budget) { budget_ = budget; }
+
+ private:
+  fml::Milliseconds budget_;
 };
 
 TEST(Instrumentation, GetDefaultFrameBudgetTest) {
@@ -32,11 +38,10 @@ TEST(Instrumentation, GetOneShotFrameBudgetTest) {
 }
 
 TEST(Instrumentation, GetFrameBudgetFromUpdaterTest) {
-  MockRefreshRateUpdater updater;
+  FakeRefreshRateUpdater updater;
   fml::Milliseconds frame_budget_90fps = fml::RefreshRateToFrameBudget(90);
-  EXPECT_CALL(updater, GetFrameBudget())
-      .Times(1)
-      .WillOnce(Return(frame_budget_90fps));
+  updater.SetFrameBudget(frame_budget_90fps);
+
   Stopwatch stopwatch(updater);
   fml::Milliseconds actual_frame_budget = stopwatch.GetFrameBudget();
   EXPECT_EQ(frame_budget_90fps, actual_frame_budget);
