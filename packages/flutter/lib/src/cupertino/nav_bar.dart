@@ -971,6 +971,30 @@ class _RenderLargeTitle extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(childConstraints);
+    final double maxScale = childSize.width != 0.0
+      ? clampDouble(constraints.maxWidth / childSize.width, 1.0, 1.1)
+      : 1.1;
+    final double scale = clampDouble(
+      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
+      1.0,
+      maxScale,
+    );
+    final Size scaledChildSize = childSize * scale;
+    return result * scale + alignment.alongOffset(constraints.biggest - scaledChildSize as Offset).dy;
+  }
+
+  @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     assert(child == this.child);
 

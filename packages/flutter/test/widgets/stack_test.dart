@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../rendering/baseline_utils.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
 class TestPaintingContext implements PaintingContext {
@@ -50,6 +51,7 @@ void main() {
               key: key,
               width: 10.0,
               height: 10.0,
+              child: ColoredBox(color: Color(0xFFFFFFFF)),
             ),
           ),
         ],
@@ -67,6 +69,7 @@ void main() {
     expect(parentData.left, equals(10.0));
     expect(parentData.width, isNull);
     expect(parentData.height, isNull);
+    verifyDryBaseline(tester.renderObject(find.byType(Stack)));
 
     await tester.pumpWidget(
       const Stack(
@@ -78,6 +81,7 @@ void main() {
               key: key,
               width: 10.0,
               height: 10.0,
+              child: ColoredBox(color: Color(0xFFFFFFFF)),
             ),
           ),
         ],
@@ -92,6 +96,7 @@ void main() {
     expect(parentData.left, isNull);
     expect(parentData.width, isNull);
     expect(parentData.height, isNull);
+    verifyDryBaseline(tester.renderObject(find.byType(Stack)));
   });
 
   testWidgetsWithLeakTracking('Can remove parent data', (WidgetTester tester) async {
@@ -394,6 +399,7 @@ void main() {
     expect(parentData.offset.dy, equals(0.0));
     expect(renderBox.size.width, equals(11.0));
     expect(renderBox.size.height, equals(12.0));
+    verifyDryBaseline(tester.renderObject(find.byType(Stack)));
 
     await tester.pumpWidget(
       const Stack(
@@ -422,6 +428,7 @@ void main() {
     expect(parentData.offset.dy, equals(0.0));
     expect(renderBox.size.width, equals(11.0));
     expect(renderBox.size.height, equals(12.0));
+    verifyDryBaseline(tester.renderObject(find.byType(Stack)));
   });
 
   testWidgetsWithLeakTracking('Can set and update clipBehavior', (WidgetTester tester) async {

@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../rendering/baseline_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 RenderBox getRenderSegmentedControl(WidgetTester tester) {
@@ -254,6 +255,47 @@ void main() {
     await tester.tap(find.text('Child 2'));
 
     expect(groupValue, 1);
+  });
+
+  testWidgetsWithLeakTracking('dry baseline', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const SizedBox(
+      height: double.infinity,
+      child: Placeholder(),
+    ) ;
+    children[1] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 2', style: TextStyle(fontSize: 20)),
+    ) ;
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    final RenderBox renderBox = getRenderSegmentedControl(tester);
+    verifyDryBaseline(renderBox);
+
+    await tester.pumpWidget(
+      boilerplate(
+        builder: (BuildContext context) {
+          return CupertinoSlidingSegmentedControl<int>(
+            children: children,
+            groupValue: groupValue,
+            onValueChanged: defaultCallback,
+          );
+        },
+      ),
+    );
+
+    verifyDryBaseline(renderBox);
   });
 
   testWidgetsWithLeakTracking(

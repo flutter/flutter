@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'baseline_utils.dart';
 import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
@@ -374,6 +375,31 @@ void main() {
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
+
+  test('baseline', () {
+    const String text = '中';
+    double? layoutAndCheckBaseline(double maxWidth) {
+      final RenderParagraph paragraph = RenderParagraph(
+        TextSpan(
+          text: text,
+          style: TextStyle(fontSize: maxWidth, fontFamily: 'FlutterTest'),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      layout(paragraph, phase: EnginePhase.sendSemanticsUpdate, constraints: BoxConstraints(maxWidth: maxWidth));
+      return verifyDryBaseline(paragraph);
+    }
+
+    expect(layoutAndCheckBaseline(10), 7.5);
+
+    expect(layoutAndCheckBaseline(20), 15);
+
+    expect(layoutAndCheckBaseline(30), 22.5);
+
+    expect(layoutAndCheckBaseline(40), 30);
+
+    expect(layoutAndCheckBaseline(50), 37.5);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
 
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(

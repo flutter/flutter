@@ -67,6 +67,12 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final double? result = child?.getDryBaseline(constraints, baseline);
+    return result;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = this.child;
     if (child != null) {
@@ -224,6 +230,20 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints innerConstraints = constraints.deflate(_resolvedPadding!);
+    final double? result = child.getDryBaseline(innerConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    return result + _resolvedPadding!.top;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _resolve();
@@ -280,12 +300,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
 
   Alignment? _resolvedAlignment;
 
-  void _resolve() {
-    if (_resolvedAlignment != null) {
-      return;
-    }
-    _resolvedAlignment = alignment.resolve(textDirection);
-  }
+  Alignment _resolve() => _resolvedAlignment ??= alignment.resolve(textDirection);
 
   void _markNeedResolution() {
     _resolvedAlignment = null;
@@ -347,6 +362,20 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     assert(_resolvedAlignment != null);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
     childParentData.offset = _resolvedAlignment!.alongOffset(size - child!.size as Offset);
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(constraints);
+    return result + _resolve().alongOffset(size - childSize as Offset).dy;
   }
 
   @override
@@ -1005,6 +1034,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(constraints, baseline) ?? super.getDryBaseline(constraints, baseline);
   }
 
   @override
@@ -1364,6 +1394,23 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    return result + delegate.getPositionForChild(
+      _getSize(constraints),
+      childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(childConstraints),
+    ).dy;
+  }
+
+  @override
   void performLayout() {
     size = _getSize(constraints);
     if (child != null) {
@@ -1435,6 +1482,23 @@ class RenderBaseline extends RenderShiftedBox {
       return Size.zero;
     }
     return constraints.smallest;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    if (baseline == baselineType) {
+      return this.baseline;
+    }
+    final double? result1 = child.getDryBaseline(constraints.loosen(), baseline);
+    final double? result2 = child.getDryBaseline(constraints.loosen(), baselineType);
+    if (result1 == null || result2 == null) {
+      return this.baseline;
+    }
+    return this.baseline + result1 - result2;
   }
 
   @override

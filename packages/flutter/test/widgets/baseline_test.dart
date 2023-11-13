@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../rendering/baseline_utils.dart';
+
 void main() {
   testWidgetsWithLeakTracking('Baseline - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -42,6 +44,7 @@ void main() {
       tester.renderObject<RenderBox>(find.byType(Baseline)).size,
       const Size(100.0, 200),
     );
+    verifyDryBaseline(tester.renderObject(find.byType(Baseline)));
   });
 
   testWidgetsWithLeakTracking('Chip caches baseline', (WidgetTester tester) async {
@@ -157,10 +160,6 @@ class RenderBaselineDetector extends RenderBox {
 
   void dirty() {
     markNeedsLayout();
-  }
-
-  @override
-  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
   }
 
   @override

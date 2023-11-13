@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import '../rendering/baseline_utils.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -209,6 +210,53 @@ void main() {
     }
 
     testHorizontalGeometry();
+  });
+
+  testWidgetsWithLeakTracking('dry baseline', (WidgetTester tester) async {
+    late bool hasSubtitle;
+
+    const double leftPadding = 10.0;
+    const double rightPadding = 20.0;
+    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
+      hasSubtitle = isTwoLine || isThreeLine;
+      subtitleScaleFactor ??= textScaleFactor;
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: MediaQuery(
+          data: MediaQueryData(
+            padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
+            textScaleFactor: textScaleFactor,
+          ),
+          child: Material(
+            child: Center(
+              child: ListTile(
+                leading: const SizedBox(width: 24.0, height: 24.0),
+                title: const Text('title'),
+                subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
+                trailing: const SizedBox(width: 24.0, height: 24.0),
+                dense: dense,
+                isThreeLine: isThreeLine,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    verifyDryBaseline(tester.renderObject(find.byType(ListTile)));
+    await tester.pumpWidget(buildFrame(isTwoLine: true));
+    verifyDryBaseline(tester.renderObject(find.byType(ListTile)));
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    verifyDryBaseline(tester.renderObject(find.byType(ListTile)));
+    await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
+    verifyDryBaseline(tester.renderObject(find.byType(ListTile)));
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
+    verifyDryBaseline(tester.renderObject(find.byType(ListTile)));
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 0.5, subtitleScaleFactor: 4.0));
+    verifyDryBaseline(tester.renderObject(find.byType(ListTile)));
+    await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
+    verifyDryBaseline(tester.renderObject(find.byType(ListTile)));
   });
 
   testWidgetsWithLeakTracking('ListTile.divideTiles', (WidgetTester tester) async {

@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/text_input.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'baseline_utils.dart';
 import 'rendering_tester.dart';
 
 void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
@@ -242,6 +243,36 @@ void main() {
       ),
     );
   });
+
+  test('baseline', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    const String text = '中';
+    double? layoutAndCheckBaseline(double maxWidth) {
+      final RenderEditable paragraph = RenderEditable(
+        text: TextSpan(
+          text: text,
+          style: TextStyle(fontSize: maxWidth, fontFamily: 'FlutterTest'),
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: delegate,
+      );
+      layout(paragraph, phase: EnginePhase.sendSemanticsUpdate, constraints: BoxConstraints(maxWidth: maxWidth));
+      return verifyDryBaseline(paragraph);
+    }
+
+    expect(layoutAndCheckBaseline(10), 7.5);
+
+    expect(layoutAndCheckBaseline(20), 15);
+
+    expect(layoutAndCheckBaseline(30), 22.5);
+
+    expect(layoutAndCheckBaseline(40), 30);
+
+    expect(layoutAndCheckBaseline(50), 37.5);
+  }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
 
   // Test that clipping will be used even when the text fits within the visible
   // region if the start position of the text is offset (e.g. during scrolling

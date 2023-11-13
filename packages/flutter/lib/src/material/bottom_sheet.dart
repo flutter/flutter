@@ -631,6 +631,20 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    return result + _getPositionForChild(_getSize(constraints), childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(constraints)).dy;
+  }
+
+  @override
   void performLayout() {
     size = _getSize(constraints);
     if (child != null) {

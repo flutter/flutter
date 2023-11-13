@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'baseline_utils.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -39,7 +40,8 @@ void main() {
       ..bottom = 0.0
       ..left = 0.0;
 
-    layout(stack, constraints: const BoxConstraints());
+    layout(stack, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints());
+    verifyDryBaseline(stack);
 
     expect(stack.size.width, equals(100.0));
     expect(stack.size.height, equals(100.0));

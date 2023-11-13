@@ -38,6 +38,8 @@ class RenderTestBox extends RenderBox {
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    calls += 1;
+    return boxSize.height / 2.0;
   }
 }
 
@@ -137,5 +139,11 @@ void main() {
     pumpFrame();
 
     expect(test.calls, 3); // Use the cached data if the layout constraints do not change.
+
+    expect(
+      test.getDryBaseline(root.additionalConstraints, TextBaseline.alphabetic),
+      test.getDryBaseline(root.additionalConstraints, TextBaseline.alphabetic),
+    );
+    expect(test.calls, 4);
   });
 }

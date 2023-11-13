@@ -1982,7 +1982,7 @@ abstract class RenderBox extends RenderObject {
   /// layout (which could happen, for instance, if this method is called when the
   /// layout of this render object is already finalized).
   ///
-  /// Accessing the current layout of this [RenderBox] or child [RenderBoxes]
+  /// Accessing the current layout of this [RenderBox] or child [RenderBox]es
   /// (including accessing [size] or `child.size`) usually indicates a bug in the
   /// implementaion, as the current layout is typically calculated using a set of
   /// [BoxConstraints] that's different from the `constraints` given as the first
@@ -2215,7 +2215,7 @@ abstract class RenderBox extends RenderObject {
     assert(!debugNeedsLayout);
     assert(owner!.debugDoingLayout || owner!.debugDoingPaint);
     assert(!owner!.debugDoingLayout || (RenderObject.debugActiveLayout == parent && parent!.debugDoingThisLayout));
-    assert(!owner!.debugDoingPaint || (RenderObject.debugActivePaint == parent) && parent!.debugDoingThisPaint || (RenderObject.debugActivePaint == this && debugDoingThisPaint));
+    assert(!owner!.debugDoingPaint || (RenderObject.debugActivePaint == parent && parent!.debugDoingThisPaint) || (RenderObject.debugActivePaint == this && debugDoingThisPaint));
     assert(_debugSetDoingBaseline(true));
     final double? result;
     try {
@@ -2242,6 +2242,26 @@ abstract class RenderBox extends RenderObject {
       (constraints, baseline),
       ((BoxConstraints, TextBaseline) pair) => computeDistanceToActualBaseline(pair.$2),
     );
+  }
+
+  /// Calls [computeDistanceToActualBaseline] and caches the result.
+  ///
+  /// This method is for testing purposes only. It always returns null in
+  /// non-debug modes.
+  @nonVirtual
+  @visibleForTesting
+  double? debugGetDistanceToBaseline(TextBaseline baseline) {
+    assert(!debugNeedsLayout);
+    double? result;
+    assert(() {
+      result = _intrinsicsCache.getOrCompute(
+        _IntrinsicsCacheType.baseline,
+        (constraints, baseline),
+        ((BoxConstraints, TextBaseline) pair) => computeDistanceToActualBaseline(pair.$2),
+      );
+      return true;
+    }());
+    return result;
   }
 
   /// Returns the distance from the y-coordinate of the position of the box to

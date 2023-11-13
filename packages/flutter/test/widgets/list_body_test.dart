@@ -7,11 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../rendering/baseline_utils.dart';
+
 const List<Widget> children = <Widget>[
-  SizedBox(width: 200.0, height: 150.0),
-  SizedBox(width: 200.0, height: 150.0),
-  SizedBox(width: 200.0, height: 150.0),
-  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF1))),
+  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF2))),
+  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF3))),
+  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF4))),
 ];
 
 void expectRects(WidgetTester tester, List<Rect> expected) {
@@ -45,6 +47,7 @@ void main() {
         const Rect.fromLTWH(0.0, 450.0, 800.0, 150.0),
       ],
     );
+    verifyDryBaseline(tester.renderObject(find.byType(ListBody)));
   });
 
   testWidgetsWithLeakTracking('ListBody up', (WidgetTester tester) async {
@@ -62,6 +65,7 @@ void main() {
         const Rect.fromLTWH(0.0, 0.0, 800.0, 150.0),
       ],
     );
+    verifyDryBaseline(tester.renderObject(find.byType(ListBody)));
   });
 
   testWidgetsWithLeakTracking('ListBody right', (WidgetTester tester) async {
@@ -85,6 +89,7 @@ void main() {
         const Rect.fromLTWH(600.0, 0.0, 200.0, 600.0),
       ],
     );
+    verifyDryBaseline(tester.renderObject(find.byType(ListBody)));
   });
 
   testWidgetsWithLeakTracking('ListBody left', (WidgetTester tester) async {
@@ -108,6 +113,7 @@ void main() {
         const Rect.fromLTWH(0.0, 0.0, 200.0, 600.0),
       ],
     );
+    verifyDryBaseline(tester.renderObject(find.byType(ListBody)));
   });
 
   testWidgetsWithLeakTracking('Limited space along main axis error', (WidgetTester tester) async {

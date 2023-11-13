@@ -2241,6 +2241,22 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
   Size computeDryLayout(BoxConstraints constraints) => _computeSize(constraints, ChildLayoutHelper.dryLayoutChild);
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(constraints);
+    final double yAdjustment = clampDouble(childSize.height + padding.bottom - maxExtent, 0, padding.bottom);
+    final double offsetY = constraints.biggest.height - childSize.height - padding.bottom + yAdjustment;
+    return result + offsetY;
+  }
+
+  @override
   void performLayout() {
     final RenderBox? child = this.child;
     if (child == null) {

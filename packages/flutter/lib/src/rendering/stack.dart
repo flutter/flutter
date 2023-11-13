@@ -546,6 +546,8 @@ class RenderStack extends RenderBox
     return hasVisualOverflow;
   }
 
+  /// Computes the baseline offset of the given `child`, from the top of the
+  /// Stack layout.
   static double? baselineForPositionedChild(RenderBox child, StackParentData childParentData, Size size, Alignment alignment, TextBaseline baseline) {
     assert(childParentData.isPositioned);
     assert(child.parentData == childParentData);

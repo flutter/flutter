@@ -276,6 +276,24 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsPaint();
   }
 
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints enforcedConstraint = BoxConstraints(
+      minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
+    ).enforce(constraints.loosen());
+    final double? result = child.getDryBaseline(enforcedConstraint, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(enforcedConstraint);
+    final bool isAbove = anchorAbove.dy >= childSize.height - _kToolbarArrowSize.height * 2;
+    return result + (isAbove ? -_kToolbarArrowSize.height : 0.0);
+  }
+
   bool get isAbove => anchorAbove.dy >= (child?.size.height ?? 0.0) - _kToolbarArrowSize.height * 2;
 
   @override

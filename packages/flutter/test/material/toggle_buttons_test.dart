@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import '../rendering/baseline_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 const double _defaultBorderWidth = 1.0;
@@ -1275,7 +1276,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('ToggleButtons text baseline alignment', (WidgetTester tester) async {
-    // The point size of the fonts must be a multiple of 4 until
+    // The font size must be a multiple of 4 until
     // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
       boilerplate(
@@ -1322,6 +1323,39 @@ void main() {
     expect(firstToggleButtonDy, secondToggleButtonDy);
     expect(firstToggleButtonDy, elevatedButtonDy - 3.0);
     expect(firstToggleButtonDy, textDy - 5.0);
+  });
+
+  testWidgetsWithLeakTracking('dry baseline', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        useMaterial3: false,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            ToggleButtons(
+              borderWidth: 5.0,
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: null,
+              style: ElevatedButton.styleFrom(textStyle: const TextStyle(
+                fontFamily: 'FlutterTest',
+                fontSize: 20.0,
+              )),
+              child: const Text('Elevated Button'),
+            ),
+            const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
+          ],
+        ),
+      ),
+    );
+
+    verifyDryBaseline(tester.renderObject(find.byType(ToggleButtons)));
   });
 
   testWidgetsWithLeakTracking('Directionality test', (WidgetTester tester) async {

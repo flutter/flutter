@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../rendering/baseline_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({required Widget child}) {
@@ -664,5 +665,28 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(find.byType(Tooltip), findsNWidgets(2));
     expect(find.byTooltip('t2'), findsOneWidget);
     expect(find.byTooltip('t3'), findsOneWidget);
+  });
+
+  testWidgetsWithLeakTracking('dry baseline', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Placeholder()),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    verifyDryBaseline(tester.renderObject(find.byType(SegmentedButton<int>)));
   });
 }

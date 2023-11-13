@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'baseline_utils.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -70,12 +71,13 @@ void main() {
         ),
       ],
     );
-    layout(root);
+    layout(root, phase: EnginePhase.sendSemanticsUpdate);
 
     final Offset aPos = a.localToGlobal(Offset.zero);
     final Offset bPos = b.localToGlobal(Offset.zero);
     expect(aPos.dy, 0.0);
     expect(bPos.dy, 96.0 - 24.0);
+    verifyDryBaseline(root);
   });
 
   test('RenderFlex and RenderIgnoreBaseline (with ignored baseline)', () {
@@ -97,11 +99,12 @@ void main() {
         ),
       ],
     );
-    layout(root);
+    layout(root, phase: EnginePhase.sendSemanticsUpdate);
 
     final Offset aPos = a.localToGlobal(Offset.zero);
     final Offset bPos = b.localToGlobal(Offset.zero);
     expect(aPos.dy, 0.0);
     expect(bPos.dy, 0.0);
+    verifyDryBaseline(root);
   });
 }

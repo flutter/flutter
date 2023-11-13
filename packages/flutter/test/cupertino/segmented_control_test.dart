@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../rendering/baseline_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 RenderBox getRenderSegmentedControl(WidgetTester tester) {
@@ -247,6 +248,46 @@ void main() {
     await tester.pumpAndSettle();
 
     await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
+  });
+
+  testWidgetsWithLeakTracking('dry baseline', (WidgetTester tester) async {
+    const Key key = Key('Container');
+
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const SizedBox(
+      height: double.infinity,
+      child: Placeholder(),
+    ) ;
+    children[1] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 2', style: TextStyle(fontSize: 20)),
+    ) ;
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoSegmentedControl<int>(
+          key: key,
+          children: children,
+          onValueChanged: (int newValue) { },
+        ),
+      ),
+    );
+
+    final RenderBox renderBox = getRenderSegmentedControl(tester);
+    verifyDryBaseline(renderBox);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: CupertinoSegmentedControl<int>(
+          key: key,
+          padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
+          children: children,
+          onValueChanged: (int newValue) { },
+        ),
+      ),
+    );
+
+    verifyDryBaseline(renderBox);
   });
 
   testWidgetsWithLeakTracking('Value attribute must be the key of one of the children widgets', (WidgetTester tester) async {

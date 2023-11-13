@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'baseline_utils.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -226,7 +227,7 @@ void main() {
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceEvenly);
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex, constraints: const BoxConstraints(
+    layout(flex, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints(
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
@@ -240,6 +241,7 @@ void main() {
     expect(box2.size.width, equals(100.0));
     expect(getOffset(box3).dx, equals(350.0));
     expect(box3.size.width, equals(100.0));
+    verifyDryBaseline(flex);
 
     flex.direction = Axis.vertical;
     pumpFrame();
@@ -249,6 +251,7 @@ void main() {
     expect(box2.size.height, equals(100.0));
     expect(getOffset(box3).dy, equals(275.0));
     expect(box3.size.height, equals(100.0));
+    verifyDryBaseline(flex);
   });
 
   test('Fit.loose', () {
@@ -257,7 +260,7 @@ void main() {
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceBetween);
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex, constraints: const BoxConstraints(
+    layout(flex, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints(
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
@@ -271,6 +274,7 @@ void main() {
     expect(box2.size.width, equals(100.0));
     expect(getOffset(box3).dx, equals(400.0));
     expect(box3.size.width, equals(100.0));
+    verifyDryBaseline(flex);
 
     void setFit(RenderBox box, FlexFit fit) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
@@ -288,6 +292,7 @@ void main() {
     expect(box2.size.width, equals(100.0));
     expect(getOffset(box3).dx, equals(400.0));
     expect(box3.size.width, equals(100.0));
+    verifyDryBaseline(flex);
 
     box1.additionalConstraints = const BoxConstraints.tightFor(width: 1000.0, height: 100.0);
 
@@ -298,6 +303,7 @@ void main() {
     expect(box2.size.width, equals(100.0));
     expect(getOffset(box3).dx, equals(400.0));
     expect(box3.size.width, equals(100.0));
+    verifyDryBaseline(flex);
   });
 
   test('Flexible with MainAxisSize.min', () {
@@ -310,7 +316,7 @@ void main() {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex, constraints: const BoxConstraints(
+    layout(flex, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints(
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
@@ -325,6 +331,7 @@ void main() {
     expect(getOffset(box3).dx, equals(200.0));
     expect(box3.size.width, equals(100.0));
     expect(flex.size.width, equals(300.0));
+    verifyDryBaseline(flex);
 
     void setFit(RenderBox box, FlexFit fit) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
@@ -343,6 +350,7 @@ void main() {
     expect(getOffset(box3).dx, equals(400.0));
     expect(box3.size.width, equals(100.0));
     expect(flex.size.width, equals(500.0));
+    verifyDryBaseline(flex);
 
     setFit(box1, FlexFit.loose);
     flex.markNeedsLayout();
@@ -355,6 +363,7 @@ void main() {
     expect(getOffset(box3).dx, equals(200.0));
     expect(box3.size.width, equals(100.0));
     expect(flex.size.width, equals(300.0));
+    verifyDryBaseline(flex);
   });
 
   test('MainAxisSize.min inside unconstrained', () {
@@ -375,28 +384,34 @@ void main() {
       child: flex,
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(parent);
+    layout(parent, phase: EnginePhase.sendSemanticsUpdate);
     expect(flex.size, const Size(300.0, 100.0));
+    verifyDryBaseline(flex);
     final FlexParentData box2ParentData = box2.parentData! as FlexParentData;
     box2ParentData.flex = 1;
     box2ParentData.fit = FlexFit.loose;
     flex.markNeedsLayout();
     pumpFrame();
     expect(flex.size, const Size(300.0, 100.0));
+    verifyDryBaseline(flex);
     parent.maxWidth = 500.0; // NOW WITH CONSTRAINED BOUNDARIES
     pumpFrame();
     expect(flex.size, const Size(300.0, 100.0));
+    verifyDryBaseline(flex);
     flex.mainAxisSize = MainAxisSize.max;
     pumpFrame();
     expect(flex.size, const Size(500.0, 100.0));
+    verifyDryBaseline(flex);
     flex.mainAxisSize = MainAxisSize.min;
     box2ParentData.fit = FlexFit.tight;
     flex.markNeedsLayout();
     pumpFrame();
     expect(flex.size, const Size(500.0, 100.0));
+    verifyDryBaseline(flex);
     parent.maxWidth = 505.0;
     pumpFrame();
     expect(flex.size, const Size(505.0, 100.0));
+    verifyDryBaseline(flex);
   });
 
   test('MainAxisSize.min inside unconstrained', () {
@@ -463,7 +478,7 @@ void main() {
       mainAxisSize: MainAxisSize.min,
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex);
+    layout(flex, phase: EnginePhase.sendSemanticsUpdate);
     expect(flex.constraints.hasTightWidth, isTrue);
     expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 250.0));
     expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 250.0));
@@ -471,6 +486,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
   });
 
   test('Flex RTL', () {
@@ -479,13 +495,14 @@ void main() {
     final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: square);
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2, box3]);
-    layout(flex);
+    layout(flex, phase: EnginePhase.sendSemanticsUpdate);
     expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
     expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 250.0));
     expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 250.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.mainAxisAlignment = MainAxisAlignment.end;
     pumpFrame();
@@ -495,6 +512,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.textDirection = TextDirection.rtl;
     pumpFrame();
@@ -504,6 +522,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.mainAxisAlignment = MainAxisAlignment.start;
     pumpFrame();
@@ -513,6 +532,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.crossAxisAlignment = CrossAxisAlignment.start; // vertical direction is down
     pumpFrame();
@@ -531,6 +551,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.verticalDirection = VerticalDirection.up;
     pumpFrame();
@@ -540,6 +561,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.crossAxisAlignment = CrossAxisAlignment.start;
     pumpFrame();
@@ -549,6 +571,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.direction = Axis.vertical; // and main=start, cross=start, up, rtl
     pumpFrame();
@@ -558,6 +581,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
@@ -567,6 +591,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.crossAxisAlignment = CrossAxisAlignment.stretch;
     pumpFrame();
@@ -576,6 +601,7 @@ void main() {
     expect(box1.size, const Size(800.0, 100.0));
     expect(box2.size, const Size(800.0, 100.0));
     expect(box3.size, const Size(800.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.textDirection = TextDirection.ltr;
     pumpFrame();
@@ -585,6 +611,7 @@ void main() {
     expect(box1.size, const Size(800.0, 100.0));
     expect(box2.size, const Size(800.0, 100.0));
     expect(box3.size, const Size(800.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.crossAxisAlignment = CrossAxisAlignment.start;
     pumpFrame();
@@ -594,6 +621,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.crossAxisAlignment = CrossAxisAlignment.end;
     pumpFrame();
@@ -603,6 +631,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.verticalDirection = VerticalDirection.down;
     pumpFrame();
@@ -612,6 +641,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
 
     flex.mainAxisAlignment = MainAxisAlignment.end;
     pumpFrame();
@@ -621,6 +651,7 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+    verifyDryBaseline(flex);
   });
 
   test('Intrinsics throw if alignment is baseline', () {

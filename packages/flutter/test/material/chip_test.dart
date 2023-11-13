@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import '../rendering/baseline_utils.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -290,6 +291,7 @@ void main() {
     expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
+    verifyDryBaseline(getRenderChip(tester) as RenderBox);
   });
 
   testWidgetsWithLeakTracking('M3 Chip defaults', (WidgetTester tester) async {
@@ -371,6 +373,7 @@ void main() {
     expect(labelStyle.overflow, textTheme.labelLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.labelLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
+    verifyDryBaseline(getRenderChip(tester) as RenderBox);
   });
 
   testWidgetsWithLeakTracking('Chip control test', (WidgetTester tester) async {
@@ -611,6 +614,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
+    verifyDryBaseline(getRenderChip(tester) as RenderBox);
   });
 
   testWidgetsWithLeakTracking('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
@@ -3301,6 +3305,17 @@ void main() {
     ));
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgetsWithLeakTracking('dry baseline', (WidgetTester tester) async {
+    await tester.pumpWidget(wrapForChip(
+      child: const Chip(
+        label: Text('text'),
+        padding: EdgeInsets.symmetric(horizontal: 20),
+      ),
+    ));
+
+    verifyDryBaseline(getRenderChip(tester) as RenderBox);
   });
 
   testWidgetsWithLeakTracking('Chip background color and shape are drawn on Ink', (WidgetTester tester) async {
