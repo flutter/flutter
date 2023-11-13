@@ -79,4 +79,8 @@ source_set("libcxxabi") {
   if (!(is_tsan && is_linux)) {
     sources += [ "src/cxa_guard.cpp" ]
   }
+
+  if (is_fuchsia || (is_posix && !is_apple)) {
+    sources += [ "src/cxa_thread_atexit.cpp" ]
+  }
 }
