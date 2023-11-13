@@ -2634,14 +2634,6 @@ DomTouch createDomTouch([Map<dynamic, dynamic>? init]) {
   }
 }
 
-DomTouchEvent createDomTouchEvent(String type, [Map<dynamic, dynamic>? init]) {
-  if (init == null) {
-    return DomTouchEvent.arg1(type.toJS);
-  } else {
-    return DomTouchEvent.arg2(type.toJS, init.toJSAnyDeep);
-  }
-}
-
 @JS('CompositionEvent')
 @staticInterop
 class DomCompositionEvent extends DomUIEvent {
