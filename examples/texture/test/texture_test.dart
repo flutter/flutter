@@ -11,6 +11,6 @@ void main() {
         .main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // triggers a frame
 
-    expect(find.text('Fluter Blue'), findsOneWidget);
+    expect(find.text('Flutter Blue'), findsOneWidget);
   });
 }
