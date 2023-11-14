@@ -1,4 +1,4 @@
-Signature: bbd0d03257ee3ddf07642ad0d8cd7c31
+Signature: d0991266cd61cc5a723cff6890aa1399
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8806,8 +8806,6 @@ ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Int96.cpp +
 ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Point.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Segment.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/SweepLine.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_RestoreTarget.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_SetTarget.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformHsw.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformSkx.cc + ../../../flutter/third_party/skia/LICENSE
@@ -9085,8 +9083,6 @@ FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Int96.cpp
 FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Point.cpp
 FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Segment.cpp
 FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/SweepLine.cpp
-FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_RestoreTarget.h
-FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_SetTarget.h
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformHsw.cc
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformSkx.cc
