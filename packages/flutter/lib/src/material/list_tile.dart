@@ -1290,9 +1290,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   // Returns (titleYOffset, subtitleYOffset, tileHeight).
   (double, double, double) _computeYPositionsForSubtitleLayout(double targetTileHeight, double targetTitleY, double targetSubtitleY, double titleHeight, double subtitleHeight) {
-    // If the title and subtitle overlap with their ideal Y placements, avoid
-    // overlapping by moving them away from each other by the same distance, to
-    // minimize the L2 norm to their respective target Y locations.
+    // Prevent the title and the subtitle from overlapping by moving them away from
+    // each other by the same distance, to minimize the L2 norm to their respective target Y locations.
     final double halfOverlap = math.max(targetTitleY + titleHeight - targetSubtitleY, 0) / 2;
     final double titleY = targetTitleY - halfOverlap;
     final double subtitleY = targetSubtitleY + halfOverlap;
