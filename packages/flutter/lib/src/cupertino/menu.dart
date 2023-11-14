@@ -15,6 +15,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'menu_item.dart';
@@ -195,8 +196,8 @@ class CupertinoMenuButton<T> extends StatefulWidget {
     this.physics,
     this.controller,
     this.useRootNavigator = false,
-    this.minSize,
-    this.buttonPadding,
+    this.minSize = kMinInteractiveDimensionCupertino,
+    this.buttonPadding = EdgeInsets.zero,
     this.edgeInsets = const EdgeInsets.all(CupertinoMenu.defaultEdgeInsets),
     this.clip = Clip.antiAlias,
     this.focusNode,
@@ -457,7 +458,11 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
         padding: widget.buttonPadding,
         child: IconTheme.merge(
           data: IconTheme.of(context),
-          child: widget.child ?? const Icon(CupertinoIcons.ellipsis),
+          child: widget.child
+                  ?? const Icon(
+                       CupertinoIcons.ellipsis_circle,
+                       size: 24
+                     ),
         ),
       )
     );
@@ -562,7 +567,7 @@ Future<T?> showCupertinoMenu<T>({
         Animation<double> animation,
         Animation<double> secondaryAnimation,
       ) {
-        if(menuAlignment == null){
+        if (menuAlignment == null){
           final Offset anchorCenter = Offset(
             anchorPosition.left + anchorSize.width / 2,
             anchorPosition.top + anchorSize.height / 2,
@@ -2172,7 +2177,7 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
     // The top layer is allowed to be more than 100% visible to allow for
     // overshoot.
     double visibleFraction = 1.0;
-    if(layers.length - 1 == index){
+    if (layers.length - 1 == index){
       visibleFraction = ui.clampDouble(nestingAnimation.value - index + 1, 0, 1.1);
     }
 
@@ -2756,7 +2761,7 @@ class _CupertinoNestedMenuState<T>
       _menuController._attach(this);
     }
 
-    if(oldWidget.itemBuilder != widget.itemBuilder) {
+    if (oldWidget.itemBuilder != widget.itemBuilder) {
       // TODO(davidhicks980): Find faster way to rebuild a nested menu layer.
       //
       // Because each menu layer is built in a separate frame, there is a
@@ -3266,7 +3271,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   @override
   void initState() {
     super.initState();
-    if(widget.anchorBorderRadius != null) {
+    if (widget.anchorBorderRadius != null) {
       _borderRadiusTween.begin =  widget.anchorBorderRadius;
     }
   }
@@ -3340,7 +3345,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   }
 
   Animation<double> _buildSurfaceAnimation() {
-    if(widget.depth == 0){
+    if (widget.depth == 0){
       return _routeAnimation!;
     } else {
       return _AnimationProduct(
@@ -3816,7 +3821,7 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
     if (childSize != Size.zero) {
       SchedulerBinding.instance.addPostFrameCallback(
         (Duration timeStamp) {
-          if(mounted) {
+          if (mounted) {
             _height = (childSize.height + _headerOffset).roundToDouble();
             // Report the height of the menu to the parent layer. See
             // _UnsafeSizeChangedLayoutNotifier for more information.

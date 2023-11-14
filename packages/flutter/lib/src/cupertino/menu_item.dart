@@ -655,7 +655,7 @@ class _CupertinoMenuItemStructure extends StatelessWidget {
       duration: const Duration(milliseconds: 600),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: math.max(height, kMinInteractiveDimensionCupertino),
+          minHeight: height,
         ),
         child: Padding(
           padding: (padding ?? defaultVerticalPadding) * paddingScaler,
@@ -1437,7 +1437,6 @@ class _MenuLeadingIcon extends StatelessWidget {
         child: iconWidget,
       );
     }
-
     return iconWidget;
   }
 }
@@ -1588,7 +1587,7 @@ class _CupertinoNestedMenuItemAnchorState<T>
   }
 
   Widget? _buildSubtitle(BuildContext context) {
-    if(widget.subtitle == null){
+    if (widget.subtitle == null){
       return null;
     }
 
