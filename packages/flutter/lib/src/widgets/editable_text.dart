@@ -3646,6 +3646,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   TextSelectionOverlay _createSelectionOverlay() {
+    final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
     final EditableTextContextMenuBuilder? contextMenuBuilder = widget.contextMenuBuilder;
     final TextSelectionOverlay selectionOverlay = TextSelectionOverlay(
       clipboardStatus: clipboardStatus,
@@ -3660,7 +3661,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: contextMenuBuilder == null
+      contextMenuBuilder: contextMenuBuilder == null || webContextMenuEnabled
         ? null
         : (BuildContext context) {
           return contextMenuBuilder(
