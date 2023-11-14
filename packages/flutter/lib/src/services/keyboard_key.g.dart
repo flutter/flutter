@@ -3034,7 +3034,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     controlRight: <LogicalKeyboardKey>{control},
   };
 
-  // A map from a pseudo-key to the set of keys that are synonyms for that pseudo-key.
+  // A map of pseudo-key to the set of keys that are synonyms for that pseudo-key.
   static final Map<LogicalKeyboardKey, Set<LogicalKeyboardKey>> _reverseSynonyms = <LogicalKeyboardKey, Set<LogicalKeyboardKey>>{
     shift: <LogicalKeyboardKey>{shiftLeft, shiftRight},
     meta: <LogicalKeyboardKey>{metaLeft, metaRight},
