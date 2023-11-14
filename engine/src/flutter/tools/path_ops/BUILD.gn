@@ -5,6 +5,8 @@
 import("//flutter/shell/version/version.gni")
 
 shared_library("path_ops") {
+  public_configs = [ "//flutter:config" ]
+
   sources = [
     "path_ops.cc",
     "path_ops.h",
