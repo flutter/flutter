@@ -3603,8 +3603,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (widget.reportsRouteUpdateToEngine) {
       SystemNavigator.selectSingleEntryHistory();
     }
-
-    SystemChannels.accessibility.setMessageHandler((dynamic message) => handleAccessibilityMessage(message as Object));
+    ServicesBinding.instance.setAccessibilityMessageHandler((dynamic message) => handleAccessibilityMessage(message as Object));
     _history.addListener(_handleHistoryChanged);
   }
 

@@ -77,6 +77,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     });
   }
 
+  /// Set the handler for messages received on the [SystemChannels.accessibility]
+  /// message channel.
+  void setAccessibilityMessageHandler(Future<void> Function(Object? message)? handler) {
+    SystemChannels.accessibility.setMessageHandler(handler);
+  }
+
   /// The default instance of [BinaryMessenger].
   ///
   /// This is used to send messages from the application to the platform, and
