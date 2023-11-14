@@ -186,9 +186,7 @@ void main() {
         'unused_element',
         'missing_required_param',
       ],
-      // TODO(srawlins): Assert with `exitMessageContains: '2 issues found.',` after
-      // https://github.com/dart-lang/sdk/commit/c033718da0502ed92609f8c6cee2f6a59ccc058e
-      // rolls into this repo.
+      exitMessageContains: '2 issues found.',
       exitCode: 1,
     );
   });
@@ -199,7 +197,6 @@ void main() {
     // which will trigger a lint for broken code that was inserted earlier
     final File optionsFile = fileSystem.file(fileSystem.path.join(projectPath, 'analysis_options.yaml'));
       optionsFile.writeAsStringSync('''
-  include: package:flutter/analysis_options_user.yaml
   linter:
     rules:
       - only_throw_errors
