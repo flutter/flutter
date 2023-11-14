@@ -644,7 +644,7 @@ class DlRuntimeEffectColorSource final : public DlColorSource {
         uniform_data_(std::move(uniform_data)) {}
 
   bool isUIThreadSafe() const override {
-    for (auto sampler : samplers_) {
+    for (const auto& sampler : samplers_) {
       if (!sampler->isUIThreadSafe()) {
         return false;
       }
