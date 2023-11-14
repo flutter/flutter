@@ -227,7 +227,6 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
       value: value,
       valueAttributes: valueAttributes,
       childrenInTraversalOrder: childrenInTraversalOrder,
-      headingLevel: headingLevel,
     );
   }
 
@@ -248,7 +247,6 @@ class SemanticsNodeUpdateObservation {
     required this.hint,
     this.hintAttributes,
     required this.childrenInTraversalOrder,
-    this.headingLevel,
   });
 
   final String label;
@@ -258,5 +256,4 @@ class SemanticsNodeUpdateObservation {
   final String hint;
   final List<StringAttribute>? hintAttributes;
   final Int32List childrenInTraversalOrder;
-  final int? headingLevel;
 }
