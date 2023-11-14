@@ -4951,14 +4951,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 debugLabel: kReleaseMode ? null : 'EditableText',
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification notification) {
-                    final bool platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
-                      TargetPlatform.android => true,
-                      TargetPlatform.iOS => true,
-                      _ => false,
-                    };
+                    final bool platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android 
+                                                           || defaultTargetPlatform == TargetPlatform.iOS;
                     final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
                     if (!platformSupportsFadeOnScroll || webContextMenuEnabled) {
-                      return true;
+                      return false;
                     }
                     // When the scroll begins and the toolbar is visible, hide it
                     // until scrolling ends.
@@ -4996,7 +4993,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                         _valueWhenShowToolbarOnScreenScheduled = _value;
                       }
                     }
-                    return true;
+                    return false;
                   },
                   child: Scrollable(
                     key: _scrollableKey,
