@@ -19,7 +19,10 @@ declare_args() {
 }
 
 config("config") {
-  include_dirs = [ ".." ]
+  include_dirs = [
+    "..",
+    ".",
+  ]
   cflags = []
   if (is_win) {
     if (current_cpu != "x86") {

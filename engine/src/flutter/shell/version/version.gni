@@ -24,13 +24,13 @@ if (engine_version == "") {
 }
 
 if (skia_version == "") {
-  skia_version_lines =
-      exec_script("//flutter/build/git_revision.py",
-                  [
-                    "--repository",
-                    rebase_path("//third_party/skia", "", _flutter_root),
-                  ],
-                  "list lines")
+  skia_version_lines = exec_script(
+          "//flutter/build/git_revision.py",
+          [
+            "--repository",
+            rebase_path("//flutter/third_party/skia", "", _flutter_root),
+          ],
+          "list lines")
   skia_version = skia_version_lines[0]
 }
 

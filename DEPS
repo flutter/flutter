@@ -627,7 +627,7 @@ deps = {
   'src/third_party/root_certificates':
    Var('dart_git') + '/root_certificates.git' + '@' + Var('dart_root_certificates_rev'),
 
-  'src/third_party/skia':
+  'src/flutter/third_party/skia':
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/third_party/ocmock':

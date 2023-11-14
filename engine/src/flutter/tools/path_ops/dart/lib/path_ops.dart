@@ -12,7 +12,7 @@ import 'dart:typed_data';
 /// calculated.
 ///
 /// This enum is used by the [Path] constructor
-// must match ordering in //third_party/skia/include/core/SkPathTypes.h
+// must match ordering in //flutter/third_party/skia/include/core/SkPathTypes.h
 enum FillType {
   /// The interior is defined by a non-zero sum of signed edge crossings.
   nonZero,
@@ -22,7 +22,7 @@ enum FillType {
 }
 
 /// A set of operations applied to two paths.
-// Sync with //third_party/skia/include/pathops/SkPathOps.h
+// Sync with //flutter/third_party/skia/include/pathops/SkPathOps.h
 enum PathOp {
   /// Subtracts the second path from the first.
   difference,
@@ -44,7 +44,7 @@ enum PathOp {
 /// The commands used in a [Path] object.
 ///
 /// This enumeration is a subset of the commands that SkPath supports.
-// Sync with //third_party/skia/include/core/SkPathTypes.h
+// Sync with //flutter/third_party/skia/include/core/SkPathTypes.h
 enum PathVerb {
   /// Picks up the pen and moves it without drawing. Uses two point values.
   moveTo,

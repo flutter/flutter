@@ -57,6 +57,25 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/rapidjson/doc', // documentation
   r'flutter/third_party/shaderc/third_party/LICENSE.glslang', // unclear what the purpose of this file is
   r'flutter/third_party/shaderc/third_party/LICENSE.spirv-tools', // unclear what the purpose of this file is
+  r'flutter/third_party/skia/bazel', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/skia/bench',
+  r'flutter/third_party/skia/demos.skia.org',
+  r'flutter/third_party/skia/docs',
+  r'flutter/third_party/skia/experimental',
+  r'flutter/third_party/skia/infra', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/skia/modules/canvaskit/go/gold_test_env',
+  r'flutter/third_party/skia/platform_tools', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/skia/resources', // contains nothing that ends up in the binary executable
+  r'flutter/third_party/skia/samplecode',
+  r'flutter/third_party/skia/site',
+  r'flutter/third_party/skia/specs',
+  r'flutter/third_party/skia/third_party/freetype2', // we use our own version
+  r'flutter/third_party/skia/third_party/icu', // we use our own version
+  r'flutter/third_party/skia/third_party/libjpeg-turbo', // we use our own version
+  r'flutter/third_party/skia/third_party/libpng', // we use our own version
+  r'flutter/third_party/skia/third_party/lua', // not linked in
+  r'flutter/third_party/skia/third_party/vello', // not linked in
+  r'flutter/third_party/skia/tools', // contains nothing that ends up in the binary executable
   r'flutter/third_party/test_shaders', // for tests only
   r'flutter/third_party/txt/third_party/fonts',
   r'flutter/tools',
@@ -164,25 +183,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/pyyaml', // build-time dependency only
   r'third_party/root_certificates/certdata.pem',
   r'third_party/root_certificates/certdata.txt',
-  r'third_party/skia/bazel', // contains nothing that ends up in the binary executable
-  r'third_party/skia/bench',
-  r'third_party/skia/demos.skia.org',
-  r'third_party/skia/docs',
-  r'third_party/skia/experimental',
-  r'third_party/skia/infra', // contains nothing that ends up in the binary executable
-  r'third_party/skia/modules/canvaskit/go/gold_test_env',
-  r'third_party/skia/platform_tools', // contains nothing that ends up in the binary executable
-  r'third_party/skia/resources', // contains nothing that ends up in the binary executable
-  r'third_party/skia/samplecode',
-  r'third_party/skia/site',
-  r'third_party/skia/specs',
-  r'third_party/skia/third_party/freetype2', // we use our own version
-  r'third_party/skia/third_party/icu', // we use our own version
-  r'third_party/skia/third_party/libjpeg-turbo', // we use our own version
-  r'third_party/skia/third_party/libpng', // we use our own version
-  r'third_party/skia/third_party/lua', // not linked in
-  r'third_party/skia/third_party/vello', // not linked in
-  r'third_party/skia/tools', // contains nothing that ends up in the binary executable
   r'third_party/stb',
   r'third_party/swiftshader', // only used on hosts for tests
   r'third_party/tinygltf',

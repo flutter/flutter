@@ -1447,14 +1447,17 @@ class _EngineSrcDirectory extends _RepositoryDirectory {
 
   @override
   List<_RepositoryDirectory> get virtualSubdirectories {
-    // Skia is updated more frequently than other third party libraries and
-    // is therefore represented as a separate top-level component.
+    // Dart and Skia are updated more frequently than other third party
+    // libraries and is therefore represented as a separate top-level component.
     final fs.Directory thirdPartyNode = findChildDirectory(ioDirectory, 'third_party')!;
-    final fs.Directory skiaNode = findChildDirectory(thirdPartyNode, 'skia')!;
     final fs.Directory dartNode = findChildDirectory(thirdPartyNode, 'dart')!;
+
+    final fs.Directory flutterNode = findChildDirectory(ioDirectory, 'flutter')!;
+    final fs.Directory flutterThirdPartyNode = findChildDirectory(flutterNode, 'third_party')!;
+    final fs.Directory skiaNode = findChildDirectory(flutterThirdPartyNode, 'skia')!;
     return <_RepositoryDirectory>[
-      _RepositorySkiaDirectory(this, skiaNode),
       _RepositorySkiaDirectory(this, dartNode),
+      _RepositorySkiaDirectory(this, skiaNode),
     ];
   }
 }
@@ -1471,8 +1474,7 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
 
   @override
   bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'skia' // handled as a virtual directory of the root
-        && entry.name != 'dart' // handled as a virtual directory of the root
+    return entry.name != 'dart' // handled as a virtual directory of the root
         && super.shouldRecurse(entry);
   }
 
@@ -1767,6 +1769,24 @@ class _RepositoryFlutterDirectory extends _RepositoryDirectory {
 
   @override
   bool get isLicenseRoot => true;
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'third_party') {
+      return _RepositoryFlutterThirdPartyDirectory(this, entry);
+    }
+    return _RepositoryDirectory(this, entry);
+  }
+}
+
+class _RepositoryFlutterThirdPartyDirectory extends _RepositoryGenericThirdPartyDirectory {
+  _RepositoryFlutterThirdPartyDirectory(super.parent, super.io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'skia' // handled as a virtual directory of the root
+        && super.shouldRecurse(entry);
+  }
 }
 
 class _RepositoryFuchsiaDirectory extends _RepositoryDirectory {
