@@ -608,6 +608,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       fileSystem: _fileSystem,
       logger: _logger,
       flutterUsage: _usage,
+      analytics: _analytics,
     );
     final String archName = androidBuildInfo.targetArchs.single.archName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
