@@ -2690,6 +2690,54 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(range.range.length, 20u);
 }
 
+- (void)testFlutterTokenizerLineEnclosingEndOfDocumentInBackwardDirectionShouldNotReturnNil {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView insertText:@"0123456789\n012345"];
+  id<UITextInputTokenizer> tokenizer = [inputView tokenizer];
+
+  FlutterTextRange* range =
+      (FlutterTextRange*)[tokenizer rangeEnclosingPosition:[inputView endOfDocument]
+                                           withGranularity:UITextGranularityLine
+                                               inDirection:UITextStorageDirectionBackward];
+  XCTAssertEqual(range.range.location, 11u);
+  XCTAssertEqual(range.range.length, 6u);
+}
+
+- (void)testFlutterTokenizerLineEnclosingEndOfDocumentInForwardDirectionShouldReturnNilOnIOS17 {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView insertText:@"0123456789\n012345"];
+  id<UITextInputTokenizer> tokenizer = [inputView tokenizer];
+
+  FlutterTextRange* range =
+      (FlutterTextRange*)[tokenizer rangeEnclosingPosition:[inputView endOfDocument]
+                                           withGranularity:UITextGranularityLine
+                                               inDirection:UITextStorageDirectionForward];
+  if (@available(iOS 17.0, *)) {
+    XCTAssertNil(range);
+  } else {
+    XCTAssertEqual(range.range.location, 11u);
+    XCTAssertEqual(range.range.length, 6u);
+  }
+}
+
+- (void)testFlutterTokenizerLineEnclosingOutOfRangePositionShouldReturnNilOnIOS17 {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView insertText:@"0123456789\n012345"];
+  id<UITextInputTokenizer> tokenizer = [inputView tokenizer];
+
+  FlutterTextPosition* position = [FlutterTextPosition positionWithIndex:100];
+  FlutterTextRange* range =
+      (FlutterTextRange*)[tokenizer rangeEnclosingPosition:position
+                                           withGranularity:UITextGranularityLine
+                                               inDirection:UITextStorageDirectionForward];
+  if (@available(iOS 17.0, *)) {
+    XCTAssertNil(range);
+  } else {
+    XCTAssertEqual(range.range.location, 0u);
+    XCTAssertEqual(range.range.length, 0u);
+  }
+}
+
 - (void)testFlutterTextInputPluginRetainsFlutterTextInputView {
   FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
   FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine];
