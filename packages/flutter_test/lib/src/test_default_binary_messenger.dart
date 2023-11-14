@@ -59,6 +59,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
 
   // The handlers for messages from the engine (including fake
   // messages sent by handlePlatformMessage).
+  // ???
   final Map<String, MessageHandler> _inboundHandlers = <String, MessageHandler>{};
 
   /// Send a mock message to the framework as if it came from the platform.
@@ -107,6 +108,9 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   void setMessageHandler(String channel, MessageHandler? handler) {
+    // print('!!!!!!!!!!!!!! start');
+    // print(StackTrace.current);
+    // print('!!!!!!!!!!!!!! end');
     if (handler == null) {
       _inboundHandlers.remove(channel);
       delegate.setMessageHandler(channel, null);

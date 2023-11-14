@@ -364,6 +364,9 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   // Handles the method calls from the plugin to forward to selection and
   // open/close callbacks.
   Future<void> _methodCallHandler(MethodCall call) async {
+        print('!!!!!!!!!!!!!! start');
+    print(StackTrace.current);
+    print('!!!!!!!!!!!!!! end');
     final int id = call.arguments as int;
     assert(
       _idMap.containsKey(id),

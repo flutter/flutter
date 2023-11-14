@@ -1648,7 +1648,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('RenderViewportBase.showOnScreen reports the correct targetRect',
-  leakTesting: LeakTesting.settings.withRetainingPath(),
+  leakTesting: LeakTesting.settings.withRetainingPath().withDisposalStackTrace(),
   (WidgetTester tester) async {
     print(LeakTracking.phase.ignoreLeaks);
     final ScrollController innerController = ScrollController();

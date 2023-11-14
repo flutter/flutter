@@ -49,3 +49,5 @@ dependency_overrides:
     path: ../../../leak_tracker/pkgs/leak_tracker
   leak_tracker_testing:
     path: ../../../leak_tracker/pkgs/leak_tracker_testing
+  flutter_test:
+    path: ../flutter_test

@@ -1595,6 +1595,9 @@ class TextInput {
   @visibleForTesting
   static void setChannel(MethodChannel newChannel) {
     assert(() {
+          print('!!!!!!!!!!!!!! start');
+    print(StackTrace.current);
+    print('!!!!!!!!!!!!!! end');
       _instance._channel = newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
     }());
