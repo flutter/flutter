@@ -30,7 +30,7 @@ class WeakPtrFlag : public fml::RefCountedThreadSafe<WeakPtrFlag> {
   void Invalidate();
 
  private:
-  bool is_valid_ = false;
+  bool is_valid_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WeakPtrFlag);
 };
