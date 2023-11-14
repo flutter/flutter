@@ -164,7 +164,7 @@ Future<void> testMain() async {
 Future<void> _createPlatformView(int id, String viewType) {
   final Completer<void> completer = Completer<void>();
   const MethodCodec codec = StandardMethodCodec();
-  window.sendPlatformMessage(
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall(
       'create',

@@ -5,7 +5,7 @@
 import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../engine.dart' show buildMode, renderer, window;
+import '../engine.dart' show buildMode, renderer;
 import 'browser_detection.dart';
 import 'configuration.dart';
 import 'dom.dart';
@@ -18,6 +18,7 @@ import 'view_embedder/dimensions_provider/dimensions_provider.dart';
 import 'view_embedder/dom_manager.dart';
 import 'view_embedder/embedding_strategy/embedding_strategy.dart';
 import 'view_embedder/style_manager.dart';
+import 'window.dart';
 
 /// Controls the placement and lifecycle of a Flutter view on the web page.
 ///
@@ -309,9 +310,13 @@ FlutterViewEmbedder get flutterViewEmbedder {
 FlutterViewEmbedder? _flutterViewEmbedder;
 
 /// Initializes the [FlutterViewEmbedder], if it's not already initialized.
-FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() =>
-    _flutterViewEmbedder ??=
-        FlutterViewEmbedder(hostElement: configuration.hostElement);
+FlutterViewEmbedder ensureFlutterViewEmbedderInitialized() {
+  // FlutterViewEmbedder needs the implicit view to be initialized because it
+  // uses some of its methods e.g. `configureDimensionsProvider`, `onResize`.
+  ensureImplicitViewInitialized();
+  return _flutterViewEmbedder ??=
+      FlutterViewEmbedder(hostElement: configuration.hostElement);
+}
 
 /// Creates a node to host text editing elements and applies a stylesheet
 /// to Flutter nodes that exist outside of the shadowDOM.

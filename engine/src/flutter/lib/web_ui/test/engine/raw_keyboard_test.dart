@@ -7,11 +7,7 @@ import 'dart:typed_data';
 import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/browser_detection.dart';
-import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/raw_keyboard.dart';
-import 'package:ui/src/engine/services.dart';
-import 'package:ui/src/engine/text_editing/text_editing.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 void main() {
@@ -20,15 +16,15 @@ void main() {
 
 void testMain() {
   group('RawKeyboard', () {
-    /// Used to save and restore [ui.window.onPlatformMessage] after each test.
+    /// Used to save and restore [PlatformDispatcher.onPlatformMessage] after each test.
     ui.PlatformMessageCallback? savedCallback;
 
     setUp(() {
-      savedCallback = ui.window.onPlatformMessage;
+      savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
     });
 
     tearDown(() {
-      ui.window.onPlatformMessage = savedCallback;
+      ui.PlatformDispatcher.instance.onPlatformMessage = savedCallback;
     });
 
     test('initializes and disposes', () {
@@ -44,7 +40,7 @@ void testMain() {
 
       String? channelReceived;
       Map<String, dynamic>? dataReceived;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         channelReceived = channel;
         dataReceived = const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>?;
@@ -78,7 +74,7 @@ void testMain() {
 
       String? channelReceived;
       Map<String, dynamic>? dataReceived;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         channelReceived = channel;
         dataReceived = const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>?;
@@ -108,7 +104,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       Map<String, dynamic>? dataReceived;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         dataReceived = const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>?;
       };
@@ -161,7 +157,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       Map<String, dynamic>? dataReceived;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         dataReceived = const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>?;
       };
@@ -189,7 +185,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         messages.add(const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>);
       };
@@ -242,7 +238,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       int count = 0;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
       };
@@ -266,7 +262,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       int count = 0;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
         final ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': true})!;
@@ -289,7 +285,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       int count = 0;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
         final ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': false})!;
@@ -312,7 +308,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       int count = 0;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
       };
@@ -338,7 +334,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       int count = 0;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
         final ByteData response = const JSONMessageCodec().encodeMessage(<String, dynamic>{'handled': true})!;
@@ -364,7 +360,7 @@ void testMain() {
       RawKeyboard.initialize();
 
       int count = 0;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         count += 1;
         final ByteData response = const JSONMessageCodec()
@@ -395,7 +391,7 @@ void testMain() {
         RawKeyboard.initialize(onMacOs: true);
 
         final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
-        ui.window.onPlatformMessage = (String channel, ByteData? data,
+        ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
             ui.PlatformMessageResponseCallback? callback) {
           messages.add(const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>);
         };
@@ -518,7 +514,7 @@ void testMain() {
         RawKeyboard.initialize(onMacOs: true);
 
         final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
-        ui.window.onPlatformMessage = (String channel, ByteData? data,
+        ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
             ui.PlatformMessageResponseCallback? callback) {
           messages.add(const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>);
         };
@@ -600,7 +596,7 @@ void testMain() {
         RawKeyboard.initialize();
 
         final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
-        ui.window.onPlatformMessage = (String channel, ByteData? data,
+        ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
             ui.PlatformMessageResponseCallback? callback) {
           messages.add(const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>);
         };
@@ -630,7 +626,7 @@ void testMain() {
       RawKeyboard.initialize(onMacOs: true);
 
       final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         messages.add(const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>);
       };
@@ -694,7 +690,7 @@ void testMain() {
         RawKeyboard.initialize(); // onMacOs: false
 
         final List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
-        ui.window.onPlatformMessage = (String channel, ByteData? data,
+        ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
             ui.PlatformMessageResponseCallback? callback) {
           messages.add(const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>);
         };

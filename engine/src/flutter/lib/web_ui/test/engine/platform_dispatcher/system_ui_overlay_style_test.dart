@@ -18,7 +18,7 @@ void testMain() {
   const MethodCodec codec = JSONMethodCodec();
 
   void sendSetSystemUIOverlayStyle({ui.Color? statusBarColor}) {
-    ui.window.sendPlatformMessage(
+    ui.PlatformDispatcher.instance.sendPlatformMessage(
       'flutter/platform',
       codec.encodeMethodCall(MethodCall(
         'SystemChrome.setSystemUIOverlayStyle',

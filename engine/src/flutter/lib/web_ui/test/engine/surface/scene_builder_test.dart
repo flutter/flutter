@@ -477,7 +477,7 @@ void testMain() {
     // Pump an empty scene to reset it, otherwise the first frame will attempt
     // to diff left-overs from a previous test, which results in unpredictable
     // DOM mutations.
-    window.render(SurfaceSceneBuilder().build());
+    ui.PlatformDispatcher.instance.render(SurfaceSceneBuilder().build());
 
     // Renders a `string` by breaking it up into individual characters and
     // rendering each character into its own layer.

@@ -15,6 +15,10 @@ void setUpUnitTests({
 }) {
   late final FakeAssetScope debugFontsScope;
   setUpAll(() async {
+    // The implicit view is needed for `debugEmulateFlutterTesterEnvironment`,
+    // `flutterViewEmbedder`, and `debugPhysicalSizeOverride`.
+    engine.ensureImplicitViewInitialized();
+
     if (emulateTesterEnvironment) {
       ui_web.debugEmulateFlutterTesterEnvironment = true;
     }
@@ -31,8 +35,8 @@ void setUpUnitTests({
       // we don't have an embedder yet this is the lowest-most layer we can put
       // this stuff in.
       const double devicePixelRatio = 3.0;
-      engine.window.debugOverrideDevicePixelRatio(devicePixelRatio);
-      engine.window.debugPhysicalSizeOverride =
+      engine.EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(devicePixelRatio);
+      engine.EnginePlatformDispatcher.instance.implicitView!.debugPhysicalSizeOverride =
           const ui.Size(800 * devicePixelRatio, 600 * devicePixelRatio);
       engine.scheduleFrameCallback = () {};
     }

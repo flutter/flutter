@@ -9,9 +9,7 @@ import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/view_embedder/dimensions_provider/custom_element_dimensions_provider.dart';
-import 'package:ui/src/engine/window.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui show Size;
 
 void main() {
@@ -42,7 +40,7 @@ void doTests() {
       const double dpr = 2.5;
       const double logicalWidth = 50;
       const double logicalHeight = 75;
-      window.debugOverrideDevicePixelRatio(dpr);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
 
       sizeSource
         ..style.width = '${logicalWidth}px'
@@ -75,7 +73,7 @@ void doTests() {
     test('from viewport physical size (simulated keyboard) - always zero', () {
       // Simulate a 100px tall keyboard showing...
       const double dpr = 2.5;
-      window.debugOverrideDevicePixelRatio(dpr);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
       const double keyboardGap = 100;
       final double physicalHeight =
           (domWindow.visualViewport!.height! + keyboardGap) * dpr;

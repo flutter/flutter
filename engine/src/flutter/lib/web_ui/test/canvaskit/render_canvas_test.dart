@@ -17,7 +17,7 @@ void testMain() {
   group('CanvasKit', () {
     setUpCanvasKitTest();
     setUp(() async {
-      window.debugOverrideDevicePixelRatio(1.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
     });
 
     Future<DomImageBitmap> newBitmap(int width, int height) async {
@@ -43,7 +43,7 @@ void testMain() {
 
       // Increase device-pixel ratio: this makes CSS pixels bigger, so we need
       // fewer of them to cover the browser window.
-      window.debugOverrideDevicePixelRatio(2.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
       canvas.render(await newBitmap(10, 16));
       expect(canvas.canvasElement.width, 10);
       expect(canvas.canvasElement.height, 16);
@@ -52,7 +52,7 @@ void testMain() {
 
       // Decrease device-pixel ratio: this makes CSS pixels smaller, so we need
       // more of them to cover the browser window.
-      window.debugOverrideDevicePixelRatio(0.5);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(0.5);
       canvas.render(await newBitmap(10, 16));
       expect(canvas.canvasElement.width, 10);
       expect(canvas.canvasElement.height, 16);

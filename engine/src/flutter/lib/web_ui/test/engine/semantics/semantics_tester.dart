@@ -371,7 +371,7 @@ DomElement? findScrollable() {
   );
 }
 
-/// Logs semantics actions dispatched to [ui.window].
+/// Logs semantics actions dispatched to [ui.PlatformDispatcher].
 class SemanticsActionLogger {
   SemanticsActionLogger() {
     _idLogController = StreamController<int>();
@@ -401,7 +401,7 @@ class SemanticsActionLogger {
   Stream<int> get idLog => _idLog;
   late Stream<int> _idLog;
 
-  /// The actions that were dispatched to [ui.window].
+  /// The actions that were dispatched to [ui.PlatformDispatcher].
   Stream<ui.SemanticsAction> get actionLog => _actionLog;
   late Stream<ui.SemanticsAction> _actionLog;
 }

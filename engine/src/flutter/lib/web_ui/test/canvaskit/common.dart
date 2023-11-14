@@ -85,7 +85,7 @@ Future<bool> matchImage(ui.Image left, ui.Image right) async {
 /// Sends a platform message to create a Platform View with the given id and viewType.
 Future<void> createPlatformView(int id, String viewType) {
   final Completer<void> completer = Completer<void>();
-  window.sendPlatformMessage(
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall(
       'create',
@@ -102,7 +102,7 @@ Future<void> createPlatformView(int id, String viewType) {
 /// Disposes of the platform view with the given [id].
 Future<void> disposePlatformView(int id) {
   final Completer<void> completer = Completer<void>();
-  window.sendPlatformMessage(
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall('dispose', id)),
     (dynamic _) => completer.complete(),

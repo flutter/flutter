@@ -373,10 +373,10 @@ Future<void> testMain() async {
     });
 
    test('handling keyboard event prevents triggering input action', () {
-      final ui.PlatformMessageCallback? savedCallback = ui.window.onPlatformMessage;
+      final ui.PlatformMessageCallback? savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
 
       bool markTextEventHandled = false;
-      ui.window.onPlatformMessage = (String channel, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         final ByteData response = const JSONMessageCodec()
             .encodeMessage(<String, dynamic>{'handled': markTextEventHandled})!;
@@ -414,7 +414,7 @@ Future<void> testMain() async {
       // Input action received.
       expect(lastInputAction, 'TextInputAction.done');
 
-      ui.window.onPlatformMessage = savedCallback;
+      ui.PlatformDispatcher.instance.onPlatformMessage = savedCallback;
       RawKeyboard.instance?.dispose();
     });
 

@@ -53,8 +53,8 @@ class PlatformMessagesSpy {
       ));
     };
 
-    _backup = window.onPlatformMessage;
-    window.onPlatformMessage = _callback;
+    _backup = PlatformDispatcher.instance.onPlatformMessage;
+    PlatformDispatcher.instance.onPlatformMessage = _callback;
   }
 
   /// Stop spying on platform messages and clear all intercepted messages.
@@ -62,11 +62,11 @@ class PlatformMessagesSpy {
   /// Make sure this is called after each test that uses [PlatformMessagesSpy].
   void tearDown() {
     assert(_isActive);
-    // Make sure [window.onPlatformMessage] wasn't tampered with.
-    assert(window.onPlatformMessage == _callback);
+    // Make sure [PlatformDispatcher.instance.onPlatformMessage] wasn't tampered with.
+    assert(PlatformDispatcher.instance.onPlatformMessage == _callback);
     _callback = null;
     messages.clear();
-    window.onPlatformMessage = _backup;
+    PlatformDispatcher.instance.onPlatformMessage = _backup;
   }
 }
 

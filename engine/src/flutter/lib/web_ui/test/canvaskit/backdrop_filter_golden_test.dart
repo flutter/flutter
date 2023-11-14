@@ -20,7 +20,7 @@ const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 500);
 void testMain() {
   group('BackdropFilter', () {
     setUpCanvasKitTest();
-    window.debugOverrideDevicePixelRatio(1.0);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
 
     test('blur renders to the edges', () async {
       // Make a checkerboard picture so we can see the blur.

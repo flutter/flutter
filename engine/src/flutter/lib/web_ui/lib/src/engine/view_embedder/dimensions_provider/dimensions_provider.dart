@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:ui/src/engine/window.dart';
 import 'package:ui/ui.dart' as ui show Size;
 
+import '../../display.dart';
 import '../../dom.dart';
 import 'custom_element_dimensions_provider.dart';
 import 'full_page_dimensions_provider.dart';
@@ -39,7 +40,7 @@ abstract class DimensionsProvider {
   /// Returns the DPI reported by the browser.
   double getDevicePixelRatio() {
     // This is overridable in tests.
-    return window.devicePixelRatio;
+    return EngineFlutterDisplay.instance.devicePixelRatio;
   }
 
   /// Returns the [ui.Size] of the "viewport".

@@ -12,28 +12,28 @@ import 'package:ui/ui.dart' as ui;
 /// See CanvasKit-specific and HTML-specific test files `frame_timings_test.dart`.
 Future<void> runFrameTimingsTest() async {
   List<ui.FrameTiming>? timings;
-  ui.window.onReportTimings = (List<ui.FrameTiming> data) {
+  ui.PlatformDispatcher.instance.onReportTimings = (List<ui.FrameTiming> data) {
     timings = data;
   };
   Completer<void> frameDone = Completer<void>();
-  ui.window.onDrawFrame = () {
+  ui.PlatformDispatcher.instance.onDrawFrame = () {
     final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
     sceneBuilder
       ..pushOffset(0, 0)
       ..pop();
-    ui.window.render(sceneBuilder.build());
+    ui.PlatformDispatcher.instance.render(sceneBuilder.build());
     frameDone.complete();
   };
 
   // Frame 1.
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.scheduleFrame();
   await frameDone.future;
   expect(timings, isNull, reason: "100 ms hasn't passed yet");
   await Future<void>.delayed(const Duration(milliseconds: 150));
 
   // Frame 2.
   frameDone = Completer<void>();
-  ui.window.scheduleFrame();
+  ui.PlatformDispatcher.instance.scheduleFrame();
   await frameDone.future;
   expect(timings, hasLength(2), reason: '100 ms passed. 2 frames pumped.');
   for (final ui.FrameTiming timing in timings!) {

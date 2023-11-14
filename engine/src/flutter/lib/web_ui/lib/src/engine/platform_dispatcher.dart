@@ -135,6 +135,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     viewData[view.viewId] = view;
   }
 
+  /// Removes [view] from the platform dispatcher's registry of [views].
+  ///
+  /// Nothing happens if the view is not already registered.
+  void unregisterView(EngineFlutterView view) {
+    viewData.remove(view.viewId);
+  }
+
   /// The current list of windows.
   @override
   Iterable<EngineFlutterView> get views => viewData.values;

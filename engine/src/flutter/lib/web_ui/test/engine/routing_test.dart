@@ -27,25 +27,33 @@ void main() {
 }
 
 void testMain() {
-  late EngineFlutterWindow window;
+  EngineFlutterWindow? savedWindow;
+  late EngineFlutterWindow myWindow;
 
   setUpAll(() async {
     await initializeEngine();
   });
 
   setUp(() {
-    window = EngineFlutterWindow(0, EnginePlatformDispatcher.instance);
+    savedWindow = EnginePlatformDispatcher.instance.implicitView;
+    myWindow = EngineFlutterWindow(0, EnginePlatformDispatcher.instance);
   });
 
   tearDown(() async {
-    await window.resetHistory();
+    await myWindow.resetHistory();
+
+    // Restore the original implicit view.
+    EnginePlatformDispatcher.instance.unregisterView(myWindow);
+    if (savedWindow != null) {
+      EnginePlatformDispatcher.instance.registerView(savedWindow!);
+    }
   });
 
   // For now, web always has an implicit view provided by the web engine.
   test('EnginePlatformDispatcher.instance.implicitView should be non-null', () async {
     expect(EnginePlatformDispatcher.instance.implicitView, isNotNull);
     expect(EnginePlatformDispatcher.instance.implicitView?.viewId, 0);
-    expect(window.viewId, 0);
+    expect(myWindow.viewId, 0);
   });
 
   test('window.defaultRouteName should work with a custom url strategy', () async {
@@ -53,8 +61,8 @@ void testMain() {
     const Object state = <dynamic, dynamic>{'origin': true};
 
     final _SampleUrlStrategy customStrategy = _SampleUrlStrategy(path, state);
-    await window.debugInitializeHistory(customStrategy, useSingle: true);
-    expect(window.defaultRouteName, '/initial');
+    await myWindow.debugInitializeHistory(customStrategy, useSingle: true);
+    expect(myWindow.defaultRouteName, '/initial');
     // Also make sure that the custom url strategy was actually used.
     expect(customStrategy.wasUsed, isTrue);
   });
@@ -63,12 +71,12 @@ void testMain() {
     final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/initial'),
     );
-    await window.debugInitializeHistory(strategy, useSingle: true);
-    expect(window.defaultRouteName, '/initial');
+    await myWindow.debugInitializeHistory(strategy, useSingle: true);
+    expect(myWindow.defaultRouteName, '/initial');
 
     // Changing the URL in the address bar later shouldn't affect [window.defaultRouteName].
     strategy.replaceState(null, '', '/newpath');
-    expect(window.defaultRouteName, '/initial');
+    expect(myWindow.defaultRouteName, '/initial');
   });
 
   // window.defaultRouteName is now permanently decoupled from the history,
@@ -76,17 +84,17 @@ void testMain() {
 
   test('window.defaultRouteName should reset after navigation platform message',
       () async {
-    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+    await myWindow.debugInitializeHistory(TestUrlStrategy.fromEntry(
       // The URL here does not set the PlatformDispatcher's defaultRouteName,
       // since it got cached as soon as we read it above.
       const TestHistoryEntry('initial state', null, '/not-really-inital/THIS_IS_IGNORED'),
     ), useSingle: true);
     // Reading it multiple times should return the same value.
-    expect(window.defaultRouteName, '/initial');
-    expect(window.defaultRouteName, '/initial');
+    expect(myWindow.defaultRouteName, '/initial');
+    expect(myWindow.defaultRouteName, '/initial');
 
     final Completer<void> callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeUpdated',
@@ -97,27 +105,27 @@ void testMain() {
     await callback.future;
     // After a navigation platform message, the PlatformDispatcher's
     // defaultRouteName resets to "/".
-    expect(window.defaultRouteName, '/');
+    expect(myWindow.defaultRouteName, '/');
   });
 
   // window.defaultRouteName is now '/'.
 
   test('can switch history mode', () async {
     Completer<void> callback;
-    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+    await myWindow.debugInitializeHistory(TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/initial'),
     ), useSingle: false);
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
 
     Future<void> check<T>(String method, Object? arguments) async {
       callback = Completer<void>();
-      window.sendPlatformMessage(
+      myWindow.sendPlatformMessage(
         'flutter/navigation',
         const JSONMethodCodec().encodeMethodCall(MethodCall(method, arguments)),
         (_) { callback.complete(); },
       );
       await callback.future;
-      expect(window.browserHistory, isA<T>());
+      expect(myWindow.browserHistory, isA<T>());
     }
 
     // These may be initialized as `null`
@@ -135,7 +143,7 @@ void testMain() {
   test('handleNavigationMessage throws for route update methods called with null arguments',
       () async {
     expect(() async {
-      await window.handleNavigationMessage(
+      await myWindow.handleNavigationMessage(
         const JSONMethodCodec().encodeMethodCall(const MethodCall(
           'routeUpdated',
         ))
@@ -143,7 +151,7 @@ void testMain() {
     }, throwsAssertionError);
 
     expect(() async {
-      await window.handleNavigationMessage(
+      await myWindow.handleNavigationMessage(
         const JSONMethodCodec().encodeMethodCall(const MethodCall(
           'routeInformationUpdated',
         ))
@@ -153,33 +161,33 @@ void testMain() {
 
   test('handleNavigationMessage execute request in order.', () async {
     // Start with multi entries.
-    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+    await myWindow.debugInitializeHistory(TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/initial'),
     ), useSingle: false);
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
     final List<String> executionOrder = <String>[];
-    await window.handleNavigationMessage(
+    await myWindow.handleNavigationMessage(
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'selectSingleEntryHistory',
       ))
     ).then<void>((bool data) {
       executionOrder.add('1');
     });
-    await window.handleNavigationMessage(
+    await myWindow.handleNavigationMessage(
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'selectMultiEntryHistory',
       ))
     ).then<void>((bool data) {
       executionOrder.add('2');
     });
-    await window.handleNavigationMessage(
+    await myWindow.handleNavigationMessage(
         const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'selectSingleEntryHistory',
       ))
     ).then<void>((bool data) {
       executionOrder.add('3');
     });
-    await window.handleNavigationMessage(
+    await myWindow.handleNavigationMessage(
         const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
         <String, dynamic>{
@@ -201,14 +209,14 @@ void testMain() {
 
   test('should not throw when using nav1 and nav2 together',
       () async {
-    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+    await myWindow.debugInitializeHistory(TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/initial'),
     ), useSingle: false);
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
 
     // routeUpdated resets the history type
     Completer<void> callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeUpdated',
@@ -217,12 +225,12 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
-    expect(window.browserHistory.urlStrategy!.getPath(), '/bar');
+    expect(myWindow.browserHistory, isA<SingleEntryBrowserHistory>());
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/bar');
 
     // routeInformationUpdated does not
     callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
@@ -234,31 +242,31 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(myWindow.browserHistory, isA<SingleEntryBrowserHistory>());
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz');
 
     // they can be interleaved safely
-    await window.handleNavigationMessage(
+    await myWindow.handleNavigationMessage(
         const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeUpdated',
         <String, dynamic>{'routeName': '/foo'},
       ))
     );
-    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
-    expect(window.browserHistory.urlStrategy!.getPath(), '/foo');
+    expect(myWindow.browserHistory, isA<SingleEntryBrowserHistory>());
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/foo');
   });
 
   test('should not throw when state is complex json object',
       () async {
     // Regression test https://github.com/flutter/flutter/issues/87823.
-    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+    await myWindow.debugInitializeHistory(TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/initial'),
     ), useSingle: false);
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
 
     // routeInformationUpdated does not
     final Completer<void> callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
@@ -278,9 +286,9 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
-    final dynamic wrappedState = window.browserHistory.urlStrategy!.getState();
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz');
+    final dynamic wrappedState = myWindow.browserHistory.urlStrategy!.getState();
     final dynamic actualState = wrappedState['state'];
     expect(actualState['state1'], true);
     expect(actualState['state2'], 1);
@@ -291,14 +299,14 @@ void testMain() {
 
   test('routeInformationUpdated can handle uri',
       () async {
-    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+    await myWindow.debugInitializeHistory(TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/initial'),
     ), useSingle: false);
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
 
     // routeInformationUpdated does not
     final Completer<void> callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
@@ -309,19 +317,19 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz?abc=def#fragment');
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz?abc=def#fragment');
   });
 
   test('can replace in MultiEntriesBrowserHistory',
       () async {
-    await window.debugInitializeHistory(TestUrlStrategy.fromEntry(
+    await myWindow.debugInitializeHistory(TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/initial'),
     ), useSingle: false);
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
 
     Completer<void> callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
@@ -333,11 +341,11 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
-    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state', 1));
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(myWindow.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state', 1));
 
     callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
@@ -350,11 +358,11 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
-    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state1', 1));
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(myWindow.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state1', 1));
 
     callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
@@ -366,12 +374,12 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory.urlStrategy!.getPath(), '/foo');
-    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/foostate1', 2));
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/foo');
+    expect(myWindow.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/foostate1', 2));
 
-    await window.browserHistory.back();
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
-    expect(window.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state1', 1));
+    await myWindow.browserHistory.back();
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(myWindow.browserHistory.urlStrategy!.getState(), _tagStateWithSerialCount('/state1', 1));
   });
 
   test('initialize browser history with default url strategy (single)', () async {
@@ -380,10 +388,10 @@ void testMain() {
 
     // Without initializing history, the default route name should be
     // initialized to "/" in tests.
-    expect(window.defaultRouteName, '/');
+    expect(myWindow.defaultRouteName, '/');
 
     final Completer<void> callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeUpdated',
@@ -392,11 +400,11 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory, isA<SingleEntryBrowserHistory>());
+    expect(myWindow.browserHistory, isA<SingleEntryBrowserHistory>());
     // The url strategy should've been set to the default, and the path
     // should've been correctly set to "/bar".
-    expect(window.browserHistory.urlStrategy, isNot(isNull));
-    expect(window.browserHistory.urlStrategy!.getPath(), '/bar');
+    expect(myWindow.browserHistory.urlStrategy, isNot(isNull));
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/bar');
   }, skip: isSafari); // https://github.com/flutter/flutter/issues/50836
 
   test('initialize browser history with default url strategy (multiple)', () async {
@@ -405,10 +413,10 @@ void testMain() {
 
     // Without initializing history, the default route name should be
     // initialized to "/" in tests.
-    expect(window.defaultRouteName, '/');
+    expect(myWindow.defaultRouteName, '/');
 
     final Completer<void> callback = Completer<void>();
-    window.sendPlatformMessage(
+    myWindow.sendPlatformMessage(
       'flutter/navigation',
       const JSONMethodCodec().encodeMethodCall(const MethodCall(
         'routeInformationUpdated',
@@ -420,11 +428,11 @@ void testMain() {
       (_) { callback.complete(); },
     );
     await callback.future;
-    expect(window.browserHistory, isA<MultiEntriesBrowserHistory>());
+    expect(myWindow.browserHistory, isA<MultiEntriesBrowserHistory>());
     // The url strategy should've been set to the default, and the path
     // should've been correctly set to "/baz".
-    expect(window.browserHistory.urlStrategy, isNot(isNull));
-    expect(window.browserHistory.urlStrategy!.getPath(), '/baz');
+    expect(myWindow.browserHistory.urlStrategy, isNot(isNull));
+    expect(myWindow.browserHistory.urlStrategy!.getPath(), '/baz');
   }, skip: isSafari); // https://github.com/flutter/flutter/issues/50836
 
   test('can disable location strategy', () async {
@@ -436,23 +444,23 @@ void testMain() {
       returnsNormally,
     );
     // History should be initialized.
-    expect(window.browserHistory, isNotNull);
+    expect(myWindow.browserHistory, isNotNull);
     // But without a URL strategy.
-    expect(window.browserHistory.urlStrategy, isNull);
+    expect(myWindow.browserHistory.urlStrategy, isNull);
     // Current path is always "/" in this case.
-    expect(window.browserHistory.currentPath, '/');
+    expect(myWindow.browserHistory.currentPath, '/');
 
     // Perform some navigation operations.
     await routeInformationUpdated('/foo/bar', null);
     // Path should not be updated because URL strategy is disabled.
-    expect(window.browserHistory.currentPath, '/');
+    expect(myWindow.browserHistory.currentPath, '/');
   });
 
   test('cannot set url strategy after it was initialized', () async {
     final TestUrlStrategy testStrategy = TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/'),
     );
-    await window.debugInitializeHistory(testStrategy, useSingle: true);
+    await myWindow.debugInitializeHistory(testStrategy, useSingle: true);
 
     expect(
       () {
@@ -482,8 +490,8 @@ void testMain() {
   // Regression test for https://github.com/flutter/flutter/issues/77817
   test('window.locale(s) are not nullable', () {
     // If the getters were nullable, these expressions would result in compiler errors.
-    ui.window.locale.countryCode;
-    ui.window.locales.first.countryCode;
+    ui.PlatformDispatcher.instance.locale.countryCode;
+    ui.PlatformDispatcher.instance.locales.first.countryCode;
   });
 }
 
