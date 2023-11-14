@@ -13,6 +13,8 @@ import android.content.MutableContextWrapper;
 import android.os.Build;
 import android.util.SparseArray;
 import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
+import android.view.MotionEvent.PointerProperties;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -774,10 +776,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    */
   public void setSoftwareRendering(boolean useSoftwareRendering) {
     usesSoftwareRendering = useSoftwareRendering;
-  }
-
-  public void setDisableImageReaderPlatformViews(boolean disableImageReaderPlatformViews) {
-    enableHardwareBufferRenderingTarget = !disableImageReaderPlatformViews;
   }
 
   /**
