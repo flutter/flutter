@@ -559,7 +559,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
       expect(verticalController.position.pixels, greaterThan(800.0));
-      double unchangedOffset = verticalController.position.pixels;
+      final double unchangedOffset = verticalController.position.pixels;
       expect(horizontalController.position.pixels, 0.0);
       expect(verticalController.position.activity?.isScrolling, isFalse);
       expect(horizontalController.position.activity?.isScrolling, isFalse);
