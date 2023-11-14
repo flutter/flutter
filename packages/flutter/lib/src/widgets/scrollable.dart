@@ -2133,26 +2133,26 @@ class _VerticalOuterDimensionState extends ScrollableState {
     switch (diagonalDragBehavior) {
       case DiagonalDragBehavior.none:
         break;
+      case DiagonalDragBehavior.free:
+        // Prepare to scroll both.
+        // vertical - will call super below after switch.
+        horizontalScrollable._handleDragStart(details);
       case DiagonalDragBehavior.weightedEvent:
       case DiagonalDragBehavior.weightedContinuous:
         // See if one axis wins the drag.
         _evaluateLockedAxis(details.globalPosition);
         switch (lockedAxis) {
           case null:
-            // Prepare to scroll diagonally
+            // Prepare to scroll both, null means no winner yet.
+            // vertical - will call super below after switch.
             horizontalScrollable._handleDragStart(details);
           case Axis.horizontal:
             // Prepare to scroll horizontally.
             horizontalScrollable._handleDragStart(details);
-            super._handleDragStart(details);
             return;
           case Axis.vertical:
-            // Prepare to scroll vertically.
-            super._handleDragStart(details);
-            return;
+            // Prepare to scroll vertically - will call super below after switch.
         }
-      case DiagonalDragBehavior.free:
-        horizontalScrollable._handleDragStart(details);
     }
     super._handleDragStart(details);
   }
@@ -2198,18 +2198,16 @@ class _VerticalOuterDimensionState extends ScrollableState {
     }
     switch (lockedAxis) {
       case null:
-        // Scroll diagonally
+        // Scroll both - vertical after switch
         horizontalScrollable._handleDragUpdate(horizontalDragDetails);
-        super._handleDragUpdate(verticalDragDetails);
       case Axis.horizontal:
         // Scroll horizontally
         horizontalScrollable._handleDragUpdate(horizontalDragDetails);
         return;
       case Axis.vertical:
-        // Scroll vertically
-        super._handleDragUpdate(verticalDragDetails);
-        return;
+        // Scroll vertically - after switch
     }
+    super._handleDragUpdate(verticalDragDetails);
   }
 
   @override
