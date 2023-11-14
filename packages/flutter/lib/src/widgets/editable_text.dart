@@ -4951,7 +4951,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 debugLabel: kReleaseMode ? null : 'EditableText',
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification notification) {
-                    final bool platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android 
+                    final bool platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android
                                                            || defaultTargetPlatform == TargetPlatform.iOS;
                     final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
                     if (!platformSupportsFadeOnScroll || webContextMenuEnabled) {
