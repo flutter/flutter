@@ -685,6 +685,7 @@ void main() {
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
@@ -798,6 +799,7 @@ void main() {
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
