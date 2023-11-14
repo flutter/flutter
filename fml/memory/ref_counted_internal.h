@@ -87,7 +87,8 @@ inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()
     : ref_count_(1u)
 #ifndef NDEBUG
       ,
-      adoption_required_(true)
+      adoption_required_(true),
+      destruction_started_(false)
 #endif
 {
 }
