@@ -70,10 +70,10 @@ Future<void> testMain() async {
         skip: browserEngine == BrowserEngine.webkit);
 
     test('loading font should send font change message', () async {
-      final ui.PlatformMessageCallback? oldHandler = ui.window.onPlatformMessage;
+      final ui.PlatformMessageCallback? oldHandler = ui.PlatformDispatcher.instance.onPlatformMessage;
       String? actualName;
       String? message;
-      window.onPlatformMessage = (String name, ByteData? data,
+      ui.PlatformDispatcher.instance.onPlatformMessage = (String name, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         actualName = name;
         final ByteBuffer buffer = data!.buffer;
@@ -86,7 +86,7 @@ Future<void> testMain() async {
       final Completer<void> completer = Completer<void>();
       domWindow.requestAnimationFrame((_) { completer.complete();});
       await completer.future;
-      window.onPlatformMessage = oldHandler;
+      ui.PlatformDispatcher.instance.onPlatformMessage = oldHandler;
       expect(actualName, 'flutter/system');
       expect(message, '{"type":"fontsChange"}');
     },

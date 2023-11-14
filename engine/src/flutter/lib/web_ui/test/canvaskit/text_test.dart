@@ -97,7 +97,9 @@ void testMain() {
     group('test fonts in flutterTester environment', () {
       final bool resetValue = ui_web.debugEmulateFlutterTesterEnvironment;
       ui_web.debugEmulateFlutterTesterEnvironment = true;
-      tearDownAll(() => ui_web.debugEmulateFlutterTesterEnvironment = resetValue);
+      tearDownAll(() {
+        ui_web.debugEmulateFlutterTesterEnvironment = resetValue;
+      });
       const List<String> testFonts = <String>['FlutterTest', 'Ahem'];
 
       test('The default test font is used when a non-test fontFamily is specified', () {

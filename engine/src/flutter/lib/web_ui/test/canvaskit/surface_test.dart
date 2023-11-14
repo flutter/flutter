@@ -19,7 +19,7 @@ void testMain() {
   group('CanvasKit', () {
     setUpCanvasKitTest();
     setUp(() {
-      window.debugOverrideDevicePixelRatio(1.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
     });
 
     test('Surface allocates canvases efficiently', () {
@@ -90,7 +90,7 @@ void testMain() {
 
       // Doubling the DPR should halve the CSS width, height, and translation of the canvas.
       // This tests https://github.com/flutter/flutter/issues/77084
-      window.debugOverrideDevicePixelRatio(2.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
       final CkSurface dpr2Surface2 =
           surface.acquireFrame(const ui.Size(5, 15)).skiaSurface;
       final DomOffscreenCanvas dpr2Canvas = surface.debugOffscreenCanvas!;
@@ -168,7 +168,7 @@ void testMain() {
 
       // Increase device-pixel ratio: this makes CSS pixels bigger, so we need
       // fewer of them to cover the browser window.
-      window.debugOverrideDevicePixelRatio(2.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
       final CkSurface highDpr =
           surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
       expect(highDpr.width(), 10);
@@ -178,7 +178,7 @@ void testMain() {
 
       // Decrease device-pixel ratio: this makes CSS pixels smaller, so we need
       // more of them to cover the browser window.
-      window.debugOverrideDevicePixelRatio(0.5);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(0.5);
       final CkSurface lowDpr =
           surface.acquireFrame(const ui.Size(10, 16)).skiaSurface;
       expect(lowDpr.width(), 10);
@@ -187,7 +187,7 @@ void testMain() {
       expect(surface.debugOffscreenCanvas!.height, 16);
 
       // See https://github.com/flutter/flutter/issues/77084#issuecomment-1120151172
-      window.debugOverrideDevicePixelRatio(2.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
       final CkSurface changeRatioAndSize =
           surface.acquireFrame(const ui.Size(9.9, 15.9)).skiaSurface;
       expect(changeRatioAndSize.width(), 10);

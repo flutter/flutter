@@ -39,6 +39,11 @@ class StubPictureRenderer implements PictureRenderer {
 void testMain() {
   late EngineSceneView sceneView;
   late StubPictureRenderer stubPictureRenderer;
+
+  setUpAll(() {
+    ensureImplicitViewInitialized();
+  });
+
   setUp(() {
     stubPictureRenderer = StubPictureRenderer();
     sceneView = EngineSceneView(stubPictureRenderer);

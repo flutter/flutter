@@ -13,6 +13,9 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'common.dart';
 import 'test_data.dart';
 
+EngineFlutterWindow get implicitView =>
+    EnginePlatformDispatcher.instance.implicitView!;
+
 DomElement get platformViewsHost {
   return EnginePlatformDispatcher.instance.implicitView!.dom.platformViewsHost;
 }
@@ -26,7 +29,7 @@ void testMain() {
     setUpCanvasKitTest();
 
     setUp(() {
-      window.debugOverrideDevicePixelRatio(1);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1);
     });
 
     test('embeds interactive platform views', () async {
@@ -238,7 +241,7 @@ void testMain() {
     });
 
     test('converts device pixels to logical pixels (no clips)', () async {
-      window.debugOverrideDevicePixelRatio(4);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(4);
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
@@ -263,7 +266,7 @@ void testMain() {
     });
 
     test('converts device pixels to logical pixels (with clips)', () async {
-      window.debugOverrideDevicePixelRatio(4);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(4);
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
@@ -417,7 +420,7 @@ void testMain() {
       for (final int id in platformViewIds) {
         const StandardMethodCodec codec = StandardMethodCodec();
         final Completer<void> completer = Completer<void>();
-        ui.window.sendPlatformMessage(
+        ui.PlatformDispatcher.instance.sendPlatformMessage(
           'flutter/platform_views',
           codec.encodeMethodCall(MethodCall(
             'dispose',
@@ -637,8 +640,8 @@ void testMain() {
       sb.addPicture(ui.Offset.zero, picture);
       sb.addPlatformView(0, width: 10, height: 10);
 
-      window.debugPhysicalSizeOverride = const ui.Size(100, 100);
-      window.debugForceResize();
+      implicitView.debugPhysicalSizeOverride = const ui.Size(100, 100);
+      implicitView.debugForceResize();
       CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
@@ -646,8 +649,8 @@ void testMain() {
         _overlay,
       ]);
 
-      window.debugPhysicalSizeOverride = const ui.Size(200, 200);
-      window.debugForceResize();
+      implicitView.debugPhysicalSizeOverride = const ui.Size(200, 200);
+      implicitView.debugForceResize();
       CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
@@ -655,8 +658,8 @@ void testMain() {
         _overlay,
       ]);
 
-      window.debugPhysicalSizeOverride = null;
-      window.debugForceResize();
+      implicitView.debugPhysicalSizeOverride = null;
+      implicitView.debugForceResize();
       // ImageDecoder is not supported in Safari or Firefox.
     }, skip: isSafari || isFirefox);
 

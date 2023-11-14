@@ -2513,16 +2513,15 @@ void _testPlatformView() {
       width: 20,
       height: 30,
     );
-    ui.window.render(sceneBuilder.build());
+    ui.PlatformDispatcher.instance.render(sceneBuilder.build());
 
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    final double dpr = EngineFlutterDisplay.instance.devicePixelRatio;
     updateNode(builder,
         rect: const ui.Rect.fromLTRB(0, 0, 20, 60),
         childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
         childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
-        transform: Float64List.fromList(Matrix4.diagonal3Values(
-                ui.window.devicePixelRatio, ui.window.devicePixelRatio, 1)
-            .storage));
+        transform: Float64List.fromList(Matrix4.diagonal3Values(dpr, dpr, 1).storage));
     updateNode(
       builder,
       id: 1,
@@ -3137,7 +3136,7 @@ const MethodCodec codec = StandardMethodCodec();
 /// Sends a platform message to create a Platform View with the given id and viewType.
 Future<void> createPlatformView(int id, String viewType) {
   final Completer<void> completer = Completer<void>();
-  ui.window.sendPlatformMessage(
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall(
       'create',
@@ -3154,7 +3153,7 @@ Future<void> createPlatformView(int id, String viewType) {
 /// Disposes of the platform view with the given [id].
 Future<void> disposePlatformView(int id) {
   final Completer<void> completer = Completer<void>();
-  window.sendPlatformMessage(
+  ui.PlatformDispatcher.instance.sendPlatformMessage(
     'flutter/platform_views',
     codec.encodeMethodCall(MethodCall('dispose', id)),
     (dynamic _) => completer.complete(),

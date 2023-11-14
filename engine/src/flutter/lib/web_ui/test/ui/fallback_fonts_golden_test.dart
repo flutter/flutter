@@ -31,7 +31,7 @@ void testMain() {
       debugDisableFontFallbacks = false;
     });
 
-    /// Used to save and restore [ui.window.onPlatformMessage] after each test.
+    /// Used to save and restore [ui.PlatformDispatcher.onPlatformMessage] after each test.
     ui.PlatformMessageCallback? savedCallback;
 
     final List<String> downloadedFontFamilies = <String>[];
@@ -41,12 +41,12 @@ void testMain() {
       renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
       renderer.fontCollection.fontFallbackManager!.downloadQueue.debugOnLoadFontFamily
         = (String family) => downloadedFontFamilies.add(family);
-      savedCallback = ui.window.onPlatformMessage;
+      savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
     });
 
     tearDown(() {
       downloadedFontFamilies.clear();
-      ui.window.onPlatformMessage = savedCallback;
+      ui.PlatformDispatcher.instance.onPlatformMessage = savedCallback;
     });
 
     test('Roboto is always a fallback font', () {
