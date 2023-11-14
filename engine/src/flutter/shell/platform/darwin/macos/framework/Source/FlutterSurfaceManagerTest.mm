@@ -4,7 +4,6 @@
 
 #import <Cocoa/Cocoa.h>
 #import <Metal/Metal.h>
-#import <OCMock/OCMock.h>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"

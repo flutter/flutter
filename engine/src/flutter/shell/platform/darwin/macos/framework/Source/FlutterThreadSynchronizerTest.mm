@@ -4,7 +4,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterThreadSynchronizer.h"
 
-#import <OCMock/OCMock.h>
 #import "flutter/fml/synchronization/waitable_event.h"
 #import "flutter/testing/testing.h"
 

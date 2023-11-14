@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import <Foundation/Foundation.h>
-#import <OCMock/OCMock.h>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEmbedderKeyResponder.h"
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
