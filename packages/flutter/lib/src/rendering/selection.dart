@@ -112,30 +112,6 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   ///
   /// Return `null` if the content length is not supported by the selectable
   int? getContentLength();
-
-  /// Retrieves a map of rectangles for a given text selection,
-  /// or all rectangles if no selection is provided.
-  ///
-  /// This method maps each character index within the bounds of [selection]
-  /// to its corresponding rectangle on screen. If [selection] is null or
-  /// no characters are selected, an empty map is returned.
-  ///
-  /// The `TextSelection` object should have `baseOffset` and `extentOffset`
-  /// which mark the beginning and end of the selection, respectively.
-  ///
-  /// The resulting map has integer keys corresponding to character indices
-  /// and `Rect` values representing each character's screen area.
-  ///
-  /// Returns an empty map if `localSelection` is null or no characters are
-  /// selected.
-  ///
-  /// Example:
-  /// ```dart
-  /// TextSelection selection = TextSelection(baseOffset: 5, extentOffset: 10);
-  /// Map<int, Rect> rects = getRectsForSelection(selection);
-  ///
-  /// ```
-  List<Rect> getRects({TextSelection? selection});
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
@@ -144,9 +120,8 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 class SelectedContent {
   /// Creates a selected content object.
   ///
-  /// not all selected content supports TextSelection, or highlightedRects
-  const SelectedContent(
-      {required this.plainText, this.textSelection, this.highlightedRects});
+  /// not all selected content supports TextSelection
+  const SelectedContent({required this.plainText, this.textSelection});
 
   /// The selected content in plain text format.
   final String plainText;
@@ -154,21 +129,16 @@ class SelectedContent {
   /// The selected content in [TextSelection] format.
   final TextSelection? textSelection;
 
-  /// The rects pertaining to the selected content
-  final List<Rect>? highlightedRects;
-
   /// Copy with constructor
   ///
   /// not all selected content supports TextSelection
   SelectedContent copyWith({
     String? plainText,
     TextSelection? textSelection,
-    List<Rect>? highlightedRects,
   }) {
     return SelectedContent(
       plainText: plainText ?? this.plainText,
       textSelection: textSelection ?? this.textSelection,
-      highlightedRects: highlightedRects ?? this.highlightedRects,
     );
   }
 }

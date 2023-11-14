@@ -193,12 +193,6 @@ class _SelectionContainerState extends State<SelectionContainer>
   }
 
   @override
-  List<Rect> getRects({TextSelection? selection}) {
-    assert(!widget._disabled);
-    return widget.delegate!.getRects(selection: selection);
-  }
-
-  @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     assert(!widget._disabled);
     return widget.delegate!.dispatchSelectionEvent(event);

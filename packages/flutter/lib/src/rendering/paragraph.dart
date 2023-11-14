@@ -1482,32 +1482,6 @@ class _SelectableFragment
   }
 
   @override
-  List<Rect> getRects({TextSelection? selection}) {
-    final int? textLength = getContentLength();
-    if (textLength == null) {
-      return const <Rect>[];
-    }
-    final int start = selection?.baseOffset ?? 0;
-    final int end = selection?.extentOffset ?? textLength;
-
-    final TextSelection currentSelection =
-        TextSelection(baseOffset: start, extentOffset: end);
-
-    // rects who have not been transformed to fragment coordinates.
-    final List<Rect> rawRects = paragraph
-        .getBoxesForSelection(currentSelection)
-        .map((ui.TextBox e) => e.toRect())
-        .toList();
-
-    final Matrix4 paragraphToFragmentTransform = getTransformToParagraph();
-
-    return rawRects
-        .map((Rect e) =>
-            MatrixUtils.transformRect(paragraphToFragmentTransform, e))
-        .toList();
-  }
-
-  @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;

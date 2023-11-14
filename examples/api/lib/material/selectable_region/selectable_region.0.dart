@@ -127,11 +127,6 @@ class _RenderSelectableAdapter extends RenderProxyBox
     return 0;
   }
 
-  @override
-  List<Rect> getRects({TextSelection? selection}) {
-    return const <Rect>[];
-  }
-
   // Selectable APIs.
 
   // Adjust this value to enlarge or shrink the selection highlight.

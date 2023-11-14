@@ -607,61 +607,6 @@ void main() {
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
 
-  group('Rects are properly found for TextSelection in a SelectableRegion', () {
-    testWidgetsWithLeakTracking(
-        'Rects are properly found for TextSelection in a SelectableRegion',
-        (WidgetTester tester) async {
-      const String text = 'How are you?';
-      final FocusNode focusNode = FocusNode();
-      SelectedContent? selectedContent;
-      addTearDown(focusNode.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            onSelectionChanged: (SelectedContent? content) {
-              selectedContent = content;
-            },
-            focusNode: focusNode,
-            selectionControls: materialTextSelectionControls,
-            child: const Text(text),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
-          find.descendant(
-              of: find.text(text), matching: find.byType(RichText)));
-      const TextSelection selection =
-          TextSelection(baseOffset: 0, extentOffset: text.length - 1);
-
-      final List<Rect> correctRects = paragraph
-          .getBoxesForSelection(selection)
-          .map((TextBox e) => e.toRect())
-          .toList();
-
-      expect(correctRects, isNotNull,
-          reason: 'Paragraph should have a rect for selection $selection');
-
-      final TestGesture gesture = await tester.startGesture(
-        textOffsetToPosition(paragraph, 0),
-        kind: PointerDeviceKind.mouse,
-      );
-      addTearDown(gesture.removePointer);
-
-      await gesture.moveTo(textOffsetToPosition(paragraph, text.length - 1));
-
-      expect(selectedContent, isNotNull);
-      expect(
-        selectedContent!.highlightedRects,
-        correctRects,
-        reason:
-            'Rects should be the same for getRects() and getBoxesForSelection()',
-      );
-    });
-  });
-
   group('Selection Offsets are correctly gathered for disjoint Text Widgets',
       () {
     const List<String> texts = <String>[
@@ -4475,11 +4420,6 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  List<Rect> getRects({TextSelection? selection}) {
-    return <Rect>[];
-  }
-
-  @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
@@ -4567,11 +4507,6 @@ class RenderSelectAll extends RenderProxyBox
   @override
   int? getContentLength() {
     return 0;
-  }
-
-  @override
-  List<Rect> getRects({TextSelection? selection}) {
-    return <Rect>[];
   }
 
   @override

@@ -608,15 +608,9 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectable?.getSelectedContent()?.plainText) {
       _lastSelectedContent = _selectable?.getSelectedContent();
       final TextSelection? textSelection = _selectable?.getLocalTextSelection();
-      final List<Rect>? rectsForSelection;
-      if (textSelection != null) {
-        rectsForSelection = _selectable?.getRects(selection: textSelection);
-      } else {
-        rectsForSelection = null;
-      }
 
-      widget.onSelectionChanged?.call(_lastSelectedContent?.copyWith(
-          textSelection: textSelection, highlightedRects: rectsForSelection));
+      widget.onSelectionChanged
+          ?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
     }
   }
 
@@ -1962,86 +1956,6 @@ abstract class MultiSelectableSelectionContainerDelegate
       baseOffset: start,
       extentOffset: end,
     );
-  }
-
-  @override
-  List<Rect> getRects({TextSelection? selection}) {
-    final List<Rect> unCoallesedRects = <Rect>[];
-    final int start = selection?.start ?? 0;
-    final int end = selection?.end ?? getContentLength() ?? 0;
-
-    int globalStart = 0;
-    int globalEnd = 0;
-
-    for (final Selectable selectable in selectables) {
-      final int? contentLength = selectable.getContentLength();
-      if (contentLength == null) {
-        continue;
-      }
-
-      globalStart = globalEnd;
-      globalEnd += contentLength;
-
-      // Calculate the intersection of the selectable's range with the selection range.
-      final int intersectStart = max(globalStart, start);
-      final int intersectEnd = min(globalEnd, end);
-
-      // Skip this selectable if there is no intersection.
-      if (intersectEnd <= intersectStart) {
-        continue;
-      }
-
-      final Rect? drawableArea = hasSize
-          ? Rect.fromLTWH(0, 0, containerSize.width, containerSize.height)
-          : null;
-
-      // Get the rects for the intersecting range only.
-      final List<Rect> currSelectableSelectionRects = selectable.getRects(
-        selection: TextSelection(
-            baseOffset: intersectStart - globalStart,
-            extentOffset: intersectEnd - globalStart),
-      );
-
-      final List<Rect> selectionRectsWithinDrawableArea =
-          currSelectableSelectionRects.map((Rect selectionRect) {
-        final Matrix4 transform = getTransformFrom(selectable);
-        final Rect localRect =
-            MatrixUtils.transformRect(transform, selectionRect);
-        if (drawableArea != null) {
-          return drawableArea.intersect(localRect);
-        }
-        return localRect;
-      }).where((Rect selectionRect) {
-        return selectionRect.isFinite && !selectionRect.isEmpty;
-      }).toList();
-      unCoallesedRects.addAll(selectionRectsWithinDrawableArea);
-    }
-
-// Sort the rectangles by their 'top' property before coalescing.
-    unCoallesedRects.sort((Rect a, Rect b) => a.top.compareTo(b.top));
-
-// Coalesce adjacent rectangles.
-    final List<Rect> coalescedRects = <Rect>[];
-    for (final Rect rect in unCoallesedRects) {
-      if (coalescedRects.isEmpty) {
-        coalescedRects.add(rect);
-      } else {
-        final Rect lastRect = coalescedRects.last;
-        if (rect.top <=
-            lastRect.bottom + _kSelectableVerticalComparingThreshold) {
-          // Rectangles are adjacent or overlapping, combine them
-          coalescedRects[coalescedRects.length - 1] = Rect.fromLTRB(
-              min(lastRect.left, rect.left),
-              min(lastRect.top, rect.top),
-              max(lastRect.right, rect.right),
-              max(lastRect.bottom, rect.bottom));
-        } else {
-          coalescedRects.add(rect);
-        }
-      }
-    }
-
-    return coalescedRects;
   }
 
   /// Called when this delegate finishes updating the selectables.

@@ -21,9 +21,10 @@ extension on web.CSSRuleList {
 }
 
 Iterable<T> _genIterable<T>(dynamic jsCollection) {
-  // ignore: avoid_dynamic_calls
   return Iterable<T>.generate(
+    // ignore: avoid_dynamic_calls
     jsCollection.length as int,
+    // ignore: avoid_dynamic_calls
     (int index) => jsCollection.item(index) as T,
   );
 }
@@ -177,11 +178,6 @@ class RenderSelectionSpy extends RenderProxyBox
   @override
   int? getContentLength() {
     return 0;
-  }
-
-  @override
-  List<Rect> getRects({TextSelection? selection}) {
-    return const <Rect>[];
   }
 
   @override
