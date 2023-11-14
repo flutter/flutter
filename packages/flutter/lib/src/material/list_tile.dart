@@ -1335,7 +1335,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     final double subtitleHeight = subtitle.getDryLayout(textConstraints).height;
     final double subtitleBaseline = title.getDryBaseline(textConstraints, subtitleBaselineType!)!;
 
-    final double targetTitleY = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0) - titleBaseline;
+    final double targetTitleY = (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - titleBaseline;
     final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - subtitleBaseline;
     final double titleY = _computeYPositionsForSubtitleLayout(defaultTileHeight, targetTitleY, targetSubtitleY, titleHeight, subtitleHeight).$1;
     return titleY + titleBaseline;
@@ -1399,7 +1399,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       titleY = (tileHeight - titleSize.height) / 2.0;
       subtitleY = null;
     } else {
-      final double targetTitleY = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0) - _boxBaseline(title!, titleBaselineType)!;
+      final double targetTitleY = (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - _boxBaseline(title!, titleBaselineType)!;
       final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - _boxBaseline(subtitle!, subtitleBaselineType!)!;
       (titleY, subtitleY, tileHeight) = _computeYPositionsForSubtitleLayout(defaultTileHeight, targetTitleY, targetSubtitleY, titleSize.height, subtitleSize.height);
     }
