@@ -316,7 +316,7 @@ void main() {
 
     final RenderTable table = RenderTable(
       textDirection: TextDirection.rtl,
-      defaultVerticalAlignment: TableCellVerticalAlignment.intrisicHeight,
+      defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
       children: <List<RenderBox>>[
         <RenderBox>[
           RenderConstrainedBox(additionalConstraints: firstConstraints),
@@ -336,6 +336,6 @@ void main() {
 
     // Make sure the table has a size and that the children are filled vertically to the highest cell.
     expect(table.size, equals(size));
-    expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrisicHeight);
+    expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrinsicHeight);
   });
 }

@@ -1084,7 +1084,7 @@ void main() {
     final Widget table = Directionality(
       textDirection: TextDirection.ltr,
       child: Table(
-        defaultVerticalAlignment: TableCellVerticalAlignment.intrisicHeight,
+        defaultVerticalAlignment: TableCellVerticalAlignment.intrinsicHeight,
         children: const <TableRow>[
           TableRow(
             children: <Widget>[
