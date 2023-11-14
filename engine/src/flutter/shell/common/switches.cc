@@ -455,17 +455,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   }
 
   {
-    std::string disable_image_reader_platform_views_value;
-    if (command_line.GetOptionValue(
-            FlagForSwitch(Switch::DisableImageReaderPlatformViews),
-            &disable_image_reader_platform_views_value)) {
-      settings.disable_image_reader_platform_views =
-          disable_image_reader_platform_views_value.empty() ||
-          "true" == disable_image_reader_platform_views_value;
-    }
-  }
-
-  {
     std::string impeller_backend_value;
     if (command_line.GetOptionValue(FlagForSwitch(Switch::ImpellerBackend),
                                     &impeller_backend_value)) {

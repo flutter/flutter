@@ -123,25 +123,6 @@ TEST(SwitchesTest, NoEnableImpeller) {
   }
 }
 
-TEST(SwitchesTest, DisableImageReaderPlatformViews) {
-  {
-    // enable
-    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
-        {"command", "--disable-image-reader-platform-views"});
-    EXPECT_TRUE(command_line.HasOption("disable-image-reader-platform-views"));
-    Settings settings = SettingsFromCommandLine(command_line);
-    EXPECT_EQ(settings.disable_image_reader_platform_views, true);
-  }
-  {
-    // disable
-    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
-        {"command", "--disable-image-reader-platform-views=false"});
-    EXPECT_TRUE(command_line.HasOption("disable-image-reader-platform-views"));
-    Settings settings = SettingsFromCommandLine(command_line);
-    EXPECT_EQ(settings.disable_image_reader_platform_views, false);
-  }
-}
-
 }  // namespace testing
 }  // namespace flutter
 

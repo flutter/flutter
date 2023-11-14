@@ -284,9 +284,6 @@ DEF_SWITCH(LeakVM,
            "When the last shell shuts down, the shared VM is leaked by default "
            "(the leak_vm in VM settings is true). To clean up the leak VM, set "
            "this value to false.")
-DEF_SWITCH(DisableImageReaderPlatformViews,
-           "disable-image-reader-platform-views",
-           "Disables the use of ImageReader backed Platform Views on Android.")
 DEF_SWITCH(
     MsaaSamples,
     "msaa-samples",

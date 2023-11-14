@@ -483,11 +483,6 @@ static jboolean GetIsSoftwareRendering(JNIEnv* env, jobject jcaller) {
   return FlutterMain::Get().GetSettings().enable_software_rendering;
 }
 
-static jboolean GetDisableImageReaderPlatformViews(JNIEnv* env,
-                                                   jobject jcaller) {
-  return FlutterMain::Get().GetSettings().disable_image_reader_platform_views;
-}
-
 static void RegisterTexture(JNIEnv* env,
                             jobject jcaller,
                             jlong shell_holder,
@@ -782,11 +777,6 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeGetIsSoftwareRenderingEnabled",
           .signature = "()Z",
           .fnPtr = reinterpret_cast<void*>(&GetIsSoftwareRendering),
-      },
-      {
-          .name = "nativeGetDisableImageReaderPlatformViews",
-          .signature = "()Z",
-          .fnPtr = reinterpret_cast<void*>(&GetDisableImageReaderPlatformViews),
       },
       {
           .name = "nativeRegisterTexture",

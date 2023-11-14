@@ -371,8 +371,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     this.renderer = new FlutterRenderer(flutterJNI);
 
     this.platformViewsController = platformViewsController;
-    this.platformViewsController.setDisableImageReaderPlatformViews(
-        flutterJNI.getDisableImageReaderPlatformViews());
     this.platformViewsController.onAttachedToJNI();
 
     this.pluginRegistry =

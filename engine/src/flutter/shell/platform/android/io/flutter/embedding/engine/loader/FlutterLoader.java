@@ -47,8 +47,6 @@ public class FlutterLoader {
       "io.flutter.embedding.android.ImpellerBackend";
   private static final String IMPELLER_OPENGL_GPU_TRACING_DATA_KEY =
       "io.flutter.embedding.android.EnableOpenGLGPUTracing";
-  private static final String DISABLE_IMAGE_READER_PLATFORM_VIEWS_KEY =
-      "io.flutter.embedding.android.DisableImageReaderPlatformViews";
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -334,9 +332,6 @@ public class FlutterLoader {
       if (metaData != null) {
         if (metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY, false)) {
           shellArgs.add("--enable-impeller");
-        }
-        if (metaData.getBoolean(DISABLE_IMAGE_READER_PLATFORM_VIEWS_KEY, false)) {
-          shellArgs.add("--disable-image-reader-platform-views");
         }
         if (metaData.getBoolean(
             ENABLE_VULKAN_VALIDATION_META_DATA_KEY, areValidationLayersOnByDefault())) {
