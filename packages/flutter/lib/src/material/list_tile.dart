@@ -1288,6 +1288,20 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     parentData.offset = offset;
   }
 
+  // Returns (titleYOffset, subtitleYOffset, tileHeight).
+  (double, double, double) _computeYPositionsForSubtitleLayout(double targetTileHeight, double targetTitleY, double targetSubtitleY, double titleHeight, double subtitleHeight) {
+    // If the title and subtitle overlap with their ideal Y placements, avoid
+    // overlapping by moving them away from each other by the same distance, to
+    // minimize the L2 norm to their respective target Y locations.
+    final double halfOverlap = math.max(targetTitleY + titleHeight - targetSubtitleY, 0) / 2;
+    final double titleY = targetTitleY - halfOverlap;
+    final double subtitleY = targetSubtitleY + halfOverlap;
+    // However if either component can't maintain the minimal padding from the top/bottom edges, the ListTile enters "compat mode".
+    return titleY < minVerticalPadding || subtitleY + subtitleHeight + minVerticalPadding > _defaultTileHeight
+      ? (minVerticalPadding, minVerticalPadding + titleHeight, 2 * _minVerticalPadding + titleHeight + subtitleHeight)
+      : (titleY, subtitleY, _defaultTileHeight);
+  }
+
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     final BoxConstraints looseConstraints = constraints.loosen();
@@ -1320,14 +1334,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       return (tileHeight - titleHeight) / 2.0 + titleBaseline;
     }
     final double subtitleHeight = subtitle.getDryLayout(textConstraints).height;
+    final double subtitleBaseline = title.getDryBaseline(textConstraints, subtitleBaselineType!)!;
 
-    final double tileHeight = math.max(defaultTileHeight, 2 * _minVerticalPadding + titleHeight + subtitleHeight);
-    final double idealTitleBaseline = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0);
-    return clampDouble(
-      idealTitleBaseline,
-      titleBaseline + _minVerticalPadding,
-      tileHeight - _minVerticalPadding - subtitleHeight - titleHeight + titleBaseline,
-    );
+    final double targetTitleY = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0) - titleBaseline;
+    final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - subtitleBaseline;
+    final double titleY = _computeYPositionsForSubtitleLayout(defaultTileHeight, targetTitleY, targetSubtitleY, titleHeight, subtitleHeight).$1;
+    return titleY + titleBaseline;
   }
 
   @override
@@ -1378,30 +1390,19 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     final Size titleSize = _layoutBox(title, textConstraints);
     final Size subtitleSize = _layoutBox(subtitle, textConstraints);
 
-    final double idealTitleBaseline = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0);
-    final double idealSubtitleBaseline = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0;
     final double defaultTileHeight = _defaultTileHeight;
 
-    final double tileHeight = math.max(defaultTileHeight, 2 * _minVerticalPadding + titleSize.height + subtitleSize.height);
+    final double tileHeight;
     final double titleY;
     final double? subtitleY;
     if (!hasSubtitle) {
+      tileHeight = math.max(defaultTileHeight, titleSize.height + 2.0 * minVerticalPadding);
       titleY = (tileHeight - titleSize.height) / 2.0;
       subtitleY = null;
     } else {
-      // Move the title's baseline as close to the ideal baseline as possible,
-      // at the same time maintain the required vertical paddings.
-      titleY = clampDouble(
-        idealTitleBaseline - _boxBaseline(title!, titleBaselineType)!,
-        _minVerticalPadding,
-        tileHeight - _minVerticalPadding - subtitleSize.height - titleSize.height,
-      );
-      assert(subtitleBaselineType != null);
-      subtitleY = clampDouble(
-        idealSubtitleBaseline - _boxBaseline(subtitle!, subtitleBaselineType!)!,
-        titleY + titleSize.height,
-        tileHeight - _minVerticalPadding - subtitleSize.height,
-      );
+      final double targetTitleY = isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0) - _boxBaseline(title!, titleBaselineType)!;
+      final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - _boxBaseline(subtitle!, subtitleBaselineType!)!;
+      (titleY, subtitleY, tileHeight) = _computeYPositionsForSubtitleLayout(defaultTileHeight, targetTitleY, targetSubtitleY, titleSize.height, subtitleSize.height);
     }
 
     final double leadingY;
