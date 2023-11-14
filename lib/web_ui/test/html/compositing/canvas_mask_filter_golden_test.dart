@@ -157,7 +157,7 @@ Future<void> testMain() async {
 
   for (final int testDpr in <int>[1, 2, 4]) {
     test('MaskFilter.blur blurs correctly for device-pixel ratio $testDpr', () async {
-      window.debugOverrideDevicePixelRatio(testDpr.toDouble());
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(testDpr.toDouble());
       const ui.Rect screenRect = ui.Rect.fromLTWH(0, 0, 150, 150);
 
       final RecordingCanvas rc = RecordingCanvas(screenRect);
@@ -174,7 +174,7 @@ Future<void> testMain() async {
 
       await canvasScreenshot(rc, 'mask_filter_blur_dpr_$testDpr',
           region: screenRect);
-      window.debugOverrideDevicePixelRatio(1.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
     });
   }
 }

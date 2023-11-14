@@ -28,8 +28,8 @@ void testMain() {
   late double dpi;
 
   setUp(() {
-    ui.window.onPointerDataPacket = null;
-    dpi = window.devicePixelRatio;
+    ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    dpi = EngineFlutterDisplay.instance.devicePixelRatio;
   });
 
   tearDown(() {
@@ -253,7 +253,7 @@ void testMain() {
     () {
       final _BasicEventContext context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -285,7 +285,7 @@ void testMain() {
     () {
       final _BasicEventContext context = _PointerEventContext();
       ui.PointerDataPacket? receivedPacket;
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         receivedPacket = packet;
       };
 
@@ -301,7 +301,7 @@ void testMain() {
     () {
       final _BasicEventContext context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -576,7 +576,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -647,7 +647,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -667,7 +667,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -700,7 +700,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -818,10 +818,10 @@ void testMain() {
       const double dpi = 2.5;
       debugOperatingSystemOverride = OperatingSystem.macOs;
       debugBrowserEngineOverride = BrowserEngine.firefox;
-      window.debugOverrideDevicePixelRatio(dpi);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpi);
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -849,7 +849,7 @@ void testMain() {
       expect(packets[0].data[0].scrollDeltaX, equals(10.0 * dpi));
       expect(packets[0].data[0].scrollDeltaY, equals(10.0 * dpi));
 
-      window.debugOverrideDevicePixelRatio(1.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
       debugOperatingSystemOverride = null;
       debugBrowserEngineOverride = null;
     },
@@ -863,10 +863,10 @@ void testMain() {
       const double dpi = 2.5;
       debugOperatingSystemOverride = OperatingSystem.macOs;
       debugBrowserEngineOverride = BrowserEngine.blink;
-      window.debugOverrideDevicePixelRatio(dpi);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpi);
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -894,7 +894,7 @@ void testMain() {
       expect(packets[0].data[0].scrollDeltaX, equals(10.0));
       expect(packets[0].data[0].scrollDeltaY, equals(10.0));
 
-      window.debugOverrideDevicePixelRatio(1.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
       debugOperatingSystemOverride = null;
       debugBrowserEngineOverride = null;
     },
@@ -910,7 +910,7 @@ void testMain() {
       }
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1147,7 +1147,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1248,7 +1248,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1372,7 +1372,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1562,7 +1562,7 @@ void testMain() {
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1626,7 +1626,7 @@ void testMain() {
       // clicking, then dismisses it with a left click.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1708,7 +1708,7 @@ void testMain() {
       //  - Releases RMB.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1777,7 +1777,7 @@ void testMain() {
       //  - Moves mouse.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1823,7 +1823,7 @@ void testMain() {
       // The move event will have "button:-1, buttons:2".
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1856,7 +1856,7 @@ void testMain() {
       //  - Move the pointer to hover.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1915,7 +1915,7 @@ void testMain() {
       // could be in a different location without any `*move` events in between.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -1974,7 +1974,7 @@ void testMain() {
       //  - Clicks RMB again in a different location;
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2045,7 +2045,7 @@ void testMain() {
       // This seems to be happening sometimes when using RMB on the Mac trackpad.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2127,7 +2127,7 @@ void testMain() {
       // when the context menu is shown.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2189,7 +2189,7 @@ void testMain() {
       // Flutter:   down-------move-------move-------up
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2266,7 +2266,7 @@ void testMain() {
       // browser window.
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2326,7 +2326,7 @@ void testMain() {
       final _MultiPointerEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
       List<ui.PointerData> data;
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2491,7 +2491,7 @@ void testMain() {
     () {
       final _MultiPointerEventMixin context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2532,7 +2532,7 @@ void testMain() {
     () {
       final _PointerEventContext context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2569,7 +2569,7 @@ void testMain() {
     () {
       final _PointerEventContext context = _PointerEventContext();
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2596,7 +2596,7 @@ void testMain() {
       // For more info, see: https://github.com/flutter/flutter/issues/75559
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
         packets.add(packet);
       };
 
@@ -2684,7 +2684,7 @@ void _testClickDebouncer() {
     context = _PointerEventContext();
     pointerPackets = <ui.PointerChange>[];
     semanticsActions = <CapturedSemanticsEvent>[];
-    ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
       for (final ui.PointerData data in packet.data) {
         pointerPackets.add(data.change);
       }

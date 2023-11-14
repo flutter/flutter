@@ -408,7 +408,7 @@ void testMain() {
     // Regression test for https://github.com/flutter/flutter/issues/44470
     test('Should handle contains for devicepixelratio != 1.0', () {
       js_util.setProperty(domWindow, 'devicePixelRatio', 4.0);
-      window.debugOverrideDevicePixelRatio(4.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(4.0);
       final Path path = Path()
         ..moveTo(50, 0)
         ..lineTo(100, 100)
@@ -417,7 +417,7 @@ void testMain() {
         ..close();
       expect(path.contains(const Offset(50, 50)), isTrue);
       js_util.setProperty(domWindow, 'devicePixelRatio', 1.0);
-      window.debugOverrideDevicePixelRatio(1.0);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
       // TODO(ferhat): Investigate failure on CI. Locally this passes.
       // [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"
     }, skip: browserEngine == BrowserEngine.firefox);

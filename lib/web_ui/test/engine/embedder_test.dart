@@ -15,6 +15,10 @@ void main() {
 }
 
 void testMain() {
+  setUpAll(() {
+    ensureImplicitViewInitialized();
+  });
+
   test('populates flt-renderer and flt-build-mode', () {
     FlutterViewEmbedder();
     expect(domDocument.body!.getAttribute('flt-renderer'),

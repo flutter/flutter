@@ -13,6 +13,7 @@ void main() {
 void doTests() {
   group('DomManager', () {
     test('fromFlutterViewEmbedderDEPRECATED', () {
+      ensureImplicitViewInitialized();
       final FlutterViewEmbedder embedder = FlutterViewEmbedder();
       final DomManager domManager =
           DomManager.fromFlutterViewEmbedderDEPRECATED(embedder);
