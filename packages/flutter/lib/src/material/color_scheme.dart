@@ -37,7 +37,7 @@ import 'theme_data.dart';
 ///   for makers to use at their discretion and are intended to support
 ///   broader color expression in products.
 ///
-/// The remaining colors of the scheme are comprised of neutral colors used for
+/// The remaining colors of the scheme are composed of neutral colors used for
 /// backgrounds and surfaces, as well as specific colors for errors, dividers
 /// and shadows.
 ///
@@ -998,7 +998,7 @@ class ColorScheme with Diagnosticable {
   ///
   /// Material Color Utilities extracts the dominant color from the
   /// supplied [ImageProvider]. Using this color, a [ColorScheme] is generated
-  /// with harmnonious colors that meet contrast requirements for accessibility.
+  /// with harmonious colors that meet contrast requirements for accessibility.
   ///
   /// If any of the optional color parameters are non-null, they will be
   /// used in place of the generated colors for that field in the resulting
@@ -1026,7 +1026,7 @@ class ColorScheme with Diagnosticable {
   ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
   ///    Material 3 Color system specification.
   ///  * <https://pub.dev/packages/material_color_utilities>, the package
-  ///    used to algorightmically determine the dominant color and to generate
+  ///    used to algorithmically determine the dominant color and to generate
   ///    the [ColorScheme].
   static Future<ColorScheme> fromImageProvider({
     required ImageProvider provider,
