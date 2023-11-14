@@ -3785,6 +3785,93 @@ void main() {
     await tester.pumpAndSettle();
     expect(count, 1);
   });
+
+  testWidgetsWithLeakTracking('PopupMenuButton uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
+    final MenuObserver rootObserver = MenuObserver();
+    final MenuObserver nestedObserver = MenuObserver();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          observers: <NavigatorObserver>[nestedObserver],
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return Material(
+                  child: PopupMenuButton<String>(
+                    useRootNavigator: true,
+                    child: const Text('button'),
+                    itemBuilder: (BuildContext context) {
+                      return <PopupMenuItem<String>>[
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item1',
+                          child: Text('item 1'),
+                        ),
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item2',
+                          child: Text('item 2'),
+                        ),
+                      ];
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.text('button'));
+
+    expect(rootObserver.menuCount, 1);
+    expect(nestedObserver.menuCount, 0);
+  });
+
+  testWidgetsWithLeakTracking('PopupMenuButton does not use root navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final MenuObserver rootObserver = MenuObserver();
+    final MenuObserver nestedObserver = MenuObserver();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          observers: <NavigatorObserver>[nestedObserver],
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return Material(
+                  child: PopupMenuButton<String>(
+                    child: const Text('button'),
+                    itemBuilder: (BuildContext context) {
+                      return <PopupMenuItem<String>>[
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item1',
+                          child: Text('item 1'),
+                        ),
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item2',
+                          child: Text('item 2'),
+                        ),
+                      ];
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.text('button'));
+
+    expect(rootObserver.menuCount, 0);
+    expect(nestedObserver.menuCount, 1);
+  });
 }
 
 class TestApp extends StatelessWidget {
