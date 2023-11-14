@@ -5,6 +5,8 @@
 import("//build/toolchain/wasm.gni")
 
 wasm_lib("skwasm") {
+  public_configs = [ "//flutter:config" ]
+
   sources = [
     "canvas.cpp",
     "contour_measure.cpp",
