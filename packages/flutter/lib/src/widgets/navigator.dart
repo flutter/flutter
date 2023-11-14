@@ -5542,10 +5542,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
                 includeSemantics: false,
                 child: UnmanagedRestorationScope(
                   bucket: bucket,
-                  child: Overlay(
-                    key: _overlayKey,
-                    clipBehavior: widget.clipBehavior,
-                    initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                  child: Semantics(
+                    explicitChildNodes: true,
+                    container: true,
+                    child: Overlay(
+                      key: _overlayKey,
+                      clipBehavior: widget.clipBehavior,
+                      initialEntries: overlay == null ?  _allRouteOverlayEntries.toList(growable: false) : const <OverlayEntry>[],
+                    ),
                   ),
                 ),
               ),

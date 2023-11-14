@@ -5009,6 +5009,39 @@ void main() {
         skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
     });
+
+    testWidgetsWithLeakTracking('Navigator does not hide semantics node of its sibling', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            textDirection: TextDirection.ltr,
+            children: <Widget>[
+              Semantics(
+                label: 'layer#1',
+                textDirection: TextDirection.ltr,
+                child: Container(),
+              ),
+              SizedBox(
+                height: 100, 
+                width: 100, 
+                child: Navigator(
+                  pages: const <Page<void>>[page], 
+                  onPopPage: (_, __) => false
+                ),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      expect(semantics, includesNodeWith(label: 'layer#1'));
+
+      semantics.dispose();
+    });
+
   });
 }
 
