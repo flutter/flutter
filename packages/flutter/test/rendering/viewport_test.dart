@@ -48,7 +48,7 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 }
 
 void main() {
-  LeakTesting.settings = LeakTesting.settings.withTracked(allNotGCed: true);
+   LeakTesting.settings = LeakTesting.settings.withTracked(allNotGCed: true);
 
   testWidgetsWithLeakTracking('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();

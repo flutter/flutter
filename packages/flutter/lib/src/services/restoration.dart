@@ -427,6 +427,7 @@ class RestorationManager extends ChangeNotifier {
 
   @override
   void dispose() {
+    SystemChannels.restoration.setMethodCallHandler(null);
     _rootBucket?.dispose();
     super.dispose();
   }
