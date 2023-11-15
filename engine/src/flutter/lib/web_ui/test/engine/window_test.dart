@@ -27,7 +27,7 @@ Future<void> testMain() async {
   late EngineFlutterWindow myWindow;
 
   setUp(() {
-    myWindow = EngineFlutterWindow(99, EnginePlatformDispatcher.instance);
+    myWindow = EngineFlutterWindow(99, EnginePlatformDispatcher.instance, createDomHTMLDivElement());
   });
 
   tearDown(() async {

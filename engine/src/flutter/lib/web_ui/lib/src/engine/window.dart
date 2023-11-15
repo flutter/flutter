@@ -26,6 +26,7 @@ import 'semantics/accessibility.dart';
 import 'services.dart';
 import 'util.dart';
 import 'view_embedder/dom_manager.dart';
+import 'view_embedder/embedding_strategy/embedding_strategy.dart';
 
 typedef _HandleMessageCallBack = Future<bool> Function();
 
@@ -40,21 +41,34 @@ const int kImplicitViewId = 0;
 /// In addition to everything defined in [ui.FlutterView], this class adds
 /// a few web-specific properties.
 base class EngineFlutterView implements ui.FlutterView {
+  /// Creates a [ui.FlutterView] that can be used in multi-view mode.
+  ///
+  /// The [hostElement] parameter specifies the container in the DOM into which
+  /// the Flutter view will be rendered.
   factory EngineFlutterView(
     int viewId,
     EnginePlatformDispatcher platformDispatcher,
+    DomElement hostElement,
   ) = _EngineFlutterViewImpl;
 
   EngineFlutterView._(
     this.viewId,
     this.platformDispatcher,
-  );
+    // This is nullable to accommodate the legacy `EngineFlutterWindow`. In
+    // multi-view mode, the host element is required for each view (as reflected
+    // by the public `EngineFlutterView` constructor).
+    DomElement? hostElement,
+  )   : embeddingStrategy = EmbeddingStrategy.create(hostElement: hostElement),
+        _dimensionsProvider = DimensionsProvider.create(hostElement: hostElement);
 
   @override
   final int viewId;
 
   @override
   final EnginePlatformDispatcher platformDispatcher;
+
+  /// Abstracts all the DOM manipulations required to embed a Flutter view in a user-supplied `hostElement`.
+  final EmbeddingStrategy embeddingStrategy;
 
   final ViewConfiguration _viewConfiguration = const ViewConfiguration();
 
@@ -143,19 +157,17 @@ base class EngineFlutterView implements ui.FlutterView {
   @override
   double get devicePixelRatio => display.devicePixelRatio;
 
-  late DimensionsProvider _dimensionsProvider;
-  void configureDimensionsProvider(DimensionsProvider dimensionsProvider) {
-    _dimensionsProvider = dimensionsProvider;
-  }
+  final DimensionsProvider _dimensionsProvider;
 
   Stream<ui.Size?> get onResize => _dimensionsProvider.onResize;
 }
 
 final class _EngineFlutterViewImpl extends EngineFlutterView {
   _EngineFlutterViewImpl(
-    int viewId,
-    EnginePlatformDispatcher platformDispatcher,
-  ) : super._(viewId, platformDispatcher) {
+    super.viewId,
+    super.platformDispatcher,
+    super.hostElement,
+  ) : super._() {
     platformDispatcher.registerView(this);
     registerHotRestartListener(() {
       // TODO(harryterkelsen): What should we do about this in multi-view?
@@ -168,9 +180,10 @@ final class _EngineFlutterViewImpl extends EngineFlutterView {
 /// The Web implementation of [ui.SingletonFlutterWindow].
 final class EngineFlutterWindow extends EngineFlutterView implements ui.SingletonFlutterWindow {
   EngineFlutterWindow(
-    int viewId,
-    EnginePlatformDispatcher platformDispatcher,
-  ) : super._(viewId, platformDispatcher) {
+    super.viewId,
+    super.platformDispatcher,
+    super.hostElement,
+  ) : super._() {
     platformDispatcher.registerView(this);
     if (ui_web.isCustomUrlStrategySet) {
       _browserHistory = createHistoryForExistingState(ui_web.urlStrategy);
@@ -585,9 +598,14 @@ EngineFlutterWindow? _window;
 
 /// Initializes the [window] (aka the implicit view), if it's not already
 /// initialized.
-EngineFlutterWindow ensureImplicitViewInitialized() {
-  return _window ??=
-      EngineFlutterWindow(kImplicitViewId, EnginePlatformDispatcher.instance);
+EngineFlutterWindow ensureImplicitViewInitialized({
+  DomElement? hostElement,
+}) {
+  return _window ??= EngineFlutterWindow(
+    kImplicitViewId,
+    EnginePlatformDispatcher.instance,
+    hostElement,
+  );
 }
 
 /// The Web implementation of [ui.ViewPadding].
