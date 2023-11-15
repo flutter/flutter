@@ -72,12 +72,12 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 @end
 
 @implementation FlutterPlatformPlugin {
-  fml::WeakPtr<FlutterEngine> _engine;
+  fml::WeakNSObject<FlutterEngine> _engine;
   // Used to detect whether this device has live text input ability or not.
   UITextField* _textField;
 }
 
-- (instancetype)initWithEngine:(fml::WeakPtr<FlutterEngine>)engine {
+- (instancetype)initWithEngine:(fml::WeakNSObject<FlutterEngine>)engine {
   FML_DCHECK(engine) << "engine must be set";
   self = [super init];
 

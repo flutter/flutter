@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
-#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
+#include "flutter/fml/platform/darwin/weak_nsobject.h"
 
 static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 
@@ -29,7 +29,7 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 @end
 
 @implementation FlutterKeyboardManager {
-  std::unique_ptr<fml::WeakPtrFactory<FlutterKeyboardManager>> _weakFactory;
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterKeyboardManager>> _weakFactory;
 }
 
 - (nonnull instancetype)init {
@@ -37,7 +37,7 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
   if (self != nil) {
     _primaryResponders = [[NSMutableArray alloc] init];
     _secondaryResponders = [[NSMutableArray alloc] init];
-    _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterKeyboardManager>>(self);
+    _weakFactory = std::make_unique<fml::WeakNSObjectFactory<FlutterKeyboardManager>>(self);
   }
   return self;
 }
@@ -64,8 +64,8 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
   [super dealloc];
 }
 
-- (fml::WeakPtr<FlutterKeyboardManager>)getWeakPtr {
-  return _weakFactory->GetWeakPtr();
+- (fml::WeakNSObject<FlutterKeyboardManager>)getWeakNSObject {
+  return _weakFactory->GetWeakNSObject();
 }
 
 - (void)handlePress:(nonnull FlutterUIPressProxy*)press
@@ -89,7 +89,7 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
       // encounter.
       NSAssert([_primaryResponders count] >= 0, @"At least one primary responder must be added.");
 
-      __block auto weakSelf = [self getWeakPtr];
+      __block auto weakSelf = [self getWeakNSObject];
       __block NSUInteger unreplied = [self.primaryResponders count];
       __block BOOL anyHandled = false;
       FlutterAsyncKeyCallback replyCallback = ^(BOOL handled) {

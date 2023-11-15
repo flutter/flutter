@@ -169,6 +169,8 @@ source_set("fml") {
       "platform/darwin/scoped_typeref.h",
       "platform/darwin/string_range_sanitization.h",
       "platform/darwin/string_range_sanitization.mm",
+      "platform/darwin/weak_nsobject.h",
+      "platform/darwin/weak_nsobject.mm",
     ]
 
     frameworks = [ "Foundation.framework" ]
@@ -369,7 +371,10 @@ if (enable_unittests) {
     }
 
     if (is_mac || is_ios) {
-      sources += [ "platform/darwin/scoped_nsobject_unittests.mm" ]
+      sources += [
+        "platform/darwin/scoped_nsobject_unittests.mm",
+        "platform/darwin/weak_nsobject_unittests.mm",
+      ]
     }
 
     if (is_win) {
@@ -399,7 +404,10 @@ if (enable_unittests) {
     testonly = true
     if (is_mac || is_ios) {
       cflags_objcc = flutter_cflags_objc_arc
-      sources = [ "platform/darwin/scoped_nsobject_arc_unittests.mm" ]
+      sources = [
+        "platform/darwin/scoped_nsobject_arc_unittests.mm",
+        "platform/darwin/weak_nsobject_arc_unittests.mm",
+      ]
     }
 
     deps = [

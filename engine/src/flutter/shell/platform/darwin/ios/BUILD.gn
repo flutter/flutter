@@ -236,7 +236,6 @@ source_set("ios_test_flutter_mrc") {
   sources = [
     "framework/Source/FlutterEnginePlatformViewTest.mm",
     "framework/Source/FlutterEngineTest_mrc.mm",
-    "framework/Source/FlutterPlatformPluginTest.mm",
     "framework/Source/FlutterPlatformViewsTest.mm",
     "framework/Source/FlutterTouchInterceptingView_Test.h",
     "framework/Source/FlutterViewControllerTest_mrc.mm",
@@ -304,6 +303,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterFakeKeyEvents.h",
     "framework/Source/FlutterFakeKeyEvents.mm",
     "framework/Source/FlutterKeyboardManagerTest.mm",
+    "framework/Source/FlutterPlatformPluginTest.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
     "framework/Source/FlutterRestorationPluginTest.mm",
     "framework/Source/FlutterSpellCheckPluginTest.mm",

@@ -1979,8 +1979,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   fml::AutoResetWaitableEvent latch;
   thread_task_runner->PostTask([&] {
     auto weakFactory =
-        std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(flutterViewController);
-    platform_view->SetOwnerViewController(weakFactory->GetWeakPtr());
+        std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(flutterViewController);
+    platform_view->SetOwnerViewController(weakFactory->GetWeakNSObject());
     auto bridge =
         std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
                                                        /*platform_view=*/platform_view.get(),
@@ -2067,9 +2067,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
         std::make_shared<flutter::FlutterPlatformViewsController>();
     OCMStub([mockFlutterViewController platformViewsController])
         .andReturn(flutterPlatformViewsController.get());
-    auto weakFactory =
-        std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(mockFlutterViewController);
-    platform_view->SetOwnerViewController(weakFactory->GetWeakPtr());
+    auto weakFactory = std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(
+        mockFlutterViewController);
+    platform_view->SetOwnerViewController(weakFactory->GetWeakNSObject());
 
     platform_view->SetSemanticsEnabled(true);
     XCTAssertNotEqual(test_delegate.set_semantics_enabled_calls, 0);
