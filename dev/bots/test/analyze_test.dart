@@ -92,6 +92,24 @@ void main() {
     expect(result[result.length - 1], ''); // trailing newline
   });
 
+  test('analyze.dart - verifyNoStopwatches', () async {
+    final List<String> result = (await capture(() => verifyNoStopwatches(testRootPath, minimumMatches: 6), shouldHaveErrors: true)).split('\n');
+    final List<String> lines = <String>[
+      '║ \ttest/analyze-test-input/root/packages/foo/stopwatch_fail.dart:8',
+      '║ \ttest/analyze-test-input/root/packages/foo/stopwatch_fail.dart:12',
+    ]
+        .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+        .toList();
+    expect(result.length, 6 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
+    expect(result[0], '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════');
+    expect(result[1], '║ Stopwatch use was found in the following files:');
+    expect(result.getRange(2, result.length - 4).toSet(), lines.toSet());
+    expect(result[result.length - 4], '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.');
+    expect(result[result.length - 3], '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.');
+    expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
+    expect(result[result.length - 1], ''); // trailing newline
+  });
+
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(testRootPath, checkMinimums: false), shouldHaveErrors: true);
     final String file = 'test/analyze-test-input/root/packages/foo/foo.dart'
