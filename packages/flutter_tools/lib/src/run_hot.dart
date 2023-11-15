@@ -96,7 +96,6 @@ class HotRunner extends ResidentRunner {
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     NativeAssetsBuildRunner? buildRunner,
     required Analytics analytics,
-    this.flavor,
   })  : _stopwatchFactory = stopwatchFactory,
         _reloadSourcesHelper = reloadSourcesHelper,
         _reassembleHelper = reassembleHelper,
@@ -499,7 +498,7 @@ class HotRunner extends ResidentRunner {
       globals.printTrace('Updating assets');
       final int result = await assetBundle.build(
         packagesPath: '.packages',
-        flavor: flavor,
+        flavor: debuggingOptions.buildInfo.flavor,
       );
       if (result != 0) {
         return UpdateFSReport();
