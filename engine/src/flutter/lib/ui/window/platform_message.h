@@ -25,7 +25,7 @@ class PlatformMessage {
 
   const std::string& channel() const { return channel_; }
   const fml::MallocMapping& data() const { return data_; }
-  bool hasData() { return has_data_; }
+  bool hasData() { return hasData_; }
 
   const fml::RefPtr<PlatformMessageResponse>& response() const {
     return response_;
@@ -36,7 +36,7 @@ class PlatformMessage {
  private:
   std::string channel_;
   fml::MallocMapping data_;
-  bool has_data_;
+  bool hasData_;
   fml::RefPtr<PlatformMessageResponse> response_;
 };
 

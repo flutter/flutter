@@ -9,6 +9,7 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/text/line_metrics.h"
+#include "flutter/lib/ui/text/text_box.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 
 namespace flutter {
