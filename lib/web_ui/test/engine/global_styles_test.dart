@@ -17,7 +17,6 @@ void testMain() {
 
   setUp(() {
     styleElement = createDomHTMLStyleElement(null);
-    domDocument.body!.append(styleElement);
     applyGlobalCssRulesToSheet(
       styleElement,
       defaultCssFont: _kDefaultCssFont,
@@ -101,6 +100,7 @@ bool hasCssRule(
   required String selector,
   required String declaration,
 }) {
+  domDocument.body!.append(styleElement);
   assert(styleElement.sheet != null);
 
   // regexr.com/740ff
@@ -110,7 +110,10 @@ bool hasCssRule(
   final DomCSSStyleSheet sheet = styleElement.sheet! as DomCSSStyleSheet;
 
   // Check that the cssText of any rule matches the ruleLike RegExp.
-  return sheet.cssRules
+  final bool result = sheet.cssRules
       .map((DomCSSRule rule) => rule.cssText)
       .any((String rule) => ruleLike.hasMatch(rule));
+
+  styleElement.remove();
+  return result;
 }
