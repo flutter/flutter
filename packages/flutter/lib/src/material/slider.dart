@@ -1457,6 +1457,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   @override
   void dispose() {
+    _drag.dispose();
+    _tap.dispose();
     _labelPainter.dispose();
     super.dispose();
   }
