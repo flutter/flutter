@@ -130,7 +130,7 @@ Future<void> _copyNativeAssetsAndroid(
   if (assetTargetLocations.isNotEmpty) {
     globals.logger
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    final List<String> jniArchDirs = [
+    final List<String> jniArchDirs = <String>[
       for (final AndroidArch androidArch in AndroidArch.values)
         androidArch.archName,
     ];
