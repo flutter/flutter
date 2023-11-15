@@ -1039,7 +1039,7 @@ class FlutterPlugin implements Plugin<Project> {
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
-            boolean isAddToAppValue = isBuildingAar || isUsedAsSubproject
+            boolean isAndroidLibraryValue = isBuildingAar || isUsedAsSubproject
 
             String variantBuildMode = buildModeFor(variant.buildType)
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
@@ -1078,7 +1078,7 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory codeSizeDirectoryValue
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
-                isAddToApp isAddToAppValue
+                isAndroidLibrary isAndroidLibraryValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -1335,7 +1335,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean validateDeferredComponents
     @Optional @Input
-    Boolean isAddToApp
+    Boolean isAndroidLibrary
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -1427,8 +1427,8 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             args "-dAndroidArchs=${targetPlatformValues.join(' ')}"
             args "-dMinSdkVersion=${minSdkVersion}"
-            if (isAddToApp != null) {
-                args "-dIsAddToApp=${isAddToApp ? "true" : "false"}"
+            if (isAndroidLibrary != null) {
+                args "-dIsAndroidLibrary=${isAndroidLibrary ? "true" : "false"}"
             }
             args ruleNames
         }

@@ -199,8 +199,8 @@ class NativeAssets extends Target {
         case TargetPlatform.android_x64:
         case TargetPlatform.android_x86:
         case TargetPlatform.android:
-          final String? isAddToAppEnvironment =
-              environment.defines[kIsAddToApp];
+          final String? isAndroidLibraryEnvironment =
+              environment.defines[kIsAndroidLibrary];
           final String? androidArchsEnvironment =
               environment.defines[kAndroidArchs];
           final List<AndroidArch> androidArchs = _androidArchs(
@@ -217,7 +217,7 @@ class NativeAssets extends Target {
             buildRunner: buildRunner,
             androidArchs: androidArchs,
             targetAndroidNdkApi: targetAndroidNdkApi,
-            isAddToApp: isAddToAppEnvironment == 'true',
+            isAndroidLibrary: isAndroidLibraryEnvironment == 'true',
           );
         case TargetPlatform.fuchsia_arm64:
         case TargetPlatform.fuchsia_x64:

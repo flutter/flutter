@@ -935,7 +935,7 @@ const String kAndroidArchs = 'AndroidArchs';
 /// This is expected to be a boolean.
 ///
 /// If not provided, defaults to false.
-const String kIsAddToApp = 'IsAddToApp';
+const String kIsAndroidLibrary = 'IsAndroidLibrary';
 
 /// The define to control what min Android SDK version is built for.
 ///
