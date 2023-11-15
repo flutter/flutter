@@ -56,7 +56,7 @@ void main() {
     final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
     fontsDirectory.deleteSync(recursive: true);
 
-    expect(fontConfigManager.dispose, returnsNormally);
+    await fontConfigManager.dispose();
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
