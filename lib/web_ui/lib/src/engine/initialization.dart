@@ -55,14 +55,6 @@ void debugEmulateHotRestart() {
   }
 }
 
-/// Fully initializes the engine, including services and UI.
-Future<void> initializeEngine({
-  ui_web.AssetManager? assetManager,
-}) async {
-  await initializeEngineServices(assetManager: assetManager);
-  await initializeEngineUi();
-}
-
 /// How far along the initialization process the engine is currently is.
 ///
 /// The initialization process starts with [none] and proceeds in increasing
@@ -231,8 +223,11 @@ Future<void> initializeEngineUi() async {
   _initializationState = DebugEngineInitializationState.initialized;
 }
 
-ui_web.AssetManager get engineAssetManager => _assetManager!;
+ui_web.AssetManager get engineAssetManager => _debugAssetManager ?? _assetManager!;
 ui_web.AssetManager? _assetManager;
+ui_web.AssetManager? _debugAssetManager;
+
+set debugOnlyAssetManager(ui_web.AssetManager? manager) => _debugAssetManager = manager;
 
 void _setAssetManager(ui_web.AssetManager assetManager) {
   if (assetManager == _assetManager) {
@@ -254,7 +249,7 @@ Future<void> _downloadAssetFonts() async {
     );
   }
 
-  if (_assetManager != null) {
+  if (_debugAssetManager != null || _assetManager != null) {
     await renderer.fontCollection.loadAssetFonts(await fetchFontManifest(ui_web.assetManager));
   }
 }
