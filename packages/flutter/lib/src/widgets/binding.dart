@@ -781,9 +781,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
-        print('!!!!!!!!!!!!!! start');
-    print(StackTrace.current);
-    print('!!!!!!!!!!!!!! end');
     switch (methodCall.method) {
       case 'popRoute':
         return handlePopRoute();

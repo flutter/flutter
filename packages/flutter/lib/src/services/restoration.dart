@@ -306,10 +306,6 @@ class RestorationManager extends ChangeNotifier {
   }
 
   Future<void> _methodHandler(MethodCall call) async {
-    print('!!!!!!!!!!!!!! start');
-    print(StackTrace.current);
-    print('!!!!!!!!!!!!!! end');
-
     switch (call.method) {
       case 'push':
         _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<Object?, Object?>);

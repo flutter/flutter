@@ -270,10 +270,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   Future<String?> _handleLifecycleMessage(String? message) async {
-        print('!!!!!!!!!!!!!! start');
-    print(StackTrace.current);
-    print('!!!!!!!!!!!!!! end');
-
     final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
     final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state!);
     generated.forEach(handleAppLifecycleStateChanged);
@@ -358,10 +354,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
-    print('!!!!!!!!!!!!!! start');
-    print(StackTrace.current);
-    print('!!!!!!!!!!!!!! end');
-
     final String method = methodCall.method;
     assert(method == 'SystemChrome.systemUIChange' || method == 'System.requestAppExit');
     switch (method) {
