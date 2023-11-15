@@ -93,7 +93,7 @@ typedef struct {
   uint16_t keyCode;
 
   // The printable string to derive logical key for.
-  uint8_t keyChar;
+  uint64_t keyChar;
 
   // If the goal is mandatory, the keyboard manager will make sure to find a
   // logical key for this character, falling back to the US keyboard layout.
