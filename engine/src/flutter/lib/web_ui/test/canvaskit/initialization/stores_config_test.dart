@@ -14,13 +14,10 @@ void main() {
 void testMain() {
   group('initializeEngineServices', () {
     test('stores user configuration', () async {
-      // dev/test_platform.dart injects a global configuration object. Let's
-      // fetch that, override one of its properties (under test), then delete it
-      // from window (so our configuration asserts don't fire!)
-      final JsFlutterConfiguration config = js_util.getProperty(domWindow, 'flutterConfiguration');
+      final JsFlutterConfiguration config = JsFlutterConfiguration();
       js_util.setProperty(config, 'canvasKitMaximumSurfaces', 32.0);
+      js_util.setProperty(config, 'canvasKitBaseUrl', '/canvaskit/');
       js_util.setProperty(domWindow, 'flutterConfiguration', null);
-
       await initializeEngineServices(jsConfiguration: config);
 
       expect(configuration.canvasKitMaximumSurfaces, 32);

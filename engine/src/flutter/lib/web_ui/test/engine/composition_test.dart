@@ -9,9 +9,10 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
 
 import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/initialization.dart';
 import 'package:ui/src/engine/text_editing/composition_aware_mixin.dart';
 import 'package:ui/src/engine/text_editing/text_editing.dart';
+
+import '../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -47,7 +48,7 @@ GloballyPositionedTextEditingStrategy _enableEditingStrategy({
 }
 
 Future<void> testMain() async {
-  await initializeEngine();
+  await bootstrapAndRunApp();
 
   const String fakeComposingText = 'ImComposingText';
 
