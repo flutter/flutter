@@ -76,12 +76,12 @@ void PlatformViewIOS::HandlePlatformMessage(std::unique_ptr<flutter::PlatformMes
   platform_message_handler_->HandlePlatformMessage(std::move(message));
 }
 
-fml::WeakPtr<FlutterViewController> PlatformViewIOS::GetOwnerViewController() const {
+fml::WeakNSObject<FlutterViewController> PlatformViewIOS::GetOwnerViewController() const {
   return owner_controller_;
 }
 
 void PlatformViewIOS::SetOwnerViewController(
-    const fml::WeakPtr<FlutterViewController>& owner_controller) {
+    const fml::WeakNSObject<FlutterViewController>& owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   std::lock_guard<std::mutex> guard(ios_surface_mutex_);
   if (ios_surface_ || !owner_controller) {

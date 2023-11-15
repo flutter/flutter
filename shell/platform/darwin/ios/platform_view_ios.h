@@ -9,8 +9,8 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/fml/platform/darwin/weak_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
@@ -59,14 +59,14 @@ class PlatformViewIOS final : public PlatformView {
    * Returns the `FlutterViewController` currently attached to the `FlutterEngine` owning
    * this PlatformViewIOS.
    */
-  fml::WeakPtr<FlutterViewController> GetOwnerViewController() const;
+  fml::WeakNSObject<FlutterViewController> GetOwnerViewController() const;
 
   /**
    * Updates the `FlutterViewController` currently attached to the `FlutterEngine` owning
    * this PlatformViewIOS. This should be updated when the `FlutterEngine`
    * is given a new `FlutterViewController`.
    */
-  void SetOwnerViewController(const fml::WeakPtr<FlutterViewController>& owner_controller);
+  void SetOwnerViewController(const fml::WeakNSObject<FlutterViewController>& owner_controller);
 
   /**
    * Called one time per `FlutterViewController` when the `FlutterViewController`'s
@@ -133,7 +133,7 @@ class PlatformViewIOS final : public PlatformView {
     std::function<void(bool)> set_semantics_enabled_;
   };
 
-  fml::WeakPtr<FlutterViewController> owner_controller_;
+  fml::WeakNSObject<FlutterViewController> owner_controller_;
   // Since the `ios_surface_` is created on the platform thread but
   // used on the raster thread we need to protect it with a mutex.
   std::mutex ios_surface_mutex_;
