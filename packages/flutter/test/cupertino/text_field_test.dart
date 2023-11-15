@@ -8412,7 +8412,7 @@ void main() {
     expect(editableText.clipBehavior, Clip.none);
 
     // TODO(harryterkelsen): see https://github.com/flutter/flutter/issues/137669
-    if (!isCanvasKit) {
+    if (!kIsWeb || !isCanvasKit) {
       await expectLater(
         find.byKey(const ValueKey<int>(1)),
         matchesGoldenFile('overflow_clipbehavior_none.cupertino.0.png'),
