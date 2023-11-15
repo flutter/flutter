@@ -36,15 +36,27 @@ void CommandBuffer::WaitUntilScheduled() {
   return OnWaitUntilScheduled();
 }
 
-bool CommandBuffer::SubmitCommandsAsync(
-    std::shared_ptr<RenderPass>
-        render_pass  // NOLINT(performance-unnecessary-value-param)
-) {
-  TRACE_EVENT0("impeller", "CommandBuffer::SubmitCommandsAsync");
+bool CommandBuffer::EncodeAndSubmit(
+    const std::shared_ptr<RenderPass>& render_pass) {
+  TRACE_EVENT0("impeller", "CommandBuffer::EncodeAndSubmit");
   if (!render_pass->IsValid() || !IsValid()) {
     return false;
   }
   if (!render_pass->EncodeCommands()) {
+    return false;
+  }
+
+  return SubmitCommands(nullptr);
+}
+
+bool CommandBuffer::EncodeAndSubmit(
+    const std::shared_ptr<BlitPass>& blit_pass,
+    const std::shared_ptr<Allocator>& allocator) {
+  TRACE_EVENT0("impeller", "CommandBuffer::EncodeAndSubmit");
+  if (!blit_pass->IsValid() || !IsValid()) {
+    return false;
+  }
+  if (!blit_pass->EncodeCommands(allocator)) {
     return false;
   }
 
