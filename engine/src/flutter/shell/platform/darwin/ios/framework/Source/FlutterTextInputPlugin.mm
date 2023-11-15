@@ -1690,6 +1690,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     }
   }
 
+  // The iOS 16 system highlight does not repect the height returned by `firstRectForRange`
+  // API (unlike iOS 17). So we return CGRectZero to hide it (unless if scribble is enabled).
+  // To support scribble's advanced gestures (e.g. insert a space with a vertical bar),
+  // at least 1 character's width is required.
+  if (@available(iOS 17, *)) {
+    // No-op
+  } else if (![self isScribbleAvailable]) {
+    return CGRectZero;
+  }
+
   NSUInteger first = start;
   if (end < start) {
     first = end;
