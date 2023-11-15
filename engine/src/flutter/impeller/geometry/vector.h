@@ -14,6 +14,8 @@
 
 namespace impeller {
 
+// NOLINTBEGIN(google-explicit-constructor)
+
 struct Vector3 {
   union {
     struct {
@@ -323,5 +325,7 @@ inline std::ostream& operator<<(std::ostream& out, const impeller::Vector4& p) {
   out << "(" << p.x << ", " << p.y << ", " << p.z << ", " << p.w << ")";
   return out;
 }
+
+// NOLINTEND(google-explicit-constructor)
 
 }  // namespace std

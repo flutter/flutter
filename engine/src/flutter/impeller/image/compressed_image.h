@@ -26,7 +26,7 @@ class CompressedImage {
  protected:
   const std::shared_ptr<const fml::Mapping> source_;
 
-  CompressedImage(std::shared_ptr<const fml::Mapping> allocation);
+  explicit CompressedImage(std::shared_ptr<const fml::Mapping> allocation);
 };
 
 }  // namespace impeller
