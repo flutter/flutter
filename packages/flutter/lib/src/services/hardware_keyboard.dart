@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'raw_keyboard.dart';
+import 'raw_keyboard_android.dart';
 import 'system_channels.dart';
 
 export 'dart:ui' show KeyData;
@@ -124,6 +125,7 @@ abstract class KeyEvent with Diagnosticable {
     required this.logicalKey,
     this.character,
     required this.timeStamp,
+    this.deviceType = ui.KeyEventDeviceType.keyboard,
     this.synthesized = false,
   });
 
@@ -206,6 +208,13 @@ abstract class KeyEvent with Diagnosticable {
   /// All events share the same timeStamp origin.
   final Duration timeStamp;
 
+  /// The source device type for the key event.
+  ///
+  /// Not all platforms supply an accurate type.
+  ///
+  /// Defaults to [ui.KeyEventDeviceType.keyboard].
+  final ui.KeyEventDeviceType deviceType;
+
   /// Whether this event is synthesized by Flutter to synchronize key states.
   ///
   /// An non-[synthesized] event is converted from a native event, and a native
@@ -253,6 +262,7 @@ class KeyDownEvent extends KeyEvent {
     super.character,
     required super.timeStamp,
     super.synthesized,
+    super.deviceType,
   });
 }
 
@@ -272,6 +282,7 @@ class KeyUpEvent extends KeyEvent {
     required super.logicalKey,
     required super.timeStamp,
     super.synthesized,
+    super.deviceType,
   });
 }
 
@@ -295,6 +306,7 @@ class KeyRepeatEvent extends KeyEvent {
     required super.logicalKey,
     super.character,
     required super.timeStamp,
+    super.deviceType,
   });
 }
 
@@ -719,20 +731,20 @@ enum KeyDataTransitMode {
   /// to both [KeyMessage.events] and [KeyMessage.rawEvent].
   rawKeyData,
 
-  /// Key event information is delivered as converted key data, followed
-  /// by raw key data.
+  /// Key event information is delivered as converted key data, followed by raw
+  /// key data.
   ///
   /// Key data ([ui.KeyData]) is a standardized event stream converted from
-  /// platform's native key event information, sent through the embedder
-  /// API. Its event model is described in [HardwareKeyboard].
+  /// platform's native key event information, sent through the embedder API.
+  /// Its event model is described in [HardwareKeyboard].
   ///
   /// Raw key data is platform's native key event information sent in JSON
   /// through a method channel. It is interpreted by subclasses of
   /// [RawKeyEventData].
   ///
-  /// If the current transit mode is [rawKeyData], the key data is converted to
-  /// [KeyMessage.events], and the raw key data is converted to
-  /// [KeyMessage.rawEvent].
+  /// If the current transit mode is [keyDataThenRawKeyData], then the
+  /// [KeyEventManager] will use the [ui.KeyData] for [KeyMessage.events], and
+  /// the raw data for [KeyMessage.rawEvent].
   keyDataThenRawKeyData,
 }
 
@@ -1112,6 +1124,33 @@ class KeyEventManager {
     return <String, dynamic>{ 'handled': handled };
   }
 
+  ui.KeyEventDeviceType _convertDeviceType(RawKeyEvent rawEvent) {
+    final RawKeyEventData data = rawEvent.data;
+    // Device type is only available from Android.
+    if (data is! RawKeyEventDataAndroid) {
+      return ui.KeyEventDeviceType.keyboard;
+    }
+
+    switch (data.eventSource) {
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_KEYBOARD
+      case 0x00000101:
+        return ui.KeyEventDeviceType.keyboard;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_DPAD
+      case 0x00000201:
+        return ui.KeyEventDeviceType.directionalPad;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_GAMEPAD
+      case 0x00000401:
+        return ui.KeyEventDeviceType.gamepad;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_JOYSTICK
+      case 0x01000010:
+        return ui.KeyEventDeviceType.joystick;
+      // https://developer.android.com/reference/android/view/InputDevice#SOURCE_HDMI
+      case 0x02000001:
+        return ui.KeyEventDeviceType.hdmi;
+    }
+    return ui.KeyEventDeviceType.keyboard;
+  }
+
   // Convert the raw event to key events, including synthesizing events for
   // modifiers, and store the key events in `_keyEventsSinceLastMessage`.
   //
@@ -1126,6 +1165,7 @@ class KeyEventManager {
     final LogicalKeyboardKey? recordedLogicalMain = _hardwareKeyboard.lookUpLayout(physicalKey);
     final Duration timeStamp = ServicesBinding.instance.currentSystemFrameTimeStamp;
     final String? character = rawEvent.character == '' ? null : rawEvent.character;
+    final ui.KeyEventDeviceType deviceType = _convertDeviceType(rawEvent);
     if (rawEvent is RawKeyDownEvent) {
       if (recordedLogicalMain == null) {
         mainEvent = KeyDownEvent(
@@ -1133,6 +1173,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           character: character,
           timeStamp: timeStamp,
+          deviceType: deviceType,
         );
         physicalKeysPressed.add(physicalKey);
       } else {
@@ -1142,6 +1183,7 @@ class KeyEventManager {
           logicalKey: recordedLogicalMain,
           character: character,
           timeStamp: timeStamp,
+          deviceType: deviceType,
         );
       }
     } else {
@@ -1153,6 +1195,7 @@ class KeyEventManager {
           logicalKey: recordedLogicalMain,
           physicalKey: physicalKey,
           timeStamp: timeStamp,
+          deviceType: deviceType,
         );
         physicalKeysPressed.remove(physicalKey);
       }
@@ -1167,6 +1210,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           timeStamp: timeStamp,
           synthesized: true,
+          deviceType: deviceType,
         ));
       } else {
         _keyEventsSinceLastMessage.add(KeyUpEvent(
@@ -1174,6 +1218,7 @@ class KeyEventManager {
           logicalKey: _hardwareKeyboard.lookUpLayout(key)!,
           timeStamp: timeStamp,
           synthesized: true,
+          deviceType: deviceType,
         ));
       }
     }
@@ -1183,6 +1228,7 @@ class KeyEventManager {
         logicalKey: _rawKeyboard.lookUpLayout(key)!,
         timeStamp: timeStamp,
         synthesized: true,
+        deviceType: deviceType,
       ));
     }
     if (mainEvent != null) {
@@ -1220,6 +1266,7 @@ class KeyEventManager {
           timeStamp: timeStamp,
           character: keyData.character,
           synthesized: keyData.synthesized,
+          deviceType: keyData.deviceType,
         );
       case ui.KeyEventType.up:
         assert(keyData.character == null);
@@ -1228,6 +1275,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           timeStamp: timeStamp,
           synthesized: keyData.synthesized,
+          deviceType: keyData.deviceType,
         );
       case ui.KeyEventType.repeat:
         return KeyRepeatEvent(
@@ -1235,6 +1283,7 @@ class KeyEventManager {
           logicalKey: logicalKey,
           timeStamp: timeStamp,
           character: keyData.character,
+          deviceType: keyData.deviceType,
         );
     }
   }
