@@ -228,6 +228,7 @@ executable("flutter_linux_unittests") {
     "fl_value_test.cc",
     "fl_view_accessible_test.cc",
     "fl_view_test.cc",
+    "key_mapping_test.cc",
     "testing/fl_test.cc",
     "testing/fl_test_gtk_logs.cc",
     "testing/fl_test_gtk_logs.h",
