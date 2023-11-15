@@ -460,6 +460,7 @@ void initialize_lock_bit_to_checked_keys(GHashTable* table) {
 }
 
 const std::vector<LayoutGoal> layout_goals = {
+    LayoutGoal{0x41, 0x20, false},         // Space
     LayoutGoal{0x30, 0x22, false},         // Quote
     LayoutGoal{0x3b, 0x2c, false},         // Comma
     LayoutGoal{0x14, 0x2d, false},         // Minus

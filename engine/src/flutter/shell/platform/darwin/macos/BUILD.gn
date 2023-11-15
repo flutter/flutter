@@ -192,6 +192,7 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterViewControllerTestUtils.mm",
     "framework/Source/FlutterViewEngineProviderTest.mm",
     "framework/Source/FlutterViewTest.mm",
+    "framework/Source/KeyCodeMapTest.mm",
     "framework/Source/TestFlutterPlatformView.h",
     "framework/Source/TestFlutterPlatformView.mm",
   ]
