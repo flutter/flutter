@@ -730,7 +730,9 @@ class AssetsEntry {
     if (yaml is String) {
       final (Uri? uri, String? error) = tryParseUri(yaml);
       return uri == null ? (null, error) : (AssetsEntry(uri: uri), null);
-    } else if (yaml is Map) {
+    }
+
+    if (yaml is Map) {
       if (yaml.keys.isEmpty) {
         return (null, null);
       }
@@ -782,11 +784,7 @@ class AssetsEntry {
       return false;
     }
 
-    if (uri != other.uri || flavors != other.flavors) {
-        return false;
-    }
-
-    return true;
+    return uri == other.uri && flavors == other.flavors;
   }
 
   @override
