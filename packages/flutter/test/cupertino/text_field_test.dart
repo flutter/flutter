@@ -2928,7 +2928,7 @@ void main() {
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       final TestGesture gesture =
-      await tester.startGesture(textFieldStart + const Offset(150.0, 5.0));
+          await tester.startGesture(textFieldStart + const Offset(150.0, 5.0));
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 

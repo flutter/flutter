@@ -127,6 +127,8 @@ class SearchAnchor extends StatefulWidget {
     this.dividerColor,
     this.viewConstraints,
     this.textCapitalization,
+    this.viewOnChanged,
+    this.viewOnSubmitted,
     required this.builder,
     required this.suggestionsBuilder,
   });
@@ -147,6 +149,8 @@ class SearchAnchor extends StatefulWidget {
     Iterable<Widget>? barTrailing,
     String? barHintText,
     GestureTapCallback? onTap,
+    ValueChanged<String>? onSubmitted,
+    ValueChanged<String>? onChanged,
     MaterialStateProperty<double?>? barElevation,
     MaterialStateProperty<Color?>? barBackgroundColor,
     MaterialStateProperty<Color?>? barOverlayColor,
@@ -289,6 +293,24 @@ class SearchAnchor extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// Called each time the user modifies the search view's text field.
+  ///
+  /// See also:
+  ///
+  ///  * [viewOnSubmitted], which is called when the user indicates that they
+  ///  are done editing the search view's text field.
+  final ValueChanged<String>? viewOnChanged;
+
+  /// Called when the user indicates that they are done editing the text in the
+  /// text field of a search view. Typically this is called when the user presses
+  /// the enter key.
+  ///
+  /// See also:
+  ///
+  /// * [viewOnChanged], which is called when the user modifies the text field
+  /// of the search view.
+  final ValueChanged<String>? viewOnSubmitted;
+
   /// Called to create a widget which can open a search view route when it is tapped.
   ///
   /// The widget returned by this builder is faded out when it is tapped.
@@ -310,15 +332,12 @@ class _SearchAnchorState extends State<SearchAnchor> {
   bool _anchorIsVisible = true;
   final GlobalKey _anchorKey = GlobalKey();
   bool get _viewIsOpen => !_anchorIsVisible;
-  late SearchController? _internalSearchController;
-  SearchController get _searchController => widget.searchController ?? _internalSearchController!;
+  SearchController? _internalSearchController;
+  SearchController get _searchController => widget.searchController ?? (_internalSearchController ??= SearchController());
 
   @override
   void initState() {
     super.initState();
-    if (widget.searchController == null) {
-      _internalSearchController = SearchController();
-    }
     _searchController._attach(this);
   }
 
@@ -335,15 +354,27 @@ class _SearchAnchorState extends State<SearchAnchor> {
   }
 
   @override
+  void didUpdateWidget(SearchAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchController != widget.searchController) {
+      oldWidget.searchController?._detach(this);
+      _searchController._attach(this);
+    }
+  }
+
+  @override
   void dispose() {
     super.dispose();
-    _searchController._detach(this);
-    _internalSearchController = null;
+    widget.searchController?._detach(this);
+    _internalSearchController?._detach(this);
+    _internalSearchController?.dispose();
   }
 
   void _openView() {
     final NavigatorState navigator = Navigator.of(context);
     navigator.push(_SearchViewRoute(
+      viewOnChanged: widget.viewOnChanged,
+      viewOnSubmitted: widget.viewOnSubmitted,
       viewLeading: widget.viewLeading,
       viewTrailing: widget.viewTrailing,
       viewHintText: widget.viewHintText,
@@ -415,6 +446,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
 
 class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   _SearchViewRoute({
+    this.viewOnChanged,
+    this.viewOnSubmitted,
     this.toggleVisibility,
     this.textDirection,
     this.viewBuilder,
@@ -438,6 +471,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     required this.capturedThemes,
   });
 
+  final ValueChanged<String>? viewOnChanged;
+  final ValueChanged<String>? viewOnSubmitted;
   final ValueGetter<bool>? toggleVisibility;
   final TextDirection? textDirection;
   final ViewBuilder? viewBuilder;
@@ -580,6 +615,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
             ),
             child: capturedThemes.wrap(
               _ViewContent(
+                viewOnChanged: viewOnChanged,
+                viewOnSubmitted: viewOnSubmitted,
                 viewLeading: viewLeading,
                 viewTrailing: viewTrailing,
                 viewHintText: viewHintText,
@@ -614,6 +651,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
 
 class _ViewContent extends StatefulWidget {
   const _ViewContent({
+    this.viewOnChanged,
+    this.viewOnSubmitted,
     this.viewBuilder,
     this.viewLeading,
     this.viewTrailing,
@@ -636,6 +675,8 @@ class _ViewContent extends StatefulWidget {
     required this.suggestionsBuilder,
   });
 
+  final ValueChanged<String>? viewOnChanged;
+  final ValueChanged<String>? viewOnSubmitted;
   final ViewBuilder? viewBuilder;
   final Widget? viewLeading;
   final Iterable<Widget>? viewTrailing;
@@ -666,16 +707,13 @@ class _ViewContentState extends State<_ViewContent> {
   late Rect _viewRect;
   late final SearchController _controller;
   Iterable<Widget> result = <Widget>[];
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
-    if (!_focusNode.hasFocus) {
-      _focusNode.requestFocus();
-    }
+    _controller.addListener(updateSuggestions);
   }
 
   @override
@@ -700,6 +738,12 @@ class _ViewContentState extends State<_ViewContent> {
       }
     }
     unawaited(updateSuggestions());
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(updateSuggestions);
+    super.dispose();
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
@@ -737,7 +781,6 @@ class _ViewContentState extends State<_ViewContent> {
         icon: const Icon(Icons.close),
         onPressed: () {
           _controller.clear();
-          updateSuggestions();
         },
       ),
     ];
@@ -816,8 +859,8 @@ class _ViewContentState extends State<_ViewContent> {
                           top: false,
                           bottom: false,
                           child: SearchBar(
+                            autoFocus: true,
                             constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
-                            focusNode: _focusNode,
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -827,9 +870,11 @@ class _ViewContentState extends State<_ViewContent> {
                             textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
                             hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
                             controller: _controller,
-                            onChanged: (_) {
+                            onChanged: (String value) {
+                              widget.viewOnChanged?.call(value);
                               updateSuggestions();
                             },
+                            onSubmitted: widget.viewOnSubmitted,
                             textCapitalization: widget.textCapitalization,
                           ),
                         ),
@@ -892,11 +937,15 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
     required super.suggestionsBuilder
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
+    viewOnSubmitted: onSubmitted,
+    viewOnChanged: onChanged,
     builder: (BuildContext context, SearchController controller) {
       return SearchBar(
         constraints: constraints,
@@ -905,9 +954,10 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
           controller.openView();
           onTap?.call();
         },
-        onChanged: (_) {
+        onChanged: (String value) {
           controller.openView();
         },
+        onSubmitted: onSubmitted,
         hintText: barHintText,
         hintStyle: barHintStyle,
         textStyle: barTextStyle,
@@ -942,15 +992,18 @@ class SearchController extends TextEditingController {
   // it controls.
   _SearchAnchorState? _anchor;
 
+  /// Whether this controller has associated search anchor.
+  bool get isAttached => _anchor != null;
+
   /// Whether or not the associated search view is currently open.
   bool get isOpen {
-    assert(_anchor != null);
+    assert(isAttached);
     return _anchor!._viewIsOpen;
   }
 
   /// Opens the search view that this controller is associated with.
   void openView() {
-    assert(_anchor != null);
+    assert(isAttached);
     _anchor!._openView();
   }
 
@@ -959,7 +1012,7 @@ class SearchController extends TextEditingController {
   /// If `selectedText` is given, then the text value of the controller is set to
   /// `selectedText`.
   void closeView(String? selectedText) {
-    assert(_anchor != null);
+    assert(isAttached);
     _anchor!._closeView(selectedText);
   }
 
@@ -1032,6 +1085,7 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
+    this.autoFocus = false,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1153,13 +1207,17 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// {@macro flutter.widgets.editableText.autofocus}
+  final bool autoFocus;
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
 
 class _SearchBarState extends State<SearchBar> {
   late final MaterialStatesController _internalStatesController;
-  late final FocusNode _focusNode;
+  FocusNode? _internalFocusNode;
+  FocusNode get _focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
   @override
   void initState() {
@@ -1168,15 +1226,12 @@ class _SearchBarState extends State<SearchBar> {
     _internalStatesController.addListener(() {
       setState(() {});
     });
-    _focusNode = widget.focusNode ?? FocusNode();
   }
 
   @override
   void dispose() {
     _internalStatesController.dispose();
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
+    _internalFocusNode?.dispose();
     super.dispose();
   }
 
@@ -1254,7 +1309,9 @@ class _SearchBarState extends State<SearchBar> {
         child: InkWell(
           onTap: () {
             widget.onTap?.call();
-            _focusNode.requestFocus();
+            if (!_focusNode.hasFocus) {
+              _focusNode.requestFocus();
+            }
           },
           overlayColor: effectiveOverlayColor,
           customBorder: effectiveShape?.copyWith(side: effectiveSide),
@@ -1266,34 +1323,34 @@ class _SearchBarState extends State<SearchBar> {
               children: <Widget>[
                 if (leading != null) leading,
                 Expanded(
-                  child: IgnorePointer(
-                    child: Padding(
-                      padding: effectivePadding,
-                      child: TextField(
-                        focusNode: _focusNode,
-                        onChanged: widget.onChanged,
-                        onSubmitted: widget.onSubmitted,
-                        controller: widget.controller,
-                        style: effectiveTextStyle,
-                        decoration: InputDecoration(
-                          hintText: widget.hintText,
-                        ).applyDefaults(InputDecorationTheme(
-                          hintStyle: effectiveHintStyle,
-
-                          // The configuration below is to make sure that the text field
-                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                          enabledBorder: InputBorder.none,
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          // Setting `isDense` to true to allow the text field height to be
-                          // smaller than 48.0
-                          isDense: true,
-                        )),
-                        textCapitalization: effectiveTextCapitalization,
-                      ),
+                  child: Padding(
+                    padding: effectivePadding,
+                    child: TextField(
+                      autofocus: widget.autoFocus,
+                      onTap: widget.onTap,
+                      onTapAlwaysCalled: true,
+                      focusNode: _focusNode,
+                      onChanged: widget.onChanged,
+                      onSubmitted: widget.onSubmitted,
+                      controller: widget.controller,
+                      style: effectiveTextStyle,
+                      decoration: InputDecoration(
+                        hintText: widget.hintText,
+                      ).applyDefaults(InputDecorationTheme(
+                        hintStyle: effectiveHintStyle,
+                        // The configuration below is to make sure that the text field
+                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                        enabledBorder: InputBorder.none,
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        // Setting `isDense` to true to allow the text field height to be
+                        // smaller than 48.0
+                        isDense: true,
+                      )),
+                      textCapitalization: effectiveTextCapitalization,
                     ),
-                  )
+                  ),
                 ),
                 if (trailing != null) ...trailing,
               ],

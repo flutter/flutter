@@ -7,11 +7,13 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -26,8 +28,10 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../reporting/unified_analytics.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
@@ -57,6 +61,16 @@ abstract class DotEnvRegex {
   // Dot env value without quotes regex (eg FOO=bar)
   // Value without quotes will be matched (eg full value after the equals sign)
   static final RegExp unquotedValue = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
+}
+
+abstract class _HttpRegex {
+  // https://datatracker.ietf.org/doc/html/rfc7230#section-3.2
+  static const String _vchar = r'\x21-\x7E';
+  static const String _spaceOrTab = r'\x20\x09';
+  static const String _nonDelimiterVchar = r'\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x39\x41-\x5A\x5E-\x7A\x7C\x7E';
+
+  // --web-header is provided as key=value for consistency with --dart-define
+  static final RegExp httpHeader = RegExp('^([$_nonDelimiterVchar]+)' r'\s*=\s*' '([$_vchar$_spaceOrTab]+)' r'$');
 }
 
 enum ExitStatus {
@@ -202,6 +216,8 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
+  ProcessInfo get processInfo => globals.processInfo;
+
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
   /// extended amount of time and refresh the device cache with the results.
@@ -213,11 +229,24 @@ abstract class FlutterCommand extends Command<void> {
   bool _excludeDebug = false;
   bool _excludeRelease = false;
 
+  /// Grabs the [Analytics] instance from the global context. It is defined
+  /// at the [FlutterCommand] level to enable any classes that extend it to
+  /// easily reference it or overwrite as necessary.
+  Analytics get analytics => globals.analytics;
+
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
   }
 
   void usesWebOptions({ required bool verboseHelp }) {
+    argParser.addMultiOption('web-header',
+      help: 'Additional key-value pairs that will added by the web server '
+            'as headers to all responses. Multiple headers can be passed by '
+            'repeating "--web-header" multiple times.',
+      valueHelp: 'X-Custom-Header=header-value',
+      splitCommas: false,
+      hide: !verboseHelp,
+    );
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help:
@@ -638,10 +667,10 @@ abstract class FlutterCommand extends Command<void> {
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    useDartDefineFromFileOption();
+    _usesDartDefineFromFileOption();
   }
 
-  void useDartDefineFromFileOption() {
+  void _usesDartDefineFromFileOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
       help:
@@ -1286,7 +1315,6 @@ abstract class FlutterCommand extends Command<void> {
       dartExperiments: experiments,
       webRenderer: webRenderer,
       performanceMeasurementFile: performanceMeasurementFile,
-      dartDefineConfigJsonMap: defineConfigJsonMap,
       packagesPath: packagesPath ?? globals.fs.path.absolute('.dart_tool', 'package_config.json'),
       nullSafetyMode: nullSafetyMode,
       codeSizeDirectory: codeSizeDirectory,
@@ -1352,7 +1380,12 @@ abstract class FlutterCommand extends Command<void> {
           final DateTime endTime = globals.systemClock.now();
           globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
+            _sendPostUsage(
+              commandPath,
+              commandResult,
+              startTime,
+              endTime,
+            );
           }
           if (_usesFatalWarnings) {
             globals.logger.checkForFatalLogs();
@@ -1423,9 +1456,10 @@ abstract class FlutterCommand extends Command<void> {
             dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {
-          throwToolExit('Json config define file "--${FlutterOptions
-              .kDartDefineFromFileOption}=$path" format err, '
-              'please fix first! format err:\n$err');
+          throwToolExit('Unable to parse the file at path "$path" due to a formatting error. '
+            'Ensure that the file contains valid JSON.\n'
+            'Error details: $err'
+          );
         }
       }
     }
@@ -1521,6 +1555,31 @@ abstract class FlutterCommand extends Command<void> {
     return dartDefinesSet.toList();
   }
 
+
+  Map<String, String> extractWebHeaders() {
+    final Map<String, String> webHeaders = <String, String>{};
+
+    if (argParser.options.containsKey('web-header')) {
+      final List<String> candidates = stringsArg('web-header');
+      final List<String> invalidHeaders = <String>[];
+      for (final String candidate in candidates) {
+        final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
+          if (keyValueMatch == null) {
+            invalidHeaders.add(candidate);
+            continue;
+          }
+
+          webHeaders[keyValueMatch.group(1)!] = keyValueMatch.group(2)!;
+      }
+
+      if (invalidHeaders.isNotEmpty) {
+        throwToolExit('Invalid web headers: ${invalidHeaders.join(', ')}');
+      }
+    }
+
+    return webHeaders;
+  }
+
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     void handler(io.ProcessSignal s) {
       globals.cache.releaseLock();
@@ -1546,7 +1605,13 @@ abstract class FlutterCommand extends Command<void> {
     DateTime endTime,
   ) {
     // Send command result.
-    CommandResultEvent(commandPath, commandResult.toString()).send();
+    final int? maxRss = getMaxRss(processInfo);
+    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
+    analytics.send(Event.flutterCommandResult(
+      commandPath: commandPath,
+      result: commandResult.toString(),
+      maxRss: maxRss,
+    ));
 
     // Send timing.
     final List<String?> labels = <String?>[
@@ -1645,7 +1710,14 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         project: project,
         checkUpToDate: cachePubGet,
       );
-      await project.regeneratePlatformSpecificTooling();
+
+      // null implicitly means all plugins are allowed
+      List<String>? allowedPlugins;
+      if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
+        // The preview device does not currently support any plugins.
+        allowedPlugins = PreviewDevice.supportedPubPlugins;
+      }
+      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }

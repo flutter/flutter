@@ -93,6 +93,7 @@ Future<T> runInContext<T>(
         runningOnBot: runningOnBot,
         flutterVersion: globals.flutterVersion,
         environment: globals.platform.environment,
+        clientIde: globals.platform.environment['FLUTTER_HOST'],
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
@@ -101,6 +102,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
         androidStudio: globals.androidStudio,
@@ -218,7 +220,10 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
-      Doctor: () => Doctor(logger: globals.logger),
+      Doctor: () => Doctor(
+        logger: globals.logger,
+        clock: globals.systemClock,
+      ),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
         java: globals.java,
@@ -384,6 +389,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
     },
   );

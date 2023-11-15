@@ -1573,6 +1573,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
     await tester.pumpWidget(
       overlay(
         child: SelectableText.rich(
@@ -1581,8 +1584,7 @@ void main() {
               const TextSpan(text: 'text'),
               TextSpan(
                 text: 'link',
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () { },
+                recognizer: recognizer..onTap = () { },
               ),
             ],
           ),
@@ -2467,6 +2469,8 @@ void main() {
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2478,7 +2482,7 @@ void main() {
                 const TextSpan(text: onScreenText),
                 TextSpan(
                   text: offScreenText,
-                  recognizer: TapGestureRecognizer()..onTap = () { },
+                  recognizer: recognizer..onTap = () { },
                 ),
               ],
               style: textStyle,
@@ -3089,7 +3093,7 @@ void main() {
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+          await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -3587,7 +3591,7 @@ void main() {
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
       final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
+          await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3677,7 +3681,7 @@ void main() {
     final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
     final TestGesture gesture =
-    await tester.startGesture(selectableTextStart + const Offset(300, 5));
+        await tester.startGesture(selectableTextStart + const Offset(300, 5));
     await tester.pump(const Duration(milliseconds: 500));
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -4640,6 +4644,8 @@ void main() {
       ..onTap = () {
         spyTaps += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4668,7 +4674,7 @@ void main() {
 
     // Starts a long press.
     final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+        await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
     await tester.pump();
@@ -4690,6 +4696,8 @@ void main() {
       ..onLongPress = () {
         spyLongPress += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4718,7 +4726,7 @@ void main() {
 
     // Starts a long press.
     final TestGesture gesture =
-    await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+        await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
     await tester.pump();

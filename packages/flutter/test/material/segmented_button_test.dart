@@ -21,6 +21,37 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
+  testWidgetsWithLeakTracking('SegmentsButton when compositing does not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/135747
+    // If the render object holds on to a stale canvas reference, this will
+    // throw an exception.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SegmentedButton<int>(
+            segments: const <ButtonSegment<int>>[
+              ButtonSegment<int>(
+                value: 0,
+                label: Opacity(
+                  opacity: 0.5,
+                  child: Text('option'),
+                ),
+                icon: Opacity(
+                  opacity: 0.5,
+                  child: Icon(Icons.add),
+                ),
+              ),
+            ],
+            selected: const <int>{0},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(SegmentedButton<int>), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgetsWithLeakTracking('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Key key = UniqueKey();

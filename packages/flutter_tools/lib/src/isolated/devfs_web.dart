@@ -40,29 +40,13 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
   required AssetReader assetReader,
   required Stream<BuildResult> buildResults,
   required ConnectionProvider chromeConnection,
-  required LoadStrategy loadStrategy,
-  required bool enableDebugging,
-  ExpressionCompiler? expressionCompiler,
-  bool enableDebugExtension,
-  String hostname,
-  bool useSseForDebugProxy,
-  bool useSseForDebugBackend,
-  bool useSseForInjectedClient,
-  UrlEncoder? urlEncoder,
-  bool spawnDds,
-  bool enableDevtoolsLaunch,
-  DevtoolsLauncher? devtoolsLauncher,
-  bool launchDevToolsInNewWindow,
-  bool emitDebugEvents,
-  bool isInternalBuild,
-  Future<bool> Function()? isFlutterApp,
+  required ToolConfiguration toolConfiguration,
 });
 
 // A minimal index for projects that do not yet support web.
@@ -189,6 +173,7 @@ class WebAssetServer implements AssetReader {
     bool enableDds,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler,
+    Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
@@ -216,6 +201,10 @@ class WebAssetServer implements AssetReader {
 
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
+
+    for (final MapEntry<String, String> header in extraHeaders.entries) {
+      httpServer.defaultResponseHeaders.add(header.key, header.value);
+    }
 
     final PackageConfig packageConfig = buildInfo.packageConfig;
     final Map<String, String> digests = <String, String>{};
@@ -278,19 +267,13 @@ class WebAssetServer implements AssetReader {
     // In debug builds, spin up DWDS and the full asset server.
     final Dwds dwds = await dwdsLauncher(
       assetReader: server,
-      enableDebugExtension: true,
       buildResults: const Stream<BuildResult>.empty(),
       chromeConnection: () async {
         final Chromium chromium = await chromiumLauncher!.connectedInstance;
         return chromium.chromeConnection;
       },
-      hostname: hostname,
-      urlEncoder: urlTunneller,
-      enableDebugging: true,
-      useSseForDebugProxy: useSseForDebugProxy,
-      useSseForDebugBackend: useSseForDebugBackend,
-      useSseForInjectedClient: useSseForInjectedClient,
-      loadStrategy: FrontendServerRequireStrategyProvider(
+      toolConfiguration: ToolConfiguration(
+        loadStrategy: FrontendServerRequireStrategyProvider(
         ReloadConfiguration.none,
         server,
         PackageUriMapper(packageConfig),
@@ -299,8 +282,17 @@ class WebAssetServer implements AssetReader {
           globals.fs.file(entrypoint).absolute.uri,
         ),
       ).strategy,
-      expressionCompiler: expressionCompiler,
-      spawnDds: enableDds,
+        debugSettings: DebugSettings(
+          enableDebugExtension: true,
+          urlEncoder: urlTunneller,
+          useSseForDebugProxy: useSseForDebugProxy,
+          useSseForDebugBackend: useSseForDebugBackend,
+          useSseForInjectedClient: useSseForInjectedClient,
+          expressionCompiler: expressionCompiler,
+          spawnDds: enableDds,
+        ),
+        appMetadata: AppMetadata(hostname: hostname),
+      ),
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -653,6 +645,7 @@ class WebDevFS implements DevFS {
     required this.enableDds,
     required this.entrypoint,
     required this.expressionCompiler,
+    required this.extraHeaders,
     required this.chromiumLauncher,
     required this.nullAssertions,
     required this.nativeNullAssertions,
@@ -670,6 +663,7 @@ class WebDevFS implements DevFS {
   final BuildInfo buildInfo;
   final bool enableDwds;
   final bool enableDds;
+  final Map<String, String> extraHeaders;
   final bool testMode;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
@@ -772,6 +766,7 @@ class WebDevFS implements DevFS {
       enableDds,
       entrypoint,
       expressionCompiler,
+      extraHeaders,
       nullSafetyMode,
       testMode: testMode,
     );
@@ -838,14 +833,11 @@ class WebDevFS implements DevFS {
       final String entrypoint = globals.fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
       webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes(
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
-      final String fileGeneratorsPath = globals.artifacts!
-          .getArtifactPath(Artifact.flutterToolsFileGenerators);
-      webAssetServer.writeFile(
-          'flutter.js', flutter_js.generateFlutterJsFile(fileGeneratorsPath));
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -855,6 +847,7 @@ class WebDevFS implements DevFS {
         generateBootstrapScript(
           requireUrl: 'require.js',
           mapperUrl: 'stack_trace_mapper.js',
+          generateLoadingIndicator: enableDwds,
         ),
       );
       webAssetServer.writeFile(
@@ -935,6 +928,12 @@ class WebDevFS implements DevFS {
     'dev_compiler',
     'amd',
     'require.js',
+  ));
+
+  @visibleForTesting
+  final File flutterJs = globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
   ));
 
   @visibleForTesting

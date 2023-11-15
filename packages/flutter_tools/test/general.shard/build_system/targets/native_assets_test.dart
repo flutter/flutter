@@ -55,11 +55,19 @@ void main() {
     expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('NativeAssets throws error if missing ios archs', () async {
+  testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     await createPackageConfig(iosEnvironment);
 
     iosEnvironment.defines.remove(kIosArchs);
-    expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+
+    final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
+    await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
+
+    final File nativeAssetsYaml =
+        iosEnvironment.buildDir.childFile('native_assets.yaml');
+    final File depsFile = iosEnvironment.buildDir.childFile('native_assets.d');
+    expect(depsFile, exists);
+    expect(nativeAssetsYaml, exists);
   });
 
   testUsingContext('NativeAssets throws error if missing sdk root', () async {

@@ -102,6 +102,111 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
+  testWidgetsWithLeakTracking('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
+    final Set<String> tappedOutside = <String>{};
+    int propagatedTaps = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      propagatedTaps += 1;
+                    },
+                    child: const Text('Outside'),
+                  ),
+                  TapRegion(
+                    consumeOutsideTaps: true,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    consumeOutsideTaps: true,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedOutside, isEmpty);
+    expect(propagatedTaps, equals(0));
+
+    await click(find.text('No Group'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Outside'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'No Group',
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(tappedOutside, isEmpty);
+  });
+
   testWidgetsWithLeakTracking('TapRegionSurface detects inside taps', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
@@ -206,8 +311,6 @@ void main() {
                   ConstrainedBox(
                     constraints: const BoxConstraints.tightFor(width: 100, height: 100),
                     child: TapRegion(
-                      // ignore: avoid_redundant_argument_values
-                      behavior: HitTestBehavior.deferToChild,
                       onTapInside: (PointerEvent event) {
                         tappedInside.add(noGroupKey.value);
                       },
@@ -263,7 +366,8 @@ void main() {
     await click(find.byKey(group1AKey));
     // No hittable children, but set to opaque, so it hits, triggering the
     // group.
-    expect(tappedInside,
+    expect(
+      tappedInside,
       equals(<String>{
         'Group 1 A',
         'Group 1 B',

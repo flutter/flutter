@@ -1665,7 +1665,7 @@ void main() {
 
     // selected radio in pressed state
     await tester.pumpWidget(buildRadio());
-    await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1677,7 +1677,7 @@ void main() {
 
     // unselected radio in pressed state
     await tester.pumpWidget(buildRadio(selected: false));
-    await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1710,9 +1710,9 @@ void main() {
     // selected radio in hovered state
     await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildRadio());
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(Radio<bool>)));
+    final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture3.addPointer();
+    await gesture3.moveTo(tester.getCenter(find.byType(Radio<bool>)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1721,6 +1721,11 @@ void main() {
     );
 
     focusNode.dispose();
+
+    // Finish gesture to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Material3 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
@@ -1754,7 +1759,7 @@ void main() {
 
     // selected radio in pressed state
     await tester.pumpWidget(buildRadio());
-    await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1765,7 +1770,7 @@ void main() {
 
     // unselected radio in pressed state
     await tester.pumpWidget(buildRadio(selected: false));
-    await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Radio<bool>)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1798,9 +1803,9 @@ void main() {
     // selected radio in hovered state
     await tester.pumpWidget(Container()); // reset test
     await tester.pumpWidget(buildRadio());
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byType(Radio<bool>)));
+    final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture3.addPointer();
+    await gesture3.moveTo(tester.getCenter(find.byType(Radio<bool>)));
     await tester.pumpAndSettle();
 
     expect(
@@ -1809,6 +1814,11 @@ void main() {
     );
 
     focusNode.dispose();
+
+    // Finish gesture to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Radio.adaptive shows the correct platform widget', (WidgetTester tester) async {

@@ -147,6 +147,7 @@ void main() {
 
   testWidgetsWithLeakTracking('AlignTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
       end: Alignment.bottomRight,
@@ -171,6 +172,7 @@ void main() {
 
   testWidgetsWithLeakTracking('RelativePositionedTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<Rect?> rectTween = RectTween(
       begin: const Rect.fromLTWH(0, 0, 30, 40),
       end: const Rect.fromLTWH(100, 200, 100, 200),
@@ -217,6 +219,7 @@ void main() {
 
   testWidgetsWithLeakTracking('AlignTransition keeps width and height factors', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
       end: Alignment.bottomRight,
@@ -238,12 +241,14 @@ void main() {
 
   testWidgetsWithLeakTracking('SizeTransition clamps negative size factors - vertical axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  Directionality(
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         sizeFactor: animation,
+        fixedCrossAxisSizeFactor: 2.0,
         child: const Text('Ready'),
       ),
     );
@@ -252,22 +257,27 @@ void main() {
 
     final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 2.0);
 
     controller.value = 0.0;
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 2.0);
 
     controller.value = 0.75;
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 0.5);
+    expect(actualPositionedBox.widthFactor, 2.0);
 
     controller.value = 1.0;
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 2.0);
   });
 
   testWidgetsWithLeakTracking('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  Directionality(
@@ -275,6 +285,7 @@ void main() {
       child: SizeTransition(
         axis: Axis.horizontal,
         sizeFactor: animation,
+        fixedCrossAxisSizeFactor: 1.0,
         child: const Text('Ready'),
       ),
     );
@@ -283,22 +294,146 @@ void main() {
 
     final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.widthFactor, 0.0);
+    expect(actualPositionedBox.heightFactor, 1.0);
 
     controller.value = 0.0;
     await tester.pump();
     expect(actualPositionedBox.widthFactor, 0.0);
+    expect(actualPositionedBox.heightFactor, 1.0);
 
     controller.value = 0.75;
     await tester.pump();
     expect(actualPositionedBox.widthFactor, 0.5);
+    expect(actualPositionedBox.heightFactor, 1.0);
 
     controller.value = 1.0;
     await tester.pump();
     expect(actualPositionedBox.widthFactor, 1.0);
+    expect(actualPositionedBox.heightFactor, 1.0);
+  });
+
+  testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
+    final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
+
+    const Key key = Key('key');
+
+    final Widget widget =  Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: SizedBox(
+          key: key,
+          child: SizeTransition(
+            sizeFactor: animation,
+            fixedCrossAxisSizeFactor: 1.0,
+            child: const SizedBox.square(dimension: 100),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.5);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+
+    controller.value = 1.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size.square(100));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.5);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+  });
+
+  testWidgetsWithLeakTracking('SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis', (WidgetTester tester) async {
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
+    final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+
+    const Key key = Key('key');
+
+    final Widget widget =  Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: SizedBox(
+          key: key,
+          child: SizeTransition(
+            axis: Axis.horizontal,
+            sizeFactor: animation,
+            fixedCrossAxisSizeFactor: 1.0,
+            child: const SizedBox.square(dimension: 100),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.0);
+    expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.0);
+    expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.5);
+    expect(tester.getSize(find.byKey(key)), const Size(50, 100));
+
+    controller.value = 1.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 1.0);
+    expect(tester.getSize(find.byKey(key)), const Size.square(100));
+
+    controller.value = 0.5;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.5);
+    expect(tester.getSize(find.byKey(key)), const Size(50, 100));
+
+    controller.value = 0.0;
+    await tester.pump();
+    expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 0.0);
+    expect(tester.getSize(find.byKey(key)), const Size(0, 100));
   });
 
   testWidgetsWithLeakTracking('MatrixTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
       onTransform: (double value) => Matrix4.translationValues(value, value, value),
@@ -339,6 +474,7 @@ void main() {
 
   testWidgetsWithLeakTracking('MatrixTransition maintains chosen alignment during animation', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = MatrixTransition(
       alignment: Alignment.topRight,
       onTransform: (double value) => Matrix4.identity(),
@@ -360,6 +496,7 @@ void main() {
 
   testWidgetsWithLeakTracking('RotationTransition animates', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
       turns: controller,
@@ -399,6 +536,7 @@ void main() {
 
   testWidgetsWithLeakTracking('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
       turns: controller,
@@ -429,6 +567,7 @@ void main() {
     }
     testWidgetsWithLeakTracking('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
@@ -472,6 +611,7 @@ void main() {
     }
     testWidgetsWithLeakTracking('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Localizations(
         locale: const Locale('en', 'us'),
@@ -522,6 +662,7 @@ void main() {
   group('MatrixTransition', () {
     testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
@@ -585,6 +726,7 @@ void main() {
   group('ScaleTransition', () {
     testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
@@ -638,6 +780,7 @@ void main() {
   group('RotationTransition', () {
     testWidgetsWithLeakTracking('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
