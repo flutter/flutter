@@ -455,6 +455,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                             iconTheme: widget.selectedIndex == i ? selectedIconTheme : effectiveUnselectedIconTheme,
                             labelTextStyle: widget.selectedIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
                             padding: widget.destinations[i].padding,
+                            hoverColor: widget.destinations[i].hoverColor,
+                            splashColor: widget.destinations[i].splashColor,
                             useIndicator: useIndicator,
                             indicatorColor: useIndicator ? indicatorColor : null,
                             indicatorShape: useIndicator ? indicatorShape : null,
@@ -544,6 +546,8 @@ class _RailDestination extends StatelessWidget {
     required this.indexLabel,
     this.padding,
     required this.useIndicator,
+    this.hoverColor,
+    this.splashColor,
     this.indicatorColor,
     this.indicatorShape,
     this.disabled = false,
@@ -567,6 +571,8 @@ class _RailDestination extends StatelessWidget {
   final String indexLabel;
   final EdgeInsetsGeometry? padding;
   final bool useIndicator;
+  final Color? hoverColor;
+  final Color? splashColor;
   final Color? indicatorColor;
   final ShapeBorder? indicatorShape;
   final bool disabled;
@@ -800,8 +806,8 @@ class _RailDestination extends StatelessWidget {
               onTap: disabled ? null : onTap,
               borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
               customBorder: indicatorShape,
-              splashColor: effectiveSplashColor,
-              hoverColor: effectiveHoverColor,
+              splashColor: splashColor ?? effectiveSplashColor,
+              hoverColor: hoverColor ?? effectiveHoverColor,
               useMaterial3: material3,
               indicatorOffset: indicatorOffset,
               applyXOffset: applyXOffset,
@@ -959,6 +965,8 @@ class NavigationRailDestination {
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,
+    this.hoverColor,
+    this.splashColor,
     this.indicatorColor,
     this.indicatorShape,
     required this.label,
@@ -992,6 +1000,12 @@ class NavigationRailDestination {
   ///  * [NavigationRailDestination.icon], for a description of how to pair
   ///    icons.
   final Widget selectedIcon;
+
+  /// The color when this destination is hovered.
+  final Color? hoverColor;
+
+  /// The color when this destination is splashed.
+  final Color? splashColor;
 
   /// The color of the [indicatorShape] when this destination is selected.
   final Color? indicatorColor;

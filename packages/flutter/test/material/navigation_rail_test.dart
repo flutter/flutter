@@ -3463,6 +3463,71 @@ void main() {
     expect(_getIndicatorDecoration(tester)?.shape, shape);
   });
 
+  testWidgetsWithLeakTracking('Navigation destination updates hover and splash color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color hoverColor = Color(0xff0000ff);
+    const Color splashColor = Color(0xff00ffff);
+
+    Widget buildNavigationRail({Color? hoverColor, Color? splashColor}) {
+      return MaterialApp(
+        theme: theme,
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    key: const ValueKey<int>(1),
+                    useIndicator: true,
+                    selectedIndex: 0,
+                    destinations: <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.favorite_border),
+                        selectedIcon: const Icon(Icons.favorite),
+                        hoverColor: hoverColor,
+                        splashColor: splashColor,
+                        label: const Text('Abc'),
+                      ),
+                      const NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text('Abc'),
+                      ),
+                    ],
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    InkResponse? getInkResponse(WidgetTester tester) {
+      return tester.firstWidget<InkResponse>(
+        find.descendant(
+          of: find.byKey(const ValueKey<int>(1)),
+          matching: find.byWidgetPredicate((Widget widget) => widget is InkResponse),
+        ).first,
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationRail());
+
+    // Test default hover and splash color.
+    expect(getInkResponse(tester)?.hoverColor, theme.colorScheme.primary.withOpacity(0.04));
+    expect(getInkResponse(tester)?.splashColor, theme.colorScheme.primary.withOpacity(0.12));
+
+    await tester.pumpWidget(buildNavigationRail(hoverColor: hoverColor, splashColor: splashColor));
+
+    // Test custom hover and splash color.
+    expect(getInkResponse(tester)?.hoverColor, hoverColor);
+    expect(getInkResponse(tester)?.splashColor, splashColor);
+  });
+
   testWidgetsWithLeakTracking("Destination's respect their disabled state", (WidgetTester tester) async {
     late int selectedIndex;
     await _pumpNavigationRail(
