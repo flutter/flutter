@@ -40,7 +40,6 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
@@ -834,14 +833,11 @@ class WebDevFS implements DevFS {
       final String entrypoint = globals.fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
       webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes(
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
-      final String fileGeneratorsPath = globals.artifacts!
-          .getArtifactPath(Artifact.flutterToolsFileGenerators);
-      webAssetServer.writeFile(
-          'flutter.js', flutter_js.generateFlutterJsFile(fileGeneratorsPath));
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -932,6 +928,12 @@ class WebDevFS implements DevFS {
     'dev_compiler',
     'amd',
     'require.js',
+  ));
+
+  @visibleForTesting
+  final File flutterJs = globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
   ));
 
   @visibleForTesting
