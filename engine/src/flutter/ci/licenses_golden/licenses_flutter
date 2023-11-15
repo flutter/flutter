@@ -2799,6 +2799,8 @@ ORIGIN: ../../../flutter/fml/platform/darwin/scoped_policy.h + ../../../flutter/
 ORIGIN: ../../../flutter/fml/platform/darwin/scoped_typeref.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/darwin/string_range_sanitization.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/darwin/string_range_sanitization.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/darwin/weak_nsobject.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/darwin/weak_nsobject.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc + ../../../flutter/LICENSE
@@ -5563,6 +5565,8 @@ FILE: ../../../flutter/fml/platform/darwin/scoped_policy.h
 FILE: ../../../flutter/fml/platform/darwin/scoped_typeref.h
 FILE: ../../../flutter/fml/platform/darwin/string_range_sanitization.h
 FILE: ../../../flutter/fml/platform/darwin/string_range_sanitization.mm
+FILE: ../../../flutter/fml/platform/darwin/weak_nsobject.h
+FILE: ../../../flutter/fml/platform/darwin/weak_nsobject.mm
 FILE: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.cc
 FILE: ../../../flutter/fml/platform/fuchsia/message_loop_fuchsia.h
 FILE: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc

@@ -10,7 +10,6 @@
 #import <Foundation/NSObject.h>
 #import <UIKit/UIKit.h>
 
-#include "flutter/fml/memory/weak_ptr.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
