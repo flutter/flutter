@@ -104,9 +104,11 @@ flutter:
     assets:
       - assets/common/
       - path: assets/vanilla/
-        flavor: vanilla
+        flavors:
+          - vanilla
       - path: assets/strawberry/
-        flavor: strawberry
+        flavors:
+          - strawberry
   ''');
 
       fileSystem.file('assets/common/image.png').createSync(recursive: true);
@@ -133,9 +135,11 @@ flutter:
     assets:
       - assets/common/
       - path: assets/vanilla/
-        flavor: vanilla
+        flavors:
+          - vanilla
       - path: assets/strawberry/
-        flavor: strawberry
+        flavors:
+          - strawberry
   ''');
 
       fileSystem.file('assets/common/image.png').createSync(recursive: true);
