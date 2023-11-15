@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'velocity_tracker_data.dart';
 
 bool _withinTolerance(double actual, double expected) {
@@ -34,7 +35,7 @@ void main() {
     Offset(-71.51939428321249, 3716.7385187526947),
   ];
 
-  test('Velocity tracker gives expected results', () {
+  testWidgetsWithLeakTracking('Velocity tracker gives expected results', (WidgetTester tester) async {
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     int i = 0;
     for (final PointerEvent event in velocityEventData) {
@@ -48,7 +49,7 @@ void main() {
     }
   });
 
-  test('Velocity control test', () {
+  testWidgetsWithLeakTracking('Velocity control test', (WidgetTester tester) async {
     const Velocity velocity1 = Velocity(pixelsPerSecond: Offset(7.0, 0.0));
     const Velocity velocity2 = Velocity(pixelsPerSecond: Offset(12.0, 0.0));
     expect(velocity1, equals(const Velocity(pixelsPerSecond: Offset(7.0, 0.0))));
@@ -60,7 +61,7 @@ void main() {
     expect(velocity1, hasOneLineDescription);
   });
 
-  test('Interrupted velocity estimation', () {
+  testWidgetsWithLeakTracking('Interrupted velocity estimation', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/7510
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     for (final PointerEvent event in interruptedVelocityEventData) {
@@ -73,12 +74,12 @@ void main() {
     }
   });
 
-  test('No data velocity estimation', () {
+  testWidgetsWithLeakTracking('No data velocity estimation', (WidgetTester tester) async {
     final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
     expect(tracker.getVelocity(), Velocity.zero);
   });
 
-  test('FreeScrollStartVelocityTracker.getVelocity throws when no points', () {
+  testWidgetsWithLeakTracking('FreeScrollStartVelocityTracker.getVelocity throws when no points', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError? exception;
     try {
@@ -90,7 +91,7 @@ void main() {
     expect(exception?.toString(), contains('at least 1 point'));
   });
 
-  test('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', () {
+  testWidgetsWithLeakTracking('FreeScrollStartVelocityTracker.getVelocity throws when the new point precedes the previous point', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     AssertionError? exception;
 
@@ -105,7 +106,7 @@ void main() {
     expect(exception?.toString(), contains('has a smaller timestamp'));
   });
 
-  test('Estimate does not throw when there are more than 1 point', () {
+  testWidgetsWithLeakTracking('Estimate does not throw when there are more than 1 point', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
@@ -127,7 +128,7 @@ void main() {
     }
   });
 
-  test('Makes consistent velocity estimates with consistent velocity', () {
+  testWidgetsWithLeakTracking('Makes consistent velocity estimates with consistent velocity', (WidgetTester tester) async {
     final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
     Offset position = Offset.zero;
     Duration time = Duration.zero;
@@ -143,5 +144,56 @@ void main() {
         expect(tracker.getVelocity().pixelsPerSecond, positionDelta);
       }
     }
+  });
+
+  testWidgetsWithLeakTracking('Assume zero velocity when there are no recent samples - base VelocityTracker', (WidgetTester tester) async {
+    final VelocityTracker tracker = VelocityTracker.withKind(PointerDeviceKind.touch);
+    Offset position = Offset.zero;
+    Duration time = Duration.zero;
+    const Offset positionDelta = Offset(0, -1);
+    const Duration durationDelta = Duration(seconds: 1);
+
+    for (int i = 0; i < 10; i+=1) {
+      position += positionDelta;
+      time += durationDelta;
+      tracker.addPosition(time, position);
+    }
+    await tester.pumpAndSettle();
+
+    expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
+  });
+
+  testWidgetsWithLeakTracking('Assume zero velocity when there are no recent samples - IOS', (WidgetTester tester) async {
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+    Offset position = Offset.zero;
+    Duration time = Duration.zero;
+    const Offset positionDelta = Offset(0, -1);
+    const Duration durationDelta = Duration(seconds: 1);
+
+    for (int i = 0; i < 10; i+=1) {
+      position += positionDelta;
+      time += durationDelta;
+      tracker.addPosition(time, position);
+    }
+    await tester.pumpAndSettle();
+
+    expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
+  });
+
+  testWidgetsWithLeakTracking('Assume zero velocity when there are no recent samples - MacOS', (WidgetTester tester) async {
+    final MacOSScrollViewFlingVelocityTracker tracker = MacOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+    Offset position = Offset.zero;
+    Duration time = Duration.zero;
+    const Offset positionDelta = Offset(0, -1);
+    const Duration durationDelta = Duration(seconds: 1);
+
+    for (int i = 0; i < 10; i+=1) {
+      position += positionDelta;
+      time += durationDelta;
+      tracker.addPosition(time, position);
+    }
+    await tester.pumpAndSettle();
+
+    expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
   });
 }
