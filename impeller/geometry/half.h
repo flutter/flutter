@@ -13,6 +13,8 @@
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 
+// NOLINTBEGIN(google-explicit-constructor)
+
 #ifdef FML_OS_WIN
 using InternalHalf = uint16_t;
 #else
@@ -184,5 +186,7 @@ inline std::ostream& operator<<(std::ostream& out,
       << static_cast<impeller::Scalar>(p.w) << ")";
   return out;
 }
+
+// NOLINTEND(google-explicit-constructor)
 
 }  // namespace std

@@ -12,6 +12,8 @@
 
 namespace impeller {
 
+// NOLINTBEGIN(google-explicit-constructor)
+
 using Scalar = float;
 
 template <class T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
@@ -51,5 +53,7 @@ struct Degrees {
     return Radians{degrees * kPi / 180.0f};
   };
 };
+
+// NOLINTEND(google-explicit-constructor)
 
 }  // namespace impeller
