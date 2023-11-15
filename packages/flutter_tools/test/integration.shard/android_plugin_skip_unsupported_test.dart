@@ -26,8 +26,15 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/97729 (#137115).
-  Future<ProcessResult> testPlugin({
+  /// Creates a project which uses a plugin, which is not supported on Android.
+  /// This means it has no entry in pubspec.yaml for:
+  /// flutter -> plugin -> platforms -> android
+  ///
+  /// [createAndroidPluginFolder] indicates that the plugin can additionally
+  /// have a functioning `android` folder.
+  Future<ProcessResult> testUnsupportedPlugin({
     required Project project,
+    required bool createAndroidPluginFolder,
   }) async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
@@ -35,28 +42,29 @@ void main() {
       'flutter',
     );
 
-    // Create dummy plugin that supports iOS and Android.
+    // Create dummy plugin that supports iOS and optionally Android.
     processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
       'create',
       '--template=plugin',
-      '--platforms=ios,android',
+      '--platforms=ios${createAndroidPluginFolder ? ',android' : ''}',
       'test_plugin',
     ], workingDirectory: tempDir.path);
 
     final Directory pluginAppDir = tempDir.childDirectory('test_plugin');
 
-    // Override pubspec to drop support for the Android implementation.
     final File pubspecFile = pluginAppDir.childFile('pubspec.yaml');
     String pubspecYamlSrc =
         pubspecFile.readAsStringSync().replaceAll('\r\n', '\n');
-    pubspecYamlSrc = pubspecYamlSrc
-        .replaceFirst(
-      RegExp(r'name:.*\n'),
-      'name: test_plugin\n',
-    )
-        .replaceFirst('''
+    if (createAndroidPluginFolder) {
+      // Override pubspec to drop support for the Android implementation.
+      pubspecYamlSrc = pubspecYamlSrc
+          .replaceFirst(
+        RegExp(r'name:.*\n'),
+        'name: test_plugin\n',
+      )
+          .replaceFirst('''
       android:
         package: com.example.test_plugin
         pluginClass: TestPlugin
@@ -66,12 +74,15 @@ void main() {
 #        pluginClass: TestPlugin
 ''');
 
-    pubspecFile.writeAsStringSync(pubspecYamlSrc);
+      pubspecFile.writeAsStringSync(pubspecYamlSrc);
 
-    // Check the android directory and the build.gradle file within.
-    final File pluginGradleFile =
-        pluginAppDir.childDirectory('android').childFile('build.gradle');
-    expect(pluginGradleFile, exists);
+      // Check the android directory and the build.gradle file within.
+      final File pluginGradleFile =
+          pluginAppDir.childDirectory('android').childFile('build.gradle');
+      expect(pluginGradleFile, exists);
+    } else {
+      expect(pubspecYamlSrc, isNot(contains('android:')));
+    }
 
     // Create a project which includes the plugin to test against
     final Directory pluginExampleAppDir =
@@ -91,7 +102,21 @@ void main() {
 
   test('skip plugin if it does not support the Android platform', () async {
     final Project project = PluginWithPathAndroidProject();
-    final ProcessResult buildApkResult = await testPlugin(project: project);
+    final ProcessResult buildApkResult = await testUnsupportedPlugin(
+        project: project, createAndroidPluginFolder: false);
+    expect(buildApkResult.stderr.toString(),
+        isNot(contains('Please fix your settings.gradle.')));
+    expect(buildApkResult.exitCode, equals(0),
+        reason:
+            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+  });
+
+  test(
+      'skip plugin with android folder if it does not support the Android platform',
+      () async {
+    final Project project = PluginWithPathAndroidProject();
+    final ProcessResult buildApkResult = await testUnsupportedPlugin(
+        project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle.')));
     expect(buildApkResult.exitCode, equals(0),
@@ -106,7 +131,24 @@ void main() {
       'skip plugin if it does not support the Android platform with a _plugin.each_ settings.gradle',
       () async {
     final Project project = PluginEachWithPathAndroidProject();
-    final ProcessResult buildApkResult = await testPlugin(project: project);
+    final ProcessResult buildApkResult = await testUnsupportedPlugin(
+        project: project, createAndroidPluginFolder: false);
+    expect(buildApkResult.stderr.toString(),
+        isNot(contains('Please fix your settings.gradle.')));
+    expect(buildApkResult.exitCode, equals(0),
+        reason:
+            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+  });
+
+  // TODO(54566): Remove test when issue is resolved.
+  /// Test with [PluginEachSettingsGradleProject] with a legacy settings.gradle
+  /// which uses the `.flutter-plugins` file to load EACH plugin.
+  test(
+      'skip plugin with android folder if it does not support the Android platform with a _plugin.each_ settings.gradle',
+      () async {
+    final Project project = PluginEachWithPathAndroidProject();
+    final ProcessResult buildApkResult = await testUnsupportedPlugin(
+        project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle.')));
     expect(buildApkResult.exitCode, equals(0),
@@ -121,7 +163,8 @@ void main() {
       'skip plugin if it does not support the Android platform with a compromised _plugin.each_ settings.gradle',
       () async {
     final Project project = PluginCompromisedEachWithPathAndroidProject();
-    final ProcessResult buildApkResult = await testPlugin(project: project);
+    final ProcessResult buildApkResult = await testUnsupportedPlugin(
+        project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
         contains('Please fix your settings.gradle.'));
     expect(buildApkResult.exitCode, equals(0),
