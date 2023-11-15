@@ -37,6 +37,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class TestActivity extends TestableFlutterActivity {
   static final String TAG = "Scenarios";
 
+  private Runnable resultsTask =
+      new Runnable() {
+        @Override
+        public void run() {
+          final Uri logFileUri = getIntent().getData();
+          writeTimelineData(logFileUri);
+          testFlutterLoaderCallbackWhenInitializedTwice();
+        }
+      };
+
+  private Handler handler = new Handler();
+
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -47,20 +59,16 @@ public abstract class TestActivity extends TestableFlutterActivity {
       if (Build.VERSION.SDK_INT > 22) {
         requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
       }
-      final Uri logFileUri = launchIntent.getData();
-      new Handler()
-          .postDelayed(
-              new Runnable() {
-                @Override
-                public void run() {
-                  writeTimelineData(logFileUri);
-                  testFlutterLoaderCallbackWhenInitializedTwice();
-                }
-              },
-              20000);
+      handler.postDelayed(resultsTask, 20000);
     } else {
       testFlutterLoaderCallbackWhenInitializedTwice();
     }
+  }
+
+  @Override
+  protected void onDestroy() {
+    handler.removeCallbacks(resultsTask);
+    super.onDestroy();
   }
 
   @Override
