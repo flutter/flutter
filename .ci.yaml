@@ -3731,6 +3731,7 @@ targets:
       - .ci.yaml
 
   - name: Mac_android hello_world_android__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/138469
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
