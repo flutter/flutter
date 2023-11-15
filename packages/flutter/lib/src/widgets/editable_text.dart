@@ -34,6 +34,7 @@ import 'notification_listener.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
+import 'scroll_notification_observer.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
@@ -2162,6 +2163,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _toolbarVisibleAtScrollStart = false;
   bool _showToolbarOnScreenScheduled = false;
   TextEditingValue? _valueWhenShowToolbarOnScreenScheduled;
+  ScrollNotificationObserverState? _scrollNotificationObserver;
 
   final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
@@ -2868,9 +2870,58 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // cursor) are supposed to run.
   bool _tickersEnabled = true;
 
+  void _handleContextMenuOnScroll(ScrollNotification notification) {
+    final bool platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android
+                                            || defaultTargetPlatform == TargetPlatform.iOS;
+    final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
+    if (!platformSupportsFadeOnScroll || webContextMenuEnabled) {
+      return;
+    }
+    // When the scroll begins and the toolbar is visible, hide it
+    // until scrolling ends.
+    //
+    // When scrolling ends and the toolbar was present at the
+    // beginning of the scroll we should re-show the toolbar only
+    // if the selection endpoints are within the viewport at the
+    // end of the scroll. If not then we should schedule the
+    // toolbar to be shown when we scroll the selection back into
+    // view.
+    //
+    // A scheduled toolbar will only be shown if the editing state
+    // did not change between the time the toolbar was first
+    // scheduled to be shown to when it is ready to be shown.
+    if (notification is ScrollStartNotification) {
+      _toolbarVisibleAtScrollStart = _selectionOverlay != null && _selectionOverlay!.toolbarIsVisible;
+      if (_toolbarVisibleAtScrollStart) {
+        hideToolbar(false);
+      }
+    } else if (notification is ScrollEndNotification) {
+      final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
+      if ((_toolbarVisibleAtScrollStart || _showToolbarOnScreenScheduled) && selectionIsVisible) {
+        _toolbarVisibleAtScrollStart = false;
+        if (_showToolbarOnScreenScheduled) {
+          _showToolbarOnScreenScheduled = false;
+          if (_valueWhenShowToolbarOnScreenScheduled == _value) {
+            showToolbar();
+          }
+          _valueWhenShowToolbarOnScreenScheduled = null;
+        } else {
+          showToolbar();
+        }
+      } else if (_toolbarVisibleAtScrollStart) {
+        _showToolbarOnScreenScheduled = true;
+        _valueWhenShowToolbarOnScreenScheduled = _value;
+      }
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    _scrollNotificationObserver?.removeListener(_handleContextMenuOnScroll);
+    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+    _scrollNotificationObserver?.addListener(_handleContextMenuOnScroll);
 
     _style = MediaQuery.boldTextOf(context)
         ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
@@ -3048,6 +3099,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleContextMenuOnScroll);
+      _scrollNotificationObserver = null;
+    }
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
@@ -4949,130 +5004,83 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 focusNode: widget.focusNode,
                 includeSemantics: false,
                 debugLabel: kReleaseMode ? null : 'EditableText',
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification notification) {
-                    final bool platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android
-                                                           || defaultTargetPlatform == TargetPlatform.iOS;
-                    final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
-                    if (!platformSupportsFadeOnScroll || webContextMenuEnabled) {
-                      return false;
-                    }
-                    // When the scroll begins and the toolbar is visible, hide it
-                    // until scrolling ends.
-                    //
-                    // When scrolling ends and the toolbar was present at the
-                    // beginning of the scroll we should re-show the toolbar only
-                    // if the selection endpoints are within the viewport at the
-                    // end of the scroll. If not then we should schedule the
-                    // toolbar to be shown when we scroll the selection back into
-                    // view.
-                    //
-                    // A scheduled toolbar will only be shown if the editing state
-                    // did not change between the time the toolbar was first
-                    // scheduled to be shown to when it is ready to be shown.
-                    if (notification is ScrollStartNotification) {
-                      _toolbarVisibleAtScrollStart = _selectionOverlay != null && _selectionOverlay!.toolbarIsVisible;
-                      if (_toolbarVisibleAtScrollStart) {
-                        hideToolbar(false);
-                      }
-                    } else if (notification is ScrollEndNotification) {
-                      final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
-                      if ((_toolbarVisibleAtScrollStart || _showToolbarOnScreenScheduled) && selectionIsVisible) {
-                        _toolbarVisibleAtScrollStart = false;
-                        if (_showToolbarOnScreenScheduled) {
-                          _showToolbarOnScreenScheduled = false;
-                          if (_valueWhenShowToolbarOnScreenScheduled == _value) {
-                            showToolbar();
-                          }
-                          _valueWhenShowToolbarOnScreenScheduled = null;
-                        } else {
-                          showToolbar();
-                        }
-                      } else if (_toolbarVisibleAtScrollStart) {
-                        _showToolbarOnScreenScheduled = true;
-                        _valueWhenShowToolbarOnScreenScheduled = _value;
-                      }
-                    }
-                    return false;
-                  },
-                  child: Scrollable(
-                    key: _scrollableKey,
-                    excludeFromSemantics: true,
-                    axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-                    controller: _scrollController,
-                    physics: widget.scrollPhysics,
-                    dragStartBehavior: widget.dragStartBehavior,
-                    restorationId: widget.restorationId,
-                    // If a ScrollBehavior is not provided, only apply scrollbars when
-                    // multiline. The overscroll indicator should not be applied in
-                    // either case, glowing or stretching.
-                    scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
-                      scrollbars: _isMultiline,
-                      overscroll: false,
-                    ),
-                    viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                      return CompositedTransformTarget(
-                        link: _toolbarLayerLink,
-                        child: Semantics(
-                          onCopy: _semanticsOnCopy(controls),
-                          onCut: _semanticsOnCut(controls),
-                          onPaste: _semanticsOnPaste(controls),
-                          child: _ScribbleFocusable(
-                            focusNode: widget.focusNode,
-                            editableKey: _editableKey,
-                            enabled: widget.scribbleEnabled,
-                            updateSelectionRects: () {
-                              _openInputConnection();
-                              _updateSelectionRects(force: true);
-                            },
-                            child: _Editable(
-                              key: _editableKey,
-                              startHandleLayerLink: _startHandleLayerLink,
-                              endHandleLayerLink: _endHandleLayerLink,
-                              inlineSpan: buildTextSpan(),
-                              value: _value,
-                              cursorColor: _cursorColor,
-                              backgroundCursorColor: widget.backgroundCursorColor,
-                              showCursor: _cursorVisibilityNotifier,
-                              forceLine: widget.forceLine,
-                              readOnly: widget.readOnly,
-                              hasFocus: _hasFocus,
-                              maxLines: widget.maxLines,
-                              minLines: widget.minLines,
-                              expands: widget.expands,
-                              strutStyle: widget.strutStyle,
-                              selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                  ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                  : widget.selectionColor,
-                              textScaler: effectiveTextScaler,
-                              textAlign: widget.textAlign,
-                              textDirection: _textDirection,
-                              locale: widget.locale,
-                              textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                              textWidthBasis: widget.textWidthBasis,
-                              obscuringCharacter: widget.obscuringCharacter,
-                              obscureText: widget.obscureText,
-                              offset: offset,
-                              rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                              cursorWidth: widget.cursorWidth,
-                              cursorHeight: widget.cursorHeight,
-                              cursorRadius: widget.cursorRadius,
-                              cursorOffset: widget.cursorOffset ?? Offset.zero,
-                              selectionHeightStyle: widget.selectionHeightStyle,
-                              selectionWidthStyle: widget.selectionWidthStyle,
-                              paintCursorAboveText: widget.paintCursorAboveText,
-                              enableInteractiveSelection: widget._userSelectionEnabled,
-                              textSelectionDelegate: this,
-                              devicePixelRatio: _devicePixelRatio,
-                              promptRectRange: _currentPromptRectRange,
-                              promptRectColor: widget.autocorrectionTextRectColor,
-                              clipBehavior: widget.clipBehavior,
-                            ),
+                child: Scrollable(
+                  key: _scrollableKey,
+                  excludeFromSemantics: true,
+                  axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+                  controller: _scrollController,
+                  physics: widget.scrollPhysics,
+                  dragStartBehavior: widget.dragStartBehavior,
+                  restorationId: widget.restorationId,
+                  // If a ScrollBehavior is not provided, only apply scrollbars when
+                  // multiline. The overscroll indicator should not be applied in
+                  // either case, glowing or stretching.
+                  scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(
+                    scrollbars: _isMultiline,
+                    overscroll: false,
+                  ),
+                  viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                    return CompositedTransformTarget(
+                      link: _toolbarLayerLink,
+                      child: Semantics(
+                        onCopy: _semanticsOnCopy(controls),
+                        onCut: _semanticsOnCut(controls),
+                        onPaste: _semanticsOnPaste(controls),
+                        child: _ScribbleFocusable(
+                          focusNode: widget.focusNode,
+                          editableKey: _editableKey,
+                          enabled: widget.scribbleEnabled,
+                          updateSelectionRects: () {
+                            _openInputConnection();
+                            _updateSelectionRects(force: true);
+                          },
+                          child: _Editable(
+                            key: _editableKey,
+                            startHandleLayerLink: _startHandleLayerLink,
+                            endHandleLayerLink: _endHandleLayerLink,
+                            inlineSpan: buildTextSpan(),
+                            value: _value,
+                            cursorColor: _cursorColor,
+                            backgroundCursorColor: widget.backgroundCursorColor,
+                            showCursor: _cursorVisibilityNotifier,
+                            forceLine: widget.forceLine,
+                            readOnly: widget.readOnly,
+                            hasFocus: _hasFocus,
+                            maxLines: widget.maxLines,
+                            minLines: widget.minLines,
+                            expands: widget.expands,
+                            strutStyle: widget.strutStyle,
+                            selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                : widget.selectionColor,
+                            textScaler: effectiveTextScaler,
+                            textAlign: widget.textAlign,
+                            textDirection: _textDirection,
+                            locale: widget.locale,
+                            textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                            textWidthBasis: widget.textWidthBasis,
+                            obscuringCharacter: widget.obscuringCharacter,
+                            obscureText: widget.obscureText,
+                            offset: offset,
+                            rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                            cursorWidth: widget.cursorWidth,
+                            cursorHeight: widget.cursorHeight,
+                            cursorRadius: widget.cursorRadius,
+                            cursorOffset: widget.cursorOffset ?? Offset.zero,
+                            selectionHeightStyle: widget.selectionHeightStyle,
+                            selectionWidthStyle: widget.selectionWidthStyle,
+                            paintCursorAboveText: widget.paintCursorAboveText,
+                            enableInteractiveSelection: widget._userSelectionEnabled,
+                            textSelectionDelegate: this,
+                            devicePixelRatio: _devicePixelRatio,
+                            promptRectRange: _currentPromptRectRange,
+                            promptRectColor: widget.autocorrectionTextRectColor,
+                            clipBehavior: widget.clipBehavior,
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
