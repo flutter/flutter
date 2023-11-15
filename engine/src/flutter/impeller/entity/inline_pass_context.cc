@@ -54,7 +54,7 @@ bool InlinePassContext::EndPass() {
   }
 
   if (command_buffer_) {
-    if (!command_buffer_->SubmitCommandsAsync(std::move(pass_))) {
+    if (!command_buffer_->EncodeAndSubmit(pass_)) {
       VALIDATION_LOG
           << "Failed to encode and submit command buffer while ending "
              "render pass.";

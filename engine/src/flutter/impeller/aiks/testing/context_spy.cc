@@ -63,12 +63,6 @@ std::shared_ptr<ContextMock> ContextSpy::MakeContext(
               return real_buffer->SetLabel(label);
             });
 
-        ON_CALL(*spy, SubmitCommandsAsync)
-            .WillByDefault([real_buffer](
-                               std::shared_ptr<RenderPass> render_pass) {
-              return real_buffer->SubmitCommandsAsync(std::move(render_pass));
-            });
-
         ON_CALL(*spy, OnCreateRenderPass)
             .WillByDefault(
                 [real_buffer, shared_this](const RenderTarget& render_target) {
