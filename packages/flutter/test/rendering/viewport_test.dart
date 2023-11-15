@@ -488,8 +488,7 @@ void main() {
     expect(revealed.offset, -200 - 22 - 2);
   });
 
-  testWidgetsWithLeakTracking('Viewport getOffsetToReveal Sliver - left - reverse growth',
-  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
     const Key centerKey = ValueKey<String>('center');
     const EdgeInsets padding = EdgeInsets.only(left: 22.0, right: 23.0);
     const Widget centerSliver = SliverPadding(
