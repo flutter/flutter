@@ -48,8 +48,6 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 }
 
 void main() {
-   LeakTesting.settings = LeakTesting.settings.withTracked(allNotGCed: true);
-
   testWidgetsWithLeakTracking('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -490,7 +488,8 @@ void main() {
     expect(revealed.offset, -200 - 22 - 2);
   });
 
-  testWidgetsWithLeakTracking('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport getOffsetToReveal Sliver - left - reverse growth',
+  (WidgetTester tester) async {
     const Key centerKey = ValueKey<String>('center');
     const EdgeInsets padding = EdgeInsets.only(left: 22.0, right: 23.0);
     const Widget centerSliver = SliverPadding(
@@ -548,7 +547,11 @@ void main() {
     expect(revealed.offset, - 300 - 22 - 1);
   });
 
-  testWidgetsWithLeakTracking('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport getOffsetToReveal Sliver - left',
+    // TODO(polina-c): fix leaks and stop ignoring them
+    // https://github.com/flutter/flutter/issues/138455
+    leakTesting: LeakTesting.settings.withIgnored(allNotGCed: true),
+  (WidgetTester tester) async {
     final ScrollController controller = ScrollController(initialScrollOffset: 300.0);
     addTearDown(controller.dispose);
     final List<Widget> children = <Widget>[];
@@ -1611,7 +1614,11 @@ void main() {
       expect(revealOffset, (300.0 + padding.horizontal)  * 5 + 22.0 * 2);
     });
 
-    testWidgetsWithLeakTracking('down, reverse growth', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('down, reverse growth',
+      // TODO(polina-c): fix leaks and stop ignoring them
+      // https://github.com/flutter/flutter/issues/138455
+      leakTesting: LeakTesting.settings.withIgnored(allNotGCed: true),
+    (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical, reverseGrowth: true));
       final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
 
