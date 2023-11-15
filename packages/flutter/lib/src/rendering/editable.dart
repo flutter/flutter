@@ -2894,11 +2894,11 @@ class _CaretPainter extends RenderEditablePainter {
   void paintRegularCursor(Canvas canvas, RenderEditable renderEditable, Color caretColor, TextPosition textPosition) {
     final Rect integralRect = renderEditable.getLocalRectForCaret(textPosition);
     if (shouldPaint) {
-      if(floatingCursorRect != null) {
+      if (floatingCursorRect != null) {
         final double distance = math.sqrt(
           math.pow(floatingCursorRect!.center.dx - integralRect.center.dx, 2) + math.pow(floatingCursorRect!.center.dx - integralRect.center.dx, 2)
         );
-        if(distance.abs() < _kShortestDistanceWithFloatingAndRegularCursors) {
+        if (distance.abs() < _kShortestDistanceWithFloatingAndRegularCursors) {
           return;
         }
       }
