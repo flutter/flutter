@@ -335,9 +335,9 @@ class AndroidSdk {
   };
 
   /// Locates the binary path for an NDK binary.
-  /// 
+  ///
   /// The order of resolution is as follows:
-  /// 
+  ///
   /// 1. If [globals.config] defines an `'android-ndk'` use that.
   /// 2. If the environment variable `ANDROID_NDK_HOME` is defined, use that.
   /// 3. If the environment variable `ANDROID_NDK_PATH` is defined, use that.
