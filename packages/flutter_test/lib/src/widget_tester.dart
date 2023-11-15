@@ -121,7 +121,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// The argument [experimentalLeakTesting] is experimental and is not recommended
 /// for use outside of Flutter Framework.
 /// In the current version [experimentalLeakTesting] is noop.
-/// Use the method `testWidgetsWithLeakTracking` to validate that tests are leak free.
+/// Use the function `testWidgetsWithLeakTracking` to validate that tests are leak free.
 ///
 /// ## Sample code
 ///
@@ -148,7 +148,6 @@ void testWidgets(
   // https://github.com/flutter/flutter/issues/135856
   // TODO(polina-c): remove stub usage of leak_tracking_testing.
   // https://github.com/flutter/flutter/issues/135856
-  // This is stub usage of leak_tracking_testing, to create dependency in G3 for future use.
   // ignore: unused_local_variable, stub usage of leak_tracking_testing, to create dependency in G3 for future use.
   const matcher_expect.Matcher matcher = isLeakFree;
 
