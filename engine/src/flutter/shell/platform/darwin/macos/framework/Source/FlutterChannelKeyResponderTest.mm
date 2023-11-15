@@ -2,26 +2,61 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.h"
+
 #include <Carbon/Carbon.h>
 #import <Foundation/Foundation.h>
-#import <OCMock/OCMock.h>
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterChannelKeyResponder.h"
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
-#import "flutter/testing/testing.h"
+#include "flutter/testing/autoreleasepool_test.h"
+#include "flutter/testing/testing.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
+
+// FlutterBasicMessageChannel fake instance that records Flutter key event messages.
+//
+// When a sendMessage:reply: callback is specified, it is invoked with the value stored in the
+// nextResponse property.
+@interface FakeMessageChannel : FlutterBasicMessageChannel
+@property(nonatomic, readonly) NSMutableArray<id>* messages;
+@property(nonatomic) NSDictionary* nextResponse;
+
+- (instancetype)init;
+- (void)sendMessage:(id _Nullable)message;
+- (void)sendMessage:(id _Nullable)message reply:(FlutterReply _Nullable)callback;
+@end
+
+@implementation FakeMessageChannel
+- (instancetype)init {
+  self = [super init];
+  if (self != nil) {
+    _messages = [[NSMutableArray<id> alloc] init];
+  }
+  return self;
+}
+
+- (void)sendMessage:(id _Nullable)message {
+  [self sendMessage:message reply:nil];
+}
+
+- (void)sendMessage:(id _Nullable)message reply:(FlutterReply _Nullable)callback {
+  [_messages addObject:message];
+  if (callback) {
+    callback(_nextResponse);
+  }
+}
+@end
 
 namespace flutter::testing {
 
 namespace {
 using flutter::testing::keycodes::kLogicalKeyQ;
 
-NSEvent* keyEvent(NSEventType type,
-                  NSEventModifierFlags modifierFlags,
-                  NSString* characters,
-                  NSString* charactersIgnoringModifiers,
-                  BOOL isARepeat,
-                  unsigned short keyCode) {
+NSEvent* CreateKeyEvent(NSEventType type,
+                        NSEventModifierFlags modifierFlags,
+                        NSString* characters,
+                        NSString* charactersIgnoringModifiers,
+                        BOOL isARepeat,
+                        unsigned short keyCode) {
   return [NSEvent keyEventWithType:type
                           location:NSZeroPoint
                      modifierFlags:modifierFlags
@@ -35,233 +70,190 @@ NSEvent* keyEvent(NSEventType type,
 }
 }  // namespace
 
-TEST(FlutterChannelKeyResponderUnittests, BasicKeyEvent) {
-  __block NSMutableArray<id>* messages = [[NSMutableArray<id> alloc] init];
-  __block BOOL next_response = TRUE;
+using FlutterChannelKeyResponderTest = AutoreleasePoolTest;
+
+TEST_F(FlutterChannelKeyResponderTest, BasicKeyEvent) {
   __block NSMutableArray<NSNumber*>* responses = [[NSMutableArray<NSNumber*> alloc] init];
-
-  id mockKeyEventChannel = OCMStrictClassMock([FlutterBasicMessageChannel class]);
-  OCMStub([mockKeyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
-      .andDo((^(NSInvocation* invocation) {
-        [invocation retainArguments];
-        NSDictionary* message;
-        [invocation getArgument:&message atIndex:2];
-        [messages addObject:message];
-
-        FlutterReply callback;
-        [invocation getArgument:&callback atIndex:3];
-        NSDictionary* keyMessage = @{
-          @"handled" : @(next_response),
-        };
-        callback(keyMessage);
-      }));
-
+  FakeMessageChannel* channel = [[FakeMessageChannel alloc] init];
   FlutterChannelKeyResponder* responder =
-      [[FlutterChannelKeyResponder alloc] initWithChannel:mockKeyEventChannel];
+      [[FlutterChannelKeyResponder alloc] initWithChannel:channel];
 
-  // Initial empty modifiers. This can happen when user opens window while modifier key is pressed
-  // and then releases the modifier. No events should be sent, but the callback
-  // should still be called.
+  // Initial empty modifiers.
+  //
+  // This can happen when user opens window while modifier key is pressed and then releases the
+  // modifier. No events should be sent, but the callback should still be called.
   // Regression test for https://github.com/flutter/flutter/issues/87339.
-  [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", FALSE, 60)
+  channel.nextResponse = @{@"handled" : @YES};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", NO, 60)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 0u);
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([responses[0] boolValue], TRUE);
+  EXPECT_EQ([channel.messages count], 0u);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([responses[0] boolValue], YES);
   [responses removeAllObjects];
 
   // Key down
-  [responder handleEvent:keyEvent(NSEventTypeKeyDown, 0x100, @"a", @"a", FALSE, 0)
+  channel.nextResponse = @{@"handled" : @YES};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeKeyDown, 0x100, @"a", @"a", NO, 0)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keydown");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 0);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0x0);
-  EXPECT_STREQ([[messages lastObject][@"characters"] UTF8String], "a");
-  EXPECT_STREQ([[messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keydown");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 0);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0x0);
+  EXPECT_STREQ([[channel.messages lastObject][@"characters"] UTF8String], "a");
+  EXPECT_STREQ([[channel.messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], TRUE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], YES);
 
-  [messages removeAllObjects];
+  [channel.messages removeAllObjects];
   [responses removeAllObjects];
 
   // Key up
-  next_response = FALSE;
-  [responder handleEvent:keyEvent(NSEventTypeKeyUp, 0x100, @"a", @"a", FALSE, 0)
+  channel.nextResponse = @{@"handled" : @NO};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeKeyUp, 0x100, @"a", @"a", NO, 0)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keyup");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 0);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0);
-  EXPECT_STREQ([[messages lastObject][@"characters"] UTF8String], "a");
-  EXPECT_STREQ([[messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keyup");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 0);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0);
+  EXPECT_STREQ([[channel.messages lastObject][@"characters"] UTF8String], "a");
+  EXPECT_STREQ([[channel.messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], FALSE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], NO);
 
-  [messages removeAllObjects];
+  [channel.messages removeAllObjects];
   [responses removeAllObjects];
 
   // LShift down
-  next_response = TRUE;
-  [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x20102, @"", @"", FALSE, 56)
+  channel.nextResponse = @{@"handled" : @YES};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeFlagsChanged, 0x20102, @"", @"", NO, 56)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keydown");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 56);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0x20002);
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keydown");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 56);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0x20002);
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], TRUE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], YES);
 
-  [messages removeAllObjects];
+  [channel.messages removeAllObjects];
   [responses removeAllObjects];
 
   // RShift down
-  next_response = false;
-  [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x20006, @"", @"", FALSE, 60)
+  channel.nextResponse = @{@"handled" : @NO};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeFlagsChanged, 0x20006, @"", @"", NO, 60)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keydown");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 60);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0x20006);
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keydown");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 60);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0x20006);
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], FALSE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], NO);
 
-  [messages removeAllObjects];
+  [channel.messages removeAllObjects];
   [responses removeAllObjects];
 
   // LShift up
-  next_response = false;
-  [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x20104, @"", @"", FALSE, 56)
+  channel.nextResponse = @{@"handled" : @NO};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeFlagsChanged, 0x20104, @"", @"", NO, 56)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keyup");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 56);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0x20004);
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keyup");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 56);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0x20004);
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], FALSE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], NO);
 
-  [messages removeAllObjects];
+  [channel.messages removeAllObjects];
   [responses removeAllObjects];
 
   // RShift up
-  next_response = false;
-  [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0, @"", @"", FALSE, 60)
+  channel.nextResponse = @{@"handled" : @NO};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeFlagsChanged, 0, @"", @"", NO, 60)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keyup");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 60);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0);
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keyup");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 60);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0);
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], FALSE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], NO);
 
-  [messages removeAllObjects];
+  [channel.messages removeAllObjects];
   [responses removeAllObjects];
 
   // RShift up again, should be ignored and not produce a keydown event, but the
   // callback should be called.
-  next_response = false;
-  [responder handleEvent:keyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", FALSE, 60)
+  channel.nextResponse = @{@"handled" : @NO};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeFlagsChanged, 0x100, @"", @"", NO, 60)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 0u);
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([responses[0] boolValue], TRUE);
+  EXPECT_EQ([channel.messages count], 0u);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([responses[0] boolValue], YES);
 }
 
-TEST(FlutterChannelKeyResponderUnittests, EmptyResponseIsTakenAsHandled) {
-  __block NSMutableArray<id>* messages = [[NSMutableArray<id> alloc] init];
+TEST_F(FlutterChannelKeyResponderTest, EmptyResponseIsTakenAsHandled) {
   __block NSMutableArray<NSNumber*>* responses = [[NSMutableArray<NSNumber*> alloc] init];
-
-  id mockKeyEventChannel = OCMStrictClassMock([FlutterBasicMessageChannel class]);
-  OCMStub([mockKeyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
-      .andDo((^(NSInvocation* invocation) {
-        [invocation retainArguments];
-        NSDictionary* message;
-        [invocation getArgument:&message atIndex:2];
-        [messages addObject:message];
-
-        FlutterReply callback;
-        [invocation getArgument:&callback atIndex:3];
-        callback(nullptr);
-      }));
-
+  FakeMessageChannel* channel = [[FakeMessageChannel alloc] init];
   FlutterChannelKeyResponder* responder =
-      [[FlutterChannelKeyResponder alloc] initWithChannel:mockKeyEventChannel];
-  [responder handleEvent:keyEvent(NSEventTypeKeyDown, 0x100, @"a", @"a", FALSE, 0)
+      [[FlutterChannelKeyResponder alloc] initWithChannel:channel];
+
+  channel.nextResponse = nil;
+  [responder handleEvent:CreateKeyEvent(NSEventTypeKeyDown, 0x100, @"a", @"a", NO, 0)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keydown");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 0);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0);
-  EXPECT_STREQ([[messages lastObject][@"characters"] UTF8String], "a");
-  EXPECT_STREQ([[messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keydown");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 0);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0);
+  EXPECT_STREQ([[channel.messages lastObject][@"characters"] UTF8String], "a");
+  EXPECT_STREQ([[channel.messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "a");
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], TRUE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], YES);
 }
 
-TEST(FlutterChannelKeyResponderUnittests, FollowsLayoutMap) {
-  __block NSMutableArray<id>* messages = [[NSMutableArray<id> alloc] init];
-  __block BOOL next_response = TRUE;
+TEST_F(FlutterChannelKeyResponderTest, FollowsLayoutMap) {
   __block NSMutableArray<NSNumber*>* responses = [[NSMutableArray<NSNumber*> alloc] init];
-
-  id mockKeyEventChannel = OCMStrictClassMock([FlutterBasicMessageChannel class]);
-  OCMStub([mockKeyEventChannel sendMessage:[OCMArg any] reply:[OCMArg any]])
-      .andDo((^(NSInvocation* invocation) {
-        [invocation retainArguments];
-        NSDictionary* message;
-        [invocation getArgument:&message atIndex:2];
-        [messages addObject:message];
-
-        FlutterReply callback;
-        [invocation getArgument:&callback atIndex:3];
-        NSDictionary* keyMessage = @{
-          @"handled" : @(next_response),
-        };
-        callback(keyMessage);
-      }));
-
+  FakeMessageChannel* channel = [[FakeMessageChannel alloc] init];
   FlutterChannelKeyResponder* responder =
-      [[FlutterChannelKeyResponder alloc] initWithChannel:mockKeyEventChannel];
+      [[FlutterChannelKeyResponder alloc] initWithChannel:channel];
 
   NSMutableDictionary<NSNumber*, NSNumber*>* layoutMap =
       [NSMutableDictionary<NSNumber*, NSNumber*> dictionary];
@@ -269,24 +261,25 @@ TEST(FlutterChannelKeyResponderUnittests, FollowsLayoutMap) {
   // French layout
   layoutMap[@(kVK_ANSI_A)] = @(kLogicalKeyQ);
 
-  [responder handleEvent:keyEvent(NSEventTypeKeyDown, kVK_ANSI_A, @"q", @"q", FALSE, 0)
+  channel.nextResponse = @{@"handled" : @YES};
+  [responder handleEvent:CreateKeyEvent(NSEventTypeKeyDown, kVK_ANSI_A, @"q", @"q", NO, 0)
                 callback:^(BOOL handled) {
                   [responses addObject:@(handled)];
                 }];
 
-  EXPECT_EQ([messages count], 1u);
-  EXPECT_STREQ([[messages lastObject][@"keymap"] UTF8String], "macos");
-  EXPECT_STREQ([[messages lastObject][@"type"] UTF8String], "keydown");
-  EXPECT_EQ([[messages lastObject][@"keyCode"] intValue], 0);
-  EXPECT_EQ([[messages lastObject][@"modifiers"] intValue], 0x0);
-  EXPECT_STREQ([[messages lastObject][@"characters"] UTF8String], "q");
-  EXPECT_STREQ([[messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "q");
-  EXPECT_EQ([messages lastObject][@"specifiedLogicalKey"], @(kLogicalKeyQ));
+  ASSERT_EQ([channel.messages count], 1u);
+  EXPECT_STREQ([[channel.messages lastObject][@"keymap"] UTF8String], "macos");
+  EXPECT_STREQ([[channel.messages lastObject][@"type"] UTF8String], "keydown");
+  EXPECT_EQ([[channel.messages lastObject][@"keyCode"] intValue], 0);
+  EXPECT_EQ([[channel.messages lastObject][@"modifiers"] intValue], 0x0);
+  EXPECT_STREQ([[channel.messages lastObject][@"characters"] UTF8String], "q");
+  EXPECT_STREQ([[channel.messages lastObject][@"charactersIgnoringModifiers"] UTF8String], "q");
+  EXPECT_EQ([channel.messages lastObject][@"specifiedLogicalKey"], @(kLogicalKeyQ));
 
-  EXPECT_EQ([responses count], 1u);
-  EXPECT_EQ([[responses lastObject] boolValue], TRUE);
+  ASSERT_EQ([responses count], 1u);
+  EXPECT_EQ([[responses lastObject] boolValue], YES);
 
-  [messages removeAllObjects];
+  [channel.messages removeAllObjects];
   [responses removeAllObjects];
 }
 
