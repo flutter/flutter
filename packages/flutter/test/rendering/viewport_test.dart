@@ -1639,6 +1639,8 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('will not assert on mismatched axis',
+      // TODO(polina-c): fox leaks an stop ignoring them
+      // https://github.com/flutter/flutter/issues/138455
       leakTesting: LeakTesting.settings.withIgnored(allNotGCed: true),
     (WidgetTester tester) async {
       await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
