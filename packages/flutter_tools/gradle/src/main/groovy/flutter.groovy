@@ -396,7 +396,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
     private void configurePlugins() {
-        configureLegacyPluginProjects()
+        configureLegacyPluginEachProjects()
         getPluginList().each this.&configurePluginProject
         getPluginList().each this.&configurePluginDependencies
     }
@@ -417,7 +417,7 @@ class FlutterPlugin implements Plugin<Project> {
      * So in summary the plugins are currently selected from the `dependencyGraph` and filtered then with the
      * [doesSupportAndroidPlatform] method instead of just using the `plugins.android` list.
      */
-    private configureLegacyPluginProjects() {
+    private configureLegacyPluginEachProjects() {
         File settingsGradle = new File(project.projectDir.parentFile, 'settings.gradle')
         if(!settingsGradle.exists() || !settingsGradle.text.contains("'.flutter-plugins'")) {
             return
