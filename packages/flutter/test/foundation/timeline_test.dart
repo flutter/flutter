@@ -72,7 +72,7 @@ void main() {
     // a bit inconsistent with Stopwatch.
     final int start = FlutterTimeline.now - 1;
     FlutterTimeline.timeSync('TEST', () {
-      final Stopwatch watch = Stopwatch()..start();
+      final Stopwatch watch = Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
       while (watch.elapsedMilliseconds < 5) {}
       watch.stop();
     });
