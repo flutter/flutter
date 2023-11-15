@@ -333,7 +333,6 @@ flutter:
     });
 
     group('flavors feature', () {
-
       Future<ManifestAssetBundle> buildBundleWithFlavor(String? flavor) async {
         final ManifestAssetBundle bundle = ManifestAssetBundle(
           logger: logger,
@@ -363,16 +362,19 @@ flutter:
         testFileSystem.file('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync(r'''
-  name: example
-  flutter:
-    assets:
-      - assets/common/
-      - path: assets/vanilla/
-        flavor: vanilla
-      - path: assets/strawberry/
-        flavor: strawberry
-      - path: assets/orange/ice-cream.png
-        flavor: orange
+name: example
+flutter:
+  assets:
+    - assets/common/
+    - path: assets/vanilla/
+      flavors:
+        - vanilla
+    - path: assets/strawberry/
+      flavors:
+        - strawberry
+    - path: assets/orange/ice-cream.png
+      flavors:
+        - orange
   ''');
 
         ManifestAssetBundle bundle;
@@ -398,7 +400,7 @@ flutter:
       testWithoutContext('throws a tool exit when a non-flavored folder contains a flavored asset', () async {
         testFileSystem.file('.packages').createSync();
         testFileSystem.file(testFileSystem.path.join('assets', 'unflavored.png')).createSync(recursive: true);
-        testFileSystem.file(testFileSystem.path.join('assets', 'vanilla.png')).createSync(recursive: true);
+        testFileSystem.file(testFileSystem.path.join('assets', 'vanillaOrange.png')).createSync(recursive: true);
 
         testFileSystem.file('pubspec.yaml')
           ..createSync()
@@ -407,17 +409,19 @@ flutter:
   flutter:
     assets:
       - assets/
-      - path: assets/vanilla.png
-        flavor: vanilla
+      - path: assets/vanillaOrange.png
+        flavors:
+          - vanilla
+          - orange
   ''');
 
         expect(
           buildBundleWithFlavor(null),
           throwsToolExit(message: 'Multiple assets entries include the file '
-            '"assets/vanilla.png", but they do not have the same flavor.\n'
-            'An entry with the path "assets/" specifies a flavor of "null".\n'
-            'An entry with the path "assets/vanilla.png" specifies a flavor of "vanilla".\n\n'
-            'Consider organizing'),
+            '"assets/vanillaOrange.png", but they specify different lists of flavors.\n'
+            'An entry with the path "assets/" does not specify any flavors.\n'
+            'An entry with the path "assets/vanillaOrange.png" specifies the flavor(s): "vanilla", "orange".\n\n'
+            'Consider organizing assets with different flavors into different directories.'),
         );
       });
 
@@ -433,16 +437,17 @@ flutter:
   flutter:
     assets:
       - path: vanilla/
-        flavor: vanilla
+        flavors:
+          - vanilla
       - vanilla/flavorless.png
   ''');
         expect(
           buildBundleWithFlavor(null),
           throwsToolExit(message: 'Multiple assets entries include the file '
-            '"vanilla/flavorless.png", but they do not have the same flavor.\n'
-            'An entry with the path "vanilla/" specifies a flavor of "vanilla".\n'
-            'An entry with the path "vanilla/flavorless.png" specifies a flavor of "null".\n\n'
-            'Consider organizing'),
+            '"vanilla/flavorless.png", but they specify different lists of flavors.\n'
+            'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
+            'An entry with the path "vanilla/flavorless.png" does not specify any flavors.\n\n'
+            'Consider organizing assets with different flavors into different directories.'),
         );
       });
 
@@ -456,16 +461,19 @@ flutter:
   flutter:
     assets:
       - path: orange.png
-        flavor: orange
+        flavors:
+          - orange
       - path: orange.png
-        flavor: mango
+        flavors:
+          - mango
   ''');
+
         expect(
           buildBundleWithFlavor(null),
           throwsToolExit(message: 'Multiple assets entries include the file '
-            '"orange.png", but they do not have the same flavor.\n'
-            'An entry with the path "orange.png" specifies a flavor of "orange".\n'
-            'An entry with the path "orange.png" specifies a flavor of "mango".'),
+            '"orange.png", but they specify different lists of flavors.\n'
+            'An entry with the path "orange.png" specifies the flavor(s): "orange".\n'
+            'An entry with the path "orange.png" specifies the flavor(s): "mango".'),
         );
     });
 
@@ -481,17 +489,19 @@ flutter:
   flutter:
     assets:
       - path: vanilla/
-        flavor: vanilla
+        flavors:
+          - vanilla
       - path: vanilla/actually-strawberry.png
-        flavor: strawberry
+        flavors:
+          - strawberry
   ''');
         expect(
           buildBundleWithFlavor(null),
           throwsToolExit(message: 'Multiple assets entries include the file '
-            '"vanilla/actually-strawberry.png", but they do not have the same flavor.\n'
-            'An entry with the path "vanilla/" specifies a flavor of "vanilla".\n'
+            '"vanilla/actually-strawberry.png", but they specify different lists of flavors.\n'
+            'An entry with the path "vanilla/" specifies the flavor(s): "vanilla".\n'
             'An entry with the path "vanilla/actually-strawberry.png" '
-            'specifies a flavor of "strawberry".'),
+            'specifies the flavor(s): "strawberry".'),
         );
       });
     });

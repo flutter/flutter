@@ -638,7 +638,6 @@ List<AssetsEntry> _computeAssets(Object? assetsSection) {
   return result;
 }
 
-
 void _validateFonts(YamlList fonts, List<String> errors) {
   const Set<int> fontWeights = <int>{
     100, 200, 300, 400, 500, 600, 700, 800, 900,
@@ -697,14 +696,14 @@ void _validateFonts(YamlList fonts, List<String> errors) {
 class AssetsEntry {
   const AssetsEntry({
     required this.uri,
-    this.flavor,
+    this.flavors = const <String>[],
   });
 
   final Uri uri;
-  final String? flavor;
+  final List<String> flavors;
 
   static const String _pathKey = 'path';
-  static const String _flavorKey = 'flavor';
+  static const String _flavorKey = 'flavors';
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
     final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
@@ -715,7 +714,8 @@ class AssetsEntry {
   }
 
   static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
-    (Uri?, String?)  tryParseUri(String uri) {
+
+    (Uri?, String?) tryParseUri(String uri) {
       try {
         return (Uri(pathSegments: uri.split('/')), null);
       } on FormatException {
@@ -734,8 +734,9 @@ class AssetsEntry {
       if (yaml.keys.isEmpty) {
         return (null, null);
       }
+
       final Object? path = yaml[_pathKey];
-      final Object? flavor = yaml[_flavorKey];
+      final Object? flavors = yaml[_flavorKey];
 
       if (path == null || path is! String) {
         return (null, 'Asset manifest entry is malformed. '
@@ -743,14 +744,29 @@ class AssetsEntry {
           'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
       }
 
-      if (flavor != null && flavor is! String) {
-        return( null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a string. Got ${flavor.runtimeType} instead.');
+      final Uri uri = Uri(pathSegments: path.split('/'));
+
+      if (flavors == null) {
+        return (AssetsEntry(uri: uri), null);
+      }
+
+      if (flavors is! YamlList) {
+        return(null, 'Asset manifest entry is malformed. '
+          'Expected "$_flavorKey" entry to be a list of strings. '
+          'Got ${flavors.runtimeType} instead.');
+      }
+
+      final List<String> flavorsListErrors = <String>[];
+      _validateListType<String>(flavors, flavorsListErrors, 'flavors list of entry "$path"', 'String');
+      if (flavorsListErrors.isNotEmpty) {
+        return (null, 'Asset manifest entry is malformed. '
+          'Expected "$_flavorKey" entry to be a list of strings.\n'
+          '${flavorsListErrors.join('\n')}');
       }
 
       final AssetsEntry entry = AssetsEntry(
         uri: Uri(pathSegments: path.split('/')),
-        flavor: flavor as String?,
+        flavors: List<String>.from(flavors),
       );
 
       return (entry, null);
@@ -766,7 +782,7 @@ class AssetsEntry {
       return false;
     }
 
-    if (uri != other.uri || flavor != other.flavor) {
+    if (uri != other.uri || flavors != other.flavors) {
         return false;
     }
 
@@ -774,5 +790,5 @@ class AssetsEntry {
   }
 
   @override
-  int get hashCode => Object.hash(uri.hashCode, flavor.hashCode);
+  int get hashCode => Object.hash(uri.hashCode, flavors.hashCode);
 }

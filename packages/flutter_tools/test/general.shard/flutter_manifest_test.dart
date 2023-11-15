@@ -160,7 +160,7 @@ flutter:
     ]);
   });
 
-  testWithoutContext('FlutterManifest has assets described via objects', () async {
+  testWithoutContext('FlutterManifest assets entry flavor is not a string', () async {
     const String manifest = '''
 name: test
 dependencies:
@@ -171,15 +171,13 @@ flutter:
   assets:
     - assets/folder/
     - path: assets/vanilla/
-      flavor: vanilla
+      flavors:
+        - key1: value1
+          key2: value2
 ''';
-
-    final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest, logger: logger)!;
-    expect(flutterManifest.assets, hasLength(2));
-    expect(flutterManifest.assets, <AssetsEntry>[
-      AssetsEntry(uri: Uri.parse('assets/folder/')),
-      AssetsEntry(uri: Uri.parse('assets/vanilla/'), flavor: 'vanilla'),
-    ]);
+    FlutterManifest.createFromString(manifest, logger: logger);
+    expect(logger.errorText, contains('Asset manifest entry is malformed. '
+      'Expected "flavors" entry to be a list of strings.'));
   });
 
   testWithoutContext('FlutterManifest has one font family with one asset', () async {

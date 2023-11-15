@@ -98,8 +98,8 @@ class DeferredComponent {
     out.write('\n  Assets:');
     for (final AssetsEntry asset in assets) {
       out.write('\n    - ${asset.uri.path}');
-      if (asset.flavor != null && asset.flavor!.isNotEmpty) {
-        out.write(' (flavor: ${asset.flavor})');
+      if (asset.flavors.isNotEmpty) {
+        out.write(' (flavor: ${asset.flavors})');
       }
     }
     return out.toString();

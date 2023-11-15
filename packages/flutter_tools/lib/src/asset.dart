@@ -659,13 +659,14 @@ class ManifestAssetBundle implements AssetBundle {
       }
 
       componentAssets.removeWhere((_Asset asset, List<_Asset> variants) {
-        if (asset.flavor != null && asset.flavor != flavor) {
-          _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
+        if (!asset.matchesFlavor(flavor)) {
+          _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since '
+            'its configured flavor(s) did not match the provided flavor (if any).\n'
+            'Configured flavors: ${asset.flavors.join(', ')}\n');
           return true;
         }
         return false;
       });
-
       deferredComponentsAssetVariants[component.name] = componentAssets;
     }
     return deferredComponentsAssetVariants;
@@ -830,7 +831,7 @@ class ManifestAssetBundle implements AssetBundle {
           assetsEntry.uri,
           packageName: packageName,
           attributedPackage: attributedPackage,
-          flavor: assetsEntry.flavor,
+          flavors: assetsEntry.flavors,
         );
       } else {
         _parseAssetFromFile(
@@ -842,14 +843,16 @@ class ManifestAssetBundle implements AssetBundle {
           assetsEntry.uri,
           packageName: packageName,
           attributedPackage: attributedPackage,
-          flavor: assetsEntry.flavor,
+          flavors: assetsEntry.flavors,
         );
       }
     }
 
     result.removeWhere((_Asset asset, List<_Asset> variants) {
-      if (asset.flavor != null && asset.flavor != flavor) {
-        _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
+      if (!asset.matchesFlavor(flavor)) {
+        _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since '
+          'its configured flavor(s) did not match the provided flavor (if any).\n'
+          'Configured flavors: ${asset.flavors.join(', ')}\n');
         return true;
       }
       return false;
@@ -915,7 +918,7 @@ class ManifestAssetBundle implements AssetBundle {
     Uri assetUri, {
     String? packageName,
     Package? attributedPackage,
-    String? flavor,
+    List<String>? flavors,
   }) {
     final String directoryPath = _fileSystem.path.join(
         assetBase, assetUri.toFilePath(windows: _platform.isWindows));
@@ -942,7 +945,7 @@ class ManifestAssetBundle implements AssetBundle {
         packageName: packageName,
         attributedPackage: attributedPackage,
         originUri: assetUri,
-        flavor: flavor,
+        flavors: flavors,
       );
     }
   }
@@ -958,7 +961,7 @@ class ManifestAssetBundle implements AssetBundle {
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
-    String? flavor,
+    List<String>? flavors,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -968,14 +971,8 @@ class ManifestAssetBundle implements AssetBundle {
       attributedPackage,
       assetKind: assetKind,
       originUri: originUri,
-      flavor: flavor,
+      flavors: flavors,
     );
-
-
-    if (asset.flavor != null && asset.flavor != flavor) {
-      _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since its configured flavor, "${asset.flavor}", did not match the provided flavor (if any).');
-      return;
-    }
 
     _checkForFlavorConflicts(asset, result.keys.toList());
 
@@ -1038,28 +1035,38 @@ class ManifestAssetBundle implements AssetBundle {
       return asset.originUri.path.endsWith('/');
     }
 
+    String flavorErrorInfo(_Asset asset) {
+      if (asset.flavors.isEmpty) {
+        return 'An entry with the path "${asset.originUri}" does not specify any flavors.';
+      }
+
+      final Iterable<String> flavorsWrappedWithQuotes = asset.flavors.map((String e) => '"$e"');
+      return 'An entry with the path "${asset.originUri}" specifies the flavor(s): '
+        '${flavorsWrappedWithQuotes.join(', ')}.';
+    }
+
     final _Asset? preExistingAsset = previouslyParsedAssets
         .where((_Asset other) => other.entryUri == newAsset.entryUri)
         .firstOrNull;
 
-    if (preExistingAsset == null || preExistingAsset.flavor == newAsset.flavor) {
+    if (preExistingAsset == null || preExistingAsset.hasEquivalentFlavorsWith(newAsset)) {
       return;
     }
 
-    String errorMessage =
+    final StringBuffer errorMessage = StringBuffer(
       'Multiple assets entries include the file '
-      '"${newAsset.entryUri.path}", but they do not have the same flavor.\n'
-      'An entry with the path "${preExistingAsset.originUri}" specifies a '
-      'flavor of "${preExistingAsset.flavor}".\n'
-      'An entry with the path "${newAsset.originUri}" specifies a flavor '
-      'of "${newAsset.flavor}".';
+      '"${newAsset.entryUri.path}", but they specify different lists of flavors.\n');
+
+    errorMessage.writeln(flavorErrorInfo(preExistingAsset));
+    errorMessage.writeln(flavorErrorInfo(newAsset));
 
     if (cameFromDirectoryEntry(newAsset)|| cameFromDirectoryEntry(preExistingAsset)) {
-      errorMessage += '\n\nConsider organizing assets with different flavors '
-        'into different directories.';
+      errorMessage.writeln();
+      errorMessage.write('Consider organizing assets with different flavors '
+        'into different directories.');
     }
 
-    throwToolExit(errorMessage);
+    throwToolExit(errorMessage.toString());
   }
 
   _Asset _resolveAsset(
@@ -1070,7 +1077,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage, {
     Uri? originUri,
     AssetKind assetKind = AssetKind.regular,
-    String? flavor,
+    List<String>? flavors,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -1083,7 +1090,7 @@ class ManifestAssetBundle implements AssetBundle {
         attributedPackage,
         assetKind: assetKind,
         originUri: originUri,
-        flavor: flavor,
+        flavors: flavors,
       );
       if (packageAsset != null) {
         return packageAsset;
@@ -1099,7 +1106,7 @@ class ManifestAssetBundle implements AssetBundle {
       package: attributedPackage,
       originUri: originUri,
       assetKind: assetKind,
-      flavor: flavor,
+      flavors: flavors,
     );
   }
 
@@ -1109,7 +1116,7 @@ class ManifestAssetBundle implements AssetBundle {
     Package? attributedPackage, {
     AssetKind assetKind = AssetKind.regular,
     Uri? originUri,
-    String? flavor,
+    List<String>? flavors,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1124,7 +1131,7 @@ class ManifestAssetBundle implements AssetBundle {
           package: attributedPackage,
           assetKind: assetKind,
           originUri: originUri,
-          flavor: flavor,
+          flavors: flavors,
         );
       }
     }
@@ -1146,8 +1153,8 @@ class _Asset {
     required this.entryUri,
     required this.package,
     this.assetKind = AssetKind.regular,
-    this.flavor,
-  }): originUri = originUri ?? entryUri;
+    List<String>? flavors,
+  }): originUri = originUri ?? entryUri, flavors = flavors ?? const <String>[];
 
   final String baseDir;
 
@@ -1166,7 +1173,7 @@ class _Asset {
 
   final AssetKind assetKind;
 
-  final String? flavor;
+  final List<String> flavors;
 
   File lookupAssetFile(FileSystem fileSystem) {
     return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));
@@ -1180,6 +1187,21 @@ class _Asset {
     }
     final int index = entryUri.path.indexOf(relativeUri.path);
     return index == -1 ? null : Uri(path: entryUri.path.substring(0, index));
+  }
+
+  bool matchesFlavor(String? flavor) {
+    if (flavors.isEmpty) {
+      return true;
+    }
+
+    return flavors.any((String e) => e == flavor);
+  }
+
+  bool hasEquivalentFlavorsWith(_Asset other) {
+    final Set<String> assetFlavors = flavors.toSet();
+    final Set<String> otherFlavors = other.flavors.toSet();
+    final Set<String> union = assetFlavors.union(otherFlavors);
+    return union.every((String e) => assetFlavors.contains(e) && otherFlavors.contains(e));
   }
 
   @override
@@ -1198,7 +1220,7 @@ class _Asset {
         && other.relativeUri == relativeUri
         && other.entryUri == entryUri
         && other.assetKind == assetKind
-        && other.flavor == flavor;
+        && hasEquivalentFlavorsWith(other);
   }
 
   @override
