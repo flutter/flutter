@@ -428,11 +428,13 @@ class FlutterPlugin implements Plugin<Project> {
         deps.each {
             Project pluginProject = project.rootProject.findProject(":${it.name}")
             if (pluginProject == null) {
+                // Plugin has a functioning `android` folder, but was not included in `settings.gradle`
                 project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle.")
+            } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
+                // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
+                configurePluginProject(it)
             } else {
-                if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
-                    configurePluginProject(it)
-                }
+                // Plugin has an empty `android` folder only. No action required
             }
         }
     }
