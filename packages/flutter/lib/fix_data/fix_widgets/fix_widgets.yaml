@@ -24,6 +24,27 @@
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/123352
+  - title: "Migrate to 'PlatformMenuBar.child'"
+    date: 2023-11-15
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'body'
+      inClass: 'PlatformMenuBar'
+    changes:
+      - kind: 'rename'
+        newName: 'child'
+  - title: "Migrate PlatformMenuBar(body:) to PlatformMenuBar(child:)"
+    date: 2023-11-15
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'PlatformMenuBar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'body'
+        newName: 'child'
+
+  # Changes made in https://github.com/flutter/flutter/pull/123352
   - title: "Migrate to 'rootElement'"
     date: 2023-03-13
     element:
