@@ -36,7 +36,7 @@ class FontConfigManager {
       globals.printTrace('Deleting ${_fontsDirectory!.path}...');
       try {
         await _fontsDirectory!.delete(recursive: true);
-      } on Exception {
+      } on FileSystemException {
         // Silently exit
       }
       _fontsDirectory = null;
