@@ -1428,7 +1428,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "-dAndroidArchs=${targetPlatformValues.join(' ')}"
             args "-dMinSdkVersion=${minSdkVersion}"
             if (isAddToApp != null) {
-                args "-dIsAddToApp=${isAddToApp}"
+                args "-dIsAddToApp=${isAddToApp ? "true" : "false"}"
             }
             args ruleNames
         }

@@ -110,8 +110,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
   if (isAddToApp && nativeAssets.isNotEmpty) {
-    throwToolExit(
-        'Native assets are not yet supported in Android add2app.');
+    throwToolExit('Native assets are not yet supported in Android add2app.');
   }
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
@@ -131,7 +130,11 @@ Future<void> _copyNativeAssetsAndroid(
   if (assetTargetLocations.isNotEmpty) {
     globals.logger
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    for (final String jniArchDir in _architectureStringsCMakeAndroid.values) {
+    final List<String> jniArchDirs = [
+      for (final AndroidArch androidArch in AndroidArch.values)
+        androidArch.archName,
+    ];
+    for (final String jniArchDir in jniArchDirs) {
       final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
       await fileSystem.directory(archUri).create(recursive: true);
     }
@@ -139,8 +142,9 @@ Future<void> _copyNativeAssetsAndroid(
         in assetTargetLocations.entries) {
       final Uri source = (assetMapping.key.path as AssetAbsolutePath).uri;
       final Uri target = (assetMapping.value.path as AssetAbsolutePath).uri;
-      final String jniArchDir = _architectureStringsCMakeAndroid[
-          assetMapping.value.target.architecture]!;
+      final AndroidArch androidArch =
+          _getAndroidArch(assetMapping.value.target);
+      final String jniArchDir = androidArch.archName;
       final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
       final Uri targetUri = archUri.resolveUri(target);
       final String targetFullPath = targetUri.toFilePath();
@@ -150,7 +154,7 @@ Future<void> _copyNativeAssetsAndroid(
   }
 }
 
-/// Extract the [Target] from an [AndroidArch].
+/// Get the [Target] for [androidArch].
 Target _getNativeTarget(AndroidArch androidArch) {
   switch (androidArch) {
     case AndroidArch.armeabi_v7a:
@@ -164,6 +168,24 @@ Target _getNativeTarget(AndroidArch androidArch) {
   }
 }
 
+/// Get the [AndroidArch] for [target].
+AndroidArch _getAndroidArch(Target target) {
+  switch (target) {
+    case Target.androidArm:
+      return AndroidArch.armeabi_v7a;
+    case Target.androidArm64:
+      return AndroidArch.arm64_v8a;
+    case Target.androidIA32:
+      return AndroidArch.x86;
+    case Target.androidX64:
+      return AndroidArch.x86_64;
+    case Target.androidRiscv64:
+      throwToolExit('Android RISC-V not yet supported.');
+    default:
+      throwToolExit('Invalid target: $target.');
+  }
+}
+
 Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) {
   return <Asset, Asset>{
     for (final Asset asset in nativeAssets)
@@ -171,6 +193,8 @@ Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) {
   };
 }
 
+/// Converts the `path` of [asset] as output from a `build.dart` invocation to
+/// the path used inside the Flutter app bundle.
 Asset _targetLocationAndroid(Asset asset) {
   final AssetPath path = asset.path;
   switch (path) {
@@ -182,18 +206,18 @@ Asset _targetLocationAndroid(Asset asset) {
       final String fileName = path.uri.pathSegments.last;
       return asset.copyWith(path: AssetAbsolutePath(Uri(path: fileName)));
   }
-  throw Exception('Unsupported asset path type ${path.runtimeType} in asset $asset');
+  throw Exception(
+    'Unsupported asset path type ${path.runtimeType} in asset $asset',
+  );
 }
 
-const Map<Architecture, String> _architectureStringsCMakeAndroid =
-    <Architecture, String>{
-  Architecture.arm: 'armeabi-v7a',
-  Architecture.arm64: 'arm64-v8a',
-  Architecture.ia32: 'x86',
-  Architecture.x64: 'x86_64',
-};
-
-
+/// Looks the NDK clang compiler tools.
+///
+/// Tool-exits if the NDK cannot be found.
+///
+/// Should only be invoked if a native assets build is performed. If the native
+/// assets feature is disabled, or none of the packages have native assets, a
+/// missing NDK is okay.
 @override
 Future<CCompilerConfig> cCompilerConfigAndroid() async {
   final AndroidSdk? androidSdk = AndroidSdk.locateAndroidSdk();

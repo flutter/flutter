@@ -334,6 +334,17 @@ class AndroidSdk {
     'windows': 'windows-x86_64',
   };
 
+  /// Locates the binary path for an NDK binary.
+  /// 
+  /// The order of resolution is as follows:
+  /// 
+  /// 1. If [globals.config] defines an `'android-ndk'` use that.
+  /// 2. If the environment variable `ANDROID_NDK_HOME` is defined, use that.
+  /// 3. If the environment variable `ANDROID_NDK_PATH` is defined, use that.
+  /// 4. If the environment variable `ANDROID_NDK_ROOT` is defined, use that.
+  /// 5. Look for the default install location inside the Android SDK:
+  ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
+  ///    newest.
   String? getNdkBinaryPath(String binaryName) {
     Directory? findAndroidNdkHomeDir() {
       String? androidNdkHomeDir;

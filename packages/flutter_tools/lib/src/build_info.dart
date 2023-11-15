@@ -943,6 +943,8 @@ const String kIsAddToApp = 'IsAddToApp';
 ///
 /// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
 ///
+/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+///
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
 /// https://developer.android.com/ndk/guides/other_build_systems#overview
