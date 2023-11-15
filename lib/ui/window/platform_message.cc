@@ -13,13 +13,13 @@ PlatformMessage::PlatformMessage(std::string channel,
                                  fml::RefPtr<PlatformMessageResponse> response)
     : channel_(std::move(channel)),
       data_(std::move(data)),
-      has_data_(true),
+      hasData_(true),
       response_(std::move(response)) {}
 PlatformMessage::PlatformMessage(std::string channel,
                                  fml::RefPtr<PlatformMessageResponse> response)
     : channel_(std::move(channel)),
       data_(),
-      has_data_(false),
+      hasData_(false),
       response_(std::move(response)) {}
 
 PlatformMessage::~PlatformMessage() = default;
