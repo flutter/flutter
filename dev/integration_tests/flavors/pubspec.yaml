@@ -78,8 +78,10 @@ flutter:
   assets:
     - assets/common/common.txt
     - path: assets/paid/
-      flavor: paid
+      flavors:
+        - paid
     - path: assets/free/
-      flavor: free
+      flavors:
+        - free
 
 # PUBSPEC CHECKSUM: 6bd3
