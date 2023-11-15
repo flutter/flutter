@@ -2,17 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/logs.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:test/fake.dart';
 
 import '../../src/context.dart';
+import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   group('logs', () {
+    late Platform platform;
+    late FakeDeviceManager deviceManager;
+    const String deviceId = 'abc123';
+
     setUp(() {
       Cache.disableLocking();
+      deviceManager = FakeDeviceManager();
+      platform = FakePlatform();
     });
 
     tearDown(() {
@@ -20,11 +33,34 @@ void main() {
     });
 
     testUsingContext('fail with a bad device id', () async {
-      final LogsCommand command = LogsCommand();
+      final LogsCommand command = LogsCommand(
+        sigterm: FakeProcessSignal(),
+        sigint: FakeProcessSignal(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
         throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
       );
     });
+
+    testUsingContext('does not try to complete exitCompleter multiple times', () async {
+      final FakeDevice fakeDevice = FakeDevice('phone', deviceId);
+      deviceManager.attachedDevices.add(fakeDevice);
+      final LogsCommand command = LogsCommand(
+        sigterm: FakeProcessSignal(),
+        sigint: FakeProcessSignal(),
+      );
+      await createTestCommandRunner(command).run(<String>['-d', deviceId, 'logs']);
+    }, overrides: <Type, Generator>{
+      Platform: () => platform,
+      DeviceManager: () => deviceManager,
+    });
   });
+}
+
+class FakeProcessSignal extends Fake implements ProcessSignal {
+  late final StreamController<ProcessSignal> _controller = StreamController<ProcessSignal>();
+
+  @override
+  Stream<ProcessSignal> watch() => _controller.stream;
 }

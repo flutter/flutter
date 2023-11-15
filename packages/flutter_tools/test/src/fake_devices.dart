@@ -118,6 +118,7 @@ class FakeDevice extends Device {
     this.connectionInterface = DeviceConnectionInterface.attached,
     PlatformType type = PlatformType.web,
     LaunchResult? launchResult,
+    this.deviceLogReader,
   }) : _isSupported = isSupported,
       _isSupportedForProject = isSupportedForProject,
       _launchResult = launchResult ?? LaunchResult.succeeded(),
@@ -131,6 +132,7 @@ class FakeDevice extends Device {
   final bool _isSupported;
   final bool _isSupportedForProject;
   final LaunchResult _launchResult;
+  DeviceLogReader? deviceLogReader;
 
   @override
   final String name;
@@ -183,6 +185,9 @@ class FakeDevice extends Device {
 
   @override
   Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
+
+  @override
+  FutureOr<DeviceLogReader> getLogReader => deviceLogReader!;
 }
 
 /// Combines fake device with its canonical JSON representation.

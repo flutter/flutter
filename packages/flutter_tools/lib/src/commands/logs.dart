@@ -12,7 +12,10 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
-  LogsCommand() {
+  LogsCommand({
+    required this.sigint,
+    required this.sigterm,
+  }) {
     argParser.addFlag('clear',
       negatable: false,
       abbr: 'c',
@@ -38,6 +41,8 @@ class LogsCommand extends FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device? device;
+  final ProcessSignal sigint;
+  final ProcessSignal sigterm;
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
@@ -77,12 +82,12 @@ class LogsCommand extends FlutterCommand {
     );
 
     // When terminating, close down the log reader.
-    ProcessSignal.sigint.watch().listen((ProcessSignal signal) {
+    sigint.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       globals.printStatus('');
       exitCompleter.complete(0);
     });
-    ProcessSignal.sigterm.watch().listen((ProcessSignal signal) {
+    sigterm.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       exitCompleter.complete(0);
     });
