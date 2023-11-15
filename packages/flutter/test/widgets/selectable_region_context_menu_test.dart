@@ -5,6 +5,8 @@
 @TestOn('browser') // This file contains web-only library.
 library;
 
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -30,7 +32,7 @@ void main() {
     element = fn(0) as web.HTMLElement;
     // The element needs to be attached to the document body to receive mouse
     // events.
-    web.document.body!.append(element);
+    web.document.body!.append(element! as JSAny);
   };
   // This force register the dom element.
   PlatformSelectableRegionContextMenu(child: const Placeholder());
