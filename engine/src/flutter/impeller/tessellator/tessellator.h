@@ -84,12 +84,9 @@ class Tessellator {
   ///                        Matrix::GetMaxBasisLength of the CTM applied to the
   ///                        path for rendering.
   ///
-  /// @return A point vector containing the vertices and a vector of indices
-  ///         into the point vector.
+  /// @return A point vector containing the vertices in triangle strip format.
   ///
-  std::pair<std::vector<Point>, std::vector<uint16_t>> TessellateConvex(
-      const Path& path,
-      Scalar tolerance);
+  std::vector<Point> TessellateConvex(const Path& path, Scalar tolerance);
 
  private:
   /// Used for polyline generation.
