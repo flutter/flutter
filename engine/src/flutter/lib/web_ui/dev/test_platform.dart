@@ -538,23 +538,36 @@ class BrowserPlatform extends PlatformPlugin {
       final String scriptBase = htmlEscape.convert(p.basename(test));
       final String link = '<link rel="x-dart-test" href="$scriptBase"${linkSkwasm ? " skwasm" : ""}>';
 
-      final String testRunner = isWasm ? '/test_dart2wasm.js' : 'packages/test/dart.js';
+      final String bootstrapScript = isWasm ? '''
+<script>
+  window.flutterConfiguration = {
+    canvasKitBaseUrl: "/canvaskit/",
+    // Some of our tests rely on color emoji
+    useColorEmoji: true,
+    canvasKitVariant: "${getCanvasKitVariant()}",
+  };
+</script>
+<script src="/test_dart2wasm.js"></script>
+      ''' : '''
+<script src="/flutter_js/flutter.js"></script>
+<script type="module">
+  import { runTest } from "/test_dart2js.js";
 
+  runTest({
+    canvasKitBaseUrl: "/canvaskit/",
+    // Some of our tests rely on color emoji
+    useColorEmoji: true,
+    canvasKitVariant: "${getCanvasKitVariant()}",
+  });
+</script>
+''';
       return shelf.Response.ok('''
         <!DOCTYPE html>
         <html>
         <head>
           <meta name="assetBase" content="/">
-          <script>
-            window.flutterConfiguration = {
-              canvasKitBaseUrl: "/canvaskit/",
-              // Some of our tests rely on color emoji
-              useColorEmoji: true,
-              canvasKitVariant: "${getCanvasKitVariant()}",
-            };
-          </script>
           $link
-          <script src="$testRunner"></script>
+          $bootstrapScript
         </head>
         </html>
       ''', headers: <String, String>{

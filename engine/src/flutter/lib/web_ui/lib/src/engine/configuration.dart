@@ -51,9 +51,15 @@ import 'canvaskit/renderer.dart';
 import 'dom.dart';
 
 /// The Web Engine configuration for the current application.
-FlutterConfiguration get configuration =>
-  _configuration ??= FlutterConfiguration.legacy(_jsConfiguration);
+FlutterConfiguration get configuration {
+  if (_debugConfiguration != null) {
+    return _debugConfiguration!;
+  }
+  return _configuration ??= FlutterConfiguration.legacy(_jsConfiguration);
+}
 FlutterConfiguration? _configuration;
+
+FlutterConfiguration? _debugConfiguration;
 
 /// Overrides the initial test configuration with new values coming from `newConfig`.
 ///
@@ -76,16 +82,9 @@ FlutterConfiguration? _configuration;
 @visibleForTesting
 void debugOverrideJsConfiguration(JsFlutterConfiguration? newConfig) {
   if (newConfig != null) {
-    final JSObject newJsConfig = objectConstructor.assign(
-      <String, Object>{}.jsify(),
-      _jsConfiguration.jsify(),
-      newConfig.jsify(),
-    );
-    _configuration = FlutterConfiguration()
-        ..setUserConfiguration(newJsConfig as JsFlutterConfiguration);
-    print('Overridden engine JS config to: ${newJsConfig.dartify()}');
+    _debugConfiguration = configuration.withOverrides(newConfig);
   } else {
-    _configuration = null;
+    _debugConfiguration = null;
   }
 }
 
@@ -118,6 +117,17 @@ class FlutterConfiguration {
       }
       return true;
     }());
+  }
+
+  FlutterConfiguration withOverrides(JsFlutterConfiguration? overrides) {
+    final JsFlutterConfiguration newJsConfig = objectConstructor.assign(
+      <String, Object>{}.jsify(),
+      _configuration.jsify(),
+      overrides.jsify(),
+    ) as JsFlutterConfiguration;
+    final FlutterConfiguration newConfig = FlutterConfiguration();
+    newConfig._configuration = newJsConfig;
+    return newConfig;
   }
 
   bool _usedLegacyConfigStyle = false;
@@ -314,8 +324,11 @@ external JsFlutterConfiguration? get _jsConfiguration;
 
 /// The JS bindings for the object that's set as `window.flutterConfiguration`.
 @JS()
+@anonymous
 @staticInterop
-class JsFlutterConfiguration {}
+class JsFlutterConfiguration {
+  external factory JsFlutterConfiguration();
+}
 
 extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
   @JS('assetBase')

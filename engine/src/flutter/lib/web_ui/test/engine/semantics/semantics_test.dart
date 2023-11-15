@@ -16,6 +16,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
 
 DateTime _testTime = DateTime(2018, 12, 17);
@@ -34,7 +35,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await ui_web.bootstrapEngine();
+  await bootstrapAndRunApp();
   runSemanticsTests();
 }
 

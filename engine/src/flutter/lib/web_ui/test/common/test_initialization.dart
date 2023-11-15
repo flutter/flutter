@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
+import 'package:ui/src/engine/initialization.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -24,7 +27,8 @@ void setUpUnitTests({
     }
 
     debugFontsScope = configureDebugFontsAssetScope(fakeAssetManager);
-    await engine.initializeEngine(assetManager: fakeAssetManager);
+    debugOnlyAssetManager = fakeAssetManager;
+    await bootstrapAndRunApp();
     engine.renderer.fontCollection.fontFallbackManager?.downloadQueue.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
 
     if (setUpTestViewDimensions) {
@@ -45,4 +49,10 @@ void setUpUnitTests({
   tearDownAll(() async {
     fakeAssetManager.popAssetScope(debugFontsScope);
   });
+}
+
+Future<void> bootstrapAndRunApp() async {
+  final Completer<void> completer = Completer<void>();
+  await ui_web.bootstrapEngine(runApp: () => completer.complete());
+  await completer.future;
 }

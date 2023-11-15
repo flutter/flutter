@@ -9,13 +9,14 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/mock_engine_canvas.dart';
+import '../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  await initializeEngine();
+  await bootstrapAndRunApp();
 
   group('EngineCanvas', () {
     late MockEngineCanvas mockCanvas;

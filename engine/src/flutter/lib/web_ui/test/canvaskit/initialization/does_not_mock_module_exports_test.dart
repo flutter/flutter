@@ -6,6 +6,8 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
+import '../../common/test_initialization.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -14,7 +16,7 @@ void testMain() {
   group('initializeEngineServices', () {
     test('does not mock module loaders', () async {
       // Initialize CanvasKit...
-      await initializeEngineServices();
+      await bootstrapAndRunApp();
 
       // CanvasKitInit should be defined...
       expect(

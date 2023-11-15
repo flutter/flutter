@@ -33,10 +33,11 @@ class CopyArtifactsStep implements PipelineStep {
   @override
   Future<void> run() async {
     await environment.webTestsArtifactsDir.create(recursive: true);
-    await copyDart2WasmTestScript();
+    await copyTestBootstrapScripts();
     await buildHostPage();
     await copyTestFonts();
     await copySkiaTestImages();
+    await copyFlutterJsFiles();
     if (artifactDeps.canvasKit) {
       print('Copying CanvasKit...');
       await copyCanvasKitFiles('canvaskit', 'canvaskit');
@@ -51,16 +52,21 @@ class CopyArtifactsStep implements PipelineStep {
     }
   }
 
-  Future<void> copyDart2WasmTestScript() async {
-    final io.File sourceFile = io.File(pathlib.join(
-      environment.webUiDevDir.path,
+  Future<void> copyTestBootstrapScripts() async {
+    for (final String filename in <String>[
+      'test_dart2js.js',
       'test_dart2wasm.js',
-    ));
-    final io.File targetFile = io.File(pathlib.join(
-      environment.webTestsArtifactsDir.path,
-      'test_dart2wasm.js',
-    ));
-    await sourceFile.copy(targetFile.path);
+    ]) {
+      final io.File sourceFile = io.File(pathlib.join(
+        environment.webUiDevDir.path,
+        filename,
+      ));
+      final io.File targetFile = io.File(pathlib.join(
+        environment.webTestsArtifactsDir.path,
+        filename,
+      ));
+      await sourceFile.copy(targetFile.path);
+    }
   }
 
   Future<void> copyTestFonts() async {
@@ -155,6 +161,37 @@ class CopyArtifactsStep implements PipelineStep {
       ));
       destination.createSync(recursive: true);
       await imageFile.copy(destination.path);
+    }
+  }
+
+  Future<void> copyFlutterJsFiles() async {
+    final io.Directory flutterJsInputDirectory = io.Directory(pathlib.join(
+      outBuildPath,
+      'flutter_web_sdk',
+      'flutter_js',
+    ));
+    final String targetDirectoryPath = pathlib.join(
+      environment.webTestsArtifactsDir.path,
+      'flutter_js',
+    );
+
+    for (final io.File sourceFile in flutterJsInputDirectory
+      .listSync(recursive: true)
+      .whereType<io.File>()
+    ) {
+      final String relativePath = pathlib.relative(
+        sourceFile.path,
+        from: flutterJsInputDirectory.path
+      );
+      final String targetPath = pathlib.join(
+        targetDirectoryPath,
+        relativePath,
+      );
+      final io.File targetFile = io.File(targetPath);
+      if (!targetFile.parent.existsSync()) {
+        targetFile.parent.createSync(recursive: true);
+      }
+      sourceFile.copySync(targetPath);
     }
   }
 
