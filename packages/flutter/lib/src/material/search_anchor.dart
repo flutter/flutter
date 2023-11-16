@@ -330,7 +330,7 @@ class SearchAnchor extends StatefulWidget {
   /// The type of action button to use for the keyboard.
   final TextInputAction? textInputAction;
 
-  /// {@macro flutter.widgets.editableText.keyboardType}
+  /// The type of keyboard to use for editing the text.
   final TextInputType? keyboardType;
 
   @override
@@ -1243,7 +1243,7 @@ class SearchBar extends StatefulWidget {
   /// The type of action button to use for the keyboard.
   final TextInputAction? textInputAction;
 
-  /// {@macro flutter.widgets.editableText.keyboardType}
+  /// The type of keyboard to use for editing the text.
   final TextInputType? keyboardType;
 
   @override
