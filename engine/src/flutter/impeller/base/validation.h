@@ -12,8 +12,6 @@
 
 #include <sstream>
 
-#include "flutter/fml/macros.h"
-
 namespace impeller {
 
 class ValidationLog {

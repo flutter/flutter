@@ -4,11 +4,8 @@
 
 #pragma once
 
-#include <optional>
-
 #include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
-#include "impeller/image/decompressed_image.h"
 
 namespace impeller {
 

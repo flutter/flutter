@@ -8,8 +8,6 @@
 #include <string>
 #include <string_view>
 
-#include "flutter/fml/macros.h"
-
 namespace impeller {
 namespace compiler {
 
