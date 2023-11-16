@@ -174,14 +174,15 @@ targets:
       # ensure files from pre-production Fuchsia SDK tests are purged from cache
       clobber: "true"
     timeout: 90
-    runIfNot:
-      - lib/web_ui/**
-      - shell/platform/android/**
-      - shell/platform/darwin/**
-      - shell/platform/glfw/**
-      - shell/platform/linux/**
-      - shell/platform/windows/**
-      - web_sdk/**
+    # TODO(https://github.com/flutter/flutter/issues/138559): Re-enable/delete.
+    # runIfNot:
+    #   - lib/web_ui/**
+    #   - shell/platform/android/**
+    #   - shell/platform/darwin/**
+    #   - shell/platform/glfw/**
+    #   - shell/platform/linux/**
+    #   - shell/platform/windows/**
+    #   - web_sdk/**
 
   - name: Linux Fuchsia FEMU
     recipe: engine/femu_test
@@ -194,14 +195,15 @@ targets:
       emulator_arch: "x64"
       enable_cso: "true"
     timeout: 60
-    runIfNot:
-      - lib/web_ui/**
-      - shell/platform/android/**
-      - shell/platform/darwin/**
-      - shell/platform/glfw/**
-      - shell/platform/linux/**
-      - shell/platform/windows/**
-      - web_sdk/**
+    # TODO(https://github.com/flutter/flutter/issues/138559): Re-enable/delete.
+    # runIfNot:
+    #   - lib/web_ui/**
+    #   - shell/platform/android/**
+    #   - shell/platform/darwin/**
+    #   - shell/platform/glfw/**
+    #   - shell/platform/linux/**
+    #   - shell/platform/windows/**
+    #   - web_sdk/**
 
   - name: Linux Fuchsia arm64 FEMU
     recipe: engine/femu_test
@@ -214,14 +216,15 @@ targets:
       enable_cso: "true"
     timeout: 60
     bringup: true
-    runIfNot:
-      - lib/web_ui/**
-      - shell/platform/android/**
-      - shell/platform/darwin/**
-      - shell/platform/glfw/**
-      - shell/platform/linux/**
-      - shell/platform/windows/**
-      - web_sdk/**
+    # TODO(https://github.com/flutter/flutter/issues/138559): Re-enable/delete.
+    # runIfNot:
+    #   - lib/web_ui/**
+    #   - shell/platform/android/**
+    #   - shell/platform/darwin/**
+    #   - shell/platform/glfw/**
+    #   - shell/platform/linux/**
+    #   - shell/platform/windows/**
+    #   - web_sdk/**
 
   - name: Linux linux_fuchsia
     recipe: engine_v2/engine_v2
@@ -231,14 +234,15 @@ targets:
       config_name: linux_fuchsia
     drone_dimensions:
       - os=Linux
-    runIfNot:
-      - lib/web_ui/**
-      - shell/platform/android/**
-      - shell/platform/darwin/**
-      - shell/platform/glfw/**
-      - shell/platform/linux/**
-      - shell/platform/windows/**
-      - web_sdk/**
+    # TODO(https://github.com/flutter/flutter/issues/138559): Re-enable/delete.
+    # runIfNot:
+    #   - lib/web_ui/**
+    #   - shell/platform/android/**
+    #   - shell/platform/darwin/**
+    #   - shell/platform/glfw/**
+    #   - shell/platform/linux/**
+    #   - shell/platform/windows/**
+    #   - web_sdk/**
 
   - name: Linux Framework Smoke Tests
     recipe: engine/framework_smoke
