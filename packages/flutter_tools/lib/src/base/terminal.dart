@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../convert.dart';
+import '../features.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart';
@@ -69,6 +70,7 @@ class OutputPreferences {
 }
 
 /// The command line terminal, if available.
+// TODO(ianh): merge this with AnsiTerminal, the abstraction isn't giving us anything.
 abstract class Terminal {
   /// Create a new test [Terminal].
   ///
@@ -81,8 +83,11 @@ abstract class Terminal {
   /// to perform animations.
   bool get supportsColor;
 
-  /// Whether to show animations on this terminal.
+  /// Whether animations should be used in the output.
   bool get isCliAnimationEnabled;
+
+  /// Configures isCliAnimationEnabled based on a [FeatureFlags] object.
+  void applyFeatureFlags(FeatureFlags flags);
 
   /// Whether the current terminal can display emoji.
   bool get supportsEmoji;
@@ -158,11 +163,12 @@ class AnsiTerminal implements Terminal {
     required io.Stdio stdio,
     required Platform platform,
     DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
-    this.isCliAnimationEnabled = true,
+    bool defaultCliAnimationEnabled = true,
   })
     : _stdio = stdio,
       _platform = platform,
-      _now = now ?? DateTime(1);
+      _now = now ?? DateTime(1),
+      _isCliAnimationEnabled = defaultCliAnimationEnabled;
 
   final io.Stdio _stdio;
   final Platform _platform;
@@ -207,7 +213,14 @@ class AnsiTerminal implements Terminal {
   bool get supportsColor => _platform.stdoutSupportsAnsi;
 
   @override
-  final bool isCliAnimationEnabled;
+  bool get isCliAnimationEnabled => _isCliAnimationEnabled;
+
+  bool _isCliAnimationEnabled;
+
+  @override
+  void applyFeatureFlags(FeatureFlags flags) {
+    _isCliAnimationEnabled = flags.isCliAnimationEnabled;
+  }
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
@@ -419,7 +432,14 @@ class _TestTerminal implements Terminal {
   final bool supportsColor;
 
   @override
-  bool get isCliAnimationEnabled => supportsColor;
+  bool get isCliAnimationEnabled => supportsColor && _isCliAnimationEnabled;
+
+  bool _isCliAnimationEnabled = true;
+
+  @override
+  void applyFeatureFlags(FeatureFlags flags) {
+    _isCliAnimationEnabled = flags.isCliAnimationEnabled;
+  }
 
   @override
   final bool supportsEmoji;

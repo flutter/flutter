@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:process/process.dart';
@@ -84,6 +82,8 @@ Future<T> runInContext<T>(
     return runner();
   }
 
+  // TODO(ianh): We should split this into two, one for tests (which should be
+  // in test/), and one for production (which should be in executable.dart).
   return context.run<T>(
     name: 'global fallbacks',
     body: runnerWrapper,

@@ -18,6 +18,7 @@ import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
+import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
 import 'src/reporting/reporting.dart';
@@ -44,6 +45,8 @@ Future<int> run(
   }
 
   return runInContext<int>(() async {
+    globals.terminal.applyFeatureFlags(featureFlags);
+
     reportCrashes ??= !await globals.isRunningOnBot;
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
     commands().forEach(runner.addCommand);
