@@ -26,6 +26,9 @@ import 'test_pointer.dart';
 import 'test_text_input.dart';
 import 'tree_traversal.dart';
 
+// Examples can assume:
+// typedef MyWidget = Placeholder;
+
 // Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 // We re-export the matcher package minus some features that we reimplement.
@@ -81,143 +84,6 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
     return result;
   }
   return null;
-}
-
-// Examples can assume:
-// typedef MyWidget = Placeholder;
-
-/// Runs the [callback] inside the Flutter test environment.
-///
-/// Use this function for testing custom [StatelessWidget]s and
-/// [StatefulWidget]s.
-///
-/// The callback can be asynchronous (using `async`/`await` or
-/// using explicit [Future]s).
-///
-/// The `timeout` argument specifies the backstop timeout implemented by the
-/// `test` package. If set, it should be relatively large (minutes). It defaults
-/// to ten minutes for tests run by `flutter test`, and is unlimited for tests
-/// run by `flutter run`; specifically, it defaults to
-/// [TestWidgetsFlutterBinding.defaultTestTimeout].
-///
-/// If the `semanticsEnabled` parameter is set to `true`,
-/// [WidgetTester.ensureSemantics] will have been called before the tester is
-/// passed to the `callback`, and that handle will automatically be disposed
-/// after the callback is finished. It defaults to true.
-///
-/// This function uses the [test] function in the test package to
-/// register the given callback as a test. The callback, when run,
-/// will be given a new instance of [WidgetTester]. The [find] object
-/// provides convenient widget [Finder]s for use with the
-/// [WidgetTester].
-///
-/// When the [variant] argument is set, [testWidgets] will run the test once for
-/// each value of the [TestVariant.values]. If [variant] is not set, the test
-/// will be run once using the base test environment.
-///
-/// If the [tags] are passed, they declare user-defined tags that are implemented by
-/// the `test` package.
-///
-/// The argument [experimentalLeakTesting] is experimental and is not recommended
-/// for use outside of the Flutter framework.
-/// When [experimentalLeakTesting] is set, it is used for leak tracking.
-/// Otherwise [LeakTesting.settings] is used.
-/// Adjust [LeakTesting.settings] in flutter_test_config.dart
-/// (see https://github.com/flutter/flutter/blob/master/packages/flutter_test/lib/flutter_test.dart)
-/// for the entire package or folder, or in the test's main for a test file.
-/// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
-/// `LeakTrackingForTests.ignore()`.
-///
-/// ## Sample code
-///
-/// ```dart
-/// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(const MyWidget());
-///   await tester.tap(find.text('Save'));
-///   expect(find.text('Success'), findsOneWidget);
-/// });
-/// ```
-@isTest
-void testWidgets(
-  String description,
-  WidgetTesterCallback callback, {
-  bool? skip,
-  test_package.Timeout? timeout,
-  bool semanticsEnabled = true,
-  TestVariant<Object?> variant = const DefaultTestVariant(),
-  dynamic tags,
-  int? retry,
-  LeakTesting? experimentalLeakTesting,
-}) {
-  assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
-
-  callback = _wrapWithLeakTracking(description, callback, experimentalLeakTesting);
-
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  final WidgetTester tester = WidgetTester._(binding);
-  for (final dynamic value in variant.values) {
-    _plannedTests += 1;
-    final String variationDescription = variant.describeValue(value);
-    // IDEs may make assumptions about the format of this suffix in order to
-    // support running tests directly from the editor (where they may have
-    // access to only the test name, provided by the analysis server).
-    // See https://github.com/flutter/flutter/issues/86659.
-    final String combinedDescription = variationDescription.isNotEmpty
-        ? '$description (variant: $variationDescription)'
-        : description;
-    test(
-      combinedDescription,
-      () {
-        tester._testDescription = combinedDescription;
-        SemanticsHandle? semanticsHandle;
-        tester._recordNumberOfSemanticsHandles();
-        if (semanticsEnabled) {
-          semanticsHandle = tester.ensureSemantics();
-        }
-
-        // This tear down happens after in-test `addTearDown`, but before
-        // separate `tearDown` in the test file.
-        test_package.addTearDown(binding.postTest);
-
-        return binding.runTest(
-          () async {
-            binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
-            debugResetSemanticsIdCounter();
-            Object? memento;
-            try {
-              memento = await variant.setUp(value);
-              await callback(tester);
-            } finally {
-              _executedTests += 1;
-              await variant.tearDown(value, memento);
-            }
-            semanticsHandle?.dispose();
-          },
-          tester._endOfTestVerifications,
-          description: combinedDescription,
-        );
-      },
-      skip: skip,
-      timeout: timeout ?? binding.defaultTestTimeout,
-      tags: tags,
-      retry: retry,
-    );
-  }
-}
-
-
-
-bool _notSupportedWarningPrinted = false;
-bool get _isPlatformSupported => !kIsWeb;
-void _maybePrintPlatformWarning() {
-  if (!LeakTracking.warnForUnsupportedPlatforms || _isPlatformSupported || _notSupportedWarningPrinted) {
-    return;
-  }
-  _notSupportedWarningPrinted = true;
-  debugPrint(
-    'Leak tracking is not supported on this platform.\n'
-    'To turn off this message, set `LeakTracking.warnForNotSupportedPlatforms` to false.',
-  );
 }
 
 void _dispatchFlutterEventToLeakTracker(ObjectEvent event) {
