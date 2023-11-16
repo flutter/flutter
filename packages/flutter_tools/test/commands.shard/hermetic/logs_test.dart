@@ -46,11 +46,17 @@ void main() {
     testUsingContext('does not try to complete exitCompleter multiple times', () async {
       final FakeDevice fakeDevice = FakeDevice('phone', deviceId);
       deviceManager.attachedDevices.add(fakeDevice);
+      final FakeProcessSignal termSignal = FakeProcessSignal();
+      final FakeProcessSignal intSignal = FakeProcessSignal();
       final LogsCommand command = LogsCommand(
-        sigterm: FakeProcessSignal(),
-        sigint: FakeProcessSignal(),
+        sigterm: termSignal,
+        sigint: intSignal,
       );
-      await createTestCommandRunner(command).run(<String>['-d', deviceId, 'logs']);
+      final Future<void> commandFuture = createTestCommandRunner(command).run(<String>['-d', deviceId, 'logs']);
+      intSignal.send(1);
+      termSignal.send(1);
+      await pumpEventQueue(times: 5);
+      await commandFuture;
     }, overrides: <Type, Generator>{
       Platform: () => platform,
       DeviceManager: () => deviceManager,
@@ -63,4 +69,10 @@ class FakeProcessSignal extends Fake implements ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() => _controller.stream;
+
+  @override
+  bool send(int pid) {
+    _controller.add(this);
+    return true;
+  }
 }
