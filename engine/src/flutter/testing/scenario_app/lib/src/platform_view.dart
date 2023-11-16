@@ -422,7 +422,6 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     required this.secondId,
   }) {
     _nextFrame = _firstFrame;
-    channelBuffers.setListener('flutter/lifecycle', _onPlatformMessage);
   }
 
   /// The platform view identifier to use for the first platform view.
@@ -438,7 +437,13 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     _nextFrame();
   }
 
+  bool _firstFrameBegan = false;
+
   void _firstFrame() {
+    if (!_firstFrameBegan) {
+      channelBuffers.setListener('flutter/lifecycle', _onPlatformMessage);
+    }
+    _firstFrameBegan = true;
     final SceneBuilder builder = SceneBuilder();
 
     builder.pushOffset(50, 600);
