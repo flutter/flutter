@@ -3610,8 +3610,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   // Record the last focused node in route entry.
   void _recordLastFocus(){
-    final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
-    entry.lastFocusNode = ServicesBinding.instance.accessibilityFocus.value;
+    final _RouteEntry? entry = _history.where(_RouteEntry.isPresentPredicate).lastOrNull;
+    entry?.lastFocusNode = ServicesBinding.instance.accessibilityFocus.value;
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
