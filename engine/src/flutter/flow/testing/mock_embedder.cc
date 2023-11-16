@@ -28,7 +28,7 @@ void MockViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
 
 // |ExternalViewEmbedder|
 void MockViewEmbedder::PrerollCompositeEmbeddedView(

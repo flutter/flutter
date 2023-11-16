@@ -45,11 +45,11 @@ class MockExternalViewEmbedder : public flutter::ExternalViewEmbedder {
   flutter::DlCanvas* GetRootCanvas() override { return nullptr; }
 
   void CancelFrame() override {}
-  void BeginFrame(SkISize frame_size,
-                  GrDirectContext* context,
-                  double device_pixel_ratio,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override {}
+  void BeginFrame(
+      SkISize frame_size,
+      GrDirectContext* context,
+      double device_pixel_ratio,
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override {}
 
   void SubmitFrame(GrDirectContext* context,
                    const std::shared_ptr<impeller::AiksContext>& aiks_context,

@@ -6,7 +6,6 @@
 #define FLUTTER_FLOW_EMBEDDED_VIEWS_H_
 
 #include <memory>
-#include <utility>
 #include <vector>
 
 #include "flutter/display_list/dl_builder.h"
@@ -52,7 +51,7 @@ class ImageFilterMutation {
  public:
   ImageFilterMutation(std::shared_ptr<const DlImageFilter> filter,
                       const SkRect& filter_rect)
-      : filter_(std::move(filter)), filter_rect_(filter_rect) {}
+      : filter_(filter), filter_rect_(filter_rect) {}
 
   const DlImageFilter& GetFilter() const { return *filter_; }
   const SkRect& GetFilterRect() const { return filter_rect_; }
@@ -111,7 +110,7 @@ class Mutator {
   explicit Mutator(const SkMatrix& matrix)
       : type_(kTransform), matrix_(matrix) {}
   explicit Mutator(const int& alpha) : type_(kOpacity), alpha_(alpha) {}
-  explicit Mutator(const std::shared_ptr<const DlImageFilter>& filter,
+  explicit Mutator(std::shared_ptr<const DlImageFilter> filter,
                    const SkRect& filter_rect)
       : type_(kBackdropFilter),
         filter_mutation_(
@@ -271,7 +270,7 @@ class EmbeddedViewParams {
                      MutatorsStack mutators_stack)
       : matrix_(matrix),
         size_points_(size_points),
-        mutators_stack_(std::move(mutators_stack)) {
+        mutators_stack_(mutators_stack) {
     SkPath path;
     SkRect starting_rect = SkRect::MakeSize(size_points);
     path.addRect(starting_rect);
@@ -296,7 +295,7 @@ class EmbeddedViewParams {
   // Pushes the stored DlImageFilter object to the mutators stack.
   //
   // `filter_rect` is in global coordinates.
-  void PushImageFilter(const std::shared_ptr<const DlImageFilter>& filter,
+  void PushImageFilter(std::shared_ptr<const DlImageFilter> filter,
                        const SkRect& filter_rect) {
     mutators_stack_.PushBackdropFilter(filter, filter_rect);
   }
@@ -345,7 +344,7 @@ class EmbedderViewSlice {
 
 class DisplayListEmbedderViewSlice : public EmbedderViewSlice {
  public:
-  explicit DisplayListEmbedderViewSlice(SkRect view_bounds);
+  DisplayListEmbedderViewSlice(SkRect view_bounds);
   ~DisplayListEmbedderViewSlice() override = default;
 
   DlCanvas* canvas() override;
@@ -392,7 +391,7 @@ class ExternalViewEmbedder {
       SkISize frame_size,
       GrDirectContext* context,
       double device_pixel_ratio,
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) = 0;
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) = 0;
 
   virtual void PrerollCompositeEmbeddedView(
       int64_t view_id,
@@ -403,7 +402,7 @@ class ExternalViewEmbedder {
   // after it does any requisite tasks needed to bring itself to a valid state.
   // Returns kSuccess if the view embedder is already in a valid state.
   virtual PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
     return PostPrerollResult::kSuccess;
   }
 
@@ -433,7 +432,7 @@ class ExternalViewEmbedder {
   // returns false.
   virtual void EndFrame(
       bool should_resubmit_frame,
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
 
   // Whether the embedder should support dynamic thread merging.
   //
@@ -469,7 +468,7 @@ class ExternalViewEmbedder {
   // See also: |PushVisitedPlatformView| for pushing platform view ids to the
   // visited platform views list.
   virtual void PushFilterToVisitedPlatformViews(
-      const std::shared_ptr<const DlImageFilter>& filter,
+      std::shared_ptr<const DlImageFilter> filter,
       const SkRect& filter_rect) {}
 
  private:

@@ -212,7 +212,7 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
 
 // |ExternalViewEmbedder|
 PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   if (!FrameHasPlatformLayers()) {
     return PostPrerollResult::kSuccess;
   }
@@ -260,7 +260,7 @@ void AndroidExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   Reset();
 
   // The surface size changed. Therefore, destroy existing surfaces as
@@ -286,7 +286,7 @@ void AndroidExternalViewEmbedder::CancelFrame() {
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   surface_pool_->RecycleLayers();
   // JNI method must be called on the platform thread.
   if (raster_thread_merger->IsOnPlatformThread()) {
