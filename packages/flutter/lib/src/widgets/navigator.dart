@@ -3035,8 +3035,7 @@ class _RouteEntry extends RouteTransitionRecord {
   void handleDidPopNext(Route<dynamic> poppedRoute) {
     route.didPopNext(poppedRoute);
     lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(poppedRoute);
-    if(lastFocusNode != null)
-    {
+    if (lastFocusNode != null) {
       // Move focus back to the last focused node.
       poppedRoute._disposeCompleter.future.then((dynamic result) {
         switch (defaultTargetPlatform) {
