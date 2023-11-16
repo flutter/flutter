@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+#include <memory>
 
 #include "impeller/base/validation.h"
 #include "impeller/core/texture_descriptor.h"
@@ -17,12 +18,13 @@ std::shared_ptr<Texture> WrapperMTL(TextureDescriptor desc,
 }
 
 TextureMTL::TextureMTL(TextureDescriptor p_desc,
-                       id<MTLTexture> texture,
-                       bool wrapped)
-    : Texture(p_desc), texture_(texture) {
+                       const AcquireTextureProc& aquire_proc,
+                       bool wrapped,
+                       bool drawable)
+    : Texture(p_desc), aquire_proc_(aquire_proc), is_drawable_(drawable) {
   const auto& desc = GetTextureDescriptor();
 
-  if (!desc.IsValid() || !texture_) {
+  if (!desc.IsValid() || !aquire_proc) {
     return;
   }
 
@@ -41,19 +43,29 @@ std::shared_ptr<TextureMTL> TextureMTL::Wrapper(
     std::function<void()> deletion_proc) {
   if (deletion_proc) {
     return std::shared_ptr<TextureMTL>(
-        new TextureMTL(desc, texture, true),
+        new TextureMTL(
+            desc, [texture]() { return texture; }, true),
         [deletion_proc = std::move(deletion_proc)](TextureMTL* t) {
           deletion_proc();
           delete t;
         });
   }
-  return std::shared_ptr<TextureMTL>(new TextureMTL(desc, texture, true));
+  return std::shared_ptr<TextureMTL>(
+      new TextureMTL(desc, [texture]() { return texture; }, true));
+}
+
+std::shared_ptr<TextureMTL> TextureMTL::Create(TextureDescriptor desc,
+                                               id<MTLTexture> texture) {
+  return std::make_shared<TextureMTL>(desc, [texture]() { return texture; });
 }
 
 TextureMTL::~TextureMTL() = default;
 
 void TextureMTL::SetLabel(std::string_view label) {
-  [texture_ setLabel:@(label.data())];
+  if (is_drawable_) {
+    return;
+  }
+  [aquire_proc_() setLabel:@(label.data())];
 }
 
 // |Texture|
@@ -68,7 +80,7 @@ bool TextureMTL::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
 bool TextureMTL::OnSetContents(const uint8_t* contents,
                                size_t length,
                                size_t slice) {
-  if (!IsValid() || !contents || is_wrapped_) {
+  if (!IsValid() || !contents || is_wrapped_ || is_drawable_) {
     return false;
   }
 
@@ -81,24 +93,28 @@ bool TextureMTL::OnSetContents(const uint8_t* contents,
 
   const auto region =
       MTLRegionMake2D(0u, 0u, desc.size.width, desc.size.height);
-  [texture_ replaceRegion:region                            //
-              mipmapLevel:0u                                //
-                    slice:slice                             //
-                withBytes:contents                          //
-              bytesPerRow:desc.GetBytesPerRow()             //
-            bytesPerImage:desc.GetByteSizeOfBaseMipLevel()  //
+  [aquire_proc_() replaceRegion:region                            //
+                    mipmapLevel:0u                                //
+                          slice:slice                             //
+                      withBytes:contents                          //
+                    bytesPerRow:desc.GetBytesPerRow()             //
+                  bytesPerImage:desc.GetByteSizeOfBaseMipLevel()  //
   ];
 
   return true;
 }
 
 ISize TextureMTL::GetSize() const {
-  return {static_cast<ISize::Type>(texture_.width),
-          static_cast<ISize::Type>(texture_.height)};
+  if (is_drawable_) {
+    return GetTextureDescriptor().size;
+  }
+  const auto& texture = aquire_proc_();
+  return {static_cast<ISize::Type>(texture.width),
+          static_cast<ISize::Type>(texture.height)};
 }
 
 id<MTLTexture> TextureMTL::GetMTLTexture() const {
-  return texture_;
+  return aquire_proc_();
 }
 
 bool TextureMTL::IsValid() const {
@@ -109,12 +125,21 @@ bool TextureMTL::IsWrapped() const {
   return is_wrapped_;
 }
 
+bool TextureMTL::IsDrawable() const {
+  return is_drawable_;
+}
+
 bool TextureMTL::GenerateMipmap(id<MTLBlitCommandEncoder> encoder) {
-  if (!texture_) {
+  if (is_drawable_) {
     return false;
   }
 
-  [encoder generateMipmapsForTexture:texture_];
+  auto texture = aquire_proc_();
+  if (!texture) {
+    return false;
+  }
+
+  [encoder generateMipmapsForTexture:texture];
   mipmap_generated_ = true;
 
   return true;

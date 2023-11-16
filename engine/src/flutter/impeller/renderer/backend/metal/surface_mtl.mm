@@ -79,7 +79,7 @@ static std::optional<RenderTarget> WrapTextureWithRenderTarget(
     resolve_tex_desc.compression_type = CompressionType::kLossy;
     resolve_tex = allocator.CreateTexture(resolve_tex_desc);
   } else {
-    resolve_tex = std::make_shared<TextureMTL>(resolve_tex_desc, texture);
+    resolve_tex = TextureMTL::Create(resolve_tex_desc, texture);
   }
 
   if (!resolve_tex) {
