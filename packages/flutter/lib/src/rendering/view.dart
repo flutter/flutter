@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate, ViewConstraints;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -19,14 +19,15 @@ import 'object.dart';
 class ViewConfiguration {
   /// Creates a view configuration.
   ///
-  /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
+  /// By default, the view has [ViewConstraints] with all dimensions set to zero
+  /// (i.e. the view is forced to [Size.zero]) and a [devicePixelRatio] of 1.0.
   const ViewConfiguration({
-    this.size = Size.zero,
+    this.constraints = const ui.ViewConstraints(maxWidth: 0.0, maxHeight: 0.0),
     this.devicePixelRatio = 1.0,
   });
 
-  /// The size of the output surface.
-  final Size size;
+  /// The constraints of the output surface in logical pixel.
+  final ui.ViewConstraints constraints;
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
@@ -46,15 +47,15 @@ class ViewConfiguration {
       return false;
     }
     return other is ViewConfiguration
-        && other.size == size
+        && other.constraints == constraints
         && other.devicePixelRatio == devicePixelRatio;
   }
 
   @override
-  int get hashCode => Object.hash(size, devicePixelRatio);
+  int get hashCode => Object.hash(constraints, devicePixelRatio);
 
   @override
-  String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
+  String toString() => '$constraints at ${debugFormatDouble(devicePixelRatio)}x';
 }
 
 /// The root of the render tree.
@@ -105,6 +106,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
     final ViewConfiguration? oldConfiguration = _configuration;
     _configuration = value;
+    _constraints = BoxConstraints.fromViewConstraints(configuration.constraints);
     if (_rootTransform == null) {
       // [prepareInitialFrame] has not been called yet, nothing to do for now.
       return;
@@ -118,6 +120,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Whether a [configuration] has been set.
   bool get hasConfiguration => _configuration != null;
+
+  @override
+  BoxConstraints get constraints {
+    if (_constraints == null) {
+      throw StateError('Constraints are not available because RenderView has not been given a configuration yet.');
+    }
+    return _constraints!;
+  }
+  BoxConstraints? _constraints;
 
   /// The [FlutterView] into which this [RenderView] will render.
   ui.FlutterView get flutterView => _view;
@@ -188,12 +199,12 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    _size = configuration.size;
-    assert(_size.isFinite);
-
+    final bool sizedByChild = !constraints.isTight;
     if (child != null) {
-      child!.layout(BoxConstraints.tight(_size));
+      child!.layout(constraints, parentUsesSize: sizedByChild);
     }
+    _size = sizedByChild && child != null ? child!.size : constraints.smallest;
+    assert(_size.isFinite);
   }
 
   /// Determines the set of render objects located at the given position.
@@ -253,7 +264,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      _view.render(scene);
+      _view.render(scene, size: size * configuration.devicePixelRatio);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {

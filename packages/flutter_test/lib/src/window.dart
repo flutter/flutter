@@ -751,6 +751,9 @@ class TestFlutterView implements FlutterView {
   /// can only be set in a test environment to emulate different view
   /// configurations. A standard [FlutterView] is not mutable from the framework.
   ///
+  /// Setting this value also sets [physicalConstraints] to tight constraints
+  /// based on the given size.
+  ///
   /// See also:
   ///
   ///   * [FlutterView.physicalSize] for the standard implementation
@@ -761,14 +764,28 @@ class TestFlutterView implements FlutterView {
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
-    platformDispatcher.onMetricsChanged?.call();
+    physicalConstraints = ViewConstraints.tight(value);
   }
 
   /// Resets [physicalSize] to the default value for this view.
   void resetPhysicalSize() {
     _physicalSize = null;
+    resetPhysicalConstraints();
+  }
+
+  @override
+  ViewConstraints get physicalConstraints => _physicalConstraints ?? _view.physicalConstraints;
+  ViewConstraints? _physicalConstraints;
+  set physicalConstraints(ViewConstraints value) {
+    _physicalConstraints = value;
     platformDispatcher.onMetricsChanged?.call();
   }
+
+  void resetPhysicalConstraints() {
+    _physicalConstraints = null;
+    platformDispatcher.onMetricsChanged?.call();
+  }
+
 
   /// The system gesture insets to use for this test.
   ///
@@ -875,8 +892,7 @@ class TestFlutterView implements FlutterView {
 
   @override
   void render(Scene scene, {Size? size}) {
-    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
-    _view.render(scene);
+    _view.render(scene, size: size);
   }
 
   @override
@@ -1637,8 +1653,7 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   void render(Scene scene, {Size? size}) {
-    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
-    _view.render(scene);
+    _view.render(scene, size: size);
   }
 
   @Deprecated(
