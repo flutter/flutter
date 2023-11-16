@@ -60,7 +60,31 @@ abstract class ProcessTextService {
 /// Any widget may use this service to get a list of text processing actions
 /// and send requests to activate these text actions.
 ///
-/// This is currently only supported by Android.
+/// This is currently only supported on Android and it requires adding the
+/// following '<queries>' element to the Android manifest file:
+///
+/// <manifest ...>
+///     <application ...>
+///       ...
+///     </application>
+///     <!-- Required to query activities that can process text, see:
+///           https://developer.android.com/training/package-visibility?hl=en and
+///           https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+///
+///           In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+///     <queries>
+///         <intent>
+///             <action android:name="android.intent.action.PROCESS_TEXT"/>
+///             <data android:mimeType="text/plain"/>
+///         </intent>
+///     </queries>
+/// </manifest>
+///
+/// The '<queries>' element is part of the Android manifest file generated when
+/// running the 'flutter create' command.
+///
+/// If the '<queries>' element is not found, `queryTextActions()` will return an
+/// empty list of `ProcessTextAction`.
 ///
 /// See also:
 ///
