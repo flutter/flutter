@@ -285,6 +285,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
           stack: stack,
           library: 'painting library',
           context: ErrorDescription('while building a TextSpan'),
+          silent: true,
         ));
         // Use a Unicode replacement character as a substitute for invalid text.
         builder.addText('\uFFFD');
