@@ -11,8 +11,6 @@
 #include "flutter/lib/ui/painting/color_filter.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
-using tonic::DartPersistentValue;
-
 namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic

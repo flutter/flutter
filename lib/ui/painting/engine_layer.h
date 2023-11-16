@@ -18,8 +18,9 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
  public:
   ~EngineLayer() override;
 
-  static void MakeRetained(Dart_Handle dart_handle,
-                           std::shared_ptr<flutter::ContainerLayer> layer) {
+  static void MakeRetained(
+      Dart_Handle dart_handle,
+      const std::shared_ptr<flutter::ContainerLayer>& layer) {
     auto engine_layer = fml::MakeRefCounted<EngineLayer>(layer);
     engine_layer->AssociateWithDartWrapper(dart_handle);
   }
