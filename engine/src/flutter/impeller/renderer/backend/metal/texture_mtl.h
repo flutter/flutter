@@ -15,14 +15,22 @@ namespace impeller {
 class TextureMTL final : public Texture,
                          public BackendCast<TextureMTL, Texture> {
  public:
+  /// @brief This callback needs to always return the same texture when called
+  ///        multiple times.
+  using AcquireTextureProc = std::function<id<MTLTexture>()>;
+
   TextureMTL(TextureDescriptor desc,
-             id<MTLTexture> texture,
-             bool wrapped = false);
+             const AcquireTextureProc& aquire_proc,
+             bool wrapped = false,
+             bool drawable = false);
 
   static std::shared_ptr<TextureMTL> Wrapper(
       TextureDescriptor desc,
       id<MTLTexture> texture,
       std::function<void()> deletion_proc = nullptr);
+
+  static std::shared_ptr<TextureMTL> Create(TextureDescriptor desc,
+                                            id<MTLTexture> texture);
 
   // |Texture|
   ~TextureMTL() override;
@@ -31,12 +39,19 @@ class TextureMTL final : public Texture,
 
   bool IsWrapped() const;
 
+  /// @brief Whether or not this texture is wrapping a Metal drawable.
+  bool IsDrawable() const;
+
+  // |Texture|
+  bool IsValid() const override;
+
   bool GenerateMipmap(id<MTLBlitCommandEncoder> encoder);
 
  private:
-  id<MTLTexture> texture_ = nullptr;
+  AcquireTextureProc aquire_proc_ = {};
   bool is_valid_ = false;
   bool is_wrapped_ = false;
+  bool is_drawable_ = false;
 
   // |Texture|
   void SetLabel(std::string_view label) override;
@@ -49,10 +64,6 @@ class TextureMTL final : public Texture,
   // |Texture|
   bool OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
                      size_t slice) override;
-
-  // |Texture|
-  bool IsValid() const override;
-
   // |Texture|
   ISize GetSize() const override;
 

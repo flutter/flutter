@@ -87,6 +87,7 @@ impeller_component("impeller_unittests") {
     "core:allocator_unittests",
     "display_list:skia_conversions_unittests",
     "geometry:geometry_unittests",
+    "renderer/backend/metal:metal_unittests",
     "runtime_stage:runtime_stage_unittests",
     "scene/importer:importer_unittests",
     "shader_archive:shader_archive_unittests",
