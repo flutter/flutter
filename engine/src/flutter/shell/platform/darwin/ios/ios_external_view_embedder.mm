@@ -34,7 +34,7 @@ void IOSExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::BeginFrame");
   FML_CHECK(platform_views_controller_);
   platform_views_controller_->BeginFrame(frame_size);
@@ -51,7 +51,7 @@ void IOSExternalViewEmbedder::PrerollCompositeEmbeddedView(
 
 // |ExternalViewEmbedder|
 PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PostPrerollAction");
   FML_CHECK(platform_views_controller_);
   PostPrerollResult result = platform_views_controller_->PostPrerollAction(raster_thread_merger);
@@ -77,8 +77,9 @@ void IOSExternalViewEmbedder::SubmitFrame(
 }
 
 // |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::EndFrame(bool should_resubmit_frame,
-                                       fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+void IOSExternalViewEmbedder::EndFrame(
+    bool should_resubmit_frame,
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::EndFrame");
   platform_views_controller_->EndFrame(should_resubmit_frame, raster_thread_merger);
 }
@@ -90,7 +91,7 @@ bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
 
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PushFilterToVisitedPlatformViews(
-    std::shared_ptr<const DlImageFilter> filter,
+    const std::shared_ptr<const DlImageFilter>& filter,
     const SkRect& filter_rect) {
   platform_views_controller_->PushFilterToVisitedPlatformViews(filter, filter_rect);
 }
