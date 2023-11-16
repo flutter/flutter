@@ -2465,16 +2465,17 @@ class TextSelectionGestureDetectorBuilder {
 
       _dragStartViewportOffset = renderEditable.offset.pixels;
       _dragStartScrollOffset = _scrollPosition;
-    }
 
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-        state: FloatingCursorDragState.Start,
-        localPosition: renderEditable.globalToLocal(details.globalPosition),
-        offset: Offset.zero,
-      );
-      editableText.updateFloatingCursor(cursorPoint);
-    }, debugLabel: 'TextSelectionGestureDetectorBuilderDelegate.updateFloatingCursor');
+      // Show the floating cursor
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+          state: FloatingCursorDragState.Start,
+          localPosition: renderEditable.globalToLocal(details.globalPosition),
+          offset: Offset.zero,
+        );
+        editableText.updateFloatingCursor(cursorPoint);
+      }, debugLabel: 'TextSelectionGestureDetectorBuilderDelegate.updateFloatingCursor');
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapMoveUpdate].
@@ -2525,13 +2526,14 @@ class TextSelectionGestureDetectorBuilder {
       }
 
       _showMagnifierIfSupportedByPlatform(details.globalPosition);
-    }
 
-    final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-      state: FloatingCursorDragState.Update,
-      offset: details.offsetFromOrigin,
-    );
-    editableText.updateFloatingCursor(cursorPoint);
+      // Update the floating cursor
+      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Update,
+        offset: details.offsetFromOrigin,
+      );
+      editableText.updateFloatingCursor(cursorPoint);
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapEnd].
@@ -2552,10 +2554,13 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
 
-    final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-      state: FloatingCursorDragState.End
-    );
-    editableText.updateFloatingCursor(cursorPoint);
+    // Update the floating cursor
+    if (delegate.selectionEnabled) {
+      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+        state: FloatingCursorDragState.End
+      );
+      editableText.updateFloatingCursor(cursorPoint);
+    }
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
