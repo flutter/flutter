@@ -184,13 +184,18 @@ class Path {
 
   void SetBounds(Rect rect);
 
-  Path& AddLinearComponent(Point p1, Point p2);
+  Path& AddLinearComponent(const Point& p1, const Point& p2);
 
-  Path& AddQuadraticComponent(Point p1, Point cp, Point p2);
+  Path& AddQuadraticComponent(const Point& p1,
+                              const Point& cp,
+                              const Point& p2);
 
-  Path& AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
+  Path& AddCubicComponent(const Point& p1,
+                          const Point& cp1,
+                          const Point& cp2,
+                          const Point& p2);
 
-  Path& AddContourComponent(Point destination, bool is_closed = false);
+  Path& AddContourComponent(const Point& destination, bool is_closed = false);
 
   /// @brief Called by `PathBuilder` to compute the bounds for certain paths.
   ///
@@ -215,9 +220,7 @@ class Path {
   FillType fill_ = FillType::kNonZero;
   Convexity convexity_ = Convexity::kUnknown;
   std::vector<ComponentIndexPair> components_;
-  std::vector<LinearPathComponent> linears_;
-  std::vector<QuadraticPathComponent> quads_;
-  std::vector<CubicPathComponent> cubics_;
+  std::vector<Point> points_;
   std::vector<ContourComponent> contours_;
 
   std::optional<Rect> computed_bounds_;

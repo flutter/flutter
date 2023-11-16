@@ -29,6 +29,10 @@ class PathBuilder {
 
   Path TakePath(FillType fill = FillType::kNonZero);
 
+  /// @brief Reserve [point_size] points and [verb_size] verbs in the underlying
+  ///        path buffer.
+  void Reserve(size_t point_size, size_t verb_size);
+
   const Path& GetCurrentPath() const;
 
   PathBuilder& SetConvexity(Convexity value);
