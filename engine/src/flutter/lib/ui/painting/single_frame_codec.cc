@@ -9,11 +9,11 @@
 
 namespace flutter {
 
-SingleFrameCodec::SingleFrameCodec(fml::RefPtr<ImageDescriptor> descriptor,
-                                   uint32_t target_width,
-                                   uint32_t target_height)
-    : status_(Status::kNew),
-      descriptor_(std::move(descriptor)),
+SingleFrameCodec::SingleFrameCodec(
+    const fml::RefPtr<ImageDescriptor>& descriptor,
+    uint32_t target_width,
+    uint32_t target_height)
+    : descriptor_(descriptor),
       target_width_(target_width),
       target_height_(target_height) {}
 
@@ -97,7 +97,8 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
         codec->status_ = Status::kComplete;
 
         // Invoke any callbacks that were provided before the frame was decoded.
-        for (const DartPersistentValue& callback : codec->pending_callbacks_) {
+        for (const tonic::DartPersistentValue& callback :
+             codec->pending_callbacks_) {
           tonic::DartInvoke(callback.value(),
                             {tonic::ToDart(codec->cached_image_),
                              tonic::ToDart(0), tonic::ToDart(decode_error)});
