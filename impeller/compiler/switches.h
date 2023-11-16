@@ -9,9 +9,7 @@
 #include <memory>
 
 #include "flutter/fml/command_line.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/unique_fd.h"
-#include "impeller/compiler/compiler.h"
 #include "impeller/compiler/include_dir.h"
 #include "impeller/compiler/types.h"
 

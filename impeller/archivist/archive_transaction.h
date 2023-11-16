@@ -5,8 +5,6 @@
 
 #include <cstdint>
 
-#include "flutter/fml/macros.h"
-
 namespace impeller {
 
 class ArchiveStatement;

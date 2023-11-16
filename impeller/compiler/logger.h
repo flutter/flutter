@@ -8,14 +8,13 @@
 #include <string>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 
 namespace impeller {
 namespace compiler {
 
 class AutoLogger {
  public:
-  AutoLogger(std::stringstream& logger) : logger_(logger) {}
+  explicit AutoLogger(std::stringstream& logger) : logger_(logger) {}
 
   ~AutoLogger() {
     logger_ << std::endl;
