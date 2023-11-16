@@ -11913,6 +11913,80 @@ void main() {
   );
 
   testWidgets(
+    'Toolbar hides on parent scrollable scroll start and re-appears on scroll end on Android and iOS',
+    (WidgetTester tester) async {
+      final TextEditingController controller = _textEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
+      );
+      final Key key1 = UniqueKey();
+      final Key key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ListView(
+                children: <Widget>[
+                  Container(
+                    height: 400,
+                    key: key1,
+                  ),
+                  TextField(controller: controller),
+                  Container(
+                    height: 1000,
+                    key: key2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      final RenderEditable renderEditable = state.renderEditable;
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pumpAndSettle();
+
+      // Long press should select word at position and show toolbar.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+
+      // Scroll down, the toolbar should be hidden since we are scrolling.
+      final TestGesture gesture = await tester.startGesture(tester.getBottomLeft(find.byKey(key1)));
+      await tester.pump();
+      await gesture.moveTo(tester.getTopLeft(find.byKey(key1)));
+      await tester.pumpAndSettle();
+      expect(contextMenuButtonFinder, findsNothing);
+
+      // Release finger to end scroll, toolbar should now be visible.
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+      expect(renderEditable.selectionStartInViewport.value, true);
+      expect(renderEditable.selectionEndInViewport.value, true);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+  );
+
+  testWidgets(
     'Toolbar can re-appear after being scrolled out of view on Android and iOS',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -12043,6 +12117,86 @@ void main() {
       expect(contextMenuButtonFinder, findsNothing);
       expect(renderEditable.selectionStartInViewport.value, false);
       expect(renderEditable.selectionEndInViewport.value, false);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+  );
+
+  testWidgets(
+    'Toolbar can re-appear after parent scrollable scrolls selection out of view on Android and iOS',
+    (WidgetTester tester) async {
+      final TextEditingController controller = _textEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
+      );
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+      final Key key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ListView(
+                controller: scrollController,
+                children: <Widget>[
+                  TextField(controller: controller),
+                  Container(
+                    height: 1500,
+                    key: key1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+      final RenderEditable renderEditable = state.renderEditable;
+
+      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+      await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
+      await tester.pumpAndSettle();
+
+      // Long press should select word at position and show toolbar.
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
+      final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
+      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+
+      // Scroll down, the toolbar should be hidden since we are scrolling.
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+      expect(contextMenuButtonFinder, findsNothing);
+      expect(renderEditable.selectionStartInViewport.value, false);
+      expect(renderEditable.selectionEndInViewport.value, false);
+
+      // Scroll back up so the TextField is inside the viewport.
+      scrollController.animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        contextMenuButtonFinder,
+        isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
+      );
+      expect(renderEditable.selectionStartInViewport.value, true);
+      expect(renderEditable.selectionEndInViewport.value, true);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
   );

@@ -2165,6 +2165,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool _toolbarVisibleAtScrollStart = false;
   bool _showToolbarOnScreenScheduled = false;
   bool _internalScrolling = false;
+  final bool _webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
 
   final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
@@ -3651,8 +3652,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  final bool _platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android
+                                          || defaultTargetPlatform == TargetPlatform.iOS;
+
   void _onEditableScroll() {
-    _selectionOverlay?.updateForScroll();
+    if (!_platformSupportsFadeOnScroll || _webContextMenuEnabled) {
+      _selectionOverlay?.updateForScroll();
+    }
     _scribbleCacheKey = null;
   }
 
@@ -3664,10 +3670,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleContextMenuOnScroll(ScrollNotification notification) {
-    final bool platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android
-                                            || defaultTargetPlatform == TargetPlatform.iOS;
-    final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
-    if (!platformSupportsFadeOnScroll || webContextMenuEnabled) {
+    if (!_platformSupportsFadeOnScroll || _webContextMenuEnabled) {
       return;
     }
     // When the scroll begins and the toolbar is visible, hide it
@@ -3710,7 +3713,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   TextSelectionOverlay _createSelectionOverlay() {
-    final bool webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
     final EditableTextContextMenuBuilder? contextMenuBuilder = widget.contextMenuBuilder;
     final TextSelectionOverlay selectionOverlay = TextSelectionOverlay(
       clipboardStatus: clipboardStatus,
@@ -3725,7 +3727,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: contextMenuBuilder == null || webContextMenuEnabled
+      contextMenuBuilder: contextMenuBuilder == null || _webContextMenuEnabled
         ? null
         : (BuildContext context) {
           return contextMenuBuilder(
@@ -4385,7 +4387,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // functionality depending on the browser (such as translate). Due to this,
     // we should not show a Flutter toolbar for the editable text elements
     // unless the browser's context menu is explicitly disabled.
-    if (kIsWeb && BrowserContextMenu.enabled) {
+    if (_webContextMenuEnabled) {
       return false;
     }
 
@@ -4426,9 +4428,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // platforms. Additionally, the Cupertino style toolbar can't be drawn on
     // the web with the HTML renderer due to
     // https://github.com/flutter/flutter/issues/123560.
-    final bool platformNotSupported = kIsWeb && BrowserContextMenu.enabled;
     if (!spellCheckEnabled
-        || platformNotSupported
+        || _webContextMenuEnabled
         || widget.readOnly
         || _selectionOverlay == null
         || !_spellCheckResultsReceived
