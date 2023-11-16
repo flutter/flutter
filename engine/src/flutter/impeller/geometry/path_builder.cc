@@ -29,6 +29,11 @@ Path PathBuilder::TakePath(FillType fill) {
   return path;
 }
 
+void PathBuilder::Reserve(size_t point_size, size_t verb_size) {
+  prototype_.points_.reserve(point_size);
+  prototype_.points_.reserve(verb_size);
+}
+
 PathBuilder& PathBuilder::MoveTo(Point point, bool relative) {
   current_ = relative ? current_ + point : point;
   subpath_start_ = current_;
