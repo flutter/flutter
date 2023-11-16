@@ -211,8 +211,8 @@ void catchIsolateErrors() {
 }
 
 void main() {
-  String serverPort = Platform.environment['SERVER_PORT'] ?? '';
-  String server = Uri.decodeComponent('$websocketUrl:\$serverPort');
+  final String serverPort = Platform.environment['SERVER_PORT'] ?? '';
+  final String server = '$websocketUrl:\$serverPort';
   StreamChannel<dynamic> testChannel = serializeSuite(() {
     catchIsolateErrors();
 ''');
