@@ -155,7 +155,7 @@ class MessageLoopTaskQueues {
   mutable std::mutex queue_mutex_;
   std::map<TaskQueueId, std::unique_ptr<TaskQueueEntry>> queue_entries_;
 
-  size_t task_queue_id_counter_;
+  size_t task_queue_id_counter_ = 0;
 
   std::atomic_int order_;
 
