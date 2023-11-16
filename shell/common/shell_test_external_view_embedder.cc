@@ -44,7 +44,7 @@ void ShellTestExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   visited_platform_views_.clear();
   mutators_stacks_.clear();
   current_composition_params_.clear();
@@ -61,7 +61,7 @@ void ShellTestExternalViewEmbedder::PrerollCompositeEmbeddedView(
 
 // |ExternalViewEmbedder|
 PostPrerollResult ShellTestExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   FML_DCHECK(raster_thread_merger);
   return post_preroll_result_;
 }
@@ -73,7 +73,7 @@ void ShellTestExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PushFilterToVisitedPlatformViews(
-    const std::shared_ptr<const DlImageFilter>& filter,
+    std::shared_ptr<const DlImageFilter> filter,
     const SkRect& filter_rect) {
   for (int64_t id : visited_platform_views_) {
     EmbeddedViewParams params = current_composition_params_[id];
@@ -109,7 +109,7 @@ void ShellTestExternalViewEmbedder::SubmitFrame(
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   end_frame_call_back_(should_resubmit_frame, raster_thread_merger);
 }
 
