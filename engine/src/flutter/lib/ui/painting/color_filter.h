@@ -9,8 +9,6 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
-using tonic::DartPersistentValue;
-
 namespace flutter {
 
 // A handle to an SkCodec object.

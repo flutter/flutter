@@ -33,14 +33,13 @@ MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator)
                                ImageGenerator::kInfinitePlayCount
                            ? -1
                            : generator_->GetPlayCount() - 1),
-      is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()),
-      nextFrameIndex_(0) {}
+      is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()) {}
 
 static void InvokeNextFrameCallback(
     const fml::RefPtr<CanvasImage>& image,
     int duration,
     const std::string& decode_error,
-    std::unique_ptr<DartPersistentValue> callback,
+    std::unique_ptr<tonic::DartPersistentValue> callback,
     size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
@@ -183,7 +182,7 @@ MultiFrameCodec::State::GetNextFrameImage(
 }
 
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
-    std::unique_ptr<DartPersistentValue> callback,
+    std::unique_ptr<tonic::DartPersistentValue> callback,
     const fml::RefPtr<fml::TaskRunner>& ui_task_runner,
     fml::WeakPtr<GrDirectContext> resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
@@ -233,7 +232,7 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
     FML_LOG(ERROR) << decode_error;
     task_runners.GetUITaskRunner()->PostTask(fml::MakeCopyable(
         [trace_id, decode_error = std::move(decode_error),
-         callback = std::make_unique<DartPersistentValue>(
+         callback = std::make_unique<tonic::DartPersistentValue>(
              tonic::DartState::Current(), callback_handle)]() mutable {
           InvokeNextFrameCallback(nullptr, 0, decode_error, std::move(callback),
                                   trace_id);
@@ -242,7 +241,7 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   }
 
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
-      [callback = std::make_unique<DartPersistentValue>(
+      [callback = std::make_unique<tonic::DartPersistentValue>(
            tonic::DartState::Current(), callback_handle),
        weak_state = std::weak_ptr<MultiFrameCodec::State>(state_), trace_id,
        ui_task_runner = task_runners.GetUITaskRunner(),
