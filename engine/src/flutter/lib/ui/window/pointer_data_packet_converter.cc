@@ -11,7 +11,7 @@
 
 namespace flutter {
 
-PointerDataPacketConverter::PointerDataPacketConverter() : pointer_(0) {}
+PointerDataPacketConverter::PointerDataPacketConverter() {}
 
 PointerDataPacketConverter::~PointerDataPacketConverter() = default;
 

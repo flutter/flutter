@@ -99,7 +99,7 @@ class PointerDataPacketConverter {
  private:
   std::map<int64_t, PointerState> states_;
 
-  int64_t pointer_;
+  int64_t pointer_ = 0;
 
   void ConvertPointerData(PointerData pointer_data,
                           std::vector<PointerData>& converted_pointers);
