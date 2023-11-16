@@ -1934,7 +1934,7 @@ abstract class MultiSelectableSelectionContainerDelegate
         final TextSelection? selection = selectable.getLocalTextSelection();
         if (!enteredSelectedRegion) {
           // ...start the selection index at the start of the current selection.
-          start += selection!.start;
+          start += selection?.start ?? 0;
         }
         enteredSelectedRegion = true;
         numSelected += selection!.extentOffset - selection.baseOffset;
