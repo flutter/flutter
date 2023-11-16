@@ -269,6 +269,7 @@
 ../../../flutter/shell/platform/android/flutter_shell_native_unittests.cc
 ../../../flutter/shell/platform/android/jni/jni_mock_unittest.cc
 ../../../flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate_unittests.cc
+../../../flutter/shell/platform/android/platform_view_android_unittests.cc
 ../../../flutter/shell/platform/android/test
 ../../../flutter/shell/platform/android/test_runner
 ../../../flutter/shell/platform/common/accessibility_bridge_unittests.cc

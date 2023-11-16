@@ -88,11 +88,15 @@ targets:
   - name: Linux linux_android_emulator_tests
     enabled_branches:
       - main
-    recipe: engine_v2/builder
-    presubmit: false
+    recipe: engine_v2/engine_v2
+    bringup: true
     properties:
       config_name: linux_android_emulator
     timeout: 60
+    runIf:
+      - .ci.yaml
+      - lib/ui/**
+      - shell/platform/android/**
 
   - name: Linux builder_cache
     enabled_branches:
