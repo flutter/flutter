@@ -608,6 +608,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       fileSystem: _fileSystem,
       logger: _logger,
       flutterUsage: _usage,
+      analytics: _analytics,
     );
     final String archName = androidBuildInfo.targetArchs.single.archName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
@@ -656,10 +657,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Directory outputDirectory,
     required String buildNumber,
   }) async {
-
     final FlutterManifest manifest = project.manifest;
-    if (!manifest.isModule && !manifest.isPlugin) {
-      throwToolExit('AARs can only be built for plugin or module projects.');
+    if (!manifest.isModule) {
+      throwToolExit('AARs can only be built for module projects.');
     }
 
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;

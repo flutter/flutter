@@ -40,7 +40,6 @@ import '../vmservice.dart';
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
-import '../web/file_generators/flutter_js.dart' as flutter_js;
 import '../web/memory_fs.dart';
 
 typedef DwdsLauncher = Future<Dwds> Function({
@@ -165,6 +164,8 @@ class WebAssetServer implements AssetReader {
     ChromiumLauncher? chromiumLauncher,
     String hostname,
     int port,
+    String? tlsCertPath,
+    String? tlsCertKeyPath,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -189,7 +190,14 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port);
+        if (tlsCertPath != null && tlsCertKeyPath != null) {
+          final SecurityContext serverContext = SecurityContext()
+             ..useCertificateChain(tlsCertPath)
+             ..usePrivateKey(tlsCertKeyPath);
+          httpServer = await HttpServer.bindSecure(address, port, serverContext);
+        } else {
+          httpServer = await HttpServer.bind(address, port);
+        }
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -636,6 +644,8 @@ class WebDevFS implements DevFS {
   WebDevFS({
     required this.hostname,
     required int port,
+    required this.tlsCertPath,
+    required this.tlsCertKeyPath,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -672,6 +682,8 @@ class WebDevFS implements DevFS {
   final bool nativeNullAssertions;
   final int _port;
   final NullSafetyMode nullSafetyMode;
+  final String? tlsCertPath;
+  final String? tlsCertKeyPath;
 
   late WebAssetServer webAssetServer;
 
@@ -758,6 +770,8 @@ class WebDevFS implements DevFS {
       chromiumLauncher,
       hostname,
       _port,
+      tlsCertPath,
+      tlsCertKeyPath,
       urlTunneller,
       useSseForDebugProxy,
       useSseForDebugBackend,
@@ -778,10 +792,13 @@ class WebDevFS implements DevFS {
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }
+    String url = '$hostname:$selectedPort';
     if (hostname == 'any') {
-      _baseUri = Uri.http('localhost:$selectedPort', webAssetServer.basePath);
-    } else {
-      _baseUri = Uri.http('$hostname:$selectedPort', webAssetServer.basePath);
+      url ='localhost:$selectedPort';
+    }
+    _baseUri = Uri.http(url, webAssetServer.basePath);
+    if (tlsCertPath != null && tlsCertKeyPath!= null) {
+      _baseUri = Uri.https(url, webAssetServer.basePath);
     }
     return _baseUri!;
   }
@@ -834,14 +851,11 @@ class WebDevFS implements DevFS {
       final String entrypoint = globals.fs.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
       webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes(
           'stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile(
           'manifest.json', '{"info":"manifest not generated in run mode."}');
-      final String fileGeneratorsPath = globals.artifacts!
-          .getArtifactPath(Artifact.flutterToolsFileGenerators);
-      webAssetServer.writeFile(
-          'flutter.js', flutter_js.generateFlutterJsFile(fileGeneratorsPath));
       webAssetServer.writeFile('flutter_service_worker.js',
           '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
@@ -932,6 +946,12 @@ class WebDevFS implements DevFS {
     'dev_compiler',
     'amd',
     'require.js',
+  ));
+
+  @visibleForTesting
+  final File flutterJs = globals.fs.file(globals.fs.path.join(
+    globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+    'flutter.js',
   ));
 
   @visibleForTesting

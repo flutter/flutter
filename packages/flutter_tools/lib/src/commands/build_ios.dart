@@ -680,6 +680,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
+        analytics: analytics,
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.

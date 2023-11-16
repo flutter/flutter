@@ -671,6 +671,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   @override
   void dispose() {
     _dragReset();
+    _recognizer?.dispose();
     super.dispose();
   }
 

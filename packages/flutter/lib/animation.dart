@@ -165,6 +165,7 @@ export 'package:flutter/scheduler.dart' show TickerCanceled;
 
 export 'src/animation/animation.dart';
 export 'src/animation/animation_controller.dart';
+export 'src/animation/animation_style.dart';
 export 'src/animation/animations.dart';
 export 'src/animation/curves.dart';
 export 'src/animation/listener_helpers.dart';
