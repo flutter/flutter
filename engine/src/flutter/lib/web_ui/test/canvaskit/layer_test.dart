@@ -32,18 +32,19 @@ void testMain() {
 
       // Intentionally use a perspective transform, which triggered the
       // https://github.com/flutter/flutter/issues/63715 bug.
-      sb.pushTransform(
-          Float64List.fromList(Matrix4.identity().storage
-            ..[15] = 2,
+      sb.pushTransform(Float64List.fromList(
+        Matrix4.identity().storage..[15] = 2,
       ));
 
       sb.addPicture(ui.Offset.zero, picture);
       final LayerTree layerTree = sb.build().layerTree;
       CanvasKitRenderer.instance.rasterizer.draw(layerTree);
-      final ClipRectEngineLayer clipRect = layerTree.rootLayer.debugLayers.single as ClipRectEngineLayer;
+      final ClipRectEngineLayer clipRect =
+          layerTree.rootLayer.debugLayers.single as ClipRectEngineLayer;
       expect(clipRect.paintBounds, const ui.Rect.fromLTRB(15, 15, 30, 30));
 
-      final TransformEngineLayer transform = clipRect.debugLayers.single as TransformEngineLayer;
+      final TransformEngineLayer transform =
+          clipRect.debugLayers.single as TransformEngineLayer;
       expect(transform.paintBounds, const ui.Rect.fromLTRB(0, 0, 30, 30));
     });
 
@@ -74,8 +75,8 @@ void testMain() {
     });
 
     test('ImageFilter layer applies matrix in preroll', () async {
-      final CkPicture picture =
-          paintPicture(const ui.Rect.fromLTRB(0, 0, 100, 100), (CkCanvas canvas) {
+      final CkPicture picture = paintPicture(
+          const ui.Rect.fromLTRB(0, 0, 100, 100), (CkCanvas canvas) {
         canvas.drawRect(const ui.Rect.fromLTRB(0, 0, 100, 100),
             CkPaint()..style = ui.PaintingStyle.fill);
       });
@@ -83,11 +84,10 @@ void testMain() {
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushImageFilter(
         ui.ImageFilter.matrix(
-          (
-            Matrix4.identity()
-              ..scale(0.5, 0.5)
-              ..translate(20)
-          ).toFloat64(),
+          (Matrix4.identity()
+                ..scale(0.5, 0.5)
+                ..translate(20))
+              .toFloat64(),
         ),
       );
       sb.addPicture(ui.Offset.zero, picture);
@@ -95,8 +95,37 @@ void testMain() {
       final LayerTree layerTree = sb.build().layerTree;
       CanvasKitRenderer.instance.rasterizer.draw(layerTree);
 
-      final ImageFilterEngineLayer imageFilterLayer = layerTree.rootLayer.debugLayers.single as ImageFilterEngineLayer;
-      expect(imageFilterLayer.paintBounds, const ui.Rect.fromLTRB(10, 0, 60, 50));
+      final ImageFilterEngineLayer imageFilterLayer =
+          layerTree.rootLayer.debugLayers.single as ImageFilterEngineLayer;
+      expect(
+          imageFilterLayer.paintBounds, const ui.Rect.fromLTRB(10, 0, 60, 50));
+    });
+
+    test('Opacity layer works correctly with Scene.toImage', () async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/138009
+      final CkPicture picture = paintPicture(
+          const ui.Rect.fromLTRB(0, 0, 100, 100), (CkCanvas canvas) {
+        canvas.drawRect(const ui.Rect.fromLTRB(0, 0, 100, 100),
+            CkPaint()..style = ui.PaintingStyle.fill);
+      });
+
+      final LayerSceneBuilder sb = LayerSceneBuilder();
+      sb.pushTransform(Matrix4.identity().toFloat64());
+      sb.pushOpacity(97, offset: const ui.Offset(20, 20));
+      sb.addPicture(ui.Offset.zero, picture);
+
+      final LayerScene scene = sb.build();
+      final ui.Image testImage = await scene.toImage(200, 200);
+
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas =
+          recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 200, 200));
+      canvas.drawImage(testImage as CkImage, ui.Offset.zero, CkPaint());
+      await matchPictureGolden(
+        'canvaskit_scene_toimage_opacity_layer.png',
+        recorder.endRecording(),
+        region: const ui.Rect.fromLTRB(0, 0, 200, 200),
+      );
     });
   });
 }

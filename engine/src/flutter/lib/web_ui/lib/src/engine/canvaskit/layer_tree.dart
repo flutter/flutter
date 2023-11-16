@@ -65,9 +65,9 @@ class LayerTree {
   /// Flattens the tree into a single [ui.Picture].
   ///
   /// This picture does not contain any platform views.
-  ui.Picture flatten() {
+  ui.Picture flatten(ui.Size size) {
     final CkPictureRecorder recorder = CkPictureRecorder();
-    final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+    final CkCanvas canvas = recorder.beginRecording(ui.Offset.zero & size);
     final PrerollContext prerollContext = PrerollContext(null, null);
     rootLayer.preroll(prerollContext, Matrix4.identity());
 
