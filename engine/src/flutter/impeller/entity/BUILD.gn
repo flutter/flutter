@@ -134,6 +134,8 @@ impeller_component("entity") {
     "contents/filters/directional_gaussian_blur_filter_contents.h",
     "contents/filters/filter_contents.cc",
     "contents/filters/filter_contents.h",
+    "contents/filters/gaussian_blur_filter_contents.cc",
+    "contents/filters/gaussian_blur_filter_contents.h",
     "contents/filters/inputs/contents_filter_input.cc",
     "contents/filters/inputs/contents_filter_input.h",
     "contents/filters/inputs/filter_contents_filter_input.cc",
@@ -255,6 +257,7 @@ impeller_component("entity_unittests") {
   sources = [
     "contents/checkerboard_contents_unittests.cc",
     "contents/filters/directional_gaussian_blur_filter_contents_unittests.cc",
+    "contents/filters/gaussian_blur_filter_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
     "contents/vertices_contents_unittests.cc",
     "entity_pass_target_unittests.cc",

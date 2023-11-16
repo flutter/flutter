@@ -3062,6 +3062,8 @@ ORIGIN: ../../../flutter/impeller/entity/contents/filters/directional_gaussian_b
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/directional_gaussian_blur_filter_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/filter_contents.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/filter_contents.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/inputs/contents_filter_input.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/inputs/contents_filter_input.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/filters/inputs/filter_contents_filter_input.cc + ../../../flutter/LICENSE
@@ -5829,6 +5831,8 @@ FILE: ../../../flutter/impeller/entity/contents/filters/directional_gaussian_blu
 FILE: ../../../flutter/impeller/entity/contents/filters/directional_gaussian_blur_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/filter_contents.h
+FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.cc
+FILE: ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents.h
 FILE: ../../../flutter/impeller/entity/contents/filters/inputs/contents_filter_input.cc
 FILE: ../../../flutter/impeller/entity/contents/filters/inputs/contents_filter_input.h
 FILE: ../../../flutter/impeller/entity/contents/filters/inputs/filter_contents_filter_input.cc
