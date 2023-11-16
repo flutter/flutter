@@ -27,7 +27,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   // TODO(polina-c): clean up leaks and stop ignoring them.
   // https://github.com/flutter/flutter/issues/137311
-  // Leak tracking is off. To enable it add `.withTrackedAll()` after `settings`.
+  // Leak tracking is off by default. To temporary enable it add `.withTrackedAll()` after `settings`.
   LeakTesting.settings = LeakTesting
     .settings
     .withIgnored(
