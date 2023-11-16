@@ -445,6 +445,15 @@ struct Matrix {
     return Vector2(v.x * m[0] + v.y * m[4], v.x * m[1] + v.y * m[5]);
   }
 
+  constexpr Quad Transform(const Quad& quad) const {
+    return {
+        *this * quad[0],
+        *this * quad[1],
+        *this * quad[2],
+        *this * quad[3],
+    };
+  }
+
   template <class T>
   static constexpr Matrix MakeOrthographic(TSize<T> size) {
     // Per assumptions about NDC documented above.

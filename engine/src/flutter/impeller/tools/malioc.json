@@ -3338,7 +3338,7 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              1.649999976158142,
+              1.3200000524520874,
               1.0,
               0.0
             ],
@@ -3346,14 +3346,14 @@
               "arithmetic"
             ],
             "total_cycles": [
-              5.0,
+              4.666666507720947,
               1.0,
               1.0
             ]
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 1,
-          "work_registers_used": 4
+          "work_registers_used": 3
         }
       }
     }
@@ -3456,7 +3456,7 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              1.649999976158142,
+              1.3200000524520874,
               1.0,
               0.0
             ],
@@ -3464,7 +3464,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              3.6666667461395264,
+              3.3333332538604736,
               1.0,
               1.0
             ]

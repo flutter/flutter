@@ -1120,14 +1120,18 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
     // Renders a green bounding rect of the target filter.
     Entity bounds_entity;
-    bounds_entity.SetContents(SolidColorContents::Make(
-        PathBuilder{}
-            .AddRect(target_contents->GetCoverage(entity).value())
-            .TakePath(),
-        bounds_color));
-    bounds_entity.SetTransformation(Matrix());
+    std::optional<Rect> target_contents_coverage =
+        target_contents->GetCoverage(entity);
+    if (target_contents_coverage.has_value()) {
+      bounds_entity.SetContents(SolidColorContents::Make(
+          PathBuilder{}
+              .AddRect(target_contents->GetCoverage(entity).value())
+              .TakePath(),
+          bounds_color));
+      bounds_entity.SetTransformation(Matrix());
 
-    bounds_entity.Render(context, pass);
+      bounds_entity.Render(context, pass);
+    }
 
     return true;
   };

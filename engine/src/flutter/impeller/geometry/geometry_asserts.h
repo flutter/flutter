@@ -59,7 +59,8 @@ inline ::testing::AssertionResult RectNear(impeller::Rect a, impeller::Rect b) {
                NumberNear(a.GetSize().height, b.GetSize().height);
 
   return equal ? ::testing::AssertionSuccess()
-               : ::testing::AssertionFailure() << "Rects are not equal.";
+               : ::testing::AssertionFailure()
+                     << "Rects are not equal (" << a << " " << b << ")";
 }
 
 inline ::testing::AssertionResult ColorNear(impeller::Color a,
@@ -76,7 +77,8 @@ inline ::testing::AssertionResult PointNear(impeller::Point a,
   auto equal = NumberNear(a.x, b.x) && NumberNear(a.y, b.y);
 
   return equal ? ::testing::AssertionSuccess()
-               : ::testing::AssertionFailure() << "Points are not equal.";
+               : ::testing::AssertionFailure()
+                     << "Points are not equal (" << a << " " << b << ").";
 }
 
 inline ::testing::AssertionResult Vector3Near(impeller::Vector3 a,

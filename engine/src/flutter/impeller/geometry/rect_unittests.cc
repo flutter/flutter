@@ -234,5 +234,19 @@ TEST(SizeTest, IRectIsEmpty) {
   EXPECT_TRUE(IRect::MakeXYWH(1, 2, -1, 7).IsEmpty());
 }
 
+TEST(RectTest, MakePointBoundsQuad) {
+  Quad quad = {
+      Point(10, 10),
+      Point(20, 10),
+      Point(10, 20),
+      Point(20, 20),
+  };
+  std::optional<Rect> bounds = Rect::MakePointBounds(quad);
+  EXPECT_TRUE(bounds.has_value());
+  if (bounds.has_value()) {
+    EXPECT_TRUE(RectNear(bounds.value(), Rect::MakeLTRB(10, 10, 20, 20)));
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

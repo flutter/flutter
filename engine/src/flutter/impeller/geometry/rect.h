@@ -48,6 +48,11 @@ struct TRect {
     return TRect(0.0, 0.0, size.width, size.height);
   }
 
+  template <typename U>
+  constexpr static std::optional<TRect> MakePointBounds(const U& value) {
+    return MakePointBounds(value.begin(), value.end());
+  }
+
   template <typename PointIter>
   constexpr static std::optional<TRect> MakePointBounds(const PointIter first,
                                                         const PointIter last) {
