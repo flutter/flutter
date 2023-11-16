@@ -30,8 +30,7 @@ static ALooper* AcquireLooperForThread() {
 
 MessageLoopAndroid::MessageLoopAndroid()
     : looper_(AcquireLooperForThread()),
-      timer_fd_(::timerfd_create(kClockType, TFD_NONBLOCK | TFD_CLOEXEC)),
-      running_(false) {
+      timer_fd_(::timerfd_create(kClockType, TFD_NONBLOCK | TFD_CLOEXEC)) {
   FML_CHECK(looper_.is_valid());
   FML_CHECK(timer_fd_.is_valid());
 
