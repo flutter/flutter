@@ -161,6 +161,24 @@ targets:
       config_name: linux_benchmarks
     timeout: 60
 
+  - name: Linux Fuchsia
+    bringup: true
+    recipe: engine/engine
+    properties:
+      build_fuchsia: "true"
+      fuchsia_ctl_version: version:0.0.27
+      # ensure files from pre-production Fuchsia SDK tests are purged from cache
+      clobber: "true"
+    timeout: 90
+    runIfNot:
+      - lib/web_ui/**
+      - shell/platform/android/**
+      - shell/platform/darwin/**
+      - shell/platform/glfw/**
+      - shell/platform/linux/**
+      - shell/platform/windows/**
+      - web_sdk/**
+
   - name: Linux Fuchsia FEMU
     recipe: engine/femu_test
     properties:

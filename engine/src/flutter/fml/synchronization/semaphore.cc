@@ -170,24 +170,24 @@ class PlatformSemaphore {
 
 namespace fml {
 
-Semaphore::Semaphore(uint32_t count) : _impl(new PlatformSemaphore(count)) {}
+Semaphore::Semaphore(uint32_t count) : impl_(new PlatformSemaphore(count)) {}
 
 Semaphore::~Semaphore() = default;
 
 bool Semaphore::IsValid() const {
-  return _impl->IsValid();
+  return impl_->IsValid();
 }
 
 bool Semaphore::Wait() {
-  return _impl->Wait();
+  return impl_->Wait();
 }
 
 bool Semaphore::TryWait() {
-  return _impl->TryWait();
+  return impl_->TryWait();
 }
 
 void Semaphore::Signal() {
-  return _impl->Signal();
+  return impl_->Signal();
 }
 
 }  // namespace fml
