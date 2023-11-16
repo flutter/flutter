@@ -31,7 +31,12 @@ namespace fml {
 template <typename T>
 class StatusOr {
  public:
+  // These constructors are intended be compatible with absl::status_or.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   StatusOr(const T& value) : status_(), value_(value) {}
+
+  // These constructors are intended be compatible with absl::status_or.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   StatusOr(const Status& status) : status_(status), value_() {}
 
   StatusOr(const StatusOr&) = default;
@@ -63,13 +68,19 @@ class StatusOr {
   bool ok() const { return status_.ok(); }
 
   const T& value() const {
-    FML_CHECK(status_.ok());
-    return value_.value();
+    if (status_.ok()) {
+      return value_.value();
+    }
+    FML_LOG(FATAL) << "StatusOr::value() called on error Status";
+    FML_UNREACHABLE();
   }
 
   T& value() {
-    FML_CHECK(status_.ok());
-    return value_.value();
+    if (status_.ok()) {
+      return value_.value();
+    }
+    FML_LOG(FATAL) << "StatusOr::value() called on error Status";
+    FML_UNREACHABLE();
   }
 
  private:
