@@ -30,6 +30,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // Leak tracking is off by default. To temporary enable it add `.withTrackedAll()` after `settings`.
   LeakTesting.settings = LeakTesting
     .settings
+    .withTrackedAll()
     .withIgnored(
       allNotGCed: true,
       notDisposed: <String, int?>{
