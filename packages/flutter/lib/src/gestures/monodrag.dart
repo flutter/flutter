@@ -538,13 +538,19 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     Offset? localPosition,
   }) {
     if (onUpdate != null) {
+      // Calculate the average motion
+      final int numPointers = _velocityTrackers.length;
+      final Offset averageDelta = delta / numPointers.toDouble();
+
+      // Use the average delta in the details
       final DragUpdateDetails details = DragUpdateDetails(
         sourceTimeStamp: sourceTimeStamp,
-        delta: delta,
-        primaryDelta: primaryDelta,
+        delta: averageDelta,
+        primaryDelta: _getPrimaryValueFromOffset(averageDelta),
         globalPosition: globalPosition,
         localPosition: localPosition,
       );
+
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
     }
   }
