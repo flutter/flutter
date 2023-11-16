@@ -40,7 +40,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
     }
   }
 
-  void DeleteTexture(GrBackendTexture texture) {
+  void DeleteTexture(const GrBackendTexture& texture) {
     // drain_immediate_ should only be used on Impeller.
     FML_DCHECK(!drain_immediate_);
     std::scoped_lock lock(mutex_);
@@ -80,7 +80,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   std::mutex mutex_;
   std::deque<SkRefCnt*> objects_;
   std::deque<GrBackendTexture> textures_;
-  bool drain_pending_;
+  bool drain_pending_ = false;
   sk_sp<ResourceContext> context_;
   // Enabled when there is an impeller context, which removes the usage of
   // the queue altogether.
@@ -95,7 +95,6 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
              bool drain_immediate = false)
       : task_runner_(std::move(task_runner)),
         drain_delay_(delay),
-        drain_pending_(false),
         context_(context),
         drain_immediate_(drain_immediate) {}
 

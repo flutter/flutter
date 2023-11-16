@@ -12,7 +12,7 @@ namespace flutter {
 class ClipPathLayer : public ClipShapeLayer<SkPath> {
  public:
   explicit ClipPathLayer(const SkPath& clip_path,
-                         Clip clip_behavior = Clip::antiAlias);
+                         Clip clip_behavior = Clip::kAntiAlias);
 
  protected:
   const SkRect& clip_shape_bounds() const override;

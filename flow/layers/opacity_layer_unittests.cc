@@ -471,7 +471,7 @@ TEST_F(OpacityLayerTest, Readback) {
 
 TEST_F(OpacityLayerTest, CullRectIsTransformed) {
   auto clip_rect_layer = std::make_shared<ClipRectLayer>(
-      SkRect::MakeLTRB(0, 0, 10, 10), flutter::hardEdge);
+      SkRect::MakeLTRB(0, 0, 10, 10), Clip::kHardEdge);
   auto opacity_layer =
       std::make_shared<OpacityLayer>(128, SkPoint::Make(20, 20));
   auto mock_layer = std::make_shared<MockLayer>(SkPath());
