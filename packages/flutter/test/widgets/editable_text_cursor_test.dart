@@ -948,7 +948,7 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     final RenderEditable editable = findRenderEditable(tester);
-    controller.value = controller.value.copyWith(selection: const TextSelection(baseOffset: 29, extentOffset: 29));
+    editable.selection = const TextSelection(baseOffset: 29, extentOffset: 29);
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     editableTextState.updateFloatingCursor(

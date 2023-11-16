@@ -44,8 +44,7 @@ typedef InputCounterWidgetBuilder = Widget? Function(
   required bool isFocused,
 });
 
-class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder
-    with FloatingCursorSingleLongPressDetectorBuilder {
+class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
     required _TextFieldState state,
   }) : _state = state,

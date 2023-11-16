@@ -2466,6 +2466,15 @@ class TextSelectionGestureDetectorBuilder {
       _dragStartViewportOffset = renderEditable.offset.pixels;
       _dragStartScrollOffset = _scrollPosition;
     }
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start,
+        localPosition: renderEditable.globalToLocal(details.globalPosition),
+        offset: Offset.zero,
+      );
+      editableText.updateFloatingCursor(cursorPoint);
+    }, debugLabel: 'TextSelectionGestureDetectorBuilderDelegate.updateFloatingCursor');
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapMoveUpdate].
@@ -2517,6 +2526,12 @@ class TextSelectionGestureDetectorBuilder {
 
       _showMagnifierIfSupportedByPlatform(details.globalPosition);
     }
+
+    final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+      state: FloatingCursorDragState.Update,
+      offset: details.offsetFromOrigin,
+    );
+    editableText.updateFloatingCursor(cursorPoint);
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapEnd].
@@ -2536,6 +2551,11 @@ class TextSelectionGestureDetectorBuilder {
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
+
+    final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+      state: FloatingCursorDragState.End
+    );
+    editableText.updateFloatingCursor(cursorPoint);
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
@@ -3650,38 +3670,4 @@ mixin TextSelectionHandleControls on TextSelectionControls {
 
   @override
   void handleSelectAll(TextSelectionDelegate delegate) {}
-}
-
-/// [FloatingCursorSingleLongPressDetectorBuilder] is a mixin that adds handling for single long press on top of [TextSelectionGestureDetectorBuilder].
-/// This mixin is primarily used to handle floating cursor behavior during text selection.
-mixin FloatingCursorSingleLongPressDetectorBuilder on TextSelectionGestureDetectorBuilder{
-  @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
-    super.onSingleLongTapStart(details);
-    final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-      state: FloatingCursorDragState.Start,
-      localPosition: renderEditable.globalToLocal(details.globalPosition),
-      offset: Offset.zero,
-    );
-    editableText.updateFloatingCursor(cursorPoint);
-  }
-
-  @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    super.onSingleLongTapMoveUpdate(details);
-    final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-      state: FloatingCursorDragState.Update,
-      offset: details.offsetFromOrigin,
-    );
-    editableText.updateFloatingCursor(cursorPoint);
-  }
-
-  @override
-  void onSingleLongTapEnd(LongPressEndDetails details) {
-    super.onSingleLongTapEnd(details);
-    final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-      state: FloatingCursorDragState.End
-    );
-    editableText.updateFloatingCursor(cursorPoint);
-  }
 }

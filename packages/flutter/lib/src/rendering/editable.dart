@@ -30,9 +30,12 @@ const EdgeInsets _kFloatingCursorSizeIncrease = EdgeInsets.symmetric(horizontal:
 // The corner radius of the floating cursor in pixels.
 const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 
-// Represents the shortest distance required when both the floating cursor
-// and regular cursor are present.
-const double _kShortestDistanceWithFloatingAndRegularCursors = 20.0;
+// This constant represents the shortest squared distance required between the floating cursor
+// and the regular cursor when both are present in the text field.
+// If the squared distance between the two cursors is less than this value,
+// it's not necessary to display both cursors at the same time.
+// This behavior is consistent with the one observed in iOS UITextField.
+const double _kShortestDistanceSquaredWithFloatingAndRegularCursors = 15.0 * 15.0;
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
@@ -2895,10 +2898,8 @@ class _CaretPainter extends RenderEditablePainter {
     final Rect integralRect = renderEditable.getLocalRectForCaret(textPosition);
     if (shouldPaint) {
       if (floatingCursorRect != null) {
-        final double distance = math.sqrt(
-          math.pow(floatingCursorRect!.center.dx - integralRect.center.dx, 2) + math.pow(floatingCursorRect!.center.dx - integralRect.center.dx, 2)
-        );
-        if (distance.abs() < _kShortestDistanceWithFloatingAndRegularCursors) {
+        final double distanceSquared = (floatingCursorRect!.center - integralRect.center).distanceSquared;
+        if (distanceSquared < _kShortestDistanceSquaredWithFloatingAndRegularCursors) {
           return;
         }
       }
