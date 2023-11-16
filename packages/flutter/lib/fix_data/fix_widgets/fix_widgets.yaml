@@ -23,7 +23,7 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
-  # Changes made in https://github.com/flutter/flutter/pull/123352
+  # Changes made in https://github.com/flutter/flutter/pull/138509
   - title: "Migrate to 'PlatformMenuBar.child'"
     date: 2023-11-15
     element:
