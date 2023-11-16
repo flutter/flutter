@@ -213,11 +213,11 @@ void main() {
 
     testWidgetsWithLeakTracking('isActivatedBy works as expected', (WidgetTester tester) async {
       // Collect some key events to use for testing.
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      final List<KeyEvent> events = <KeyEvent>[];
       await tester.pumpWidget(
         Focus(
           autofocus: true,
-          onKey: (FocusNode node, RawKeyEvent event) {
+          onKeyEvent: (FocusNode node, KeyEvent event) {
             events.add(event);
             return KeyEventResult.ignored;
           },
@@ -229,10 +229,13 @@ void main() {
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
-      expect(ShortcutActivator.isActivatedBy(set, events[0]), isTrue);
+      expect(ShortcutActivator.isActivatedBy(set, events.last), isTrue);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(set, events.last), isTrue);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(set, events.last), isFalse);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      expect(ShortcutActivator.isActivatedBy(set, events[0]), isFalse);
+      expect(ShortcutActivator.isActivatedBy(set, events.last), isFalse);
     });
 
     test('LogicalKeySet diagnostics work.', () {
@@ -457,11 +460,11 @@ void main() {
 
     testWidgetsWithLeakTracking('isActivatedBy works as expected', (WidgetTester tester) async {
       // Collect some key events to use for testing.
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      final List<KeyEvent> events = <KeyEvent>[];
       await tester.pumpWidget(
         Focus(
           autofocus: true,
-          onKey: (FocusNode node, RawKeyEvent event) {
+          onKeyEvent: (FocusNode node, KeyEvent event) {
             events.add(event);
             return KeyEventResult.ignored;
           },
@@ -471,12 +474,27 @@ void main() {
 
       const SingleActivator singleActivator = SingleActivator(LogicalKeyboardKey.keyA, control: true);
 
+     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isTrue);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isTrue);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isFalse);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(ShortcutActivator.isActivatedBy(singleActivator, events.last), isFalse);
+
+      const SingleActivator noRepeatSingleActivator = SingleActivator(LogicalKeyboardKey.keyA, control: true, includeRepeats: false);
+
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(noRepeatSingleActivator, events.last), isTrue);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(noRepeatSingleActivator, events.last), isFalse);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1]), isTrue);
+      expect(ShortcutActivator.isActivatedBy(noRepeatSingleActivator, events.last), isFalse);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      expect(ShortcutActivator.isActivatedBy(singleActivator, events[1]), isFalse);
+      expect(ShortcutActivator.isActivatedBy(noRepeatSingleActivator, events.last), isFalse);
     });
 
     group('diagnostics.', () {
@@ -1241,11 +1259,11 @@ void main() {
 
     testWidgetsWithLeakTracking('isActivatedBy works as expected', (WidgetTester tester) async {
       // Collect some key events to use for testing.
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      final List<KeyEvent> events = <KeyEvent>[];
       await tester.pumpWidget(
         Focus(
           autofocus: true,
-          onKey: (FocusNode node, RawKeyEvent event) {
+          onKeyEvent: (FocusNode node, KeyEvent event) {
             events.add(event);
             return KeyEventResult.ignored;
           },
@@ -1256,8 +1274,20 @@ void main() {
       const CharacterActivator characterActivator = CharacterActivator('a');
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(characterActivator, events.last), isTrue);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(characterActivator, events.last), isTrue);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
-      expect(ShortcutActivator.isActivatedBy(characterActivator, events[0]), isTrue);
+      expect(ShortcutActivator.isActivatedBy(characterActivator, events.last), isFalse);
+
+      const CharacterActivator noRepeatCharacterActivator = CharacterActivator('a', includeRepeats: false);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(noRepeatCharacterActivator, events.last), isTrue);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(noRepeatCharacterActivator, events.last), isFalse);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA);
+      expect(ShortcutActivator.isActivatedBy(noRepeatCharacterActivator, events.last), isFalse);
     });
 
     group('diagnostics.', () {
@@ -1936,7 +1966,7 @@ class TestAction extends CallbackAction<Intent> {
 /// An activator that accepts down events that has [key] as the logical key.
 ///
 /// This class is used only to tests. It is intentionally designed poorly by
-/// returning null in [triggers], and checks [key] in [accepts].
+/// returning null in [triggers], and checks [key] in [acceptsEvent].
 class DumbLogicalActivator extends ShortcutActivator {
   const DumbLogicalActivator(this.key);
 
@@ -1946,8 +1976,8 @@ class DumbLogicalActivator extends ShortcutActivator {
   Iterable<LogicalKeyboardKey>? get triggers => null;
 
   @override
-  bool accepts(RawKeyEvent event, RawKeyboard state) {
-    return event is RawKeyDownEvent
+  bool accepts(KeyEvent event, HardwareKeyboard state) {
+    return (event is KeyDownEvent || event is KeyRepeatEvent)
         && event.logicalKey == key;
   }
 
@@ -1980,8 +2010,8 @@ class TestShortcutManager extends ShortcutManager {
   List<LogicalKeyboardKey> keys;
 
   @override
-  KeyEventResult handleKeypress(BuildContext context, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
       keys.add(event.logicalKey);
     }
     return super.handleKeypress(context, event);

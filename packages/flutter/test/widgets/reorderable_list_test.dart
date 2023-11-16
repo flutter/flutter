@@ -1356,6 +1356,55 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgetsWithLeakTracking(
+    'When creating a new item, be in the correct position',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LayoutBuilder(
+            builder: (_, BoxConstraints view) {
+              // The third one just appears on the screen
+              final double itemSize = view.maxWidth / 2 - 20;
+              return Scaffold(
+                body: CustomScrollView(
+                  scrollDirection: Axis.horizontal,
+                  cacheExtent: 0, // The fourth one will not be created in the initial state.
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return ReorderableDragStartListener(
+                          key: ValueKey<int>(index),
+                          index: index,
+                          child: Builder(
+                            builder: (BuildContext context) {
+                              return SizedBox(
+                                width: itemSize,
+                                child: Text('$index'),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      itemCount: 4,
+                      onReorder: (int fromIndex, int toIndex) {},
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('0')));
+      await tester.pump(kLongPressTimeout);
+      await drag.moveBy(const Offset(20, 0));
+      await tester.pump();
+      expect(find.text('3').hitTestable(at: Alignment.topLeft), findsNothing);
+      await drag.up();
+      await tester.pumpAndSettle();
+    },
+  );
 }
 
 class TestList extends StatelessWidget {

@@ -487,13 +487,15 @@ Future<Iterable<Asset>> dryRunNativeAssetsSingleArchitectureInternal(
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
 
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  final List<Asset> nativeAssets = (await buildRunner.dryRun(
+
+  final DryRunResult dryRunResult = await buildRunner.dryRun(
     linkModePreference: LinkModePreference.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
-  ))
-      .assets;
+  );
+  ensureNativeAssetsBuildSucceed(dryRunResult);
+  final List<Asset> nativeAssets = dryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Uri? absolutePath = flutterTester ? buildUri : null;
@@ -549,6 +551,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsSingleA
     includeParentEnvironment: true,
     cCompilerConfig: await buildRunner.cCompilerConfig,
   );
+  ensureNativeAssetsBuildSucceed(result);
   final List<Asset> nativeAssets = result.assets;
   final Set<Uri> dependencies = result.dependencies.toSet();
   ensureNoLinkModeStatic(nativeAssets);
@@ -653,5 +656,13 @@ Future<void> _copyNativeAssetsSingleArchitecture(
       await fileSystem.file(source).copy(targetFullPath);
     }
     globals.logger.printTrace('Copying native assets done.');
+  }
+}
+
+void ensureNativeAssetsBuildSucceed(DryRunResult result) {
+  if (!result.success) {
+    throwToolExit(
+      'Building native assets failed. See the logs for more details.',
+    );
   }
 }

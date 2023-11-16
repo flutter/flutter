@@ -41,7 +41,7 @@ import org.gradle.internal.os.OperatingSystem
 */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 33
+    static int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 19
@@ -1130,12 +1130,19 @@ class FlutterPlugin implements Plugin<Project> {
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
             }
-            // Task compressAssets uses the output of copyFlutterAssetsTask,
-            // so it's necessary to declare it as an dependency.
+            // The following tasks use the output of copyFlutterAssetsTask,
+            // so it's necessary to declare it as an dependency since Gradle 8.
+            // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
             def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
             if (compressAssetsTask) {
                 compressAssetsTask.dependsOn copyFlutterAssetsTask
             }
+
+            def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
+            if (bundleAarTask) {
+                bundleAarTask.dependsOn copyFlutterAssetsTask
+            }
+
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
 
