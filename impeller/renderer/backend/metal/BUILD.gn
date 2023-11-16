@@ -26,6 +26,8 @@ impeller_component("metal") {
     "formats_mtl.mm",
     "gpu_tracer_mtl.h",
     "gpu_tracer_mtl.mm",
+    "lazy_drawable_holder.h",
+    "lazy_drawable_holder.mm",
     "pipeline_library_mtl.h",
     "pipeline_library_mtl.mm",
     "pipeline_mtl.h",
@@ -56,4 +58,20 @@ impeller_component("metal") {
   ]
 
   frameworks = [ "Metal.framework" ]
+}
+
+impeller_component("metal_unittests") {
+  testonly = true
+
+  sources = [ "texture_mtl_unittests.mm" ]
+
+  deps = [
+    ":metal",
+    "//flutter/testing:testing_lib",
+  ]
+
+  frameworks = [
+    "AppKit.framework",
+    "QuartzCore.framework",
+  ]
 }

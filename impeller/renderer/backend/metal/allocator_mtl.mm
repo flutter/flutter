@@ -217,7 +217,7 @@ std::shared_ptr<Texture> AllocatorMTL::OnCreateTexture(
   if (!texture) {
     return nullptr;
   }
-  return std::make_shared<TextureMTL>(desc, texture);
+  return TextureMTL::Create(desc, texture);
 }
 
 uint16_t AllocatorMTL::MinimumBytesPerRow(PixelFormat format) const {

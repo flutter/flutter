@@ -50,7 +50,7 @@ std::shared_ptr<Texture> DeviceBufferMTL::AsTexture(
   if (!texture) {
     return nullptr;
   }
-  return std::make_shared<TextureMTL>(descriptor, texture);
+  return TextureMTL::Create(descriptor, texture);
 }
 
 [[nodiscard]] bool DeviceBufferMTL::OnCopyHostBuffer(const uint8_t* source,
