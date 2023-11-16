@@ -70,32 +70,31 @@ class LogsCommand extends FlutterCommand {
 
     final Completer<int> exitCompleter = Completer<int>();
 
+    // First check if we already completed by another branch before completing
+    // with [exitCode].
+    void maybeComplete([int exitCode = 0]) {
+      if (exitCompleter.isCompleted) {
+        return;
+      }
+      exitCompleter.complete(exitCode);
+    }
+
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
       (String message) => globals.printStatus(message, wrap: false),
-      onDone: () {
-        exitCompleter.complete(0);
-      },
-      onError: (dynamic error) {
-        exitCompleter.complete(error is int ? error : 1);
-      },
+      onDone: () => maybeComplete(),
+      onError: (dynamic error) => maybeComplete(error is int ? error : 1),
     );
 
     // When terminating, close down the log reader.
     sigint.watch().listen((ProcessSignal signal) {
       subscription.cancel();
-      if (exitCompleter.isCompleted) {
-        return;
-      }
+      maybeComplete();
       globals.printStatus('');
-      exitCompleter.complete(0);
     });
     sigterm.watch().listen((ProcessSignal signal) {
       subscription.cancel();
-      if (exitCompleter.isCompleted) {
-        return;
-      }
-      exitCompleter.complete(0);
+      maybeComplete();
     });
 
     // Wait for the log reader to be finished.
