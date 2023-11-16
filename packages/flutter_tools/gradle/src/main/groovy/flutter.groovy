@@ -752,7 +752,7 @@ class FlutterPlugin implements Plugin<Project> {
     //
     // See https://developer.android.com/training/app-links/ for more information about app link.
     //
-    // The json will be stored in <project>/build/app/app-link-settings-<variant>.json
+    // The json will be saved in path stored in outputPath parameter.
     //
     // An example json:
     // {
@@ -830,7 +830,7 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                     def generator = new JsonGenerator.Options().build()
-                    new File(project.buildDir, "app-link-settings-${variant.name}.json").write(generator.toJson(appLinkSettings))
+                    new File(project.getProperty("outputPath")).write(generator.toJson(appLinkSettings))
                 }
             }
         }

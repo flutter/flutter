@@ -810,16 +810,22 @@ class AndroidGradleBuilder implements AndroidBuilder {
   }
 
   @override
-  Future<void> outputsAppLinkSettings(
+  Future<String> outputsAppLinkSettings(
     String buildVariant, {
     required FlutterProject project,
   }) async {
     final String taskName = _getOutputAppLinkSettingsTaskFor(buildVariant);
+    final Directory directory = await project.buildDirectory
+        .childDirectory('deeplink_data').create(recursive: true);
+    final String outputPath = globals.fs.path.join(
+      directory.absolute.path,
+      'app-link-settings-$buildVariant.json',
+    );
     final Stopwatch sw = Stopwatch()
       ..start();
     final RunResult result = await _runGradleTask(
       taskName,
-      options: const <String>['-q'],
+      options: <String>['-q', '-PoutputPath=$outputPath'],
       project: project,
     );
     _usage.sendTiming('outputs', 'app link settings', sw.elapsed);
@@ -827,7 +833,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
       _logger.printError(result.stderr, wrap: false);
+      throwToolExit(result.stderr);
     }
+    return outputPath;
   }
 }
 
