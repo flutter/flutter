@@ -3608,7 +3608,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _history.addListener(_handleHistoryChanged);
   }
 
-  /// Record the last focused node in route entry..
+  // Record the last focused node in route entry.
   void _recordLastFocus(){
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
     entry.lastFocusNode = ServicesBinding.instance.accessibilityFocus.value;
