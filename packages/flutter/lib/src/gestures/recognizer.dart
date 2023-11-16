@@ -48,6 +48,72 @@ enum DragStartBehavior {
   start,
 }
 
+/// Configuration of drag behavior on multitouch devices.
+/// This only takes effect when receiving input from multiple pointers simultaneously.
+enum MultiTouchDragBehavior {
+  /// This will choose the best behavior based on the platform.
+  ///
+  /// On iOS, this will use [MultiTouchDragBehavior.average].
+  /// On Android, this will use [MultiTouchDragBehavior.last].
+  ///
+  /// Other platforms will use [MultiTouchDragBehavior.average].
+  ///
+  /// This is the default behavior.
+  platformDefault,
+
+  /// Each pointer's delta is averaged out, so the effective point tracked by the
+  /// recognizer is the centerpoint of all active pointers.
+  ///
+  /// E.g. if two pointers are pressed, with the first moving +10 pixels and the
+  /// second moving -10 pixels, the recognizer will report a delta of 0.
+  ///
+  /// But if two pointers are pressed, with the first moving +10 pixels and the
+  /// second moving +10 pixels, the recognizer will report a delta of +10.
+  ///
+  /// Furthermore, if two pointers are pressed, with the first moving +10 pixels
+  /// and the second moving +20 pixels, the recognizer will report a delta of +15.
+  ///
+  /// This matches the behavior of iOS, iPadOS, macOS, and other Apple platforms.
+  average,
+
+  /// The recognizer only tracks the first pointer that was added, ignoring
+  /// all other pointers until that first pointer is released.
+  ///
+  /// Upon release, the earliest of the remaining active pointers will continue
+  /// to be tracked.
+  ///
+  /// E.g. if two pointers are pressed, with the first moving +10 pixels and the
+  /// second moving -10 pixels, the recognizer will report a delta of +10.
+  ///
+  /// This is not used by iOS or Android, but is included for completeness.
+  first,
+
+  /// The recognizer only tracks the last pointer that was added, ignoring
+  /// all other pointers until that last pointer is released.
+  ///
+  /// Upon release, the latest of the remaining active pointers will continue to
+  /// be tracked.
+  ///
+  /// E.g. if two pointers are pressed, with the first moving +10 pixels and the
+  /// second moving -10 pixels, the recognizer will report a delta of -10.
+  ///
+  /// This matches Android's behavior.
+  last,
+
+  /// The recognizer sums the deltas of all active pointers, so the effective
+  /// point tracked by the recognizer is the sum of all active pointers.
+  ///
+  /// E.g. if two pointers are pressed, with the first moving +10 pixels and the
+  /// second moving -10 pixels, the recognizer will report a delta of 0.
+  ///
+  /// But if two pointers are pressed, with the first moving +10 pixels and the
+  /// second moving +10 pixels, the recognizer will report a delta of +20.
+  ///
+  /// This is the legacy behavior of Flutter's gesture system.
+  sum,
+}
+
+
 /// Signature for `allowedButtonsFilter` in [GestureRecognizer].
 /// Used to filter the input buttons of incoming pointer events.
 /// The parameter `buttons` comes from [PointerEvent.buttons].

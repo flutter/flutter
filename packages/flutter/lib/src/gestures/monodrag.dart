@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
@@ -74,6 +76,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.multiTouchDragBehavior = MultiTouchDragBehavior.platformDefault,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
@@ -110,6 +113,19 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// instead set to [DragStartBehavior.start], [onStart] will be called with
   /// position (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
+
+  /// {@template flutter.gestures.monodrag.DragGestureRecognizer.multiTouchDragBehavior}
+  /// Determines how this [DragGestureRecognizer] will behave when it has multiple
+  /// pointers in contact with the touch surface simultaneously.
+  /// {@endtemplate}
+  ///
+  /// By default, the behavior is [MultiTouchDragBehavior.platformDefault].
+  ///
+  /// See also:
+  ///
+  /// * [MultiTouchDragBehavior], which describes the different drag behaviors
+  ///   available.
+  MultiTouchDragBehavior multiTouchDragBehavior;
 
   /// A pointer has contacted the screen with a primary button and might begin
   /// to move.
@@ -359,6 +375,27 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _addPointer(event);
   }
 
+  MultiTouchDragBehavior _platformDragBehavior() {
+    if (Platform.isAndroid) {
+      return MultiTouchDragBehavior.last;
+    }
+
+    return MultiTouchDragBehavior.average;
+  }
+
+  bool _shouldTrackMoveEvent(int pointer, MultiTouchDragBehavior behavior) {
+    switch (behavior) {
+      case MultiTouchDragBehavior.platformDefault:
+        return _shouldTrackMoveEvent(pointer, _platformDragBehavior());
+      case MultiTouchDragBehavior.average || MultiTouchDragBehavior.sum:
+        return true;
+      case MultiTouchDragBehavior.first:
+        return _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.first;
+      case MultiTouchDragBehavior.last:
+        return _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
+    }
+  }
+
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
@@ -380,7 +417,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _giveUpPointer(event.pointer);
       return;
     }
-    if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
+    if ((event is PointerMoveEvent || event is PointerPanZoomUpdateEvent)
+         && _shouldTrackMoveEvent(event.pointer, multiTouchDragBehavior)) {
       final Offset delta = (event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta;
       final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
       final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
@@ -392,6 +430,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           primaryDelta: _getPrimaryValueFromOffset(localDelta),
           globalPosition: position,
           localPosition: localPosition,
+          multiTouchDragBehavior: multiTouchDragBehavior,
         );
       } else {
         _pendingDragOffset += OffsetPair(local: localDelta, global: delta);
@@ -419,7 +458,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  final Set<int> _acceptedActivePointers = <int>{};
+  final List<int> _acceptedActivePointers = <int>[];
 
   @override
   void acceptGesture(int pointer) {
@@ -457,6 +496,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _giveUpPointer(int pointer) {
     stopTrackingPointer(pointer);
+    _velocityTrackers.remove(pointer);
     // If we never accepted the pointer, we reject it since we are no longer
     // interested in winning the gesture arena for it.
     if (!_acceptedActivePointers.remove(pointer)) {
@@ -510,6 +550,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
         globalPosition: correctedPosition.global,
         localPosition: correctedPosition.local,
+        multiTouchDragBehavior: multiTouchDragBehavior,
       );
     }
     // This acceptGesture might have been called only for one pointer, instead
@@ -536,20 +577,43 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     double? primaryDelta,
     required Offset globalPosition,
     Offset? localPosition,
+    MultiTouchDragBehavior? multiTouchDragBehavior,
   }) {
     if (onUpdate != null) {
-      // Calculate the average motion
-      final int numPointers = _velocityTrackers.length;
-      final Offset averageDelta = delta / numPointers.toDouble();
+      final DragUpdateDetails details;
 
-      // Use the average delta in the details
-      final DragUpdateDetails details = DragUpdateDetails(
-        sourceTimeStamp: sourceTimeStamp,
-        delta: averageDelta,
-        primaryDelta: _getPrimaryValueFromOffset(averageDelta),
-        globalPosition: globalPosition,
-        localPosition: localPosition,
-      );
+      switch (multiTouchDragBehavior) {
+        case MultiTouchDragBehavior.platformDefault || null:
+          _checkUpdate(
+            sourceTimeStamp: sourceTimeStamp,
+            delta: delta,
+            primaryDelta: primaryDelta,
+            globalPosition: globalPosition,
+            localPosition: localPosition,
+            multiTouchDragBehavior: _platformDragBehavior(),
+          );
+          return;
+
+        case MultiTouchDragBehavior.average:
+          final int numPointers = _velocityTrackers.length;
+          final Offset averageDelta = delta / numPointers.toDouble();
+
+          details = DragUpdateDetails(
+            sourceTimeStamp: sourceTimeStamp,
+            delta: averageDelta,
+            primaryDelta: _getPrimaryValueFromOffset(averageDelta),
+            globalPosition: globalPosition,
+            localPosition: localPosition,
+          );
+        case MultiTouchDragBehavior.first || MultiTouchDragBehavior.last || MultiTouchDragBehavior.sum:
+          details = DragUpdateDetails(
+            sourceTimeStamp: sourceTimeStamp,
+            delta: delta,
+            primaryDelta: primaryDelta,
+            globalPosition: globalPosition,
+            localPosition: localPosition,
+          );
+      }
 
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
     }
