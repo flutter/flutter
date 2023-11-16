@@ -57,7 +57,7 @@ void MockRasterCache::AddMockPicture(int width, int height) {
   LayerStateStack state_stack;
   PaintContextHolder holder =
       GetSamplePaintContextHolder(state_stack, this, &raster_time, &ui_time);
-  holder.paint_context.dst_color_space = color_space_.get();
+  holder.paint_context.dst_color_space = color_space_;
 
   DisplayListRasterCacheItem display_list_item(display_list, SkPoint(), true,
                                                false);
@@ -95,7 +95,7 @@ PrerollContextHolder GetSamplePrerollContextHolder(
           .gr_context                    = nullptr,
           .view_embedder                 = nullptr,
           .state_stack                   = state_stack,
-          .dst_color_space               = srgb.get(),
+          .dst_color_space               = srgb,
           .surface_needs_readback        = false,
           .raster_time                   = *raster_time,
           .ui_time                       = *ui_time,
@@ -121,7 +121,7 @@ PaintContextHolder GetSamplePaintContextHolder(
         .state_stack                   = state_stack,
         .canvas                        = nullptr,
         .gr_context                    = nullptr,
-        .dst_color_space               = srgb.get(),
+        .dst_color_space               = srgb,
         .view_embedder                 = nullptr,
         .raster_time                   = *raster_time,
         .ui_time                       = *ui_time,

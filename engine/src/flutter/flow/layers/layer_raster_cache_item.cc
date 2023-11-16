@@ -6,6 +6,7 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/raster_cache_util.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 
 namespace flutter {
 

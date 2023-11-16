@@ -49,14 +49,14 @@ class RasterCacheItem;
 static constexpr SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
 // This should be an exact copy of the Clip enum in painting.dart.
-enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer };
+enum Clip { kNone, kHardEdge, kAntiAlias, kAntiAliasWithSaveLayer };
 
 struct PrerollContext {
   RasterCache* raster_cache;
   GrDirectContext* gr_context;
   ExternalViewEmbedder* view_embedder;
   LayerStateStack& state_stack;
-  SkColorSpace* dst_color_space;
+  sk_sp<SkColorSpace> dst_color_space;
   bool surface_needs_readback;
 
   // These allow us to paint in the end of subtree Preroll.
@@ -106,7 +106,7 @@ struct PaintContext {
   bool rendering_above_platform_view = false;
 
   GrDirectContext* gr_context;
-  SkColorSpace* dst_color_space;
+  sk_sp<SkColorSpace> dst_color_space;
   ExternalViewEmbedder* view_embedder;
   const Stopwatch& raster_time;
   const Stopwatch& ui_time;
