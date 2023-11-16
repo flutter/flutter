@@ -47,6 +47,7 @@ executable("flutter_shell_native_unittests") {
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
+    "platform_view_android_unittests.cc",
   ]
   public_configs = [ "//flutter:config" ]
   deps = [
