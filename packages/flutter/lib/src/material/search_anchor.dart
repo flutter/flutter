@@ -327,10 +327,10 @@ class SearchAnchor extends StatefulWidget {
   /// To get a different layout, use [viewBuilder] to override.
   final SuggestionsBuilder suggestionsBuilder;
 
-  ///
+  /// The type of action button to use for the keyboard.
   final TextInputAction? textInputAction;
 
-  ///
+  /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType? keyboardType;
 
   @override
@@ -1240,10 +1240,10 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autoFocus;
 
-  ///
+  /// The type of action button to use for the keyboard.
   final TextInputAction? textInputAction;
 
-  ///
+  /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType? keyboardType;
 
   @override
