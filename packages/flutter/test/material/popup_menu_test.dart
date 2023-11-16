@@ -3785,6 +3785,177 @@ void main() {
     await tester.pumpAndSettle();
     expect(count, 1);
   });
+
+  testWidgetsWithLeakTracking('PopupMenuButton uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
+    final MenuObserver rootObserver = MenuObserver();
+    final MenuObserver nestedObserver = MenuObserver();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          observers: <NavigatorObserver>[nestedObserver],
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return Material(
+                  child: PopupMenuButton<String>(
+                    useRootNavigator: true,
+                    child: const Text('button'),
+                    itemBuilder: (BuildContext context) {
+                      return <PopupMenuItem<String>>[
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item1',
+                          child: Text('item 1'),
+                        ),
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item2',
+                          child: Text('item 2'),
+                        ),
+                      ];
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.text('button'));
+
+    expect(rootObserver.menuCount, 1);
+    expect(nestedObserver.menuCount, 0);
+  });
+
+  testWidgetsWithLeakTracking('PopupMenuButton does not use root navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final MenuObserver rootObserver = MenuObserver();
+    final MenuObserver nestedObserver = MenuObserver();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[rootObserver],
+        home: Navigator(
+          observers: <NavigatorObserver>[nestedObserver],
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(
+              builder: (BuildContext context) {
+                return Material(
+                  child: PopupMenuButton<String>(
+                    child: const Text('button'),
+                    itemBuilder: (BuildContext context) {
+                      return <PopupMenuItem<String>>[
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item1',
+                          child: Text('item 1'),
+                        ),
+                        const CheckedPopupMenuItem<String>(
+                          value: 'item2',
+                          child: Text('item 2'),
+                        ),
+                      ];
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.text('button'));
+
+    expect(rootObserver.menuCount, 0);
+    expect(nestedObserver.menuCount, 1);
+  });
+
+  testWidgetsWithLeakTracking('Override Popup Menu animation using AnimationStyle', (WidgetTester tester) async {
+    final Key targetKey = UniqueKey();
+
+    Widget buildPopupMenu({ AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: PopupMenuButton<int>(
+              key: targetKey,
+              popUpAnimationStyle: animationStyle,
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<int>>[
+                  const PopupMenuItem<int>(
+                    value: 1,
+                    child: Text('One'),
+                  ),
+                  const PopupMenuItem<int>(
+                    value: 2,
+                    child: Text('Two'),
+                  ),
+                  const PopupMenuItem<int>(
+                    value: 3,
+                    child: Text('Three'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default animation.
+    await tester.pumpWidget(buildPopupMenu());
+
+    await tester.tap(find.byKey(targetKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 1/3 of its duration.
+
+    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 80.0)));
+
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 2/3 of its duration.
+
+    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 160.0)));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 160.0)));
+
+    // Tap outside to dismiss the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pumpAndSettle();
+
+    // Override the animation duration.
+    await tester.pumpWidget(buildPopupMenu(animationStyle: AnimationStyle(duration: Duration.zero)));
+
+    await tester.tap(find.byKey(targetKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1)); // Advance the animation by 1 millisecond.
+
+    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 160.0)));
+
+    // Tap outside to dismiss the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pumpAndSettle();
+
+    // Override the animation curve.
+    await tester.pumpWidget(buildPopupMenu(animationStyle: AnimationStyle(curve: Easing.emphasizedAccelerate)));
+
+    await tester.tap(find.byKey(targetKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 1/3 of its duration.
+
+    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(32.4, 15.4)));
+
+    await tester.pump(const Duration(milliseconds: 100)); // Advance the animation by 2/3 of its duration.
+
+    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 72.2)));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 160.0)));
+  });
 }
 
 class TestApp extends StatelessWidget {
