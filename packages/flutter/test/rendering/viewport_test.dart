@@ -1314,6 +1314,46 @@ void main() {
         },
       );
 
+      testWidgetsWithLeakTracking('RenderViewportBase.showOnScreen twice almost instantly', (WidgetTester tester) async{
+        // Regression test for https://github.com/flutter/flutter/issues/137901
+        await tester.pumpWidget(
+          buildList(
+            floatingHeader: SliverPersistentHeader(
+              pinned: true,
+              floating: true,
+              delegate: _TestSliverPersistentHeaderDelegate(minExtent: 100, maxExtent: 300, key: headerKey, vsync: vsync),
+            ),
+          ),
+        );
+
+        final Finder pinnedHeaderContent = find.byKey(headerKey, skipOffstage: false);
+
+        controller.jumpTo(300.0 * 15);
+        await tester.pumpAndSettle();
+        expect(mainAxisExtent(tester, pinnedHeaderContent), lessThan(300));
+
+
+        tester.renderObject(pinnedHeaderContent).showOnScreen(
+          descendant: tester.renderObject(pinnedHeaderContent),
+          // Adding different rect to check if the second showOnScreen call
+          // leads to a different result.
+          // When the animation has forward status and the second showOnScreen
+          // is called, the new animation won't start.
+          rect: Offset.zero & const Size(150, 150),
+          duration: const Duration(seconds: 3),
+        );
+        await tester.pump(const Duration(seconds: 1));
+
+        tester.renderObject(pinnedHeaderContent).showOnScreen(
+          descendant: tester.renderObject(pinnedHeaderContent),
+          rect: Offset.zero & const Size(300, 300),
+        );
+
+        await tester.pumpAndSettle();
+        expect(controller.offset, 300.0 * 15);
+        expect(mainAxisExtent(tester, pinnedHeaderContent), 150);
+      });
+
       testWidgetsWithLeakTracking(
         'RenderViewportBase.showOnScreen but no child',
         (WidgetTester tester) async {
