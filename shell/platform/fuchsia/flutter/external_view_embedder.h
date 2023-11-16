@@ -68,19 +68,20 @@ class ExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   flutter::PostPrerollResult PostPrerollAction(
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
+      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
+      override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(
-      SkISize frame_size,
-      GrDirectContext* context,
-      double device_pixel_ratio,
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
+  void BeginFrame(SkISize frame_size,
+                  GrDirectContext* context,
+                  double device_pixel_ratio,
+                  const fml::RefPtr<fml::RasterThreadMerger>&
+                      raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(
-      bool should_resubmit_frame,
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
+  void EndFrame(bool should_resubmit_frame,
+                const fml::RefPtr<fml::RasterThreadMerger>&
+                    raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,

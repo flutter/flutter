@@ -46,11 +46,11 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(
-      SkISize frame_size,
-      GrDirectContext* context,
-      double device_pixel_ratio,
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
+  void BeginFrame(SkISize frame_size,
+                  GrDirectContext* context,
+                  double device_pixel_ratio,
+                  const fml::RefPtr<fml::RasterThreadMerger>&
+                      raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -59,7 +59,8 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   PostPrerollResult PostPrerollAction(
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
+      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
+      override;
 
   // |ExternalViewEmbedder|
   DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
@@ -69,7 +70,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PushFilterToVisitedPlatformViews(
-      std::shared_ptr<const DlImageFilter> filter,
+      const std::shared_ptr<const DlImageFilter>& filter,
       const SkRect& filter_rect) override;
 
   // |ExternalViewEmbedder|
@@ -78,9 +79,9 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
                    std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(
-      bool should_resubmit_frame,
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
+  void EndFrame(bool should_resubmit_frame,
+                const fml::RefPtr<fml::RasterThreadMerger>&
+                    raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
