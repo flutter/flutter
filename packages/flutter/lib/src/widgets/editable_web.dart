@@ -424,9 +424,9 @@ class _EditableWebState extends State<EditableWeb> {
       ..lineHeight = '1.5'; // can this be modified by a property?
 
     // debug
-    if (widget.textInputConfiguration.obscureText) {
-      inputEl.style.outline = '1px solid red'; // debug
-    }
+    // if (widget.textInputConfiguration.obscureText) {
+    //   inputEl.style.outline = '1px solid red'; // debug
+    // }
 
     if (widget.selectionColor != null) {
       /*
