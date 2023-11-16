@@ -103,7 +103,7 @@ flutter::DlCanvas* ExternalViewEmbedder::CompositeEmbeddedView(
 }
 
 flutter::PostPrerollResult ExternalViewEmbedder::PostPrerollAction(
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   return flutter::PostPrerollResult::kSuccess;
 }
 
@@ -111,7 +111,7 @@ void ExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "ExternalViewEmbedder::BeginFrame");
 
   // Reset for new frame.
@@ -128,7 +128,7 @@ void ExternalViewEmbedder::BeginFrame(
 
 void ExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "ExternalViewEmbedder::EndFrame");
 }
 
