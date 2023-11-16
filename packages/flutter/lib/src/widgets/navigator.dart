@@ -3603,28 +3603,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     if (widget.reportsRouteUpdateToEngine) {
       SystemNavigator.selectSingleEntryHistory();
     }
-    ServicesBinding.instance.setAccessibilityMessageHandler((dynamic message) => handleAccessibilityMessage(message as Object));
+
+    ServicesBinding.instance.accessibilityFocus.addListener(_recordLastFocus);
     _history.addListener(_handleHistoryChanged);
   }
 
-  /// Handler called for messages received on the [SystemChannels.accessibility]
-  /// message channel.
-  Future<void> handleAccessibilityMessage(Object accessibilityMessage) async {
-    final Map<String, dynamic> message =
-        (accessibilityMessage as Map<Object?, Object?>).cast<String, dynamic>();
-
-    final String type = message['type'] as String;
-    switch (type) {
-      case 'didGainFocus':
-        recordLastFocus(message['nodeId'] as int);
-    }
-    return;
-  }
-
   /// Record the last focused node in route entry..
-  void recordLastFocus(int id){
+  void _recordLastFocus(){
     final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
-    entry.lastFocusNode = id;
+    entry.lastFocusNode = ServicesBinding.instance.accessibilityFocus.value;
   }
 
   // Use [_nextPagelessRestorationScopeId] to get the next id.
@@ -3919,6 +3906,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _rawNextPagelessRestorationScopeId.dispose();
     _serializableHistory.dispose();
     userGestureInProgressNotifier.dispose();
+    ServicesBinding.instance.accessibilityFocus.removeListener(_recordLastFocus);
     _history.removeListener(_handleHistoryChanged);
     _history.dispose();
     super.dispose();
