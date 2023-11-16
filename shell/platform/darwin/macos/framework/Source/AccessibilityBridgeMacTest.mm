@@ -80,17 +80,10 @@ class AccessibilityBridgeMacWindowTest : public AutoreleasePoolTest {
   FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgeMacWindowTest);
 };
 
-// AutoreleasePoolTest subclass that exists simply to provide more specific naming.
-class AccessibilityBridgeMacTest : public AutoreleasePoolTest {
- public:
-  AccessibilityBridgeMacTest() = default;
-  ~AccessibilityBridgeMacTest() = default;
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgeMacTest);
-};
-
 NSWindow* AccessibilityBridgeMacWindowTest::gWindow_ = nil;
+
+// Test-specific name for AutoreleasePoolTest fixture.
+using AccessibilityBridgeMacTest = AutoreleasePoolTest;
 
 }  // namespace
 

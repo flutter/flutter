@@ -67,15 +67,8 @@
 
 namespace flutter::testing {
 
-// AutoreleasePoolTest subclass that exists simply to provide more specific naming.
-class FlutterEmbedderExternalTextureTest : public AutoreleasePoolTest {
- public:
-  FlutterEmbedderExternalTextureTest() = default;
-  ~FlutterEmbedderExternalTextureTest() = default;
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderExternalTextureTest);
-};
+// Test-specific name for AutoreleasePoolTest fixture.
+using FlutterEmbedderExternalTextureTest = AutoreleasePoolTest;
 
 TEST_F(FlutterEmbedderExternalTextureTest, TestTextureResolution) {
   // Constants.
