@@ -11,6 +11,7 @@
 #include <mutex>
 #include <thread>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/shared_mutex.h"
 #include "impeller/base/thread_safety.h"
@@ -159,11 +160,11 @@ class ConditionVariable {
 
   //----------------------------------------------------------------------------
   /// @brief      Atomically unlocks the mutex and waits on the condition
-  ///             variable up to a specified time point. Spurious wakes may
-  ///             happen before the time point is reached. In such cases the
-  ///             predicate is invoked and it must return `false` for the wait
-  ///             to continue. The predicate will be invoked with the mutex
-  ///             locked.
+  ///             variable up to a specified time point. Lock will be reacquired
+  ///             when the wait exits. Spurious wakes may happen before the time
+  ///             point is reached. In such cases the predicate is invoked and
+  ///             it must return `false` for the wait to continue. The predicate
+  ///             will be invoked with the mutex locked.
   ///
   /// @note       Since the predicate is invoked with the mutex locked, if it
   ///             accesses other guarded resources, the predicate itself must be
@@ -191,15 +192,18 @@ class ConditionVariable {
                  const std::chrono::time_point<Clock, Duration>& time_point,
                  const Predicate& should_stop_waiting) IPLR_REQUIRES(mutex) {
     std::unique_lock lock(mutex.mutex_, std::adopt_lock);
-    return cv_.wait_until(lock, time_point, should_stop_waiting);
+    const auto result = cv_.wait_until(lock, time_point, should_stop_waiting);
+    lock.release();
+    return result;
   }
 
   //----------------------------------------------------------------------------
   /// @brief      Atomically unlocks the mutex and waits on the condition
-  ///             variable for a designated duration. Spurious wakes may happen
-  ///             before the time point is reached. In such cases the predicate
-  ///             is invoked and it must return `false` for the wait to
-  ///             continue. The predicate will be invoked with the mutex locked.
+  ///             variable for a designated duration. Lock will be reacquired
+  ///             when the wait exits. Spurious wakes may happen before the time
+  ///             point is reached. In such cases the predicate is invoked and
+  ///             it must return `false` for the wait to continue. The predicate
+  ///             will be invoked with the mutex locked.
   ///
   /// @note       Since the predicate is invoked with the mutex locked, if it
   ///             accesses other guarded resources, the predicate itself must be
@@ -233,10 +237,11 @@ class ConditionVariable {
   //----------------------------------------------------------------------------
   /// @brief      Atomically unlocks the mutex and waits on the condition
   ///             variable indefinitely till the predicate determines that the
-  ///             wait must end. Spurious wakes may happen before the time point
-  ///             is reached. In such cases the predicate is invoked and it must
-  ///             return `false` for the wait to continue. The predicate will be
-  ///             invoked with the mutex locked.
+  ///             wait must end. Lock will be reacquired when the wait exits.
+  ///             Spurious wakes may happen before the time point is reached. In
+  ///             such cases the predicate is invoked and it must return `false`
+  ///             for the wait to continue. The predicate will be invoked with
+  ///             the mutex locked.
   ///
   /// @note       Since the predicate is invoked with the mutex locked, if it
   ///             accesses other guarded resources, the predicate itself must be
@@ -255,6 +260,7 @@ class ConditionVariable {
       IPLR_REQUIRES(mutex) {
     std::unique_lock lock(mutex.mutex_, std::adopt_lock);
     cv_.wait(lock, should_stop_waiting);
+    lock.release();
   }
 
  private:

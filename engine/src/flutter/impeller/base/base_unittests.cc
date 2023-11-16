@@ -143,5 +143,95 @@ TEST(ConditionVariableTest, WaitForever) {
   ASSERT_EQ(test.rando_ivar, 12u);
 }
 
+TEST(ConditionVariableTest, TestsCriticalSectionAfterWaitForUntil) {
+  std::vector<std::thread> threads;
+  const auto kThreadCount = 10u;
+
+  Mutex mtx;
+  ConditionVariable cv;
+  size_t sum = 0u;
+
+  std::condition_variable start_cv;
+  std::mutex start_mtx;
+  bool start = false;
+  auto start_predicate = [&start]() { return start; };
+  auto thread_main = [&]() {
+    {
+      std::unique_lock start_lock(start_mtx);
+      start_cv.wait(start_lock, start_predicate);
+    }
+
+    mtx.Lock();
+    cv.WaitFor(mtx, std::chrono::milliseconds{0u}, []() { return true; });
+    auto old_val = sum;
+    std::this_thread::sleep_for(std::chrono::milliseconds{100u});
+    sum = old_val + 1u;
+    mtx.Unlock();
+  };
+  // Launch all threads. They will wait for the start CV to be signaled.
+  for (size_t i = 0; i < kThreadCount; i++) {
+    threads.emplace_back(thread_main);
+  }
+  // Notify all threads that the test may start.
+  {
+    {
+      std::scoped_lock start_lock(start_mtx);
+      start = true;
+    }
+    start_cv.notify_all();
+  }
+  // Join all threads.
+  ASSERT_EQ(threads.size(), kThreadCount);
+  for (size_t i = 0; i < kThreadCount; i++) {
+    threads[i].join();
+  }
+  ASSERT_EQ(sum, kThreadCount);
+}
+
+TEST(ConditionVariableTest, TestsCriticalSectionAfterWait) {
+  std::vector<std::thread> threads;
+  const auto kThreadCount = 10u;
+
+  Mutex mtx;
+  ConditionVariable cv;
+  size_t sum = 0u;
+
+  std::condition_variable start_cv;
+  std::mutex start_mtx;
+  bool start = false;
+  auto start_predicate = [&start]() { return start; };
+  auto thread_main = [&]() {
+    {
+      std::unique_lock start_lock(start_mtx);
+      start_cv.wait(start_lock, start_predicate);
+    }
+
+    mtx.Lock();
+    cv.Wait(mtx, []() { return true; });
+    auto old_val = sum;
+    std::this_thread::sleep_for(std::chrono::milliseconds{100u});
+    sum = old_val + 1u;
+    mtx.Unlock();
+  };
+  // Launch all threads. They will wait for the start CV to be signaled.
+  for (size_t i = 0; i < kThreadCount; i++) {
+    threads.emplace_back(thread_main);
+  }
+  // Notify all threads that the test may start.
+  {
+    {
+      std::scoped_lock start_lock(start_mtx);
+      start = true;
+    }
+    start_cv.notify_all();
+  }
+  // Join all threads.
+  ASSERT_EQ(threads.size(), kThreadCount);
+  for (size_t i = 0; i < kThreadCount; i++) {
+    threads[i].join();
+  }
+  ASSERT_EQ(sum, kThreadCount);
+}
+
 }  // namespace testing
 }  // namespace impeller
