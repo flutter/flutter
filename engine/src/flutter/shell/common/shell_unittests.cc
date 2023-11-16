@@ -939,7 +939,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
         std::make_shared<TransformLayer>(SkMatrix::Translate(1, 1));
     root->Add(transform_layer);
     auto clip_rect_layer = std::make_shared<ClipRectLayer>(
-        SkRect::MakeLTRB(0, 0, 30, 30), Clip::hardEdge);
+        SkRect::MakeLTRB(0, 0, 30, 30), Clip::kHardEdge);
     transform_layer->Add(clip_rect_layer);
     auto filter = std::make_shared<DlBlurImageFilter>(5, 5, DlTileMode::kClamp);
     auto backdrop_filter_layer =

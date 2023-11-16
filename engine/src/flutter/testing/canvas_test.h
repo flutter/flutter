@@ -20,7 +20,7 @@ class CanvasTestBase : public BaseT {
   CanvasTestBase() = default;
 
   MockCanvas& mock_canvas() { return canvas_; }
-  SkColorSpace* mock_color_space() { return color_space_.get(); }
+  sk_sp<SkColorSpace> mock_color_space() { return color_space_; }
 
  private:
   MockCanvas canvas_;

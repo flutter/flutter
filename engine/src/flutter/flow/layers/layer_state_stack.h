@@ -217,15 +217,14 @@ class LayerStateStack {
     void clipPath(const SkPath& path, bool is_aa);
 
    private:
-    MutatorContext(LayerStateStack* stack)
+    explicit MutatorContext(LayerStateStack* stack)
         : layer_state_stack_(stack),
-          stack_restore_count_(stack->stack_count()),
-          save_needed_(true) {}
+          stack_restore_count_(stack->stack_count()) {}
     friend class LayerStateStack;
 
     LayerStateStack* layer_state_stack_;
     const size_t stack_restore_count_;
-    bool save_needed_;
+    bool save_needed_ = true;
 
     FML_DISALLOW_COPY_ASSIGN_AND_MOVE(MutatorContext);
   };

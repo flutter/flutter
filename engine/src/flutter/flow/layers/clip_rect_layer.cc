@@ -14,7 +14,7 @@ const SkRect& ClipRectLayer::clip_shape_bounds() const {
 }
 
 void ClipRectLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
-  mutator.clipRect(clip_shape(), clip_behavior() != Clip::hardEdge);
+  mutator.clipRect(clip_shape(), clip_behavior() != Clip::kHardEdge);
 }
 
 }  // namespace flutter

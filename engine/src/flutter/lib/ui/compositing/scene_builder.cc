@@ -110,7 +110,7 @@ void SceneBuilder::pushClipPath(Dart_Handle layer_handle,
                                 int clipBehavior,
                                 const fml::RefPtr<EngineLayer>& oldLayer) {
   flutter::Clip clip_behavior = static_cast<flutter::Clip>(clipBehavior);
-  FML_DCHECK(clip_behavior != flutter::Clip::none);
+  FML_DCHECK(clip_behavior != flutter::Clip::kNone);
   auto layer =
       std::make_shared<flutter::ClipPathLayer>(path->path(), clip_behavior);
   PushLayer(layer);

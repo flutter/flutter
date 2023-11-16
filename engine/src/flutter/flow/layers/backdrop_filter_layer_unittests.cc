@@ -22,7 +22,7 @@ TEST_F(BackdropFilterLayerTest, PaintingEmptyLayerDies) {
   auto filter = DlBlurImageFilter(5, 5, DlTileMode::kClamp);
   auto layer = std::make_shared<BackdropFilterLayer>(filter.shared(),
                                                      DlBlendMode::kSrcOver);
-  auto parent = std::make_shared<ClipRectLayer>(kEmptyRect, Clip::hardEdge);
+  auto parent = std::make_shared<ClipRectLayer>(kEmptyRect, Clip::kHardEdge);
   parent->Add(layer);
 
   parent->Preroll(preroll_context());
@@ -59,7 +59,7 @@ TEST_F(BackdropFilterLayerTest, EmptyFilter) {
   auto layer =
       std::make_shared<BackdropFilterLayer>(nullptr, DlBlendMode::kSrcOver);
   layer->Add(mock_layer);
-  auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::hardEdge);
+  auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::kHardEdge);
   parent->Add(layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -106,7 +106,7 @@ TEST_F(BackdropFilterLayerTest, SimpleFilter) {
   auto layer = std::make_shared<BackdropFilterLayer>(layer_filter,
                                                      DlBlendMode::kSrcOver);
   layer->Add(mock_layer);
-  auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::hardEdge);
+  auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::kHardEdge);
   parent->Add(layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -154,7 +154,7 @@ TEST_F(BackdropFilterLayerTest, NonSrcOverBlend) {
   auto layer =
       std::make_shared<BackdropFilterLayer>(layer_filter, DlBlendMode::kSrc);
   layer->Add(mock_layer);
-  auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::hardEdge);
+  auto parent = std::make_shared<ClipRectLayer>(child_bounds, Clip::kHardEdge);
   parent->Add(layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -214,7 +214,7 @@ TEST_F(BackdropFilterLayerTest, MultipleChildren) {
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
   auto parent =
-      std::make_shared<ClipRectLayer>(children_bounds, Clip::hardEdge);
+      std::make_shared<ClipRectLayer>(children_bounds, Clip::kHardEdge);
   parent->Add(layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -283,7 +283,7 @@ TEST_F(BackdropFilterLayerTest, Nested) {
   layer1->Add(mock_layer1);
   layer1->Add(layer2);
   auto parent =
-      std::make_shared<ClipRectLayer>(children_bounds, Clip::hardEdge);
+      std::make_shared<ClipRectLayer>(children_bounds, Clip::kHardEdge);
   parent->Add(layer1);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -381,7 +381,7 @@ TEST_F(BackdropFilterLayerTest, OpacityInheritance) {
   const DlPaint mock_paint = DlPaint(DlColor::kRed());
   const SkRect clip_rect = SkRect::MakeLTRB(0, 0, 100, 100);
 
-  auto clip = std::make_shared<ClipRectLayer>(clip_rect, Clip::hardEdge);
+  auto clip = std::make_shared<ClipRectLayer>(clip_rect, Clip::kHardEdge);
   auto parent = std::make_shared<OpacityLayer>(128, SkPoint::Make(0, 0));
   auto layer = std::make_shared<BackdropFilterLayer>(backdrop_filter.shared(),
                                                      DlBlendMode::kSrcOver);
@@ -446,7 +446,7 @@ TEST_F(BackdropLayerDiffTest, BackdropLayer) {
   MockLayerTree l2(SkISize::Make(100, 100));
 
   auto clip = std::make_shared<ClipRectLayer>(SkRect::MakeLTRB(20, 20, 60, 60),
-                                              Clip::hardEdge);
+                                              Clip::kHardEdge);
   clip->Add(std::make_shared<BackdropFilterLayer>(filter.shared(),
                                                   DlBlendMode::kSrcOver));
   l2.root()->Add(clip);
@@ -488,7 +488,7 @@ TEST_F(BackdropLayerDiffTest, ReadbackOutsideOfPaintArea) {
   MockLayerTree l1(SkISize::Make(100, 100));
 
   auto clip = std::make_shared<ClipRectLayer>(SkRect::MakeLTRB(60, 60, 80, 80),
-                                              Clip::hardEdge);
+                                              Clip::kHardEdge);
   clip->Add(std::make_shared<BackdropFilterLayer>(filter.shared(),
                                                   DlBlendMode::kSrcOver));
   l1.root()->Add(clip);

@@ -26,7 +26,7 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerCheckBoard) {
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipRectLayer>(layer_bounds,
-                                               Clip::antiAliasWithSaveLayer);
+                                               Clip::kAntiAliasWithSaveLayer);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_matrix);
@@ -104,8 +104,8 @@ TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerCheckBoard) {
   const DlPaint child_paint = DlPaint(DlColor::kYellow());
   const DlPaint clip_paint;
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer =
-      std::make_shared<ClipPathLayer>(layer_path, Clip::antiAliasWithSaveLayer);
+  auto layer = std::make_shared<ClipPathLayer>(layer_path,
+                                               Clip::kAntiAliasWithSaveLayer);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_matrix);
@@ -181,7 +181,7 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerCheckBoard) {
   const DlPaint clip_paint;
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<ClipRRectLayer>(layer_rrect,
-                                                Clip::antiAliasWithSaveLayer);
+                                                Clip::kAntiAliasWithSaveLayer);
   layer->Add(mock_layer);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_matrix);

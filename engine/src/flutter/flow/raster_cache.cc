@@ -85,9 +85,8 @@ std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
   SkRect dest_rect =
       RasterCacheUtil::GetRoundedOutDeviceBounds(context.logical_rect, matrix);
 
-  const SkImageInfo image_info =
-      SkImageInfo::MakeN32Premul(dest_rect.width(), dest_rect.height(),
-                                 sk_ref_sp(context.dst_color_space));
+  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(
+      dest_rect.width(), dest_rect.height(), context.dst_color_space);
 
   sk_sp<SkSurface> surface =
       context.gr_context

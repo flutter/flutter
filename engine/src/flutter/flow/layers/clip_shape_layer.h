@@ -19,7 +19,7 @@ class ClipShapeLayer : public CacheableContainerLayer {
       : CacheableContainerLayer(),
         clip_shape_(clip_shape),
         clip_behavior_(clip_behavior) {
-    FML_DCHECK(clip_behavior != Clip::none);
+    FML_DCHECK(clip_behavior != Clip::kNone);
   }
 
   void Diff(DiffContext* context, const Layer* old_layer) override {
@@ -100,7 +100,7 @@ class ClipShapeLayer : public CacheableContainerLayer {
   }
 
   bool UsesSaveLayer() const {
-    return clip_behavior_ == Clip::antiAliasWithSaveLayer;
+    return clip_behavior_ == Clip::kAntiAliasWithSaveLayer;
   }
 
  protected:

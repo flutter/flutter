@@ -48,9 +48,9 @@ TEST_F(PlatformViewLayerTest, ClippedPlatformViewPrerollsAndPaintsNothing) {
   auto layer =
       std::make_shared<PlatformViewLayer>(layer_offset, layer_size, view_id);
   auto child_clip_layer =
-      std::make_shared<ClipRectLayer>(child_clip, Clip::hardEdge);
+      std::make_shared<ClipRectLayer>(child_clip, Clip::kHardEdge);
   auto parent_clip_layer =
-      std::make_shared<ClipRectLayer>(parent_clip, Clip::hardEdge);
+      std::make_shared<ClipRectLayer>(parent_clip, Clip::kHardEdge);
   parent_clip_layer->Add(child_clip_layer);
   child_clip_layer->Add(layer);
 
