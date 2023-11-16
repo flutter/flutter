@@ -9,7 +9,6 @@
 #include <string>
 #include <type_traits>
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/allocation.h"
 #include "impeller/core/buffer.h"
 #include "impeller/core/buffer_view.h"

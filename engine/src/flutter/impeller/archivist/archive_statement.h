@@ -7,7 +7,6 @@
 #include <memory>
 #include <type_traits>
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/allocation.h"
 
 namespace impeller {

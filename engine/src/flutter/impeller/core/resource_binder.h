@@ -10,7 +10,6 @@
 #include <string>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler.h"

@@ -47,7 +47,7 @@ struct CompilerBackend {
 
   spirv_cross::Compiler* GetCompiler();
 
-  operator bool() const;
+  explicit operator bool() const;
 
   enum class ExtendedResourceIndex {
     kPrimary,

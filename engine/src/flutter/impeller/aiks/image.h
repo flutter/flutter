@@ -13,7 +13,7 @@ namespace impeller {
 
 class Image {
  public:
-  Image(std::shared_ptr<Texture> texture);
+  explicit Image(std::shared_ptr<Texture> texture);
 
   ~Image();
 

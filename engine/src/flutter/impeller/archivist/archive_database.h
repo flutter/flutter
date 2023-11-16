@@ -8,7 +8,6 @@
 #include <memory>
 #include <string>
 
-#include "flutter/fml/macros.h"
 #include "impeller/archivist/archive_transaction.h"
 
 namespace impeller {
@@ -22,7 +21,7 @@ struct ArchiveDef;
 ///
 class ArchiveDatabase {
  public:
-  ArchiveDatabase(const std::string& filename);
+  explicit ArchiveDatabase(const std::string& filename);
 
   ~ArchiveDatabase();
 

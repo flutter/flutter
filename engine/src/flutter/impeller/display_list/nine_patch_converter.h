@@ -6,12 +6,10 @@
 
 #include <memory>
 
-#include "flutter/fml/macros.h"
 #include "impeller/aiks/canvas_type.h"
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/core/sampler_descriptor.h"
-#include "impeller/geometry/path.h"
 
 namespace impeller {
 

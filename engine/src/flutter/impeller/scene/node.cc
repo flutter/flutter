@@ -14,6 +14,7 @@
 #include "impeller/base/thread.h"
 #include "impeller/base/validation.h"
 #include "impeller/geometry/matrix.h"
+#include "impeller/image/decompressed_image.h"
 #include "impeller/scene/animation/animation_player.h"
 #include "impeller/scene/importer/conversions.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"

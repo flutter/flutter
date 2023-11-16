@@ -10,7 +10,6 @@
 #include <variant>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "spirv_glsl.hpp"
 
 namespace impeller {

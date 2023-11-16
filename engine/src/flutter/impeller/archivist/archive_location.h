@@ -7,7 +7,6 @@
 #include <optional>
 #include <type_traits>
 
-#include "flutter/fml/macros.h"
 #include "impeller/archivist/archivable.h"
 #include "impeller/archivist/archive.h"
 #include "impeller/base/allocation.h"
