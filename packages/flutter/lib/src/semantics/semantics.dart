@@ -701,7 +701,7 @@ class SemanticsData with Diagnosticable {
           flag.name,
     ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
-    properties.add(StringProperty('identifier', identifier));
+    properties.add(StringProperty('identifier', identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', attributedLabel));
     properties.add(AttributedStringProperty('value', attributedValue));
     properties.add(AttributedStringProperty('increasedValue', attributedIncreasedValue));
@@ -1649,7 +1649,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    properties.add(StringProperty('identifier', identifier, defaultValue: null));
+    properties.add(StringProperty('identifier', identifier));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
     properties.add(StringProperty('value', value, defaultValue: null));
@@ -2934,6 +2934,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
+    properties.add(StringProperty('identifier', _identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', _attributedLabel));
     properties.add(AttributedStringProperty('value', _attributedValue));
     properties.add(AttributedStringProperty('increasedValue', _attributedIncreasedValue));
