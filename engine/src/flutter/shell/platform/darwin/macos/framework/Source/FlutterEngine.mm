@@ -275,6 +275,24 @@ constexpr char kTextPlainFormat[] = "text/plain";
 
 #pragma mark -
 
+@implementation FlutterPasteboard
+
+- (NSInteger)clearContents {
+  return [[NSPasteboard generalPasteboard] clearContents];
+}
+
+- (NSString*)stringForType:(NSPasteboardType)dataType {
+  return [[NSPasteboard generalPasteboard] stringForType:dataType];
+}
+
+- (BOOL)setString:(nonnull NSString*)string forType:(nonnull NSPasteboardType)dataType {
+  return [[NSPasteboard generalPasteboard] setString:string forType:dataType];
+}
+
+@end
+
+#pragma mark -
+
 /**
  * `FlutterPluginRegistrar` implementation handling a single plugin.
  */
@@ -452,6 +470,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
+  _pasteboard = [[FlutterPasteboard alloc] init];
   _active = NO;
   _visible = NO;
   _project = project ?: [[FlutterDartProject alloc] init];
@@ -1186,29 +1205,23 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (NSDictionary*)getClipboardData:(NSString*)format {
-  NSPasteboard* pasteboard = self.pasteboard;
   if ([format isEqualToString:@(kTextPlainFormat)]) {
-    NSString* stringInPasteboard = [pasteboard stringForType:NSPasteboardTypeString];
+    NSString* stringInPasteboard = [self.pasteboard stringForType:NSPasteboardTypeString];
     return stringInPasteboard == nil ? nil : @{@"text" : stringInPasteboard};
   }
   return nil;
 }
 
 - (void)setClipboardData:(NSDictionary*)data {
-  NSPasteboard* pasteboard = self.pasteboard;
   NSString* text = data[@"text"];
-  [pasteboard clearContents];
+  [self.pasteboard clearContents];
   if (text && ![text isEqual:[NSNull null]]) {
-    [pasteboard setString:text forType:NSPasteboardTypeString];
+    [self.pasteboard setString:text forType:NSPasteboardTypeString];
   }
 }
 
 - (BOOL)clipboardHasStrings {
   return [self.pasteboard stringForType:NSPasteboardTypeString].length > 0;
-}
-
-- (NSPasteboard*)pasteboard {
-  return [NSPasteboard generalPasteboard];
 }
 
 - (std::vector<std::string>)switches {
