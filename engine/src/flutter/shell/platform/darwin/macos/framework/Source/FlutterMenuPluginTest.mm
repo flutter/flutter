@@ -2,67 +2,103 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin_Internal.h"
+
+#import "flutter/shell/platform/common/platform_provided_menu.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMenuPlugin_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
-
-#include "flutter/shell/platform/common/platform_provided_menu.h"
+#include "flutter/testing/autoreleasepool_test.h"
+#include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
-#import <OCMock/OCMock.h>
-#import "flutter/testing/testing.h"
-
-@interface FlutterMenuPluginTestObjc : NSObject
-- (bool)testSetMenu;
+@interface FakePluginRegistrar : NSObject <FlutterPluginRegistrar>
+@property(nonatomic, readonly) id<FlutterPlugin> plugin;
+@property(nonatomic, readonly) FlutterMethodChannel* channel;
 @end
 
-@implementation FlutterMenuPluginTestObjc
+@implementation FakePluginRegistrar
+@synthesize messenger;
+@synthesize textures;
+@synthesize view;
 
-- (bool)testSetMenu {
-  // Workaround to deflake the test.
-  // See: https://github.com/flutter/flutter/issues/104748#issuecomment-1159336728
-  NSView* view = [[NSView alloc] initWithFrame:NSZeroRect];
-  view.wantsLayer = YES;
+- (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate
+                      channel:(nonnull FlutterMethodChannel*)channel {
+  _plugin = delegate;
+  _channel = channel;
+  [_channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    [delegate handleMethodCall:call result:result];
+  }];
+}
 
+- (void)addApplicationDelegate:(nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate {
+}
+
+- (void)registerViewFactory:(nonnull NSObject<FlutterPlatformViewFactory>*)factory
+                     withId:(nonnull NSString*)factoryId {
+}
+
+- (void)publish:(nonnull NSObject*)value {
+}
+
+- (nonnull NSString*)lookupKeyForAsset:(nonnull NSString*)asset {
+  return @"";
+}
+
+- (nonnull NSString*)lookupKeyForAsset:(nonnull NSString*)asset
+                           fromPackage:(nonnull NSString*)package {
+  return @"";
+}
+@end
+
+namespace flutter::testing {
+
+// FlutterMenuPluginTest is an AutoreleasePoolTest that allocates an NSView.
+//
+// This supports the use of NSApplication features that rely on the assumption of a view, such as
+// when modifying the application menu bar, or even accessing the NSApplication.localizedName
+// property.
+//
+// See: https://github.com/flutter/flutter/issues/104748#issuecomment-1159336728
+class FlutterMenuPluginTest : public AutoreleasePoolTest {
+ public:
+  FlutterMenuPluginTest();
+  ~FlutterMenuPluginTest() = default;
+
+ private:
+  NSView* view_;
+};
+
+FlutterMenuPluginTest::FlutterMenuPluginTest() {
+  view_ = [[NSView alloc] initWithFrame:NSZeroRect];
+  view_.wantsLayer = YES;
+}
+
+TEST_F(FlutterMenuPluginTest, TestSetMenu) {
   // Build a simulation of the default main menu.
   NSMenu* mainMenu = [[NSMenu alloc] init];
-  NSMenuItem* appNameMenu = [[NSMenuItem alloc] initWithTitle:@"APP_NAME"
+  NSMenuItem* appNameMenu = [[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"APP_NAME", nil)
                                                        action:nil
                                                 keyEquivalent:@""];
-  NSMenu* submenu = [[NSMenu alloc] initWithTitle:@"Prexisting APP_NAME menu"];
-  [submenu addItem:[[NSMenuItem alloc] initWithTitle:@"About APP_NAME"
+  NSMenu* submenu =
+      [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Prexisting APP_NAME menu", nil)];
+  [submenu addItem:[[NSMenuItem alloc] initWithTitle:NSLocalizedString(@"About APP_NAME", nil)
                                               action:nil
                                        keyEquivalent:@""]];
   appNameMenu.submenu = submenu;
   [mainMenu addItem:appNameMenu];
   [NSApp setMainMenu:mainMenu];
 
-  id<FlutterPluginRegistrar> pluginRegistrarMock =
-      OCMProtocolMock(@protocol(FlutterPluginRegistrar));
-  __block FlutterMethodChannel* pluginChannel;
-  __block FlutterMenuPlugin* plugin;
-  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
-  OCMStub([pluginRegistrarMock messenger]).andReturn(binaryMessengerMock);
-  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
-      [pluginRegistrarMock addMethodCallDelegate:[OCMArg any] channel:[OCMArg any]])
-      .andDo(^(NSInvocation* invocation) {
-        id<FlutterPlugin> delegate;
-        FlutterMethodChannel* channel;
-        [invocation getArgument:&delegate atIndex:2];
-        [invocation getArgument:&channel atIndex:3];
-        pluginChannel = channel;
-        plugin = delegate;
-        [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-          [delegate handleMethodCall:call result:result];
-        }];
-      });
-  [FlutterMenuPlugin registerWithRegistrar:pluginRegistrarMock];
+  FakePluginRegistrar* registrar = [[FakePluginRegistrar alloc] init];
+  [FlutterMenuPlugin registerWithRegistrar:registrar];
+  FlutterMenuPlugin* plugin = [registrar plugin];
 
   NSDictionary* testMenus = @{
     @"0" : @[
@@ -173,14 +209,6 @@
   EXPECT_TRUE(
       [NSStringFromSelector([secondMenuLast action]) isEqualToString:@"flutterMenuItemSelected:"]);
   EXPECT_EQ([secondMenuLast tag], 7);
-
-  return true;
 }
 
-@end
-
-namespace flutter::testing {
-TEST(FlutterMenuPluginTest, TestSetMenu) {
-  ASSERT_TRUE([[FlutterMenuPluginTestObjc alloc] testSetMenu]);
-}
 }  // namespace flutter::testing
