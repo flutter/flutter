@@ -83,11 +83,17 @@ class LogsCommand extends FlutterCommand {
 
     // When terminating, close down the log reader.
     sigint.watch().listen((ProcessSignal signal) {
+      if (exitCompleter.isCompleted) {
+        return;
+      }
       subscription.cancel();
       globals.printStatus('');
       exitCompleter.complete(0);
     });
     sigterm.watch().listen((ProcessSignal signal) {
+      if (exitCompleter.isCompleted) {
+        return;
+      }
       subscription.cancel();
       exitCompleter.complete(0);
     });
