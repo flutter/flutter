@@ -73,6 +73,7 @@ static MockPlatformView* gMockPlatformView = nil;
 namespace flutter {
 namespace {
 class MockDelegate : public PlatformView::Delegate {
+ public:
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
   void OnPlatformViewDestroyed() override {}
   void OnPlatformViewScheduleFrame() override {}
@@ -101,7 +102,6 @@ class MockDelegate : public PlatformView::Delegate {
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
 
- private:
   flutter::Settings settings_;
 };
 
@@ -147,11 +147,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   auto bridge =
       std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
                                                      /*platform_view=*/platform_view.get(),
@@ -169,11 +171,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(mockFlutterView);
@@ -198,11 +202,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -245,11 +251,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -277,11 +285,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
         std::make_shared<flutter::FlutterPlatformViewsController>();
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_delegate,
-        /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+        /*rendering_api=*/mock_delegate.settings_.enable_impeller
+            ? flutter::IOSRenderingAPI::kMetal
+            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/flutterPlatformViewsController,
         /*task_runners=*/runners,
         /*worker_task_runner=*/nil,
-        /*is_gpu_disabled_sync_switch=*/nil);
+        /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
     id mockFlutterView = OCMClassMock([FlutterView class]);
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
     OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -336,11 +346,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
         std::make_shared<flutter::FlutterPlatformViewsController>();
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_delegate,
-        /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+        /*rendering_api=*/mock_delegate.settings_.enable_impeller
+            ? flutter::IOSRenderingAPI::kMetal
+            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/flutterPlatformViewsController,
         /*task_runners=*/runners,
         /*worker_task_runner=*/nil,
-        /*is_gpu_disabled_sync_switch=*/nil);
+        /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     MockFlutterPlatformFactory* factory = [[[MockFlutterPlatformFactory alloc] init] autorelease];
     flutterPlatformViewsController->RegisterViewFactory(
@@ -381,11 +393,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -475,11 +489,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -547,11 +563,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -619,11 +637,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -687,11 +707,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -734,11 +756,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -818,11 +842,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -893,11 +919,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -967,11 +995,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1024,11 +1054,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1121,11 +1153,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1207,11 +1241,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1299,11 +1335,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1343,11 +1381,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1413,11 +1453,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1482,11 +1524,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1557,11 +1601,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1634,11 +1680,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1707,11 +1755,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1782,11 +1832,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1839,11 +1891,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1901,11 +1955,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1971,11 +2027,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   fml::AutoResetWaitableEvent latch;
   thread_task_runner->PostTask([&] {
     auto weakFactory =
@@ -2006,11 +2064,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/nil);
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -2056,11 +2116,13 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   thread_task_runner->PostTask([&] {
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/test_delegate,
-        /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+        /*rendering_api=*/test_delegate.settings_.enable_impeller
+            ? flutter::IOSRenderingAPI::kMetal
+            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
         /*worker_task_runner=*/nil,
-        /*is_gpu_disabled_sync_switch=*/nil);
+        /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
     auto flutterPlatformViewsController =
