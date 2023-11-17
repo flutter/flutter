@@ -50,7 +50,7 @@ class RendererDartTest : public PlaygroundTest,
   flutter::testing::AutoIsolateShutdown* GetIsolate() {
     // Sneak the context into the Flutter GPU API.
     assert(GetContext() != nullptr);
-    flutter::Context::SetOverrideContext(GetContext());
+    flutter::gpu::Context::SetOverrideContext(GetContext());
 
     return isolate_.get();
   }
@@ -128,11 +128,17 @@ TEST_P(RendererDartTest, CanInstantiateFlutterGPUContext) {
 /// `flutter/impeller/fixtures/dart_tests.dart`
 
 DART_TEST_CASE(canEmplaceHostBuffer);
-DART_TEST_CASE(canCreateDeviceBuffer);
 
+DART_TEST_CASE(canCreateDeviceBuffer);
 DART_TEST_CASE(canOverwriteDeviceBuffer);
 DART_TEST_CASE(deviceBufferOverwriteFailsWhenOutOfBounds);
 DART_TEST_CASE(deviceBufferOverwriteThrowsForNegativeDestinationOffset);
+
+DART_TEST_CASE(canCreateTexture);
+DART_TEST_CASE(canOverwriteTexture);
+DART_TEST_CASE(textureOverwriteThrowsForWrongBufferSize);
+DART_TEST_CASE(textureAsImageReturnsAValidUIImageHandle);
+DART_TEST_CASE(textureAsImageThrowsWhenNotShaderReadable);
 
 }  // namespace testing
 }  // namespace impeller

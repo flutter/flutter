@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
+
 part of flutter_gpu;
 
 /// Specifies where an allocation resides and how it may be used.
@@ -25,4 +27,35 @@ enum StorageMode {
   /// device memory. Prefer using these allocations for intermediates like depth
   /// and stencil buffers.
   deviceTransient,
+}
+
+enum PixelFormat {
+  unknown,
+  a8UNormInt,
+  r8UNormInt,
+  r8g8UNormInt,
+  r8g8b8a8UNormInt,
+  r8g8b8a8UNormIntSRGB,
+  b8g8r8a8UNormInt,
+  b8g8r8a8UNormIntSRGB,
+  r32g32b32a32Float,
+  r16g16b16a16Float,
+  b10g10r10XR,
+  b10g10r10XRSRGB,
+  b10g10r10a10XR,
+  // Depth and stencil formats.
+  s8UInt,
+  d24UnormS8Uint,
+  d32FloatS8UInt,
+}
+
+enum TextureCoordinateSystem {
+  /// Alternative coordinate system used when uploading texture data from the
+  /// host.
+  /// (0, 0) is the bottom-left of the image with +Y going up.
+  uploadFromHost,
+
+  /// Default coordinate system.
+  /// (0, 0) is the top-left of the image with +Y going down.
+  renderToTexture,
 }

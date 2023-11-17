@@ -42,6 +42,8 @@ source_set("gpu") {
       "host_buffer.h",
       "smoketest.cc",
       "smoketest.h",
+      "texture.cc",
+      "texture.h",
     ]
   }
   deps = [

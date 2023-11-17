@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
+
 part of flutter_gpu;
 
 /// A handle to a graphics context. Used to create and manage GPU resources.
@@ -15,6 +17,27 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     if (error != null) {
       throw Exception(error);
     }
+  }
+
+  /// A supported [PixelFormat] for textures that store 4-channel colors
+  /// (red/green/blue/alpha).
+  PixelFormat get defaultColorFormat {
+    return PixelFormat.values[_getDefaultColorFormat()];
+  }
+
+  /// A supported [PixelFormat] for textures that store stencil information.
+  /// May include a depth channel if a stencil-only format is not available.
+  PixelFormat get defaultStencilFormat {
+    return PixelFormat.values[_getDefaultStencilFormat()];
+  }
+
+  /// A supported `PixelFormat` for textures that store both a stencil and depth
+  /// component. This will never return a depth-only or stencil-only texture.
+  ///
+  /// May be [PixelFormat.unknown] if no suitable depth+stencil format was
+  /// found.
+  PixelFormat get defaultDepthStencilFormat {
+    return PixelFormat.values[_getDefaultDepthStencilFormat()];
   }
 
   /// Allocates a new region of GPU-resident memory.
@@ -46,10 +69,47 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return result.isValid ? result : null;
   }
 
+  /// Allocates a new texture in GPU-resident memory.
+  ///
+  /// Returns [null] if the [Texture] creation failed.
+  Texture? createTexture(StorageMode storageMode, int width, int height,
+      {PixelFormat format = PixelFormat.r8g8b8a8UNormInt,
+      sampleCount = 1,
+      TextureCoordinateSystem coordinateSystem =
+          TextureCoordinateSystem.renderToTexture,
+      bool enableRenderTargetUsage = true,
+      bool enableShaderReadUsage = true,
+      bool enableShaderWriteUsage = false}) {
+    Texture result = Texture._initialize(
+        this,
+        storageMode,
+        format,
+        width,
+        height,
+        sampleCount,
+        coordinateSystem,
+        enableRenderTargetUsage,
+        enableShaderReadUsage,
+        enableShaderWriteUsage);
+    return result.isValid ? result : null;
+  }
+
   /// Associates the default Impeller context with this Context.
   @Native<Handle Function(Handle)>(
       symbol: 'InternalFlutterGpu_Context_InitializeDefault')
   external String? _initializeDefault();
+
+  @Native<Int Function(Pointer<Void>)>(
+      symbol: 'InternalFlutterGpu_Context_GetDefaultColorFormat')
+  external int _getDefaultColorFormat();
+
+  @Native<Int Function(Pointer<Void>)>(
+      symbol: 'InternalFlutterGpu_Context_GetDefaultStencilFormat')
+  external int _getDefaultStencilFormat();
+
+  @Native<Int Function(Pointer<Void>)>(
+      symbol: 'InternalFlutterGpu_Context_GetDefaultDepthStencilFormat')
+  external int _getDefaultDepthStencilFormat();
 }
 
 /// The default graphics context.

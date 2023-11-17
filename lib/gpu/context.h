@@ -10,6 +10,7 @@
 #include "impeller/renderer/context.h"
 
 namespace flutter {
+namespace gpu {
 
 class Context : public RefCountedDartWrappable<Context> {
   DEFINE_WRAPPERTYPEINFO();
@@ -36,6 +37,7 @@ class Context : public RefCountedDartWrappable<Context> {
   FML_DISALLOW_COPY_AND_ASSIGN(Context);
 };
 
+}  // namespace gpu
 }  // namespace flutter
 
 //----------------------------------------------------------------------------
@@ -47,5 +49,21 @@ extern "C" {
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_Context_InitializeDefault(
     Dart_Handle wrapper);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Context_GetBackendType(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Context_GetDefaultColorFormat(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Context_GetDefaultStencilFormat(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
+    flutter::gpu::Context* wrapper);
 
 }  // extern "C"
