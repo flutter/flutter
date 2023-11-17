@@ -9,6 +9,7 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
+namespace gpu {
 
 IMPLEMENT_WRAPPERTYPEINFO(gpu, HostBuffer);
 
@@ -23,6 +24,7 @@ size_t HostBuffer::EmplaceBytes(const tonic::DartByteData& byte_data) {
   return view.range.offset;
 }
 
+}  // namespace gpu
 }  // namespace flutter
 
 //----------------------------------------------------------------------------
@@ -30,11 +32,12 @@ size_t HostBuffer::EmplaceBytes(const tonic::DartByteData& byte_data) {
 ///
 
 void InternalFlutterGpu_HostBuffer_Initialize(Dart_Handle wrapper) {
-  auto res = fml::MakeRefCounted<flutter::HostBuffer>();
+  auto res = fml::MakeRefCounted<flutter::gpu::HostBuffer>();
   res->AssociateWithDartWrapper(wrapper);
 }
 
-size_t InternalFlutterGpu_HostBuffer_EmplaceBytes(flutter::HostBuffer* wrapper,
-                                                  Dart_Handle byte_data) {
+size_t InternalFlutterGpu_HostBuffer_EmplaceBytes(
+    flutter::gpu::HostBuffer* wrapper,
+    Dart_Handle byte_data) {
   return wrapper->EmplaceBytes(tonic::DartByteData(byte_data));
 }

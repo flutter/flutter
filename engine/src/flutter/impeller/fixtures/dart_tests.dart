@@ -78,3 +78,84 @@ void deviceBufferOverwriteThrowsForNegativeDestinationOffset() {
   }
   assert(exception!.contains('destinationOffsetInBytes must be positive'));
 }
+
+@pragma('vm:entry-point')
+void canCreateTexture() {
+  final gpu.Texture? texture =
+      gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
+  assert(texture != null);
+
+  // Check the defaults.
+  assert(
+      texture!.coordinateSystem == gpu.TextureCoordinateSystem.renderToTexture);
+  assert(texture!.width == 100);
+  assert(texture!.height == 100);
+  assert(texture!.storageMode == gpu.StorageMode.hostVisible);
+  assert(texture!.sampleCount == 1);
+  assert(texture!.format == gpu.PixelFormat.r8g8b8a8UNormInt);
+  assert(texture!.enableRenderTargetUsage == true);
+  assert(texture!.enableShaderReadUsage == true);
+  assert(texture!.enableShaderWriteUsage == false);
+  assert(texture!.bytesPerTexel == 4);
+  assert(texture!.GetBaseMipLevelSizeInBytes() == 40000);
+}
+
+@pragma('vm:entry-point')
+void canOverwriteTexture() {
+  final gpu.Texture? texture =
+      gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+  assert(texture != null);
+  final ui.Color red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
+  final ui.Color green = ui.Color.fromARGB(0xFF, 0, 0xFF, 0);
+  final bool success = texture!.overwrite(
+      Int32List.fromList(<int>[red.value, green.value, green.value, red.value])
+          .buffer
+          .asByteData());
+  assert(success);
+}
+
+@pragma('vm:entry-point')
+void textureOverwriteThrowsForWrongBufferSize() {
+  final gpu.Texture? texture =
+      gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
+  assert(texture != null);
+  final ui.Color red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
+  String? exception;
+  try {
+    texture!.overwrite(
+        Int32List.fromList(<int>[red.value, red.value, red.value, red.value])
+            .buffer
+            .asByteData());
+  } catch (e) {
+    exception = e.toString();
+  }
+  assert(exception!.contains(
+      'The length of sourceBytes (bytes: 16) must exactly match the size of the base mip level (bytes: 40000)'));
+}
+
+@pragma('vm:entry-point')
+void textureAsImageReturnsAValidUIImageHandle() {
+  final gpu.Texture? texture =
+      gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
+  assert(texture != null);
+
+  final ui.Image image = texture!.asImage();
+  assert(image.width == 100);
+  assert(image.height == 100);
+}
+
+@pragma('vm:entry-point')
+void textureAsImageThrowsWhenNotShaderReadable() {
+  final gpu.Texture? texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible, 100, 100,
+      enableShaderReadUsage: false);
+  assert(texture != null);
+  String? exception;
+  try {
+    texture!.asImage();
+  } catch (e) {
+    exception = e.toString();
+  }
+  assert(exception!.contains(
+      'Only shader readable Flutter GPU textures can be used as UI Images'));
+}

@@ -1970,6 +1970,11 @@ base class _Image extends NativeFieldWrapperClass1 {
   String toString() => '[$width\u00D7$height]';
 }
 
+@pragma('vm:entry-point')
+Image _wrapImage(_Image image) {
+  return Image._(image, image.width, image.height);
+}
+
 /// Callback signature for [decodeImageFromList].
 typedef ImageDecoderCallback = void Function(Image result);
 

@@ -10,6 +10,7 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
+namespace gpu {
 
 class HostBuffer : public RefCountedDartWrappable<HostBuffer> {
   DEFINE_WRAPPERTYPEINFO();
@@ -28,6 +29,7 @@ class HostBuffer : public RefCountedDartWrappable<HostBuffer> {
   FML_DISALLOW_COPY_AND_ASSIGN(HostBuffer);
 };
 
+}  // namespace gpu
 }  // namespace flutter
 
 //----------------------------------------------------------------------------
@@ -41,7 +43,7 @@ extern void InternalFlutterGpu_HostBuffer_Initialize(Dart_Handle wrapper);
 
 FLUTTER_GPU_EXPORT
 extern size_t InternalFlutterGpu_HostBuffer_EmplaceBytes(
-    flutter::HostBuffer* wrapper,
+    flutter::gpu::HostBuffer* wrapper,
     Dart_Handle byte_data);
 
 }  // extern "C"

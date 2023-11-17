@@ -29,6 +29,8 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
     return fml::MakeRefCounted<CanvasImage>();
   }
 
+  Dart_Handle CreateOuterWrapping();
+
   int width() { return image_ ? image_->width() : 0; }
 
   int height() { return image_ ? image_->height() : 0; }
