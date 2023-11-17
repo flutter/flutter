@@ -145,4 +145,4 @@ cd dev/devicelab
 File `test/frame_policy.dart` and its driving script `test_driver/frame_policy_test.dart`
 are used for testing [`fullyLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
 and [`benchmarkLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
-policies in terms of its effect on [`WidgetTester.handlePointerEventRecord`](https://master-api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).
+policies in terms of its effect on [`WidgetTester.handlePointerEventRecord`](https://api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).
