@@ -1,4 +1,4 @@
-Signature: eef0824b6b4edae7e9a891ee3fa634c7
+Signature: c921dd30236f9202e1b33a91797c6a88
 
 ====================================================================================================
 LIBRARY: etc1
@@ -5428,6 +5428,7 @@ ORIGIN: ../../../flutter/third_party/skia/fuzz/FuzzPolyUtils.cpp + ../../../flut
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/canvaskit_bindings.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_Transform.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkNoDestructor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkGlyph.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkTypeface_remote.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -5437,6 +5438,7 @@ FILE: ../../../flutter/third_party/skia/fuzz/FuzzPolyUtils.cpp
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/canvaskit_bindings.cpp
 FILE: ../../../flutter/third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_Transform.h
+FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc
 FILE: ../../../flutter/third_party/skia/src/base/SkNoDestructor.h
 FILE: ../../../flutter/third_party/skia/src/core/SkGlyph.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkTypeface_remote.cpp
@@ -8806,7 +8808,6 @@ ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Int96.cpp +
 ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Point.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Segment.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/bentleyottmann/src/SweepLine.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformHsw.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformSkx.cc + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkBezierCurves.h + ../../../flutter/third_party/skia/LICENSE
@@ -9083,7 +9084,6 @@ FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Int96.cpp
 FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Point.cpp
 FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/Segment.cpp
 FILE: ../../../flutter/third_party/skia/modules/bentleyottmann/src/SweepLine.cpp
-FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformBaseline.cc
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformHsw.cc
 FILE: ../../../flutter/third_party/skia/modules/skcms/src/skcms_TransformSkx.cc
 FILE: ../../../flutter/third_party/skia/src/base/SkBezierCurves.h
