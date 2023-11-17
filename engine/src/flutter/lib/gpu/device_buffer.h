@@ -11,6 +11,7 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
+namespace gpu {
 
 class DeviceBuffer : public RefCountedDartWrappable<DeviceBuffer> {
   DEFINE_WRAPPERTYPEINFO();
@@ -30,6 +31,7 @@ class DeviceBuffer : public RefCountedDartWrappable<DeviceBuffer> {
   FML_DISALLOW_COPY_AND_ASSIGN(DeviceBuffer);
 };
 
+}  // namespace gpu
 }  // namespace flutter
 
 //----------------------------------------------------------------------------
@@ -41,19 +43,19 @@ extern "C" {
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_DeviceBuffer_Initialize(
     Dart_Handle wrapper,
-    flutter::Context* gpu_context,
+    flutter::gpu::Context* gpu_context,
     int storage_mode,
     int size_in_bytes);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_DeviceBuffer_InitializeWithHostData(
     Dart_Handle wrapper,
-    flutter::Context* gpu_context,
+    flutter::gpu::Context* gpu_context,
     Dart_Handle byte_data);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_DeviceBuffer_Overwrite(
-    flutter::DeviceBuffer* wrapper,
+    flutter::gpu::DeviceBuffer* wrapper,
     Dart_Handle source_byte_data,
     int destination_offset_in_bytes);
 

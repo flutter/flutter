@@ -14,9 +14,12 @@ library flutter_gpu;
 import 'dart:ffi';
 import 'dart:nativewrappers';
 import 'dart:typed_data';
+// ignore: uri_does_not_exist
+import 'dart:ui' as ui;
 
 export 'src/smoketest.dart';
 
 part 'src/formats.dart';
 part 'src/context.dart';
 part 'src/buffer.dart';
+part 'src/texture.dart';
