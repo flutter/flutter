@@ -113,6 +113,16 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   @override
   SelectionGeometry get value => _geometry.value;
 
+  @override
+  TextSelection? getLocalTextSelection() {
+    return value.hasSelection ? const TextSelection.collapsed(offset: 0) : null;
+  }
+
+  @override
+  int? getContentLength() {
+    return 0;
+  }
+
   // Selectable APIs.
 
   // Adjust this value to enlarge or shrink the selection highlight.
