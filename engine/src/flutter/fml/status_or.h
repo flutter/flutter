@@ -37,7 +37,10 @@ class StatusOr {
 
   // These constructors are intended be compatible with absl::status_or.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  StatusOr(const Status& status) : status_(status), value_() {}
+  StatusOr(const Status& status) : status_(status), value_() {
+    // It's not valid to construct a StatusOr with an OK status and no value.
+    FML_CHECK(!status_.ok());
+  }
 
   StatusOr(const StatusOr&) = default;
   StatusOr(StatusOr&&) = default;
@@ -68,7 +71,8 @@ class StatusOr {
   bool ok() const { return status_.ok(); }
 
   const T& value() const {
-    if (status_.ok()) {
+    if (value_.has_value()) {
+      FML_DCHECK(status_.ok());
       return value_.value();
     }
     FML_LOG(FATAL) << "StatusOr::value() called on error Status";
@@ -76,7 +80,8 @@ class StatusOr {
   }
 
   T& value() {
-    if (status_.ok()) {
+    if (value_.has_value()) {
+      FML_DCHECK(status_.ok());
       return value_.value();
     }
     FML_LOG(FATAL) << "StatusOr::value() called on error Status";
