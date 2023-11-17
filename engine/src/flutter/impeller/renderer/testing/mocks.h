@@ -6,10 +6,13 @@
 
 #include "gmock/gmock.h"
 #include "impeller/core/allocator.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/texture.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/renderer/sampler_library.h"
 
 namespace impeller {
 namespace testing {
@@ -83,6 +86,19 @@ class MockBlitPass : public BlitPass {
               OnGenerateMipmapCommand,
               (std::shared_ptr<Texture> texture, std::string label),
               (override));
+};
+
+class MockRenderPass : public RenderPass {
+ public:
+  MockRenderPass(std::weak_ptr<const Context> context,
+                 const RenderTarget& target)
+      : RenderPass(std::move(context), target) {}
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(bool,
+              OnEncodeCommands,
+              (const Context& context),
+              (const, override));
+  MOCK_METHOD(void, OnSetLabel, (std::string label), (override));
 };
 
 class MockCommandBuffer : public CommandBuffer {
@@ -162,6 +178,38 @@ class MockTexture : public Texture {
               OnSetContents,
               (std::shared_ptr<const fml::Mapping> mapping, size_t slice),
               (override));
+};
+
+class MockCapabilities : public Capabilities {
+ public:
+  MOCK_METHOD(bool, SupportsOffscreenMSAA, (), (const, override));
+  MOCK_METHOD(bool, SupportsImplicitResolvingMSAA, (), (const, override));
+  MOCK_METHOD(bool, SupportsSSBO, (), (const, override));
+  MOCK_METHOD(bool, SupportsBufferToTextureBlits, (), (const, override));
+  MOCK_METHOD(bool, SupportsTextureToTextureBlits, (), (const, override));
+  MOCK_METHOD(bool, SupportsFramebufferFetch, (), (const, override));
+  MOCK_METHOD(bool, SupportsCompute, (), (const, override));
+  MOCK_METHOD(bool, SupportsComputeSubgroups, (), (const, override));
+  MOCK_METHOD(bool, SupportsReadFromResolve, (), (const, override));
+  MOCK_METHOD(bool, SupportsDecalSamplerAddressMode, (), (const, override));
+  MOCK_METHOD(bool, SupportsDeviceTransientTextures, (), (const, override));
+  MOCK_METHOD(PixelFormat, GetDefaultColorFormat, (), (const, override));
+  MOCK_METHOD(PixelFormat, GetDefaultStencilFormat, (), (const, override));
+  MOCK_METHOD(PixelFormat, GetDefaultDepthStencilFormat, (), (const, override));
+};
+
+class MockSamplerLibrary : public SamplerLibrary {
+ public:
+  MOCK_METHOD(std::shared_ptr<const Sampler>,
+              GetSampler,
+              (SamplerDescriptor descriptor),
+              (override));
+};
+
+class MockSampler : public Sampler {
+ public:
+  explicit MockSampler(const SamplerDescriptor& desc) : Sampler(desc) {}
+  MOCK_METHOD(bool, IsValid, (), (const, override));
 };
 
 }  // namespace testing
