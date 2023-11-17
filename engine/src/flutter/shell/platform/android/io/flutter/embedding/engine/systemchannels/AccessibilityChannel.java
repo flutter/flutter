@@ -2,6 +2,7 @@ package io.flutter.embedding.engine.systemchannels;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -99,6 +100,13 @@ public class AccessibilityChannel {
         new BasicMessageChannel<>(
             dartExecutor, "flutter/accessibility", StandardMessageCodec.INSTANCE);
     channel.setMessageHandler(parsingMessageHandler);
+    this.flutterJNI = flutterJNI;
+  }
+
+  @VisibleForTesting
+  public AccessibilityChannel(
+      @NonNull BasicMessageChannel<Object> channel, @NonNull FlutterJNI flutterJNI) {
+    this.channel = channel;
     this.flutterJNI = flutterJNI;
   }
 
