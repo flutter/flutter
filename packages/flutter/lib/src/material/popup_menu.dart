@@ -816,7 +816,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.constraints,
     required this.clipBehavior,
     super.settings,
-    this.popUpAnimationStyle,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
@@ -835,22 +834,18 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final CapturedThemes capturedThemes;
   final BoxConstraints? constraints;
   final Clip clipBehavior;
-  final AnimationStyle? popUpAnimationStyle;
 
   @override
   Animation<double> createAnimation() {
-    if (popUpAnimationStyle != AnimationStyle.noAnimation) {
-      return CurvedAnimation(
-        parent: super.createAnimation(),
-        curve: popUpAnimationStyle?.curve ?? Curves.linear,
-        reverseCurve: popUpAnimationStyle?.reverseCurve ?? const Interval(0.0, _kMenuCloseIntervalEnd),
-      );
-    }
-    return super.createAnimation();
+    return CurvedAnimation(
+      parent: super.createAnimation(),
+      curve: Curves.linear,
+      reverseCurve: const Interval(0.0, _kMenuCloseIntervalEnd),
+    );
   }
 
   @override
-  Duration get transitionDuration => popUpAnimationStyle?.duration ?? _kMenuDuration;
+  Duration get transitionDuration => _kMenuDuration;
 
   @override
   bool get barrierDismissible => true;
@@ -982,7 +977,6 @@ Future<T?> showMenu<T>({
   BoxConstraints? constraints,
   Clip clipBehavior = Clip.none,
   RouteSettings? routeSettings,
-  AnimationStyle? popUpAnimationStyle,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1014,7 +1008,6 @@ Future<T?> showMenu<T>({
     constraints: constraints,
     clipBehavior: clipBehavior,
     settings: routeSettings,
-    popUpAnimationStyle: popUpAnimationStyle,
   ));
 }
 
@@ -1102,13 +1095,6 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// ** See code in examples/api/lib/material/popup_menu/popup_menu.1.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad}
-/// This sample showcases how to override the [PopupMenuButton] animation
-/// curves and duration using [AnimationStyle].
-///
-/// ** See code in examples/api/lib/material/popup_menu/popup_menu.2.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.
@@ -1143,7 +1129,6 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.position,
     this.clipBehavior = Clip.none,
     this.useRootNavigator = false,
-    this.popUpAnimationStyle,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1314,24 +1299,6 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Defaults to false.
   final bool useRootNavigator;
 
-  /// Used to override the default animation curves and durations of the popup
-  /// menu's open and close transitions.
-  ///
-  /// If [AnimationStyle.curve] is provided, it will be used to override
-  /// the default popup animation curve. Otherwise, defaults to [Curves.linear].
-  ///
-  /// If [AnimationStyle.reverseCurve] is provided, it will be used to
-  /// override the default popup animation reverse curve. Otherwise, defaults to
-  /// `Interval(0.0, 2.0 / 3.0)`.
-  ///
-  /// If [AnimationStyle.duration] is provided, it will be used to override
-  /// the default popup animation duration. Otherwise, defaults to 300ms.
-  ///
-  /// To disable the theme animation, use [AnimationStyle.noAnimation].
-  ///
-  /// If this is null, then the default animation will be used.
-  final AnimationStyle? popUpAnimationStyle;
-
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1389,7 +1356,6 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         constraints: widget.constraints,
         clipBehavior: widget.clipBehavior,
         useRootNavigator: widget.useRootNavigator,
-        popUpAnimationStyle: widget.popUpAnimationStyle,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
