@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@JS()
-library window;
-
 import 'dart:async';
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -16,7 +12,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
 import 'display.dart';
 import 'dom.dart';
-import 'embedder.dart';
 import 'mouse/context_menu.dart';
 import 'mouse/cursor.dart';
 import 'navigation/history.dart';
@@ -59,7 +54,12 @@ base class EngineFlutterView implements ui.FlutterView {
     // by the public `EngineFlutterView` constructor).
     DomElement? hostElement,
   )   : embeddingStrategy = EmbeddingStrategy.create(hostElement: hostElement),
-        _dimensionsProvider = DimensionsProvider.create(hostElement: hostElement);
+        _dimensionsProvider = DimensionsProvider.create(hostElement: hostElement) {
+    platformDispatcher.registerView(this);
+    // The embeddingStrategy will take care of cleaning up the rootElement on
+    // hot restart.
+    embeddingStrategy.attachGlassPane(dom.rootElement);
+  }
 
   @override
   final int viewId;
@@ -87,8 +87,7 @@ base class EngineFlutterView implements ui.FlutterView {
 
   late final ContextMenu contextMenu = ContextMenu(dom.rootElement);
 
-  late final DomManager dom =
-      DomManager.fromFlutterViewEmbedderDEPRECATED(flutterViewEmbedder);
+  late final DomManager dom = DomManager(devicePixelRatio: devicePixelRatio);
 
   late final PlatformViewMessageHandler platformViewMessageHandler =
       PlatformViewMessageHandler(platformViewsContainer: dom.platformViewsHost);
@@ -168,7 +167,6 @@ final class _EngineFlutterViewImpl extends EngineFlutterView {
     super.platformDispatcher,
     super.hostElement,
   ) : super._() {
-    platformDispatcher.registerView(this);
     registerHotRestartListener(() {
       // TODO(harryterkelsen): What should we do about this in multi-view?
       renderer.clearFragmentProgramCache();
@@ -184,7 +182,6 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
     super.platformDispatcher,
     super.hostElement,
   ) : super._() {
-    platformDispatcher.registerView(this);
     if (ui_web.isCustomUrlStrategySet) {
       _browserHistory = createHistoryForExistingState(ui_web.urlStrategy);
     }
