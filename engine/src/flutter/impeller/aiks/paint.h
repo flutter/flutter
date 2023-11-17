@@ -6,16 +6,12 @@
 
 #include <memory>
 
-#include "flutter/fml/macros.h"
 #include "impeller/aiks/color_filter.h"
 #include "impeller/aiks/color_source.h"
 #include "impeller/aiks/image_filter.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
-#include "impeller/entity/contents/linear_gradient_contents.h"
-#include "impeller/entity/contents/radial_gradient_contents.h"
-#include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
@@ -92,7 +88,7 @@ struct Paint {
                                                     bool cover = false) const;
 
   std::shared_ptr<Contents> CreateContentsForGeometry(
-      std::shared_ptr<Geometry> geometry) const;
+      const std::shared_ptr<Geometry>& geometry) const;
 
   /// @brief   Whether this paint has a color filter that can apply opacity
   bool HasColorFilter() const;

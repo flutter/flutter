@@ -329,7 +329,7 @@ void Canvas::ClipRect(const Rect& rect, Entity::ClipOperation clip_op) {
     return;  // This clip will do nothing, so skip it.
   }
 
-  ClipGeometry(std::move(geometry), clip_op);
+  ClipGeometry(geometry, clip_op);
   switch (clip_op) {
     case Entity::ClipOperation::kIntersect:
       IntersectCulling(rect);
@@ -365,7 +365,7 @@ void Canvas::ClipRRect(const Rect& rect,
     return;  // This clip will do nothing, so skip it.
   }
 
-  ClipGeometry(std::move(geometry), clip_op);
+  ClipGeometry(geometry, clip_op);
   switch (clip_op) {
     case Entity::ClipOperation::kIntersect:
       IntersectCulling(rect);
@@ -390,10 +390,10 @@ void Canvas::ClipRRect(const Rect& rect,
   }
 }
 
-void Canvas::ClipGeometry(std::unique_ptr<Geometry> geometry,
+void Canvas::ClipGeometry(const std::shared_ptr<Geometry>& geometry,
                           Entity::ClipOperation clip_op) {
   auto contents = std::make_shared<ClipContents>();
-  contents->SetGeometry(std::move(geometry));
+  contents->SetGeometry(geometry);
   contents->SetClipOperation(clip_op);
 
   Entity entity;
