@@ -37,8 +37,8 @@ static constexpr SkRect kEmptyRect = SkRect::MakeEmpty();
 class MockCanvas final : public DlCanvas {
  public:
   enum ClipEdgeStyle {
-    kHard_ClipEdgeStyle,
-    kSoft_ClipEdgeStyle,
+    kHardClipEdgeStyle,
+    kSoftClipEdgeStyle,
   };
 
   struct SaveData {
