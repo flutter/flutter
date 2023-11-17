@@ -2091,6 +2091,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('textInsideRange', range.textInside(fullText)));
     properties.add(DiagnosticsProperty<TextRange>('range', range));
-    properties.add(DiagnosticsProperty<TextRange>('fullText', fullText));
+    properties.add(DiagnosticsProperty<String>('fullText', fullText));
   }
 }
