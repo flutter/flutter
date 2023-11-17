@@ -212,55 +212,66 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('Outer scrollable always scrolls first with BouncingScrollPhysics; fix for (#136199)', (WidgetTester tester) async {
-    final Key inner = UniqueKey();
-    final Key outer = UniqueKey();
+  testWidgets('NestedScrollView always scrolls outer scrollable first, (double precision errors, #136199)', (WidgetTester tester) async {
+    final Key innerKey = UniqueKey();
+    final Key outerKey = UniqueKey();
+
+    final ScrollController outerController = ScrollController();
 
     Widget build() {
-      return Scaffold(
-        body: NestedScrollView(
-          key: outer,
-          physics: const BouncingScrollPhysics(),
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
-            SliverToBoxAdapter(
-              child: Container(color: Colors.green, height: 300),
-            ),
-            SliverOverlapAbsorber(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              sliver: SliverToBoxAdapter(
-                child: Container(
-                  color: Colors.blue,
-                  height: 64,
-                ),
-              ),
-            ),
-          ],
-          body: SingleChildScrollView(
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          body: NestedScrollView(
+            key: outerKey,
+            controller: outerController,
             physics: const BouncingScrollPhysics(),
-            child: Container(
-              key: inner,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <ui.Color>[Colors.black, Colors.blue],
-                  stops: <double>[0, 1],
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+              SliverToBoxAdapter(
+                child: Container(color: Colors.green, height: 300),
+              ),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.blue,
+                    height: 64,
+                  ),
                 ),
               ),
-              height: 800,
+            ],
+            body: SingleChildScrollView(
+              key: innerKey,
+              physics: const BouncingScrollPhysics(),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <ui.Color>[Colors.black, Colors.blue],
+                    stops: <double>[0, 1],
+                  ),
+                ),
+                height: 800,
+              ),
             ),
           ),
         ),
       );
     }
 
-    // Build the widget.
     await tester.pumpWidget(build());
 
-    // TODO Write the actual test (fling inner scrollable, outer scrollable should not move)
+    outerController.addListener(() {
+      assert(false); // We do not want this to be called.
+    });
+
+    await tester.drag(find.byKey(innerKey), const Offset(0, 2000)); // Over-scroll the inner Scrollable to the bottom
+    await tester.fling(find.byKey(innerKey), const Offset(0, -600), 2000); // Fling the inner Scrollable to the top
+    await tester.pumpAndSettle();
   });
 
-  testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
