@@ -43,7 +43,7 @@ class VulkanBackbuffer {
   VulkanCommandBuffer& GetRenderCommandBuffer();
 
  private:
-  const VulkanProcTable& vk;
+  const VulkanProcTable& vk_;
   const VulkanHandle<VkDevice>& device_;
   std::array<VulkanHandle<VkSemaphore>, 2> semaphores_;
   std::array<VulkanHandle<VkFence>, 2> use_fences_;

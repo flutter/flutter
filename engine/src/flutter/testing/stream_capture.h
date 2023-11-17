@@ -21,7 +21,7 @@ namespace testing {
 class StreamCapture {
  public:
   // Begins capturing output to the specified stream.
-  StreamCapture(std::ostream* ostream);
+  explicit StreamCapture(std::ostream* ostream);
 
   // Stops capturing output to the specified stream, and restores the original
   // output buffer, if |Stop| has not already been called.

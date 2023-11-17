@@ -41,7 +41,7 @@ class VulkanCommandBuffer {
       const VkImageMemoryBarrier* image_memory_barriers) const;
 
  private:
-  const VulkanProcTable& vk;
+  const VulkanProcTable& vk_;
   const VulkanHandle<VkDevice>& device_;
   const VulkanHandle<VkCommandPool>& pool_;
   VulkanHandle<VkCommandBuffer> handle_;

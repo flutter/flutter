@@ -76,7 +76,7 @@ class VulkanDevice {
   [[nodiscard]] bool WaitIdle() const;
 
  private:
-  VulkanProcTable& vk;
+  VulkanProcTable& vk_;
   VulkanHandle<VkPhysicalDevice> physical_device_;
   VulkanHandle<VkDevice> device_;
   VulkanHandle<VkQueue> queue_;
