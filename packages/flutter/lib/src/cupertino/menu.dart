@@ -564,7 +564,7 @@ Future<T?> showCupertinoMenu<T>({
         Animation<double> secondaryAnimation,
       ) {
 
-        if(menuAlignment == null){
+        if (menuAlignment == null) {
           final Offset anchorCenter = Offset(
             anchorPosition.left + anchorSize.width / 2,
             anchorPosition.top + anchorSize.height / 2,
@@ -2179,7 +2179,7 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
     // The top layer is allowed to be more than 100% visible to allow for
     // overshoot.
     double visibleFraction = 1.0;
-    if(layers.length - 1 == index){
+    if (layers.length - 1 == index) {
       visibleFraction = ui.clampDouble(nestingAnimation.value - index + 1, 0, 1.1);
     }
 
@@ -2761,7 +2761,7 @@ class _CupertinoNestedMenuState<T>
       _menuController._attach(this);
     }
 
-    if(oldWidget.itemBuilder != widget.itemBuilder) {
+    if (oldWidget.itemBuilder != widget.itemBuilder) {
       // TODO(davidhicks980): Find faster way to rebuild a nested menu layer.
       //
       // Because each menu layer is built in a separate frame, there is a
@@ -3271,7 +3271,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   @override
   void initState() {
     super.initState();
-    if(widget.anchorBorderRadius != null) {
+    if (widget.anchorBorderRadius != null) {
       _borderRadiusTween.begin =  widget.anchorBorderRadius;
     }
   }
@@ -3345,7 +3345,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   }
 
   Animation<double> _buildSurfaceAnimation() {
-    if(widget.depth == 0){
+    if (widget.depth == 0) {
       return _routeAnimation!;
     } else {
       return _AnimationProduct(
@@ -3806,7 +3806,7 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
     if (childSize != Size.zero) {
       SchedulerBinding.instance.addPostFrameCallback(
         (Duration timeStamp) {
-          if(mounted) {
+          if (mounted) {
             _height = (childSize.height + _headerOffset).roundToDouble();
             // Report the height of the menu to the parent layer. See
             // _UnsafeSizeChangedLayoutNotifier for more information.
@@ -3903,7 +3903,7 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
     _isTopLayer = depth == _topLayer;
 
     Widget? stickyHeader;
-    switch(widget.children.first){
+    switch (widget.children.first) {
       case _MenuCoordinateScope(:final CupertinoStickyMenuHeader child):
         _headerOffset = child.getScaledHeight(MediaQuery.textScalerOf(context));
         stickyHeader =
