@@ -501,13 +501,14 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// Outputs app link related settings into a json file.
   ///
-  /// The file is stored in
-  /// `<project>/build/app/app-link-settings-<variant>.json`.
-  Future<void> outputsAppLinkSettings({required String variant}) async {
+  /// The return future resolves to the path of the json file.
+  ///
+  /// The future resolves to null if it fails to retrieve app link settings.
+  Future<String> outputsAppLinkSettings({required String variant}) async {
     if (!existsSync() || androidBuilder == null) {
-      return;
+      throwToolExit('Target directory $hostAppGradleRoot is not an Android project');
     }
-    await androidBuilder!.outputsAppLinkSettings(variant, project: parent);
+    return androidBuilder!.outputsAppLinkSettings(variant, project: parent);
   }
 
   bool _computeSupportedVersion() {
