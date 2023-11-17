@@ -69,6 +69,7 @@ class _EditableWebState extends State<EditableWeb> {
   double sizedBoxHeight = 24;
   late final int _maxLines;
   TextEditingValue? lastEditingState;
+  bool get _isMultiline => widget.maxLines != 1;
 
   @override
   void initState() {
@@ -181,7 +182,8 @@ class _EditableWebState extends State<EditableWeb> {
         autocapitalize = 'off';
         break;
     }
-    (inputEl as html.InputElement).autocapitalize = autocapitalize;
+    inputEl.setAttribute('autocapitalize', autocapitalize);
+    // inputEl.autocapitalize = autocapitalize;
   }
 
   /// NOTE: Taken from engine.
@@ -418,6 +420,7 @@ class _EditableWebState extends State<EditableWeb> {
       ..border = 'none'
       ..background = 'transparent'
       ..padding = '0'
+      ..overflow = 'hidden'
       ..textAlign = textAlignToCssValue(widget.textAlign, widget.textDirection)
       // ..pointerEvents = widget.rendererIgnoresPointer ? 'none' : 'auto' // Can't use this, material3 text field sets this to none
       ..direction = widget.textDirection.name
@@ -455,22 +458,44 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   // TODO: Handle composition and delta model?
+  // TODO: Clean up type stuff
   void handleChange(html.Event event) {
-    final html.InputElement element = _inputEl as html.InputElement;
-    final String text = element.value!;
-    final TextSelection selection = TextSelection(
-        baseOffset: element.selectionStart ?? 0,
-        extentOffset: element.selectionEnd ?? 0);
+    if (isTextArea(_inputEl)) {
+      final html.TextAreaElement element = _inputEl as html.TextAreaElement;
+      final String text = element.value!;
+      final TextSelection selection = TextSelection(
+          baseOffset: element.selectionStart ?? 0,
+          extentOffset: element.selectionEnd ?? 0);
 
-    print('handle change value ${text}');
-    print('handle change selection ${element.selectionStart} - ${element.selectionEnd}');
-    final TextEditingValue newEditingState =
-        TextEditingValue(text: text, selection: selection);
+      print('handle change value ${text}');
+      print(
+          'handle change selection ${element.selectionStart} - ${element.selectionEnd}');
+      final TextEditingValue newEditingState =
+          TextEditingValue(text: text, selection: selection);
 
-    if (newEditingState != lastEditingState) {
-      lastEditingState = newEditingState;
-      print('updateEditingState');
-      updateEditingState(newEditingState);
+      if (newEditingState != lastEditingState) {
+        lastEditingState = newEditingState;
+        print('updateEditingState');
+        updateEditingState(newEditingState);
+      }
+    } else if(isInput(_inputEl)) {
+      final html.InputElement element = _inputEl as html.InputElement;
+      final String text = element.value!;
+      final TextSelection selection = TextSelection(
+          baseOffset: element.selectionStart ?? 0,
+          extentOffset: element.selectionEnd ?? 0);
+
+      print('handle change value ${text}');
+      print(
+          'handle change selection ${element.selectionStart} - ${element.selectionEnd}');
+      final TextEditingValue newEditingState =
+          TextEditingValue(text: text, selection: selection);
+
+      if (newEditingState != lastEditingState) {
+        lastEditingState = newEditingState;
+        print('updateEditingState');
+        updateEditingState(newEditingState);
+      }
     }
   }
 
@@ -562,8 +587,10 @@ class _EditableWebState extends State<EditableWeb> {
   void setTextAreaElementAttributes(html.TextAreaElement textAreaEl) {
     textAreaEl.rows = _maxLines;
     textAreaEl.readOnly = widget.textInputConfiguration.readOnly;
+    textAreaEl.style.overflow = 'hidden';
     _textAreaElement = textAreaEl;
   }
+
   // TODO add a submit type input to each autofill group
   void setupAutofill(html.HtmlElement inputEl) {
     // No autofill group, nothing to setup
@@ -614,7 +641,7 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   void initializePlatformView(html.HtmlElement inputEl) {
-    _maxLines > 1
+    _isMultiline
         ? setTextAreaElementAttributes(inputEl as html.TextAreaElement)
         : setInputElementAttributes(inputEl as html.InputElement);
     setElementStyles(inputEl);
@@ -698,7 +725,7 @@ class _EditableWebState extends State<EditableWeb> {
 
   static Map<String, _EditableWebState>? formOwners = {};
 
-  // single EditableWeb that is a form owner for both cases.  
+  // single EditableWeb that is a form owner for both cases.
   @override
   Widget build(BuildContext context) {
     // final String autofillScopeId = widget.currentAutofillScope?.id ?? _defaultId;
@@ -721,7 +748,7 @@ class _EditableWebState extends State<EditableWeb> {
     return SizedBox(
       height: sizedBoxHeight,
       child: HtmlElementView.fromTagName(
-        tagName: _maxLines > 1 ? 'textarea' : 'input',
+        tagName: _isMultiline ? 'textarea' : 'input',
         onElementCreated: (Object element) {
           initializePlatformView(element as html.HtmlElement);
         },
@@ -778,7 +805,7 @@ class WebTextInputControl with TextInputControl {
   @override
   void detach(TextInputClient client) {
     // Blur here since order goes detach -> hide.
-    (_currentInputElement! as html.InputElement).blur();
+    _currentInputElement!.blur();
 
     // Remove selectionchange listener.
     html.document.removeEventListener('selectionchange', handleChangeRef);
@@ -796,8 +823,6 @@ class WebTextInputControl with TextInputControl {
   @override
   void setEditingState(TextEditingValue value) {
     print('setEditingState ${value}');
-    final html.InputElement element =
-        _currentInputElement! as html.InputElement;
     final int minOffset =
         math.min(value.selection.baseOffset, value.selection.extentOffset);
     final int maxOffset =
@@ -821,15 +846,26 @@ class WebTextInputControl with TextInputControl {
       ),
     );
 
-    element.value = value.text;
-    element.setSelectionRange(minOffset, maxOffset);
+    if(isInput(_currentInputElement!)){
+      final html.InputElement element = _currentInputElement! as html.InputElement;
+
+      element.value = value.text;
+      element.setSelectionRange(minOffset, maxOffset);
+    } else if (isTextArea(_currentInputElement!)) {
+      final html.TextAreaElement element = _currentInputElement! as html.TextAreaElement;
+
+      element.value = value.text;
+      element.setSelectionRange(minOffset, maxOffset);
+    }
+
+    
 
     _currentEditableWebInstance!.lastEditingState = lastEditingState;
   }
 
   @override
   void show() {
-    (_currentInputElement! as html.InputElement).focus();
+    _currentInputElement!.focus();
   }
 
   @override
@@ -839,7 +875,7 @@ class WebTextInputControl with TextInputControl {
     // This blur call is for instances where we blur to hide keyboard without
     // detaching the connection (if such a circumstance exists).
     if (_currentInputElement != null) {
-      (_currentInputElement! as html.InputElement).blur();
+      _currentInputElement!.blur();
     }
   }
 
@@ -872,4 +908,12 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void finishAutofillContext({bool shouldSave = true}) {}
+}
+
+bool isInput(html.HtmlElement el) {
+  return el.tagName.toUpperCase() == 'INPUT';
+}
+
+bool isTextArea(html.HtmlElement el) {
+  return el.tagName.toUpperCase() == 'TEXTAREA';
 }
