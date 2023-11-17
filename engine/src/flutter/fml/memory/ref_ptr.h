@@ -108,6 +108,7 @@ class RefPtr final {
   // Destructor.
   ~RefPtr() {
     if (ptr_) {
+      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDelete)
       ptr_->Release();
     }
   }

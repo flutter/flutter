@@ -9,6 +9,8 @@
 #import <objc/runtime.h>
 
 #include <stdlib.h>
+
+#include <utility>
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_counted.h"
@@ -73,7 +75,7 @@ class WeakNSObjectFactory;
 // receives nullify() from the object's sentinel.
 class WeakContainer : public fml::RefCountedThreadSafe<WeakContainer> {
  public:
-  explicit WeakContainer(id object, debug::DebugThreadChecker checker);
+  explicit WeakContainer(id object, const debug::DebugThreadChecker& checker);
 
   id object() {
     CheckThreadSafety();
@@ -154,6 +156,8 @@ class WeakNSProtocol {
     return get() != that;
   }
 
+  // This appears to be intentional to allow truthiness?
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator NST() const {
     CheckThreadSafety();
     return get();
@@ -162,8 +166,9 @@ class WeakNSProtocol {
  protected:
   friend class WeakNSObjectFactory<NST>;
 
-  explicit WeakNSProtocol(RefPtr<fml::WeakContainer> container, debug::DebugThreadChecker checker)
-      : container_(container), checker_(checker) {}
+  explicit WeakNSProtocol(RefPtr<fml::WeakContainer> container,
+                          const debug::DebugThreadChecker& checker)
+      : container_(std::move(container)), checker_(checker) {}
 
   // Refecounted reference to the container tracking the ObjectiveC object this
   // class encapsulates.
@@ -217,7 +222,8 @@ class WeakNSObject<id> : public WeakNSProtocol<id> {
  private:
   friend class WeakNSObjectFactory<id>;
 
-  explicit WeakNSObject(RefPtr<fml::WeakContainer> container, debug::DebugThreadChecker checker)
+  explicit WeakNSObject(const RefPtr<fml::WeakContainer>& container,
+                        const debug::DebugThreadChecker& checker)
       : WeakNSProtocol<id>(container, checker) {}
 };
 
