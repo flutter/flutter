@@ -264,7 +264,7 @@ class RasterCache {
   RasterCacheMetrics layer_metrics_;
   RasterCacheMetrics picture_metrics_;
   mutable RasterCacheKey::Map<Entry> cache_;
-  bool checkerboard_images_;
+  bool checkerboard_images_ = false;
 
   void TraceStatsToTimeline() const;
 

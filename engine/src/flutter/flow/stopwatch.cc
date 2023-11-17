@@ -9,9 +9,7 @@ namespace flutter {
 static const size_t kMaxSamples = 120;
 
 Stopwatch::Stopwatch(const RefreshRateUpdater& updater)
-    : refresh_rate_updater_(updater),
-      start_(fml::TimePoint::Now()),
-      current_sample_(0) {
+    : refresh_rate_updater_(updater), start_(fml::TimePoint::Now()) {
   const fml::TimeDelta delta = fml::TimeDelta::Zero();
   laps_.resize(kMaxSamples, delta);
 }

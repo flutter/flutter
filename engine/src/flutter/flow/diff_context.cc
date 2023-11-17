@@ -47,13 +47,7 @@ void DiffContext::EndSubtree() {
   state_stack_.pop_back();
 }
 
-DiffContext::State::State()
-    : dirty(false),
-      rect_index(0),
-      integral_transform(false),
-      clip_tracker_save_count(0),
-      has_filter_bounds_adjustment(false),
-      has_texture(false) {}
+DiffContext::State::State() {}
 
 void DiffContext::PushTransform(const SkMatrix& transform) {
   clip_tracker_.transform(transform);
