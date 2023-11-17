@@ -15,8 +15,7 @@ namespace flutter {
 OpacityLayer::OpacityLayer(SkAlpha alpha, const SkPoint& offset)
     : CacheableContainerLayer(std::numeric_limits<int>::max(), true),
       alpha_(alpha),
-      offset_(offset),
-      children_can_accept_opacity_(false) {}
+      offset_(offset) {}
 
 void OpacityLayer::Diff(DiffContext* context, const Layer* old_layer) {
   DiffContext::AutoSubtreeRestore subtree(context);

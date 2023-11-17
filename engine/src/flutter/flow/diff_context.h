@@ -208,9 +208,9 @@ class DiffContext {
   struct State {
     State();
 
-    bool dirty;
+    bool dirty = false;
 
-    size_t rect_index;
+    size_t rect_index = 0;
 
     // In order to replicate paint process closely, DiffContext needs to take
     // into account that some layers are painted with transform translation
@@ -221,17 +221,17 @@ class DiffContext {
     // during paint. This means the integral coordinates must be applied after
     // culling before painting the layer content (either the layer itself, or
     // when starting subtree to paint layer children).
-    bool integral_transform;
+    bool integral_transform = false;
 
     // Used to restoring clip tracker when popping state.
-    int clip_tracker_save_count;
+    int clip_tracker_save_count = 0;
 
     // Whether this subtree has filter bounds adjustment function. If so,
     // it will need to be removed from stack when subtree is closed.
-    bool has_filter_bounds_adjustment;
+    bool has_filter_bounds_adjustment = false;
 
     // Whether there is a texture layer in this subtree.
-    bool has_texture;
+    bool has_texture = false;
   };
 
   void MakeCurrentTransformIntegral();

@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/flow/raster_cache_key.h"
@@ -31,7 +32,7 @@ class RasterCacheItem {
   explicit RasterCacheItem(RasterCacheKeyID key_id,
                            CacheState cache_state = CacheState::kNone,
                            unsigned child_entries = 0)
-      : key_id_(key_id),
+      : key_id_(std::move(key_id)),
         cache_state_(cache_state),
         child_items_(child_entries) {}
 

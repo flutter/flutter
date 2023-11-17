@@ -71,8 +71,7 @@ void RasterCacheResult::draw(DlCanvas& canvas,
 RasterCache::RasterCache(size_t access_threshold,
                          size_t display_list_cache_limit_per_frame)
     : access_threshold_(access_threshold),
-      display_list_cache_limit_per_frame_(display_list_cache_limit_per_frame),
-      checkerboard_images_(false) {}
+      display_list_cache_limit_per_frame_(display_list_cache_limit_per_frame) {}
 
 /// @note Procedure doesn't copy all closures.
 std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
