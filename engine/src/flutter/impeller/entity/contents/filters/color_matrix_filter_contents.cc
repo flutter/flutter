@@ -78,7 +78,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                     entity.GetTransformation() * input_snapshot->transform *
+                     entity.GetTransform() * input_snapshot->transform *
                      Matrix::MakeScale(Vector2(size));
     frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
@@ -109,7 +109,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
 
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
-    return coverage.TransformBounds(entity.GetTransformation());
+    return coverage.TransformBounds(entity.GetTransform());
   };
 
   auto contents = AnonymousContents::Make(render_proc, coverage_proc);

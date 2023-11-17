@@ -80,7 +80,7 @@ TEST_P(GaussianBlurFilterContentsTest, CoverageWithTexture) {
           desc);
   FilterInput::Vector inputs = {FilterInput::Make(texture)};
   Entity entity;
-  entity.SetTransformation(Matrix::MakeTranslation({100, 100, 0}));
+  entity.SetTransform(Matrix::MakeTranslation({100, 100, 0}));
   std::optional<Rect> coverage =
       contents.GetFilterCoverage(inputs, entity, /*effect_transform=*/Matrix());
   ASSERT_EQ(coverage, Rect::MakeLTRB(99, 99, 201, 201));
@@ -98,7 +98,7 @@ TEST_P(GaussianBlurFilterContentsTest, CoverageWithEffectTransform) {
           desc);
   FilterInput::Vector inputs = {FilterInput::Make(texture)};
   Entity entity;
-  entity.SetTransformation(Matrix::MakeTranslation({100, 100, 0}));
+  entity.SetTransform(Matrix::MakeTranslation({100, 100, 0}));
   std::optional<Rect> coverage = contents.GetFilterCoverage(
       inputs, entity, /*effect_transform=*/Matrix::MakeScale({2.0, 2.0, 1.0}));
   ASSERT_EQ(coverage, Rect::MakeLTRB(100 - 2, 100 - 2, 200 + 2, 200 + 2));
@@ -159,7 +159,7 @@ TEST_P(GaussianBlurFilterContentsTest,
   std::shared_ptr<ContentContext> renderer = GetContentContext();
 
   Entity entity;
-  entity.SetTransformation(Matrix::MakeTranslation({100, 200, 0}));
+  entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
   std::optional<Entity> result =
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
@@ -196,8 +196,8 @@ TEST_P(GaussianBlurFilterContentsTest,
   std::shared_ptr<ContentContext> renderer = GetContentContext();
 
   Entity entity;
-  entity.SetTransformation(Matrix::MakeTranslation({400, 100, 0}) *
-                           Matrix::MakeRotationZ(Degrees(90.0)));
+  entity.SetTransform(Matrix::MakeTranslation({400, 100, 0}) *
+                      Matrix::MakeRotationZ(Degrees(90.0)));
   std::optional<Entity> result =
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());

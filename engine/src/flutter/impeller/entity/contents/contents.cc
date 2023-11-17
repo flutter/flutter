@@ -87,9 +87,9 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
                                               RenderPass& pass) -> bool {
         Entity sub_entity;
         sub_entity.SetBlendMode(BlendMode::kSourceOver);
-        sub_entity.SetTransformation(
+        sub_entity.SetTransform(
             Matrix::MakeTranslation(Vector3(-coverage->origin)) *
-            entity.GetTransformation());
+            entity.GetTransform());
         return contents.Render(renderer, sub_entity, pass);
       },
       msaa_enabled);

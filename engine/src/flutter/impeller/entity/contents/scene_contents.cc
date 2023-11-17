@@ -98,7 +98,7 @@ bool SceneContents::Render(const ContentContext& renderer,
   contents.SetGeometry(GetGeometry());
   contents.SetTexture(subpass_target.GetRenderTargetTexture());
   contents.SetEffectTransform(
-      Matrix::MakeScale(1 / entity.GetTransformation().GetScale()));
+      Matrix::MakeScale(1 / entity.GetTransform().GetScale()));
   return contents.Render(renderer, entity, pass);
 }
 

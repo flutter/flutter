@@ -203,8 +203,7 @@ std::optional<Rect> FilterContents::GetLocalCoverage(
 
 std::optional<Rect> FilterContents::GetCoverage(const Entity& entity) const {
   Entity entity_with_local_transform = entity;
-  entity_with_local_transform.SetTransformation(
-      GetTransform(entity.GetTransformation()));
+  entity_with_local_transform.SetTransform(GetTransform(entity.GetTransform()));
 
   return GetLocalCoverage(entity_with_local_transform);
 }
@@ -271,8 +270,7 @@ std::optional<Entity> FilterContents::GetEntity(
     const Entity& entity,
     const std::optional<Rect>& coverage_hint) const {
   Entity entity_with_local_transform = entity;
-  entity_with_local_transform.SetTransformation(
-      GetTransform(entity.GetTransformation()));
+  entity_with_local_transform.SetTransform(GetTransform(entity.GetTransform()));
 
   auto coverage = GetLocalCoverage(entity_with_local_transform);
   if (!coverage.has_value() || coverage->IsEmpty()) {

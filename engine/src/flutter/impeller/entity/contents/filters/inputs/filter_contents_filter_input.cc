@@ -51,11 +51,11 @@ std::optional<Rect> FilterContentsFilterInput::GetSourceCoverage(
 
 Matrix FilterContentsFilterInput::GetLocalTransform(
     const Entity& entity) const {
-  return filter_->GetLocalTransform(entity.GetTransformation());
+  return filter_->GetLocalTransform(entity.GetTransform());
 }
 
 Matrix FilterContentsFilterInput::GetTransform(const Entity& entity) const {
-  return filter_->GetTransform(entity.GetTransformation());
+  return filter_->GetTransform(entity.GetTransform());
 }
 
 void FilterContentsFilterInput::PopulateGlyphAtlas(

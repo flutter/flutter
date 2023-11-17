@@ -49,7 +49,7 @@ class ColorSourceContents : public Contents {
   //----------------------------------------------------------------------------
   /// @brief  Set the effect transform for this color source.
   ///
-  ///         The effect transform is a transformation matrix that is applied to
+  ///         The effect transform is a transform matrix that is applied to
   ///         the shaded color output and does not impact geometry in any way.
   ///
   ///         For example: With repeat tiling, any gradient or

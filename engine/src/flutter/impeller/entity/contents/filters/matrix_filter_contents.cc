@@ -41,7 +41,7 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
   }
 
   // The filter's matrix needs to be applied within the space defined by the
-  // scene's current transformation matrix (CTM). For example: If the CTM is
+  // scene's current transform matrix (CTM). For example: If the CTM is
   // scaled up, then translations applied by the matrix should be magnified
   // accordingly.
   //
@@ -57,7 +57,7 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
 
   auto transform = rendering_mode_ == Entity::RenderingMode::kSubpass
                        ? effect_transform
-                       : entity.GetTransformation();
+                       : entity.GetTransform();
   snapshot->transform = transform *           //
                         matrix_ *             //
                         transform.Invert() *  //

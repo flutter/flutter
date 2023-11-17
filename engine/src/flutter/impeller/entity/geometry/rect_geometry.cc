@@ -22,7 +22,7 @@ GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
               .index_type = IndexType::kNone,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation(),
+                   entity.GetTransform(),
       .prevent_overdraw = false,
   };
 }

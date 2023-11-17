@@ -170,8 +170,8 @@ class FilterContents : public Contents {
   Matrix GetTransform(const Matrix& parent_transform) const;
 
   /// @brief  Returns true if this filter graph doesn't perform any basis
-  ///         transformations to the filtered content. For example: Rotating,
-  ///         scaling, and skewing are all basis transformations, but
+  ///         transforms to the filtered content. For example: Rotating,
+  ///         scaling, and skewing are all basis transforms, but
   ///         translating is not.
   ///
   ///         This is useful for determining whether a filtered object's space
@@ -191,8 +191,8 @@ class FilterContents : public Contents {
   /// @brief  Marks this filter chain as applying in a subpass scenario.
   ///
   ///         Subpasses render in screenspace, and this setting informs filters
-  ///         that the current transformation matrix of the entity is not stored
-  ///         in the Entity transformation matrix. Instead, the effect transform
+  ///         that the current transform matrix of the entity is not stored
+  ///         in the Entity transform matrix. Instead, the effect transform
   ///         is used in this case.
   virtual void SetRenderingMode(Entity::RenderingMode rendering_mode);
 

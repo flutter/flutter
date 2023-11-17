@@ -19,7 +19,7 @@ TEST(FilterInputTest, CanSetLocalTransformForTexture) {
   auto input =
       FilterInput::Make(texture, Matrix::MakeTranslation({1.0, 0.0, 0.0}));
   Entity e;
-  e.SetTransformation(Matrix::MakeTranslation({0.0, 2.0, 0.0}));
+  e.SetTransform(Matrix::MakeTranslation({0.0, 2.0, 0.0}));
 
   ASSERT_MATRIX_NEAR(input->GetLocalTransform(e),
                      Matrix::MakeTranslation({1.0, 0.0, 0.0}));
