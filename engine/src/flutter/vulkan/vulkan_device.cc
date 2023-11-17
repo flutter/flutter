@@ -32,11 +32,11 @@ static uint32_t FindGraphicsQueueIndex(
 VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
                            VulkanHandle<VkPhysicalDevice> physical_device,
                            bool enable_validation_layers)
-    : vk(p_vk),
+    : vk_(p_vk),
       physical_device_(std::move(physical_device)),
       graphics_queue_index_(std::numeric_limits<uint32_t>::max()),
       valid_(false) {
-  if (!physical_device_ || !vk.AreInstanceProcsSetup()) {
+  if (!physical_device_ || !vk_.AreInstanceProcsSetup()) {
     return;
   }
 
@@ -60,20 +60,20 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 
   const char* extensions[] = {
 #if FML_OS_ANDROID
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #endif
 #if OS_FUCHSIA
-    VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
-    VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
-    VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
-    VK_FUCHSIA_EXTERNAL_MEMORY_EXTENSION_NAME,
-    VK_FUCHSIA_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
-    VK_FUCHSIA_BUFFER_COLLECTION_EXTENSION_NAME,
+      VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+      VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+      VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
+      VK_FUCHSIA_EXTERNAL_MEMORY_EXTENSION_NAME,
+      VK_FUCHSIA_EXTERNAL_SEMAPHORE_EXTENSION_NAME,
+      VK_FUCHSIA_BUFFER_COLLECTION_EXTENSION_NAME,
 #endif
   };
 
   auto enabled_layers =
-      DeviceLayersToEnable(vk, physical_device_, enable_validation_layers);
+      DeviceLayersToEnable(vk_, physical_device_, enable_validation_layers);
 
   const char* layers[enabled_layers.size()];
 
@@ -96,23 +96,23 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 
   VkDevice device = VK_NULL_HANDLE;
 
-  if (VK_CALL_LOG_ERROR(vk.CreateDevice(physical_device_, &create_info, nullptr,
-                                        &device)) != VK_SUCCESS) {
+  if (VK_CALL_LOG_ERROR(vk_.CreateDevice(physical_device_, &create_info,
+                                         nullptr, &device)) != VK_SUCCESS) {
     FML_DLOG(INFO) << "Could not create device.";
     return;
   }
 
   device_ = VulkanHandle<VkDevice>{
-      device, [this](VkDevice device) { vk.DestroyDevice(device, nullptr); }};
+      device, [this](VkDevice device) { vk_.DestroyDevice(device, nullptr); }};
 
-  if (!vk.SetupDeviceProcAddresses(device_)) {
+  if (!vk_.SetupDeviceProcAddresses(device_)) {
     FML_DLOG(INFO) << "Could not set up device proc addresses.";
     return;
   }
 
   VkQueue queue = VK_NULL_HANDLE;
 
-  vk.GetDeviceQueue(device_, graphics_queue_index_, 0, &queue);
+  vk_.GetDeviceQueue(device_, graphics_queue_index_, 0, &queue);
 
   if (queue == VK_NULL_HANDLE) {
     FML_DLOG(INFO) << "Could not get the device queue handle.";
@@ -133,13 +133,13 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
                            VulkanHandle<VkDevice> device,
                            uint32_t queue_family_index,
                            VulkanHandle<VkQueue> queue)
-    : vk(p_vk),
+    : vk_(p_vk),
       physical_device_(std::move(physical_device)),
       device_(std::move(device)),
       queue_(std::move(queue)),
       graphics_queue_index_(queue_family_index),
       valid_(false) {
-  if (!physical_device_ || !vk.AreInstanceProcsSetup()) {
+  if (!physical_device_ || !vk_.AreInstanceProcsSetup()) {
     return;
   }
 
@@ -159,8 +159,8 @@ bool VulkanDevice::InitializeCommandPool() {
   };
 
   VkCommandPool command_pool = VK_NULL_HANDLE;
-  if (VK_CALL_LOG_ERROR(vk.CreateCommandPool(device_, &command_pool_create_info,
-                                             nullptr, &command_pool)) !=
+  if (VK_CALL_LOG_ERROR(vk_.CreateCommandPool(
+          device_, &command_pool_create_info, nullptr, &command_pool)) !=
       VK_SUCCESS) {
     FML_DLOG(INFO) << "Could not create the command pool.";
     return false;
@@ -168,7 +168,7 @@ bool VulkanDevice::InitializeCommandPool() {
 
   command_pool_ = VulkanHandle<VkCommandPool>{
       command_pool, [this](VkCommandPool pool) {
-        vk.DestroyCommandPool(device_, pool, nullptr);
+        vk_.DestroyCommandPool(device_, pool, nullptr);
       }};
 
   return true;
@@ -183,7 +183,7 @@ bool VulkanDevice::IsValid() const {
 }
 
 bool VulkanDevice::WaitIdle() const {
-  return VK_CALL_LOG_ERROR(vk.DeviceWaitIdle(device_)) == VK_SUCCESS;
+  return VK_CALL_LOG_ERROR(vk_.DeviceWaitIdle(device_)) == VK_SUCCESS;
 }
 
 const VulkanHandle<VkDevice>& VulkanDevice::GetHandle() const {
@@ -220,7 +220,7 @@ bool VulkanDevice::GetSurfaceCapabilities(
   }
 
   bool success =
-      VK_CALL_LOG_ERROR(vk.GetPhysicalDeviceSurfaceCapabilitiesKHR(
+      VK_CALL_LOG_ERROR(vk_.GetPhysicalDeviceSurfaceCapabilitiesKHR(
           physical_device_, surface.Handle(), capabilities)) == VK_SUCCESS;
 
   if (!success) {
@@ -254,7 +254,7 @@ bool VulkanDevice::GetPhysicalDeviceFeatures(
   if (features == nullptr || !physical_device_) {
     return false;
   }
-  vk.GetPhysicalDeviceFeatures(physical_device_, features);
+  vk_.GetPhysicalDeviceFeatures(physical_device_, features);
   return true;
 }
 
@@ -289,13 +289,13 @@ std::vector<VkQueueFamilyProperties> VulkanDevice::GetQueueFamilyProperties()
     const {
   uint32_t count = 0;
 
-  vk.GetPhysicalDeviceQueueFamilyProperties(physical_device_, &count, nullptr);
+  vk_.GetPhysicalDeviceQueueFamilyProperties(physical_device_, &count, nullptr);
 
   std::vector<VkQueueFamilyProperties> properties;
   properties.resize(count, {});
 
-  vk.GetPhysicalDeviceQueueFamilyProperties(physical_device_, &count,
-                                            properties.data());
+  vk_.GetPhysicalDeviceQueueFamilyProperties(physical_device_, &count,
+                                             properties.data());
 
   return properties;
 }
@@ -310,7 +310,7 @@ int VulkanDevice::ChooseSurfaceFormat(
   }
 
   uint32_t format_count = 0;
-  if (VK_CALL_LOG_ERROR(vk.GetPhysicalDeviceSurfaceFormatsKHR(
+  if (VK_CALL_LOG_ERROR(vk_.GetPhysicalDeviceSurfaceFormatsKHR(
           physical_device_, surface.Handle(), &format_count, nullptr)) !=
       VK_SUCCESS) {
     return -1;
@@ -323,7 +323,7 @@ int VulkanDevice::ChooseSurfaceFormat(
   std::vector<VkSurfaceFormatKHR> formats;
   formats.resize(format_count);
 
-  if (VK_CALL_LOG_ERROR(vk.GetPhysicalDeviceSurfaceFormatsKHR(
+  if (VK_CALL_LOG_ERROR(vk_.GetPhysicalDeviceSurfaceFormatsKHR(
           physical_device_, surface.Handle(), &format_count, formats.data())) !=
       VK_SUCCESS) {
     return -1;
@@ -388,7 +388,7 @@ bool VulkanDevice::QueueSubmit(
       .pSignalSemaphores = signal_semaphores.data(),
   };
 
-  if (VK_CALL_LOG_ERROR(vk.QueueSubmit(queue_, 1, &submit_info, fence)) !=
+  if (VK_CALL_LOG_ERROR(vk_.QueueSubmit(queue_, 1, &submit_info, fence)) !=
       VK_SUCCESS) {
     return false;
   }

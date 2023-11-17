@@ -24,7 +24,7 @@ class VulkanHandle {
       : handle_(handle), disposer_(disposer) {}
 
   VulkanHandle(VulkanHandle&& other)
-      : handle_(other.handle_), disposer_(other.disposer_) {
+      : handle_(other.handle_), disposer_(std::move(other.disposer_)) {
     other.handle_ = VK_NULL_HANDLE;
     other.disposer_ = nullptr;
   }

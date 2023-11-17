@@ -208,21 +208,21 @@ void MockCanvas::DrawDisplayList(const sk_sp<DisplayList> display_list,
 }
 
 void MockCanvas::ClipRect(const SkRect& rect, ClipOp op, bool is_aa) {
-  ClipEdgeStyle style = is_aa ? kSoft_ClipEdgeStyle : kHard_ClipEdgeStyle;
+  ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipRectData{rect, op, style}});
   tracker_.clipRect(rect, op, is_aa);
 }
 
 void MockCanvas::ClipRRect(const SkRRect& rrect, ClipOp op, bool is_aa) {
-  ClipEdgeStyle style = is_aa ? kSoft_ClipEdgeStyle : kHard_ClipEdgeStyle;
+  ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipRRectData{rrect, op, style}});
   tracker_.clipRRect(rrect, op, is_aa);
 }
 
 void MockCanvas::ClipPath(const SkPath& path, ClipOp op, bool is_aa) {
-  ClipEdgeStyle style = is_aa ? kSoft_ClipEdgeStyle : kHard_ClipEdgeStyle;
+  ClipEdgeStyle style = is_aa ? kSoftClipEdgeStyle : kHardClipEdgeStyle;
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ClipPathData{path, op, style}});
   tracker_.clipPath(path, op, is_aa);
@@ -501,8 +501,8 @@ bool operator==(const MockCanvas::ClipRectData& a,
 
 static std::ostream& operator<<(std::ostream& os,
                                 const MockCanvas::ClipEdgeStyle& style) {
-  return os << (style == MockCanvas::kSoft_ClipEdgeStyle ? "kSoftEdges"
-                                                         : "kHardEdges");
+  return os << (style == MockCanvas::kSoftClipEdgeStyle ? "kSoftEdges"
+                                                        : "kHardEdges");
 }
 
 std::ostream& operator<<(std::ostream& os,
