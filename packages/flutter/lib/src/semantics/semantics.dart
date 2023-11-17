@@ -3281,7 +3281,17 @@ class SemanticsOwner extends ChangeNotifier {
   /// Creates a [SemanticsOwner] that manages zero or more [SemanticsNode] objects.
   SemanticsOwner({
     required this.onSemanticsUpdate,
-  });
+  }){
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/semantics.dart',
+        className: '$SemanticsOwner',
+        object: this,
+      );
+    }
+  }
 
   /// The [onSemanticsUpdate] callback is expected to dispatch [SemanticsUpdate]s
   /// to the [FlutterView] that is associated with this [PipelineOwner] and/or
@@ -3302,6 +3312,9 @@ class SemanticsOwner extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _dirtyNodes.clear();
     _nodes.clear();
     _detachedNodes.clear();

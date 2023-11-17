@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../rendering/rendering_tester.dart';
@@ -965,6 +966,16 @@ void main() {
     expect(config.onTap, same(onTap));
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
+
+  test('SemanticsOwner dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() =>  SemanticsOwner(
+        onSemanticsUpdate: (SemanticsUpdate update) {},
+      ).dispose(), SemanticsOwner),
+      areCreateAndDispose,
+    );
+  });
+
 }
 
 class TestRender extends RenderProxyBox {
