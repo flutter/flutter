@@ -152,6 +152,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// [PlatformDispatcher] unless explicitly overridden for test purposes.
   TestPlatformDispatcher({
     required PlatformDispatcher platformDispatcher,
+    this.renderIntoFlutterView = false,
   }) : _platformDispatcher = platformDispatcher {
     _updateViewsAndDisplays();
     _platformDispatcher.onMetricsChanged = _handleMetricsChanged;
@@ -159,6 +160,15 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   /// The [PlatformDispatcher] that is wrapped by this [TestPlatformDispatcher].
   final PlatformDispatcher _platformDispatcher;
+
+  /// Whether the [views] managed by this platform dispatcher will send frames
+  /// to the engine when [FlutterView.render] is called.
+  ///
+  /// When this [TestPlatformDispatcher] is used in an environment that manually
+  /// drives the frame pipeline (e.g. [AutomatedTestWidgetsFlutterBinding])
+  /// frames shouldn't be sent to the engine as the engine may not be ready
+  /// to process them.
+  final bool renderIntoFlutterView;
 
   @override
   TestFlutterView? get implicitView {
@@ -875,7 +885,9 @@ class TestFlutterView implements FlutterView {
 
   @override
   void render(Scene scene) {
-    _view.render(scene);
+    if (platformDispatcher.renderIntoFlutterView) {
+      _view.render(scene);
+    }
   }
 
   @override
@@ -1636,7 +1648,9 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   void render(Scene scene) {
-    _view.render(scene);
+    if (platformDispatcher.renderIntoFlutterView) {
+      _view.render(scene);
+    }
   }
 
   @Deprecated(

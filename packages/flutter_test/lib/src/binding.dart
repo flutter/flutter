@@ -192,9 +192,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
-    platformDispatcher: PlatformDispatcher.instance,
-  ) {
+  TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
@@ -229,7 +227,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late final TestWindow window;
 
   @override
-  final TestPlatformDispatcher platformDispatcher;
+  TestPlatformDispatcher get platformDispatcher => _platformDispatcher;
+  late final TestPlatformDispatcher _platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+    renderIntoFlutterView: _renderIntoFlutterView,
+  );
+
+  bool get _renderIntoFlutterView => false;
 
   @override
   TestRestorationManager get restorationManager {
@@ -1690,6 +1694,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
     return LiveTestWidgetsFlutterBinding.instance;
   }
+
+  @override
+  bool get _renderIntoFlutterView => true;
 
   @override
   bool get inTest => _inTest;

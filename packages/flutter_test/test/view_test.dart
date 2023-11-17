@@ -243,21 +243,6 @@ void main() {
       expect(initial, matchesSnapshot(reset));
     });
 
-    testWidgets('render is passed through to backing FlutterView', (WidgetTester tester) async {
-      final Scene expectedScene = SceneBuilder().build();
-      final _FakeFlutterView backingView = _FakeFlutterView();
-      final TestFlutterView view = TestFlutterView(
-        view: backingView,
-        platformDispatcher: tester.binding.platformDispatcher,
-        display: _FakeDisplay(),
-      );
-
-      view.render(expectedScene);
-
-      expect(backingView.lastRenderedScene, isNotNull);
-      expect(backingView.lastRenderedScene, expectedScene);
-    });
-
     testWidgets('updateSemantics is passed through to backing FlutterView', (WidgetTester tester) async {
       final SemanticsUpdate expectedUpdate = SemanticsUpdateBuilder().build();
       final _FakeFlutterView backingView = _FakeFlutterView();
@@ -271,6 +256,41 @@ void main() {
 
       expect(backingView.lastSemanticsUpdate, isNotNull);
       expect(backingView.lastSemanticsUpdate, expectedUpdate);
+    });
+
+    testWidgets('does not call render if renderIntoFlutterView is false', (WidgetTester tester) async {
+      final TestPlatformDispatcher nonRenderingDispatcher = TestPlatformDispatcher(
+        platformDispatcher: tester.binding.platformDispatcher,
+        renderIntoFlutterView: false,
+      );
+      final _FakeFlutterView flutterView = _FakeFlutterView();
+      final TestFlutterView testFlutterView = TestFlutterView(
+        view: flutterView,
+        platformDispatcher: nonRenderingDispatcher,
+        display: _FakeDisplay(),
+      );
+
+      expect(flutterView.lastRenderedScene, isNull);
+      final Scene scene = SceneBuilder().build();
+      testFlutterView.render(scene);
+      expect(flutterView.lastRenderedScene, isNull);
+    });
+
+    testWidgets('does call render if renderIntoFlutterView is true', (WidgetTester tester) async {
+      final TestPlatformDispatcher nonRenderingDispatcher = TestPlatformDispatcher(
+        platformDispatcher: tester.binding.platformDispatcher,
+      );
+      final _FakeFlutterView flutterView = _FakeFlutterView();
+      final TestFlutterView testFlutterView = TestFlutterView(
+        view: flutterView,
+        platformDispatcher: nonRenderingDispatcher,
+        display: _FakeDisplay(),
+      );
+
+      expect(flutterView.lastRenderedScene, isNull);
+      final Scene scene = SceneBuilder().build();
+      testFlutterView.render(scene);
+      expect(flutterView.lastRenderedScene, isNotNull);
     });
   });
 }

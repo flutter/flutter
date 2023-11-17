@@ -138,4 +138,9 @@ void main() {
   },
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   );
+
+  testWidgetsWithLeakTracking('LiveTestWidgetsFlutterBinding does render into FlutterViews', (WidgetTester tester) async {
+    expect(tester.binding, isA<LiveTestWidgetsFlutterBinding>());
+    expect(tester.binding.platformDispatcher.renderIntoFlutterView, isTrue);
+  });
 }

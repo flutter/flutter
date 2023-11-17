@@ -111,4 +111,9 @@ void main() {
     });
     expect(responded, true);
   });
+
+  test('AutomatedTestWidgetsFlutterBinding does not render into FlutterViews', () {
+    expect(binding, isA<AutomatedTestWidgetsFlutterBinding>());
+    expect(binding.platformDispatcher.renderIntoFlutterView, isFalse);
+  });
 }
