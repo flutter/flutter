@@ -9,7 +9,7 @@
 namespace impeller {
 
 /// @brief A geometry that is created from a vertices object.
-class VerticesGeometry : public Geometry {
+class VerticesGeometry final : public Geometry {
  public:
   enum class VertexMode {
     kTriangles,
@@ -24,7 +24,7 @@ class VerticesGeometry : public Geometry {
                    Rect bounds,
                    VerticesGeometry::VertexMode vertex_mode);
 
-  ~VerticesGeometry();
+  ~VerticesGeometry() = default;
 
   GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
                                         const Entity& entity,
@@ -35,12 +35,12 @@ class VerticesGeometry : public Geometry {
                                      Matrix effect_transform,
                                      const ContentContext& renderer,
                                      const Entity& entity,
-                                     RenderPass& pass) override;
+                                     RenderPass& pass) const override;
 
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
-                                   RenderPass& pass) override;
+                                   RenderPass& pass) const override;
 
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;

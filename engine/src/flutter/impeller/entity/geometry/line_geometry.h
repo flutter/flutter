@@ -4,15 +4,16 @@
 
 #pragma once
 
+#include <type_traits>
 #include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
 
-class LineGeometry : public Geometry {
+class LineGeometry final : public Geometry {
  public:
   explicit LineGeometry(Point p0, Point p1, Scalar width, Cap cap);
 
-  ~LineGeometry();
+  ~LineGeometry() = default;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -42,7 +43,7 @@ class LineGeometry : public Geometry {
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
-                                   RenderPass& pass) override;
+                                   RenderPass& pass) const override;
 
   // |Geometry|
   GeometryVertexType GetVertexType() const override;
@@ -55,7 +56,7 @@ class LineGeometry : public Geometry {
                                      Matrix effect_transform,
                                      const ContentContext& renderer,
                                      const Entity& entity,
-                                     RenderPass& pass) override;
+                                     RenderPass& pass) const override;
 
   Point p0_;
   Point p1_;
@@ -66,5 +67,7 @@ class LineGeometry : public Geometry {
 
   LineGeometry& operator=(const LineGeometry&) = delete;
 };
+
+static_assert(std::is_trivially_destructible<LineGeometry>::value);
 
 }  // namespace impeller

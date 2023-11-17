@@ -10,7 +10,6 @@
 #include <optional>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/paint.h"
@@ -23,7 +22,6 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
-#include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_frame.h"
 
 namespace impeller {
@@ -175,7 +173,7 @@ class Canvas {
 
   size_t GetClipDepth() const;
 
-  void ClipGeometry(std::unique_ptr<Geometry> geometry,
+  void ClipGeometry(const std::shared_ptr<Geometry>& geometry,
                     Entity::ClipOperation clip_op);
 
   void IntersectCulling(Rect clip_bounds);

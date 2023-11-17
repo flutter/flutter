@@ -439,7 +439,7 @@ StrokePathGeometry::CreateSolidStrokeVertices(
 GeometryResult StrokePathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass) {
+    RenderPass& pass) const {
   if (stroke_width_ < 0.0) {
     return {};
   }
@@ -471,7 +471,7 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
     Matrix effect_transform,
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass) {
+    RenderPass& pass) const {
   if (stroke_width_ < 0.0) {
     return {};
   }

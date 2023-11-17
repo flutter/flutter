@@ -14,12 +14,10 @@ PointFieldGeometry::PointFieldGeometry(std::vector<Point> points,
                                        bool round)
     : points_(std::move(points)), radius_(radius), round_(round) {}
 
-PointFieldGeometry::~PointFieldGeometry() = default;
-
 GeometryResult PointFieldGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass) {
+    RenderPass& pass) const {
   if (renderer.GetDeviceCapabilities().SupportsCompute()) {
     return GetPositionBufferGPU(renderer, entity, pass);
   }
@@ -43,7 +41,7 @@ GeometryResult PointFieldGeometry::GetPositionUVBuffer(
     Matrix effect_transform,
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass) {
+    RenderPass& pass) const {
   if (renderer.GetDeviceCapabilities().SupportsCompute()) {
     return GetPositionBufferGPU(renderer, entity, pass, texture_coverage,
                                 effect_transform);
@@ -69,7 +67,7 @@ GeometryResult PointFieldGeometry::GetPositionUVBuffer(
 std::optional<VertexBufferBuilder<SolidFillVertexShader::PerVertexData>>
 PointFieldGeometry::GetPositionBufferCPU(const ContentContext& renderer,
                                          const Entity& entity,
-                                         RenderPass& pass) {
+                                         RenderPass& pass) const {
   if (radius_ < 0.0) {
     return std::nullopt;
   }
@@ -127,7 +125,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
     const Entity& entity,
     RenderPass& pass,
     std::optional<Rect> texture_coverage,
-    std::optional<Matrix> effect_transform) {
+    std::optional<Matrix> effect_transform) const {
   FML_DCHECK(renderer.GetDeviceCapabilities().SupportsCompute());
   if (radius_ < 0.0) {
     return {};

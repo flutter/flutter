@@ -4,6 +4,7 @@
 
 #include "impeller/entity/geometry/geometry.h"
 
+#include <memory>
 #include <optional>
 
 #include "impeller/entity/geometry/cover_geometry.h"
@@ -69,31 +70,27 @@ GeometryResult ComputeUVGeometryForRect(Rect source_rect,
   };
 }
 
-Geometry::Geometry() = default;
-
-Geometry::~Geometry() = default;
-
 GeometryResult Geometry::GetPositionUVBuffer(Rect texture_coverage,
                                              Matrix effect_transform,
                                              const ContentContext& renderer,
                                              const Entity& entity,
-                                             RenderPass& pass) {
+                                             RenderPass& pass) const {
   return {};
 }
 
-std::unique_ptr<Geometry> Geometry::MakeFillPath(
+std::shared_ptr<Geometry> Geometry::MakeFillPath(
     const Path& path,
     std::optional<Rect> inner_rect) {
-  return std::make_unique<FillPathGeometry>(path, inner_rect);
+  return std::make_shared<FillPathGeometry>(path, inner_rect);
 }
 
-std::unique_ptr<Geometry> Geometry::MakePointField(std::vector<Point> points,
+std::shared_ptr<Geometry> Geometry::MakePointField(std::vector<Point> points,
                                                    Scalar radius,
                                                    bool round) {
-  return std::make_unique<PointFieldGeometry>(std::move(points), radius, round);
+  return std::make_shared<PointFieldGeometry>(std::move(points), radius, round);
 }
 
-std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
+std::shared_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
                                                    Scalar stroke_width,
                                                    Scalar miter_limit,
                                                    Cap stroke_cap,
@@ -102,23 +99,23 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  return std::make_unique<StrokePathGeometry>(path, stroke_width, miter_limit,
+  return std::make_shared<StrokePathGeometry>(path, stroke_width, miter_limit,
                                               stroke_cap, stroke_join);
 }
 
-std::unique_ptr<Geometry> Geometry::MakeCover() {
-  return std::make_unique<CoverGeometry>();
+std::shared_ptr<Geometry> Geometry::MakeCover() {
+  return std::make_shared<CoverGeometry>();
 }
 
-std::unique_ptr<Geometry> Geometry::MakeRect(Rect rect) {
-  return std::make_unique<RectGeometry>(rect);
+std::shared_ptr<Geometry> Geometry::MakeRect(Rect rect) {
+  return std::make_shared<RectGeometry>(rect);
 }
 
-std::unique_ptr<Geometry> Geometry::MakeLine(Point p0,
+std::shared_ptr<Geometry> Geometry::MakeLine(Point p0,
                                              Point p1,
                                              Scalar width,
                                              Cap cap) {
-  return std::make_unique<LineGeometry>(p0, p1, width, cap);
+  return std::make_shared<LineGeometry>(p0, p1, width, cap);
 }
 
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {
