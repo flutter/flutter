@@ -1254,6 +1254,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         child: title,
       ),
     };
+    final ScaffoldState? scaffold = Scaffold.maybeOf(context);
+    final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
+    final bool hasLeading = leading != null || (scaffold?.hasDrawer ?? false)
+      || (parentRoute?.impliesAppBarDismissal ?? false);
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
@@ -1261,7 +1265,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
       toolbarOpacity: toolbarOpacity,
       isScrolledUnder: isScrolledUnder,
-      hasLeading: leading != null || automaticallyImplyLeading,
+      hasLeading: hasLeading,
       child: AppBar(
         clipBehavior: clipBehavior,
         leading: leading,

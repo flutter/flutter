@@ -316,7 +316,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle = theme.primaryTextTheme.titleLarge!;
+            TextStyle titleStyle = theme.useMaterial3 ? theme.textTheme.titleLarge! : theme.primaryTextTheme.titleLarge!;
             titleStyle = titleStyle.copyWith(
               color: titleStyle.color!.withOpacity(opacity),
             );
