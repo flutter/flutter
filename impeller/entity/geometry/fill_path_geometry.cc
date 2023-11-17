@@ -11,12 +11,10 @@ FillPathGeometry::FillPathGeometry(const Path& path,
                                    std::optional<Rect> inner_rect)
     : path_(path), inner_rect_(inner_rect) {}
 
-FillPathGeometry::~FillPathGeometry() = default;
-
 GeometryResult FillPathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass) {
+    RenderPass& pass) const {
   auto& host_buffer = pass.GetTransientsBuffer();
   VertexBuffer vertex_buffer;
 
@@ -76,7 +74,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
     Matrix effect_transform,
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass) {
+    RenderPass& pass) const {
   using VS = TextureFillVertexShader;
 
   auto uv_transform =

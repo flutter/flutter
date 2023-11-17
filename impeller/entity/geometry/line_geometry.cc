@@ -15,8 +15,6 @@ LineGeometry::LineGeometry(Point p0, Point p1, Scalar width, Cap cap)
   FML_DCHECK(cap != Cap::kRound);
 }
 
-LineGeometry::~LineGeometry() = default;
-
 bool LineGeometry::ComputeCorners(Point corners[4],
                                   const Matrix& transform,
                                   bool extend_endpoints) const {
@@ -55,7 +53,7 @@ bool LineGeometry::ComputeCorners(Point corners[4],
 
 GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                const Entity& entity,
-                                               RenderPass& pass) {
+                                               RenderPass& pass) const {
   auto& host_buffer = pass.GetTransientsBuffer();
 
   Point corners[4];
@@ -84,7 +82,7 @@ GeometryResult LineGeometry::GetPositionUVBuffer(Rect texture_coverage,
                                                  Matrix effect_transform,
                                                  const ContentContext& renderer,
                                                  const Entity& entity,
-                                                 RenderPass& pass) {
+                                                 RenderPass& pass) const {
   auto& host_buffer = pass.GetTransientsBuffer();
 
   auto uv_transform =
