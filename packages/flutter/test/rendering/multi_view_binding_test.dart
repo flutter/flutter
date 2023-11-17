@@ -187,6 +187,8 @@ class FakeFlutterView extends Fake implements FlutterView  {
   @override
   Size physicalSize;
   @override
+  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
+  @override
   ViewPadding padding;
 
   List<Scene> renderedScenes = <Scene>[];

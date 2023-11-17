@@ -77,8 +77,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderBox? child,
     ViewConfiguration? configuration,
     required ui.FlutterView view,
-  }) : _configuration = configuration,
-       _view = view {
+  }) : _view = view {
+    if (configuration != null) {
+      this.configuration = configuration;
+    }
     this.child = child;
   }
 
