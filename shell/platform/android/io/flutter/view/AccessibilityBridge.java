@@ -1166,6 +1166,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
           accessibilityChannel.dispatchSemanticsAction(
               virtualViewId, Action.DID_GAIN_ACCESSIBILITY_FOCUS);
+
+          HashMap<String, Object> message = new HashMap<>();
+          message.put("type", "didGainFocus");
+          message.put("nodeId", semanticsNode.id);
+          accessibilityChannel.channel.send(message);
+
           sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
 
           if (semanticsNode.hasAction(Action.INCREASE)
