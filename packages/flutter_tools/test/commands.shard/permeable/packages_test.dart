@@ -255,6 +255,81 @@ void main() {
       ),
     });
 
+    testUsingContext('get generates synthetic package when l10n.yaml has synthetic-package: true', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      final Directory projectDir = globals.fs.directory(projectPath);
+      projectDir
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .childFile('app_en.arb')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "hello": "Hello world!" }');
+      String pubspecFileContent = projectDir.childFile('pubspec.yaml').readAsStringSync();
+      pubspecFileContent = pubspecFileContent.replaceFirst(RegExp(r'\nflutter\:'), '''
+flutter:
+  generate: true
+''');
+      projectDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync(pubspecFileContent);
+      projectDir
+        .childFile('l10n.yaml')
+        .writeAsStringSync('synthetic-package: true');
+      await runCommandIn(projectPath, 'get');
+      expect(
+        projectDir
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_gen')
+          .childDirectory('gen_l10n')
+          .childFile('app_localizations.dart')
+          .existsSync(),
+        true
+      );
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
+    testUsingContext('get generates normal files when l10n.yaml has synthetic-package: false', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      final Directory projectDir = globals.fs.directory(projectPath);
+      projectDir
+        .childDirectory('lib')
+        .childDirectory('l10n')
+        .childFile('app_en.arb')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ "hello": "Hello world!" }');
+      projectDir
+        .childFile('l10n.yaml')
+        .writeAsStringSync('synthetic-package: false');
+      await runCommandIn(projectPath, 'get');
+      expect(
+        projectDir
+          .childDirectory('lib')
+          .childDirectory('l10n')
+          .childFile('app_localizations.dart')
+          .existsSync(),
+        true
+      );
+    }, overrides: <Type, Generator>{
+      Pub: () => Pub(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        usage: globals.flutterUsage,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+      ),
+    });
+
     testUsingContext('set no plugins as usage value', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);

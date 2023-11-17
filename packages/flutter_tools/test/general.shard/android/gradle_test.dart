@@ -211,7 +211,7 @@ void main() {
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      localEngineArtifacts = Artifacts.test(localEngine: 'out/android_arm');
+      localEngineArtifacts = Artifacts.testLocalEngine(localEngine: 'out/android_arm', localEngineHost: 'out/host_release');
     });
 
     void testUsingAndroidContext(String description, dynamic Function() testMethod) {

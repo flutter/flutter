@@ -137,10 +137,14 @@
   "bottomSheetLabel": "Төменгі парақша",
   "scrimOnTapHint": "$modalRouteContentName жабу",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "жию үшін екі рет түртіңіз",
+  "expansionTileCollapsedHint": "жаю үшін екі рет түртіңіз",
+  "expansionTileExpandedTapHint": "Жию",
+  "expansionTileCollapsedTapHint": "Толық мәлімет алу үшін жайыңыз.",
+  "expandedHint": "Жиылды",
+  "collapsedHint": "Жайылды",
+  "menuDismissLabel": "Мәзірді жабу",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

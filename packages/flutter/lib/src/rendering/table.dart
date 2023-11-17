@@ -132,8 +132,6 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 /// This is the cheapest way to size a column.
 class FixedColumnWidth extends TableColumnWidth {
   /// Creates a column width based on a fixed number of logical pixels.
-  ///
-  /// The [value] argument must not be null.
   const FixedColumnWidth(this.value);
 
   /// The width the column should occupy in logical pixels.
@@ -159,8 +157,6 @@ class FixedColumnWidth extends TableColumnWidth {
 class FractionColumnWidth extends TableColumnWidth {
   /// Creates a column width based on a fraction of the table's constraints'
   /// maxWidth.
-  ///
-  /// The [value] argument must not be null.
   const FractionColumnWidth(this.value);
 
   /// The fraction of the table's constraints' maxWidth that this column should
@@ -197,8 +193,6 @@ class FractionColumnWidth extends TableColumnWidth {
 class FlexColumnWidth extends TableColumnWidth {
   /// Creates a column width based on a fraction of the remaining space once all
   /// the other columns have been laid out.
-  ///
-  /// The [value] argument must not be null.
   const FlexColumnWidth([this.value = 1.0]);
 
   /// The fraction of the remaining space once all the other columns have
@@ -263,12 +257,11 @@ class MaxColumnWidth extends TableColumnWidth {
   @override
   double? flex(Iterable<RenderBox> cells) {
     final double? aFlex = a.flex(cells);
-    if (aFlex == null) {
-      return b.flex(cells);
-    }
     final double? bFlex = b.flex(cells);
-    if (bFlex == null) {
-      return null;
+    if (aFlex == null) {
+      return bFlex;
+    } else if (bFlex == null) {
+      return aFlex;
     }
     return math.max(aFlex, bFlex);
   }
@@ -316,12 +309,11 @@ class MinColumnWidth extends TableColumnWidth {
   @override
   double? flex(Iterable<RenderBox> cells) {
     final double? aFlex = a.flex(cells);
-    if (aFlex == null) {
-      return b.flex(cells);
-    }
     final double? bFlex = b.flex(cells);
-    if (bFlex == null) {
-      return null;
+    if (aFlex == null) {
+      return bFlex;
+    } else if (bFlex == null) {
+      return aFlex;
     }
     return math.min(aFlex, bFlex);
   }
@@ -371,8 +363,6 @@ class RenderTable extends RenderBox {
   ///  * `children` must either be null or contain lists of all the same length.
   ///    if `children` is not null, then `rows` must be null.
   ///  * [columnWidths] may be null, in which case it defaults to an empty map.
-  ///  * [defaultColumnWidth] must not be null.
-  ///  * [configuration] must not be null (but has a default value).
   RenderTable({
     int? columns,
     int? rows,

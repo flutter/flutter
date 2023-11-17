@@ -30,8 +30,8 @@ enum Orientation {
 ///
 /// [MediaQuery] contains a large number of related properties. Widgets frequently
 /// depend on only a few of these attributes. For example, a widget that needs to
-/// rebuild when the [MediaQueryData.textScaleFactor] changes does not need to
-/// be notified when the [MediaQueryData.size] changes. Specifying an aspect avoids
+/// rebuild when the [MediaQueryData.textScaler] changes does not need to be
+/// notified when the [MediaQueryData.size] changes. Specifying an aspect avoids
 /// unnecessary rebuilds.
 enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.size].
@@ -42,6 +42,8 @@ enum _MediaQueryAspect {
   devicePixelRatio,
   /// Specifies the aspect corresponding to [MediaQueryData.textScaleFactor].
   textScaleFactor,
+  /// Specifies the aspect corresponding to [MediaQueryData.textScaler].
+  textScaler,
   /// Specifies the aspect corresponding to [MediaQueryData.platformBrightness].
   platformBrightness,
   /// Specifies the aspect corresponding to [MediaQueryData.padding].
@@ -138,12 +140,20 @@ enum _MediaQueryAspect {
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
-  /// Consider using [MediaQueryData.fromView] to create data based on a
-  /// [dart:ui.FlutterView].
+  /// In a typical application, calling this constructor directly is rarely
+  /// needed. Consider using [MediaQueryData.fromView] to create data based on a
+  /// [dart:ui.FlutterView], or [MediaQueryData.copyWith] to create a new copy
+  /// of [MediaQueryData] with updated properties from a base [MediaQueryData].
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
-    this.textScaleFactor = 1.0,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = _kUnspecifiedTextScaler,
     this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
@@ -158,7 +168,12 @@ class MediaQueryData {
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
-  });
+  }) : _textScaleFactor = textScaleFactor,
+       _textScaler = textScaler,
+       assert(
+         identical(textScaler, _kUnspecifiedTextScaler) || textScaleFactor == 1.0,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+       );
 
   /// Deprecated. Use [MediaQueryData.fromView] instead.
   ///
@@ -201,6 +216,10 @@ class MediaQueryData {
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
   ///
+  /// In general, [MediaQuery.of] is the appropriate way to obtain
+  /// [MediaQueryData] from a widget. This `fromView` constructor is primarily
+  /// for use in the implementation of the framework itself.
+  ///
   /// See also:
   ///
   ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
@@ -209,7 +228,8 @@ class MediaQueryData {
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
     : size = view.physicalSize / view.devicePixelRatio,
       devicePixelRatio = view.devicePixelRatio,
-      textScaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor,
+      _textScaleFactor = 1.0, // _textScaler is the source of truth.
+      _textScaler = _textScalerFromView(view, platformData),
       platformBrightness = platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
       padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
       viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
@@ -225,6 +245,11 @@ class MediaQueryData {
       gestureSettings = DeviceGestureSettings.fromView(view),
       displayFeatures = view.displayFeatures;
 
+  static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
+    final double scaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor;
+    return scaleFactor == 1.0 ? TextScaler.noScaling : TextScaler.linear(scaleFactor);
+  }
+
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
   /// Logical pixels are roughly the same visual size across devices. Physical
@@ -237,9 +262,12 @@ class MediaQueryData {
   /// It is considered bad practice to cache and later use the size returned
   /// by `MediaQuery.of(context).size`. It will make the application non responsive
   /// and might lead to unexpected behaviors.
-  /// For instance, during startup, especially in release mode, the first returned
-  /// size might be (0,0). The size will be updated when the native platform
-  /// reports the actual resolution.
+  ///
+  /// For instance, during startup, especially in release mode, the first
+  /// returned size might be (0,0). The size will be updated when the native
+  /// platform reports the actual resolution. Using [MediaQuery.of] will ensure
+  /// that when the size changes, any widgets depending on the size are
+  /// automatically rebuilt.
   ///
   /// See the article on [Creating responsive and adaptive
   /// apps](https://docs.flutter.dev/development/ui/layout/adaptive-responsive)
@@ -257,6 +285,9 @@ class MediaQueryData {
   /// the Nexus 6 has a device pixel ratio of 3.5.
   final double devicePixelRatio;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -266,7 +297,44 @@ class MediaQueryData {
   ///
   ///  * [MediaQuery.textScaleFactorOf], a method to find and depend on the
   ///    textScaleFactor defined for a [BuildContext].
-  final double textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
+  double get textScaleFactor => textScaler.textScaleFactor;
+  // TODO(LongCatIsLooong): remove this after textScaleFactor is removed. To
+  // maintain backward compatibility and also keep the const constructor this
+  // has to be kept as a private field.
+  // https://github.com/flutter/flutter/issues/128825
+  final double _textScaleFactor;
+
+  /// The font scaling strategy to use for laying out textual contents.
+  ///
+  /// If this [MediaQueryData] is created by the [MediaQueryData.fromView]
+  /// constructor, this property reflects the platform's preferred text scaling
+  /// strategy, and may change as the user changes the scaling factor in the
+  /// operating system's accessibility settings.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.textScalerOf], a method to find and depend on the
+  ///    [textScaler] defined for a [BuildContext].
+  ///  * [TextPainter], a class that lays out and paints text.
+  TextScaler get textScaler {
+    // The constructor was called with an explicitly specified textScaler value,
+    // we assume the caller is migrated and ignore _textScaleFactor.
+    if (!identical(_kUnspecifiedTextScaler, _textScaler)) {
+      return _textScaler;
+    }
+    return _textScaleFactor == 1.0
+      // textScaleFactor and textScaler from the constructor are consistent.
+      ? TextScaler.noScaling
+      // The constructor was called with an explicitly specified textScaleFactor,
+      // we assume the caller is unmigrated and ignore _textScaler.
+      : TextScaler.linear(_textScaleFactor);
+  }
+  final TextScaler _textScaler;
 
   /// The current brightness mode of the host platform.
   ///
@@ -477,10 +545,19 @@ class MediaQueryData {
 
   /// Creates a copy of this media query data but with the given fields replaced
   /// with the new values.
+  ///
+  /// The `textScaler` parameter and `textScaleFactor` parameter must not be
+  /// both specified.
   MediaQueryData copyWith({
     Size? size,
     double? devicePixelRatio,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     double? textScaleFactor,
+    TextScaler? textScaler,
     Brightness? platformBrightness,
     EdgeInsets? padding,
     EdgeInsets? viewPadding,
@@ -496,10 +573,14 @@ class MediaQueryData {
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
   }) {
+    assert(textScaleFactor == null || textScaler == null);
+    if (textScaleFactor != null) {
+      textScaler ??= TextScaler.linear(textScaleFactor);
+    }
     return MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
-      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      textScaler: textScaler ?? this.textScaler,
       platformBrightness: platformBrightness ?? this.platformBrightness,
       padding: padding ?? this.padding,
       viewPadding: viewPadding ?? this.viewPadding,
@@ -520,8 +601,8 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given [padding]s
   /// replaced with zero.
   ///
-  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
-  /// must not be null. If all four are false (the default) then this
+  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
+  /// `removeBottom` arguments are false (the default), then this
   /// [MediaQueryData] is returned unmodified.
   ///
   /// See also:
@@ -560,8 +641,8 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given [viewInsets]
   /// replaced with zero.
   ///
-  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
-  /// must not be null. If all four are false (the default) then this
+  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
+  /// `removeBottom` arguments are false (the default), then this
   /// [MediaQueryData] is returned unmodified.
   ///
   /// See also:
@@ -598,8 +679,8 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given [viewPadding]
   /// replaced with zero.
   ///
-  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
-  /// must not be null. If all four are false (the default) then this
+  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
+  /// `removeBottom` arguments are false (the default), then this
   /// [MediaQueryData] is returned unmodified.
   ///
   /// See also:
@@ -733,7 +814,7 @@ class MediaQueryData {
     final List<String> properties = <String>[
       'size: $size',
       'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}',
-      'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}',
+      'textScaler: $textScaler',
       'platformBrightness: $platformBrightness',
       'padding: $padding',
       'viewPadding: $viewPadding',
@@ -785,8 +866,6 @@ class MediaQueryData {
 ///  * [MediaQueryData], the data structure that represents the metrics.
 class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
-  ///
-  /// The [data] and [child] arguments must not be null.
   const MediaQuery({
     super.key,
     required this.data,
@@ -800,15 +879,12 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// is consumed by a widget in such a way that the padding is no longer
   /// exposed to the widget's descendants or siblings.
   ///
-  /// The [context] argument is required, must not be null, and must have a
-  /// [MediaQuery] in scope.
+  /// The [context] argument must have a [MediaQuery] in scope.
   ///
-  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
-  /// must not be null. If all four are false (the default) then the returned
+  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
+  /// `removeBottom` arguments are false (the default), then the returned
   /// [MediaQuery] reuses the ambient [MediaQueryData] unmodified, which is not
   /// particularly useful.
-  ///
-  /// The [child] argument is required and must not be null.
   ///
   /// See also:
   ///
@@ -847,15 +923,12 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// insets are consumed by a widget in such a way that the view insets are no
   /// longer exposed to the widget's descendants or siblings.
   ///
-  /// The [context] argument is required, must not be null, and must have a
-  /// [MediaQuery] in scope.
+  /// The [context] argument must have a [MediaQuery] in scope.
   ///
-  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
-  /// must not be null. If all four are false (the default) then the returned
+  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
+  /// `removeBottom` arguments are false (the default), then the returned
   /// [MediaQuery] reuses the ambient [MediaQueryData] unmodified, which is not
   /// particularly useful.
-  ///
-  /// The [child] argument is required and must not be null.
   ///
   /// See also:
   ///
@@ -892,15 +965,12 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// padding is consumed by a widget in such a way that the view padding is no
   /// longer exposed to the widget's descendants or siblings.
   ///
-  /// The [context] argument is required, must not be null, and must have a
-  /// [MediaQuery] in scope.
+  /// The [context] argument must have a [MediaQuery] in scope.
   ///
-  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
-  /// must not be null. If all four are false (the default) then the returned
+  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
+  /// `removeBottom` arguments are false (the default), then the returned
   /// [MediaQuery] reuses the ambient [MediaQueryData] unmodified, which is not
   /// particularly useful.
-  ///
-  /// The [child] argument is required and must not be null.
   ///
   /// See also:
   ///
@@ -970,8 +1040,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// The injected [MediaQuery] automatically updates when any of the data used
   /// to construct it changes.
-  ///
-  /// The [view] and [child] arguments are required and must not be null.
   static Widget fromView({
     Key? key,
     required FlutterView view,
@@ -982,6 +1050,64 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       view: view,
       child: child,
     );
+  }
+
+  /// Wraps the `child` in a [MediaQuery] with its [MediaQueryData.textScaler]
+  /// set to [TextScaler.noScaling].
+  ///
+  /// The returned widget must be inserted in a widget tree below an existing
+  /// [MediaQuery] widget.
+  ///
+  /// This can be used to prevent, for example, icon fonts from scaling as the
+  /// user adjusts the platform's text scaling value.
+  static Widget withNoTextScaling({
+    Key? key,
+    required Widget child,
+  }) {
+    return Builder(
+      key: key,
+      builder: (BuildContext context) {
+        assert(debugCheckHasMediaQuery(context));
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+          child: child,
+        );
+      },
+    );
+  }
+
+  /// Wraps the `child` in a [MediaQuery] and applies [TextScaler.clamp] on the
+  /// current [MediaQueryData.textScaler].
+  ///
+  /// The returned widget must be inserted in a widget tree below an existing
+  /// [MediaQuery] widget.
+  ///
+  /// This is a convenience function to restrict the range of the scaled text
+  /// size to `[minScaleFactor * fontSize, maxScaleFactor * fontSize]` (to
+  /// prevent excessive text scaling that would break the UI, for example). When
+  /// `minScaleFactor` equals `maxScaleFactor`, the scaler becomes
+  /// `TextScaler.linear(minScaleFactor)`.
+  static Widget withClampedTextScaling({
+    Key? key,
+    double minScaleFactor = 0.0,
+    double maxScaleFactor = double.infinity,
+    required Widget child,
+  }) {
+    assert(maxScaleFactor >= minScaleFactor);
+    assert(!maxScaleFactor.isNaN);
+    assert(minScaleFactor.isFinite);
+    assert(minScaleFactor >= 0);
+
+    return Builder(builder: (BuildContext context) {
+      assert(debugCheckHasMediaQuery(context));
+      final MediaQueryData data = MediaQuery.of(context);
+      return MediaQuery(
+        data: data.copyWith(
+          textScaler: data.textScaler.clamp(minScaleFactor: minScaleFactor, maxScaleFactor: maxScaleFactor),
+        ),
+        child: child,
+      );
+    });
   }
 
   /// Contains information about the current media.
@@ -1108,19 +1234,52 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
   static double? maybeDevicePixelRatioOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [maybeTextScalerOf] instead.
+  ///
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or
   /// 1.0, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  @Deprecated(
+    'Use textScalerOf instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [maybeTextScalerOf] instead.
+  ///
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or
   /// null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery]
+  /// changes.
+  @Deprecated(
+    'Use maybeTextScalerOf instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
+
+  /// Returns the [TextScaler] for the nearest [MediaQuery] ancestor or null if
+  /// no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
+  /// changes.
+  static TextScaler textScalerOf(BuildContext context) => maybeTextScalerOf(context) ?? TextScaler.noScaling;
+
+  /// Returns the [TextScaler] for the nearest [MediaQuery] ancestor or
+  /// [TextScaler.noScaling] if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
+  /// changes.
+  static TextScaler? maybeTextScalerOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaler)?.textScaler;
 
   /// Returns platformBrightness for the nearest MediaQuery ancestor or
   /// [Brightness.light], if no such ancestor exists.
@@ -1370,6 +1529,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             if (data.textScaleFactor != oldWidget.data.textScaleFactor) {
               return true;
             }
+          case _MediaQueryAspect.textScaler:
+            if (data.textScaler != oldWidget.data.textScaler) {
+              return true;
+            }
           case _MediaQueryAspect.platformBrightness:
             if (data.platformBrightness != oldWidget.data.platformBrightness) {
               return true;
@@ -1578,4 +1741,20 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
       child: widget.child,
     );
   }
+}
+
+const TextScaler _kUnspecifiedTextScaler = _UnspecifiedTextScaler();
+// TODO(LongCatIsLooong): Remove once `MediaQueryData.textScaleFactor` is
+// removed: https://github.com/flutter/flutter/issues/128825.
+class _UnspecifiedTextScaler implements TextScaler {
+  const _UnspecifiedTextScaler();
+
+  @override
+  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) => throw UnimplementedError();
+
+  @override
+  double scale(double fontSize) => throw UnimplementedError();
+
+  @override
+  double get textScaleFactor => throw UnimplementedError();
 }

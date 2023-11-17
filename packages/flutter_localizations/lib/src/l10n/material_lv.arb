@@ -137,10 +137,14 @@
   "bottomSheetLabel": "Ekrāna apakšdaļas lapa",
   "scrimOnTapHint": "Aizvērt $modalRouteContentName",
   "keyboardKeyShift": "Pārslēgšanas taustiņš",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "dubultskāriens, lai sakļautu",
+  "expansionTileCollapsedHint": "dubultskāriens, lai izvērstu",
+  "expansionTileExpandedTapHint": "Sakļaut",
+  "expansionTileCollapsedTapHint": "Izvērst, lai iegūtu plašāku informāciju",
+  "expandedHint": "Sakļauts",
+  "collapsedHint": "Izvērsts",
+  "menuDismissLabel": "Nerādīt izvēlni",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

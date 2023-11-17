@@ -210,8 +210,6 @@ class ExpansionTileThemeData with Diagnosticable {
 ///    [ExpansionTileTheme] for [ExpansionTile]s below the overall [Theme].
 class ExpansionTileTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
-  ///
-  /// The [data] and [child] arguments must not be null.
   const ExpansionTileTheme({
     super.key,
     required this.data,

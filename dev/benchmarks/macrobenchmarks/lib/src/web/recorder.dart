@@ -4,12 +4,9 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-// The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
-// for `JSObject.[]=`.
-// ignore: unused_import
-import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:ui';
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -86,8 +83,6 @@ Future<void> _dummyAsyncVoidCallback() async {}
 @sealed
 class Runner {
   /// Creates a runner for the [recorder].
-  ///
-  /// All arguments must not be null.
   Runner({
     required this.recorder,
     this.setUpAllDidRun = _dummyAsyncVoidCallback,
@@ -1335,10 +1330,7 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 
   if (_engineBenchmarkListeners.isEmpty) {
     // The first listener is being registered. Register the global listener.
-    web.window['_flutter_internal_on_benchmark'.toJS] =
-        // Upcast to [Object] to export.
-        // ignore: unnecessary_cast
-        (_dispatchEngineBenchmarkValue as Object).toJS;
+    ui_web.benchmarkValueCallback = _dispatchEngineBenchmarkValue;
   }
   _engineBenchmarkListeners[name] = listener;
 }
@@ -1349,7 +1341,7 @@ void stopListeningToEngineBenchmarkValues(String name) {
   if (_engineBenchmarkListeners.isEmpty) {
 
     // The last listener unregistered. Remove the global listener.
-    web.window['_flutter_internal_on_benchmark'.toJS] = null;
+    ui_web.benchmarkValueCallback = null;
   }
 }
 

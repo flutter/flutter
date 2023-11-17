@@ -16,7 +16,7 @@ const String _kPictureMemory = 'PictureMBytes';
 /// Summarizes [TimelineEvents]s corresponding to [kRasterCacheEvent] events.
 ///
 /// A sample event (some fields have been omitted for brevity):
-/// ```
+/// ```json
 ///     {
 ///       "name": "RasterCache",
 ///       "ts": 75598996256,

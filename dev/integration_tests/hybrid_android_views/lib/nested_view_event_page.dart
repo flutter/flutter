@@ -51,13 +51,30 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
         children: <Widget>[
           SizedBox(
             height: 300,
-              child: showPlatformView ?
-                AndroidPlatformView(
-                  key: const ValueKey<String>('PlatformView'),
-                  viewType: 'simple_view',
-                  onPlatformViewCreated: onPlatformViewCreated,
-                  useHybridComposition: useHybridComposition,
-                ) : null,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                if (showPlatformView)
+                  AndroidPlatformView(
+                    key: const ValueKey<String>('PlatformView'),
+                    viewType: 'simple_view',
+                    onPlatformViewCreated: onPlatformViewCreated,
+                    useHybridComposition: useHybridComposition,
+                  ),
+                // The overlapping widget stabilizes the view tree by ensuring
+                // that there is widget content on top of the platform view.
+                // Without this widget, we rely on the UI elements down below
+                // to "incidentally" draw on top of the PlatformView which
+                // is not a reliable behavior as we eliminate non-visible
+                // rendering operations throughout the framework and engine.
+                const Positioned(
+                  top: 50,
+                  child: Text('overlapping widget',
+                    style: TextStyle(color: Colors.yellow),
+                  ),
+                ),
+              ],
+            ),
           ),
           if (_lastTestStatus != _LastTestStatus.pending) _statusWidget(),
           if (viewChannel != null) ... <Widget>[

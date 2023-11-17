@@ -19,8 +19,12 @@
   "copyButtonLabel": "Kopioi",
   "pasteButtonLabel": "Liitä",
   "selectAllButtonLabel": "Valitse kaikki",
-  "tabSemanticsLabel": "Välilehti $tabIndex/$tabCount",
+  "tabSemanticsLabel": "Välilehti $tabIndex kautta $tabCount",
   "modalBarrierDismissLabel": "Ohita",
   "searchTextFieldPlaceholderLabel": "Hae",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Korvaavia sanoja ei löydy",
+  "menuDismissLabel": "Hylkää valikko",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

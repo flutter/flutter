@@ -472,7 +472,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
@@ -730,7 +730,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                 addendum.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
               }
             }
-            addendum.add(ErrorHint('See also: https://flutter.dev/layout/'));
+            addendum.add(ErrorHint('See also: https://flutter.dev/unbounded-constraints'));
           } else {
             return true;
           }
@@ -916,7 +916,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       while (child != null) {
         assert(() {
           if (textBaseline == null) {
-            throw FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
+            throw FlutterError('To use CrossAxisAlignment.baseline, you must also specify which baseline to use using the "textBaseline" argument.');
           }
           return true;
         }());

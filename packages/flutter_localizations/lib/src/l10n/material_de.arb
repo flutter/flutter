@@ -137,10 +137,14 @@
   "bottomSheetLabel": "Ansicht am unteren Rand",
   "scrimOnTapHint": "$modalRouteContentName schließen",
   "keyboardKeyShift": "Umschalttaste",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "Zum Minimieren doppeltippen",
+  "expansionTileCollapsedHint": "Zum Maximieren doppeltippen",
+  "expansionTileExpandedTapHint": "Minimieren",
+  "expansionTileCollapsedTapHint": "Für weitere Details maximieren",
+  "expandedHint": "Minimiert",
+  "collapsedHint": "Maximiert",
+  "menuDismissLabel": "Menü schließen",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -4,8 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 final Matcher isUnitCircle = isPathThat(
   includes: <Offset>[
     const Offset(-0.6035617555492896, 0.2230970398703236),
