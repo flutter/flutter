@@ -333,7 +333,7 @@ void AccessibilityBridge::SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
     return;
   }
   if (flags & kFlutterSemanticsFlagHasToggledState) {
-    node_data.role = ax::mojom::Role::kToggleButton;
+    node_data.role = ax::mojom::Role::kSwitch;
     return;
   }
   if (flags & kFlutterSemanticsFlagIsSlider) {
@@ -477,7 +477,7 @@ void AccessibilityBridge::SetIntAttributesFromFlutterUpdate(
             : flags & FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked
                 ? ax::mojom::CheckedState::kTrue
                 : ax::mojom::CheckedState::kFalse));
-  } else if (node_data.role == ax::mojom::Role::kToggleButton) {
+  } else if (node_data.role == ax::mojom::Role::kSwitch) {
     node_data.AddIntAttribute(
         ax::mojom::IntAttribute::kCheckedState,
         static_cast<int32_t>(

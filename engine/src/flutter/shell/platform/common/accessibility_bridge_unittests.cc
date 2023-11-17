@@ -253,7 +253,7 @@ TEST(AccessibilityBridgeTest, DoesNotAssignEditableRootToSelectableText) {
       ax::mojom::BoolAttribute::kEditableRoot));
 }
 
-TEST(AccessibilityBridgeTest, ToggleHasToggleButtonRole) {
+TEST(AccessibilityBridgeTest, SwitchHasSwitchRole) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
@@ -265,7 +265,7 @@ TEST(AccessibilityBridgeTest, ToggleHasToggleButtonRole) {
   bridge->CommitUpdates();
 
   auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
-  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kToggleButton);
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kSwitch);
 }
 
 TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
