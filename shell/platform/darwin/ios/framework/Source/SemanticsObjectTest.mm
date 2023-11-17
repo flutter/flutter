@@ -6,6 +6,8 @@
 #import <XCTest/XCTest.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTestMocks.h"
 
@@ -920,6 +922,75 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertNil(scrollable.accessibilityContainer);
   XCTAssertNil(object2.accessibilityContainer);
+}
+
+- (void)testAccessibilityHitTestSearchCanReturnPlatformView {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* object0 = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* object1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* object3 = [[SemanticsObject alloc] initWithBridge:bridge uid:3];
+  FlutterTouchInterceptingView* platformView =
+      [[FlutterTouchInterceptingView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+  FlutterPlatformViewSemanticsContainer* platformViewSemanticsContainer =
+      [[FlutterPlatformViewSemanticsContainer alloc] initWithBridge:bridge
+                                                                uid:1
+                                                       platformView:platformView];
+
+  object0.children = @[ object1 ];
+  object0.childrenInHitTestOrder = @[ object1 ];
+  object1.children = @[ platformViewSemanticsContainer, object3 ];
+  object1.childrenInHitTestOrder = @[ platformViewSemanticsContainer, object3 ];
+
+  flutter::SemanticsNode node0;
+  node0.id = 0;
+  node0.rect = SkRect::MakeXYWH(0, 0, 200, 200);
+  node0.label = "0";
+  [object0 setSemanticsNode:&node0];
+
+  flutter::SemanticsNode node1;
+  node1.id = 1;
+  node1.rect = SkRect::MakeXYWH(0, 0, 200, 200);
+  node1.label = "1";
+  [object1 setSemanticsNode:&node1];
+
+  flutter::SemanticsNode node2;
+  node2.id = 2;
+  node2.rect = SkRect::MakeXYWH(0, 0, 100, 100);
+  node2.label = "2";
+  [platformViewSemanticsContainer setSemanticsNode:&node2];
+
+  flutter::SemanticsNode node3;
+  node3.id = 3;
+  node3.rect = SkRect::MakeXYWH(0, 0, 200, 200);
+  node3.label = "3";
+  [object3 setSemanticsNode:&node3];
+
+  CGPoint point = CGPointMake(10, 10);
+  id hitTestResult = [object0 _accessibilityHitTest:point withEvent:nil];
+
+  XCTAssertEqual(hitTestResult, platformView);
+}
+
+- (void)testFlutterPlatformViewSemanticsContainer {
+  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  __weak FlutterTouchInterceptingView* weakPlatformView;
+  @autoreleasepool {
+    FlutterTouchInterceptingView* platformView = [[FlutterTouchInterceptingView alloc] init];
+    weakPlatformView = platformView;
+    FlutterPlatformViewSemanticsContainer* container =
+        [[FlutterPlatformViewSemanticsContainer alloc] initWithBridge:bridge
+                                                                  uid:1
+                                                         platformView:platformView];
+    XCTAssertEqualObjects(platformView.accessibilityContainer, container);
+    XCTAssertNotNil(weakPlatformView);
+  }
+  // Check if there's no more strong references to `platformView` after container and platformView
+  // are released.
+  XCTAssertNil(weakPlatformView);
 }
 
 @end

@@ -261,7 +261,7 @@ class FlutterPlatformViewsController {
                    const std::shared_ptr<IOSContext>& ios_context,
                    std::unique_ptr<SurfaceFrame> frame);
 
-  void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
+  void OnMethodCall(FlutterMethodCall* call, FlutterResult result);
 
   // Returns the platform view id if the platform view (or any of its descendant view) is the first
   // responder. Returns -1 if no such platform view is found.
@@ -279,10 +279,10 @@ class FlutterPlatformViewsController {
 
   using LayersMap = std::map<int64_t, std::vector<std::shared_ptr<FlutterPlatformViewLayer>>>;
 
-  void OnCreate(FlutterMethodCall* call, FlutterResult& result);
-  void OnDispose(FlutterMethodCall* call, FlutterResult& result);
-  void OnAcceptGesture(FlutterMethodCall* call, FlutterResult& result);
-  void OnRejectGesture(FlutterMethodCall* call, FlutterResult& result);
+  void OnCreate(FlutterMethodCall* call, FlutterResult result);
+  void OnDispose(FlutterMethodCall* call, FlutterResult result);
+  void OnAcceptGesture(FlutterMethodCall* call, FlutterResult result);
+  void OnRejectGesture(FlutterMethodCall* call, FlutterResult result);
   // Dispose the views in `views_to_dispose_`.
   void DisposeViews();
 
