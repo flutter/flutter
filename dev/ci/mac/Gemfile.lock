@@ -3,7 +3,7 @@ GEM
   specs:
     CFPropertyList (3.0.5)
       rexml
-    activesupport (6.1.7.3)
+    activesupport (6.1.7.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -63,10 +63,10 @@ GEM
     fuzzy_match (2.0.4)
     gh_inspector (1.1.3)
     httpclient (2.8.3)
-    i18n (1.12.0)
+    i18n (1.14.1)
       concurrent-ruby (~> 1.0)
     json (2.6.1)
-    minitest (5.18.0)
+    minitest (5.19.0)
     molinillo (0.8.0)
     nanaimo (0.3.0)
     nap (1.1.0)
@@ -85,7 +85,7 @@ GEM
       colored2 (~> 3.1)
       nanaimo (~> 0.3.0)
       rexml (~> 3.2.4)
-    zeitwerk (2.6.7)
+    zeitwerk (2.6.11)
 
 PLATFORMS
   ruby

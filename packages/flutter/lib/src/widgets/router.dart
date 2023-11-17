@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -41,7 +42,7 @@ import 'restoration_properties.dart';
 class RouteInformation {
   /// Creates a route information object.
   ///
-  /// Either location or uri must not be null.
+  /// Either `location` or `uri` must not be null.
   const RouteInformation({
     @Deprecated(
       'Pass Uri.parse(location) to uri parameter instead. '
@@ -64,7 +65,7 @@ class RouteInformation {
   )
   String get location {
     if (_location != null) {
-      return _location!;
+      return _location;
     }
     return Uri.decodeComponent(
       Uri(
@@ -85,7 +86,7 @@ class RouteInformation {
   /// In web platform, the host and scheme are always empty.
   Uri get uri {
     if (_uri != null){
-      return _uri!;
+      return _uri;
     }
     return Uri.parse(_location!);
   }
@@ -119,19 +120,19 @@ class RouteInformation {
 /// and [BackButtonDispatcher]. This abstract class provides way to bundle these
 /// delegates into a single object to configure a [Router].
 ///
-/// The [routerDelegate] must not be null. The [backButtonDispatcher],
-/// [routeInformationProvider], and [routeInformationProvider] are optional.
+/// The [backButtonDispatcher], [routeInformationProvider], and
+/// [routeInformationProvider] are optional.
 ///
 /// The [routeInformationProvider] and [routeInformationParser] must
-/// both be provided or not provided.
+/// both be provided or both not provided.
 class RouterConfig<T> {
   /// Creates a [RouterConfig].
   ///
-  /// The [routerDelegate] must not be null. The [backButtonDispatcher],
-  /// [routeInformationProvider], and [routeInformationParser] are optional.
+  /// The [backButtonDispatcher], [routeInformationProvider], and
+  /// [routeInformationParser] are optional.
   ///
-  /// The [routeInformationProvider] and [routeInformationParser] must
-  /// both be provided or not provided.
+  /// The [routeInformationProvider] and [routeInformationParser] must both be
+  /// provided or both not provided.
   const RouterConfig({
     this.routeInformationProvider,
     this.routeInformationParser,
@@ -356,8 +357,6 @@ class Router<T> extends StatefulWidget {
   ///
   /// The [routeInformationProvider] and [routeInformationParser] must
   /// both be provided or not provided.
-  ///
-  /// The [routerDelegate] must not be null.
   const Router({
     super.key,
     this.routeInformationProvider,
@@ -380,8 +379,6 @@ class Router<T> extends StatefulWidget {
   /// If the [RouterConfig.routeInformationProvider] is not null, then
   /// [RouterConfig.routeInformationParser] must also not be
   /// null.
-  ///
-  /// The [RouterConfig.routerDelegate] must not be null.
   factory Router.withConfig({
     Key? key,
     required RouterConfig<T> config,
@@ -1082,8 +1079,6 @@ class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingO
 /// [parent] of the [ChildBackButtonDispatcher].
 class ChildBackButtonDispatcher extends BackButtonDispatcher {
   /// Creates a back button dispatcher that acts as the child of another.
-  ///
-  /// The [parent] must not be null.
   ChildBackButtonDispatcher(this.parent);
 
   /// The back button dispatcher that this object will attempt to take priority
@@ -1138,8 +1133,6 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
 /// screen but don't want to use a new page for that.
 class BackButtonListener extends StatefulWidget {
   /// Creates a BackButtonListener widget .
-  ///
-  /// The [child] and [onBackButtonPressed] arguments must not be null.
   const BackButtonListener({
     super.key,
     required this.child,
@@ -1464,14 +1457,24 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   /// provider.
   PlatformRouteInformationProvider({
     required RouteInformation initialRouteInformation,
-  }) : _value = initialRouteInformation;
+  }) : _value = initialRouteInformation {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
+  static bool _equals(Uri a, Uri b) {
+    return a.path == b.path
+        && a.fragment == b.fragment
+        && const DeepCollectionEquality.unordered().equals(a.queryParametersAll, b.queryParametersAll);
+  }
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&
-       _valueInEngine.uri == routeInformation.uri);
+      _equals(_valueInEngine.uri, routeInformation.uri));
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       uri: routeInformation.uri,

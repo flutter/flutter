@@ -54,9 +54,6 @@ enum BannerLocation {
 /// Paints a [Banner].
 class BannerPainter extends CustomPainter {
   /// Creates a banner painter.
-  ///
-  /// The [message], [textDirection], [location], and [layoutDirection]
-  /// arguments must not be null.
   BannerPainter({
     required this.message,
     required this.textDirection,
@@ -236,8 +233,6 @@ class BannerPainter extends CustomPainter {
 ///    debug mode, to show a banner that says "DEBUG".
 class Banner extends StatelessWidget {
   /// Creates a banner.
-  ///
-  /// The [message] and [location] arguments must not be null.
   const Banner({
     super.key,
     this.child,

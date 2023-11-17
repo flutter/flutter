@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "Flipi $tabIndex af $tabCount",
   "modalBarrierDismissLabel": "Hunsa",
   "searchTextFieldPlaceholderLabel": "Leit",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Engir staðgenglar fundust",
+  "menuDismissLabel": "Loka valmynd",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

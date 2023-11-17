@@ -83,8 +83,6 @@ enum SnackBarClosedReason {
 ///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
-  ///
-  /// The [label] and [onPressed] arguments must be non-null.
   const SnackBarAction({
     super.key,
     this.textColor,
@@ -127,7 +125,7 @@ class SnackBarAction extends StatefulWidget {
   /// The button label.
   final String label;
 
-  /// The callback to be called when the button is pressed. Must not be null.
+  /// The callback to be called when the button is pressed.
   ///
   /// This callback will be called at most once each time this action is
   /// displayed in a [SnackBar].
@@ -250,6 +248,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
 /// ** See code in examples/api/lib/material/snack_bar/snack_bar.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example demonstrates the various [SnackBar] widget components,
+/// including an optional icon, in either floating or fixed format.
+///
+/// ** See code in examples/api/lib/material/snack_bar/snack_bar.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ScaffoldMessenger.of], to obtain the current [ScaffoldMessengerState],
@@ -265,8 +270,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 class SnackBar extends StatefulWidget {
   /// Creates a snack bar.
   ///
-  /// The [content] argument must be non-null. The [elevation] must be null or
-  /// non-negative.
+  /// The [elevation] must be null or non-negative.
   const SnackBar({
     super.key,
     required this.content,
@@ -276,6 +280,7 @@ class SnackBar extends StatefulWidget {
     this.padding,
     this.width,
     this.shape,
+    this.hitTestBehavior,
     this.behavior,
     this.action,
     this.actionOverflowThreshold,
@@ -324,6 +329,8 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [SnackBarThemeData.insetPadding] of
   /// [ThemeData.snackBarTheme] is used. If that is also null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
+  ///
+  /// If this property is not null and [hitTestBehavior] is null, then [hitTestBehavior] default is [HitTestBehavior.deferToChild].
   final EdgeInsetsGeometry? margin;
 
   /// The amount of padding to apply to the snack bar's content and optional
@@ -376,6 +383,13 @@ class SnackBar extends StatefulWidget {
   /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder? shape;
+
+  /// Defines how the snack bar area, including margin, will behave during hit testing.
+  ///
+  /// If this property is null and [margin] is not null, then [HitTestBehavior.deferToChild] is used by default.
+  ///
+  /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
+  final HitTestBehavior? hitTestBehavior;
 
   /// This defines the behavior and location of the snack bar.
   ///
@@ -449,12 +463,12 @@ class SnackBar extends StatefulWidget {
 
   /// The direction in which the SnackBar can be dismissed.
   ///
-  /// Cannot be null, defaults to [DismissDirection.down].
+  /// Defaults to [DismissDirection.down].
   final DismissDirection dismissDirection;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   // API for ScaffoldMessengerState.showSnackBar():
@@ -482,6 +496,7 @@ class SnackBar extends StatefulWidget {
       padding: padding,
       width: width,
       shape: shape,
+      hitTestBehavior: hitTestBehavior,
       behavior: behavior,
       action: action,
       actionOverflowThreshold: actionOverflowThreshold,
@@ -769,6 +784,7 @@ class _SnackBarState extends State<SnackBar> {
         key: const Key('dismissible'),
         direction: widget.dismissDirection,
         resizeDuration: null,
+        behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },

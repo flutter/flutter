@@ -229,7 +229,23 @@ function shared::execute() {
     exit 1
   fi
 
-  upgrade_flutter 7< "$PROG_NAME"
+  # File descriptor 7 is prepared here so that we can use it with
+  # flock(1) in _lock() (see above).
+  #
+  # We use number 7 because it's a luckier number than 3; luck is
+  # important when making locks work reliably. Also because that way
+  # if anyone is redirecting other file descriptors there's less
+  # chance of a conflict.
+  #
+  # In any case, the file we redirect into this file descriptor is
+  # this very source file you are reading right now, because that's
+  # the only file we can truly guarantee exists, since we're running
+  # it. We don't use PROG_NAME because otherwise if you run `dart` and
+  # `flutter` simultaneously they'll end up using different lock files
+  # and will corrupt each others' downloads.
+  #
+  # SHARED_NAME itself is prepared by the caller script.
+  upgrade_flutter 7< "$SHARED_NAME"
 
   BIN_NAME="$(basename "$PROG_NAME")"
   case "$BIN_NAME" in

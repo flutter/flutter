@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 
@@ -52,7 +53,7 @@ void main() {
     expect(themeData.mouseCursor, null);
   });
 
-  testWidgets('Default BottomNavigationBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default BottomNavigationBarThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData().debugFillProperties(builder);
 
@@ -64,7 +65,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('BottomNavigationBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBarThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -105,7 +106,7 @@ void main() {
     expect(description[11], 'mouseCursor: MaterialStateMouseCursor(clickable)');
   });
 
-  testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBar is themeable', (WidgetTester tester) async {
     const Color backgroundColor = Color(0xFF000001);
     const Color selectedItemColor = Color(0xFF000002);
     const Color unselectedItemColor = Color(0xFF000003);
@@ -209,7 +210,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
-  testWidgets('BottomNavigationBar properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBar properties are taken over the theme values', (WidgetTester tester) async {
     const Color themeBackgroundColor = Color(0xFF000001);
     const Color themeSelectedItemColor = Color(0xFF000002);
     const Color themeUnselectedItemColor = Color(0xFF000003);
@@ -336,7 +337,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgets('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66738.
     await tester.pumpWidget(
       MaterialApp(
@@ -374,7 +375,7 @@ void main() {
     expect(tester.widget<Visibility>(findVisibility.at(1)).visible, false);
   });
 
-  testWidgets('BottomNavigationBarTheme can be used to hide selected labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBarTheme can be used to hide selected labels', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66738.
     await tester.pumpWidget(
       MaterialApp(
@@ -412,7 +413,7 @@ void main() {
     expect(tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value, 1.0);
   });
 
-  testWidgets('BottomNavigationBarTheme can be used to hide unselected labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBarTheme can be used to hide unselected labels', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(

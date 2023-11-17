@@ -89,7 +89,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -184,15 +184,12 @@ abstract class ButtonStyleButton extends StatefulWidget {
     EdgeInsetsGeometry geometry3x,
     double textScaleFactor,
   ) {
-
-    if (textScaleFactor <= 1) {
-      return geometry1x;
-    } else if (textScaleFactor >= 3) {
-      return geometry3x;
-    } else if (textScaleFactor <= 2) {
-      return EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1)!;
-    }
-    return EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2)!;
+    return switch (textScaleFactor) {
+      <= 1 => geometry1x,
+      < 2  => EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1)!,
+      < 3  => EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2)!,
+      _    => geometry3x,
+    };
   }
 }
 

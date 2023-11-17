@@ -6,11 +6,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('SearchBar defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SearchBar defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
 
@@ -691,6 +690,108 @@ void main() {
     await tester.pump();
     inputText = tester.widget(find.text('input text'));
     expect(inputText.style.color, focusedColor);
+  });
+
+  testWidgets('SearchBar respects textCapitalization property', (WidgetTester tester) async {
+    Widget buildSearchBar(TextCapitalization textCapitalization) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchBar(
+              textCapitalization: textCapitalization,
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.characters));
+    await tester.pump();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.characters);
+
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.sentences));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.sentences);
+
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.words));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.words);
+
+    await tester.pumpWidget(buildSearchBar(TextCapitalization.none));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.none);
+  });
+
+  testWidgets('SearchAnchor respects textCapitalization property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextCapitalization textCapitalization) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              textCapitalization: textCapitalization,
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.ac_unit),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextCapitalization.characters));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.characters);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pump();
+
+    await tester.pumpWidget(buildSearchAnchor(TextCapitalization.none));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.none);
+  });
+
+  testWidgets('SearchAnchor.bar respects textCapitalization property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextCapitalization textCapitalization) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor.bar(
+              textCapitalization: textCapitalization,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextCapitalization.characters));
+    await tester.pump();
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder textFieldFinder = find.descendant(of: findViewContent(), matching: find.byType(TextField));
+    final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
+    expect(textFieldInView.textCapitalization, TextCapitalization.characters);
+    // Close search view.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pumpAndSettle();
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textCapitalization, TextCapitalization.characters);
   });
 
   testWidgets('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
@@ -1953,6 +2054,117 @@ void main() {
       final EditableText inputText = tester.widget(find.text(input));
       expect(inputText.style.color, theme.colorScheme.onSurface);
     });
+  });
+
+  testWidgets('SearchAnchor view respects theme brightness', (WidgetTester tester) async {
+    Widget buildSearchAnchor(ThemeData theme) {
+      return MaterialApp(
+        theme: theme,
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.ac_unit),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    ThemeData theme = ThemeData(brightness: Brightness.light);
+    await tester.pumpWidget(buildSearchAnchor(theme));
+
+    // Open the search view.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+
+    // Test the search view background color.
+    Material material = getSearchViewMaterial(tester);
+    expect(material.color, theme.colorScheme.surface);
+
+    // Change the theme brightness.
+    theme = ThemeData(brightness: Brightness.dark);
+    await tester.pumpWidget(buildSearchAnchor(theme));
+    await tester.pumpAndSettle();
+
+    // Test the search view background color.
+    material = getSearchViewMaterial(tester);
+    expect(material.color, theme.colorScheme.surface);
+  });
+
+  testWidgets('Search view widgets can inherit local themes', (WidgetTester tester) async {
+    final ThemeData globalTheme = ThemeData(colorSchemeSeed: Colors.red);
+    final ThemeData localTheme = ThemeData(
+      colorSchemeSeed: Colors.green,
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          backgroundColor: const Color(0xffffff00)
+        ),
+      ),
+      cardTheme: const CardTheme(color: Color(0xff00ffff)),
+    );
+    Widget buildSearchAnchor() {
+      return MaterialApp(
+        theme: globalTheme,
+        home: Center(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Theme(
+                data: localTheme,
+                child: Material(
+                  child: SearchAnchor.bar(
+                    suggestionsBuilder: (BuildContext context, SearchController controller) {
+                      return <Widget>[
+                        Card(
+                          child: ListTile(
+                            onTap: () {},
+                            title: const Text('Item 1'),
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
+                ),
+              );
+            }
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSearchAnchor());
+
+    // Open the search view.
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
+
+    // Test the search view background color.
+    final Material searchViewMaterial = getSearchViewMaterial(tester);
+    expect(searchViewMaterial.color, localTheme.colorScheme.surface);
+
+    // Test the search view icons background color.
+    final Material iconButtonMaterial = tester.widget<Material>(find.descendant(
+      of: find.byType(IconButton),
+      matching: find.byType(Material),
+    ).first);
+    expect(find.byWidget(iconButtonMaterial), findsOneWidget);
+    expect(iconButtonMaterial.color, localTheme.iconButtonTheme.style?.backgroundColor?.resolve(<MaterialState>{}));
+
+    // Test the suggestion card color.
+    final Material suggestionMaterial = tester.widget<Material>(find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Material),
+    ).first);
+    expect(suggestionMaterial.color, localTheme.cardTheme.color);
   });
 }
 

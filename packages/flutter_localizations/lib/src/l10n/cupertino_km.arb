@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "ផ្ទាំងទី $tabIndex នៃ $tabCount",
   "modalBarrierDismissLabel": "ច្រាន​ចោល",
   "searchTextFieldPlaceholderLabel": "ស្វែងរក",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "រកមិនឃើញ​ការជំនួសទេ",
+  "menuDismissLabel": "ច្រានចោល​ម៉ឺនុយ",
+  "lookUpButtonLabel": "រកមើល",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

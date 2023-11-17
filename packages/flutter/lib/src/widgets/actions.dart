@@ -455,8 +455,6 @@ abstract class Action<T extends Intent> with Diagnosticable {
 @immutable
 class ActionListener extends StatefulWidget {
   /// Create a const [ActionListener].
-  ///
-  /// The [listener], [action], and [child] arguments must not be null.
   const ActionListener({
     super.key,
     required this.listener,
@@ -465,13 +463,9 @@ class ActionListener extends StatefulWidget {
   });
 
   /// The [ActionListenerCallback] callback to register with the [action].
-  ///
-  /// Must not be null.
   final ActionListenerCallback listener;
 
   /// The [Action] that the callback will be registered with.
-  ///
-  /// Must not be null.
   final Action<Intent> action;
 
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -712,8 +706,6 @@ class ActionDispatcher with Diagnosticable {
 ///  * [ActionDispatcher], the object that this widget uses to manage actions.
 class Actions extends StatefulWidget {
   /// Creates an [Actions] widget.
-  ///
-  /// The [child], [actions], and [dispatcher] arguments must not be null.
   const Actions({
     super.key,
     this.dispatcher,
@@ -950,8 +942,6 @@ class Actions extends StatefulWidget {
   /// This method returns the result of invoking the action's [Action.invoke]
   /// method.
   ///
-  /// The `context` and `intent` arguments must not be null.
-  ///
   /// If the given `intent` doesn't map to an action, then it will look to the
   /// next ancestor [Actions] widget in the hierarchy until it reaches the root.
   ///
@@ -1002,8 +992,6 @@ class Actions extends StatefulWidget {
   /// method. If no action mapping was found for the specified intent, or if the
   /// first action found was disabled, or the action itself returns null
   /// from [Action.invoke], then this method returns null.
-  ///
-  /// The `context` and `intent` arguments must not be null.
   ///
   /// If the given `intent` doesn't map to an action, then it will look to the
   /// next ancestor [Actions] widget in the hierarchy until it reaches the root.
@@ -1153,8 +1141,6 @@ class _ActionsScope extends InheritedWidget {
 /// It hosts its own [FocusNode] or uses [focusNode], if given.
 class FocusableActionDetector extends StatefulWidget {
   /// Create a const [FocusableActionDetector].
-  ///
-  /// The [enabled], [autofocus], [mouseCursor], and [child] arguments must not be null.
   const FocusableActionDetector({
     super.key,
     this.enabled = true,

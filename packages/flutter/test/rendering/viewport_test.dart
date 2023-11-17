@@ -1586,6 +1586,14 @@ void main() {
       final double revealOffset = viewport.getOffsetToReveal(target, 0.0).offset;
       expect(revealOffset, -(300.0 + padding.horizontal)  * 5 + 34.0 * 2);
     });
+
+    testWidgets('will not assert on mismatched axis', (WidgetTester tester) async {
+      await tester.pumpWidget(buildList(axis: Axis.vertical, reverse: true, reverseGrowth: true));
+      final RenderAbstractViewport viewport = tester.allRenderObjects.whereType<RenderAbstractViewport>().first;
+
+      final RenderObject target = tester.renderObject(find.text('Tile 0', skipOffstage: false));
+      viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
+    });
   });
 
   testWidgets('RenderViewportBase.showOnScreen reports the correct targetRect', (WidgetTester tester) async {

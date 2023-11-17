@@ -42,5 +42,9 @@
   "selectAllButtonLabel": "Dewis y Cyfan",
   "searchTextFieldPlaceholderLabel": "Chwilio",
   "modalBarrierDismissLabel": "Diystyru",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Dim Ailosodiadau wedi'u Canfod",
+  "menuDismissLabel": "Diystyru'r ddewislen",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

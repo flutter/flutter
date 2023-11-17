@@ -1,4 +1,7 @@
 {
+  "lookUpButtonLabel": "Procurar",
+  "noSpellCheckReplacementsLabel": "Não foram encontradas substituições",
+  "menuDismissLabel": "Ignorar menu",
   "searchTextFieldPlaceholderLabel": "Pesquise",
   "tabSemanticsLabel": "Separador $tabIndex de $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour hora",

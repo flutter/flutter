@@ -7,9 +7,10 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('TapRegionSurface detects outside taps', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface detects outside taps', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -101,7 +102,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside taps', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface detects inside taps', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -188,7 +189,7 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside taps correctly with behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TapRegionSurface detects inside taps correctly with behavior', (WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     const ValueKey<String> noGroupKey = ValueKey<String>('No Group');
     const ValueKey<String> group1AKey = ValueKey<String>('Group 1 A');
@@ -275,7 +276,7 @@ void main() {
     tappedInside.clear();
   });
 
-  testWidgets('Setting the group updates the registration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Setting the group updates the registration', (WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(

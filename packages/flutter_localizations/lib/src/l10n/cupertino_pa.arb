@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ",
   "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ",
   "searchTextFieldPlaceholderLabel": "ਖੋਜੋ",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "ਕੋਈ ਸੁਝਾਅ ਨਹੀਂ ਮਿਲਿਆ",
+  "menuDismissLabel": "ਮੀਨੂ ਖਾਰਜ ਕਰੋ",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

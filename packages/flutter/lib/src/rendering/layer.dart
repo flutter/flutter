@@ -172,6 +172,9 @@ abstract class Layer with DiagnosticableTreeMixin {
   }
 
   void _fireCompositionCallbacks({required bool includeChildren}) {
+    if (_callbacks.isEmpty) {
+      return;
+    }
     for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
       callback();
     }
@@ -495,46 +498,43 @@ abstract class Layer with DiagnosticableTreeMixin {
     _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
-  /// The owner for this node (null if unattached).
+  /// The owner for this layer (null if unattached).
   ///
-  /// The entire subtree that this node belongs to will have the same owner.
+  /// The entire layer tree that this layer belongs to will have the same owner.
+  ///
+  /// Typically the owner is a [RenderView].
   Object? get owner => _owner;
   Object? _owner;
 
-  /// Whether this node is in a tree whose root is attached to something.
+  /// Whether the layer tree containing this layer is attached to an owner.
   ///
   /// This becomes true during the call to [attach].
   ///
   /// This becomes false during the call to [detach].
   bool get attached => _owner != null;
 
-  /// Mark this node as attached to the given owner.
+  /// Mark this layer as attached to the given owner.
   ///
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [attach] method, and then [attach] all their children to the
-  /// same [owner].
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.attach(owner)`.
+  /// Subclasses with children should override this method to
+  /// [attach] all their children to the same [owner]
+  /// after calling the inherited method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(covariant Object owner) {
     assert(_owner == null);
     _owner = owner;
   }
 
-  /// Mark this node as detached.
+  /// Mark this layer as detached from its owner.
   ///
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [detach] method, and then [detach] all their children.
-  ///
-  /// Implementations of this method should end with a call to the inherited
-  /// method, as in `super.detach()`.
+  /// Subclasses with children should override this method to
+  /// [detach] all their children after calling the inherited method,
+  /// as in `super.detach()`.
   @mustCallSuper
   void detach() {
     assert(_owner != null);
@@ -542,10 +542,12 @@ abstract class Layer with DiagnosticableTreeMixin {
     assert(parent == null || attached == parent!.attached);
   }
 
-  /// The depth of this node in the tree.
+  /// The depth of this layer in the layer tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
+  /// the tree.  There's no guarantee regarding depth between siblings.
+  ///
+  /// The depth is used to ensure that nodes are processed in depth order.
   int get depth => _depth;
   int _depth = 0;
 
@@ -917,9 +919,9 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
+///  * [TextureRegistry](/javadoc/io/flutter/view/TextureRegistry.html)
 ///    for how to create and manage backend textures on Android.
-///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * [TextureRegistry Protocol](/ios-embedder/protocol_flutter_texture_registry-p.html)
 ///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
@@ -972,8 +974,6 @@ class TextureLayer extends Layer {
 /// on iOS.
 class PlatformViewLayer extends Layer {
   /// Creates a platform view layer.
-  ///
-  /// The `rect` and `viewId` parameters must not be null.
   PlatformViewLayer({
     required this.rect,
     required this.viewId,
@@ -1409,8 +1409,6 @@ class ContainerLayer extends Layer {
   /// may explicitly allow null as a value, for example if they know that they
   /// transform all their children identically.
   ///
-  /// The `transform` argument must not be null.
-  ///
   /// Used by [FollowerLayer] to transform its child to a [LeaderLayer]'s
   /// position.
   void applyTransform(Layer? child, Matrix4 transform) {
@@ -1608,7 +1606,7 @@ class ClipRectLayer extends ContainerLayer {
   /// The [clipRect] argument must not be null before the compositing phase of
   /// the pipeline.
   ///
-  /// The [clipBehavior] argument must not be null, and must not be [Clip.none].
+  /// The [clipBehavior] argument must not be [Clip.none].
   ClipRectLayer({
     Rect? clipRect,
     Clip clipBehavior = Clip.hardEdge,
@@ -2366,9 +2364,8 @@ class LayerLink {
 class LeaderLayer extends ContainerLayer {
   /// Creates a leader layer.
   ///
-  /// The [link] property must not be null, and must not have been provided to
-  /// any other [LeaderLayer] layers that are [attached] to the layer tree at
-  /// the same time.
+  /// The [link] property must not have been provided to any other [LeaderLayer]
+  /// layers that are [attached] to the layer tree at the same time.
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
@@ -2477,8 +2474,6 @@ class LeaderLayer extends ContainerLayer {
 /// layer at a distance rather than directly overlapping it.
 class FollowerLayer extends ContainerLayer {
   /// Creates a follower layer.
-  ///
-  /// The [link] property must not be null.
   ///
   /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
   /// must be non-null before the compositing phase of the pipeline.
@@ -2803,8 +2798,6 @@ class FollowerLayer extends ContainerLayer {
 /// if [opaque] is true and the layer's annotation is added.
 class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
   /// Creates a new layer that annotates its children with [value].
-  ///
-  /// The [value] provided cannot be null.
   AnnotatedRegionLayer(
     this.value, {
     this.size,

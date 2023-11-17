@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../../bin/xcode_backend.dart';
-import '../src/common.dart';
+import '../src/common.dart' hide Context;
 import '../src/fake_process_manager.dart';
 
 void main() {
@@ -51,6 +51,7 @@ void main() {
               '-dTrackWidgetCreation=',
               '-dDartObfuscation=',
               '-dAction=build',
+              '-dFrontendServerStarterPath=',
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
@@ -103,6 +104,7 @@ void main() {
               '-dTrackWidgetCreation=',
               '-dDartObfuscation=',
               '-dAction=',
+              '-dFrontendServerStarterPath=',
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
@@ -136,6 +138,7 @@ void main() {
       const String expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
       const String extraFrontEndOptions = '--some-option';
       const String extraGenSnapshotOptions = '--obfuscate';
+      const String frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
       const String sdkRoot = '/path/to/sdk';
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
@@ -154,6 +157,7 @@ void main() {
           'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
           'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
           'FLUTTER_ROOT': flutterRoot.path,
+          'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath,
           'INFOPLIST_PATH': 'Info.plist',
           'SDKROOT': sdkRoot,
           'SPLIT_DEBUG_INFO': splitDebugInfo,
@@ -177,6 +181,7 @@ void main() {
               '-dTrackWidgetCreation=$trackWidgetCreation',
               '-dDartObfuscation=$dartObfuscation',
               '-dAction=install',
+              '-dFrontendServerStarterPath=$frontendServerStarterPath',
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',

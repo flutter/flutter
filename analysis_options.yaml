@@ -17,6 +17,7 @@
 analyzer:
   language:
     strict-casts: true
+    strict-inference: true
     strict-raw-types: true
   errors:
     # allow self-reference to deprecated members (we do this because otherwise we have
@@ -50,7 +51,7 @@ linter:
     - avoid_field_initializers_in_const_classes
     # - avoid_final_parameters # incompatible with prefer_final_parameters
     - avoid_function_literals_in_foreach_calls
-    - avoid_implementing_value_types
+    # - avoid_implementing_value_types # see https://github.com/dart-lang/linter/issues/4558
     - avoid_init_to_null
     - avoid_js_rounded_ints
     # - avoid_multiple_declarations_per_line # seems to be a stylistic choice we don't subscribe to
@@ -116,7 +117,7 @@ linter:
     - library_prefixes
     - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
-    # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/linter/issues/453
+    - literal_only_boolean_expressions
     # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list

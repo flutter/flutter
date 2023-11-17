@@ -32,8 +32,21 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     postFrameCallbacks = <void Function(Duration)>[];
   }
 
+  late final RenderView _renderView = RenderView(
+    view: platformDispatcher.implicitView!,
+  );
+
+  late final PipelineOwner _pipelineOwner = PipelineOwner(
+    onSemanticsUpdate: (ui.SemanticsUpdate _) { assert(false); },
+  );
+
   void setHitTest(BoxHitTest hitTest) {
-    renderView.child = _TestHitTester(hitTest);
+    if (_pipelineOwner.rootNode == null) {
+      _pipelineOwner.rootNode = _renderView;
+      rootPipelineOwner.adoptChild(_pipelineOwner);
+      addRenderView(_renderView);
+    }
+    _renderView.child = _TestHitTester(hitTest);
   }
 
   SchedulerPhase? _overridePhase;

@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -215,14 +214,14 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
 class FixedExtentScrollController extends ScrollController {
   /// Creates a scroll controller for scrollables whose items have the same size.
   ///
-  /// [initialItem] defaults to 0 and must not be null.
+  /// [initialItem] defaults to zero.
   FixedExtentScrollController({
     this.initialItem = 0,
   });
 
   /// The page to show when first creating the scroll view.
   ///
-  /// Defaults to 0 and must not be null.
+  /// Defaults to zero.
   final int initialItem;
 
   /// The currently selected item index that's closest to the center of the viewport.
@@ -255,8 +254,6 @@ class FixedExtentScrollController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   Future<void> animateToItem(
     int itemIndex, {
     required Duration duration,
@@ -666,8 +663,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.RenderListWheelViewport.overAndUnderCenterOpacity}
   final double overAndUnderCenterOpacity;
 
-  /// Size of each child in the main axis. Must not be null and must be
-  /// positive.
+  /// Size of each child in the main axis.
+  ///
+  /// Must be positive.
   final double itemExtent;
 
   /// {@macro flutter.rendering.RenderListWheelViewport.squeeze}
@@ -709,12 +707,14 @@ class ListWheelScrollView extends StatefulWidget {
 
 class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   int _lastReportedItemIndex = 0;
-  ScrollController? scrollController;
+  ScrollController? _backupController;
+
+  ScrollController get _effectiveController =>
+    widget.controller ?? (_backupController ??= FixedExtentScrollController());
 
   @override
   void initState() {
     super.initState();
-    scrollController = widget.controller ?? FixedExtentScrollController();
     if (widget.controller is FixedExtentScrollController) {
       final FixedExtentScrollController controller = widget.controller! as FixedExtentScrollController;
       _lastReportedItemIndex = controller.initialItem;
@@ -722,15 +722,9 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   }
 
   @override
-  void didUpdateWidget(ListWheelScrollView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.controller != null && widget.controller != scrollController) {
-      final ScrollController? oldScrollController = scrollController;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        oldScrollController!.dispose();
-      });
-      scrollController = widget.controller;
-    }
+  void dispose() {
+    _backupController?.dispose();
+    super.dispose();
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -754,7 +748,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: _FixedExtentScrollable(
-        controller: scrollController,
+        controller: _effectiveController,
         physics: widget.physics,
         itemExtent: widget.itemExtent,
         restorationId: widget.restorationId,
@@ -945,18 +939,18 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 class ListWheelViewport extends RenderObjectWidget {
   /// Creates a viewport where children are rendered onto a wheel.
   ///
-  /// The [diameterRatio] argument defaults to 2.0 and must not be null.
+  /// The [diameterRatio] argument defaults to 2.
   ///
-  /// The [perspective] argument defaults to 0.003 and must not be null.
+  /// The [perspective] argument defaults to 0.003.
   ///
   /// The [itemExtent] argument in pixels must be provided and must be positive.
   ///
-  /// The [clipBehavior] argument defaults to [Clip.hardEdge] and must not be null.
+  /// The [clipBehavior] argument defaults to [Clip.hardEdge].
   ///
   /// The [renderChildrenOutsideViewport] argument defaults to false and must
   /// not be null.
   ///
-  /// The [offset] argument must be provided and must not be null.
+  /// The [offset] argument must be provided.
   const ListWheelViewport({
     super.key,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,

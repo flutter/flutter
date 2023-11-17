@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
         with:
           persist-credentials: false
 
@@ -43,7 +43,7 @@ jobs:
 
       # Upload the results as artifacts (optional).
       - name: "Upload artifact"
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
         with:
           name: SARIF file
           path: results.sarif
@@ -51,6 +51,6 @@ jobs:
 
       # Upload the results to GitHub's code scanning dashboard.
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@04df1262e6247151b5ac09cd2c303ac36ad3f62b
+        uses: github/codeql-action/upload-sarif@701f152f28d4350ad289a5e31435e9ab6169a7ca
         with:
           sarif_file: results.sarif

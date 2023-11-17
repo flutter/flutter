@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestValueKey<T> extends ValueKey<T> {
   const TestValueKey(super.value);
@@ -19,7 +20,7 @@ class NotEquals {
 }
 
 void main() {
-  testWidgets('Keys', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Keys', (WidgetTester tester) async {
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(3)), isTrue);
     expect(ValueKey<num>(nonconst(3)) == ValueKey<int>(nonconst(3)), isFalse);
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(2)), isFalse);

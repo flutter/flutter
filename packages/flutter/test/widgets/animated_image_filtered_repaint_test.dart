@@ -7,9 +7,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('ImageFiltered avoids repainting child as it animates', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ImageFiltered avoids repainting child as it animates', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       ColoredBox(

@@ -136,10 +136,14 @@
   "bottomSheetLabel": "Bảng dưới cùng",
   "scrimOnTapHint": "Đóng $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "nhấn đúp để thu gọn",
+  "expansionTileCollapsedHint": "nhấn đúp để mở rộng",
+  "expansionTileExpandedTapHint": "Thu gọn",
+  "expansionTileCollapsedTapHint": "Mở rộng để xem thêm chi tiết",
+  "expandedHint": "Đã thu gọn",
+  "collapsedHint": "Đã mở rộng",
+  "menuDismissLabel": "Đóng trình đơn",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

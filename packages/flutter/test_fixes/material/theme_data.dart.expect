@@ -440,4 +440,7 @@ void main() {
   themeData = ThemeData(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
   themeData = ThemeData.raw(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
   themeData = ThemeData.copyWith(bottomAppBarTheme: BottomAppBarTheme(color: Colors.green));
+
+  // Changes made in https://github.com/flutter/flutter/pull/131455
+  ThemeData themeData = ThemeData.copyWith();
 }

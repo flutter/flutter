@@ -53,8 +53,6 @@ import 'basic_types.dart';
 @immutable
 class FractionalOffset extends Alignment {
   /// Creates a fractional offset.
-  ///
-  /// The [dx] and [dy] arguments must not be null.
   const FractionalOffset(double dx, double dy)
     : super(dx * 2.0 - 1.0, dy * 2.0 - 1.0);
 

@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
@@ -109,7 +110,7 @@ Widget buildTest({
 }
 
 void main() {
-  testWidgets('ScrollDirection test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollDirection test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
     final List<ScrollDirection> receivedResult = <ScrollDirection>[];
     const List<ScrollDirection> expectedReverseResult = <ScrollDirection>[ScrollDirection.reverse, ScrollDirection.idle];
@@ -211,7 +212,7 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -234,7 +235,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -259,7 +260,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('NestedScrollView overscroll and release', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView overscroll and release', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
@@ -275,7 +276,7 @@ void main() {
     expect(find.text('aaa2'), findsOneWidget);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('NestedScrollView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     expect(find.text('aaa3'), findsNothing);
@@ -342,10 +343,11 @@ void main() {
     );
   });
 
-  testWidgets('NestedScrollView with a ScrollController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView with a ScrollController', (WidgetTester tester) async {
     final ScrollController controller = ScrollController(
       initialScrollOffset: 50.0,
     );
+    addTearDown(controller.dispose);
 
     late double scrollOffset;
     controller.addListener(() {
@@ -419,8 +421,9 @@ void main() {
     expect(find.text('ddd1'), findsOneWidget);
   });
 
-  testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
+    addTearDown(controller.dispose);
     expect(controller.mostRecentlyUpdatedPosition, isNull);
     expect(controller.initialScrollOffset, 0.0);
 
@@ -482,7 +485,7 @@ void main() {
     );
   });
 
-  testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollViews with custom physics', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Localizations(
@@ -520,7 +523,7 @@ void main() {
     expect(point1.dy, greaterThan(point2.dy));
   });
 
-  testWidgets('NestedScrollViews respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollViews respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/113753
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -561,7 +564,7 @@ void main() {
     expect(point1, point2);
   });
 
-  testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView and internal scrolling', (WidgetTester tester) async {
     debugDisableShadows = false;
     const List<String> tabs = <String>['Hello', 'World'];
     int buildCount = 0;
@@ -843,7 +846,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('NestedScrollView and bouncing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView and bouncing', (WidgetTester tester) async {
     // This verifies that overscroll bouncing works correctly on iOS. For
     // example, this checks that if you pull to overscroll, friction is applied;
     // it also makes sure that if you scroll back the other way, the scroll
@@ -946,7 +949,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   group('NestedScrollViewState exposes inner and outer controllers', () {
-    testWidgets('Scrolling by less than the outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Scrolling by less than the outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -978,7 +981,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('Scrolling by exactly the outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Scrolling by exactly the outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -1010,7 +1013,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('Scrolling by greater than the outer extent scrolls the inner body', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Scrolling by greater than the outer extent scrolls the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -1046,7 +1049,7 @@ void main() {
       );
     });
 
-    testWidgets('Inertia-cancel event does not modify either position.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Inertia-cancel event does not modify either position.', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -1094,7 +1097,7 @@ void main() {
       );
     });
 
-    testWidgets('scrolling by less than the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('scrolling by less than the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(key: globalKey));
 
@@ -1123,7 +1126,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('scrolling by exactly the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('scrolling by exactly the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(key: globalKey));
 
@@ -1152,7 +1155,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('scrolling by greater than the expanded outer extent scrolls the inner body', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('scrolling by greater than the expanded outer extent scrolls the inner body', (WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(key: globalKey));
 
@@ -1182,11 +1185,12 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 50.0);
     });
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'NestedScrollViewState.outerController should correspond to NestedScrollView.controller',
       (WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
         final ScrollController scrollController = ScrollController();
+        addTearDown(scrollController.dispose);
 
         await tester.pumpWidget(buildTest(
           controller: scrollController,
@@ -1213,7 +1217,7 @@ void main() {
     );
 
     group('manipulating controllers when', () {
-      testWidgets('outer: not scrolled, inner: not scrolled', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('outer: not scrolled, inner: not scrolled', (WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1255,7 +1259,7 @@ void main() {
         expect(globalKey2.currentState!.outerController.position.pixels, 0.0);
       });
 
-      testWidgets('outer: not scrolled, inner: scrolled', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('outer: not scrolled, inner: scrolled', (WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1299,7 +1303,7 @@ void main() {
         expect(globalKey2.currentState!.outerController.position.pixels, 0.0);
       });
 
-      testWidgets('outer: scrolled, inner: not scrolled', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('outer: scrolled, inner: not scrolled', (WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1343,7 +1347,7 @@ void main() {
         expect(globalKey2.currentState!.outerController.position.pixels, 0.0);
       });
 
-      testWidgets('outer: scrolled, inner: scrolled', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('outer: scrolled, inner: scrolled', (WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1392,7 +1396,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39963.
-  testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
     await tester.pumpWidget(const _TestLayoutExtentIsNegative(1));
     await tester.pumpWidget(const _TestLayoutExtentIsNegative(10));
   });
@@ -1471,7 +1475,7 @@ void main() {
       return geometry.paintExtent;
     }
 
-    testWidgets('float', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1523,7 +1527,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('float expanded', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float expanded', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1578,7 +1582,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
-    testWidgets('float with pointer signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float with pointer signal', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1635,7 +1639,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('snap with pointer signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('snap with pointer signal', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1689,7 +1693,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
     });
 
-    testWidgets('float expanded with pointer signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float expanded with pointer signal', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1749,7 +1753,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
-    testWidgets('only snap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('only snap', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       final GlobalKey<NestedScrollViewState> nestedKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
@@ -1884,7 +1888,7 @@ void main() {
       expect(nestedKey.currentState!.outerController.offset, 56.0);
     });
 
-    testWidgets('only snap expanded', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('only snap expanded', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       final GlobalKey<NestedScrollViewState> nestedKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
@@ -2020,7 +2024,7 @@ void main() {
       expect(nestedKey.currentState!.outerController.offset, 200.0);
     });
 
-    testWidgets('float pinned', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float pinned', (WidgetTester tester) async {
       // This configuration should have the same behavior of a pinned app bar.
       // No floating should happen, and the app bar should persist.
       final GlobalKey appBarKey = GlobalKey();
@@ -2075,7 +2079,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('float pinned expanded', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float pinned expanded', (WidgetTester tester) async {
       // Only the expanded portion (flexible space) of the app bar should float
       // in and out.
       final GlobalKey appBarKey = GlobalKey();
@@ -2134,7 +2138,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
-    testWidgets('float pinned with pointer signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float pinned with pointer signal', (WidgetTester tester) async {
       // This configuration should have the same behavior of a pinned app bar.
       // No floating should happen, and the app bar should persist.
       final GlobalKey appBarKey = GlobalKey();
@@ -2194,7 +2198,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('float pinned expanded with pointer signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('float pinned expanded with pointer signal', (WidgetTester tester) async {
       // Only the expanded portion (flexible space) of the app bar should float
       // in and out.
       final GlobalKey appBarKey = GlobalKey();
@@ -2289,10 +2293,11 @@ void main() {
       );
     }
 
-    testWidgets('overscroll, hold for 0 velocity, and release', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('overscroll, hold for 0 velocity, and release', (WidgetTester tester) async {
       // Dragging into an overscroll and holding so that when released, the
       // ballistic scroll activity has a 0 velocity.
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(buildBallisticTest(controller));
       // Last item of the inner scroll view.
       expect(find.text('Item 49'), findsNothing);
@@ -2316,10 +2321,11 @@ void main() {
       expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-    testWidgets('overscroll, release, and tap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('overscroll, release, and tap', (WidgetTester tester) async {
       // Tapping while an inner ballistic scroll activity is in progress will
       // trigger a secondary ballistic scroll activity with a 0 velocity.
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(buildBallisticTest(controller));
       // Last item of the inner scroll view.
       expect(find.text('Item 49'), findsNothing);
@@ -2350,7 +2356,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/63978
-  testWidgets('Inner _NestedScrollPosition.applyClampedDragUpdate correctly calculates range when in overscroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Inner _NestedScrollPosition.applyClampedDragUpdate correctly calculates range when in overscroll', (WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2404,8 +2410,9 @@ void main() {
     expect(nestedScrollView.currentState!.innerController.position.pixels, 295.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Scroll pointer signal should not cause overscroll.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll pointer signal should not cause overscroll.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(buildTest(controller: controller));
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(NestedScrollView));
@@ -2426,7 +2433,7 @@ void main() {
     expect(find.text('ddd1'), findsOneWidget);
   });
 
-  testWidgets('NestedScrollView basic scroll with pointer signal', (WidgetTester tester) async{
+  testWidgetsWithLeakTracking('NestedScrollView basic scroll with pointer signal', (WidgetTester tester) async{
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     expect(find.text('aaa3'), findsNothing);
@@ -2466,12 +2473,13 @@ void main() {
   });
 
   // Related to https://github.com/flutter/flutter/issues/64266
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse',
     (WidgetTester tester) async {
       ScrollDirection? lastUserScrollingDirection;
 
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(buildTest(controller: controller));
 
       controller.addListener(() {
@@ -2503,7 +2511,7 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/72257
-  testWidgets('NestedScrollView works well when rebuilding during scheduleWarmUpFrame', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView works well when rebuilding during scheduleWarmUpFrame', (WidgetTester tester) async {
     bool? isScrolled;
     final Widget myApp = MaterialApp(
       home: Scaffold(
@@ -2546,8 +2554,9 @@ void main() {
   });
 
   // Regression test of https://github.com/flutter/flutter/issues/74372
-  testWidgets('ScrollPosition can be accessed during `_updatePosition()`', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScrollPosition can be accessed during `_updatePosition()`', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     late ScrollPosition position;
 
     Widget buildFrame({ScrollPhysics? physics}) {
@@ -2592,7 +2601,7 @@ void main() {
     expect(position.pixels, 0.0);
   });
 
-  testWidgets("NestedScrollView doesn't crash due to precision error", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("NestedScrollView doesn't crash due to precision error", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63825
 
     await tester.pumpWidget(MaterialApp(
@@ -2639,7 +2648,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('NestedScrollViewCoordinator.pointerScroll dispatches correct scroll notifications', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollViewCoordinator.pointerScroll dispatches correct scroll notifications', (WidgetTester tester) async {
     int scrollEnded = 0;
     int scrollStarted = 0;
     bool isScrolled = false;
@@ -2701,7 +2710,7 @@ void main() {
     expect(scrollEnded, 2);
   });
 
-  testWidgets('SliverAppBar.medium collapses in NestedScrollView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar.medium collapses in NestedScrollView', (WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 112;
@@ -2783,7 +2792,7 @@ void main() {
     expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
   });
 
-  testWidgets('SliverAppBar.large collapses in NestedScrollView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar.large collapses in NestedScrollView', (WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 152;
@@ -2866,7 +2875,7 @@ void main() {
     expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
   });
 
-  testWidgets('NestedScrollView does not crash when inner scrollable changes while scrolling', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView does not crash when inner scrollable changes while scrolling', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126454.
     Widget buildApp({required bool nested}) {
       final Widget innerScrollable = ListView(
@@ -2903,7 +2912,7 @@ void main() {
     await tester.pumpWidget(buildApp(nested: true));
   });
 
-  testWidgets('SliverOverlapInjector asserts when there is no SliverOverlapAbsorber', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverOverlapInjector asserts when there is no SliverOverlapAbsorber', (WidgetTester tester) async {
     Widget buildApp() {
       return MaterialApp(
         home: Scaffold(
@@ -2997,7 +3006,8 @@ void main() {
         )
       );
     }
-    testWidgets('when headerSliverBuilder is empty', (WidgetTester tester) async {
+
+    testWidgetsWithLeakTracking('when headerSliverBuilder is empty', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/117316
       // Regression test for https://github.com/flutter/flutter/issues/46089
       // Short body / long body
@@ -3015,7 +3025,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('when headerSliverBuilder extent is 0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when headerSliverBuilder extent is 0', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/79077
       // Short body / long body
       for (final _BodyLength bodyLength in _BodyLength.values) {
@@ -3169,7 +3179,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('With a pinned SliverAppBar', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('With a pinned SliverAppBar', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/110956
       // Regression test for https://github.com/flutter/flutter/issues/127282
       // Regression test for https://github.com/flutter/flutter/issues/32563
@@ -3199,6 +3209,13 @@ void main() {
         }
       }
     });
+  });
+
+  testWidgetsWithLeakTracking('$SliverOverlapAbsorberHandle dispatches creation in constructor', (WidgetTester widgetTester) async {
+    await expectLater(
+      await memoryEvents(() => SliverOverlapAbsorberHandle().dispose(), SliverOverlapAbsorberHandle),
+      areCreateAndDispose,
+    );
   });
 }
 

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_widgets.dart';
 
@@ -49,7 +50,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
 final TestParentData kNonPositioned = TestParentData();
 
 void main() {
-  testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
@@ -249,12 +250,99 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentData overwrite with custom ParentDataWidget subclasses', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
-          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            CustomPositionedWidget(
+              bottom: 8.0,
+              child: Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: DecoratedBox(decoration: kBoxDecorationB),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      startsWith(
+        'Incorrect use of ParentDataWidget.\n'
+        'Competing ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        '- Positioned(left: 7.0, top: 6.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        '- CustomPositionedWidget, which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        'A RenderObject can receive parent data from multiple '
+        'ParentDataWidgets, but the Type of ParentData must be unique to '
+        'prevent one overwriting another.\n'
+        'Usually, this indicates that one or more of the offending ParentDataWidgets listed '
+        "above isn't placed inside a dedicated compatible ancestor widget that it isn't "
+        'sharing with another ParentDataWidget of the same type.\n'
+        'Otherwise, separating aspects of ParentData to prevent conflicts can '
+        'be done using mixins, mixing them all in on the full ParentData '
+        'Object, such as KeepAlive does with KeepAliveParentDataMixin.\n'
+        'The ownership chain for the RenderObject that received the parent data was:\n'
+        '  DecoratedBox ← Positioned ← CustomPositionedWidget ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
+      ),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            SubclassPositioned(
+              bottom: 8.0,
+              child: Positioned(
+                top: 6.0,
+                left: 7.0,
+                child: DecoratedBox(decoration: kBoxDecorationB),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      startsWith(
+        'Incorrect use of ParentDataWidget.\n'
+        'Competing ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        '- Positioned(left: 7.0, top: 6.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        '- SubclassPositioned(bottom: 8.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        'A RenderObject can receive parent data from multiple '
+        'ParentDataWidgets, but the Type of ParentData must be unique to '
+        'prevent one overwriting another.\n'
+        'Usually, this indicates that one or more of the offending ParentDataWidgets listed '
+        "above isn't placed inside a dedicated compatible ancestor widget that it isn't "
+        'sharing with another ParentDataWidget of the same type.\n'
+        'Otherwise, separating aspects of ParentData to prevent conflicts can '
+        'be done using mixins, mixing them all in on the full ParentData '
+        'Object, such as KeepAlive does with KeepAliveParentDataMixin.\n'
+        'The ownership chain for the RenderObject that received the parent data was:\n'
+        '  DecoratedBox ← Positioned ← SubclassPositioned ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
+      ),
+    );
+  });
+
+  testWidgetsWithLeakTracking('ParentDataWidget conflicting data', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
           children: <Widget>[
             Positioned(
               top: 5.0,
@@ -276,19 +364,26 @@ void main() {
       exception.toString(),
       startsWith(
         'Incorrect use of ParentDataWidget.\n'
-        'The following ParentDataWidgets are providing parent data to the same RenderObject:\n'
-        '- Positioned(left: 7.0, top: 6.0) (typically placed directly inside a Stack widget)\n'
-        '- Positioned(top: 5.0, bottom: 8.0) (typically placed directly inside a Stack widget)\n'
-        'However, a RenderObject can only receive parent data from at most one ParentDataWidget.\n'
-        'Usually, this indicates that at least one of the offending ParentDataWidgets listed '
-        'above is not placed directly inside a compatible ancestor widget.\n'
+        'Competing ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        '- Positioned(left: 7.0, top: 6.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        '- Positioned(top: 5.0, bottom: 8.0), which writes ParentData of type '
+        'StackParentData, (typically placed directly inside a Stack widget)\n'
+        'A RenderObject can receive parent data from multiple '
+        'ParentDataWidgets, but the Type of ParentData must be unique to '
+        'prevent one overwriting another.\n'
+        'Usually, this indicates that one or more of the offending ParentDataWidgets listed '
+        "above isn't placed inside a dedicated compatible ancestor widget that it isn't "
+        'sharing with another ParentDataWidget of the same type.\n'
+        'Otherwise, separating aspects of ParentData to prevent conflicts can '
+        'be done using mixins, mixing them all in on the full ParentData '
+        'Object, such as KeepAlive does with KeepAliveParentDataMixin.\n'
         'The ownership chain for the RenderObject that received the parent data was:\n'
         '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
       ),
     );
 
     await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
-
     checkTree(tester, <TestParentData>[]);
 
     await tester.pumpWidget(
@@ -307,6 +402,7 @@ void main() {
         ),
       ),
     );
+
     exception = tester.takeException();
     expect(exception, isFlutterError);
     expect(
@@ -327,11 +423,10 @@ void main() {
     await tester.pumpWidget(
       const Stack(textDirection: TextDirection.ltr),
     );
-
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -389,7 +484,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Parent data invalid ancestor', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
@@ -424,7 +519,7 @@ void main() {
     );
   });
 
-  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
       OneAncestorWidget(
         child: Container(),
@@ -455,6 +550,46 @@ void main() {
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');
   });
+}
+
+class SubclassPositioned extends Positioned {
+  const SubclassPositioned({
+    super.key,
+    super.left,
+    super.top,
+    super.right,
+    super.bottom,
+    super.width,
+    super.height,
+    required super.child,
+  });
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is StackParentData);
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    parentData.bottom = bottom;
+  }
+}
+
+class CustomPositionedWidget extends ParentDataWidget<StackParentData> {
+  const CustomPositionedWidget({
+    super.key,
+    required this.bottom,
+    required super.child,
+  });
+
+  final double bottom;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is StackParentData);
+    final StackParentData parentData = renderObject.parentData! as StackParentData;
+    parentData.bottom = bottom;
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Stack;
 }
 
 class TestParentDataWidget extends ParentDataWidget<DummyParentData> {

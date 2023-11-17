@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
 import 'application_package.dart';
-import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
@@ -394,7 +393,7 @@ class DeviceDiscoverySupportFilter {
     if (_flutterProject == null) {
       return true;
     }
-    return device.isSupportedForProject(_flutterProject!);
+    return device.isSupportedForProject(_flutterProject);
   }
 }
 
@@ -504,12 +503,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     if (_timer == null) {
       deviceNotifier ??= ItemListNotifier<Device>();
       // Make initial population the default, fast polling timeout.
-      _timer = _initTimer(null);
+      _timer = _initTimer(null, initialCall: true);
     }
   }
 
-  Timer _initTimer(Duration? pollingTimeout) {
-    return Timer(_pollingInterval, () async {
+  Timer _initTimer(Duration? pollingTimeout, {bool initialCall = false}) {
+    // Poll for devices immediately on the initial call for faster initial population.
+    return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
         deviceNotifier!.updateWithNewList(devices);
@@ -740,9 +740,6 @@ abstract class Device {
   /// Clear the device's logs.
   void clearLogs();
 
-  /// Optional device-specific artifact overrides.
-  OverrideArtifacts? get artifactOverrides => null;
-
   /// Start an app package on the current device.
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
@@ -848,8 +845,10 @@ abstract class Device {
     ];
   }
 
-  static Future<void> printDevices(List<Device> devices, Logger logger) async {
-    (await descriptions(devices)).forEach(logger.printStatus);
+  static Future<void> printDevices(List<Device> devices, Logger logger, { String prefix = '' }) async {
+    for (final String line in await descriptions(devices)) {
+      logger.printStatus('$prefix$line');
+    }
   }
 
   static List<String> devicesPlatformTypes(List<Device> devices) {
