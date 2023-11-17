@@ -6,6 +6,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+class Page extends StatefulWidget {
+  const Page({
+    super.key,
+    required this.title,
+    required this.onDispose,
+  });
+
+  final String title;
+
+  final void Function()? onDispose;
+
+  @override
+  State<Page> createState() => _PageState();
+}
+
+class _PageState extends State<Page> {
+  @override
+  void dispose() {
+    widget.onDispose?.call();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FilledButton(
+        onPressed: () {},
+        child: Text(widget.title),
+      ),
+    );
+  }
+}
+
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/21506.
   testWidgetsWithLeakTracking('InkSplash receives textDirection', (WidgetTester tester) async {
@@ -65,5 +98,36 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/136441.
+  testWidgetsWithLeakTracking('PageView item can dispose when widget with NoSplash.splashFactory is tapped', (WidgetTester tester) async {
+    final PageController controller = PageController();
+    final List<int> disposedPageIndexes = <int>[];
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(splashFactory: NoSplash.splashFactory),
+      home: Scaffold(
+        body: PageView.builder(
+          controller: controller,
+          itemBuilder: (BuildContext context, int index) {
+            return Page(
+              title: 'Page $index',
+              onDispose: () {
+                disposedPageIndexes.add(index);
+              },
+            );
+          },
+          itemCount: 3,
+        ),
+      ),
+    ));
+    controller.jumpToPage(1);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Page 1'));
+    await tester.pumpAndSettle();
+    controller.jumpToPage(0);
+    await tester.pumpAndSettle();
+    expect(disposedPageIndexes, <int>[0, 1]);
+    controller.dispose();
   });
 }
