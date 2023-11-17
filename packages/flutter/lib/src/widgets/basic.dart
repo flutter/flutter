@@ -5875,8 +5875,7 @@ class RichText extends MultiChildRenderObjectWidget {
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
-    return RenderParagraph(
-      text,
+    return RenderParagraph(text,
       textAlign: textAlign,
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
