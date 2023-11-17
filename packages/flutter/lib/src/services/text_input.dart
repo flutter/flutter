@@ -1458,6 +1458,19 @@ class TextInputConnection {
       textAlign: textAlign,
     );
   }
+  
+  /// Send scroll state information.
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    assert(attached);
+
+    TextInput._instance._setScrollState(
+      scrollTop: scrollTop,
+      scrollLeft: scrollLeft,
+    );
+  }
 
   /// Stop interacting with the text input control.
   ///
@@ -2010,6 +2023,18 @@ class TextInput {
       );
     }
   }
+  
+  void _setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    for (final TextInputControl control in _inputControls) {
+      control.setScrollState(
+        scrollTop: scrollTop,
+        scrollLeft: scrollLeft,
+      );
+    }
+  }
 
   void _requestAutofill() {
     for (final TextInputControl control in _inputControls) {
@@ -2205,6 +2230,15 @@ mixin TextInputControl {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
+  }) {}
+
+  /// Informs the text input control about scroll state changes.
+  /// 
+  /// This method is called on the when the attached input client's scroll state
+  /// changes.
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
   }) {}
 
   /// Requests autofill from the text input control.

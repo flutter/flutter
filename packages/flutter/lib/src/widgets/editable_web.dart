@@ -33,6 +33,8 @@ class EditableWeb extends StatefulWidget {
     required this.performAction,
     required this.textInputConfiguration, // contains a bunch of things like obscureText, readOnly, autofillHints, etc.
     this.currentAutofillScope, // contains a bunch of things like obscureText, readOnly, autofillHints, etc.
+    required this.scrollTop,
+    required this.scrollLeft,
   });
 
   final TextStyle? textStyle;
@@ -57,6 +59,8 @@ class EditableWeb extends StatefulWidget {
   final void Function(TextInputAction) performAction;
   final TextInputConfiguration textInputConfiguration;
   final AutofillScope? currentAutofillScope;
+  final double scrollTop;
+  final double scrollLeft;
 
   @override
   State<EditableWeb> createState() => _EditableWebState();
@@ -901,6 +905,15 @@ class WebTextInputControl with TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {}
+
+  @override
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    _currentInputElement!.scrollTop = scrollTop.toInt();
+    _currentInputElement!.scrollLeft = scrollLeft.toInt();
+  }
 
   // no-op
   @override

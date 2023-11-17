@@ -3411,6 +3411,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         )
         ..setEditingState(localValue)
         ..show();
+
+        if(kIsWeb) {
+          final double scrollOffset = _scrollController.offset;
+          final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
+          final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
+          _textInputConnection!.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+        }
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
         // the platform text input plugin.
@@ -3479,6 +3486,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         textAlign: widget.textAlign,
       )
       ..setEditingState(_value);
+
+    if(kIsWeb) {
+      final double scrollOffset = _scrollController.offset;
+      final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
+      final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
+      _textInputConnection!.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+    }
     _lastKnownRemoteTextEditingValue = _value;
   }
 
@@ -3546,6 +3560,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onEditableScroll() {
+    if(kIsWeb && _hasInputConnection) {
+      final double scrollOffset = _scrollController.offset;
+      final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
+      final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
+      _textInputConnection!.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+    }
     _selectionOverlay?.updateForScroll();
     _scribbleCacheKey = null;
   }
@@ -4902,7 +4922,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                   // autofillHints always end up empty [] because of the way props are being passed from EditableText wrappers like TextField()
                                   // Instead, it exists in the autofillClient  
                                   textInputConfiguration: _effectiveAutofillClient.textInputConfiguration,
-                                  currentAutofillScope: currentAutofillScope
+                                  currentAutofillScope: currentAutofillScope,
+                                  scrollTop: widget.keyboardType == TextInputType.multiline ? _scrollController.offset : 0,
+                                  scrollLeft: widget.keyboardType == TextInputType.multiline ? _scrollController.offset : 0,
                                 ),
                               ),
                               _Editable(
