@@ -117,6 +117,27 @@ void doTests() {
       expect(style!.tagName, equalsIgnoringCase('style'));
       expect(style.parentNode, domManager.renderingHost);
     });
+
+    test('setScene', () {
+      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+
+      final DomElement sceneHost =
+          domManager.renderingHost.querySelector('flt-scene-host')!;
+
+      final DomElement scene1 = createDomElement('flt-scene');
+      domManager.setScene(scene1);
+      expect(sceneHost.children, <DomElement>[scene1]);
+
+      // Insert the same scene again.
+      domManager.setScene(scene1);
+      expect(sceneHost.children, <DomElement>[scene1]);
+
+      // Insert a different scene.
+      final DomElement scene2 = createDomElement('flt-scene');
+      domManager.setScene(scene2);
+      expect(sceneHost.children, <DomElement>[scene2]);
+      expect(scene1.parent, isNull);
+    });
   });
 }
 
