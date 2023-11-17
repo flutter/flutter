@@ -10,10 +10,12 @@ copy("impeller") {
     "constants.glsl",
     "conversions.glsl",
     "dithering.glsl",
+    "external_texture_oes.glsl",
     "gaussian.glsl",
     "gradient.glsl",
     "path.glsl",
     "texture.glsl",
+    "tile_mode.glsl",
     "transform.glsl",
     "types.glsl",
   ]

@@ -143,6 +143,7 @@
 ../../../flutter/impeller/entity/contents/filters/gaussian_blur_filter_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/filters/inputs/filter_input_unittests.cc
 ../../../flutter/impeller/entity/contents/test
+../../../flutter/impeller/entity/contents/tiled_texture_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/vertices_contents_unittests.cc
 ../../../flutter/impeller/entity/entity_pass_target_unittests.cc
 ../../../flutter/impeller/entity/entity_unittests.cc
