@@ -125,7 +125,7 @@ class Path {
         size_t contour_index) const;
 
    private:
-    ReclaimPointBufferCallback reclaim_points;
+    ReclaimPointBufferCallback reclaim_points_;
   };
 
   Path();

@@ -228,20 +228,20 @@ bool Path::GetContourComponentAtIndex(size_t index,
 
 Path::Polyline::Polyline(Path::Polyline::PointBufferPtr point_buffer,
                          Path::Polyline::ReclaimPointBufferCallback reclaim)
-    : points(std::move(point_buffer)), reclaim_points(std::move(reclaim)) {
+    : points(std::move(point_buffer)), reclaim_points_(std::move(reclaim)) {
   FML_DCHECK(points);
 }
 
 Path::Polyline::Polyline(Path::Polyline&& other) {
   points = std::move(other.points);
-  reclaim_points = std::move(other.reclaim_points);
+  reclaim_points_ = std::move(other.reclaim_points_);
   contours = std::move(other.contours);
 }
 
 Path::Polyline::~Polyline() {
-  if (reclaim_points) {
+  if (reclaim_points_) {
     points->clear();
-    reclaim_points(std::move(points));
+    reclaim_points_(std::move(points));
   }
 }
 

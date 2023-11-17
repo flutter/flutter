@@ -840,10 +840,14 @@ struct Color {
 
   static Color Random() {
     return {
+        // This method is not used for cryptographic purposes.
+        // NOLINTBEGIN(clang-analyzer-security.insecureAPI.rand)
         static_cast<Scalar>((std::rand() % 255) / 255.0f),  //
         static_cast<Scalar>((std::rand() % 255) / 255.0f),  //
         static_cast<Scalar>((std::rand() % 255) / 255.0f),  //
-        1.0f                                                //
+        // NOLINTEND(clang-analyzer-security.insecureAPI.rand)
+        1.0f  //
+
     };
   }
 
