@@ -140,6 +140,17 @@ def main():
 
   args = parser.parse_args()
 
+  android_api_level = subprocess.check_output([
+      args.adb_path, 'shell', 'getprop', 'ro.build.version.sdk'
+  ],
+                                              text=True).strip()
+  if int(android_api_level) < 29:
+    print(
+        'Android API %s detected. This script requires API 29 or above.' %
+        android_api_level
+    )
+    return 0
+
   install_apk(args.apk_path, args.package_name, args.adb_path)
   start_perfetto(args.package_name, args.adb_path)
   launch_package(args.package_name, args.activity_name, args.adb_path)
