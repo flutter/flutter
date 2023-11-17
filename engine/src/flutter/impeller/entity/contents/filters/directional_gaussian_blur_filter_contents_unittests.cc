@@ -48,7 +48,7 @@ TEST_P(DirectionalGaussianBlurFilterContentsTest, CoverageWithEffectTransform) {
           desc);
   FilterInput::Vector inputs = {FilterInput::Make(texture)};
   Entity entity;
-  entity.SetTransformation(Matrix::MakeTranslation({100, 100, 0}));
+  entity.SetTransform(Matrix::MakeTranslation({100, 100, 0}));
   std::optional<Rect> coverage = contents->GetFilterCoverage(
       inputs, entity, /*effect_transform=*/Matrix::MakeScale({2.0, 2.0, 1.0}));
   EXPECT_TRUE(coverage.has_value());

@@ -19,7 +19,7 @@ VerticesContents::VerticesContents() = default;
 VerticesContents::~VerticesContents() = default;
 
 std::optional<Rect> VerticesContents::GetCoverage(const Entity& entity) const {
-  return geometry_->GetCoverage(entity.GetTransformation());
+  return geometry_->GetCoverage(entity.GetTransform());
 };
 
 void VerticesContents::SetGeometry(std::shared_ptr<VerticesGeometry> geometry) {

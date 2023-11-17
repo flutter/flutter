@@ -148,9 +148,9 @@ std::shared_ptr<SubAtlasResult> AtlasContents::GenerateSubAtlas() const {
 
 std::optional<Rect> AtlasContents::GetCoverage(const Entity& entity) const {
   if (cull_rect_.has_value()) {
-    return cull_rect_.value().TransformBounds(entity.GetTransformation());
+    return cull_rect_.value().TransformBounds(entity.GetTransform());
   }
-  return ComputeBoundingBox().TransformBounds(entity.GetTransformation());
+  return ComputeBoundingBox().TransformBounds(entity.GetTransform());
 }
 
 Rect AtlasContents::ComputeBoundingBox() const {
@@ -283,7 +283,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
     frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                     entity.GetTransformation();
+                     entity.GetTransform();
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(cmd, uniform_view);
@@ -338,7 +338,7 @@ AtlasTextureContents::~AtlasTextureContents() {}
 
 std::optional<Rect> AtlasTextureContents::GetCoverage(
     const Entity& entity) const {
-  return coverage_.TransformBounds(entity.GetTransformation());
+  return coverage_.TransformBounds(entity.GetTransform());
 }
 
 void AtlasTextureContents::SetAlpha(Scalar alpha) {
@@ -419,7 +419,7 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation();
+                   entity.GetTransform();
   frame_info.texture_sampler_y_coord_scale = texture->GetYCoordScale();
   frame_info.alpha = alpha_;
 
@@ -444,7 +444,7 @@ AtlasColorContents::~AtlasColorContents() {}
 
 std::optional<Rect> AtlasColorContents::GetCoverage(
     const Entity& entity) const {
-  return coverage_.TransformBounds(entity.GetTransformation());
+  return coverage_.TransformBounds(entity.GetTransform());
 }
 
 void AtlasColorContents::SetAlpha(Scalar alpha) {
@@ -507,7 +507,7 @@ bool AtlasColorContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation();
+                   entity.GetTransform();
 
   FS::FragInfo frag_info;
   frag_info.alpha = alpha_;

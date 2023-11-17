@@ -77,7 +77,7 @@ vec2 IPComputeConicalT(vec2 c0, float r0, vec2 c1, float r1, vec2 pos) {
     }
 
     // Apply mapping from [Cf, C1] to unit x, and apply the precalculations from
-    // steps 3 and 4, all in the same transformation.
+    // steps 3 and 4, all in the same transform.
     vec2 cf = c0 * (1.0 - f) + c1 * f;
     mat3 transform = IPMapToUnitX(cf, c1);
 

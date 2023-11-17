@@ -61,7 +61,7 @@ void TextContents::SetOffset(Vector2 offset) {
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  return frame_->GetBounds().TransformBounds(entity.GetTransformation());
+  return frame_->GetBounds().TransformBounds(entity.GetTransform());
 }
 
 void TextContents::PopulateGlyphAtlas(
@@ -111,8 +111,8 @@ bool TextContents::Render(const ContentContext& renderer,
               static_cast<Scalar>(atlas->GetTexture()->GetSize().height)};
   frame_info.offset = offset_;
   frame_info.is_translation_scale =
-      entity.GetTransformation().IsTranslationScaleOnly();
-  frame_info.entity_transform = entity.GetTransformation();
+      entity.GetTransform().IsTranslationScaleOnly();
+  frame_info.entity_transform = entity.GetTransform();
   frame_info.text_color = ToVector(color.Premultiply());
 
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));

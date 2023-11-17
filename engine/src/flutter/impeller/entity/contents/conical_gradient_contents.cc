@@ -90,7 +90,7 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation();
+                   entity.GetTransform();
   frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;

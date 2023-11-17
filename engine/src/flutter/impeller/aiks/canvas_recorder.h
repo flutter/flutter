@@ -118,8 +118,8 @@ class CanvasRecorder {
                                count);
   }
 
-  const Matrix& GetCurrentTransformation() const {
-    return canvas_.GetCurrentTransformation();
+  const Matrix& GetCurrentTransform() const {
+    return canvas_.GetCurrentTransform();
   }
 
   const std::optional<Rect> GetCurrentLocalCullingBounds() const {
@@ -130,18 +130,18 @@ class CanvasRecorder {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(ResetTransform));
   }
 
-  void Transform(const Matrix& xformation) {
+  void Transform(const Matrix& transform) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(Transform),
-                               xformation);
+                               transform);
   }
 
-  void Concat(const Matrix& xformation) {
-    return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(Concat), xformation);
+  void Concat(const Matrix& transform) {
+    return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(Concat), transform);
   }
 
-  void PreConcat(const Matrix& xformation) {
+  void PreConcat(const Matrix& transform) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(PreConcat),
-                               xformation);
+                               transform);
   }
 
   void Translate(const Vector3& offset) {

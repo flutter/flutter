@@ -45,9 +45,9 @@ std::shared_ptr<Texture> Picture::RenderToTexture(
 
   pass->IterateAllEntities([&translate](auto& entity) -> bool {
     auto matrix = translate.has_value()
-                      ? translate.value() * entity.GetTransformation()
-                      : entity.GetTransformation();
-    entity.SetTransformation(matrix);
+                      ? translate.value() * entity.GetTransform()
+                      : entity.GetTransform();
+    entity.SetTransform(matrix);
     return true;
   });
 

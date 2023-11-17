@@ -92,7 +92,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
 
-    auto transform = entity.GetTransformation() * effect_transform.Basis();
+    auto transform = entity.GetTransform() * effect_transform.Basis();
     auto transformed_radius =
         transform.TransformDirection(direction_ * radius_.radius);
     auto transformed_texture_vertices =

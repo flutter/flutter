@@ -956,7 +956,7 @@ TEST_P(DisplayListTest, TransparentShadowProducesCorrectColor) {
 
   std::shared_ptr<SolidRRectBlurContents> rrect_blur;
   picture.pass->IterateAllEntities([&rrect_blur](Entity& entity) {
-    if (ScalarNearlyEqual(entity.GetTransformation().GetScale().x, 1.618f)) {
+    if (ScalarNearlyEqual(entity.GetTransform().GetScale().x, 1.618f)) {
       rrect_blur = std::static_pointer_cast<SolidRRectBlurContents>(
           entity.GetContents());
       return false;

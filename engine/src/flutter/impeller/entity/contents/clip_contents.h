@@ -65,7 +65,7 @@ class ClipRestoreContents final : public Contents {
   /// @brief  The area on the pass texture where this clip restore will be
   ///         applied. If unset, the entire pass texture will be restored.
   ///
-  /// @note   This rectangle is not transformed by the entity's transformation.
+  /// @note   This rectangle is not transformed by the entity's transform.
   void SetRestoreCoverage(std::optional<Rect> coverage);
 
   // |Contents|
