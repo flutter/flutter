@@ -258,9 +258,7 @@ abstract final class SelectionUtils {
     if (point.dy > targetRect.bottom) {
       return SelectionResult.next;
     }
-    return point.dx >= targetRect.right
-        ? SelectionResult.next
-        : SelectionResult.previous;
+    return point.dx >= targetRect.right ? SelectionResult.next : SelectionResult.previous;
   }
 
   /// Adjusts the dragging offset based on the target rect.
@@ -284,22 +282,16 @@ abstract final class SelectionUtils {
   /// For points in Area 2:
   ///   Move them to bottom-right of the rect if text direction is ltr, or
   ///   bottom-left if rtl.
-  static Offset adjustDragOffset(Rect targetRect, Offset point,
-      {TextDirection direction = TextDirection.ltr}) {
+  static Offset adjustDragOffset(Rect targetRect, Offset point, {TextDirection direction = TextDirection.ltr}) {
     if (targetRect.contains(point)) {
       return point;
     }
-    if (point.dy <= targetRect.top ||
-        point.dy <= targetRect.bottom && point.dx <= targetRect.left) {
+    if (point.dy <= targetRect.top || point.dy <= targetRect.bottom && point.dx <= targetRect.left) {
       // Area 1
-      return direction == TextDirection.ltr
-          ? targetRect.topLeft
-          : targetRect.topRight;
+      return direction == TextDirection.ltr ? targetRect.topLeft : targetRect.topRight;
     } else {
       // Area 2
-      return direction == TextDirection.ltr
-          ? targetRect.bottomRight
-          : targetRect.bottomLeft;
+      return direction == TextDirection.ltr ? targetRect.bottomRight : targetRect.bottomLeft;
     }
   }
 }
@@ -399,8 +391,7 @@ class ClearSelectionEvent extends SelectionEvent {
 /// This event can be sent as the result of mobile long press selection.
 class SelectWordSelectionEvent extends SelectionEvent {
   /// Creates a select word event at the [globalPosition].
-  const SelectWordSelectionEvent({required this.globalPosition})
-      : super._(SelectionEventType.selectWord);
+  const SelectWordSelectionEvent({required this.globalPosition}) : super._(SelectionEventType.selectWord);
 
   /// The position in global coordinates to select word at.
   final Offset globalPosition;
@@ -428,8 +419,7 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
-  const SelectionEdgeUpdateEvent.forStart(
-      {required this.globalPosition, TextGranularity? granularity})
+  const SelectionEdgeUpdateEvent.forStart({required this.globalPosition, TextGranularity? granularity})
       : granularity = granularity ?? TextGranularity.character,
         super._(SelectionEventType.startEdgeUpdate);
 
@@ -439,8 +429,7 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
-  const SelectionEdgeUpdateEvent.forEnd(
-      {required this.globalPosition, TextGranularity? granularity})
+  const SelectionEdgeUpdateEvent.forEnd({required this.globalPosition, TextGranularity? granularity})
       : granularity = granularity ?? TextGranularity.character,
         super._(SelectionEventType.endEdgeUpdate);
 
@@ -647,8 +636,7 @@ class SelectionGeometry {
     this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
-  }) : assert((startSelectionPoint == null && endSelectionPoint == null) ||
-            status != SelectionStatus.none);
+  }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
 
   /// The geometry information at the selection start.
   ///
@@ -789,8 +777,7 @@ class SelectionPoint with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DoubleProperty('lineHeight', lineHeight));
-    properties
-        .add(EnumProperty<TextSelectionHandleType>('handleType', handleType));
+    properties.add(EnumProperty<TextSelectionHandleType>('handleType', handleType));
   }
 }
 

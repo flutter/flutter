@@ -10,9 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'object.dart';
 
-export 'package:flutter/painting.dart' show
-  BoxFit,
-  ImageRepeat;
+export 'package:flutter/painting.dart' show BoxFit, ImageRepeat;
 
 /// An image in the render tree.
 ///
@@ -44,22 +42,22 @@ class RenderImage extends RenderBox {
     bool invertColors = false,
     bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.low,
-  }) : _image = image,
-       _width = width,
-       _height = height,
-       _scale = scale,
-       _color = color,
-       _opacity = opacity,
-       _colorBlendMode = colorBlendMode,
-       _fit = fit,
-       _alignment = alignment,
-       _repeat = repeat,
-       _centerSlice = centerSlice,
-       _matchTextDirection = matchTextDirection,
-       _invertColors = invertColors,
-       _textDirection = textDirection,
-       _isAntiAlias = isAntiAlias,
-       _filterQuality = filterQuality {
+  })  : _image = image,
+        _width = width,
+        _height = height,
+        _scale = scale,
+        _color = color,
+        _opacity = opacity,
+        _colorBlendMode = colorBlendMode,
+        _fit = fit,
+        _alignment = alignment,
+        _repeat = repeat,
+        _centerSlice = centerSlice,
+        _matchTextDirection = matchTextDirection,
+        _invertColors = invertColors,
+        _textDirection = textDirection,
+        _isAntiAlias = isAntiAlias,
+        _filterQuality = filterQuality {
     _updateColorFilter();
   }
 
@@ -199,7 +197,6 @@ class RenderImage extends RenderBox {
     _filterQuality = value;
     markNeedsPaint();
   }
-
 
   /// Used to combine [color] with this image.
   ///
