@@ -101,7 +101,7 @@ class CreateCommand extends CreateBase {
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost => globals.flutterVersion.channel == 'stable'
         ? 'api.flutter.dev'
-        : 'master-api.flutter.dev';
+        : 'main-api.flutter.dev';
 
   Future<String?> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
