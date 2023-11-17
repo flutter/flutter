@@ -84,6 +84,7 @@
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 #include "impeller/entity/texture_fill_external.frag.h"
+#include "impeller/entity/tiled_texture_fill_external.frag.h"
 #endif  // IMPELLER_ENABLE_OPENGLES
 
 #if IMPELLER_ENABLE_3D
@@ -249,6 +250,10 @@ using UvComputeShaderPipeline = ComputePipelineBuilder<UvComputeShader>;
 #ifdef IMPELLER_ENABLE_OPENGLES
 using TextureExternalPipeline =
     RenderPipelineT<TextureFillVertexShader, TextureFillExternalFragmentShader>;
+
+using TiledTextureExternalPipeline =
+    RenderPipelineT<TextureFillVertexShader,
+                    TiledTextureFillExternalFragmentShader>;
 #endif  // IMPELLER_ENABLE_OPENGLES
 
 /// Pipeline state configuration.
@@ -397,6 +402,13 @@ class ContentContext {
     FML_DCHECK(GetContext()->GetBackendType() ==
                Context::BackendType::kOpenGLES);
     return GetPipeline(texture_external_pipelines_, opts);
+  }
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetTiledTextureExternalPipeline(
+      ContentContextOptions opts) const {
+    FML_DCHECK(GetContext()->GetBackendType() ==
+               Context::BackendType::kOpenGLES);
+    return GetPipeline(tiled_texture_external_pipelines_, opts);
   }
 #endif  // IMPELLER_ENABLE_OPENGLES
 
@@ -768,6 +780,8 @@ class ContentContext {
   mutable Variants<TexturePipeline> texture_pipelines_;
 #ifdef IMPELLER_ENABLE_OPENGLES
   mutable Variants<TextureExternalPipeline> texture_external_pipelines_;
+  mutable Variants<TiledTextureExternalPipeline>
+      tiled_texture_external_pipelines_;
 #endif  // IMPELLER_ENABLE_OPENGLES
   mutable Variants<PositionUVPipeline> position_uv_pipelines_;
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;

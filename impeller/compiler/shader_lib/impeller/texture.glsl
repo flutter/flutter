@@ -7,6 +7,7 @@
 
 #include <impeller/branching.glsl>
 #include <impeller/conversions.glsl>
+#include <impeller/tile_mode.glsl>
 #include <impeller/types.glsl>
 
 /// Sample from a texture.
@@ -34,13 +35,6 @@ vec4 IPSampleLinear(sampler2D texture_sampler,
   coords.y = mix(half_texel.y, 1 - half_texel.y, coords.y);
   return IPSample(texture_sampler, coords, y_coord_scale);
 }
-
-// These values must correspond to the order of the items in the
-// 'Entity::TileMode' enum class.
-const float kTileModeClamp = 0;
-const float kTileModeRepeat = 1;
-const float kTileModeMirror = 2;
-const float kTileModeDecal = 3;
 
 /// Remap a float using a tiling mode.
 ///

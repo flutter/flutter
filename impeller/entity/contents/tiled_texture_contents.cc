@@ -4,12 +4,14 @@
 
 #include "impeller/entity/contents/tiled_texture_contents.h"
 
+#include "fml/logging.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
+#include "impeller/entity/tiled_texture_fill_external.frag.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
@@ -78,7 +80,7 @@ std::shared_ptr<Texture> TiledTextureContents::CreateFilterTexture(
   return nullptr;
 }
 
-SamplerDescriptor TiledTextureContents::CreateDescriptor(
+SamplerDescriptor TiledTextureContents::CreateSamplerDescriptor(
     const Capabilities& capabilities) const {
   SamplerDescriptor descriptor = sampler_descriptor_;
   auto width_mode = TileModeToAddressMode(x_tile_mode_, capabilities);
@@ -119,11 +121,15 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
   using VS = TextureFillVertexShader;
   using FS = TiledTextureFillFragmentShader;
+  using FSExternal = TiledTextureFillExternalFragmentShader;
 
   const auto texture_size = texture_->GetSize();
   if (texture_size.IsEmpty()) {
     return true;
   }
+
+  bool is_external_texture =
+      texture_->GetTextureDescriptor().type == TextureType::kTextureExternalOES;
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
@@ -153,34 +159,67 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
     options.stencil_operation = StencilOperation::kIncrementClamp;
   }
   options.primitive_type = geometry_result.type;
+
+#ifdef IMPELLER_ENABLE_OPENGLES
+  if (is_external_texture) {
+    cmd.pipeline = renderer.GetTiledTextureExternalPipeline(options);
+  } else {
+    cmd.pipeline = uses_emulated_tile_mode
+                       ? renderer.GetTiledTexturePipeline(options)
+                       : renderer.GetTexturePipeline(options);
+  }
+#else
   cmd.pipeline = uses_emulated_tile_mode
                      ? renderer.GetTiledTexturePipeline(options)
                      : renderer.GetTexturePipeline(options);
+#endif  // IMPELLER_ENABLE_OPENGLES
 
   cmd.BindVertices(geometry_result.vertex_buffer);
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 
-  if (uses_emulated_tile_mode) {
+  if (is_external_texture) {
+    FSExternal::FragInfo frag_info;
+    frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
+    frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
+    FSExternal::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
+  } else if (uses_emulated_tile_mode) {
     FS::FragInfo frag_info;
     frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
     frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
   }
 
-  if (color_filter_) {
-    auto filtered_texture = CreateFilterTexture(renderer);
-    if (!filtered_texture) {
-      return false;
-    }
-    FS::BindTextureSampler(
-        cmd, filtered_texture,
-        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            CreateDescriptor(renderer.GetDeviceCapabilities())));
-  } else {
-    FS::BindTextureSampler(
+  if (is_external_texture) {
+    SamplerDescriptor sampler_desc;
+    // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid, so we
+    // emulate all other tile modes here by remapping the texture coordinates.
+    sampler_desc.width_address_mode = SamplerAddressMode::kClampToEdge;
+    sampler_desc.height_address_mode = SamplerAddressMode::kClampToEdge;
+
+    // Also, external textures cannot be bound to color filters, so ignore this
+    // case for now.
+    FML_DCHECK(!color_filter_)
+        << "Color filters are not currently supported for external textures.";
+
+    FSExternal::BindSAMPLEREXTERNALOESTextureSampler(
         cmd, texture_,
-        renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            CreateDescriptor(renderer.GetDeviceCapabilities())));
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
+  } else {
+    if (color_filter_) {
+      auto filtered_texture = CreateFilterTexture(renderer);
+      if (!filtered_texture) {
+        return false;
+      }
+      FS::BindTextureSampler(
+          cmd, filtered_texture,
+          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+              CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
+    } else {
+      FS::BindTextureSampler(
+          cmd, texture_,
+          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+              CreateSamplerDescriptor(renderer.GetDeviceCapabilities())));
+    }
   }
 
   if (!pass.AddCommand(std::move(cmd))) {
