@@ -1081,7 +1081,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
 
   {
     auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
-    EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kToggleButton);
+    EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kSwitch);
     EXPECT_EQ(root_node->GetData().GetCheckedState(),
               ax::mojom::CheckedState::kTrue);
 
@@ -1104,6 +1104,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
     VARIANT native_state = {};
     ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
     EXPECT_TRUE(native_state.lVal & STATE_SYSTEM_PRESSED);
+    EXPECT_TRUE(native_state.lVal & STATE_SYSTEM_CHECKED);
 
     // Test similarly on UIA node.
     IRawElementProviderSimple* uia_node;
@@ -1129,7 +1130,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
 
   {
     auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
-    EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kToggleButton);
+    EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kSwitch);
     EXPECT_EQ(root_node->GetData().GetCheckedState(),
               ax::mojom::CheckedState::kFalse);
 
@@ -1146,6 +1147,7 @@ TEST(FlutterWindowsViewTest, SwitchNativeState) {
     VARIANT native_state = {};
     ASSERT_TRUE(SUCCEEDED(native_view->get_accState(varchild, &native_state)));
     EXPECT_FALSE(native_state.lVal & STATE_SYSTEM_PRESSED);
+    EXPECT_FALSE(native_state.lVal & STATE_SYSTEM_CHECKED);
 
     // Test similarly on UIA node.
     IRawElementProviderSimple* uia_node;
