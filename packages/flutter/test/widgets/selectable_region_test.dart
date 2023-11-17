@@ -2110,12 +2110,7 @@ void main() {
                         text:
                             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       ),
-                      WidgetSpan(
-                        child: Text(
-                          'Some text in a WidgetSpan. ',
-                          isInlineWidget: true,
-                        ),
-                      ),
+                      WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
                       TextSpan(text: 'Hello, world.'),
                     ],
                   ),

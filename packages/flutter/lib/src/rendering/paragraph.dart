@@ -277,7 +277,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
-    bool? isInlineWidget,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -287,7 +286,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
        _softWrap = softWrap,
        _overflow = overflow,
        _selectionColor = selectionColor,
-       _isInlineWidget = isInlineWidget,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -405,23 +403,17 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final String plainText = text.toPlainText(includeSemanticsLabels: false);
     final List<_SelectableFragment> result = <_SelectableFragment>[];
     int start = 0;
-    bool currentFragmentFollowedByInlineElement = false;
     while (start < plainText.length) {
       int end = plainText.indexOf(_placeholderCharacter, start);
       if (start != end) {
         if (end == -1) {
           end = plainText.length;
-          currentFragmentFollowedByInlineElement = false;
-        } else {
-          currentFragmentFollowedByInlineElement = true;
         }
         result.add(
           _SelectableFragment(
             paragraph: this,
             range: TextRange(start: start, end: end),
             fullText: plainText,
-            isFollowedByInlineElement: currentFragmentFollowedByInlineElement,
-            isInlineWidget: isInlineWidget,
           ),
         );
         start = end;
@@ -631,19 +623,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (_lastSelectableFragments?.any((_SelectableFragment fragment) => fragment.value.hasSelection) ?? false) {
       markNeedsPaint();
     }
-  }
-
-  /// Whether this [RenderParagraph] is an inline widget inside of an [InlineSpan]
-  /// tree.
-  ///
-  /// Ignored if the text is not selectable (e.g. if [registrar] is null).
-  bool? get isInlineWidget => _isInlineWidget;
-  bool? _isInlineWidget;
-  set isInlineWidget(bool? value) {
-    if (_isInlineWidget == value) {
-      return;
-    }
-    _isInlineWidget = value;
   }
 
   Offset _getOffsetForPosition(TextPosition position) {
@@ -1346,10 +1325,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.paragraph,
     required this.fullText,
     required this.range,
-    required this.isFollowedByInlineElement,
-    bool? isInlineWidget,
-  }) : isInlineWidget = isInlineWidget ?? false,
-       assert(range.isValid && !range.isCollapsed && range.isNormalized) {
+  }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
          if (kFlutterMemoryAllocationsEnabled) {
            ChangeNotifier.maybeDispatchObjectCreation(this);
          }
@@ -1359,8 +1335,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   final TextRange range;
   final RenderParagraph paragraph;
   final String fullText;
-  final bool isFollowedByInlineElement;
-  final bool isInlineWidget;
 
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
@@ -1452,12 +1426,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         result = _handleSelectAll();
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
-        final SelectionResult localResult = _handleSelectWord(selectWord.globalPosition);
-        if (isFollowedByInlineElement && localResult != SelectionResult.end) {
-          result = SelectionResult.forward;
-        } else {
-          result = localResult;
-        }
+        result = _handleSelectWord(selectWord.globalPosition);
       case SelectionEventType.granularlyExtendSelection:
         final GranularlyExtendSelectionEvent granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
         result = _handleGranularlyExtendSelection(
@@ -1763,13 +1732,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
-    final Matrix4 transform = paragraph.getTransformTo(null);
-    transform.invert();
-    final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
-    if (!_rect.contains(localPosition) && (isFollowedByInlineElement || isInlineWidget)) {
-      return SelectionResult.forward;
-    }
-
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
       return SelectionResult.end;

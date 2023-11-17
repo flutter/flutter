@@ -2139,18 +2139,13 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     SelectionResult? lastSelectionResult;
-    bool lookForwardWithoutRectConstraints = false;
     for (int index = 0; index < selectables.length; index += 1) {
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      if (globalRect.contains(event.globalPosition) || lookForwardWithoutRectConstraints) {
+      if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
-        if (lastSelectionResult == SelectionResult.forward) {
-          lookForwardWithoutRectConstraints = true;
-          continue;
-        }
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
           return SelectionResult.next;
         }
@@ -2375,7 +2370,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
         case SelectionResult.next:
-        case SelectionResult.forward:
         case SelectionResult.none:
           newIndex = index;
         case SelectionResult.end:
@@ -2474,7 +2468,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         case SelectionResult.none:
           finalResult = currentSelectableResult;
         case SelectionResult.next:
-        case SelectionResult.forward:
           if (forward == false) {
             newIndex += 1;
             finalResult = SelectionResult.end;

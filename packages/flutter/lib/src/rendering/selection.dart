@@ -53,9 +53,6 @@ enum SelectionResult {
   /// [SelectAllSelectionEvent], [ClearSelectionEvent], and
   /// [SelectWordSelectionEvent].
   none,
-  /// The selection may begin in this [Selectable], further selection should
-  /// continue to next [Selectable] in screen order.
-  forward,
 }
 
 /// The abstract interface to handle [SelectionEvent]s.
