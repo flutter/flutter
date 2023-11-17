@@ -707,7 +707,6 @@ class _ViewContentState extends State<_ViewContent> {
   late Rect _viewRect;
   late final SearchController _controller;
   Iterable<Widget> result = <Widget>[];
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -715,10 +714,6 @@ class _ViewContentState extends State<_ViewContent> {
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
     _controller.addListener(updateSuggestions);
-
-    if (!_focusNode.hasFocus) {
-      _focusNode.requestFocus();
-    }
   }
 
   @override
@@ -748,7 +743,6 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -865,8 +859,8 @@ class _ViewContentState extends State<_ViewContent> {
                           top: false,
                           bottom: false,
                           child: SearchBar(
+                            autoFocus: true,
                             constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
-                            focusNode: _focusNode,
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -1091,6 +1085,7 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
+    this.autoFocus = false,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1212,6 +1207,9 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// {@macro flutter.widgets.editableText.autofocus}
+  final bool autoFocus;
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1311,7 +1309,9 @@ class _SearchBarState extends State<SearchBar> {
         child: InkWell(
           onTap: () {
             widget.onTap?.call();
-            _focusNode.requestFocus();
+            if (!_focusNode.hasFocus) {
+              _focusNode.requestFocus();
+            }
           },
           overlayColor: effectiveOverlayColor,
           customBorder: effectiveShape?.copyWith(side: effectiveSide),
@@ -1323,34 +1323,34 @@ class _SearchBarState extends State<SearchBar> {
               children: <Widget>[
                 if (leading != null) leading,
                 Expanded(
-                  child: IgnorePointer(
-                    child: Padding(
-                      padding: effectivePadding,
-                      child: TextField(
-                        focusNode: _focusNode,
-                        onChanged: widget.onChanged,
-                        onSubmitted: widget.onSubmitted,
-                        controller: widget.controller,
-                        style: effectiveTextStyle,
-                        decoration: InputDecoration(
-                          hintText: widget.hintText,
-                        ).applyDefaults(InputDecorationTheme(
-                          hintStyle: effectiveHintStyle,
-
-                          // The configuration below is to make sure that the text field
-                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                          enabledBorder: InputBorder.none,
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          // Setting `isDense` to true to allow the text field height to be
-                          // smaller than 48.0
-                          isDense: true,
-                        )),
-                        textCapitalization: effectiveTextCapitalization,
-                      ),
+                  child: Padding(
+                    padding: effectivePadding,
+                    child: TextField(
+                      autofocus: widget.autoFocus,
+                      onTap: widget.onTap,
+                      onTapAlwaysCalled: true,
+                      focusNode: _focusNode,
+                      onChanged: widget.onChanged,
+                      onSubmitted: widget.onSubmitted,
+                      controller: widget.controller,
+                      style: effectiveTextStyle,
+                      decoration: InputDecoration(
+                        hintText: widget.hintText,
+                      ).applyDefaults(InputDecorationTheme(
+                        hintStyle: effectiveHintStyle,
+                        // The configuration below is to make sure that the text field
+                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                        enabledBorder: InputBorder.none,
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        // Setting `isDense` to true to allow the text field height to be
+                        // smaller than 48.0
+                        isDense: true,
+                      )),
+                      textCapitalization: effectiveTextCapitalization,
                     ),
-                  )
+                  ),
                 ),
                 if (trailing != null) ...trailing,
               ],
