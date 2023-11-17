@@ -2035,7 +2035,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            Uri.parse('https://main-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() {}')),
           ),
         ]);
@@ -2058,7 +2058,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/foo.bar.Baz.dart'),
+            Uri.parse('https://main-api.flutter.dev/snippets/foo.bar.Baz.dart'),
             response: FakeResponse(body: utf8.encode('void main() { String? foo; print(foo); } // ignore: avoid_print')),
           ),
         ]);
@@ -2085,7 +2085,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
             response: FakeResponse(body: utf8.encode(samplesIndexJson)),
           ),
         ]);
@@ -2114,7 +2114,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
           ),
         ]);
       };
@@ -2138,7 +2138,7 @@ void main() {
       return () {
         return FakeHttpClient.list(<FakeRequest>[
           FakeRequest(
-            Uri.parse('https://master-api.flutter.dev/snippets/index.json'),
+            Uri.parse('https://main-api.flutter.dev/snippets/index.json'),
             response: const FakeResponse(statusCode: HttpStatus.notFound),
           ),
         ]);

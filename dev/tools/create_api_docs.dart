@@ -341,7 +341,7 @@ class Configurator {
     final String branch = FlutterInformation.instance.getBranchName();
     final String metadata = template.replaceAll(
       '{SITE_URL}',
-      branch == 'stable' ? 'https://api.flutter.dev/' : 'https://master-api.flutter.dev/',
+      branch == 'stable' ? 'https://api.flutter.dev/' : 'https://main-api.flutter.dev/',
     );
     metadataPath.parent.create(recursive: true);
     metadataPath.writeAsStringSync(metadata);
@@ -412,7 +412,7 @@ class Configurator {
     final bool isStable = platform.environment['LUCI_BRANCH'] == 'stable';
     offlineDir.childFile('flutter.xml').writeAsStringSync('<entry>\n'
         '  <version>${FlutterInformation.instance.getFlutterVersion()}</version>\n'
-        '  <url>https://${isStable ? '' : 'master-'}api.flutter.dev/offline/flutter.docset.tar.gz</url>\n'
+        '  <url>https://${isStable ? '' : 'main-'}api.flutter.dev/offline/flutter.docset.tar.gz</url>\n'
         '</entry>\n');
   }
 
