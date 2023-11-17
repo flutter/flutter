@@ -1793,6 +1793,53 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     selectable.removeListener(_handleSelectableGeometryChange);
   }
 
+  @override
+  int? getContentLength() {
+    int length = 0;
+    for (final Selectable selectable in selectables) {
+      length += selectable.getContentLength() ?? 0;
+    }
+    return length;
+  }
+
+  @override
+  TextSelection? getLocalTextSelection() {
+    // initialize data structures
+    int start = 0;
+    int? end;
+    int numSelected = 0;
+    bool enteredSelectedRegion = false;
+
+    for (final Selectable selectable in selectables) {
+      // Retrieve the selected content, if any, of the current 'selectable'.
+      final SelectedContent? data = selectable.getSelectedContent();
+      if (data != null) {
+        final TextSelection? selection = selectable.getLocalTextSelection();
+        if (!enteredSelectedRegion) {
+          // ...start the selection index at the start of the current selection.
+          start += selection!.start;
+        }
+        enteredSelectedRegion = true;
+        numSelected += selection!.extentOffset - selection.baseOffset;
+      } else {
+        if (!enteredSelectedRegion) {
+          // add its length to the 'start' index if we haven't started selection.
+          start += selectable.getContentLength() ?? 0;
+        }
+      }
+    }
+
+    if (numSelected == 0) {
+      return null;
+    }
+    end = numSelected + start;
+    // Return a TextSelection that represents the selected range of text.
+    return TextSelection(
+      baseOffset: start,
+      extentOffset: end,
+    );
+  }
+
   /// Called when this delegate finishes updating the selectables.
   @protected
   @mustCallSuper
