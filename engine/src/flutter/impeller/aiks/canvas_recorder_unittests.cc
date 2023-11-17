@@ -61,20 +61,20 @@ class Serializer {
 TEST(CanvasRecorder, Save) {
   CanvasRecorder<Serializer> recorder;
   recorder.Save();
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Save);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kSave);
 }
 
 TEST(CanvasRecorder, SaveLayer) {
   CanvasRecorder<Serializer> recorder;
   Paint paint;
   recorder.SaveLayer(paint);
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::SaveLayer);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kSaveLayer);
 }
 
 TEST(CanvasRecorder, Restore) {
   CanvasRecorder<Serializer> recorder;
   recorder.Restore();
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Restore);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kRestore);
 }
 
 TEST(CanvasRecorder, RestoreToCount) {
@@ -82,140 +82,142 @@ TEST(CanvasRecorder, RestoreToCount) {
   recorder.Save();
   recorder.RestoreToCount(0);
   ASSERT_EQ(recorder.GetSerializer().last_op_,
-            CanvasRecorderOp::RestoreToCount);
+            CanvasRecorderOp::kRestoreToCount);
 }
 
 TEST(CanvasRecorder, ResetTransform) {
   CanvasRecorder<Serializer> recorder;
   recorder.ResetTransform();
   ASSERT_EQ(recorder.GetSerializer().last_op_,
-            CanvasRecorderOp::ResetTransform);
+            CanvasRecorderOp::kResetTransform);
 }
 
 TEST(CanvasRecorder, Transform) {
   CanvasRecorder<Serializer> recorder;
   recorder.Transform(Matrix());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Transform);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kTransform);
 }
 
 TEST(CanvasRecorder, Concat) {
   CanvasRecorder<Serializer> recorder;
   recorder.Concat(Matrix());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Concat);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kConcat);
 }
 
 TEST(CanvasRecorder, PreConcat) {
   CanvasRecorder<Serializer> recorder;
   recorder.PreConcat(Matrix());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::PreConcat);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kPreConcat);
 }
 
 TEST(CanvasRecorder, Translate) {
   CanvasRecorder<Serializer> recorder;
   recorder.Translate(Vector3());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Translate);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kTranslate);
 }
 
 TEST(CanvasRecorder, Scale2) {
   CanvasRecorder<Serializer> recorder;
   recorder.Scale(Vector2());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Scale2);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kScale2);
 }
 
 TEST(CanvasRecorder, Scale3) {
   CanvasRecorder<Serializer> recorder;
   recorder.Scale(Vector3());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Scale3);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kScale3);
 }
 
 TEST(CanvasRecorder, Skew) {
   CanvasRecorder<Serializer> recorder;
   recorder.Skew(0, 0);
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Skew);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kSkew);
 }
 
 TEST(CanvasRecorder, Rotate) {
   CanvasRecorder<Serializer> recorder;
   recorder.Rotate(Radians(0));
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::Rotate);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kRotate);
 }
 
 TEST(CanvasRecorder, DrawPath) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawPath(Path(), Paint());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawPath);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawPath);
 }
 
 TEST(CanvasRecorder, DrawPaint) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawPaint(Paint());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawPaint);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawPaint);
 }
 
 TEST(CanvasRecorder, DrawRect) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawRect(Rect(), Paint());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawRect);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawRect);
 }
 
 TEST(CanvasRecorder, DrawRRect) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawRRect(Rect(), {}, Paint());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawRRect);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawRRect);
 }
 
 TEST(CanvasRecorder, DrawCircle) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawCircle(Point(), 0, Paint());
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawCircle);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawCircle);
 }
 
 TEST(CanvasRecorder, DrawPoints) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawPoints(std::vector<Point>{}, 0, Paint(), PointStyle::kRound);
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawPoints);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawPoints);
 }
 
 TEST(CanvasRecorder, DrawImage) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawImage({}, {}, {}, {});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawImage);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawImage);
 }
 
 TEST(CanvasRecorder, DrawImageRect) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawImageRect({}, {}, {}, {}, {});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawImageRect);
+  ASSERT_EQ(recorder.GetSerializer().last_op_,
+            CanvasRecorderOp::kDrawImageRect);
 }
 
 TEST(CanvasRecorder, ClipPath) {
   CanvasRecorder<Serializer> recorder;
   recorder.ClipPath({});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::ClipPath);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kClipPath);
 }
 
 TEST(CanvasRecorder, ClipRect) {
   CanvasRecorder<Serializer> recorder;
   recorder.ClipRect({});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::ClipRect);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kClipRect);
 }
 
 TEST(CanvasRecorder, ClipRRect) {
   CanvasRecorder<Serializer> recorder;
   recorder.ClipRRect({}, {});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::ClipRRect);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kClipRRect);
 }
 
 TEST(CanvasRecorder, DrawPicture) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawPicture({});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawPicture);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawPicture);
 }
 
 TEST(CanvasRecorder, DrawTextFrame) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawTextFrame({}, {}, {});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawTextFrame);
+  ASSERT_EQ(recorder.GetSerializer().last_op_,
+            CanvasRecorderOp::kDrawTextFrame);
 }
 
 TEST(CanvasRecorder, DrawVertices) {
@@ -223,13 +225,13 @@ TEST(CanvasRecorder, DrawVertices) {
   auto geometry = std::shared_ptr<VerticesGeometry>(
       new VerticesGeometry({}, {}, {}, {}, {}, {}));
   recorder.DrawVertices(geometry, {}, {});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawVertices);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawVertices);
 }
 
 TEST(CanvasRecorder, DrawAtlas) {
   CanvasRecorder<Serializer> recorder;
   recorder.DrawAtlas({}, {}, {}, {}, {}, {}, {}, {});
-  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::DrawAtlas);
+  ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawAtlas);
 }
 
 }  // namespace testing
