@@ -39,29 +39,11 @@ class FlutterViewEmbedder {
     reset();
   }
 
-  DomElement get _sceneHostElement => window.dom.sceneHost;
-
   /// A child element of body outside the shadowroot that hosts
   /// global resources such svg filters and clip paths when using webkit.
   DomElement? _resourcesHost;
 
   DomElement get _semanticsHostElement => window.dom.semanticsHost;
-
-  /// The last scene element rendered by the [render] method.
-  DomElement? get sceneElement => _sceneElement;
-  DomElement? _sceneElement;
-
-  /// Don't unnecessarily move DOM nodes around. If a DOM node is
-  /// already in the right place, skip DOM mutation. This is both faster and
-  /// more correct, because moving DOM nodes loses internal state, such as
-  /// text selection.
-  void addSceneToSceneHost(DomElement? sceneElement) {
-    if (sceneElement != _sceneElement) {
-      _sceneElement?.remove();
-      _sceneElement = sceneElement;
-      _sceneHostElement.append(sceneElement!);
-    }
-  }
 
   DomElement get _flutterViewElement => window.dom.rootElement;
   DomShadowRoot get _glassPaneShadow => window.dom.renderingHost;
