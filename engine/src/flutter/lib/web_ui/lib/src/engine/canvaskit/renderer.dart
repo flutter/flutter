@@ -68,7 +68,9 @@ class CanvasKitRenderer implements Renderer {
     // added eagerly during initialization here and never touched, unless the
     // system is reset due to hot restart or in a test.
     _sceneHost = createDomElement('flt-scene');
-    embedder.addSceneToSceneHost(_sceneHost);
+    // TODO(harryterkelsen): Do this operation on the appropriate Flutter View.
+    final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
+    implicitView.dom.setScene(_sceneHost!);
   }
 
   @override

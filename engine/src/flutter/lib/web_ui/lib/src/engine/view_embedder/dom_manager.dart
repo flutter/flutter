@@ -178,6 +178,25 @@ class DomManager {
 
   /// This is where accessibility announcements are inserted.
   final DomElement announcementsHost;
+
+  DomElement? _lastSceneElement;
+
+  /// Inserts the [sceneElement] into the DOM and removes the existing scene (if
+  /// any).
+  ///
+  /// The [sceneElement] is inserted  as a child of the <flt-scene-host> element
+  /// inside the [renderingHost].
+  ///
+  /// If the [sceneElement] has already been inserted, this method does nothing
+  /// to avoid unnecessary DOM mutations. This is both faster and more correct,
+  /// because moving DOM nodes loses internal state, such as text selection.
+  void setScene(DomElement sceneElement) {
+    if (sceneElement != _lastSceneElement) {
+      _lastSceneElement?.remove();
+      _lastSceneElement = sceneElement;
+      sceneHost.append(sceneElement);
+    }
+  }
 }
 
 DomShadowRoot _attachShadowRoot(DomElement element) {

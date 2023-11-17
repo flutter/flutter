@@ -20,8 +20,6 @@ class HtmlRenderer implements Renderer {
 
   late final HtmlFontCollection _fontCollection = HtmlFontCollection();
 
-  late FlutterViewEmbedder _viewEmbedder;
-
   @override
   HtmlFontCollection get fontCollection => _fontCollection;
 
@@ -38,9 +36,7 @@ class HtmlRenderer implements Renderer {
   }
 
   @override
-  void reset(FlutterViewEmbedder embedder) {
-    _viewEmbedder = embedder;
-  }
+  void reset(FlutterViewEmbedder embedder) {}
 
   @override
   ui.Paint createPaint() => SurfacePaint();
@@ -328,7 +324,8 @@ class HtmlRenderer implements Renderer {
 
   @override
   void renderScene(ui.Scene scene) {
-    _viewEmbedder.addSceneToSceneHost((scene as SurfaceScene).webOnlyRootElement);
+    final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
+    implicitView.dom.setScene((scene as SurfaceScene).webOnlyRootElement!);
     frameTimingsOnRasterFinish();
   }
 
