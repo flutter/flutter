@@ -738,8 +738,8 @@ abstract class SemanticsUpdateBuilder {
   /// string describes what result an action performed on this node has. The
   /// reading direction of all these strings is given by `textDirection`.
   ///
-  /// The `labelAttirbutes`, `valueAttirbutes`, `hintAttributes`,
-  /// `increasedValueAttirbutes`, and `decreasedValueAttributes` are the lists of
+  /// The `labelAttributes`, `valueAttributes`, `hintAttributes`,
+  /// `increasedValueAttributes`, and `decreasedValueAttributes` are the lists of
   /// [StringAttribute] carried by the `label`, `value`, `hint`, `increasedValue`,
   /// and `decreasedValue` respectively. Their contents must not be changed during
   /// the semantics update.
