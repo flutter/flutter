@@ -159,7 +159,7 @@ std::string ShaderCErrorToString(shaderc_compilation_status status) {
     case Status::shaderc_compilation_status_validation_error:
       return "Validation error";
     case Status::shaderc_compilation_status_transformation_error:
-      return "Transformation error";
+      return "Transform error";
     case Status::shaderc_compilation_status_configuration_error:
       return "Configuration error";
   }

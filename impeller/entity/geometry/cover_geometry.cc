@@ -21,7 +21,7 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
       .vertex_buffer =
           {
               .vertex_buffer = host_buffer.Emplace(
-                  rect.GetTransformedPoints(entity.GetTransformation().Invert())
+                  rect.GetTransformedPoints(entity.GetTransform().Invert())
                       .data(),
                   8 * sizeof(float), alignof(float)),
               .index_buffer = host_buffer.Emplace(
@@ -30,7 +30,7 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
               .index_type = IndexType::k16bit,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation(),
+                   entity.GetTransform(),
       .prevent_overdraw = false,
   };
 }

@@ -67,7 +67,7 @@ TEST(RectTest, RectGetNormalizingTransform) {
   }
 
   {
-    // Checks for expected transformation of points relative to the rect
+    // Checks for expected transform of points relative to the rect
 
     auto r = Rect::MakeLTRB(300, 500, 400, 700);
     auto m = r.GetNormalizingTransform();
@@ -155,7 +155,7 @@ TEST(RectTest, IRectGetNormalizingTransform) {
   }
 
   {
-    // Checks for expected transformation of points relative to the rect
+    // Checks for expected transform of points relative to the rect
 
     auto r = IRect::MakeLTRB(300, 500, 400, 700);
     auto m = r.GetNormalizingTransform();

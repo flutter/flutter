@@ -126,7 +126,7 @@ class EntityPass {
   ///
   size_t GetElementCount() const;
 
-  void SetTransformation(Matrix xformation);
+  void SetTransform(Matrix transform);
 
   void SetClipDepth(size_t clip_depth);
 
@@ -281,7 +281,7 @@ class EntityPass {
   std::vector<Element> elements_;
 
   EntityPass* superpass_ = nullptr;
-  Matrix xformation_;
+  Matrix transform_;
   size_t clip_depth_ = 0u;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool flood_clip_ = false;

@@ -64,7 +64,7 @@ class FilterInput {
   virtual Matrix GetLocalTransform(const Entity& entity) const;
 
   /// @brief  Get the transform of this `FilterInput`. This is equivalent to
-  ///         calling `entity.GetTransformation() * GetLocalTransform()`.
+  ///         calling `entity.GetTransform() * GetLocalTransform()`.
   virtual Matrix GetTransform(const Entity& entity) const;
 
   /// @see    `Contents::PopulateGlyphAtlas`
@@ -72,7 +72,7 @@ class FilterInput {
       const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
       Scalar scale);
 
-  /// @see  `FilterContents::HasBasisTransformations`
+  /// @see  `FilterContents::HasBasisTransforms`
   virtual bool IsTranslationOnly() const;
 
   /// @brief  Returns `true` unless this input is a `FilterInput`, which may

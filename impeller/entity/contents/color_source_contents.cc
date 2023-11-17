@@ -44,7 +44,7 @@ bool ColorSourceContents::IsSolidColor() const {
 
 std::optional<Rect> ColorSourceContents::GetCoverage(
     const Entity& entity) const {
-  return geometry_->GetCoverage(entity.GetTransformation());
+  return geometry_->GetCoverage(entity.GetTransform());
 };
 
 bool ColorSourceContents::CanInheritOpacity(const Entity& entity) const {

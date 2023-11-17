@@ -42,7 +42,7 @@ std::optional<Rect> SolidColorContents::GetCoverage(
   if (geometry == nullptr) {
     return std::nullopt;
   }
-  return geometry->GetCoverage(entity.GetTransformation());
+  return geometry->GetCoverage(entity.GetTransform());
 };
 
 bool SolidColorContents::Render(const ContentContext& renderer,
@@ -98,7 +98,7 @@ std::optional<Color> SolidColorContents::AsBackgroundColor(
     const Entity& entity,
     ISize target_size) const {
   Rect target_rect = Rect::MakeSize(target_size);
-  return GetGeometry()->CoversArea(entity.GetTransformation(), target_rect)
+  return GetGeometry()->CoversArea(entity.GetTransform(), target_rect)
              ? GetColor()
              : std::optional<Color>();
 }

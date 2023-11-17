@@ -693,14 +693,14 @@ void DlDispatcher::transformFullPerspective(SkScalar mxx,
   // The order of arguments is row-major but Impeller matrices are
   // column-major.
   // clang-format off
-  auto xformation = Matrix{
+  auto transform = Matrix{
     mxx, myx, mzx, mwx,
     mxy, myy, mzy, mwy,
     mxz, myz, mzz, mwz,
     mxt, myt, mzt, mwt
   };
   // clang-format on
-  canvas_.Transform(xformation);
+  canvas_.Transform(transform);
 }
 
 // |flutter::DlOpReceiver|
@@ -989,7 +989,7 @@ void DlDispatcher::drawDisplayList(
   // Matrix and clip are left untouched, the current
   // transform is saved as the new base matrix, and paint
   // values are reset to defaults.
-  initial_matrix_ = canvas_.GetCurrentTransformation();
+  initial_matrix_ = canvas_.GetCurrentTransform();
   paint_ = Paint();
 
   // Handle passed opacity in the most brute-force way by using
@@ -1096,7 +1096,7 @@ void DlDispatcher::drawShadow(const SkPath& path,
   paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
       .style = FilterContents::BlurStyle::kNormal,
       .sigma = Radius{kLightRadius * occluder_z /
-                      canvas_.GetCurrentTransformation().GetScale().y},
+                      canvas_.GetCurrentTransform().GetScale().y},
   };
 
   canvas_.Save();

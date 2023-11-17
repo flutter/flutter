@@ -71,7 +71,7 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
   if (GetOpacity() == 0) {
     return std::nullopt;
   }
-  return destination_rect_.TransformBounds(entity.GetTransformation());
+  return destination_rect_.TransformBounds(entity.GetTransform());
 };
 
 std::optional<Snapshot> TextureContents::RenderToSnapshot(
@@ -90,7 +90,7 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
     auto scale = Vector2(bounds.size / Size(texture_->GetSize()));
     return Snapshot{
         .texture = texture_,
-        .transform = entity.GetTransformation() *
+        .transform = entity.GetTransform() *
                      Matrix::MakeTranslation(bounds.origin) *
                      Matrix::MakeScale(scale),
         .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
@@ -143,7 +143,7 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   capture.AddMatrix("Transform", entity.GetTransformation());
+                   capture.AddMatrix("Transform", entity.GetTransform());
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frame_info.alpha = capture.AddScalar("Alpha", GetOpacity());
 

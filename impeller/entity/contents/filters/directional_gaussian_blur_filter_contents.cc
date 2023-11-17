@@ -95,7 +95,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
 
   auto radius = Radius{ScaleSigma(blur_sigma_)}.radius;
 
-  auto transform = entity.GetTransformation() * effect_transform.Basis();
+  auto transform = entity.GetTransform() * effect_transform.Basis();
   auto transformed_blur_radius =
       transform.TransformDirection(blur_direction_ * radius);
 
