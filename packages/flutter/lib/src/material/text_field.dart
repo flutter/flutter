@@ -97,6 +97,52 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 }
 
+class _WebTextFieldGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
+  _WebTextFieldGestureDetectorBuilder({
+    required _TextFieldState state,
+  }) : _state = state,
+       super(delegate: state);
+
+    final _TextFieldState _state;
+
+    @override
+    void onTapTrackStart() {}
+    @override
+    void onTapTrackReset() {}
+    @override
+    void onTapDown(TapDragDownDetails details) {}
+    @override
+    void onForcePressStart(ForcePressDetails details) {}
+    @override
+    void onForcePressEnd(ForcePressDetails details) {}
+    @override
+    void onSecondaryTap() {}
+    @override
+    void onSecondaryTapDown(TapDownDetails details) {}
+    @override
+    void onSingleTapUp(TapDragUpDetails details) {}
+    @override
+    void onSingleTapCancel() {}
+    @override
+    void onUserTap() {}
+    @override
+    void onSingleLongTapStart(LongPressStartDetails details) {}
+    @override
+    void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {}
+    @override
+    void onSingleLongTapEnd(LongPressEndDetails details) {}
+    @override
+    void onDoubleTapDown(TapDragDownDetails details) {}
+    @override
+    void onTripleTapDown(TapDragDownDetails details) {}
+    @override
+    void onDragSelectionStart(TapDragStartDetails details) {}
+    @override
+    void onDragSelectionUpdate(TapDragUpdateDetails details) {}
+    @override
+    void onDragSelectionEnd(TapDragEndDetails details) {}
+}
+
 /// A Material Design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
@@ -952,6 +998,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   bool _showSelectionHandles = false;
 
   late _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+  late _WebTextFieldGestureDetectorBuilder _webSelectionGestureDetectorBuilder;
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
@@ -1048,6 +1095,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void initState() {
     super.initState();
     _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
+    _webSelectionGestureDetectorBuilder = _WebTextFieldGestureDetectorBuilder(state: this);
     if (widget.controller == null) {
       _createLocalController();
     }
@@ -1506,7 +1554,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       onExit: (PointerExitEvent event) => _handleHover(false),
       child: TextFieldTapRegion(
         child: IgnorePointer(
-          ignoring: !_isEnabled || kIsWeb,
+          ignoring: !_isEnabled,
           child: AnimatedBuilder(
             animation: controller, // changes the _currentLength
             builder: (BuildContext context, Widget? child) {
@@ -1524,7 +1572,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 child: child,
               );
             },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
+            child: (kIsWeb ? _webSelectionGestureDetectorBuilder : _selectionGestureDetectorBuilder).buildGestureDetector(
               behavior: HitTestBehavior.translucent,
               child: child,
             ),
