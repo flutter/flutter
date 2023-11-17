@@ -121,7 +121,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
     }
 
     if (context) {
-      for (GrBackendTexture texture : textures) {
+      for (const GrBackendTexture& texture : textures) {
         context->deleteBackendTexture(texture);
       }
 

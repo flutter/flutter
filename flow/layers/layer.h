@@ -266,7 +266,7 @@ class Layer {
   SkRect paint_bounds_;
   uint64_t unique_id_;
   uint64_t original_layer_id_;
-  bool subtree_has_platform_view_;
+  bool subtree_has_platform_view_ = false;
 
   static uint64_t NextUniqueID();
 

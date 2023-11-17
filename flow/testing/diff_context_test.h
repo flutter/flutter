@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_DIFF_CONTEXT_TEST_H_
 #define FLUTTER_SHELL_DIFF_CONTEXT_TEST_H_
 
+#include <utility>
+
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
@@ -58,7 +60,7 @@ class DiffContextTest : public LayerTest {
 
   std::shared_ptr<ContainerLayer> CreateContainerLayer(
       std::shared_ptr<Layer> l) {
-    return CreateContainerLayer({l});
+    return CreateContainerLayer({std::move(l)});
   }
 
   std::shared_ptr<OpacityLayer> CreateOpacityLater(

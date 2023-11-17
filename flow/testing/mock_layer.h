@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <utility>
 #include "flutter/flow/diff_context.h"
 #include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/container_layer.h"
@@ -28,11 +29,11 @@ class MockLayer : public Layer {
 
   static std::shared_ptr<MockLayer> Make(SkPath path,
                                          DlPaint paint = DlPaint()) {
-    return std::make_shared<MockLayer>(path, paint);
+    return std::make_shared<MockLayer>(std::move(path), std::move(paint));
   }
 
   static std::shared_ptr<MockLayer> MakeOpacityCompatible(SkPath path) {
-    auto mock_layer = std::make_shared<MockLayer>(path, DlPaint());
+    auto mock_layer = std::make_shared<MockLayer>(std::move(path), DlPaint());
     mock_layer->set_fake_opacity_compatible(true);
     return mock_layer;
   }
@@ -152,10 +153,10 @@ class MockLayerCacheableItem : public LayerRasterCacheItem {
 };
 class MockCacheableLayer : public MockLayer {
  public:
-  explicit MockCacheableLayer(SkPath path,
+  explicit MockCacheableLayer(const SkPath& path,
                               DlPaint paint = DlPaint(),
                               int render_limit = 3)
-      : MockLayer(path, paint) {
+      : MockLayer(path, std::move(paint)) {
     raster_cache_item_ =
         std::make_unique<MockLayerCacheableItem>(this, render_limit);
   }
