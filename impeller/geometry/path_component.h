@@ -102,7 +102,7 @@ struct CubicPathComponent {
 
   CubicPathComponent() {}
 
-  CubicPathComponent(const QuadraticPathComponent& q)
+  explicit CubicPathComponent(const QuadraticPathComponent& q)
       : p1(q.p1),
         cp1(q.p1 + (q.cp - q.p1) * (2.0 / 3.0)),
         cp2(q.p2 + (q.cp - q.p2) * (2.0 / 3.0)),
@@ -148,7 +148,7 @@ struct ContourComponent {
 
   ContourComponent() {}
 
-  ContourComponent(Point p, bool is_closed = false)
+  explicit ContourComponent(Point p, bool is_closed = false)
       : destination(p), is_closed(is_closed) {}
 
   bool operator==(const ContourComponent& other) const {
