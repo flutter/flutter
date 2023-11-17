@@ -1590,6 +1590,18 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).color, isNot(const Color(0xff1c1b1f)));
     expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xfffffbfe));
   });
+
+  testWidgetsWithLeakTracking('AnimationStyle.noAnimation removes AnimatedTheme from the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle()));
+
+    expect(find.byType(AnimatedTheme), findsOneWidget);
+    expect(find.byType(Theme), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle.noAnimation));
+
+    expect(find.byType(AnimatedTheme), findsNothing);
+    expect(find.byType(Theme), findsOneWidget);
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {

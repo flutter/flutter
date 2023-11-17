@@ -955,8 +955,11 @@ class _MaterialAppState extends State<MaterialApp> {
     final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
     final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
-    Widget childWidget = widget.builder != null
-      ? Builder(
+    Widget childWidget = child ?? const SizedBox.shrink();
+
+    if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
+      if (widget.builder != null) {
+        childWidget = Builder(
           builder: (BuildContext context) {
             // Why are we surrounding a builder with a builder?
             //
@@ -971,14 +974,17 @@ class _MaterialAppState extends State<MaterialApp> {
             // resolves to the theme we passed to AnimatedTheme.
             return widget.builder!(context, child);
           },
-        )
-      : child ?? const SizedBox.shrink();
-
-    if (widget.themeAnimationStyle != AnimationStyle.noAnimation) {
+        );
+      }
       childWidget = AnimatedTheme(
         data: theme,
         duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
         curve: widget.themeAnimationStyle?.curve ?? widget.themeAnimationCurve,
+        child: childWidget,
+      );
+    } else {
+      childWidget = Theme(
+        data: theme,
         child: childWidget,
       );
     }
@@ -988,12 +994,7 @@ class _MaterialAppState extends State<MaterialApp> {
       child: DefaultSelectionStyle(
         selectionColor: effectiveSelectionColor,
         cursorColor: effectiveCursorColor,
-        child: AnimatedTheme(
-          data: theme,
-          duration: widget.themeAnimationStyle?.duration ?? widget.themeAnimationDuration,
-          curve: widget.themeAnimationStyle?.curve ?? widget.themeAnimationCurve,
-          child: childWidget,
-        ),
+        child: childWidget,
       ),
     );
   }
