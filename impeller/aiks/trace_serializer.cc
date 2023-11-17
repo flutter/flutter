@@ -116,35 +116,35 @@ std::ostream& operator<<(std::ostream& os, const Paint& paint) {
 namespace {
 std::string_view CanvasRecorderOpToString(CanvasRecorderOp op) {
   switch (op) {
-    FLT_CANVAS_RECORDER_OP_TO_STRING(New);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Save);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(SaveLayer);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Restore);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(RestoreToCount);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(ResetTransform);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Transform);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Concat);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(PreConcat);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Translate);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Scale2);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Scale3);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Skew);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(Rotate);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawPath);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawPaint);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawRect);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawRRect);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawCircle);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawPoints);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawImage);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawImageRect);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(ClipPath);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(ClipRect);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(ClipRRect);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawPicture);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawTextFrame);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawVertices);
-    FLT_CANVAS_RECORDER_OP_TO_STRING(DrawAtlas);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kNew);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kSave);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kSaveLayer);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kRestore);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kRestoreToCount);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kResetTransform);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kTransform);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kConcat);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kPreConcat);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kTranslate);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kScale2);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kScale3);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kSkew);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kRotate);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPath);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPaint);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawRect);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawRRect);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawCircle);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPoints);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawImage);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawImageRect);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kClipPath);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kClipRect);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kClipRRect);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawPicture);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawTextFrame);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawVertices);
+    FLT_CANVAS_RECORDER_OP_TO_STRING(kDrawAtlas);
   }
 }
 }  // namespace
@@ -152,7 +152,7 @@ std::string_view CanvasRecorderOpToString(CanvasRecorderOp op) {
 TraceSerializer::TraceSerializer() {}
 
 void TraceSerializer::Write(CanvasRecorderOp op) {
-  if (op == CanvasRecorderOp::New) {
+  if (op == CanvasRecorderOp::kNew) {
     FML_LOG(ERROR) << "######################################################";
   } else {
     FML_LOG(ERROR) << CanvasRecorderOpToString(op) << ":" << buffer_.str();
