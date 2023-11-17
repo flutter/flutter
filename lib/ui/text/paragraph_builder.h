@@ -80,7 +80,7 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
                             const std::string& locale,
                             bool applyRoundingHack);
 
-  std::unique_ptr<txt::ParagraphBuilder> m_paragraphBuilder;
+  std::unique_ptr<txt::ParagraphBuilder> m_paragraph_builder_;
 };
 
 }  // namespace flutter

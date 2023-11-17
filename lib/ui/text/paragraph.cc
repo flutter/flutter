@@ -22,55 +22,55 @@ namespace flutter {
 IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 
 Paragraph::Paragraph(std::unique_ptr<txt::Paragraph> paragraph)
-    : m_paragraph(std::move(paragraph)) {}
+    : m_paragraph_(std::move(paragraph)) {}
 
 Paragraph::~Paragraph() = default;
 
 double Paragraph::width() {
-  return m_paragraph->GetMaxWidth();
+  return m_paragraph_->GetMaxWidth();
 }
 
 double Paragraph::height() {
-  return m_paragraph->GetHeight();
+  return m_paragraph_->GetHeight();
 }
 
 double Paragraph::longestLine() {
-  return m_paragraph->GetLongestLine();
+  return m_paragraph_->GetLongestLine();
 }
 
 double Paragraph::minIntrinsicWidth() {
-  return m_paragraph->GetMinIntrinsicWidth();
+  return m_paragraph_->GetMinIntrinsicWidth();
 }
 
 double Paragraph::maxIntrinsicWidth() {
-  return m_paragraph->GetMaxIntrinsicWidth();
+  return m_paragraph_->GetMaxIntrinsicWidth();
 }
 
 double Paragraph::alphabeticBaseline() {
-  return m_paragraph->GetAlphabeticBaseline();
+  return m_paragraph_->GetAlphabeticBaseline();
 }
 
 double Paragraph::ideographicBaseline() {
-  return m_paragraph->GetIdeographicBaseline();
+  return m_paragraph_->GetIdeographicBaseline();
 }
 
 bool Paragraph::didExceedMaxLines() {
-  return m_paragraph->DidExceedMaxLines();
+  return m_paragraph_->DidExceedMaxLines();
 }
 
 void Paragraph::layout(double width) {
-  m_paragraph->Layout(width);
+  m_paragraph_->Layout(width);
 }
 
 void Paragraph::paint(Canvas* canvas, double x, double y) {
-  if (!m_paragraph || !canvas) {
+  if (!m_paragraph_ || !canvas) {
     // disposed.
     return;
   }
 
   DisplayListBuilder* builder = canvas->builder();
   if (builder) {
-    m_paragraph->Paint(builder, x, y);
+    m_paragraph_->Paint(builder, x, y);
   }
 }
 
@@ -98,7 +98,7 @@ tonic::Float32List Paragraph::getRectsForRange(unsigned start,
                                                unsigned end,
                                                unsigned boxHeightStyle,
                                                unsigned boxWidthStyle) {
-  std::vector<txt::Paragraph::TextBox> boxes = m_paragraph->GetRectsForRange(
+  std::vector<txt::Paragraph::TextBox> boxes = m_paragraph_->GetRectsForRange(
       start, end, static_cast<txt::Paragraph::RectHeightStyle>(boxHeightStyle),
       static_cast<txt::Paragraph::RectWidthStyle>(boxWidthStyle));
   return EncodeTextBoxes(boxes);
@@ -106,13 +106,13 @@ tonic::Float32List Paragraph::getRectsForRange(unsigned start,
 
 tonic::Float32List Paragraph::getRectsForPlaceholders() {
   std::vector<txt::Paragraph::TextBox> boxes =
-      m_paragraph->GetRectsForPlaceholders();
+      m_paragraph_->GetRectsForPlaceholders();
   return EncodeTextBoxes(boxes);
 }
 
 Dart_Handle Paragraph::getPositionForOffset(double dx, double dy) {
   txt::Paragraph::PositionWithAffinity pos =
-      m_paragraph->GetGlyphPositionAtCoordinate(dx, dy);
+      m_paragraph_->GetGlyphPositionAtCoordinate(dx, dy);
   std::vector<size_t> result = {
       pos.position,                      // size_t already
       static_cast<size_t>(pos.affinity)  // affinity (enum)
@@ -121,13 +121,13 @@ Dart_Handle Paragraph::getPositionForOffset(double dx, double dy) {
 }
 
 Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
-  txt::Paragraph::Range<size_t> point = m_paragraph->GetWordBoundary(offset);
+  txt::Paragraph::Range<size_t> point = m_paragraph_->GetWordBoundary(offset);
   std::vector<size_t> result = {point.start, point.end};
   return tonic::DartConverter<decltype(result)>::ToDart(result);
 }
 
 Dart_Handle Paragraph::getLineBoundary(unsigned utf16Offset) {
-  std::vector<txt::LineMetrics> metrics = m_paragraph->GetLineMetrics();
+  std::vector<txt::LineMetrics> metrics = m_paragraph_->GetLineMetrics();
   int line_start = -1;
   int line_end = -1;
   for (txt::LineMetrics& line : metrics) {
@@ -142,7 +142,7 @@ Dart_Handle Paragraph::getLineBoundary(unsigned utf16Offset) {
 }
 
 tonic::Float64List Paragraph::computeLineMetrics() const {
-  std::vector<txt::LineMetrics> metrics = m_paragraph->GetLineMetrics();
+  std::vector<txt::LineMetrics> metrics = m_paragraph_->GetLineMetrics();
 
   // Layout:
   // boxes.size() groups of 9 which are the line metrics
@@ -172,7 +172,7 @@ tonic::Float64List Paragraph::computeLineMetrics() const {
 Dart_Handle Paragraph::getLineMetricsAt(int lineNumber,
                                         Dart_Handle constructor) const {
   skia::textlayout::LineMetrics line;
-  const bool found = m_paragraph->GetLineMetricsAt(lineNumber, &line);
+  const bool found = m_paragraph_->GetLineMetricsAt(lineNumber, &line);
   if (!found) {
     return Dart_Null();
   }
@@ -198,15 +198,15 @@ Dart_Handle Paragraph::getLineMetricsAt(int lineNumber,
 }
 
 size_t Paragraph::getNumberOfLines() const {
-  return m_paragraph->GetNumberOfLines();
+  return m_paragraph_->GetNumberOfLines();
 }
 
 int Paragraph::getLineNumberAt(size_t utf16Offset) const {
-  return m_paragraph->GetLineNumberAt(utf16Offset);
+  return m_paragraph_->GetLineNumberAt(utf16Offset);
 }
 
 void Paragraph::dispose() {
-  m_paragraph.reset();
+  m_paragraph_.reset();
   ClearDartWrapper();
 }
 
