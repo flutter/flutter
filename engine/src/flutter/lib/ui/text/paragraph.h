@@ -54,7 +54,7 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
   void dispose();
 
  private:
-  std::unique_ptr<txt::Paragraph> m_paragraph;
+  std::unique_ptr<txt::Paragraph> m_paragraph_;
 
   explicit Paragraph(std::unique_ptr<txt::Paragraph> paragraph);
 };
