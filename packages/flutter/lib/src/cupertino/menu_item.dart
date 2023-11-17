@@ -268,11 +268,13 @@ class CupertinoMenuTitle extends StatelessWidget
   const CupertinoMenuTitle({
     super.key,
     required this.child,
+    this.textStyle = defaultTextStyle,
     this.textAlign = TextAlign.center,
   });
 
   /// The alignment of the title.
   final TextAlign textAlign;
+  final TextStyle textStyle;
 
   /// The widget to display as a title. Usually a [Text] widget.
   final Widget child;
@@ -314,10 +316,9 @@ class CupertinoMenuTitle extends StatelessWidget
           maxLines: 2,
           textAlign: textAlign,
           child: child,
-          // Color is obtained from the defaultTextStyle to allow for customization
-          style: defaultTextStyle.copyWith(
+          style: textStyle.copyWith(
             color: CupertinoDynamicColor.maybeResolve(
-              defaultTextStyle.color,
+              textStyle.color,
               context,
             ),
           ),
@@ -479,7 +480,10 @@ class CupertinoStickyMenuHeader extends StatelessWidget
   bool get hasLeading => true;
 
   double getScaledHeight(TextScaler scaler) {
-    return scaler.scale(height - padding.vertical - 8) + padding.vertical;
+    return scaler.clamp(
+            minScaleFactor: 0.9,
+            maxScaleFactor:  2.0
+          ).scale(height - padding.vertical - 8) + padding.vertical;
   }
 
   @override
@@ -513,7 +517,7 @@ class CupertinoStickyMenuHeader extends StatelessWidget
             padding: padding,
             trailing: trailing,
             leading:  Padding(
-              padding: const EdgeInsets.only(right: 4.0),
+              padding: const EdgeInsetsDirectional.only(end: 4.0),
               child: leading,
             ),
             title: DefaultTextStyle.merge(
@@ -597,24 +601,29 @@ class _CupertinoMenuItemStructure extends StatelessWidget {
   const _CupertinoMenuItemStructure({
     required this.title,
     this.height = kMinInteractiveDimensionCupertino,
-    this.padding,
     this.leading,
     this.trailing,
     this.subtitle,
     this.scalePadding = true,
+    this.leadingAlignment = defaultLeadingAlignment,
+    this.trailingAlignment = defaultTrailingAlignment,
+    EdgeInsetsDirectional? padding,
     double? leadingWidth,
     double? trailingWidth,
   })  : _trailingWidth = trailingWidth,
-        _leadingWidth = leadingWidth;
+        _leadingWidth = leadingWidth,
+        _padding = padding ?? defaultPadding;
 
-  static const EdgeInsetsDirectional defaultVerticalPadding =
+  static const EdgeInsetsDirectional defaultPadding =
       EdgeInsetsDirectional.symmetric(vertical: 12);
   static const double defaultHorizontalWidth = 16;
   static const double leadingWidgetWidth = 32.0;
-  static const double trailingWidgetWidth = 38.5;
+  static const double trailingWidgetWidth = 44.0;
+  static const AlignmentDirectional defaultLeadingAlignment = AlignmentDirectional(1/6, 0);
+  static const AlignmentDirectional defaultTrailingAlignment = AlignmentDirectional(3/11, 0);
 
   // The padding for the contents of the menu item.
-  final EdgeInsetsDirectional? padding;
+  final EdgeInsetsDirectional _padding;
 
   // The widget shown before the title. Typically a [CupertinoIcon].
   final Widget? leading;
@@ -627,6 +636,14 @@ class _CupertinoMenuItemStructure extends StatelessWidget {
 
   // The width of the trailing portion of the menu item.
   final double? _trailingWidth;
+
+  // The alignment of the leading widget within the leading portion of the menu
+  // item.
+  final AlignmentDirectional leadingAlignment;
+
+  // The alignment of the trailing widget within the trailing portion of the
+  // menu item.
+  final AlignmentDirectional trailingAlignment;
 
   // The height of the menu item.
   final double height;
@@ -648,17 +665,23 @@ class _CupertinoMenuItemStructure extends StatelessWidget {
     final bool showTrailingWidget = textScale < 1.25 && trailing != null;
     // Padding scales with textScale, but at a slower rate than text. Square
     // root is used to estimate the padding scaling factor.
-    final double paddingScaler = scalePadding ? math.sqrt(textScale) : 1.0;
+    final double scaledPadding = scalePadding ? math.sqrt(textScale) : 1.0;
+    final double trailingWidth = (_trailingWidth
+                                   ?? (showTrailingWidget
+                                        ? trailingWidgetWidth
+                                        : defaultHorizontalWidth)) * scaledPadding;
+    final double leadingWidth = (_leadingWidth
+                                  ?? (showLeadingWidget
+                                       ? leadingWidgetWidth
+                                       : defaultHorizontalWidth)) * scaledPadding;
     // AnimatedSize is used to limit jump when the contents of a menu item change
     return AnimatedSize(
       curve: Curves.easeOutExpo,
       duration: const Duration(milliseconds: 600),
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: height,
-        ),
+        constraints: BoxConstraints(minHeight: height * scaledPadding),
         child: Padding(
-          padding: (padding ?? defaultVerticalPadding) * paddingScaler,
+          padding: _padding * scaledPadding,
           child: Row(
             children: <Widget>[
               // The leading and trailing widgets are wrapped in SizedBoxes and
@@ -666,41 +689,28 @@ class _CupertinoMenuItemStructure extends StatelessWidget {
               // behavior of the SizedBoxes appears to be more consistent with
               // AutoLayout (iOS).
               SizedBox(
-                width: _leadingWidth
-                        ?? (showLeadingWidget
-                              ? leadingWidgetWidth
-                              : defaultHorizontalWidth) * paddingScaler,
+                width: leadingWidth,
                 child: showLeadingWidget
-                    ? Align(
-                        alignment: const AlignmentDirectional(0.167, 0),
-                        child: leading,
-                      )
-                    : null,
+                         ? Align(alignment: defaultLeadingAlignment, child: leading)
+                         : null,
               ),
               Expanded(
-                child: subtitle != null
-                    ? Column(
+                child: subtitle == null
+                    ? title
+                    : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           title,
                           subtitle!,
                         ],
-                      )
-                    : title,
+                      ),
               ),
-              const SizedBox(width: 4),
               SizedBox(
-                width: _trailingWidth
-                         ?? (showTrailingWidget
-                              ? trailingWidgetWidth
-                              : defaultHorizontalWidth),
+                width: trailingWidth,
                 child: showTrailingWidget
-                    ? Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: trailing,
-                      )
-                    : null,
+                         ? Align(alignment: defaultTrailingAlignment, child: trailing)
+                         : null,
               ),
             ],
           ),
@@ -1546,7 +1556,7 @@ class _CupertinoNestedMenuItemAnchorState<T>
   late TextStyle _defaultTextStyle;
   bool _isTopTextVisible = false;
 
-  void _updateSemantics(){
+  void _updateSemantics() {
     setState(() {
       _isTopTextVisible = _topTextAnimation!.value.color!.opacity > 0.5;
     });
@@ -1587,7 +1597,7 @@ class _CupertinoNestedMenuItemAnchorState<T>
   }
 
   Widget? _buildSubtitle(BuildContext context) {
-    if (widget.subtitle == null){
+    if (widget.subtitle == null) {
       return null;
     }
 
@@ -1616,7 +1626,6 @@ class _CupertinoNestedMenuItemAnchorState<T>
                           .copyWith(color: labelColor);
     _buildAnimations();
     widget.animation.addListener(_updateSemantics);
-
   }
 
   @override

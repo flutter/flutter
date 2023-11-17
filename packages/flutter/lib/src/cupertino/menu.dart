@@ -15,12 +15,12 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
-import 'constants.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'menu_item.dart';
 import 'scrollbar.dart';
 import 'theme.dart';
+
 
 // TODO(davidhicks980): Shuffle the classes to make the file more readable.
 
@@ -196,8 +196,8 @@ class CupertinoMenuButton<T> extends StatefulWidget {
     this.physics,
     this.controller,
     this.useRootNavigator = false,
-    this.minSize = kMinInteractiveDimensionCupertino,
-    this.buttonPadding = EdgeInsets.zero,
+    this.minSize,
+    this.buttonPadding,
     this.edgeInsets = const EdgeInsets.all(CupertinoMenu.defaultEdgeInsets),
     this.clip = Clip.antiAlias,
     this.focusNode,
@@ -455,7 +455,7 @@ class CupertinoMenuButtonState<T> extends State<CupertinoMenuButton<T>>
         pressedOpacity: widget.child != null ? 1 : 0.4,
         onPressed: widget.enabled ? showMenu : null,
         minSize: widget.minSize,
-        padding: widget.buttonPadding,
+        padding: widget.buttonPadding ?? EdgeInsets.zero,
         child: IconTheme.merge(
           data: IconTheme.of(context),
           child: widget.child
@@ -541,18 +541,14 @@ Future<T?> showCupertinoMenu<T>({
   }
 
   onOpened?.call();
-  final NavigatorState navigator = Navigator.of(
-    context,
-    rootNavigator: useRootNavigator,
-  );
-  final Size overlaySize = navigator.overlay?.context.size
-                            ?? MediaQuery.sizeOf(context);
+  final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+  final Size overlaySize = navigator.overlay!.context.size!;
   final Size anchorSize = anchorPosition.toSize(overlaySize);
+  Alignment? menuAlignment = alignment;
   final CapturedThemes inheritedTheme = InheritedTheme.capture(
     from: context,
     to: navigator.context,
   );
-  Alignment? menuAlignment = alignment;
   return navigator.push<T>(
     _CupertinoMenuRoute<T>(
       curve: const ElasticOutCurve(1.65),
@@ -567,7 +563,8 @@ Future<T?> showCupertinoMenu<T>({
         Animation<double> animation,
         Animation<double> secondaryAnimation,
       ) {
-        if (menuAlignment == null){
+
+        if(menuAlignment == null){
           final Offset anchorCenter = Offset(
             anchorPosition.left + anchorSize.width / 2,
             anchorPosition.top + anchorSize.height / 2,
@@ -609,17 +606,20 @@ Future<T?> showCupertinoMenu<T>({
               },
             ),
         );
-        return Builder(
-          builder: (BuildContext context) {
-            return MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              removeBottom: true,
-              removeLeft: true,
-              removeRight: true,
-              child: child,
-            );
-          }
+
+
+        return  Directionality(
+            textDirection: Directionality.of(context),
+            child: Builder(
+              builder: (BuildContext localContext) {
+                return MediaQuery(
+                  data: MediaQuery.of(localContext).copyWith(
+                    textScaler: MediaQuery.textScalerOf(context),
+                  ),
+                  child: child,
+                );
+              }
+          ),
         );
       },
     ),
@@ -900,6 +900,7 @@ class _MenuScope extends StatefulWidget {
 }
 
 class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
+  static const Duration _forceCloseDuration = Duration(milliseconds: 50);
   // A list of built layers in ascending order
   final List<Widget> _visibleLayers = <Widget>[];
 
@@ -932,7 +933,6 @@ class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
       <_AnimationControllerWithStatusOverride>[];
 
   /// Duration of the animation that runs when a menu layer is force closed.
-  static const Duration forceCloseDuration = Duration(milliseconds: 50);
   bool _isForceClosing = false;
   // The topmost nested menu controller, if that menu is currently closing.
   // Otherwise, null. Used to force the closing menu to finish before
@@ -1110,7 +1110,7 @@ class _MenuScopeState extends State<_MenuScope> with TickerProviderStateMixin {
       // the AnimationController will properly report its status when the
       // animation completes.
       _closingController!.clearStatus();
-      await _closingController!.animateBack(0, duration: forceCloseDuration);
+      await _closingController!.animateBack(0, duration: _forceCloseDuration);
       _isForceClosing = false;
       if (mounted) {
         setState(() {
@@ -1758,7 +1758,7 @@ class CupertinoMenu<T> extends StatefulWidget {
   ///    information to the menu items
   ///
   // TODO(davidhicks980): Consider moving this logic to _MenuBody
-  static List<_MenuCoordinateScope> wrapMenuItems<T>({
+  static List<_MenuCoordinateScope> _wrapMenuItems<T>({
     required List<CupertinoMenuEntry<T>> items,
     required int depth,
     required List<int> path,
@@ -1986,7 +1986,7 @@ class _CupertinoMenuState<T> extends State<CupertinoMenu<T>>
   @override
   Widget build(BuildContext context) {
     final List<_MenuCoordinateScope> builtChildren =
-      CupertinoMenu.wrapMenuItems(
+      CupertinoMenu._wrapMenuItems(
         items: widget.children,
         depth: 0,
         path: <int>[0],
@@ -2141,19 +2141,21 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
   final ValueNotifier<Rect?> rootMenuRectNotifier;
   final ValueNotifier<Offset?> pointerPositionNotifier;
   final EdgeInsets padding;
+
+  static const double defaultShift = 16;
+
   Offset? get pointerPosition => pointerPositionNotifier.value;
   Rect get rootMenuRect => rootMenuRectNotifier.value ?? Rect.zero;
-  static const double defaultShift = 16;
 
   @override
   void paintChildren(FlowPaintingContext context) {
     final List<Matrix4> transforms =
           overrideTransforms
-          ?? List<Matrix4>.generate(
-              context.childCount,
-              (int int) => Matrix4.identity(),
-              growable: false,
-            );
+            ?? List<Matrix4>.generate(
+                context.childCount,
+                (int int) => Matrix4.identity(),
+                growable: false,
+              );
 
     if (overrideTransforms == null) {
       _applyTransforms(context, transforms);
@@ -2177,7 +2179,7 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
     // The top layer is allowed to be more than 100% visible to allow for
     // overshoot.
     double visibleFraction = 1.0;
-    if (layers.length - 1 == index){
+    if(layers.length - 1 == index){
       visibleFraction = ui.clampDouble(nestingAnimation.value - index + 1, 0, 1.1);
     }
 
@@ -2221,9 +2223,7 @@ class _CupertinoMenuFlowDelegate extends FlowDelegate {
       // If the height of the menu layer is greater than the area underneath the
       // root anchor position minus bottom padding, shift the menu upwards by
       // the amount the menu overflows.
-      if (
-        size.height - padding.bottom < layerYOffset + finalLayerHeight
-      ) {
+      if (size.height - padding.bottom < layerYOffset + finalLayerHeight) {
         if (finalLayerHeight > rootAnchorBottom - padding.bottom) {
           menuOffsetY = ui.lerpDouble(
             0,
@@ -2761,7 +2761,7 @@ class _CupertinoNestedMenuState<T>
       _menuController._attach(this);
     }
 
-    if (oldWidget.itemBuilder != widget.itemBuilder) {
+    if(oldWidget.itemBuilder != widget.itemBuilder) {
       // TODO(davidhicks980): Find faster way to rebuild a nested menu layer.
       //
       // Because each menu layer is built in a separate frame, there is a
@@ -2822,7 +2822,7 @@ class _CupertinoNestedMenuState<T>
         final ui.Size anchorSize = (context.findRenderObject()! as RenderBox).size;
 
         final List<_MenuCoordinateScope> wrappedItems =
-          CupertinoMenu.wrapMenuItems(
+          CupertinoMenu._wrapMenuItems(
             items: <CupertinoMenuEntry<T>>[
               CupertinoNestedMenuItemAnchor<T>(
                 key: widget.expandedMenuAnchorKey,
@@ -3271,7 +3271,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   @override
   void initState() {
     super.initState();
-    if (widget.anchorBorderRadius != null) {
+    if(widget.anchorBorderRadius != null) {
       _borderRadiusTween.begin =  widget.anchorBorderRadius;
     }
   }
@@ -3345,7 +3345,7 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
   }
 
   Animation<double> _buildSurfaceAnimation() {
-    if (widget.depth == 0){
+    if(widget.depth == 0){
       return _routeAnimation!;
     } else {
       return _AnimationProduct(
@@ -3367,22 +3367,6 @@ class _MenuContainerState<T> extends State<_MenuContainer<T>>
               || _nestingAnimation.value - widget.depth > 0.3;
   }
 
-  // Builds a shadow that will repaint whenever the menu animation changes.
-  //
-  // Because the shadow is painted and clipped whenever a new layer is pushed,
-  // instead of only when the it's parent layer is opened, this is built
-  // separately from the _MenuSurface widget.
-  CustomPaint _buildShadow(BuildContext context, Widget child) {
-    return CustomPaint(
-      painter: _ShadowPainter(
-        brightness: CupertinoTheme.brightnessOf(context),
-        depth: widget.depth,
-        radius: CupertinoMenu.radius,
-        repaint: _nestingAnimationReciprocal,
-      ),
-      child: child,
-    );
-  }
 
   // Absorb pointers when the menu is animating open or closed.
   Widget _buildAbsorbPointer(BuildContext context, Widget? child) {
@@ -3452,7 +3436,7 @@ class _ShadowPainter extends CustomPainter {
     required this.repaint,
   }) : super(repaint: repaint);
 
-  double get shadowOpacity => (repaint?.value ?? 0).clamp(0, 1);
+  double get shadowOpacity => ui.clampDouble(repaint?.value ?? 0.0, 0.0, 1.0);
   final Animation<double>? repaint;
   final Radius radius;
   final int depth;
@@ -3572,16 +3556,18 @@ class _AnimatedSurface extends AnimatedWidget {
                              : CupertinoMenu.background,
   })  : _depth = depth;
 
-  static const Interval _blurInterval = Interval(0.2, 0.4);
-  static const Interval _rootOpacityInterval = Interval(0.3, 1);
-  static const Interval _nestedOpacityInterval = Interval(0.0, 0.05);
-  static const Color _nestedLighteningColor = ui.Color(0x33FFFFFF);
   final int _depth;
   final Widget child;
   final Widget shadowPainter;
   final CupertinoDynamicColor background;
   final BorderRadiusTween borderRadiusTween;
   final Clip clip;
+
+  static const Interval _blurInterval = Interval(0.2, 0.4);
+  static const Interval _rootOpacityInterval = Interval(0.3, 1);
+  static const Interval _nestedOpacityInterval = Interval(0.0, 0.05);
+  static const Color _nestedLighteningColor = ui.Color(0x33FFFFFF);
+
   double get value => (super.listenable as Animation<double>).value;
   Interval get opacityInterval => _depth == 0 ? _rootOpacityInterval
                                               : _nestedOpacityInterval;
@@ -3596,8 +3582,7 @@ class _AnimatedSurface extends AnimatedWidget {
         color = Color.alphaBlend(color, _nestedLighteningColor);
       }
       color = color.withOpacity(
-        color.opacity *
-        opacityInterval.transform(clampedValue),
+        color.opacity * opacityInterval.transform(clampedValue),
       );
     }
 
@@ -3821,7 +3806,7 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
     if (childSize != Size.zero) {
       SchedulerBinding.instance.addPostFrameCallback(
         (Duration timeStamp) {
-          if (mounted) {
+          if(mounted) {
             _height = (childSize.height + _headerOffset).roundToDouble();
             // Report the height of the menu to the parent layer. See
             // _UnsafeSizeChangedLayoutNotifier for more information.
@@ -3966,7 +3951,7 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
-                          stickyHeader!,
+                          Flexible(child: stickyHeader!)
                         ],
                       )
                     ),
