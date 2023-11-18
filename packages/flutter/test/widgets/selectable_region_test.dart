@@ -547,10 +547,15 @@ void main() {
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
 
-  group('Selection Offsets are correctly gathered for disjoint Text Widgets', () {
-    const List<String> texts = <String>['How are you', 'you doing on this', 'fine day?'];
+  group('Selection Offsets are correctly gathered for disjoint Text Widgets',
+      () {
+    const List<String> texts = <String>[
+      'How are you',
+      'you doing on this',
+      'fine day?'
+    ];
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'iteratively gather offsets 0 through the last character of each Text widget',
       (WidgetTester tester) async {
         TextSelection? currentSelection;
@@ -565,20 +570,24 @@ void main() {
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Column(
-              children: List<Widget>.from(texts.map((String text) => Text(text)).toList())
+              children: List<Widget>.from(
+                  texts.map((String text) => Text(text)).toList())
                 ..insert(
                   2,
-                  const SizedBox(height: 20), // Spacer after the second Text widget
+                  const SizedBox(
+                      height: 20), // Spacer after the second Text widget
                 ),
             ),
           ),
         );
 
         await tester.pumpWidget(widget);
-        final List<RenderParagraph> paragraphs =
-            tester.renderObjectList<RenderParagraph>(find.byType(RichText)).toList();
+        final List<RenderParagraph> paragraphs = tester
+            .renderObjectList<RenderParagraph>(find.byType(RichText))
+            .toList();
 
-        expect(paragraphs.length, texts.length, reason: 'Should have a paragraph for each text');
+        expect(paragraphs.length, texts.length,
+            reason: 'Should have a paragraph for each text');
 
         final TestGesture gesture = await tester.startGesture(
           textOffsetToPosition(paragraphs.first, 0),
@@ -609,7 +618,7 @@ void main() {
       variant: TargetPlatformVariant.all(),
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'Test collecting offsets from the middle of the first Text widget through the middle of the last Text widget',
       (WidgetTester tester) async {
         TextSelection? currentSelection;
