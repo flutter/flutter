@@ -188,10 +188,10 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.leading], the intended use for the return value of this method.
   Widget? buildLeading(BuildContext context);
 
-  /// {@macro AppBar.automaticallyImplyLeading}
+  /// [AppBar.automaticallyImplyLeading]
   bool? automaticallyImplyLeading;
 
-  /// {@macro AppBar.leadingWidth}
+  /// [AppBar.leadingWidth]
   double? leadingWidth;
 
   /// Widgets to display after the search query in the [AppBar].
