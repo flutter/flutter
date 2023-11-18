@@ -94,6 +94,7 @@ class BuildLinuxCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: logger,
         flutterUsage: globals.flutterUsage,
+        analytics: analytics,
       ),
       needCrossBuild: needCrossBuild,
       targetPlatform: targetPlatform,
