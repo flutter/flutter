@@ -390,8 +390,8 @@ id<MTLCommandBuffer> ContextMTL::CreateMTLCommandBuffer(
   return buffer;
 }
 
-void ContextMTL::StoreTaskForGPU(std::function<void()> task) {
-  tasks_awaiting_gpu_.emplace_back(std::move(task));
+void ContextMTL::StoreTaskForGPU(const std::function<void()>& task) {
+  tasks_awaiting_gpu_.emplace_back(task);
   while (tasks_awaiting_gpu_.size() > kMaxTasksAwaitingGPU) {
     tasks_awaiting_gpu_.front()();
     tasks_awaiting_gpu_.pop_front();

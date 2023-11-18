@@ -339,7 +339,7 @@ std::shared_ptr<Context> SwapchainImplVK::GetContext() const {
 SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
   auto context_strong = context_.lock();
   if (!context_strong) {
-    return {};
+    return SwapchainImplVK::AcquireResult{};
   }
 
   const auto& context = ContextVK::Cast(*context_strong);
@@ -353,7 +353,7 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
   ///
   if (!sync->WaitForFence(context.GetDevice())) {
     VALIDATION_LOG << "Could not wait for fence.";
-    return {};
+    return SwapchainImplVK::AcquireResult{};
   }
 
   //----------------------------------------------------------------------------
@@ -368,7 +368,7 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
     if (caps_result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not get surface capabilities: "
                      << vk::to_string(caps_result);
-      return {};
+      return SwapchainImplVK::AcquireResult{};
     }
     if (caps.currentTransform != transform_if_changed_discard_swapchain_) {
       transform_if_changed_discard_swapchain_ = caps.currentTransform;
@@ -404,7 +404,7 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
 
   if (index >= images_.size()) {
     VALIDATION_LOG << "Swapchain returned an invalid image index.";
-    return {};
+    return SwapchainImplVK::AcquireResult{};
   }
 
   /// Record all subsequent cmd buffers as part of the current frame.

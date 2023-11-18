@@ -14,7 +14,7 @@ class CompressedImageSkia final : public CompressedImage {
   static std::shared_ptr<CompressedImage> Create(
       std::shared_ptr<const fml::Mapping> allocation);
 
-  CompressedImageSkia(std::shared_ptr<const fml::Mapping> allocation);
+  explicit CompressedImageSkia(std::shared_ptr<const fml::Mapping> allocation);
 
   ~CompressedImageSkia() override;
 

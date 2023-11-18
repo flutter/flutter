@@ -25,6 +25,7 @@ class SharedObjectVKT : public SharedObjectVK {
 
   explicit SharedObjectVKT(UniqueResource res) : resource_(std::move(res)) {}
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator Resource() const { return Get(); }
 
   const Resource& Get() const { return *resource_; }

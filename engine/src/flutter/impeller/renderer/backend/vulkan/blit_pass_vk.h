@@ -26,7 +26,7 @@ class BlitPassVK final : public BlitPass {
   std::vector<std::unique_ptr<BlitEncodeVK>> commands_;
   std::string label_;
 
-  BlitPassVK(std::weak_ptr<CommandBufferVK> command_buffer);
+  explicit BlitPassVK(std::weak_ptr<CommandBufferVK> command_buffer);
 
   // |BlitPass|
   bool IsValid() const override;

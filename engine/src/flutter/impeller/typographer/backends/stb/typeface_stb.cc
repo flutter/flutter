@@ -13,8 +13,7 @@ namespace impeller {
 // Instantiate a typeface based on a .ttf or other font file
 TypefaceSTB::TypefaceSTB(std::unique_ptr<fml::Mapping> typeface_mapping)
     : typeface_mapping_(std::move(typeface_mapping)),
-      font_info_(std::make_unique<stbtt_fontinfo>()),
-      is_valid_(false) {
+      font_info_(std::make_unique<stbtt_fontinfo>()) {
   // We need an "offset" into the ttf file
   auto offset = stbtt_GetFontOffsetForIndex(typeface_mapping_->GetMapping(), 0);
   if (stbtt_InitFont(font_info_.get(), typeface_mapping_->GetMapping(),
