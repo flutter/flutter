@@ -11,6 +11,13 @@ import 'package:leak_tracker/leak_tracker.dart';
 import '_goldens_io.dart'
   if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
 
+/// If true, leak tracking will be enabled for all tests `testWidgetsWithLeakTracking`.
+///
+/// By default, the constant is false.
+/// To enable the leak tracking, pass the compilation flag
+/// `--dart-define=flutter_test_config.leak_tracking=true`.
+const bool _kLeakTracking = bool.fromEnvironment('flutter_test_config.leak_tracking');
+
 /// Test configuration for each test library in this directory.
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
@@ -36,6 +43,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
         'OverlayEntry': null,
       },
     );
+
+  if (_kLeakTracking) {
+    LeakTesting.settings = LeakTesting.settings.withTrackedAll();
+  }
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
