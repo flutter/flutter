@@ -27,10 +27,12 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
@@ -38,6 +40,7 @@ void main() {
   group('Flutter Command', () {
     late FakeCache cache;
     late TestUsage usage;
+    late FakeAnalytics fakeAnalytics;
     late FakeClock clock;
     late FakeProcessInfo processInfo;
     late MemoryFileSystem fileSystem;
@@ -64,6 +67,10 @@ void main() {
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
       preRunValidator = PreRunValidator(fileSystem: fileSystem);
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -194,6 +201,7 @@ void main() {
         ProcessManager: () => processManager,
         SystemClock: () => clock,
         Usage: () => usage,
+        Analytics: () => fakeAnalytics,
       });
     }
 
@@ -219,6 +227,13 @@ void main() {
           'dummy',
           label: 'success',
           value: 10,
+        ),
+      ]);
+      expect(fakeAnalytics.sentEvents, <Event>[
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'success',
+          maxRss: 10
         ),
       ]);
     });
@@ -247,6 +262,13 @@ void main() {
           value: 10,
         ),
       ]);
+      expect(fakeAnalytics.sentEvents, <Event>[
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'warning',
+          maxRss: 10
+        ),
+      ]);
     });
 
     testUsingCommandContext('reports command that results in error', () async {
@@ -273,6 +295,13 @@ void main() {
           'dummy',
           label: 'fail',
           value: 10,
+        ),
+      ]);
+      expect(fakeAnalytics.sentEvents, <Event>[
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'fail',
+          maxRss: 10
         ),
       ]);
     });
@@ -381,6 +410,13 @@ void main() {
             value: 10,
           ),
         ]);
+      expect(fakeAnalytics.sentEvents, <Event>[
+        Event.flutterCommandResult(
+          commandPath: 'dummy',
+          result: 'killed',
+          maxRss: 10
+        ),
+      ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
@@ -391,6 +427,7 @@ void main() {
         ),
         SystemClock: () => clock,
         Usage: () => usage,
+        Analytics: () => fakeAnalytics,
       });
 
       testUsingContext('command release lock on kill signal', () async {

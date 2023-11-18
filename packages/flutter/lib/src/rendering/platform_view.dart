@@ -202,7 +202,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
         // Schedule a new post frame callback.
         _setOffset();
       }
-    });
+    }, debugLabel: 'RenderAndroidView.setOffset');
   }
 
   @override
@@ -440,6 +440,12 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
   }
 }
 
@@ -809,5 +815,11 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
   }
 }

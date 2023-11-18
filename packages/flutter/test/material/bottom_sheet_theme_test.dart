@@ -397,7 +397,7 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme, {bool us
                 RawMaterialButton(
                   child: const Text('Show Persistent'),
                   onPressed: () {
-                    showBottomSheet<void>(
+                    showBottomSheet(
                       context: context,
                       builder: (BuildContext _) {
                         return const Text(

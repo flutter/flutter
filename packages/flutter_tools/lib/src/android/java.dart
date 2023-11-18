@@ -17,7 +17,6 @@ const String _javaExecutable = 'java';
 
 /// Represents an installation of Java.
 class Java {
-
   Java({
     required this.javaHome,
     required this.binaryPath,
@@ -154,6 +153,17 @@ class Java {
     final Iterable<RegExpMatch> matches =
         jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
+      // Fallback to second string format like "java 21.0.1 2023-09-19 LTS"
+      final RegExp secondJdkVersionRegex =
+          RegExp(r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d');
+      final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);
+      if (match != null) {
+        final Version? parsedVersion = Version.parse(match.namedGroup('version'));
+        if (parsedVersion == null) {
+          return null;
+        }
+        return parsedVersion;
+      }
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;
     }

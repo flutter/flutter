@@ -24,10 +24,12 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -70,6 +72,7 @@ final Platform notMacosPlatform = FakePlatform(
 void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
+  late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeProcessManager processManager;
   late ProcessUtils processUtils;
@@ -83,6 +86,10 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     artifacts = Artifacts.test(fileSystem: fileSystem);
     usage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     processUtils = ProcessUtils(
@@ -146,6 +153,7 @@ void main() {
     bool verbose = false,
     bool simulator = false,
     bool customNaming = false,
+    bool disablePortPublication = false,
     String? deviceId,
     int exitCode = 0,
     String? stdout,
@@ -189,6 +197,8 @@ void main() {
         ],
         '-resultBundlePath', _xcBundleDirectoryPath,
         '-resultBundleVersion', '3',
+        if (disablePortPublication)
+          'DISABLE_PORT_PUBLICATION=YES',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
@@ -299,6 +309,69 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ios build invokes xcode build with disable port publication setting', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']
+    );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(
+        disablePortPublication: true,
+        onRun: () {
+          fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        },
+      ),
+      setUpRsyncCommand(),
+    ]),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ios build invokes xcode build without disable port publication setting when not in CI', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ios', '--no-pub', '--no-publish-port']
+    );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(
+        onRun: () {
+          fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+        },
+      ),
+      setUpRsyncCommand(),
+    ]),
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
@@ -470,6 +543,9 @@ void main() {
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
@@ -477,6 +553,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
@@ -521,6 +598,13 @@ void main() {
           parameters:CustomDimensions(),
         ),
       ));
+
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'plist-impeller-enabled',
+          buildType: 'ios',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -541,6 +625,7 @@ void main() {
       ),
       Usage: () => usage,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('Sends an analytics event when Impeller is disabled', () async {
@@ -576,6 +661,13 @@ void main() {
           parameters:CustomDimensions(),
         ),
       ));
+
+      expect(fakeAnalytics.sentEvents, contains(
+        Event.flutterBuildInfo(
+          label: 'plist-impeller-disabled',
+          buildType: 'ios',
+        ),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
@@ -607,6 +699,7 @@ void main() {
           plutilCommand, plutilCommand, plutilCommand,
         ]),
       ),
+      Analytics: () => fakeAnalytics,
     });
   });
 
