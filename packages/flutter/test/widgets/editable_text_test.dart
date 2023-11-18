@@ -13906,7 +13906,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13916,7 +13915,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13934,7 +13932,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13943,7 +13940,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13969,7 +13965,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13978,7 +13973,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -14018,7 +14012,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -14027,7 +14020,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange.empty,
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
