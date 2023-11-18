@@ -1390,8 +1390,8 @@ class ListView extends BoxScrollView {
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
   /// null.
-  /// The `includeSeperatorForLastItem` argument determines whether to add
-  /// a seperator after the last item or not. Defaults to `False`.
+  /// The `includeSeparatorForLastItem` argument determines whether to add
+  /// a separator after the last item or not. Defaults to `False`.
   ListView.separated({
     super.key,
     super.scrollDirection,
@@ -1413,7 +1413,7 @@ class ListView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
-    bool includeSeperatorForLastItem = false,
+    bool includeSeparatorForLastItem = false,
   }) : assert(itemCount >= 0),
        itemExtent = null,
        itemExtentBuilder = null,
@@ -1427,7 +1427,7 @@ class ListView extends BoxScrollView {
            return separatorBuilder(context, itemIndex);
          },
          findChildIndexCallback: findChildIndexCallback,
-         childCount: _computeActualChildCount(itemCount, includeSeperatorForLastItem),
+         childCount: _computeActualChildCount(itemCount, includeSeparatorForLastItem),
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
@@ -1581,8 +1581,8 @@ class ListView extends BoxScrollView {
   }
 
   // Helper method to compute the actual child count for the separated constructor.
-  static int _computeActualChildCount(int itemCount, bool includeSeperatorForLastItem) {
-    if (includeSeperatorForLastItem) {
+  static int _computeActualChildCount(int itemCount, bool includeSeparatorForLastItem) {
+    if (includeSeparatorForLastItem) {
       return math.max(0, itemCount * 2);
     }
     return math.max(0, itemCount * 2 - 1);
