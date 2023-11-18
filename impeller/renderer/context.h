@@ -195,7 +195,7 @@ class Context {
   /// Threadsafe.
   ///
   /// `task` will be executed on the platform thread.
-  virtual void StoreTaskForGPU(std::function<void()> task) {
+  virtual void StoreTaskForGPU(const std::function<void()>& task) {
     FML_CHECK(false && "not supported in this context");
   }
 

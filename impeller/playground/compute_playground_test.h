@@ -39,7 +39,7 @@ class ComputePlaygroundTest
 
   template <typename T>
   std::shared_ptr<DeviceBuffer> CreateHostVisibleDeviceBuffer(
-      std::shared_ptr<Context> context,
+      const std::shared_ptr<Context>& context,
       const std::string& label) {
     DeviceBufferDescriptor desc;
     desc.storage_mode = StorageMode::kHostVisible;

@@ -15,7 +15,7 @@ namespace impeller {
 class TypefaceSkia final : public Typeface,
                            public BackendCast<TypefaceSkia, Typeface> {
  public:
-  TypefaceSkia(sk_sp<SkTypeface> typeface);
+  explicit TypefaceSkia(sk_sp<SkTypeface> typeface);
 
   ~TypefaceSkia() override;
 
