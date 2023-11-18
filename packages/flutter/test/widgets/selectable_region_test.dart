@@ -3769,6 +3769,16 @@ class RenderSelectAll extends RenderProxyBox
   }
 
   @override
+  TextSelection? getLocalTextSelection() {
+    return const TextSelection(baseOffset: 0, extentOffset: 0);
+  }
+
+  @override
+  int? getContentLength() {
+    return 0;
+  }
+
+  @override
   SelectionGeometry get value => _value;
   SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,

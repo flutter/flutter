@@ -559,9 +559,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _updateSelectedContentIfNeeded() {
-    if (_lastSelectedContent?.plainText != _selectable?.getSelectedContent()?.plainText) {
+    if (_lastSelectedContent?.plainText !=_selectable?.getSelectedContent()?.plainText) {
       _lastSelectedContent = _selectable?.getSelectedContent();
-      widget.onSelectionChanged?.call(_lastSelectedContent);
+      final TextSelection? textSelection = _selectable?.getLocalTextSelection();
+      widget.onSelectionChanged?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
     }
   }
 
