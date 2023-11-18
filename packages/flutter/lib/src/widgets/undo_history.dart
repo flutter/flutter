@@ -32,6 +32,7 @@ class UndoHistory<T> extends StatefulWidget {
     required this.value,
     required this.onTriggered,
     required this.focusNode,
+    this.historyModifier,
     this.controller,
     required this.child,
   });
@@ -42,6 +43,12 @@ class UndoHistory<T> extends StatefulWidget {
   /// Called when checking whether a value change should be pushed onto
   /// the undo stack.
   final bool Function(T? oldValue, T newValue)? shouldChangeUndoStack;
+
+  /// Called right before a history entry is pushed to the undo stack.
+  ///
+  /// The value returned from this method will be pushed to the stack instead
+  /// of the original value.
+  final T Function(T value)? historyModifier;
 
   /// Called when an undo or redo causes a state change.
   ///
@@ -178,9 +185,9 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
       return;
     }
 
-    _lastValue = widget.value.value;
+    _lastValue = widget.historyModifier?.call(widget.value.value) ?? widget.value.value;
 
-    _throttleTimer = _throttledPush(widget.value.value);
+    _throttleTimer = _throttledPush(_lastValue!);
   }
 
   void _handleFocus() {
