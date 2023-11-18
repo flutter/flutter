@@ -640,22 +640,22 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 8 + TestPointCount * 8, 1, 8 + TestPointCount * 8,
             [](DlOpReceiver& r) {
               r.drawPoints(DlCanvas::PointMode::kPoints, TestPointCount,
-                           TestPoints);
+                           kTestPoints);
             }},
            {1, 8 + (TestPointCount - 1) * 8, 1, 8 + (TestPointCount - 1) * 8,
             [](DlOpReceiver& r) {
               r.drawPoints(DlCanvas::PointMode::kPoints, TestPointCount - 1,
-                           TestPoints);
+                           kTestPoints);
             }},
            {1, 8 + TestPointCount * 8, 1, 8 + TestPointCount * 8,
             [](DlOpReceiver& r) {
               r.drawPoints(DlCanvas::PointMode::kLines, TestPointCount,
-                           TestPoints);
+                           kTestPoints);
             }},
            {1, 8 + TestPointCount * 8, 1, 8 + TestPointCount * 8,
             [](DlOpReceiver& r) {
               r.drawPoints(DlCanvas::PointMode::kPolygon, TestPointCount,
-                           TestPoints);
+                           kTestPoints);
             }},
        }},
       {"DrawVertices",

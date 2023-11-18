@@ -79,7 +79,8 @@ inline SkCanvas::PointMode ToSk(DlCanvas::PointMode mode) {
 }
 
 extern sk_sp<SkShader> ToSk(const DlColorSource* source);
-inline sk_sp<SkShader> ToSk(std::shared_ptr<const DlColorSource> source) {
+inline sk_sp<SkShader> ToSk(
+    const std::shared_ptr<const DlColorSource>& source) {
   return ToSk(source.get());
 }
 inline sk_sp<SkShader> ToSk(const DlColorSource& source) {
@@ -87,7 +88,8 @@ inline sk_sp<SkShader> ToSk(const DlColorSource& source) {
 }
 
 extern sk_sp<SkImageFilter> ToSk(const DlImageFilter* filter);
-inline sk_sp<SkImageFilter> ToSk(std::shared_ptr<const DlImageFilter> filter) {
+inline sk_sp<SkImageFilter> ToSk(
+    const std::shared_ptr<const DlImageFilter>& filter) {
   return ToSk(filter.get());
 }
 inline sk_sp<SkImageFilter> ToSk(const DlImageFilter& filter) {
@@ -95,7 +97,8 @@ inline sk_sp<SkImageFilter> ToSk(const DlImageFilter& filter) {
 }
 
 extern sk_sp<SkColorFilter> ToSk(const DlColorFilter* filter);
-inline sk_sp<SkColorFilter> ToSk(std::shared_ptr<const DlColorFilter> filter) {
+inline sk_sp<SkColorFilter> ToSk(
+    const std::shared_ptr<const DlColorFilter>& filter) {
   return ToSk(filter.get());
 }
 inline sk_sp<SkColorFilter> ToSk(const DlColorFilter& filter) {
@@ -103,7 +106,8 @@ inline sk_sp<SkColorFilter> ToSk(const DlColorFilter& filter) {
 }
 
 extern sk_sp<SkMaskFilter> ToSk(const DlMaskFilter* filter);
-inline sk_sp<SkMaskFilter> ToSk(std::shared_ptr<const DlMaskFilter> filter) {
+inline sk_sp<SkMaskFilter> ToSk(
+    const std::shared_ptr<const DlMaskFilter>& filter) {
   return ToSk(filter.get());
 }
 inline sk_sp<SkMaskFilter> ToSk(const DlMaskFilter& filter) {
@@ -111,7 +115,8 @@ inline sk_sp<SkMaskFilter> ToSk(const DlMaskFilter& filter) {
 }
 
 extern sk_sp<SkPathEffect> ToSk(const DlPathEffect* effect);
-inline sk_sp<SkPathEffect> ToSk(std::shared_ptr<const DlPathEffect> effect) {
+inline sk_sp<SkPathEffect> ToSk(
+    const std::shared_ptr<const DlPathEffect>& effect) {
   return ToSk(effect.get());
 }
 inline sk_sp<SkPathEffect> ToSk(const DlPathEffect& effect) {
@@ -119,7 +124,8 @@ inline sk_sp<SkPathEffect> ToSk(const DlPathEffect& effect) {
 }
 
 extern sk_sp<SkVertices> ToSk(const DlVertices* vertices);
-inline sk_sp<SkVertices> ToSk(std::shared_ptr<const DlVertices> vertices) {
+inline sk_sp<SkVertices> ToSk(
+    const std::shared_ptr<const DlVertices>& vertices) {
   return ToSk(vertices.get());
 }
 inline sk_sp<SkVertices> ToSk(const DlVertices& vertices) {

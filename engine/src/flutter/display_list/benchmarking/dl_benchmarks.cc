@@ -23,23 +23,23 @@ namespace testing {
 DlPaint GetPaintForRun(unsigned attributes) {
   DlPaint paint;
 
-  if (attributes & kStrokedStyle_Flag && attributes & kFilledStyle_Flag) {
+  if (attributes & kStrokedStyle && attributes & kFilledStyle) {
     // Not currently exposed by Flutter, but we can probably benchmark this in
     // the future
     paint.setDrawStyle(DlDrawStyle::kStrokeAndFill);
-  } else if (attributes & kStrokedStyle_Flag) {
+  } else if (attributes & kStrokedStyle) {
     paint.setDrawStyle(DlDrawStyle::kStroke);
-  } else if (attributes & kFilledStyle_Flag) {
+  } else if (attributes & kFilledStyle) {
     paint.setDrawStyle(DlDrawStyle::kFill);
   }
 
-  if (attributes & kHairlineStroke_Flag) {
+  if (attributes & kHairlineStroke) {
     paint.setStrokeWidth(0.0f);
   } else {
     paint.setStrokeWidth(1.0f);
   }
 
-  paint.setAntiAlias(attributes & kAntiAliasing_Flag);
+  paint.setAntiAlias(attributes & kAntiAliasing);
   return paint;
 }
 
@@ -57,17 +57,15 @@ void AnnotateAttributes(unsigned attributes,
                         benchmark::State& state,
                         const DisplayListAttributeFlags flags) {
   if (flags.always_stroked()) {
-    state.counters["HairlineStroke"] =
-        attributes & kHairlineStroke_Flag ? 1 : 0;
+    state.counters["HairlineStroke"] = attributes & kHairlineStroke ? 1 : 0;
   }
   if (flags.applies_style()) {
-    state.counters["HairlineStroke"] =
-        attributes & kHairlineStroke_Flag ? 1 : 0;
-    state.counters["StrokedStyle"] = attributes & kStrokedStyle_Flag ? 1 : 0;
-    state.counters["FilledStyle"] = attributes & kFilledStyle_Flag ? 1 : 0;
+    state.counters["HairlineStroke"] = attributes & kHairlineStroke ? 1 : 0;
+    state.counters["StrokedStyle"] = attributes & kStrokedStyle ? 1 : 0;
+    state.counters["FilledStyle"] = attributes & kFilledStyle ? 1 : 0;
   }
   if (flags.applies_anti_alias()) {
-    state.counters["AntiAliasing"] = attributes & kAntiAliasing_Flag ? 1 : 0;
+    state.counters["AntiAliasing"] = attributes & kAntiAliasing ? 1 : 0;
   }
 }
 

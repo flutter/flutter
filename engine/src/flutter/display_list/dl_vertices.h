@@ -165,7 +165,7 @@ class DlVertices {
 
    private:
     std::shared_ptr<DlVertices> vertices_;
-    bool needs_vertices_;
+    bool needs_vertices_ = true;
     bool needs_texture_coords_;
     bool needs_colors_;
     bool needs_indices_;

@@ -144,7 +144,7 @@ class DlRTree : public SkRefCnt {
               std::vector<int>* results) const;
 
   std::vector<Node> nodes_;
-  int leaf_count_;
+  int leaf_count_ = 0;
   int invalid_id_;
   mutable std::optional<DlRegion> region_;
 };
