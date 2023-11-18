@@ -1781,7 +1781,7 @@ void main() {
     expect(find.text('item-widget'), findsNWidgets(10));
     expect(find.text('separator-widget'), findsNWidgets(9));
 
-    await tester.pumpWidget(buildFrame(includeSeperatorForLastItem: true));
+    await tester.pumpWidget(buildFrame(includeSeparatorForLastItem: true));
     expect(find.text('item-widget'), findsNWidgets(10));
     expect(find.text('separator-widget'), findsNWidgets(10));
   });
