@@ -1572,7 +1572,7 @@ Future<void> _runCustomerTesting() async {
     'git',
     <String>[
       'checkout',
-      String.fromEnvironment('REVISION', defaultValue: 'HEAD'),
+      const String.fromEnvironment('REVISION', defaultValue: 'HEAD'),
     ],
     workingDirectory: flutterRoot,
   );
