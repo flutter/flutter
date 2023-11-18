@@ -1759,12 +1759,12 @@ void main() {
     expect(item2Height, 30.0);
   });
 
-  testWidgetsWithLeakTracking('ListView.separated honors includeSeperatorForLastItem', (WidgetTester tester) async {
-    Widget buildFrame({bool includeSeperatorForLastItem = false}) {
+  testWidgetsWithLeakTracking('ListView.separated honors includeSeparatorForLastItem', (WidgetTester tester) async {
+    Widget buildFrame({bool includeSeparatorForLastItem = false}) {
       return MaterialApp(
         home: Material(
           child: ListView.separated(
-            includeSeperatorForLastItem: includeSeperatorForLastItem,
+            includeSeparatorForLastItem: includeSeparatorForLastItem,
             itemCount: 10,
             separatorBuilder: (BuildContext context, int index) {
               return const Text('separator-widget');
