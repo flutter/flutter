@@ -666,8 +666,7 @@ void main() {
           expect(currentSelection, isNotNull);
           expect(
             currentSelection,
-            TextSelection(
-                baseOffset: 0, extentOffset: runningOffset + textLength - 1),
+            TextSelection(baseOffset: 0, extentOffset: runningOffset + textLength - 1),
             reason: 'Selection should span the entire current Text widget',
           );
 
@@ -698,24 +697,20 @@ void main() {
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: Column(
-              children: List<Widget>.from(
-                  texts.map((String text) => Text(text)).toList())
+              children: List<Widget>.from(texts.map((String text) => Text(text)).toList())
                 ..insert(
                   2,
-                  const SizedBox(
-                      height: 20), // Spacer after the second Text widget
+                  const SizedBox(height: 20), // Spacer after the second Text widget
                 ),
             ),
           ),
         );
 
         await tester.pumpWidget(widget);
-        final List<RenderParagraph> paragraphs = tester
-            .renderObjectList<RenderParagraph>(find.byType(RichText))
-            .toList();
+        final List<RenderParagraph> paragraphs =
+            tester.renderObjectList<RenderParagraph>(find.byType(RichText)).toList();
 
-        expect(paragraphs.length, texts.length,
-            reason: 'Should have a paragraph for each text');
+        expect(paragraphs.length, texts.length, reason: 'Should have a paragraph for each text');
 
         final TestGesture gesture = await tester.startGesture(
           textOffsetToPosition(paragraphs.first, expectedStart),
@@ -728,10 +723,8 @@ void main() {
         expect(currentSelection, isNotNull);
         expect(
           currentSelection,
-          const TextSelection(
-              baseOffset: expectedStart, extentOffset: expectedEnd),
-          reason:
-              'Selection should span from middle of first to middle of last Text widget',
+          const TextSelection(baseOffset: expectedStart, extentOffset: expectedEnd),
+          reason: 'Selection should span from middle of first to middle of last Text widget',
         );
 
         await gesture.up();
@@ -741,8 +734,7 @@ void main() {
   });
 
   group('SelectionArea integration', () {
-    testWidgets('mouse can select single text on desktop platforms',
-        (WidgetTester tester) async {
+    testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
@@ -4497,11 +4489,6 @@ class RenderSelectAll extends RenderProxyBox
   @override
   SelectedContent? getSelectedContent() {
     return const SelectedContent(plainText: 'content');
-  }
-
-  @override
-  TextSelection? getLocalTextSelection() {
-    return const TextSelection(baseOffset: 0, extentOffset: 0);
   }
 
   @override

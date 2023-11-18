@@ -848,8 +848,8 @@ class _ReusableRenderView extends RenderView {
   }
 
   @override
+  // ignore: must_call_super
   void dispose() {
-    // ignore: must_call_super
     child = null;
   }
 }

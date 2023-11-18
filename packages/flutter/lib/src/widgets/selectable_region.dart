@@ -604,13 +604,10 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _updateSelectedContentIfNeeded() {
-    if (_lastSelectedContent?.plainText !=
-        _selectable?.getSelectedContent()?.plainText) {
+    if (_lastSelectedContent?.plainText !=_selectable?.getSelectedContent()?.plainText) {
       _lastSelectedContent = _selectable?.getSelectedContent();
       final TextSelection? textSelection = _selectable?.getLocalTextSelection();
-
-      widget.onSelectionChanged
-          ?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
+      widget.onSelectionChanged?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
     }
   }
 
@@ -1937,7 +1934,7 @@ abstract class MultiSelectableSelectionContainerDelegate
           start += selection?.start ?? 0;
         }
         enteredSelectedRegion = true;
-        numSelected += selection!.extentOffset - selection.baseOffset;
+        numSelected += (selection?.extentOffset ?? 0) - (selection?.baseOffset ?? 0);
       } else {
         if (!enteredSelectedRegion) {
           // add its length to the 'start' index if we haven't started selection.
@@ -1949,7 +1946,6 @@ abstract class MultiSelectableSelectionContainerDelegate
     if (numSelected == 0) {
       return null;
     }
-
     end = numSelected + start;
     // Return a TextSelection that represents the selected range of text.
     return TextSelection(
