@@ -1043,7 +1043,7 @@ void main() {
     final Finder appBarFinder = find.byType(AppBar);
     final AppBar appBar = tester.widget<AppBar>(appBarFinder);
     expect(appBar.leadingWidth, 16);
-    await tester.tapAt(const Offset(8, 16)); 
+    await tester.tapAt(const Offset(8, 16));
     await tester.pumpAndSettle();
     expect(find.text('Suggestions'), findsNothing);
     expect(find.text('HomeBody'), findsOneWidget);
