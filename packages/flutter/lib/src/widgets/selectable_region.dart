@@ -1821,7 +1821,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           start += selection?.start ?? 0;
         }
         enteredSelectedRegion = true;
-        numSelected += selection!.extentOffset - selection.baseOffset;
+        numSelected += (selection?.extentOffset ?? 0) - (selection?.baseOffset ?? 0);
       } else {
         if (!enteredSelectedRegion) {
           // add its length to the 'start' index if we haven't started selection.

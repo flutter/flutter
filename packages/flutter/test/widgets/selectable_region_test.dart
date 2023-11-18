@@ -3690,6 +3690,11 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
+  int? getContentLength() {
+    return 0;
+  }
+
+  @override
   final SelectionGeometry value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
@@ -3766,11 +3771,6 @@ class RenderSelectAll extends RenderProxyBox
   @override
   SelectedContent? getSelectedContent() {
     return const SelectedContent(plainText: 'content');
-  }
-
-  @override
-  TextSelection? getLocalTextSelection() {
-    return const TextSelection(baseOffset: 0, extentOffset: 0);
   }
 
   @override
