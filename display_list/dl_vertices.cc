@@ -203,8 +203,7 @@ DlVertices::Builder::Builder(DlVertexMode mode,
                              int vertex_count,
                              Flags flags,
                              int index_count)
-    : needs_vertices_(true),
-      needs_texture_coords_(flags.has_texture_coordinates),
+    : needs_texture_coords_(flags.has_texture_coordinates),
       needs_colors_(flags.has_colors),
       needs_indices_(index_count > 0) {
   vertex_count = std::max(vertex_count, 0);

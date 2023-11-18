@@ -33,9 +33,7 @@ class DisplayListGLComplexityCalculator
   class GLHelper : public ComplexityCalculatorHelper {
    public:
     explicit GLHelper(unsigned int ceiling)
-        : ComplexityCalculatorHelper(ceiling),
-          save_layer_count_(0),
-          draw_text_blob_count_(0) {}
+        : ComplexityCalculatorHelper(ceiling) {}
 
     void saveLayer(const SkRect* bounds,
                    const SaveLayerOptions options,
@@ -88,8 +86,8 @@ class DisplayListGLComplexityCalculator
     unsigned int BatchedComplexity() override;
 
    private:
-    unsigned int save_layer_count_;
-    unsigned int draw_text_blob_count_;
+    unsigned int save_layer_count_ = 0;
+    unsigned int draw_text_blob_count_ = 0;
   };
 
   DisplayListGLComplexityCalculator()
