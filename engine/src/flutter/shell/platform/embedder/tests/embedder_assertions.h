@@ -15,6 +15,8 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSize.h"
 
+// NOLINTBEGIN(google-objc-function-naming)
+
 //------------------------------------------------------------------------------
 // Equality
 //------------------------------------------------------------------------------
@@ -575,5 +577,7 @@ inline FlutterRoundedRect FlutterRoundedRectMake(const SkRRect& rect) {
       FlutterSizeMake(rect.radii(SkRRect::Corner::kLowerLeft_Corner));
   return r;
 }
+
+// NOLINTEND(google-objc-function-naming)
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_ASSERTIONS_H_

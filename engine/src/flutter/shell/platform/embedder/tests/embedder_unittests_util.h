@@ -8,6 +8,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <future>
+#include <utility>
 
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
@@ -104,8 +105,8 @@ class EmbedderTestTaskRunner {
   EmbedderTestTaskRunner(fml::RefPtr<fml::TaskRunner> real_task_runner,
                          TaskExpiryCallback on_task_expired)
       : identifier_(++sEmbedderTaskRunnerIdentifiers),
-        real_task_runner_(real_task_runner),
-        on_task_expired_(on_task_expired) {
+        real_task_runner_(std::move(real_task_runner)),
+        on_task_expired_(std::move(on_task_expired)) {
     FML_CHECK(real_task_runner_);
     FML_CHECK(on_task_expired_);
 
