@@ -470,7 +470,7 @@ class LocalizationOptions {
   /// as it may mask errors.
   final bool relaxSyntax;
 
-  /// The `use-named-arguments` argument.
+  /// The `use-named-argument` argument.
   ///
   /// Whether or not to use named arguments for the generated localization
   /// methods.
