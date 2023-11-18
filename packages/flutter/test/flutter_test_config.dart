@@ -14,10 +14,11 @@ import '_goldens_io.dart'
 /// If true, leak tracking will be enabled for all tests `testWidgetsWithLeakTracking`.
 ///
 /// By default, the constant is false.
-/// To enable the leak tracking, either pass the compilation flag
+/// To enable the leak tracking for all tests, either pass the compilation flag
 /// `--dart-define=flutter_test_config.leak_tracking=true` or
-/// temporarily add `defaultValue = false` to `bool.fromEnvironment`.
-/// You also can enable leak tracking for individual test file by adding line to main:
+/// temporarily pass `defaultValue = true` to `fromEnvironment` in the constant definition.
+///
+/// To enable leak tracking for an individual test file, add the line to the test `main`:
 /// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
 const bool _kLeakTracking = bool.fromEnvironment('flutter_test_config.leak_tracking');
 
