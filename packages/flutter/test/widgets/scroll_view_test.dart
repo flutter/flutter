@@ -1758,4 +1758,31 @@ void main() {
     expect(item1Height, 30.0);
     expect(item2Height, 30.0);
   });
+
+  testWidgetsWithLeakTracking('ListView.separated honors includeSeperatorForLastItem', (WidgetTester tester) async {
+    Widget buildFrame({bool includeSeperatorForLastItem = false}) {
+      return MaterialApp(
+        home: Material(
+          child: ListView.separated(
+            includeSeperatorForLastItem: includeSeperatorForLastItem,
+            itemCount: 10,
+            separatorBuilder: (BuildContext context, int index) {
+              return const Text('separator-widget');
+            },
+            itemBuilder: (BuildContext context, int index) {
+              return const Text('item-widget');
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text('item-widget'), findsNWidgets(10));
+    expect(find.text('separator-widget'), findsNWidgets(9));
+
+    await tester.pumpWidget(buildFrame(includeSeperatorForLastItem: true));
+    expect(find.text('item-widget'), findsNWidgets(10));
+    expect(find.text('separator-widget'), findsNWidgets(10));
+  });
 }
