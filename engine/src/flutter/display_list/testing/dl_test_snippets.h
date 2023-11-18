@@ -57,13 +57,13 @@ constexpr float kInvertColorMatrix[20] = {
 const SkScalar kTestDashes1[] = {4.0, 2.0};
 const SkScalar kTestDashes2[] = {1.0, 1.5};
 
-constexpr SkPoint TestPoints[] = {
+constexpr SkPoint kTestPoints[] = {
     {10, 10},
     {20, 20},
     {10, 20},
     {20, 10},
 };
-#define TestPointCount sizeof(TestPoints) / (sizeof(TestPoints[0]))
+#define TestPointCount sizeof(kTestPoints) / (sizeof(kTestPoints[0]))
 
 static DlImageSampling kNearestSampling = DlImageSampling::kNearestNeighbor;
 static DlImageSampling kLinearSampling = DlImageSampling::kLinear;
@@ -203,13 +203,13 @@ static const SkMatrix kTestMatrix2 = SkMatrix::RotateDeg(45);
 static std::shared_ptr<const DlVertices> TestVertices1 =
     DlVertices::Make(DlVertexMode::kTriangles,  //
                      3,
-                     TestPoints,
+                     kTestPoints,
                      nullptr,
                      kColors);
 static std::shared_ptr<const DlVertices> TestVertices2 =
     DlVertices::Make(DlVertexMode::kTriangleFan,  //
                      3,
-                     TestPoints,
+                     kTestPoints,
                      nullptr,
                      kColors);
 

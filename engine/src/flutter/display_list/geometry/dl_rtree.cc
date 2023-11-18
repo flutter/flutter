@@ -14,7 +14,7 @@ DlRTree::DlRTree(const SkRect rects[],
                  const int ids[],
                  bool p(int),
                  int invalid_id)
-    : leaf_count_(0), invalid_id_(invalid_id) {
+    : invalid_id_(invalid_id) {
   if (N <= 0) {
     FML_DCHECK(N >= 0);
     return;
