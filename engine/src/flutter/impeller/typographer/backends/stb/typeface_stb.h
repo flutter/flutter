@@ -38,7 +38,7 @@ class TypefaceSTB final : public Typeface,
  private:
   std::unique_ptr<fml::Mapping> typeface_mapping_;
   std::unique_ptr<stbtt_fontinfo> font_info_;
-  bool is_valid_;
+  bool is_valid_ = false;
 
   TypefaceSTB(const TypefaceSTB&) = delete;
 

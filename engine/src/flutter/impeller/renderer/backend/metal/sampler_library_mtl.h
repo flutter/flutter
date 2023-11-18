@@ -29,7 +29,7 @@ class SamplerLibraryMTL final
   id<MTLDevice> device_ = nullptr;
   SamplerMap samplers_;
 
-  SamplerLibraryMTL(id<MTLDevice> device);
+  explicit SamplerLibraryMTL(id<MTLDevice> device);
 
   // |SamplerLibrary|
   std::shared_ptr<const Sampler> GetSampler(

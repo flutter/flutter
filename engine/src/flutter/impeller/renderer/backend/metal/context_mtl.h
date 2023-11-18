@@ -99,12 +99,12 @@ class ContextMTL final : public Context,
 #endif  // IMPELLER_DEBUG
 
   // |Context|
-  void StoreTaskForGPU(std::function<void()> task) override;
+  void StoreTaskForGPU(const std::function<void()>& task) override;
 
  private:
   class SyncSwitchObserver : public fml::SyncSwitch::Observer {
    public:
-    SyncSwitchObserver(ContextMTL& parent);
+    explicit SyncSwitchObserver(ContextMTL& parent);
     virtual ~SyncSwitchObserver() = default;
     void OnSyncSwitchUpdate(bool new_value) override;
 
