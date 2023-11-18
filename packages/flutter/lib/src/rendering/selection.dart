@@ -98,6 +98,16 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// See also:
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
+
+  /// Gets the TextSelection from the selected content
+  ///
+  /// Return `null` if nothing is selected, or is not supported by the selectable
+  TextSelection? getLocalTextSelection();
+
+  /// Gets the content length of the selectable
+  ///
+  /// Return `null` if the content length is not supported by the selectable
+  int? getContentLength();
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
@@ -106,11 +116,27 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 class SelectedContent {
   /// Creates a selected content object.
   ///
-  /// Only supports plain text.
-  const SelectedContent({required this.plainText});
+  /// not all selected content supports TextSelection
+  const SelectedContent({required this.plainText, this.textSelection});
 
   /// The selected content in plain text format.
   final String plainText;
+
+  /// The selected content in [TextSelection] format.
+  final TextSelection? textSelection;
+
+  /// Copy with constructor
+  ///
+  /// not all selected content supports TextSelection
+  SelectedContent copyWith({
+    String? plainText,
+    TextSelection? textSelection,
+  }) {
+    return SelectedContent(
+      plainText: plainText ?? this.plainText,
+      textSelection: textSelection ?? this.textSelection,
+    );
+  }
 }
 
 /// A mixin that can be selected by users when under a [SelectionArea] widget.
@@ -203,6 +229,10 @@ mixin SelectionRegistrant on Selectable {
       _subscribedToSelectionRegistrar = false;
     }
   }
+
+  // not applicable since don't know the type here
+  @override
+  TextSelection? getLocalTextSelection() => null;
 }
 
 /// A utility class that provides useful methods for handling selection events.

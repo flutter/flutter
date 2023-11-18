@@ -2071,4 +2071,20 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
 
   @override
   TextRange getWordBoundary(TextPosition position) => paragraph.getWordBoundary(position);
+
+  @override
+  TextSelection? getLocalTextSelection() {
+    if (_textSelectionStart != null && _textSelectionEnd != null) {
+      final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+      final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+
+      return TextSelection(baseOffset: start, extentOffset: end);
+    }
+    return null;
+  }
+
+  @override
+  int? getContentLength() {
+    return fullText.length;
+  }
 }

@@ -559,9 +559,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _updateSelectedContentIfNeeded() {
-    if (_lastSelectedContent?.plainText != _selectable?.getSelectedContent()?.plainText) {
+    if (_lastSelectedContent?.plainText !=_selectable?.getSelectedContent()?.plainText) {
       _lastSelectedContent = _selectable?.getSelectedContent();
-      widget.onSelectionChanged?.call(_lastSelectedContent);
+      final TextSelection? textSelection = _selectable?.getLocalTextSelection();
+      widget.onSelectionChanged?.call(_lastSelectedContent?.copyWith(textSelection: textSelection));
     }
   }
 
@@ -1791,6 +1792,53 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       currentSelectionStartIndex -= 1;
     }
     selectable.removeListener(_handleSelectableGeometryChange);
+  }
+
+  @override
+  int? getContentLength() {
+    int length = 0;
+    for (final Selectable selectable in selectables) {
+      length += selectable.getContentLength() ?? 0;
+    }
+    return length;
+  }
+
+  @override
+  TextSelection? getLocalTextSelection() {
+    // initialize data structures
+    int start = 0;
+    int? end;
+    int numSelected = 0;
+    bool enteredSelectedRegion = false;
+
+    for (final Selectable selectable in selectables) {
+      // Retrieve the selected content, if any, of the current 'selectable'.
+      final SelectedContent? data = selectable.getSelectedContent();
+      if (data != null) {
+        final TextSelection? selection = selectable.getLocalTextSelection();
+        if (!enteredSelectedRegion) {
+          // ...start the selection index at the start of the current selection.
+          start += selection?.start ?? 0;
+        }
+        enteredSelectedRegion = true;
+        numSelected += (selection?.extentOffset ?? 0) - (selection?.baseOffset ?? 0);
+      } else {
+        if (!enteredSelectedRegion) {
+          // add its length to the 'start' index if we haven't started selection.
+          start += selectable.getContentLength() ?? 0;
+        }
+      }
+    }
+
+    if (numSelected == 0) {
+      return null;
+    }
+    end = numSelected + start;
+    // Return a TextSelection that represents the selected range of text.
+    return TextSelection(
+      baseOffset: start,
+      extentOffset: end,
+    );
   }
 
   /// Called when this delegate finishes updating the selectables.
