@@ -14,8 +14,11 @@ import '_goldens_io.dart'
 /// If true, leak tracking will be enabled for all tests `testWidgetsWithLeakTracking`.
 ///
 /// By default, the constant is false.
-/// To enable the leak tracking, pass the compilation flag
-/// `--dart-define=flutter_test_config.leak_tracking=true`.
+/// To enable the leak tracking, either pass the compilation flag
+/// `--dart-define=flutter_test_config.leak_tracking=true` or
+/// temporarily add `defaultValue = false` to `bool.fromEnvironment`.
+/// You also can enable leak tracking for individual test file by adding line to main:
+/// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
 const bool _kLeakTracking = bool.fromEnvironment('flutter_test_config.leak_tracking');
 
 /// Test configuration for each test library in this directory.
@@ -32,11 +35,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   LeakTracking.warnForUnsupportedPlatforms = false;
 
-  // TODO(polina-c): clean up leaks and stop ignoring them.
-  // https://github.com/flutter/flutter/issues/137311
-  // Leak tracking is off by default. To temporary enable it add `.withTrackedAll()` after `settings`.
   LeakTesting.settings = LeakTesting
     .settings
+    // TODO(polina-c): clean up leaks and stop ignoring them.
+    // https://github.com/flutter/flutter/issues/137311
     .withIgnored(
       allNotGCed: true,
       notDisposed: <String, int?>{
@@ -44,6 +46,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
       },
     );
 
+  // Leak tracking is off by default.
+  // To enable it, follow doc for [_kLeakTracking].
   if (_kLeakTracking) {
     LeakTesting.settings = LeakTesting.settings.withTrackedAll();
   }
