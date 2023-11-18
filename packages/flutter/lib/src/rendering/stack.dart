@@ -182,18 +182,19 @@ class RelativeRect {
     if (identical(this, other)) {
       return true;
     }
-    return other is RelativeRect
-        && other.left == left
-        && other.top == top
-        && other.right == right
-        && other.bottom == bottom;
+    return other is RelativeRect &&
+        other.left == left &&
+        other.top == top &&
+        other.right == right &&
+        other.bottom == bottom;
   }
 
   @override
   int get hashCode => Object.hash(left, top, right, bottom);
 
   @override
-  String toString() => 'RelativeRect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
+  String toString() =>
+      'RelativeRect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
 }
 
 /// Parent data for use with [RenderStack].
@@ -235,7 +236,8 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   /// are non-null. Positioned children do not factor into determining the size
   /// of the stack but are instead placed relative to the non-positioned
   /// children in the stack.
-  bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
+  bool get isPositioned =>
+      top != null || right != null || bottom != null || left != null || width != null || height != null;
 
   @override
   String toString() {
@@ -334,8 +336,9 @@ enum StackFit {
 ///
 ///  * [RenderFlow]
 class RenderStack extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, StackParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
+    with
+        ContainerRenderObjectMixin<RenderBox, StackParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
   /// Creates a stack render object.
   ///
   /// By default, the non-positioned children of the stack are aligned by their
@@ -346,10 +349,10 @@ class RenderStack extends RenderBox
     TextDirection? textDirection,
     StackFit fit = StackFit.loose,
     Clip clipBehavior = Clip.hardEdge,
-  }) : _alignment = alignment,
-       _textDirection = textDirection,
-       _fit = fit,
-       _clipBehavior = clipBehavior {
+  })  : _alignment = alignment,
+        _textDirection = textDirection,
+        _fit = fit,
+        _clipBehavior = clipBehavior {
     addAll(children);
   }
 
@@ -619,7 +622,8 @@ class RenderStack extends RenderBox
       if (!childParentData.isPositioned) {
         childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
+        _hasVisualOverflow =
+            layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
       }
 
       assert(child.parentData == childParentData);
@@ -628,7 +632,7 @@ class RenderStack extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -738,7 +742,7 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     if (firstChild == null || index == null) {
       return false;
     }

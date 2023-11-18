@@ -147,7 +147,7 @@ abstract class CustomPainter extends Listenable {
   /// Creates a custom painter.
   ///
   /// The painter will repaint whenever `repaint` notifies its listeners.
-  const CustomPainter({ Listenable? repaint }) : _repaint = repaint;
+  const CustomPainter({Listenable? repaint}) : _repaint = repaint;
 
   final Listenable? _repaint;
 
@@ -283,7 +283,7 @@ abstract class CustomPainter extends Listenable {
   bool? hitTest(Offset position) => null;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
+  String toString() => '${describeIdentity(this)}(${_repaint?.toString() ?? ""})';
 }
 
 /// Contains properties describing information drawn in a rectangle contained by
@@ -385,16 +385,17 @@ class RenderCustomPaint extends RenderProxyBox {
     this.isComplex = false,
     this.willChange = false,
     RenderBox? child,
-  }) : _painter = painter,
-       _foregroundPainter = foregroundPainter,
-       _preferredSize = preferredSize,
-       super(child);
+  })  : _painter = painter,
+        _foregroundPainter = foregroundPainter,
+        _preferredSize = preferredSize,
+        super(child);
 
   /// The background custom paint delegate.
   ///
   /// This painter, if non-null, is called to paint behind the children.
   CustomPainter? get painter => _painter;
   CustomPainter? _painter;
+
   /// Set a new background custom paint delegate.
   ///
   /// If the new delegate is the same as the previous one, this does nothing.
@@ -421,6 +422,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// This painter, if non-null, is called to paint in front of the children.
   CustomPainter? get foregroundPainter => _foregroundPainter;
   CustomPainter? _foregroundPainter;
+
   /// Set a new foreground custom paint delegate.
   ///
   /// If the new delegate is the same as the previous one, this does nothing.
@@ -552,7 +554,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     if (_foregroundPainter != null && (_foregroundPainter!.hitTest(position) ?? false)) {
       return true;
     }
@@ -600,10 +602,11 @@ class RenderCustomPaint extends RenderProxyBox {
           ErrorSummary(
             'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
             '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
-            'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
+            'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's'} '
             'than it called canvas.restore().',
           ),
-          ErrorDescription('This leaves the canvas in an inconsistent state and will probably result in a broken display.'),
+          ErrorDescription(
+              'This leaves the canvas in an inconsistent state and will probably result in a broken display.'),
           ErrorHint('You must pair each call to save()/saveLayer() with a later matching call to restore().'),
         ]);
       }
@@ -612,7 +615,7 @@ class RenderCustomPaint extends RenderProxyBox {
           ErrorSummary(
             'The $painter custom painter called canvas.restore() '
             '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
-            'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
+            'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's'} '
             'than it called canvas.save() or canvas.saveLayer().',
           ),
           ErrorDescription('This leaves the canvas in an inconsistent state and will result in a broken display.'),
@@ -684,14 +687,12 @@ class RenderCustomPaint extends RenderProxyBox {
       return true;
     }());
 
-    final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
-      ? _backgroundSemanticsBuilder!(size)
-      : const <CustomPainterSemantics>[];
+    final List<CustomPainterSemantics> backgroundSemantics =
+        _backgroundSemanticsBuilder != null ? _backgroundSemanticsBuilder!(size) : const <CustomPainterSemantics>[];
     _backgroundSemanticsNodes = _updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
 
-    final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
-      ? _foregroundSemanticsBuilder!(size)
-      : const <CustomPainterSemantics>[];
+    final List<CustomPainterSemantics> foregroundSemantics =
+        _foregroundSemanticsBuilder != null ? _foregroundSemanticsBuilder!(size) : const <CustomPainterSemantics>[];
     _foregroundSemanticsNodes = _updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
 
     final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes!.isNotEmpty;
@@ -877,9 +878,10 @@ class RenderCustomPaint extends RenderProxyBox {
   static SemanticsNode _updateSemanticsChild(SemanticsNode? oldChild, CustomPainterSemantics newSemantics) {
     assert(oldChild == null || _canUpdateSemanticsChild(oldChild, newSemantics));
 
-    final SemanticsNode newChild = oldChild ?? SemanticsNode(
-      key: newSemantics.key,
-    );
+    final SemanticsNode newChild = oldChild ??
+        SemanticsNode(
+          key: newSemantics.key,
+        );
 
     final SemanticsProperties properties = newSemantics.properties;
     final SemanticsConfiguration config = SemanticsConfiguration();
@@ -1058,7 +1060,8 @@ class RenderCustomPaint extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(MessageProperty('painter', '$painter'));
-    properties.add(MessageProperty('foregroundPainter', '$foregroundPainter', level: foregroundPainter != null ? DiagnosticLevel.info : DiagnosticLevel.fine));
+    properties.add(MessageProperty('foregroundPainter', '$foregroundPainter',
+        level: foregroundPainter != null ? DiagnosticLevel.info : DiagnosticLevel.fine));
     properties.add(DiagnosticsProperty<Size>('preferredSize', preferredSize, defaultValue: Size.zero));
     properties.add(DiagnosticsProperty<bool>('isComplex', isComplex, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('willChange', willChange, defaultValue: false));

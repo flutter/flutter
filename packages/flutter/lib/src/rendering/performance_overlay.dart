@@ -66,10 +66,10 @@ class RenderPerformanceOverlay extends RenderBox {
     int rasterizerThreshold = 0,
     bool checkerboardRasterCacheImages = false,
     bool checkerboardOffscreenLayers = false,
-  }) : _optionsMask = optionsMask,
-       _rasterizerThreshold = rasterizerThreshold,
-       _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
-       _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
+  })  : _optionsMask = optionsMask,
+        _rasterizerThreshold = rasterizerThreshold,
+        _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
+        _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.

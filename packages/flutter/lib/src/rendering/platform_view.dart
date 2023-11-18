@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
@@ -39,7 +38,7 @@ bool _factoryTypesSetEquals<T>(Set<Factory<T>>? a, Set<Factory<T>>? b) {
   if (a == b) {
     return true;
   }
-  if (a == null ||  b == null) {
+  if (a == null || b == null) {
     return false;
   }
   return setEquals(_factoriesTypeSet(a), _factoriesTypeSet(b));
@@ -80,9 +79,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
     Clip clipBehavior = Clip.hardEdge,
-  }) : _viewController = viewController,
-       _clipBehavior = clipBehavior,
-       super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
+  })  : _viewController = viewController,
+        _clipBehavior = clipBehavior,
+        super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
     _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
@@ -219,8 +218,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
     // To prevent unwanted scaling artifacts while resizing, clip the texture.
     // This guarantees that the size of the texture frame we're painting is always
     // _currentAndroidTextureSize.
-    final bool isTextureLargerThanWidget = _currentTextureSize!.width > size.width ||
-                                           _currentTextureSize!.height > size.height;
+    final bool isTextureLargerThanWidget =
+        _currentTextureSize!.width > size.width || _currentTextureSize!.height > size.height;
     if (isTextureLargerThanWidget && clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
         true,
@@ -280,11 +279,10 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   RenderDarwinPlatformView({
     required T viewController,
     required this.hitTestBehavior,
-      required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
   }) : _viewController = viewController {
     updateGestureRecognizers(gestureRecognizers);
   }
-
 
   /// The unique identifier of the platform view controlled by this controller.
   T get viewController => _viewController;
@@ -334,7 +332,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset? position }) {
+  bool hitTest(BoxHitTestResult result, {Offset? position}) {
     if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position!)) {
       return false;
     }
@@ -364,7 +362,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   }
 
   @override
-  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.platformViewId = _viewController.id;
@@ -407,10 +405,10 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   /// Creates a render object for an iOS UIView.
   RenderUiKitView({
-      required super.viewController,
-      required super.hitTestBehavior,
-      required super.gestureRecognizers,
-    });
+    required super.viewController,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
+  });
 
   /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   @override
@@ -473,12 +471,8 @@ class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded UIView.
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _UiKitViewGestureRecognizer(
-    this.controller,
-    this.gestureRecognizerFactories
-  ) {
-    team = GestureArenaTeam()
-      ..captain = this;
+  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories) {
+    team = GestureArenaTeam()..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
         final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
@@ -487,11 +481,11 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
         // compete in the gesture arena.
         // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
         if (gestureRecognizer is LongPressGestureRecognizer) {
-          gestureRecognizer.onLongPress ??= (){};
+          gestureRecognizer.onLongPress ??= () {};
         } else if (gestureRecognizer is DragGestureRecognizer) {
-          gestureRecognizer.onDown ??= (_){};
+          gestureRecognizer.onDown ??= (_) {};
         } else if (gestureRecognizer is TapGestureRecognizer) {
-          gestureRecognizer.onTapDown ??= (_){};
+          gestureRecognizer.onTapDown ??= (_) {};
         }
         return gestureRecognizer;
       },
@@ -518,7 +512,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'UIKit view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {
@@ -549,12 +543,8 @@ typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 // When the team wins, the recognizer sends all the cached pointer events to `_handlePointerEvent`, and
 // sets itself to a "forwarding mode" where it will forward any new pointer event to `_handlePointerEvent`.
 class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _PlatformViewGestureRecognizer(
-    _HandlePointerEvent handlePointerEvent,
-    this.gestureRecognizerFactories
-  ) {
-    team = GestureArenaTeam()
-      ..captain = this;
+  _PlatformViewGestureRecognizer(_HandlePointerEvent handlePointerEvent, this.gestureRecognizerFactories) {
+    team = GestureArenaTeam()..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
       (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
         final OneSequenceGestureRecognizer gestureRecognizer = recognizerFactory.constructor();
@@ -563,11 +553,11 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
         // compete in the gesture arena.
         // https://github.com/flutter/flutter/issues/35394#issuecomment-562285087
         if (gestureRecognizer is LongPressGestureRecognizer) {
-          gestureRecognizer.onLongPress ??= (){};
+          gestureRecognizer.onLongPress ??= () {};
         } else if (gestureRecognizer is DragGestureRecognizer) {
-          gestureRecognizer.onDown ??= (_){};
+          gestureRecognizer.onDown ??= (_) {};
         } else if (gestureRecognizer is TapGestureRecognizer) {
-          gestureRecognizer.onTapDown ??= (_){};
+          gestureRecognizer.onTapDown ??= (_) {};
         }
         return gestureRecognizer;
       },
@@ -605,7 +595,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'Platform view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {
@@ -631,7 +621,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _cacheEvent(PointerEvent event) {
     if (!cachedEvents.containsKey(event.pointer)) {
-      cachedEvents[event.pointer] = <PointerEvent> [];
+      cachedEvents[event.pointer] = <PointerEvent>[];
     }
     cachedEvents[event.pointer]!.add(event);
   }
@@ -665,7 +655,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     required PlatformViewController controller,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) :  assert(controller.viewId > -1),
+  })  : assert(controller.viewId > -1),
         _controller = controller {
     this.hitTestBehavior = hitTestBehavior;
     updateGestureRecognizers(gestureRecognizers);
@@ -674,6 +664,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// The controller for this render object.
   PlatformViewController get controller => _controller;
   PlatformViewController _controller;
+
   /// Setting this value to a new value will result in a repaint.
   set controller(covariant PlatformViewController controller) {
     assert(controller.viewId > -1);
@@ -742,7 +733,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 
 /// The Mixin handling the pointer events and gestures of a platform view render box.
 mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
-
   /// How to behave during hit testing.
   // Changing _hitTestBehavior might affect which objects are considered hovered over.
   set hitTestBehavior(PlatformViewHitTestBehavior value) {
@@ -753,6 +743,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
       }
     }
   }
+
   PlatformViewHitTestBehavior? _hitTestBehavior;
 
   _HandlePointerEvent? _handlePointerEvent;
@@ -761,7 +752,8 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
-  void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
+  void _updateGestureRecognizersWithCallBack(
+      Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
       'There were multiple gesture recognizer factories for the same type, there must only be a single '
@@ -778,7 +770,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   _PlatformViewGestureRecognizer? _gestureRecognizer;
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (_hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
       return false;
     }

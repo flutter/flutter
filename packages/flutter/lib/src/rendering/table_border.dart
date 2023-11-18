@@ -36,7 +36,14 @@ class TableBorder {
     BorderRadius borderRadius = BorderRadius.zero,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
-    return TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side, borderRadius: borderRadius);
+    return TableBorder(
+        top: side,
+        right: side,
+        bottom: side,
+        left: side,
+        horizontalInside: side,
+        verticalInside: side,
+        borderRadius: borderRadius);
   }
 
   /// Creates a border for a table where all the interior sides use the same
@@ -89,7 +96,6 @@ class TableBorder {
   /// Whether all the sides of the border (outside and inside) are identical.
   /// Uniform borders are typically more efficient to paint.
   bool get isUniform {
-
     final Color topColor = top.color;
     if (right.color != topColor ||
         bottom.color != topColor ||
@@ -268,14 +274,14 @@ class TableBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TableBorder
-        && other.top == top
-        && other.right == right
-        && other.bottom == bottom
-        && other.left == left
-        && other.horizontalInside == horizontalInside
-        && other.verticalInside == verticalInside
-        && other.borderRadius == borderRadius;
+    return other is TableBorder &&
+        other.top == top &&
+        other.right == right &&
+        other.bottom == bottom &&
+        other.left == left &&
+        other.horizontalInside == horizontalInside &&
+        other.verticalInside == verticalInside &&
+        other.borderRadius == borderRadius;
   }
 
   @override

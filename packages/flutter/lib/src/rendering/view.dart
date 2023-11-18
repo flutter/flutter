@@ -45,9 +45,7 @@ class ViewConfiguration {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ViewConfiguration
-        && other.size == size
-        && other.devicePixelRatio == devicePixelRatio;
+    return other is ViewConfiguration && other.size == size && other.devicePixelRatio == devicePixelRatio;
   }
 
   @override
@@ -76,8 +74,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     RenderBox? child,
     ViewConfiguration? configuration,
     required ui.FlutterView view,
-  }) : _configuration = configuration,
-       _view = view {
+  })  : _configuration = configuration,
+        _view = view {
     this.child = child;
   }
 
@@ -178,7 +176,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   // We never call layout() on this class, so this should never get
   // checked. (This class is laid out using scheduleInitialLayout().)
   @override
-  void debugAssertDoesMeetConstraints() { assert(false); }
+  void debugAssertDoesMeetConstraints() {
+    assert(false);
+  }
 
   @override
   void performResize() {
@@ -206,7 +206,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// which is to say, in logical pixels. This is not necessarily the same
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
-  bool hitTest(HitTestResult result, { required Offset position }) {
+  bool hitTest(HitTestResult result, {required Offset position}) {
     if (child != null) {
       child!.hitTest(BoxHitTestResult.wrap(result), position: position);
     }
@@ -390,12 +390,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
+      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' : Platform.operatingSystem}'));
       return true;
     }());
     properties.add(DiagnosticsProperty<Size>('view size', _view.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', _view.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
-    properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
+    properties.add(
+        DoubleProperty('device pixel ratio', _view.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties
+        .add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
     if (_view.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
     }
