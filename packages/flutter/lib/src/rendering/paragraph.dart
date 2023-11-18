@@ -1996,6 +1996,31 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
   }
 
+  List<Rect>? _cachedGranularRects;
+  @override
+  List<Rect> get granularRects {
+    if (_cachedGranularRects == null) {
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(
+        TextSelection(baseOffset: range.start, extentOffset: range.end),
+      );// Maybe we can re-use the getBoxesForSelections results in `_rect`.
+      if (boxes.isNotEmpty) {
+        _cachedGranularRects = <Rect>[];
+        for (final TextBox textBox in boxes) {
+          final Rect rectBox = textBox.toRect();
+          final Rect rect = Rect.fromLTWH(0.0, 0.0, rectBox.width, rectBox.height);
+          final Matrix4 transform = Matrix4.translationValues(rectBox.left, rectBox.top, 0.0)..multiply(paragraph.getTransformTo(null));
+          _cachedGranularRects!.add(MatrixUtils.transformRect(transform, rect));
+        }
+      } else {
+        final Offset offset = paragraph._getOffsetForPosition(TextPosition(offset: range.start));
+        final Rect rect = Rect.fromPoints(offset, offset.translate(0, - paragraph._textPainter.preferredLineHeight));
+        _cachedGranularRects = <Rect>[MatrixUtils.transformRect(getTransformTo(null), rect)];
+      }
+    }
+    return _cachedGranularRects!;
+  }
+
+  Rect? _cachedRect;
   Rect get _rect {
     if (_cachedRect == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
@@ -2014,7 +2039,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
     return _cachedRect!;
   }
-  Rect? _cachedRect;
 
   void didChangeParagraphLayout() {
     _cachedRect = null;

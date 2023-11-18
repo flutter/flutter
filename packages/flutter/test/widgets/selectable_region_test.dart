@@ -3785,8 +3785,15 @@ class RenderSelectionSpy extends RenderProxyBox
   Size _size = Size.zero;
 
   @override
+  List<Rect> get granularRects => _granularRects;
+  List<Rect> _granularRects = <Rect>[];
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     _size = Size(constraints.maxWidth, constraints.maxHeight);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _granularRects.add(MatrixUtils.transformRect(getTransformTo(null), Rect.fromLTWH(0.0, 0.0, _size.width, _size.height)));
+    });
     return _size;
   }
 
@@ -3850,6 +3857,18 @@ class RenderSelectAll extends RenderProxyBox
     SelectionRegistrar? registrar,
   ) {
     this.registrar = registrar;
+  }
+
+  @override
+  List<Rect> get granularRects => _granularRects;
+  List<Rect> _granularRects = <Rect>[];
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _granularRects.add(MatrixUtils.transformRect(getTransformTo(null), Rect.fromLTWH(0.0, 0.0, size.width, size.height)));
+    });
+    return super.computeDryLayout(constraints);
   }
 
   final Set<VoidCallback> listeners = <VoidCallback>{};
