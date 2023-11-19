@@ -4823,7 +4823,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
                 return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
               },
-              historyModifier: (TextEditingValue value) {
+              undoStackModifier: (TextEditingValue value) {
                 return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
               },
               focusNode: widget.focusNode,
