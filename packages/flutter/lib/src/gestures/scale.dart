@@ -708,6 +708,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.accepted && shouldStartIfAccepted) {
+      _initialEventTimestamp = event.timeStamp;
       _state = _ScaleState.started;
       _dispatchOnStartCallbackIfNeeded();
     }

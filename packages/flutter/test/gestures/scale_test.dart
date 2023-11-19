@@ -121,7 +121,7 @@ void main() {
     expect(updatedVerticalScale, 2.0);
     expect(updatedDelta, const Offset(-5.0, -5.0));
     expect(updatedSourceTimestamp, const Duration(milliseconds: 40));
-    expect(initialSourceTimestamp, const Duration(milliseconds: 30));
+    expect(initialSourceTimestamp, const Duration(milliseconds: 40));
     updatedScale = null;
     updatedHorizontalScale = null;
     updatedVerticalScale = null;
@@ -192,7 +192,7 @@ void main() {
     updatedDelta = null;
     expect(updatedSourceTimestamp, const Duration(milliseconds: 90));
     updatedSourceTimestamp = null;
-    expect(initialSourceTimestamp, const Duration(milliseconds: 80));
+    expect(initialSourceTimestamp, const Duration(milliseconds: 90));
     initialSourceTimestamp = null;
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
