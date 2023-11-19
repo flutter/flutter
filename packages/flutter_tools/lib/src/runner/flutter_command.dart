@@ -7,11 +7,13 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -26,8 +28,10 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../preview_device.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
+import '../reporting/unified_analytics.dart';
 import '../web/compile.dart';
 import 'flutter_command_runner.dart';
 import 'target_devices.dart';
@@ -212,6 +216,8 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get deprecated => false;
 
+  ProcessInfo get processInfo => globals.processInfo;
+
   /// When the command runs and this is true, trigger an async process to
   /// discover devices from discoverers that support wireless devices for an
   /// extended amount of time and refresh the device cache with the results.
@@ -222,6 +228,11 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _excludeDebug = false;
   bool _excludeRelease = false;
+
+  /// Grabs the [Analytics] instance from the global context. It is defined
+  /// at the [FlutterCommand] level to enable any classes that extend it to
+  /// easily reference it or overwrite as necessary.
+  Analytics get analytics => globals.analytics;
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;
@@ -249,6 +260,16 @@ abstract class FlutterCommand extends Command<void> {
       help: 'The host port to serve the web application from. If not provided, the tool '
         'will select a random open port on the host.',
       hide: !verboseHelp,
+    );
+    argParser.addOption(
+      'web-tls-cert-path',
+      help: 'The certificate that host will use to serve using TLS connection. '
+          'If not provided, the tool will use default http scheme.',
+    );
+    argParser.addOption(
+      'web-tls-cert-key-path',
+      help: 'The certificate key that host will use to authenticate cert. '
+          'If not provided, the tool will use default http scheme.',
     );
     argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
@@ -1369,7 +1390,12 @@ abstract class FlutterCommand extends Command<void> {
           final DateTime endTime = globals.systemClock.now();
           globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
+            _sendPostUsage(
+              commandPath,
+              commandResult,
+              startTime,
+              endTime,
+            );
           }
           if (_usesFatalWarnings) {
             globals.logger.checkForFatalLogs();
@@ -1589,7 +1615,13 @@ abstract class FlutterCommand extends Command<void> {
     DateTime endTime,
   ) {
     // Send command result.
-    CommandResultEvent(commandPath, commandResult.toString()).send();
+    final int? maxRss = getMaxRss(processInfo);
+    CommandResultEvent(commandPath, commandResult.toString(), maxRss).send();
+    analytics.send(Event.flutterCommandResult(
+      commandPath: commandPath,
+      result: commandResult.toString(),
+      maxRss: maxRss,
+    ));
 
     // Send timing.
     final List<String?> labels = <String?>[
@@ -1688,7 +1720,14 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         project: project,
         checkUpToDate: cachePubGet,
       );
-      await project.regeneratePlatformSpecificTooling();
+
+      // null implicitly means all plugins are allowed
+      List<String>? allowedPlugins;
+      if (stringArg(FlutterGlobalOptions.kDeviceIdOption, global: true) == 'preview') {
+        // The preview device does not currently support any plugins.
+        allowedPlugins = PreviewDevice.supportedPubPlugins;
+      }
+      await project.regeneratePlatformSpecificTooling(allowedPlugins: allowedPlugins);
       if (reportNullSafety) {
         await _sendNullSafetyAnalyticsEvents(project);
       }
