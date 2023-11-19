@@ -31,7 +31,7 @@ class PopupMenuExample extends StatefulWidget {
 }
 
 class _PopupMenuExampleState extends State<PopupMenuExample> {
-  SampleItem? selectedItem;
+  SampleItem? selectedMenu;
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +39,11 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
       appBar: AppBar(title: const Text('PopupMenuButton')),
       body: Center(
         child: PopupMenuButton<SampleItem>(
-          initialValue: selectedItem,
+          initialValue: selectedMenu,
+          // Callback that sets the selected popup menu item.
           onSelected: (SampleItem item) {
             setState(() {
-              selectedItem = item;
+              selectedMenu = item;
             });
           },
           itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
