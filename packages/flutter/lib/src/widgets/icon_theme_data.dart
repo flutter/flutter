@@ -94,6 +94,7 @@ class IconThemeData with Diagnosticable {
       color: other.color,
       opacity: other.opacity,
       shadows: other.shadows,
+      applyTextScaling: other.applyTextScaling,
     );
   }
 
@@ -186,6 +187,7 @@ class IconThemeData with Diagnosticable {
       color: Color.lerp(a?.color, b?.color, t),
       opacity: ui.lerpDouble(a?.opacity, b?.opacity, t),
       shadows: Shadow.lerpList(a?.shadows, b?.shadows, t),
+      applyTextScaling: t < 0.5 ? a?.applyTextScaling : b?.applyTextScaling,
     );
   }
 
