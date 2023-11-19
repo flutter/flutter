@@ -175,16 +175,16 @@ void main() {
     expect(result, const ProcessResultMatcher());
 
     final Directory androidApp = tempDir.childDirectory('android');
+    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
     result = await processManager.run(<String>[
       '.${platform.pathSeparator}${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
       '-q', // quiet output.
+      '-PoutputPath=${fileDump.path}',
       'outputDebugAppLinkSettings',
     ], workingDirectory: androidApp.path);
 
     expect(result, const ProcessResultMatcher());
-
-    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
     expect(fileDump.existsSync(), true);
     final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
     expect(json['applicationId'], 'com.example.testapp');
@@ -220,16 +220,16 @@ void main() {
     expect(result, const ProcessResultMatcher());
 
     final Directory androidApp = tempDir.childDirectory('android');
+    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
     result = await processManager.run(<String>[
       '.${platform.pathSeparator}${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
       '-q', // quiet output.
+      '-PoutputPath=${fileDump.path}',
       'outputDebugAppLinkSettings',
     ], workingDirectory: androidApp.path);
 
     expect(result, const ProcessResultMatcher());
-
-    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
     expect(fileDump.existsSync(), true);
     final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
     expect(json['applicationId'], 'com.example.testapp');
