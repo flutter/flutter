@@ -175,7 +175,7 @@ class _Resampler {
         _timer = Timer.periodic(_samplingInterval, (_) => _onSampleTimeChanged());
         // Trigger an immediate sample time change.
         _onSampleTimeChanged();
-      });
+      }, debugLabel: 'Resampler.startTimer');
     }
   }
 

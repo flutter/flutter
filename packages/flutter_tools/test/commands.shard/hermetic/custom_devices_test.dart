@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../../src/common.dart';
@@ -240,6 +241,11 @@ class FakeTerminal implements Terminal {
 
   @override
   bool get isCliAnimationEnabled => terminal.isCliAnimationEnabled;
+
+  @override
+  void applyFeatureFlags(FeatureFlags flags) {
+    // ignored
+  }
 
   @override
   bool get supportsEmoji => terminal.supportsEmoji;
