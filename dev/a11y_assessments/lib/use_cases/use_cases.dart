@@ -4,10 +4,15 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'auto_complete.dart';
+import 'badge.dart';
 import 'check_box_list_tile.dart';
 import 'date_picker.dart';
 import 'dialog.dart';
+import 'material_banner.dart';
+import 'navigation_bar.dart';
 import 'slider.dart';
+import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';
 
@@ -24,4 +29,9 @@ final List<UseCase> useCases = <UseCase>[
   TextFieldUseCase(),
   TextFieldPasswordUseCase(),
   DatePickerUseCase(),
+  AutoCompleteUseCase(),
+  BadgeUseCase(),
+  MaterialBannerUseCase(),
+  NavigationBarUseCase(),
+  TextButtonUseCase(),
 ];

@@ -33,8 +33,8 @@ class FocusExample extends StatefulWidget {
 class _FocusExampleState extends State<FocusExample> {
   Color _color = Colors.white;
 
-  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
       debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
       if (event.logicalKey == LogicalKeyboardKey.keyR) {
         debugPrint('Changing color to red.');
@@ -68,7 +68,7 @@ class _FocusExampleState extends State<FocusExample> {
       child: DefaultTextStyle(
         style: textTheme.headlineMedium!,
         child: Focus(
-          onKey: _handleKeyPress,
+          onKeyEvent: _handleKeyPress,
           debugLabel: 'Button',
           child: Builder(
             builder: (BuildContext context) {

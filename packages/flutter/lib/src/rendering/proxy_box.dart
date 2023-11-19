@@ -95,7 +95,8 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return child?.getDryLayout(constraints) ?? computeSizeForNoChild(constraints);
   }
 
@@ -284,7 +285,8 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child != null) {
       return child!.getDryLayout(_additionalConstraints.enforce(constraints));
     } else {
@@ -383,7 +385,8 @@ class RenderLimitedBox extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
@@ -565,7 +568,8 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _applyAspectRatio(constraints);
   }
 
@@ -726,7 +730,8 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
@@ -826,7 +831,8 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeSize(
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
@@ -2258,6 +2264,12 @@ class RenderDecoratedBox extends RenderProxyBox {
   }
 
   @override
+  void dispose() {
+    _painter?.dispose();
+    super.dispose();
+  }
+
+  @override
   bool hitTestSelf(Offset position) {
     return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
   }
@@ -2672,7 +2684,8 @@ class RenderFittedBox extends RenderProxyBox {
   // TODO(ianh): The intrinsic dimensions of this box are wrong.
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child != null) {
       final Size childSize = child!.getDryLayout(const BoxConstraints());
 
@@ -3693,7 +3706,8 @@ class RenderOffstage extends RenderProxyBox {
   bool get sizedByParent => offstage;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (offstage) {
       return constraints.smallest;
     }

@@ -1060,6 +1060,7 @@ void main() {
 
   testWidgetsWithLeakTracking('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
     final HeroController controller = MaterialApp.createMaterialHeroController();
+    addTearDown(controller.dispose);
     final Tween<Rect?> tween = controller.createRectTween!(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
@@ -1114,12 +1115,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -1145,12 +1141,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -1236,12 +1227,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;

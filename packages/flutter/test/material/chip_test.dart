@@ -1778,7 +1778,7 @@ void main() {
               labelStyle: TextStyle(height: 4), // inherit: true
             ),
           ),
-          child: const Chip(label: Text('Label')), // labeStyle: null
+          child: const Chip(label: Text('Label')), // labelStyle: null
         ),
       );
     }
@@ -3568,6 +3568,40 @@ void main() {
         borderRadius: BorderRadius.all(Radius.circular(7.0)),
       ),
     );
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Chip.iconTheme respects default iconTheme.size', (WidgetTester tester) async {
+    Widget buildChip({ IconThemeData? iconTheme }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: RawChip(
+                iconTheme: iconTheme,
+                avatar: const Icon(Icons.add),
+                label: const SizedBox(width: 100, height: 100),
+                onSelected: (bool newValue) { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff332211))));
+
+    // Icon should have the default chip iconSize.
+    expect(getIconData(tester).size, 18.0);
+    expect(getIconData(tester).color, const Color(0xff332211));
+
+    // Icon should have the provided iconSize.
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff112233), size: 23.0)));
+    await tester.pumpAndSettle();
+
+    expect(getIconData(tester).size, 23.0);
+    expect(getIconData(tester).color, const Color(0xff112233));
   });
 
   group('Material 2', () {

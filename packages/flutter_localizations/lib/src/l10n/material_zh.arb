@@ -51,7 +51,6 @@
   "reorderItemRight": "右移",
   "expandedIconTapHint": "收起",
   "collapsedIconTapHint": "展开",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "还可输入 1 个字符",
   "remainingTextFieldCharacterCountOther": "还可输入 $remainingCount 个字符",
   "refreshIndicatorSemanticLabel": "刷新",

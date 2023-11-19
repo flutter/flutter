@@ -1183,11 +1183,9 @@ class _NestedScrollController extends ScrollController {
     // the position change notifications because those happen synchronously
     // during a frame, at a time where it's too late to call setState. Since the
     // result is usually animated, the lag incurred is no big deal.
-    SchedulerBinding.instance.addPostFrameCallback(
-      (Duration timeStamp) {
-        coordinator.updateShadow();
-      },
-    );
+    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      coordinator.updateShadow();
+    }, debugLabel: 'NestedScrollController.updateShadow');
   }
 
   Iterable<_NestedScrollPosition> get nestedPositions {

@@ -364,7 +364,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
        _readOnly = readOnly,
        _forceLine = forceLine,
        _clipBehavior = clipBehavior,
-       _hasFocus = hasFocus ?? false {
+       _hasFocus = hasFocus ?? false,
+       _disposeShowCursor = showCursor == null {
     assert(!_showCursor.value || cursorColor != null);
 
     _selectionPainter.highlightColor = selectionColor;
@@ -405,6 +406,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionPainter.dispose();
     _caretPainter.dispose();
     _textPainter.dispose();
+    if (_disposeShowCursor) {
+      _showCursor.dispose();
+      _disposeShowCursor = false;
+    }
     super.dispose();
   }
 
@@ -879,6 +884,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _caretPainter.backgroundCursorColor = value;
   }
 
+  bool _disposeShowCursor;
+
   /// Whether to paint the cursor.
   ValueNotifier<bool> get showCursor => _showCursor;
   ValueNotifier<bool> _showCursor;
@@ -888,6 +895,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (attached) {
       _showCursor.removeListener(_showHideCursor);
+    }
+    if (_disposeShowCursor) {
+      _showCursor.dispose();
+      _disposeShowCursor = false;
     }
     _showCursor = value;
     if (attached) {
@@ -1817,12 +1828,28 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMinIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics) {
+      return 0.0;
+    }
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
+      double.infinity,
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+    ));
     _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics) {
+      return 0.0;
+    }
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
+      double.infinity,
+      // Height and baseline is irrelevant as all text will be laid
+      // out in a single line. Therefore, using 0.0 as a dummy for the height.
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+    ));
     _layoutText();
     return _textPainter.maxIntrinsicWidth + _caretMargin;
   }
@@ -1890,12 +1917,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
-    return _preferredHeight(width);
-  }
+  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
 
   @override
   double computeMaxIntrinsicHeight(double width) {
+    if (!_canComputeIntrinsics) {
+      return 0.0;
+    }
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild));
     return _preferredHeight(width);
   }
 
@@ -2270,7 +2299,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool get _canComputeIntrinsics => _canComputeIntrinsicsCached ??= _canComputeDryLayoutForInlineWidgets();
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (!_canComputeIntrinsics) {
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
@@ -2630,7 +2660,8 @@ class _RenderEditableCustomPaint extends RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.biggest;
 }
 
 /// An interface that paints within a [RenderEditable]'s bounds, above or

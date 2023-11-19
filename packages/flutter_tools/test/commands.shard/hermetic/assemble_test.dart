@@ -290,49 +290,4 @@ void main() {
       ],
     });
   });
-
-  testUsingContext('test --dart-define-from-file option with err file format', () {
-    globals.fs.directory('config').createSync();
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    ));
-
-    expect(commandRunner.run(<String>['assemble',
-      '-o Output',
-      'debug_macos_bundle_flutter_assets',
-      '--dart-define=k=v',
-      '--dart-define-from-file=config']),
-        throwsToolExit(message: 'Did not find the file passed to "--dart-define-from-file". Path: config'));
-  }, overrides: <Type, Generator>{
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
-  testUsingContext('test --dart-define-from-file option with err json format', () async {
-    await globals.fs.file('config.json').writeAsString(
-        '''
-          {
-            "kInt": 1,
-            "kDouble": 1.1,
-            "name": "err json format,
-            "title": "this is title from config json file"
-          }
-        '''
-    );
-    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    ));
-
-    expect(commandRunner.run(<String>['assemble',
-      '-o Output',
-      'debug_macos_bundle_flutter_assets',
-      '--dart-define=k=v',
-      '--dart-define-from-file=config.json']),
-        throwsToolExit(message: 'Json config define file "--dart-define-from-file=config.json" format err, please fix first! format err:'));
-  }, overrides: <Type, Generator>{
-    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
 }

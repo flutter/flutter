@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
@@ -27,7 +28,11 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required super.logger, required super.verboseHelp }) {
+  BuildIOSCommand({
+    required super.logger,
+    required bool verboseHelp,
+  }) : super(verboseHelp: verboseHelp) {
+    addPublishPort(verboseHelp: verboseHelp);
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -658,11 +663,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
+      disablePortPublication: usingCISystem &&
+          xcodeBuildAction == XcodeBuildAction.build &&
+          await disablePortPublication,
     );
     xcodeBuildResult = result;
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
+      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger, globals.analytics);
       final String presentParticiple = xcodeBuildAction == XcodeBuildAction.build ? 'building' : 'archiving';
       throwToolExit('Encountered error while $presentParticiple for $logTarget.');
     }
@@ -672,6 +680,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
+        analytics: analytics,
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.
@@ -732,13 +741,19 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
         plistPath, PlistParser.kFLTEnableImpellerKey,
       );
-      BuildEvent(
-        impellerEnabled == false
+
+      final String buildLabel = impellerEnabled == false
           ? 'plist-impeller-disabled'
-          : 'plist-impeller-enabled',
+          : 'plist-impeller-enabled';
+      BuildEvent(
+        buildLabel,
         type: 'ios',
         flutterUsage: globals.flutterUsage,
       ).send();
+      globals.analytics.send(Event.flutterBuildInfo(
+        label: buildLabel,
+        buildType: 'ios',
+      ));
 
       return FlutterCommandResult.success();
     }

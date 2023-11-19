@@ -34,7 +34,11 @@ class FontConfigManager {
   Future<void> dispose() async {
     if (_fontsDirectory != null) {
       globals.printTrace('Deleting ${_fontsDirectory!.path}...');
-      await _fontsDirectory!.delete(recursive: true);
+      try {
+        await _fontsDirectory!.delete(recursive: true);
+      } on FileSystemException {
+        // Silently exit
+      }
       _fontsDirectory = null;
     }
   }

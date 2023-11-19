@@ -2262,6 +2262,44 @@ void main() {
       },
     );
 
+    testWidgetsWithLeakTracking(
+      '${SnackBarBehavior.floating} should align SnackBar with the top of BottomNavigationBar '
+          'when Scaffold has both BottomNavigationBar and FloatingActionButton and '
+          'BottomNavigationBar.top is higher than FloatingActionButton.top',
+          (WidgetTester tester) async {
+        final UniqueKey boxKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Container(),
+              bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 200),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+              floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+            ),
+          ),
+        );
+
+        final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+        scaffoldMessengerState.showSnackBar(
+          const SnackBar(
+            content: Text('SnackBar text'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+        final Offset fabTopRight = tester.getTopRight(find.byType(FloatingActionButton));
+        final Offset navBarTopRight = tester.getTopRight(find.byKey(boxKey));
+
+        // Test the top of the navigation bar is higher than the top of the floating action button.
+        expect(fabTopRight.dy, greaterThan(navBarTopRight.dy));
+
+        expect(snackBarBottomRight.dy, equals(navBarTopRight.dy));
+      },
+    );
+
     Future<void> openFloatingSnackBar(WidgetTester tester) async {
       final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
       scaffoldMessengerState.showSnackBar(
