@@ -495,37 +495,17 @@ class ExpansionTile extends StatefulWidget {
   /// than supplying a controller.
   final ExpansionTileController? controller;
 
-  /// Whether this list tile is part of a vertically dense list.
+  /// Dense expansion tile's default to a smaller height.
   ///
-  /// If this property is null then its value is based on [ListTileTheme.dense].
-  ///
-  /// Dense list tiles default to a smaller height.
-  ///
-  /// It is not recommended to set [dense] to true when [ThemeData.useMaterial3] is true.
+  /// {@macro flutter.material.ListTile.dense}
   final bool? dense;
 
-  /// Defines how compact the list tile's layout will be.
+  /// Defines how compact the expansion tile's layout will be.
   ///
   /// {@macro flutter.material.themedata.visualDensity}
-  ///
-  /// See also:
-  ///
-  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all
-  ///    widgets within a [Theme].
   final VisualDensity? visualDensity;
 
-  /// {@template flutter.material.ListTile.enableFeedback}
-  /// Whether detected gestures should provide acoustic and/or haptic feedback.
-  ///
-  /// For example, on Android a tap will produce a clicking sound and a
-  /// long-press will produce a short vibration, when feedback is enabled.
-  ///
-  /// When null, the default value is true.
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  /// {@macro flutter.material.ListTile.enableFeedback}
   final bool? enableFeedback;
 
   @override
