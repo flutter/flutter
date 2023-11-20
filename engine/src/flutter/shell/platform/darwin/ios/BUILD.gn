@@ -287,11 +287,11 @@ shared_library("ios_test_flutter") {
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/skia",
+    "//flutter/third_party/ocmock:ocmock_shared",
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/spring_animation",
     "//flutter/third_party/tonic",
     "//flutter/third_party/txt",
-    "//third_party/ocmock:ocmock_shared",
   ]
   public_configs = [
     ":ios_gpu_configuration_config",

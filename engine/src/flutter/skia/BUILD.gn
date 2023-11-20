@@ -222,7 +222,7 @@ optional("fontmgr_android") {
 
   deps = [
     ":typeface_freetype",
-    "//third_party/expat",
+    "//flutter/third_party/expat",
   ]
   public = [ "$_skia_root/include/ports/SkFontMgr_android.h" ]
   sources = [
@@ -564,7 +564,7 @@ optional("jpeg_decode") {
   enabled = skia_use_libjpeg_turbo_decode
   public_defines = [ "SK_CODEC_DECODES_JPEG" ]
 
-  deps = [ "//third_party/libjpeg-turbo:libjpeg" ]
+  deps = [ "//flutter/third_party/libjpeg-turbo:libjpeg" ]
   sources = [
     "$_skia_root/src/codec/SkJpegCodec.cpp",
     "$_skia_root/src/codec/SkJpegDecoderMgr.cpp",
@@ -576,7 +576,7 @@ optional("jpeg_decode") {
 optional("jpeg_encode") {
   enabled = skia_use_libjpeg_turbo_encode && !skia_use_ndk_images
 
-  deps = [ "//third_party/libjpeg-turbo:libjpeg" ]
+  deps = [ "//flutter/third_party/libjpeg-turbo:libjpeg" ]
   public = skia_encode_jpeg_public
   sources = skia_encode_jpeg_srcs
 }
@@ -634,7 +634,7 @@ optional("webp_decode") {
   enabled = skia_use_libwebp_decode
   public_defines = [ "SK_CODEC_DECODES_WEBP" ]
 
-  deps = [ "//third_party/libwebp" ]
+  deps = [ "//flutter/third_party/libwebp" ]
   sources = [ "$_skia_root/src/codec/SkWebpCodec.cpp" ]
 }
 
@@ -642,7 +642,7 @@ optional("webp_encode") {
   enabled = skia_use_libwebp_encode && !skia_use_ndk_images
   public = skia_encode_webp_public
 
-  deps = [ "//third_party/libwebp" ]
+  deps = [ "//flutter/third_party/libwebp" ]
   sources = skia_encode_webp_srcs
 }
 
@@ -650,7 +650,7 @@ optional("wuffs") {
   enabled = skia_use_wuffs
   public_defines = [ "SK_HAS_WUFFS_LIBRARY" ]
 
-  deps = [ "//third_party/wuffs" ]
+  deps = [ "//flutter/third_party/wuffs" ]
   sources = [ "$_skia_root/src/codec/SkWuffsCodec.cpp" ]
 }
 
@@ -658,7 +658,7 @@ optional("xml") {
   enabled = skia_use_expat || skia_use_jpeg_gainmaps
   public_defines = [ "SK_XML" ]
 
-  deps = [ "//third_party/expat" ]
+  deps = [ "//flutter/third_party/expat" ]
   sources = skia_xml_sources + skia_codec_xmp + [
               "$_skia_root/src/svg/SkSVGCanvas.cpp",
               "$_skia_root/src/svg/SkSVGDevice.cpp",
@@ -778,7 +778,7 @@ skia_component("skia") {
   }
 
   if (is_android) {
-    deps += [ "//third_party/expat" ]
+    deps += [ "//flutter/third_party/expat" ]
     sources += [ "$_skia_root/src/ports/SkDebug_android.cpp" ]
     libs += [
       "EGL",
