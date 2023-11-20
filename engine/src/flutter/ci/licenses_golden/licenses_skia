@@ -1,4 +1,4 @@
-Signature: 9a9db652e640edff648e8d2f0c2c0e79
+Signature: 91912f96213ec480d37b4fa2485c51d2
 
 ====================================================================================================
 LIBRARY: etc1
@@ -387,6 +387,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/FontConfigInterface.md
+FILE: ../../../flutter/third_party/skia/relnotes/vksemaphore.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -8778,6 +8779,7 @@ ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h +
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/SkSurfaceMetal.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/vk/GrVkBackendSemaphore.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/BackendSemaphore.h + ../../../flutter/third_party/skia/LICENSE
@@ -8913,6 +8915,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/image/SkImage_RasterPin
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/image/SkSpecialImage_Ganesh.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/surface/SkSurface_AndroidFactories.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/AHardwareBufferVk.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkBackendSemaphore.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurface.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurfacePriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkDirectContext.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9054,6 +9057,7 @@ FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/SkSurfaceMetal.h
+FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/vk/GrVkBackendSemaphore.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/BackendSemaphore.h
@@ -9189,6 +9193,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/image/SkImage_RasterPinna
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/image/SkSpecialImage_Ganesh.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/surface/SkSurface_AndroidFactories.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/AHardwareBufferVk.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkBackendSemaphore.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurface.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurfacePriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/vk/GrVkDirectContext.cpp
