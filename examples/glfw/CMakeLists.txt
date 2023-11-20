@@ -12,9 +12,9 @@ option(GLFW_BUILD_EXAMPLES "" OFF)
 option(GLFW_BUILD_TESTS "" OFF)
 option(GLFW_BUILD_DOCS "" OFF)
 option(GLFW_INSTALL "" OFF)
-add_subdirectory(${CMAKE_SOURCE_DIR}/../../../third_party/glfw glfw)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../../third_party/glfw glfw)
 target_link_libraries(flutter_glfw glfw)
-include_directories(${CMAKE_SOURCE_DIR}/../../../third_party/glfw/include)
+include_directories(${CMAKE_SOURCE_DIR}/../../third_party/glfw/include)
 
 ############################################################
 # Flutter Engine
