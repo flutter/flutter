@@ -424,6 +424,7 @@ class ListTile extends StatelessWidget {
   /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
+  /// {@template flutter.material.ListTile.dense}
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
@@ -431,6 +432,7 @@ class ListTile extends StatelessWidget {
   /// Dense list tiles default to a smaller height.
   ///
   /// It is not recommended to set [dense] to true when [ThemeData.useMaterial3] is true.
+  /// {@endtemplate}
   final bool? dense;
 
   /// Defines how compact the list tile's layout will be.

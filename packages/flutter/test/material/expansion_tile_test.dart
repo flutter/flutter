@@ -1198,4 +1198,38 @@ void main() {
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
   });
+
+  testWidgetsWithLeakTracking('Check if dense, enableFeedback, visualDensity parameter is working', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey nonDescendantKey = GlobalKey();
+
+    const bool dense = true;
+    const bool enableFeedback = false;
+    const VisualDensity visualDensity = VisualDensity.compact;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              dense: dense,
+              enableFeedback: enableFeedback,
+              visualDensity: visualDensity,
+              title: Text('Title', key: titleKey),
+              children: const <Widget>[
+                Text('Child 0'),
+              ],
+            ),
+            Text('Non descendant', key: nonDescendantKey),
+          ],
+        ),
+      ),
+    ));
+
+    final Finder tileFinder = find.byType(ListTile);
+    final ListTile tileWidget = tester.widget<ListTile>(tileFinder);
+    expect(tileWidget.dense, dense);
+    expect(tileWidget.enableFeedback, enableFeedback);
+    expect(tileWidget.visualDensity, visualDensity);
+  });
 }
