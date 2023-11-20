@@ -1029,6 +1029,9 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   static final RegExp _licenseNamePattern = RegExp(r'^(?!.*\.py$)(?!.*(?:no|update)-copyright)(?!.*mh-bsd-gcc).*\b_*(?:license(?!\.html)|copying|copyright|notice|l?gpl|GPLv2|bsd|mit|mpl?|ftl|Apache)_*\b', caseSensitive: false);
 
   static const Map<String, _Constructor> _specialCaseFiles = <String, _Constructor>{
+    '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
+    '/flutter/third_party/libjpeg-turbo/src/LICENSE': _RepositoryLibJpegTurboLicenseFile.new,
+    '/flutter/third_party/libjpeg-turbo/src/README.ijg': _RepositoryReadmeIjgFile.new,
     '/flutter/third_party/rapidjson/LICENSE': _RepositoryOpaqueLicenseFile.new,
     '/flutter/third_party/rapidjson/license.txt': _RepositoryOpaqueLicenseFile.new,
     '/fuchsia/sdk/linux/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
@@ -1040,12 +1043,9 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/third_party/khronos/LICENSE': _RepositoryKhronosLicenseFile.new,
     '/third_party/libcxx/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
     '/third_party/libcxxabi/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
-    '/third_party/libjpeg-turbo/LICENSE': _RepositoryLibJpegTurboLicenseFile.new,
-    '/third_party/libjpeg-turbo/README.ijg': _RepositoryReadmeIjgFile.new,
     '/third_party/libpng/LICENSE': _RepositoryLibPngLicenseFile.new,
     '/third_party/root_certificates/LICENSE': _RepositoryMpl2File.new,
     '/third_party/vulkan-deps/vulkan-validation-layers/src/LICENSE.txt': _RepositoryVulkanApacheLicenseFile.new,
-    '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
   };
 
   _RepositoryFile createFile(fs.IoNode entry) {
@@ -1786,6 +1786,14 @@ class _RepositoryFlutterThirdPartyDirectory extends _RepositoryGenericThirdParty
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'skia' // handled as a virtual directory of the root
         && super.shouldRecurse(entry);
+  }
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'expat') {
+      return _RepositoryExpatDirectory(this, entry);
+    }
+    return super.createSubdirectory(entry);
   }
 }
 

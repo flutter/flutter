@@ -30,6 +30,8 @@ final Set<String> skippedPaths = <String>{
   r'flutter/prebuilts',
   r'flutter/sky/packages/sky_engine/LICENSE',
   r'flutter/third_party/benchmark', // only used by tests
+  r'flutter/third_party/expat/expat/doc',
+  r'flutter/third_party/expat/expat/win32/expat.iss',
   r'flutter/third_party/flatbuffers/android',
   r'flutter/third_party/flatbuffers/benchmarks',
   r'flutter/third_party/flatbuffers/docs',
@@ -43,7 +45,18 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/glfw/docs',
   r'flutter/third_party/gn',
   r'flutter/third_party/imgui',
+  r'flutter/third_party/inja/doc', // documentation
+  r'flutter/third_party/inja/third_party/amalgamate', // only used at build time
+  r'flutter/third_party/inja/third_party/include/doctest', // seems to be a unit test library
+  r'flutter/third_party/libtess2/Contrib/nanosvg.c', // only used by the ../Example
+  r'flutter/third_party/libtess2/Contrib/nanosvg.h', // only used by the ../Example
+  r'flutter/third_party/libtess2/Example',
+  r'flutter/third_party/libwebp/doc',
+  r'flutter/third_party/libwebp/gradle', // not included in our build
+  r'flutter/third_party/libwebp/swig', // not included in our build
+  r'flutter/third_party/libwebp/webp_js',
   r'flutter/third_party/ninja', // build system
+  r'flutter/third_party/ocmock', // only used for tests
   r'flutter/third_party/pkg/archive', // contains nothing that ends up in the binary executable
   r'flutter/third_party/pkg/equatable',
   r'flutter/third_party/pkg/flutter_packages',
@@ -53,6 +66,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/pkg/process',
   r'flutter/third_party/pkg/process_runner',
   r'flutter/third_party/pkg/vector_math',
+  r'flutter/third_party/pyyaml', // build-time dependency only
   r'flutter/third_party/rapidjson/contrib', // contains nothing that ends up in the binary executable
   r'flutter/third_party/rapidjson/doc', // documentation
   r'flutter/third_party/shaderc/third_party/LICENSE.glslang', // unclear what the purpose of this file is
@@ -78,6 +92,8 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/skia/tools', // contains nothing that ends up in the binary executable
   r'flutter/third_party/test_shaders', // for tests only
   r'flutter/third_party/txt/third_party/fonts',
+  r'flutter/third_party/wuffs/docs',
+  r'flutter/third_party/wuffs/script',
   r'flutter/tools',
   r'flutter/web_sdk', // this code is not linked into Flutter apps; it's only used by engine tests and tools
   r'fuchsia/sdk/linux/docs',
@@ -127,10 +143,7 @@ final Set<String> skippedPaths = <String>{
   r'third_party/dart/third_party/pkg_tested',
   r'third_party/dart/third_party/requirejs', // only used by DDC
   r'third_party/dart/tools', // not shipped in binary
-  r'third_party/expat/expat/doc',
-  r'third_party/expat/expat/win32/expat.iss',
   r'third_party/google_fonts_for_unit_tests', // only used in web unit tests
-  r'third_party/fontconfig', // not used in standard configurations
   r'third_party/freetype2/builds',
   r'third_party/freetype2/src/tools',
   r'third_party/gradle',
@@ -145,9 +158,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/icu/source/data/brkitr/dictionaries/cjdict.txt', // explicitly handled by ICU license
   r'third_party/icu/source/data/brkitr/dictionaries/laodict.txt', // explicitly handled by ICU license
   r'third_party/icu/source/data/dtd',
-  r'flutter/third_party/inja/doc', // documentation
-  r'flutter/third_party/inja/third_party/amalgamate', // only used at build time
-  r'flutter/third_party/inja/third_party/include/doctest', // seems to be a unit test library
   r'third_party/java', // only used for Android builds
   r'third_party/json/docs',
   r'third_party/libcxx/benchmarks',
@@ -160,15 +170,7 @@ final Set<String> skippedPaths = <String>{
   r'third_party/libpng/powerpc', // not linked in
   r'third_party/libpng/projects', // not linked in
   r'third_party/libpng/scripts', // not linked in
-  r'flutter/third_party/libtess2/Contrib/nanosvg.c', // only used by the ../Example
-  r'flutter/third_party/libtess2/Contrib/nanosvg.h', // only used by the ../Example
-  r'flutter/third_party/libtess2/Example',
-  r'third_party/libwebp/doc',
-  r'third_party/libwebp/gradle', // not included in our build
-  r'third_party/libwebp/swig', // not included in our build
-  r'third_party/libwebp/webp_js',
   r'third_party/libxml', // dependency of the testing system that we don't actually use
-  r'third_party/ocmock', // only used for tests
   r'third_party/perfetto/debian', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/infra', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/protos', // contains nothing that ends up in the binary executable
@@ -180,7 +182,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/perfetto/src/traced', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/src/tracing', // contains nothing that ends up in the binary executable
   r'third_party/protobuf', // build-time dependency only
-  r'third_party/pyyaml', // build-time dependency only
   r'third_party/root_certificates/certdata.pem',
   r'third_party/root_certificates/certdata.txt',
   r'third_party/stb',
@@ -213,8 +214,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/vulkan_memory_allocator/src',
   r'third_party/vulkan_memory_allocator/tools',
   r'third_party/web_dependencies/canvaskit', // redundant; covered by Skia dependencies
-  r'third_party/wuffs/docs',
-  r'third_party/wuffs/script',
   r'third_party/yapf', // only used for code formatting
   r'third_party/zlib/contrib/minizip/miniunz.c', // sample file
   r'third_party/zlib/contrib/minizip/minizip.c', // sample file

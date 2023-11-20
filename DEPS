@@ -618,7 +618,7 @@ deps = {
   'src/third_party/colorama/src':
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
 
-  'src/third_party/expat':
+  'src/flutter/third_party/expat':
    Var('chromium_git') + '/external/github.com/libexpat/libexpat.git' + '@' + '654d2de0da85662fcc7644a7acd7c2dd2cfb21f0',
 
   'src/third_party/freetype2':
@@ -630,26 +630,20 @@ deps = {
   'src/flutter/third_party/skia':
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
-  'src/third_party/ocmock':
+  'src/flutter/third_party/ocmock':
    Var('ocmock_git') + '@' +  Var('ocmock_rev'),
 
-  'src/third_party/libjpeg-turbo':
+  'src/flutter/third_party/libjpeg-turbo/src':
    Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
 
   'src/third_party/libpng':
    Var('flutter_git') + '/third_party/libpng' + '@' + '9187b6e12756317f6d44fc669ac11dfc262bd192',
 
-  'src/third_party/libwebp':
+  'src/flutter/third_party/libwebp':
    Var('chromium_git') + '/webm/libwebp.git' + '@' + '2af26267cdfcb63a88e5c74a85927a12d6ca1d76', # 1.3.1
 
-  'src/third_party/wuffs':
+  'src/flutter/third_party/wuffs':
    Var('skia_git') + '/external/github.com/google/wuffs-mirror-release-c.git' + '@' + '600cd96cf47788ee3a74b40a6028b035c9fd6a61',
-
-  'src/third_party/fontconfig/src':
-   Var('chromium_git') + '/external/fontconfig.git' + '@' + 'c336b8471877371f0190ba06f7547c54e2b890ba',
-
-  'src/third_party/fontconfig':
-   Var('flutter_git') + '/third_party/fontconfig' + '@' + '81c83d510ae3aa75589435ce32a5de05139aacb0',
 
   'src/third_party/libxml':
    Var('flutter_git') + '/third_party/libxml' + '@' + 'a143e452b5fc7d872813eeadc8db421694058098',
@@ -666,7 +660,7 @@ deps = {
   'src/flutter/third_party/sqlite':
    Var('flutter_git') + '/third_party/sqlite' + '@' + '0f61bd2023ba94423b4e4c8cfb1a23de1fe6a21c',
 
-  'src/third_party/pyyaml':
+  'src/flutter/third_party/pyyaml':
    Var('fuchsia_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
 
    'src/third_party/swiftshader':
