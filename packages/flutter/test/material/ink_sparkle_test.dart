@@ -140,7 +140,7 @@ Future<void> _runTest(WidgetTester tester, String positionName, double distanceF
           key: repaintKey,
           child: ElevatedButton(
             key: buttonKey,
-            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+            style: ElevatedButton.styleFrom(),
             child: const Text('Sparkle!'),
             onPressed: () { },
           ),
