@@ -1621,6 +1621,7 @@ abstract class FlutterCommand extends Command<void> {
       commandPath: commandPath,
       result: commandResult.toString(),
       maxRss: maxRss,
+      commandHasTerminal: globals.stdio.hasTerminal,
     ));
 
     // Send timing.
