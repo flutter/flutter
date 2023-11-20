@@ -155,6 +155,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
     "//flutter/skia",
+    "//flutter/third_party/txt",
     "//flutter/vulkan",
   ]
 
