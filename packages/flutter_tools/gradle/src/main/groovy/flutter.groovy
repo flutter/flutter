@@ -602,34 +602,6 @@ class FlutterPlugin implements Plugin<Project> {
 
     /** Gets the list of plugins that support the Android platform. */
     private List<Map<String, Object>> getPluginList() {
-        // Consider a `.flutter-plugins-dependencies` file with the following content:
-        // {
-        //     "plugins": {
-        //       "android": [
-        //         {
-        //           "name": "plugin-a",
-        //           "path": "/path/to/plugin-a",
-        //           "dependencies": ["plugin-b", "plugin-c"],
-        //           "native_build": true,
-        //         },
-        //         {
-        //           "name": "plugin-b",
-        //           "path": "/path/to/plugin-b",
-        //           "dependencies": ["plugin-c"],
-        //           "native_build": true,
-        //         },
-        //         {
-        //           "name": "plugin-c",
-        //           "path": "/path/to/plugin-c",
-        //           "dependencies": [],
-        //           "native_build": true,
-        //         },
-        //       ],
-        //     },
-        // }
-        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
-        // `plugin-b` depends on `plugin-c`.
-        // `plugin-c` doesn't depend on anything.
         return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
     }
 
@@ -637,27 +609,6 @@ class FlutterPlugin implements Plugin<Project> {
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies() {
-        // Consider a `.flutter-plugins-dependencies` file with the following content:
-        // {
-        //     "dependencyGraph": [
-        //       {
-        //         "name": "plugin-a",
-        //         "dependencies": ["plugin-b","plugin-c"]
-        //       },
-        //       {
-        //         "name": "plugin-b",
-        //         "dependencies": ["plugin-c"]
-        //       },
-        //       {
-        //         "name": "plugin-c",
-        //         "dependencies": []'
-        //       }
-        //     ]
-        // }
-        //
-        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
-        // `plugin-b` depends on `plugin-c`.
-        // `plugin-c` doesn't depend on anything.
         Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
         if (meta == null) {
             return []
