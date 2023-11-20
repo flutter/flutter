@@ -511,7 +511,7 @@
 					"$(PROJECT_DIR)/Tests",
 					../../../../out/$FLUTTER_ENGINE,
 					../../../../out/$FLUTTER_ENGINE/obj/flutter/shell/platform/darwin/ios/,
-					../../../../out/$FLUTTER_ENGINE/obj/third_party/ocmock/,
+					../../../../out/$FLUTTER_ENGINE/obj/flutter/third_party/ocmock/,
 					"$(PROJECT_DIR)",
 				);
 				OTHER_LDFLAGS = (
@@ -522,7 +522,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.flutter.IosUnitTestsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SYSTEM_HEADER_SEARCH_PATHS = ../../../../third_party/ocmock/Source/;
+				SYSTEM_HEADER_SEARCH_PATHS = ../../../third_party/ocmock/Source/;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IosUnitTests.app/IosUnitTests";
 			};
@@ -556,7 +556,7 @@
 					"$(PROJECT_DIR)/Tests",
 					../../../../out/$FLUTTER_ENGINE,
 					../../../../out/$FLUTTER_ENGINE/obj/flutter/shell/platform/darwin/ios/,
-					../../../../out/$FLUTTER_ENGINE/obj/third_party/ocmock/,
+					../../../../out/$FLUTTER_ENGINE/obj/flutter/third_party/ocmock/,
 					"$(PROJECT_DIR)",
 				);
 				OTHER_LDFLAGS = (
@@ -567,7 +567,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.flutter.IosUnitTestsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SYSTEM_HEADER_SEARCH_PATHS = ../../../../third_party/ocmock/Source/;
+				SYSTEM_HEADER_SEARCH_PATHS = ../../../third_party/ocmock/Source/;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IosUnitTests.app/IosUnitTests";
 			};

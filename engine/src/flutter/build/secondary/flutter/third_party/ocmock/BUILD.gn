@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-ocmock_path = "//third_party/ocmock/Source"
+ocmock_path = "//flutter/third_party/ocmock/Source"
 
 # OCMock headers use `#import <OCMock/Foo.h>`.
 config("ocmock_config") {

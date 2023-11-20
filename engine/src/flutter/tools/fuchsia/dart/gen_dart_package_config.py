@@ -16,9 +16,7 @@ import sys
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path += [
-    os.path.join(
-        THIS_DIR, '..', '..', '..', '..', 'third_party', 'pyyaml', 'lib3'
-    )
+    os.path.join(THIS_DIR, '..', '..', '..', 'third_party', 'pyyaml', 'lib3')
 ]
 import yaml
 

@@ -5,7 +5,7 @@
 config("expat_config") {
   include_dirs = [
     "expat/lib",
-    "//flutter/build/secondary/third_party/expat/expat_config",
+    "//flutter/build/secondary/flutter/third_party/expat/expat_config",
   ]
 
   defines = [
