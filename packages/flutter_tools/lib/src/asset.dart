@@ -658,15 +658,7 @@ class ManifestAssetBundle implements AssetBundle {
         }
       }
 
-      componentAssets.removeWhere((_Asset asset, List<_Asset> variants) {
-        if (!asset.matchesFlavor(flavor)) {
-          _logger.printTrace('Skipping assets entry "${asset.entryUri.path}" since '
-            'its configured flavor(s) did not match the provided flavor (if any).\n'
-            'Configured flavors: ${asset.flavors.join(', ')}\n');
-          return true;
-        }
-        return false;
-      });
+      componentAssets.removeWhere((_Asset asset, List<_Asset> variants) => !asset.matchesFlavor(flavor));
       deferredComponentsAssetVariants[component.name] = componentAssets;
     }
     return deferredComponentsAssetVariants;
