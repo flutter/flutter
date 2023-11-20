@@ -1569,15 +1569,17 @@ Future<void> _runCustomerTesting() async {
     workingDirectory: flutterRoot,
   );
   final Map<String, String> env = Platform.environment;
-  final String revision = env['REVISION'] ?? 'HEAD';
-  await runCommand(
-    'git',
-    <String>[
-      'checkout',
-      revision,
-    ],
-    workingDirectory: flutterRoot,
-  );
+  final String? revision = env['REVISION'];
+  if (revision != null) {
+    await runCommand(
+      'git',
+      <String>[
+        'checkout',
+        revision,
+      ],
+      workingDirectory: flutterRoot,
+    );
+  }
   await runCommand(
     Platform.isWindows? 'ci.bat': './ci.sh' ,
     <String>[ ],
