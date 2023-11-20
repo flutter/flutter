@@ -27,9 +27,11 @@ struct PipelineProduceResult {
 };
 
 enum class PipelineConsumeResult {
+  // NOLINTBEGIN(readability-identifier-naming)
   NoneAvailable,
   Done,
   MoreAvailable,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 size_t GetNextPipelineTraceID();

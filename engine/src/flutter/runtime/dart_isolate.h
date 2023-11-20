@@ -91,6 +91,7 @@ class DartIsolate : public UIDartState {
   ///             isolate and start over.
   ///
   enum class Phase {
+    // NOLINTBEGIN(readability-identifier-naming)
     //--------------------------------------------------------------------------
     /// The initial phase of all Dart isolates. This is an internal phase and
     /// callers can never get a reference to a Dart isolate in this phase.
@@ -132,6 +133,7 @@ class DartIsolate : public UIDartState {
     /// reference to a Dart isolate in this phase.
     ///
     Shutdown,
+    // NOLINTEND(readability-identifier-naming)
   };
 
   //----------------------------------------------------------------------------

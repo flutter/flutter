@@ -24,13 +24,14 @@ class ResourceCacheLimitItem {
 
 class ResourceCacheLimitCalculator {
  public:
-  ResourceCacheLimitCalculator(size_t max_bytes_threshold)
+  explicit ResourceCacheLimitCalculator(size_t max_bytes_threshold)
       : max_bytes_threshold_(max_bytes_threshold) {}
 
   ~ResourceCacheLimitCalculator() = default;
 
   // This will be called on the platform thread.
-  void AddResourceCacheLimitItem(fml::WeakPtr<ResourceCacheLimitItem> item) {
+  void AddResourceCacheLimitItem(
+      const fml::WeakPtr<ResourceCacheLimitItem>& item) {
     items_.push_back(item);
   }
 
