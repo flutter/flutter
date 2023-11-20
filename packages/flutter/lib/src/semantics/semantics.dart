@@ -4982,7 +4982,6 @@ class SemanticsConfiguration {
       .._textDirection = _textDirection
       .._sortKey = _sortKey
       .._identifier = _identifier
-      ..identifier = _identifier
       .._attributedLabel = _attributedLabel
       .._attributedIncreasedValue = _attributedIncreasedValue
       .._attributedValue = _attributedValue
