@@ -1568,11 +1568,13 @@ Future<void> _runCustomerTesting() async {
     ],
     workingDirectory: flutterRoot,
   );
+
+  const String revision = String.fromEnvironment('REVISION', defaultValue: 'HEAD');
   await runCommand(
     'git',
     <String>[
       'checkout',
-      const String.fromEnvironment('REVISION', defaultValue: 'HEAD'),
+      revision,
     ],
     workingDirectory: flutterRoot,
   );
