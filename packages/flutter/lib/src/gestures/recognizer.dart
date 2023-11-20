@@ -62,7 +62,8 @@ enum MultiTouchDragBehavior {
   platformDefault,
 
   /// Each pointer's delta is averaged out, so the effective point tracked by the
-  /// recognizer is the centerpoint of all active pointers.
+  /// recognizer is the centerpoint of all active pointers, where each pointer's
+  /// estimated motion is above the [kMinFlingVelocity] threshold.
   ///
   /// E.g. if two pointers are pressed, with the first moving +10 pixels and the
   /// second moving -10 pixels, the recognizer will report a delta of 0.
@@ -72,6 +73,10 @@ enum MultiTouchDragBehavior {
   ///
   /// Furthermore, if two pointers are pressed, with the first moving +10 pixels
   /// and the second moving +20 pixels, the recognizer will report a delta of +15.
+  ///
+  /// Finally, if two pointers are pressed, with the first moving +10 pixels and
+  /// the second with negligible motion (below [kMinFlingVelocity]), the recognizer
+  /// will report a delta of +10.
   ///
   /// This matches the behavior of iOS, iPadOS, macOS, and other Apple platforms.
   average,

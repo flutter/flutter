@@ -595,13 +595,35 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           return;
 
         case MultiTouchDragBehavior.average:
-          final int numPointers = _velocityTrackers.length;
+          // Filter trackers to only include those that are active (above the threshold)
+          final Iterable<VelocityTracker> trackers = _velocityTrackers.values.where((VelocityTracker tracker) {
+            final VelocityEstimate? estimate = tracker.getVelocityEstimate();
+            if (estimate == null) {
+              return false;
+            }
+
+            final double? absolutePrimaryValue = _getPrimaryValueFromOffset(estimate.pixelsPerSecond)?.abs();
+
+            if (absolutePrimaryValue == null) {
+              return false;
+            }
+
+            return absolutePrimaryValue > kMinFlingVelocity;
+          });
+
+          final int numPointers = trackers.length;
+
+          if (numPointers == 0) {
+            return; // Prevent division by zero
+          }
+
           final Offset averageDelta = delta / numPointers.toDouble();
+          final double? primaryDelta = _getPrimaryValueFromOffset(averageDelta);
 
           details = DragUpdateDetails(
             sourceTimeStamp: sourceTimeStamp,
             delta: averageDelta,
-            primaryDelta: _getPrimaryValueFromOffset(averageDelta),
+            primaryDelta: primaryDelta,
             globalPosition: globalPosition,
             localPosition: localPosition,
           );
