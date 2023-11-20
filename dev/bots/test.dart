@@ -1568,8 +1568,8 @@ Future<void> _runCustomerTesting() async {
     ],
     workingDirectory: flutterRoot,
   );
-
-  const String revision = String.fromEnvironment('REVISION', defaultValue: 'HEAD');
+  final Map<String, String> env = Platform.environment;
+  const String revision = env.containsKey('REVISION')? env['REVISION'] : 'HEAD';
   await runCommand(
     'git',
     <String>[
