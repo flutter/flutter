@@ -495,7 +495,6 @@ class ExpansionTile extends StatefulWidget {
   /// than supplying a controller.
   final ExpansionTileController? controller;
 
-  /// Dense expansion tile's default to a smaller height.
   ///
   /// {@macro flutter.material.ListTile.dense}
   final bool? dense;
