@@ -774,6 +774,17 @@ class TestFlutterView implements FlutterView {
     resetPhysicalConstraints();
   }
 
+  /// The physical constraints to use for this test.
+  ///
+  /// Defaults to the value provided by [FlutterView.physicalConstraints]. This
+  /// can only be set in a test environment to emulate different view
+  /// configurations. A standard [FlutterView] is not mutable from the framework.
+  ///
+  /// See also:
+  ///
+  ///   * [FlutterView.physicalConstraints] for the standard implementation
+  ///   * [physicalConstraints] to reset this value specifically
+  ///   * [reset] to reset all test values for this view
   @override
   ViewConstraints get physicalConstraints => _physicalConstraints ?? _view.physicalConstraints;
   ViewConstraints? _physicalConstraints;
