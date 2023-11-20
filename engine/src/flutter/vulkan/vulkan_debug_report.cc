@@ -185,8 +185,8 @@ static VKAPI_ATTR VkBool32
 VulkanDebugReport::VulkanDebugReport(
     const VulkanProcTable& p_vk,
     const VulkanHandle<VkInstance>& application)
-    : vk(p_vk), application_(application), valid_(false) {
-  if (!vk.CreateDebugReportCallbackEXT || !vk.DestroyDebugReportCallbackEXT) {
+    : vk_(p_vk), application_(application), valid_(false) {
+  if (!vk_.CreateDebugReportCallbackEXT || !vk_.DestroyDebugReportCallbackEXT) {
     return;
   }
 
@@ -207,14 +207,14 @@ VulkanDebugReport::VulkanDebugReport(
   };
 
   VkDebugReportCallbackEXT handle = VK_NULL_HANDLE;
-  if (VK_CALL_LOG_ERROR(vk.CreateDebugReportCallbackEXT(
+  if (VK_CALL_LOG_ERROR(vk_.CreateDebugReportCallbackEXT(
           application_, &create_info, nullptr, &handle)) != VK_SUCCESS) {
     return;
   }
 
   handle_ = VulkanHandle<VkDebugReportCallbackEXT>{
       handle, [this](VkDebugReportCallbackEXT handle) {
-        vk.DestroyDebugReportCallbackEXT(application_, handle, nullptr);
+        vk_.DestroyDebugReportCallbackEXT(application_, handle, nullptr);
       }};
 
   valid_ = true;

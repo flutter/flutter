@@ -24,7 +24,7 @@ class VulkanDebugReport {
   bool IsValid() const;
 
  private:
-  const VulkanProcTable& vk;
+  const VulkanProcTable& vk_;
   const VulkanHandle<VkInstance>& application_;
   VulkanHandle<VkDebugReportCallbackEXT> handle_;
   bool valid_;
