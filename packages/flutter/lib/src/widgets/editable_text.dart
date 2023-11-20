@@ -3692,12 +3692,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         hideToolbar(false);
       }
     } else if (notification is ScrollEndNotification) {
-      final Rect paintBounds = renderEditable.paintBounds;
-      final double viewportTop = _scrollController.offset;
-      final double viewportBottom = viewportTop + _scrollController.position.viewportDimension;
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
-      final bool renderEditableInView = renderEditable.localToGlobal(paintBounds.topLeft).dy < viewportBottom && renderEditable.localToGlobal(paintBounds.bottomRight).dy > viewportTop;
-
+      final bool renderEditableInView = renderEditable.getTransformTo(null) != Matrix4.zero();
       if ((_toolbarVisibleAtScrollStart || _showToolbarOnScreenScheduled) && (selectionIsVisible && renderEditableInView)) {
         _toolbarVisibleAtScrollStart = false;
         if (_showToolbarOnScreenScheduled) {
