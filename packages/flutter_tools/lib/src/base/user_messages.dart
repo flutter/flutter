@@ -136,18 +136,10 @@ class UserMessages {
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
-  String androidCannotRunSdkManager(String sdkManagerPath, String error, Platform platform, [String? suggestion]) {
-      final StringBuffer errorMessage = StringBuffer('Android sdkmanager tool '
-      'was found, but failed to run ($sdkManagerPath): "$error".\n'
-      );
-      if (suggestion != null) {
-        errorMessage.write(suggestion);
-      } else {
-        errorMessage.write('Try re-installing or updating your Android SDK,\n'
-          'visit ${androidSdkInstallUrl(platform)} for detailed instructions.');
-      }
-      return errorMessage.toString();
-  }
+  String androidCannotRunSdkManager(String sdkManagerPath, String error, Platform platform) =>
+      'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
+      'Try re-installing or updating your Android SDK,\n'
+      'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkBuildToolsOutdated(int sdkMinVersion, String buildToolsMinVersion, Platform platform) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${androidSdkInstallUrl(platform)} for detailed instructions.';

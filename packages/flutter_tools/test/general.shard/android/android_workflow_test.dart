@@ -608,7 +608,7 @@ Android sdkmanager tool was found, but failed to run
     await expectLater(
       licenseValidator.runLicenseManager(),
       throwsToolExit(
-        message: RegExp('.*Consider updating your installation of Android studio. Alternatively, you.*'),
+        message: RegExp('.*consider updating your installation of Android studio. Alternatively, you.*'),
       ),
     );
     expect(processManager, hasNoRemainingExpectations);
