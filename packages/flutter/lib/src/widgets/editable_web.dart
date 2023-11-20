@@ -591,7 +591,6 @@ class _EditableWebState extends State<EditableWeb> {
   void setTextAreaElementAttributes(html.TextAreaElement textAreaEl) {
     textAreaEl.rows = _maxLines;
     textAreaEl.readOnly = widget.textInputConfiguration.readOnly;
-    textAreaEl.style.overflow = 'hidden';
     _textAreaElement = textAreaEl;
   }
 
