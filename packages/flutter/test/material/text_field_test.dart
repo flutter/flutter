@@ -12181,6 +12181,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNothing);
+      expect(contextMenuButtonFinder, findsNothing);
 
       // Scroll back up so the TextField is inside the viewport.
       scrollController.animateTo(
