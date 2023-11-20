@@ -767,7 +767,8 @@ class TestFlutterView implements FlutterView {
     physicalConstraints = ViewConstraints.tight(value);
   }
 
-  /// Resets [physicalSize] to the default value for this view.
+  /// Resets [physicalSize] (and implicitly also the [physicalConstraints]) to
+  /// the default value for this view.
   void resetPhysicalSize() {
     _physicalSize = null;
     resetPhysicalConstraints();
@@ -781,6 +782,7 @@ class TestFlutterView implements FlutterView {
     platformDispatcher.onMetricsChanged?.call();
   }
 
+  /// Resets [physicalConstraints] to the default value for this view.
   void resetPhysicalConstraints() {
     _physicalConstraints = null;
     platformDispatcher.onMetricsChanged?.call();
@@ -917,6 +919,7 @@ class TestFlutterView implements FlutterView {
     resetDisplayFeatures();
     resetPadding();
     resetPhysicalSize();
+    // resetPhysicalConstraints is implicitly called by resetPhysicalSize.
     resetSystemGestureInsets();
     resetViewInsets();
     resetViewPadding();
