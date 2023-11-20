@@ -90,6 +90,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState(() => infoText = 'enter pressed');
               },
             ),
+            TextFormField(
+              key: const Key('input3'),
+              enabled: true,
+							initialValue: 'Text3',
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(10.0),
+                labelText: 'Text Input Field 2:',
+              ),
+              onFieldSubmitted: (String str) {
+                print('event received');
+                setState(() => infoText = 'enter pressed');
+              },
+            ),
             Text(
               infoText,
               key: const Key('text'),

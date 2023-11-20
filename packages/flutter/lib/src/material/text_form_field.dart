@@ -100,7 +100,7 @@ class TextFormField extends FormField<String> {
   /// and [TextField.new], the constructor.
   TextFormField({
     super.key,
-    this.controller,
+    TextEditingController? controller,
     String? initialValue,
     FocusNode? focusNode,
     InputDecoration? decoration = const InputDecoration(),
@@ -264,13 +264,15 @@ class TextFormField extends FormField<String> {
              ),
            );
          },
-       );
+       ) {
+				this.controller = controller ?? TextEditingController(text: initialValue);
+			 }
 
   /// Controls the text being edited.
   ///
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
-  final TextEditingController? controller;
+  late final TextEditingController? controller;
 
   /// {@template flutter.material.TextFormField.onChanged}
   /// Called when the user initiates a change to the TextField's

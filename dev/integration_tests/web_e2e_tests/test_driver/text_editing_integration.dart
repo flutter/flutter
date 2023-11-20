@@ -63,6 +63,30 @@ void main() {
     expect(input.value, 'New Value');
   }, semanticsEnabled: false);
 
+  testWidgets('Input field with no controller but has initial value works',
+      (WidgetTester tester) async {
+    app.main();
+    await tester.pumpAndSettle();
+
+    // Focus on a TextFormField.
+    final Finder finder = find.byKey(const Key('input3'));
+    expect(finder, findsOneWidget);
+    await tester.tap(find.byKey(const Key('input3')));
+
+    // A native input element will be appended to the DOM.
+    final List<Node> nodeList = findElements('input');
+    expect(nodeList.length, equals(1));
+    final InputElement input = nodeList[0] as InputElement;
+    // The element's value will be the same as the textFormField's value.
+    expect(input.value, 'Text3');
+
+    // Change the value of the TextFormField.
+    final TextFormField textFormField = tester.widget(finder);
+    textFormField.controller?.text = 'New Value';
+    // DOM element's value also changes.
+    expect(input.value, 'New Value');
+  }, semanticsEnabled: false);
+
   testWidgets('Pressing enter on the text field triggers submit',
       (WidgetTester tester) async {
     app.main();
