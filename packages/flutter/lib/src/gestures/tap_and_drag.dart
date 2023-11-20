@@ -1286,7 +1286,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
   void _didExceedDeadline() {
     if (currentDown != null) {
-      debugPrint('did exceed deadline');
       _checkTapDown(currentDown!);
 
       if (consecutiveTapCount > 1) {
