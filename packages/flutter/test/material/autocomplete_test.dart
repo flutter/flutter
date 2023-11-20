@@ -92,7 +92,7 @@ void main() {
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
     final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
-    expect(field.controller!.text, 'chameleon');
+    expect(field.controller.text, 'chameleon');
     expect(lastSelection, 'chameleon');
 
     // Modify the field text. The options appear again and are filtered.
@@ -148,7 +148,7 @@ void main() {
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
     final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
-    expect(field.controller!.text, 'Alice, alice@example.com');
+    expect(field.controller.text, 'Alice, alice@example.com');
 
     // Modify the field text. The options appear again and are filtered.
     await tester.enterText(find.byType(TextFormField), 'B');
@@ -200,7 +200,7 @@ void main() {
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
     final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
-    expect(field.controller!.text, kOptionsUsers.first.name);
+    expect(field.controller.text, kOptionsUsers.first.name);
   });
 
   testWidgetsWithLeakTracking('can build a custom field', (WidgetTester tester) async {
@@ -314,7 +314,7 @@ void main() {
       final Finder listFinder = find.byType(ListView);
       final Finder inputFinder = find.byType(TextFormField);
       final TextFormField field = inputFinder.evaluate().first.widget as TextFormField;
-      field.controller!.clear();
+      field.controller.clear();
       await tester.tap(inputFinder);
       await tester.enterText(inputFinder, enteredText);
       await tester.pump();
@@ -378,7 +378,7 @@ void main() {
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
     expect(
-      tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text,
+      tester.widget<TextFormField>(find.byType(TextFormField)).controller.text,
       'lem',
     );
 
@@ -397,7 +397,7 @@ void main() {
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
     final TextFormField field = find.byType(TextFormField).evaluate().first.widget as TextFormField;
-    expect(field.controller!.text, 'lemur');
+    expect(field.controller.text, 'lemur');
     expect(lastSelection, 'lemur');
   });
 

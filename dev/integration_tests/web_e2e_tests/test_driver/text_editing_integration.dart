@@ -34,7 +34,7 @@ void main() {
 
     // Change the value of the TextFormField.
     final TextFormField textFormField = tester.widget(finder);
-    textFormField.controller?.text = 'New Value';
+    textFormField.controller.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
   }, semanticsEnabled: false);
@@ -58,7 +58,7 @@ void main() {
 
     // Change the value of the TextFormField.
     final TextFormField textFormField = tester.widget(finder);
-    textFormField.controller?.text = 'New Value';
+    textFormField.controller.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
   }, semanticsEnabled: false);
@@ -82,7 +82,7 @@ void main() {
 
     // Change the value of the TextFormField.
     final TextFormField textFormField = tester.widget(finder);
-    textFormField.controller?.text = 'New Value';
+    textFormField.controller.text = 'New Value';
     // DOM element's value also changes.
     expect(input.value, 'New Value');
   }, semanticsEnabled: false);
