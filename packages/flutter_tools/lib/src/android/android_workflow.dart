@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:process/process.dart';
 
@@ -389,12 +390,15 @@ class AndroidLicenseValidator extends DoctorValidator {
         ),
       );
 
+      final Stream<List<int>> stderrBroadcast = process.stderr.asBroadcastStream();
+      final List<String> stderr = <String>[];
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {
         await Future.wait<void>(<Future<void>>[
           _stdio.addStdoutStream(process.stdout),
-          _stdio.addStderrStream(process.stderr),
+          _stdio.addStderrStream(stderrBroadcast),
+          stderrBroadcast.transform(utf8.decoder).forEach(stderr.add),
         ]);
       } on Exception catch (err, stack) {
         _logger.printTrace('Echoing stdout or stderr from the license subprocess failed:');
@@ -403,10 +407,12 @@ class AndroidLicenseValidator extends DoctorValidator {
 
       final int exitCode = await process.exitCode;
       if (exitCode != 0) {
+        final String? suggestion = suggestionForSdkManagerError(stderr, _platform);
         throwToolExit(_userMessages.androidCannotRunSdkManager(
           _androidSdk.sdkManagerPath ?? '',
           'exited code $exitCode',
           _platform,
+          suggestion,
         ));
       }
       return true;
@@ -425,5 +431,19 @@ class AndroidLicenseValidator extends DoctorValidator {
       return false;
     }
     return _processManager.canRun(sdkManagerPath);
+  }
+
+  String? suggestionForSdkManagerError(List<String> androidSdkStderr, Platform platform) {
+    final String join = androidSdkStderr.join();
+    final bool failedDueToJdkIncompatibility = join.contains(
+      RegExp(r'.*java\.lang\.UnsupportedClassVersionError.*SdkManagerCli '
+        r'has been compiled by a more recent version of the Java Runtime.*'));
+
+    if (failedDueToJdkIncompatibility) {
+      return 'Consider updating your installation of Android studio. Alternatively, you '
+        'can uninstall the Android SDK command-line tools and install an earlier version. ';
+    }
+
+    return null;
   }
 }
