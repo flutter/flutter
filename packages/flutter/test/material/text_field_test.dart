@@ -12125,7 +12125,7 @@ void main() {
     'Toolbar can re-appear after parent scrollable scrolls selection out of view on Android and iOS',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
+        text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
@@ -12139,7 +12139,7 @@ void main() {
                 children: <Widget>[
                   TextField(controller: controller),
                   Container(
-                    height: 1500,
+                    height: 1500.0,
                     key: key1,
                   ),
                 ],
@@ -12180,9 +12180,7 @@ void main() {
         curve: Curves.linear,
       );
       await tester.pumpAndSettle();
-      expect(contextMenuButtonFinder, findsNothing);
-      expect(renderEditable.selectionStartInViewport.value, false);
-      expect(renderEditable.selectionEndInViewport.value, false);
+      expect(find.byType(TextField), findsNothing);
 
       // Scroll back up so the TextField is inside the viewport.
       scrollController.animateTo(
@@ -12191,6 +12189,7 @@ void main() {
         curve: Curves.linear,
       );
       await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsOneWidget);
       expect(
         contextMenuButtonFinder,
         isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),

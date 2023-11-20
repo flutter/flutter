@@ -3666,6 +3666,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_internalScrolling) {
       return;
     }
+    debugPrint('parent scroll');
     _handleContextMenuOnScroll(notification);
   }
 
@@ -3687,24 +3688,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // did not change between the time the toolbar was first
     // scheduled to be shown to when it is ready to be shown.
     if (notification is ScrollStartNotification) {
+      debugPrint('scroll start');
       _toolbarVisibleAtScrollStart = _selectionOverlay != null && _selectionOverlay!.toolbarIsVisible;
       if (_toolbarVisibleAtScrollStart) {
+        debugPrint('hiding toolbar');
         hideToolbar(false);
       }
     } else if (notification is ScrollEndNotification) {
+      debugPrint('scroll end');
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
       if ((_toolbarVisibleAtScrollStart || _showToolbarOnScreenScheduled) && selectionIsVisible) {
         _toolbarVisibleAtScrollStart = false;
         if (_showToolbarOnScreenScheduled) {
           _showToolbarOnScreenScheduled = false;
           if (_valueWhenShowToolbarOnScreenScheduled == _value) {
+            debugPrint('show scheduled toolbar');
             showToolbar();
           }
           _valueWhenShowToolbarOnScreenScheduled = null;
         } else {
+          debugPrint('re-show toolbar');
           showToolbar();
         }
       } else if (_toolbarVisibleAtScrollStart) {
+        debugPrint('show toolbar scheduled');
         _showToolbarOnScreenScheduled = true;
         _valueWhenShowToolbarOnScreenScheduled = _value;
       }
@@ -5016,6 +5023,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 debugLabel: kReleaseMode ? null : 'EditableText',
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification notification) {
+                    debugPrint('internal scroll');
                     _internalScrolling = true;
                     _handleContextMenuOnScroll(notification);
                     return false;

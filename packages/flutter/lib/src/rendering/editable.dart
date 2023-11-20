@@ -728,6 +728,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionEndInViewport.value = visibleRegion
       .inflate(visibleRegionSlop)
       .contains(endOffset + effectiveOffset);
+    debugPrint('start: ${_selectionStartInViewport.value} end: ${_selectionEndInViewport.value}');
   }
 
   void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
