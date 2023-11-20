@@ -266,7 +266,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      _view.render(scene, size: size * configuration.devicePixelRatio);
+      final Size physicalSize = size * configuration.devicePixelRatio;
+      assert(_view.physicalConstraints.isSatisfiedBy(physicalSize));
+      _view.render(scene, size: physicalSize);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
