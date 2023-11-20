@@ -124,6 +124,16 @@ void testNoCrashes() {
   });
 }
 
+const String kFlutterBuildDirectory = 'kFlutterBuildDirectory';
+
+String get _flutterBuildPath {
+  const String buildPath = String.fromEnvironment(kFlutterBuildDirectory);
+  if (buildPath.isEmpty) {
+    throw StateError('kFlutterBuildDirectory -D variable is not set.');
+  }
+  return buildPath;
+}
+
 void main() async {
   final ImageComparer comparer = await ImageComparer.create();
 
@@ -530,7 +540,7 @@ void main() async {
     // Skia renders a tofu if the font does not have a glyph for a character.
     // However, Flutter opts-in to a Skia feature to render tabs as a single space.
     // See: https://github.com/flutter/flutter/issues/79153
-    final File file = File(path.join('flutter', 'testing', 'resources', 'RobotoSlab-VariableFont_wght.ttf'));
+    final File file = File(path.join(_flutterBuildPath, 'flutter', 'third_party', 'txt', 'assets', 'Roboto-Regular.ttf'));
     final Uint8List fontData = await file.readAsBytes();
     await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
 
@@ -1030,6 +1040,39 @@ void main() async {
     expect(canvas.getSaveCount(), equals(6));
     canvas.restoreToCount(canvas.getSaveCount() + 1);
     expect(canvas.getSaveCount(), equals(6));
+  });
+
+  test('TextDecoration renders non-solid lines', () async {
+    final File file = File(path.join(_flutterBuildPath, 'flutter', 'third_party', 'txt', 'assets', 'Roboto-Regular.ttf'));
+    final Uint8List fontData = await file.readAsBytes();
+    await loadFontFromList(fontData, fontFamily: 'RobotoSlab');
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    for (final (int index, TextDecorationStyle style) in TextDecorationStyle.values.indexed) {
+      final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+      builder.pushStyle(TextStyle(
+        decoration: TextDecoration.underline,
+        decorationStyle: style,
+        decorationThickness: 1.0,
+        decorationColor: const Color(0xFFFF0000),
+        fontFamily: 'RobotoSlab',
+        fontSize: 24.0,
+        foreground: Paint()..color = const Color(0xFF0000FF),
+      ));
+
+      builder.addText(style.name);
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 1000));
+
+      // Draw and layout based on the index vertically.
+      canvas.drawParagraph(paragraph, Offset(0, index * 40.0));
+    }
+
+    final Picture picture = recorder.endRecording();
+    final Image image = await picture.toImage(200, 200);
+    await comparer.addGoldenImage(image, 'text_decoration.png');
   });
 }
 
