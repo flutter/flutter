@@ -12,6 +12,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
+import '../common/matchers.dart';
 import '../common/test_initialization.dart';
 
 const int kPhysicalKeyA = 0x00070004;
@@ -462,5 +463,37 @@ Future<void> testMain() async {
     });
 
     await expectLater(completer.future, completes);
+  });
+
+  test('dispose', () {
+    final DomHTMLDivElement host = createDomHTMLDivElement();
+    final EngineFlutterView view = EngineFlutterView(
+      123,
+      EnginePlatformDispatcher.instance,
+      host,
+    );
+
+    // First, let's make sure the view's root element was inserted into the
+    // host, and the dimensions provider is active.
+    expect(view.dom.rootElement.parentElement, host);
+    expect(view.dimensionsProvider.isClosed, isFalse);
+
+    // Now, let's dispose the view and make sure its root element was removed,
+    // and the dimensions provider is closed.
+    view.dispose();
+    expect(view.dom.rootElement.parentElement, isNull);
+    expect(view.dimensionsProvider.isClosed, isTrue);
+
+    // Can't render into a disposed view.
+    expect(
+      () => view.render(ui.SceneBuilder().build()),
+      throwsAssertionError,
+    );
+
+    // Can't update semantics on a disposed view.
+    expect(
+      () => view.updateSemantics(ui.SemanticsUpdateBuilder().build()),
+      throwsAssertionError,
+    );
   });
 }

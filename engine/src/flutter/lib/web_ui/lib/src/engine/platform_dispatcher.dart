@@ -104,6 +104,12 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _disconnectFontSizeObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
+
+    // We need to call `toList()` in order to avoid concurrent modification inside
+    // the loop (`view.dispose()` removes itself from the view map).
+    for (final EngineFlutterView view in views.toList()) {
+      view.dispose();
+    }
   }
 
   /// Receives all events related to platform configuration changes.
