@@ -12173,7 +12173,7 @@ void main() {
         isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
       );
 
-      // Scroll down, the toolbar should be hidden since we are scrolling.
+      // Scroll down, the TextField should no longer be in the viewport.
       scrollController.animateTo(
         scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 100),
