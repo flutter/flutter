@@ -46,5 +46,6 @@ impeller_component("typographer_unittests") {
     "../playground:playground_test",
     "backends/skia:typographer_skia_backend",
     "backends/stb:typographer_stb_backend",
+    "//flutter/third_party/txt",
   ]
 }
