@@ -90,6 +90,9 @@ using FrameRasterizedCallback = std::function<void(const FrameTiming&)>;
 
 class DartIsolate;
 
+// TODO(https://github.com/flutter/flutter/issues/138750): Re-order fields to
+// reduce padding.
+// NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
 struct Settings {
   Settings();
 
