@@ -764,6 +764,7 @@ class TestFlutterView implements FlutterView {
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
+    // For backwards compatibility the constraints are set based on the provided size.
     physicalConstraints = ViewConstraints.tight(value);
   }
 
