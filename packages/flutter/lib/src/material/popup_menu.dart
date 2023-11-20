@@ -1128,6 +1128,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.constraints,
     this.position,
     this.clipBehavior = Clip.none,
+    this.useRootNavigator = false,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1292,6 +1293,12 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// Used to determine whether to push the menu to the [Navigator] furthest
+  /// from or nearest to the given `context`.
+  ///
+  /// Defaults to false.
+  final bool useRootNavigator;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1348,6 +1355,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         color: widget.color ?? popupMenuTheme.color,
         constraints: widget.constraints,
         clipBehavior: widget.clipBehavior,
+        useRootNavigator: widget.useRootNavigator,
       )
       .then<void>((T? newValue) {
         if (!mounted) {

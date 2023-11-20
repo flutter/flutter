@@ -37,7 +37,7 @@ import 'theme_data.dart';
 ///   for makers to use at their discretion and are intended to support
 ///   broader color expression in products.
 ///
-/// The remaining colors of the scheme are comprised of neutral colors used for
+/// The remaining colors of the scheme are composed of neutral colors used for
 /// backgrounds and surfaces, as well as specific colors for errors, dividers
 /// and shadows.
 ///
