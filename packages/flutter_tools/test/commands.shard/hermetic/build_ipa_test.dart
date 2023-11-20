@@ -398,12 +398,10 @@ void main() {
   testUsingContext('ipa build ignores deletion failure if generatedExportPlist does not exist', () async {
     final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
     final BuildCommand command = BuildCommand(
-      artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      logger: logger,
+      logger: BufferLogger.test(),
       fileSystem: fileSystem,
-      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
@@ -423,7 +421,6 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    Logger: () => logger,
     ProcessManager: () => fakeProcessManager,
     Platform: () => macosPlatform,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
