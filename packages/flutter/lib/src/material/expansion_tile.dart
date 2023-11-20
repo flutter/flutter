@@ -14,6 +14,7 @@ import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
@@ -248,6 +249,9 @@ class ExpansionTile extends StatefulWidget {
     this.clipBehavior,
     this.controlAffinity,
     this.controller,
+    this.dense,
+    this.visualDensity,
+    this.enableFeedback = true,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -491,6 +495,17 @@ class ExpansionTile extends StatefulWidget {
   /// than supplying a controller.
   final ExpansionTileController? controller;
 
+  /// {@macro flutter.material.ListTile.dense}
+  final bool? dense;
+
+  /// Defines how compact the expansion tile's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  final VisualDensity? visualDensity;
+
+  /// {@macro flutter.material.ListTile.enableFeedback}
+  final bool? enableFeedback;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -629,6 +644,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       case TargetPlatform.windows:
         break;
     }
+
     return Container(
       clipBehavior: clipBehavior,
       decoration: ShapeDecoration(
@@ -646,6 +662,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               textColor: _headerColor.value,
               child: ListTile(
                 onTap: _handleTap,
+                dense: widget.dense,
+                visualDensity: widget.visualDensity,
+                enableFeedback: widget.enableFeedback,
                 contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
                 leading: widget.leading ?? _buildLeadingIcon(context),
                 title: widget.title,
