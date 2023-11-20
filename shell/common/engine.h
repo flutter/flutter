@@ -76,6 +76,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   /// @brief      Indicates the result of the call to `Engine::Run`.
   ///
   enum class RunStatus {
+    // NOLINTBEGIN(readability-identifier-naming)
     //--------------------------------------------------------------------------
     /// The call to |Engine::Run| was successful and the root isolate is in the
     /// `DartIsolate::Phase::Running` phase with its entry-point invocation
@@ -125,6 +126,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///   AOT mode operation of the Dart VM.
     ///
     Failure,
+    // NOLINTEND(readability-identifier-naming)
   };
 
   //----------------------------------------------------------------------------

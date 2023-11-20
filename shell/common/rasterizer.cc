@@ -42,11 +42,9 @@ static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
 Rasterizer::Rasterizer(Delegate& delegate,
                        MakeGpuImageBehavior gpu_image_behavior)
-    : is_torn_down_(false),
-      delegate_(delegate),
+    : delegate_(delegate),
       gpu_image_behavior_(gpu_image_behavior),
       compositor_context_(std::make_unique<flutter::CompositorContext>(*this)),
-      user_override_resource_cache_bytes_(false),
       snapshot_controller_(
           SnapshotController::Make(*this, delegate.GetSettings())),
       weak_factory_(this) {

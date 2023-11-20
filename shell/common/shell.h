@@ -45,6 +45,7 @@ namespace flutter {
 
 /// Error exit codes for the Dart isolate.
 enum class DartErrorCode {
+  // NOLINTBEGIN(readability-identifier-naming)
   /// No error has occurred.
   NoError = 0,
   /// The Dart error code for an API error.
@@ -53,6 +54,7 @@ enum class DartErrorCode {
   CompilationError = 254,
   /// The Dart error code for an unknown error.
   UnknownError = 255
+  // NOLINTEND(readability-identifier-naming)
 };
 
 /// Values for |Shell::SetGpuAvailability|.

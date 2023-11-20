@@ -104,7 +104,7 @@ TEST_F(ShellTest, VSyncTargetTime) {
   platform_task.wait();
   on_target_time_latch.Wait();
   const auto vsync_waiter_target_time =
-      ConstantFiringVsyncWaiter::frame_target_time;
+      ConstantFiringVsyncWaiter::kFrameTargetTime;
   ASSERT_EQ(vsync_waiter_target_time.ToEpochDelta().ToMicroseconds(),
             target_time);
 
