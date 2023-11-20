@@ -13,9 +13,9 @@ option(GLFW_BUILD_DOCS "" OFF)
 option(GLFW_INSTALL "" OFF)
 find_package(OpenGL REQUIRED COMPONENTS EGL)
 include_directories(${OPENGL_INCLUDE_DIRS})
-add_subdirectory(${CMAKE_SOURCE_DIR}/../../../third_party/glfw glfw)
+add_subdirectory(${CMAKE_SOURCE_DIR}/../../third_party/glfw glfw)
 target_link_libraries(flutter_glfw glfw OpenGL::EGL)
-include_directories(${CMAKE_SOURCE_DIR}/../../../third_party/glfw/include)
+include_directories(${CMAKE_SOURCE_DIR}/../../third_party/glfw/include)
 
 ############################################################
 # Flutter Engine

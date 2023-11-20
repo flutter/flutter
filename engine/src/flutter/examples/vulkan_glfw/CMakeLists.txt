@@ -30,7 +30,7 @@ target_link_libraries(${EXE_NAME} PRIVATE Vulkan::Vulkan)
 
 # Dependency: GLFW
 
-set(GLFW_REPOSITORY ${CMAKE_SOURCE_DIR}/../../../third_party/glfw)
+set(GLFW_REPOSITORY ${CMAKE_SOURCE_DIR}/../../third_party/glfw)
 
 set(BUILD_SHARED_LIBS OFF)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
