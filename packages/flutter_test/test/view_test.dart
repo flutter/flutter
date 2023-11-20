@@ -258,10 +258,9 @@ void main() {
       expect(backingView.lastSemanticsUpdate, expectedUpdate);
     });
 
-    testWidgets('does not call render if renderIntoFlutterView is false', (WidgetTester tester) async {
+    testWidgets('does not call render if renderIntoFlutterView is false (default)', (WidgetTester tester) async {
       final TestPlatformDispatcher nonRenderingDispatcher = TestPlatformDispatcher(
         platformDispatcher: tester.binding.platformDispatcher,
-        renderIntoFlutterView: false,
       );
       final _FakeFlutterView flutterView = _FakeFlutterView();
       final TestFlutterView testFlutterView = TestFlutterView(
@@ -279,6 +278,7 @@ void main() {
     testWidgets('does call render if renderIntoFlutterView is true', (WidgetTester tester) async {
       final TestPlatformDispatcher nonRenderingDispatcher = TestPlatformDispatcher(
         platformDispatcher: tester.binding.platformDispatcher,
+        renderIntoFlutterView: true,
       );
       final _FakeFlutterView flutterView = _FakeFlutterView();
       final TestFlutterView testFlutterView = TestFlutterView(
