@@ -192,7 +192,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() {
+  TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+  ) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
@@ -227,10 +229,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late final TestWindow window;
 
   @override
-  TestPlatformDispatcher get platformDispatcher => _platformDispatcher;
-  late final TestPlatformDispatcher _platformDispatcher = TestPlatformDispatcher(
-    platformDispatcher: PlatformDispatcher.instance,
-  );
+  final TestPlatformDispatcher platformDispatcher;
 
   @override
   TestRestorationManager get restorationManager {
@@ -1223,12 +1222,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return AutomatedTestWidgetsFlutterBinding.instance;
   }
 
-  @override
-  late final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(
-    platformDispatcher: PlatformDispatcher.instance,
-    sendScenesToEngine: false,
-  );
-
   FakeAsync? _currentFakeAsync; // set in runTest; cleared in postTest
   Completer<void>? _pendingAsyncTasks;
 
@@ -1669,23 +1662,6 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// provided by the binding active while the test framework is
 /// running.
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
-  /// Creates a [LiveTestWidgetsFlutterBinding].
-  LiveTestWidgetsFlutterBinding({this.sendScenesToEngine = true});
-
-  /// Whether the [FlutterView]s managed by the [platformDispatcher] will send
-  /// frames to the engine when [FlutterView.render] is called.
-  ///
-  /// When this binding is used in an environment that manually drives the frame
-  /// pipeline frames shouldn't be sent to the engine as the engine may not be
-  /// ready to process them.
-  final bool sendScenesToEngine;
-
-  @override
-  late final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(
-    platformDispatcher: PlatformDispatcher.instance,
-    sendScenesToEngine: sendScenesToEngine,
-  );
-
   @override
   void initInstances() {
     super.initInstances();

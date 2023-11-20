@@ -17,7 +17,7 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  LiveTestWidgetsFlutterBinding(sendScenesToEngine: false).framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
+  LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
   testWidgetsWithLeakTracking('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
