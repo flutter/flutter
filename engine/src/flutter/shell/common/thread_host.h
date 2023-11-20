@@ -20,11 +20,13 @@ using ThreadConfigSetter = fml::Thread::ThreadConfigSetter;
 /// The collection of all the threads used by the engine.
 struct ThreadHost {
   enum Type {
+    // NOLINTBEGIN(readability-identifier-naming)
     Platform = 1 << 0,
     UI = 1 << 1,
     RASTER = 1 << 2,
     IO = 1 << 3,
     Profiler = 1 << 4,
+    // NOLINTEND(readability-identifier-naming)
   };
 
   /// The collection of all the thread configures, and we create custom thread

@@ -344,6 +344,7 @@ class Rasterizer final : public SnapshotDelegate,
   ///             rendered layer tree.
   ///
   enum class ScreenshotType {
+    // NOLINTBEGIN(readability-identifier-naming)
     //--------------------------------------------------------------------------
     /// A format used to denote a Skia picture. A Skia picture is a serialized
     /// representation of an `SkPicture` that can be used to introspect the
@@ -373,6 +374,7 @@ class Rasterizer final : public SnapshotDelegate,
     /// is determined from the surface. This is the only way to read wide gamut
     /// color data, but isn't supported everywhere.
     SurfaceData,
+    // NOLINTEND(readability-identifier-naming)
   };
 
   //----------------------------------------------------------------------------
@@ -711,7 +713,7 @@ class Rasterizer final : public SnapshotDelegate,
   static bool ShouldResubmitFrame(const DoDrawResult& result);
   static DrawStatus ToDrawStatus(DoDrawStatus status);
 
-  bool is_torn_down_;
+  bool is_torn_down_ = false;
   Delegate& delegate_;
   MakeGpuImageBehavior gpu_image_behavior_;
   std::weak_ptr<impeller::Context> impeller_context_;
@@ -720,7 +722,7 @@ class Rasterizer final : public SnapshotDelegate,
   std::unique_ptr<flutter::CompositorContext> compositor_context_;
   std::unordered_map<int64_t, ViewRecord> view_records_;
   fml::closure next_frame_callback_;
-  bool user_override_resource_cache_bytes_;
+  bool user_override_resource_cache_bytes_ = false;
   std::optional<size_t> max_cache_bytes_;
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
   std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;

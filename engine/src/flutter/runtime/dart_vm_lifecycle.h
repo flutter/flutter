@@ -71,6 +71,7 @@ class DartVMRef {
     return vm_.get();
   }
 
+  // NOLINTNEXTLINE(google-runtime-operator)
   DartVM* operator&() {
     FML_DCHECK(vm_);
     return vm_.get();

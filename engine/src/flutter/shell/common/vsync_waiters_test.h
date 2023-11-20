@@ -7,6 +7,8 @@
 #ifndef FLUTTER_SHELL_COMMON_VSYNC_WAITERS_TEST_H_
 #define FLUTTER_SHELL_COMMON_VSYNC_WAITERS_TEST_H_
 
+#include <utility>
+
 #include "flutter/shell/common/shell.h"
 
 namespace flutter {
@@ -30,9 +32,9 @@ class ShellTestVsyncClock {
 
 class ShellTestVsyncWaiter : public VsyncWaiter {
  public:
-  ShellTestVsyncWaiter(TaskRunners task_runners,
+  ShellTestVsyncWaiter(const TaskRunners& task_runners,
                        std::shared_ptr<ShellTestVsyncClock> clock)
-      : VsyncWaiter(std::move(task_runners)), clock_(clock) {}
+      : VsyncWaiter(task_runners), clock_(std::move(clock)) {}
 
  protected:
   void AwaitVSync() override;
@@ -44,13 +46,13 @@ class ShellTestVsyncWaiter : public VsyncWaiter {
 class ConstantFiringVsyncWaiter : public VsyncWaiter {
  public:
   // both of these are set in the past so as to fire immediately.
-  static constexpr fml::TimePoint frame_begin_time =
+  static constexpr fml::TimePoint kFrameBeginTime =
       fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(0));
-  static constexpr fml::TimePoint frame_target_time =
+  static constexpr fml::TimePoint kFrameTargetTime =
       fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(100));
 
-  explicit ConstantFiringVsyncWaiter(TaskRunners task_runners)
-      : VsyncWaiter(std::move(task_runners)) {}
+  explicit ConstantFiringVsyncWaiter(const TaskRunners& task_runners)
+      : VsyncWaiter(task_runners) {}
 
  protected:
   void AwaitVSync() override;
