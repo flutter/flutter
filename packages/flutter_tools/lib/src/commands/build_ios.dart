@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -487,7 +488,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         ],
       );
     } finally {
-      generatedExportPlist?.deleteSync();
+      if (generatedExportPlist != null) {
+        ErrorHandlingFileSystem.deleteIfExists(generatedExportPlist);
+      }
       status?.stop();
     }
 
