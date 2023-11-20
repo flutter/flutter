@@ -53,6 +53,7 @@ class FullPageDimensionsProvider extends DimensionsProvider {
 
   @override
   void close() {
+    super.close();
     _domResizeSubscription.cancel();
     // ignore:unawaited_futures
     _onResizeStreamController.close();

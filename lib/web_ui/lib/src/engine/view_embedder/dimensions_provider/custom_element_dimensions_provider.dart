@@ -55,6 +55,7 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
 
   @override
   void close() {
+    super.close();
     _hostElementResizeObserver?.disconnect();
     // ignore:unawaited_futures
     _onResizeStreamController.close();
