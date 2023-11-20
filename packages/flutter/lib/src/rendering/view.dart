@@ -41,6 +41,19 @@ class ViewConfiguration {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
 
+  /// Transforms the provided [Size] in logical pixels to physical pixels.
+  ///
+  /// The [FlutterView.render] method accepts only sizes in physical pixels,
+  /// but the framework operates in logical pixels. This method is used to
+  /// transform the logical size calculated for a [RenderView] back to a
+  /// physical size suitable to be passed to [FlutterView.render].
+  ///
+  /// By default, this method just multiplies the provided [Size] with the
+  /// [devicePixelRatio].
+  Size toPhysicalSize(Size logicalSize) {
+    return logicalSize * devicePixelRatio;
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
@@ -266,9 +279,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      final Size physicalSize = size * configuration.devicePixelRatio;
-      assert(_view.physicalConstraints.isSatisfiedBy(physicalSize));
-      _view.render(scene, size: physicalSize);
+      assert(configuration.constraints.isSatisfiedBy(size));
+      _view.render(scene, size: configuration.toPhysicalSize(size));
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {

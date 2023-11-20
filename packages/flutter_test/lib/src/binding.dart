@@ -2117,6 +2117,7 @@ class TestViewConfiguration extends ViewConfiguration {
   /// The [size] defaults to 800x600.
   TestViewConfiguration.fromView({required ui.FlutterView view, Size size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
+        _physicalSize = view.physicalSize,
         super(devicePixelRatio: view.devicePixelRatio, constraints: ui.ViewConstraints.tight(size));
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
@@ -2147,6 +2148,11 @@ class TestViewConfiguration extends ViewConfiguration {
 
   @override
   Matrix4 toMatrix() => _paintMatrix.clone();
+
+  final Size _physicalSize;
+
+  @override
+  Size toPhysicalSize(Size logicalSize) => _physicalSize;
 
   @override
   String toString() => 'TestViewConfiguration';
