@@ -1391,7 +1391,7 @@ class ListView extends BoxScrollView {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property. None may be
   /// null.
   /// The `includeSeparatorForLastItem` argument determines whether to add
-  /// a separator after the last item or not. Defaults to `false`.
+  /// a separator after the last item or not. Defaults to false.
   ListView.separated({
     super.key,
     super.scrollDirection,
