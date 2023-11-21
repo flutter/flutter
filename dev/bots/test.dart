@@ -1580,9 +1580,10 @@ Future<void> _runCustomerTesting() async {
       workingDirectory: flutterRoot,
     );
   }
+  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
   await runCommand(
-    Platform.isWindows? 'powershell.exe': './ci.sh',
-    Platform.isWindows? <String>['ci.bat'] : <String>[],
+    Platform.isWindows? winScript: './ci.sh',
+    <String>[],
     workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
   );
 }
