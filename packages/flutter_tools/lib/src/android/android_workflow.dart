@@ -407,7 +407,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
       final int exitCode = await process.exitCode;
       if (exitCode != 0) {
-        throwToolExit(messageForSdkManagerError(_java!, _androidSdk, stderrLines, exitCode, _platform));
+        throwToolExit(_messageForSdkManagerError(stderrLines, exitCode));
       }
       return true;
     } on ProcessException catch (e) {
@@ -427,14 +427,11 @@ class AndroidLicenseValidator extends DoctorValidator {
     return _processManager.canRun(sdkManagerPath);
   }
 
-  String messageForSdkManagerError(
-    Java java,
-    AndroidSdk androidSdk,
+  String _messageForSdkManagerError(
     List<String> androidSdkStderr,
     int exitCode,
-    Platform platform,
   ) {
-    final String sdkManagerPath = androidSdk.sdkManagerPath!;
+    final String sdkManagerPath = _androidSdk!.sdkManagerPath!;
 
     final bool failedDueToJdkIncompatibility = androidSdkStderr.join().contains(
       RegExp(r'java\.lang\.UnsupportedClassVersionError.*SdkManagerCli '
@@ -442,7 +439,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     if (failedDueToJdkIncompatibility) {
       return 'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "exited code $exitCode".\n'
-        'It appears the version of the Java binary used (${java.binaryPath}) is '
+        'It appears the version of the Java binary used (${_java!.binaryPath}) is '
         'too out-of-date and is incompatible with the Android sdkmanager tool.\n'
         'If the Java binary came bundled with Android Studio, consider updating '
         'your installation of Android studio. Alternatively, you can uninstall '
