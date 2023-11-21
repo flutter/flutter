@@ -434,7 +434,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     int exitCode,
     Platform platform,
   ) {
-    final String sdkManagerPath = androidSdk.sdkManagerPath ?? '';
+    final String sdkManagerPath = androidSdk.sdkManagerPath!;
 
     final bool failedDueToJdkIncompatibility = androidSdkStderr.join().contains(
       RegExp(r'java\.lang\.UnsupportedClassVersionError.*SdkManagerCli '
@@ -448,10 +448,11 @@ class AndroidLicenseValidator extends DoctorValidator {
         'your installation of Android studio. Alternatively, you can uninstall '
         'the Android SDK command-line tools and install an earlier version. ';
     }
-    throwToolExit(_userMessages.androidCannotRunSdkManager(
+
+    return _userMessages.androidCannotRunSdkManager(
       sdkManagerPath,
       'exited code $exitCode',
       _platform,
-    ));
+    );
   }
 }
