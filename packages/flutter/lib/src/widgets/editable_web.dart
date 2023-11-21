@@ -430,6 +430,9 @@ class _EditableWebState extends State<EditableWeb> {
       ..direction = widget.textDirection.name
       ..lineHeight = '1.5'; // can this be modified by a property?
 
+    // Removes autofill overlay which clashes with Flutter styles
+    inputEl.classes.add('transparentTextEditing');
+
     // debug
     // if (widget.textInputConfiguration.obscureText) {
     //   inputEl.style.outline = '1px solid red'; // debug
@@ -720,34 +723,9 @@ class _EditableWebState extends State<EditableWeb> {
     }
   }
 
-  /*
-    Nice-to-have:
-      million inputs results in 1 form platform view created. 
-      will this have problems with laying out the inputs?
-  */
-
-  static Map<String, _EditableWebState>? formOwners = {};
-
   // single EditableWeb that is a form owner for both cases.
   @override
   Widget build(BuildContext context) {
-    // final String autofillScopeId = widget.currentAutofillScope?.id ?? _defaultId;
-
-    // if(formOwners[autofillScopeId] == null) {
-    //   // create form platform view
-    //   formOwners[autofillScopeId] = this;
-    // } else if(formOwners[autofillScopeId] == this) {
-    //   return HtmlElementView.fromTagName(
-    //     tagName: 'form',
-    //     onElementCreated: (Object element) {
-    //       // initalizeForm(element);
-    //       // initializePlatformView(element as html.HtmlElement);
-    //     },
-    //   );
-    // } else {
-    //   return Container();
-    // }
-
     return SizedBox(
       height: sizedBoxHeight,
       child: HtmlElementView.fromTagName(
@@ -868,6 +846,7 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void show() {
+    print('show being called');
     _currentInputElement!.focus();
   }
 
