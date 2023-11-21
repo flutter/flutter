@@ -64,146 +64,146 @@ class NativeAssets extends Target {
       await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
     }
     else {
-      final File packagesFile = fileSystem
-          .directory(projectUri)
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json');
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packagesFile,
-        logger: environment.logger,
-      );
-      final NativeAssetsBuildRunner buildRunner = _buildRunner ??
-          NativeAssetsBuildRunnerImpl(
-            projectUri,
-            packageConfig,
-            fileSystem,
-            environment.logger,
-          );
+    final File packagesFile = fileSystem
+        .directory(projectUri)
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packagesFile,
+      logger: environment.logger,
+    );
+    final NativeAssetsBuildRunner buildRunner = _buildRunner ??
+        NativeAssetsBuildRunnerImpl(
+          projectUri,
+          packageConfig,
+          fileSystem,
+          environment.logger,
+        );
 
-      switch (targetPlatform) {
-        case TargetPlatform.ios:
-          final String? iosArchsEnvironment = environment.defines[kIosArchs];
-          if (iosArchsEnvironment == null) {
-            throw MissingDefineException(kIosArchs, name);
-          }
-          final List<DarwinArch> iosArchs = iosArchsEnvironment.split(' ').map(getDarwinArchForName).toList();
-          final String? environmentBuildMode = environment.defines[kBuildMode];
-          if (environmentBuildMode == null) {
-            throw MissingDefineException(kBuildMode, name);
-          }
-          final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
-          final String? sdkRoot = environment.defines[kSdkRoot];
-          if (sdkRoot == null) {
-            throw MissingDefineException(kSdkRoot, name);
-          }
-          final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem)!;
-          dependencies = await buildNativeAssetsIOS(
-            environmentType: environmentType,
-            darwinArchs: iosArchs,
-            buildMode: buildMode,
-            projectUri: projectUri,
-            codesignIdentity: environment.defines[kCodesignIdentity],
-            fileSystem: fileSystem,
-            buildRunner: buildRunner,
-            yamlParentDirectory: environment.buildDir.uri,
-          );
-        case TargetPlatform.darwin:
-          final String? darwinArchsEnvironment = environment.defines[kDarwinArchs];
-          if (darwinArchsEnvironment == null) {
-            throw MissingDefineException(kDarwinArchs, name);
-          }
-          final List<DarwinArch> darwinArchs = darwinArchsEnvironment.split(' ').map(getDarwinArchForName).toList();
-          final String? environmentBuildMode = environment.defines[kBuildMode];
-          if (environmentBuildMode == null) {
-            throw MissingDefineException(kBuildMode, name);
-          }
-          final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+    switch (targetPlatform) {
+      case TargetPlatform.ios:
+        final String? iosArchsEnvironment = environment.defines[kIosArchs];
+        if (iosArchsEnvironment == null) {
+          throw MissingDefineException(kIosArchs, name);
+        }
+        final List<DarwinArch> iosArchs = iosArchsEnvironment.split(' ').map(getDarwinArchForName).toList();
+        final String? environmentBuildMode = environment.defines[kBuildMode];
+        if (environmentBuildMode == null) {
+          throw MissingDefineException(kBuildMode, name);
+        }
+        final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        final String? sdkRoot = environment.defines[kSdkRoot];
+        if (sdkRoot == null) {
+          throw MissingDefineException(kSdkRoot, name);
+        }
+        final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem)!;
+        dependencies = await buildNativeAssetsIOS(
+          environmentType: environmentType,
+          darwinArchs: iosArchs,
+          buildMode: buildMode,
+          projectUri: projectUri,
+          codesignIdentity: environment.defines[kCodesignIdentity],
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+          yamlParentDirectory: environment.buildDir.uri,
+        );
+      case TargetPlatform.darwin:
+        final String? darwinArchsEnvironment = environment.defines[kDarwinArchs];
+        if (darwinArchsEnvironment == null) {
+          throw MissingDefineException(kDarwinArchs, name);
+        }
+        final List<DarwinArch> darwinArchs = darwinArchsEnvironment.split(' ').map(getDarwinArchForName).toList();
+        final String? environmentBuildMode = environment.defines[kBuildMode];
+        if (environmentBuildMode == null) {
+          throw MissingDefineException(kBuildMode, name);
+        }
+        final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        (_, dependencies) = await buildNativeAssetsMacOS(
+          darwinArchs: darwinArchs,
+          buildMode: buildMode,
+          projectUri: projectUri,
+          codesignIdentity: environment.defines[kCodesignIdentity],
+          yamlParentDirectory: environment.buildDir.uri,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+        final String? environmentBuildMode = environment.defines[kBuildMode];
+        if (environmentBuildMode == null) {
+          throw MissingDefineException(kBuildMode, name);
+        }
+        final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        (_, dependencies) = await buildNativeAssetsLinux(
+          targetPlatform: targetPlatform,
+          buildMode: buildMode,
+          projectUri: projectUri,
+          yamlParentDirectory: environment.buildDir.uri,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
+      case TargetPlatform.windows_x64:
+        final String? environmentBuildMode = environment.defines[kBuildMode];
+        if (environmentBuildMode == null) {
+          throw MissingDefineException(kBuildMode, name);
+        }
+        final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        (_, dependencies) = await buildNativeAssetsWindows(
+          targetPlatform: targetPlatform,
+          buildMode: buildMode,
+          projectUri: projectUri,
+          yamlParentDirectory: environment.buildDir.uri,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
+      case TargetPlatform.tester:
+        if (const LocalPlatform().isMacOS) {
           (_, dependencies) = await buildNativeAssetsMacOS(
-            darwinArchs: darwinArchs,
-            buildMode: buildMode,
+            buildMode: BuildMode.debug,
             projectUri: projectUri,
             codesignIdentity: environment.defines[kCodesignIdentity],
             yamlParentDirectory: environment.buildDir.uri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            flutterTester: true,
           );
-        case TargetPlatform.linux_arm64:
-        case TargetPlatform.linux_x64:
-          final String? environmentBuildMode = environment.defines[kBuildMode];
-          if (environmentBuildMode == null) {
-            throw MissingDefineException(kBuildMode, name);
-          }
-          final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        } else if (const LocalPlatform().isLinux) {
           (_, dependencies) = await buildNativeAssetsLinux(
-            targetPlatform: targetPlatform,
-            buildMode: buildMode,
+            buildMode: BuildMode.debug,
             projectUri: projectUri,
             yamlParentDirectory: environment.buildDir.uri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            flutterTester: true,
           );
-        case TargetPlatform.windows_x64:
-          final String? environmentBuildMode = environment.defines[kBuildMode];
-          if (environmentBuildMode == null) {
-            throw MissingDefineException(kBuildMode, name);
-          }
-          final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        } else if (const LocalPlatform().isWindows) {
           (_, dependencies) = await buildNativeAssetsWindows(
-            targetPlatform: targetPlatform,
-            buildMode: buildMode,
+            buildMode: BuildMode.debug,
             projectUri: projectUri,
             yamlParentDirectory: environment.buildDir.uri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            flutterTester: true,
           );
-        case TargetPlatform.tester:
-          if (const LocalPlatform().isMacOS) {
-            (_, dependencies) = await buildNativeAssetsMacOS(
-              buildMode: BuildMode.debug,
-              projectUri: projectUri,
-              codesignIdentity: environment.defines[kCodesignIdentity],
-              yamlParentDirectory: environment.buildDir.uri,
-              fileSystem: fileSystem,
-              buildRunner: buildRunner,
-              flutterTester: true,
-            );
-          } else if (const LocalPlatform().isLinux) {
-            (_, dependencies) = await buildNativeAssetsLinux(
-              buildMode: BuildMode.debug,
-              projectUri: projectUri,
-              yamlParentDirectory: environment.buildDir.uri,
-              fileSystem: fileSystem,
-              buildRunner: buildRunner,
-              flutterTester: true,
-            );
-          } else if (const LocalPlatform().isWindows) {
-            (_, dependencies) = await buildNativeAssetsWindows(
-              buildMode: BuildMode.debug,
-              projectUri: projectUri,
-              yamlParentDirectory: environment.buildDir.uri,
-              fileSystem: fileSystem,
-              buildRunner: buildRunner,
-              flutterTester: true,
-            );
-          } else {
-            // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
-            // Write the file we claim to have in the [outputs].
-            await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
-            dependencies = <Uri>[];
-          }
-        case TargetPlatform.android_arm:
-        case TargetPlatform.android_arm64:
-        case TargetPlatform.android_x64:
-        case TargetPlatform.android_x86:
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia_arm64:
-        case TargetPlatform.fuchsia_x64:
-        case TargetPlatform.web_javascript:
+        } else {
           // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
           // Write the file we claim to have in the [outputs].
           await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
           dependencies = <Uri>[];
-      }
+        }
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.web_javascript:
+        // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
+        // Write the file we claim to have in the [outputs].
+        await writeNativeAssetsYaml(<Asset>[], environment.buildDir.uri, fileSystem);
+        dependencies = <Uri>[];
+    }
     }
 
     final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
