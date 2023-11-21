@@ -20,7 +20,6 @@ import '../../globals.dart' as globals;
 import '../../html_utils.dart';
 import '../../project.dart';
 import '../../web/compile.dart';
-import '../../web/file_generators/flutter_js.dart' as flutter_js;
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
 import '../../web/file_generators/wasm_bootstrap.dart' as wasm_bootstrap;
@@ -525,11 +524,12 @@ class WebBuiltInAssets extends Target {
     }
 
     // Write the flutter.js file
-    final File flutterJsFile = environment.outputDir.childFile('flutter.js');
-    final String fileGeneratorsPath =
-        environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
-    flutterJsFile.writeAsStringSync(
-        flutter_js.generateFlutterJsFile(fileGeneratorsPath));
+    final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, 'flutter.js');
+    final File flutterJsFile = fileSystem.file(fileSystem.path.join(
+      globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+      'flutter.js',
+    ));
+    flutterJsFile.copySync(flutterJsOut);
   }
 }
 
