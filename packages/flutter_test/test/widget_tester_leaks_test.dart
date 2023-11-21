@@ -16,10 +16,10 @@ late final String _test4TrackingOnWithCreationStackTrace;
 late final String _test5TrackingOnWithDisposalStackTrace;
 
 void main() {
-  late final Leaks reportedLeaks;
-  collectedLeaksReporter = (Leaks leaks) => reportedLeaks = leaks;
+  collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
   LeakTesting.settings = LeakTesting.settings.copyWith(ignoredLeaks: const IgnoredLeaks(), ignore: false);
 
+  // It is important that the test file starts with group, to test that leaks are collected for all tests after group too.
   group('Group', () {
     testWidgets('test', (_) async {
       StatelessLeakingWidget();
@@ -71,58 +71,59 @@ void main() {
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     },
   );
+}
 
-  // `withRetainingPath` is tested in leak tracker, because it requires a flag to enable vm.
-  // TODO(polina-c): link the test in leak_tracker
-  // https://github.com/flutter/flutter/issues/135856#issuecomment-1806560080
+bool _leakReporterIsInvoked = false;
 
-  tearDownAll(() {
-    try {
-      expect(reportedLeaks, isLeakFree);
-    } catch (e) {
-      if (e is! TestFailure) {
-        rethrow;
-      }
-      expect(e.message, contains('https://github.com/dart-lang/leak_tracker'));
+void verifyLeaks(Leaks leaks) {
+  expect(_leakReporterIsInvoked, false);
+  _leakReporterIsInvoked = true;
 
-      expect(e.message, isNot(contains(_test1TrackingOnNoLeaks)));
-      expect(e.message, isNot(contains(_test2TrackingOffLeaks)));
-      expect(e.message, contains('test: $_test3TrackingOnLeaks'));
-      expect(e.message, contains('test: $_test4TrackingOnWithCreationStackTrace'));
-      expect(e.message, contains('test: $_test5TrackingOnWithDisposalStackTrace'));
+  try {
+    expect(leaks, isLeakFree);
+  } catch (e) {
+    if (e is! TestFailure) {
+      rethrow;
     }
+    expect(e.message, contains('https://github.com/dart-lang/leak_tracker'));
 
-    _verifyLeaks(
-      reportedLeaks,
-      _test3TrackingOnLeaks,
-      notDisposed: 1,
-      notGCed: 1,
-      expectedContextKeys: <LeakType, List<String>>{
-        LeakType.notGCed: <String>[],
-        LeakType.notDisposed: <String>[],
-      },
-    );
-    _verifyLeaks(
-      reportedLeaks,
-      _test4TrackingOnWithCreationStackTrace,
-      notDisposed: 1,
-      notGCed: 1,
-      expectedContextKeys: <LeakType, List<String>>{
-        LeakType.notGCed: <String>['start'],
-        LeakType.notDisposed: <String>['start'],
-      },
-    );
-    _verifyLeaks(
-      reportedLeaks,
-      _test5TrackingOnWithDisposalStackTrace,
-      notDisposed: 1,
-      notGCed: 1,
-      expectedContextKeys: <LeakType, List<String>>{
-        LeakType.notGCed: <String>['disposal'],
-        LeakType.notDisposed: <String>[],
-      },
-    );
-  });
+    expect(e.message, isNot(contains(_test1TrackingOnNoLeaks)));
+    expect(e.message, isNot(contains(_test2TrackingOffLeaks)));
+    expect(e.message, contains('test: $_test3TrackingOnLeaks'));
+    expect(e.message, contains('test: $_test4TrackingOnWithCreationStackTrace'));
+    expect(e.message, contains('test: $_test5TrackingOnWithDisposalStackTrace'));
+  }
+
+  _verifyLeaks(
+    leaks,
+    _test3TrackingOnLeaks,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>[],
+      LeakType.notDisposed: <String>[],
+    },
+  );
+  _verifyLeaks(
+    leaks,
+    _test4TrackingOnWithCreationStackTrace,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>['start'],
+      LeakType.notDisposed: <String>['start'],
+    },
+  );
+  _verifyLeaks(
+    leaks,
+    _test5TrackingOnWithDisposalStackTrace,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>['disposal'],
+      LeakType.notDisposed: <String>[],
+    },
+  );
 }
 
 /// Verifies [allLeaks] contains expected number of leaks for the test [testName].
@@ -135,6 +136,7 @@ void _verifyLeaks(
   int notGCed = 0,
   Map<LeakType, List<String>> expectedContextKeys = const <LeakType, List<String>>{},
 }) {
+
   const String linkToLeakTracker = 'https://github.com/dart-lang/leak_tracker';
 
   final Leaks testLeaks = Leaks(
