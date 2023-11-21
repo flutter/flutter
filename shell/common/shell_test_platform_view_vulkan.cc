@@ -76,8 +76,7 @@ ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
     fml::RefPtr<vulkan::VulkanProcTable> vk,
     std::shared_ptr<ShellTestExternalViewEmbedder>
         shell_test_external_view_embedder)
-    : valid_(false),
-      vk_(std::move(vk)),
+    : vk_(std::move(vk)),
       shell_test_external_view_embedder_(
           std::move(shell_test_external_view_embedder)) {
   if (!vk_ || !vk_->HasAcquiredMandatoryProcAddresses()) {
