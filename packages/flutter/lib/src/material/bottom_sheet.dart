@@ -296,7 +296,7 @@ class _BottomSheetState extends State<BottomSheet> {
       dragHandleMaterialState.remove(MaterialState.dragged);
     });
     bool isClosing = false;
-    if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
+    if (details.velocity.pixelsPerSecond.dy.abs() > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (widget.animationController!.value > 0.0) {
         widget.animationController!.fling(velocity: flingVelocity);
