@@ -705,6 +705,11 @@ class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
 
   @override
   T resolve(Set<MaterialState> states) => _resolve(states);
+
+  @override
+  String toString() {
+    return 'MaterialStateProperty.resolveWith<$T>()';
+  }
 }
 
 /// Convenience class for creating a [MaterialStateProperty] that

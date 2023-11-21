@@ -16,9 +16,10 @@ void main() {
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byIcon(Icons.navigation), findsOneWidget);
 
-    RawMaterialButton getRawMaterialButtonWidget() {
-      return tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-    }
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(ElevatedButton),
+      matching: find.byType(Material),
+    ));
 
     Color? getIconColor() {
       final RichText iconRichText = tester.widget<RichText>(
@@ -29,17 +30,22 @@ void main() {
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle(); // Wait for the animation to finish.
-    expect(getRawMaterialButtonWidget().fillColor, Colors.green);
+    expect(material.color, const Color(0xffeaddff));
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle(); // Wait for the animation to finish.
-    expect(getRawMaterialButtonWidget().fillColor, Colors.green);
+    expect(material.color, const Color(0xffeaddff));
     expect(getIconColor(), Colors.white);
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle(); // Wait for the animation to finish.
-    expect(getRawMaterialButtonWidget().fillColor, Colors.green);
+    expect(material.color, const Color(0xffeaddff));
     expect(getIconColor(), Colors.white);
-    expect(getRawMaterialButtonWidget().shape, const CircleBorder());
+    expect(
+      material.shape,
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+    );
   });
 }

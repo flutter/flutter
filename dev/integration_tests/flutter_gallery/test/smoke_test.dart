@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 const String kGalleryTitle = 'Flutter gallery';
 
 // All of the classes printed by debugDump etc, must have toString()
-// values approved by verityToStringOutput().
+// values approved by verifyToStringOutput().
 int toStringErrors = 0;
 
 // There are 3 places where the Gallery demos are traversed.
@@ -33,7 +33,7 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
   const int margin = 5;
   final int firstLine = math.max(0, lineNumber - margin);
   final int lastLine = math.min(lines.length, lineNumber + margin);
-  print('$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
+  print('$name : $route : line $lineNumber of ${lines.length} : $message; Offending line was:\n${lines[lineNumber]}\nNearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
   toStringErrors += 1;
 }
 

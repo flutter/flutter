@@ -626,7 +626,7 @@ class InkResponse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
-    return _InkResponseStateWidget(
+    final _InkResponseStateWidget stateWidget = _InkResponseStateWidget(
       onTap: onTap,
       onTapDown: onTapDown,
       onTapUp: onTapUp,
@@ -664,6 +664,8 @@ class InkResponse extends StatelessWidget {
       hoverDuration: hoverDuration,
       child: child,
     );
+    debugPrint('_InkResponseStateWidget: ${stateWidget.toStringDeep()}');
+    return stateWidget;
   }
 
   /// Asserts that the given context satisfies the prerequisites for
@@ -785,6 +787,14 @@ class _InkResponseStateWidget extends StatefulWidget {
       description: '${containedInkWell ? "clipped to " : ""}$highlightShape',
       showName: false,
     ));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
+    properties.add(ColorProperty('overlayColor', overlayColor?.resolve(<MaterialState>{}), defaultValue: null));
+    properties.add(ColorProperty('overlayColor(pressed)', overlayColor?.resolve(<MaterialState>{MaterialState.pressed}), defaultValue: null));
+    properties.add(ColorProperty('overlayColor(hovered)', overlayColor?.resolve(<MaterialState>{MaterialState.hovered}), defaultValue: null));
+    properties.add(ColorProperty('overlayColor(focused)', overlayColor?.resolve(<MaterialState>{MaterialState.focused}), defaultValue: null));
   }
 }
 
@@ -995,6 +1005,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
           }
         }
+        debugPrint('resolvedOverlayColor: $resolvedOverlayColor');
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
@@ -1295,6 +1306,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
+    debugPrint('Building $widget');
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     Color getHighlightColorForType(_HighlightType type) {
@@ -1317,9 +1329,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
     for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
+      debugPrint('InkWell[${type.name}]: ${_highlights[type]?.color}');
     }
 
     _currentSplash?.color = widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;
+    debugPrint('InkWell current splash: ${_currentSplash?.color}');
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,

@@ -8,8 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
 import 'color_scheme.dart';
+import 'constants.dart';
+import 'elevated_button.dart';
 import 'floating_action_button_theme.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
@@ -398,9 +399,7 @@ class FloatingActionButton extends StatelessWidget {
   /// By default, floating action buttons are non-mini and have a height and
   /// width of 56.0 logical pixels. Mini floating action buttons have a height
   /// and width of 40.0 logical pixels with a layout width and height of 48.0
-  /// logical pixels. (The extra 4 pixels of padding on each side are added as a
-  /// result of the floating action button having [MaterialTapTargetSize.padded]
-  /// set on the underlying [RawMaterialButton.materialTapTargetSize].)
+  /// logical pixels.
   final bool mini;
 
   /// The shape of the button's [Material].
@@ -570,27 +569,76 @@ class FloatingActionButton extends StatelessWidget {
         );
     }
 
-    Widget result = RawMaterialButton(
+    // If the shape is an OutlinedBorder, then apply it using the ButtonStyle.
+    // If not, then apply it to the child with a DecoratedBox.
+    final Widget? decoratedChild = shape is! OutlinedBorder
+      ? DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: ShapeDecoration(shape: shape),
+          child: resolvedChild)
+      : resolvedChild;
+
+    debugPrint('splashColor: $splashColor');
+
+    final MaterialStateProperty<Color?> resolvedOverlayColor = MaterialStateProperty.resolveWith(
+      (Set<MaterialState> states) {
+        if (states.contains(MaterialState.pressed)) {
+          return splashColor;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return hoverColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return focusColor;
+        }
+        return null;
+      },
+    );
+
+    final MaterialStateProperty<double> resolvedElevation = MaterialStateProperty.resolveWith(
+      (Set<MaterialState> states) {
+          if (states.contains(MaterialState.disabled)) {
+            return disabledElevation;
+          }
+          if (states.contains(MaterialState.pressed)) {
+            return highlightElevation;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return hoverElevation;
+          }
+          if (states.contains(MaterialState.focused)) {
+            return focusElevation;
+          }
+          return elevation;
+      },
+    );
+
+    Widget result = ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: foregroundColor,
+        backgroundColor: backgroundColor,
+        textStyle: extendedTextStyle,
+        padding: EdgeInsets.zero,
+        minimumSize: Size(sizeConstraints.minWidth, sizeConstraints.minHeight),
+        maximumSize: Size(sizeConstraints.maxWidth, sizeConstraints.maxHeight),
+        shape: shape is! OutlinedBorder ? const RoundedRectangleBorder() : shape,
+        tapTargetSize: materialTapTargetSize,
+        animationDuration: kThemeChangeDuration,
+        enableFeedback: enableFeedback,
+      ).copyWith(
+        overlayColor: resolvedOverlayColor,
+        elevation: resolvedElevation,
+        mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            return MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
+                ?? floatingActionButtonTheme.mouseCursor?.resolve(states)
+                ?? MaterialStateMouseCursor.clickable.resolve(states);
+          }),
+        ),
       onPressed: onPressed,
-      mouseCursor: _EffectiveMouseCursor(mouseCursor, floatingActionButtonTheme.mouseCursor),
-      elevation: elevation,
-      focusElevation: focusElevation,
-      hoverElevation: hoverElevation,
-      highlightElevation: highlightElevation,
-      disabledElevation: disabledElevation,
-      constraints: sizeConstraints,
-      materialTapTargetSize: materialTapTargetSize,
-      fillColor: backgroundColor,
-      focusColor: focusColor,
-      hoverColor: hoverColor,
-      splashColor: splashColor,
-      textStyle: extendedTextStyle,
-      shape: shape,
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
-      enableFeedback: enableFeedback,
-      child: resolvedChild,
+      child: decoratedChild,
     );
 
     if (tooltip != null) {
@@ -631,26 +679,6 @@ class FloatingActionButton extends StatelessWidget {
     properties.add(FlagProperty('isExtended', value: isExtended, ifTrue: 'extended'));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
-}
-
-// This MaterialStateProperty is passed along to RawMaterialButton which
-// resolves the property against MaterialState.pressed, MaterialState.hovered,
-// MaterialState.focused, MaterialState.disabled.
-class _EffectiveMouseCursor extends MaterialStateMouseCursor {
-  const _EffectiveMouseCursor(this.widgetCursor, this.themeCursor);
-
-  final MouseCursor? widgetCursor;
-  final MaterialStateProperty<MouseCursor?>? themeCursor;
-
-  @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states)
-      ?? themeCursor?.resolve(states)
-      ?? MaterialStateMouseCursor.clickable.resolve(states);
-  }
-
-  @override
-  String get debugDescription => 'MaterialStateMouseCursor(FloatActionButton)';
 }
 
 // This widget's size matches its child's size unless its constraints

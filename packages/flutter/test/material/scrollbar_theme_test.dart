@@ -717,18 +717,18 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description, <String>[
-      "thumbVisibility: Instance of '_MaterialStatePropertyWith<bool?>'",
-      "thickness: Instance of '_MaterialStatePropertyWith<double?>'",
+    expect(description, equals(<String>[
+      'thumbVisibility: MaterialStateProperty.resolveWith<bool?>()',
+      'thickness: MaterialStateProperty.resolveWith<double?>()',
       'showTrackOnHover: true',
       'radius: Radius.circular(3.0)',
-      "thumbColor: Instance of '_MaterialStatePropertyWith<Color?>'",
-      "trackColor: Instance of '_MaterialStatePropertyWith<Color?>'",
-      "trackBorderColor: Instance of '_MaterialStatePropertyWith<Color?>'",
+      'thumbColor: MaterialStateProperty.resolveWith<Color?>()',
+      'trackColor: MaterialStateProperty.resolveWith<Color?>()',
+      'trackBorderColor: MaterialStateProperty.resolveWith<Color?>()',
       'crossAxisMargin: 3.0',
       'mainAxisMargin: 6.0',
       'minThumbLength: 120.0',
-    ]);
+    ]));
 
     // On the web, Dart doubles and ints are backed by the same kind of object because
     // JavaScript does not support integers. So, the Dart double "4.0" is identical

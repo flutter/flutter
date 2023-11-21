@@ -110,20 +110,20 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
-      'color: Color(0xfffffff1)',
+    expect(description, equals(<String>[
+      'color: Color(0xffffffff)',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'elevation: 2.0',
       'shadowColor: Color(0xfffffff2)',
       'surfaceTintColor: Color(0xfffffff3)',
       'text style: TextStyle(inherit: true, color: Color(0xfffffff4))',
-      "labelTextStyle: Instance of '_MaterialStatePropertyWith<TextStyle?>'",
+      'labelTextStyle: MaterialStateProperty.resolveWith<TextStyle?>()',
       'enableFeedback: false',
       'mouseCursor: MaterialStateMouseCursor(clickable)',
       'position: over',
       'iconColor: Color(0xfffffff8)',
       'iconSize: 31.0'
-    ]);
+    ]));
   });
 
   testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
