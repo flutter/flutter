@@ -466,15 +466,15 @@ void main() {
     expect(updateDelta, const Offset(20.0, 0.0));
   });
 
-  testGesture('Drag with multiple pointers in down behavior - trackAllActivePointers', (GestureTester tester) {
+  testGesture('Drag with multiple pointers in down behavior - sumAllPointers', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 =
       HorizontalDragGestureRecognizer()
         ..dragStartBehavior = DragStartBehavior.down
-        ..multitouchDragStrategy = MultitouchDragStrategy.trackAllActivePointers;
+        ..multitouchDragStrategy = MultitouchDragStrategy.sumAllPointers;
     final VerticalDragGestureRecognizer drag2 =
       VerticalDragGestureRecognizer()
         ..dragStartBehavior = DragStartBehavior.down
-        ..multitouchDragStrategy = MultitouchDragStrategy.trackAllActivePointers;
+        ..multitouchDragStrategy = MultitouchDragStrategy.sumAllPointers;
     addTearDown(() => drag1.dispose);
     addTearDown(() => drag2.dispose);
 
@@ -511,7 +511,7 @@ void main() {
     tester.route(down6);
     log.add('-d');
 
-    // Check all active pointers can trigger 'drag1-update'
+    // Check all active pointers can trigger 'drag1-update'.
 
     tester.route(pointer5.move(const Offset(0.0, 100.0)));
     log.add('-e');
@@ -592,27 +592,27 @@ void main() {
     tester.route(down6);
     log.add('-d');
 
-    // Current latest active pointer is pointer6
+    // Current latest active pointer is pointer6.
 
-    // Should not trigger the drag1-update
+    // Should not trigger the drag1-update.
     tester.route(pointer5.move(const Offset(0.0, 100.0)));
     log.add('-e');
     tester.route(pointer5.move(const Offset(70.0, 70.0)));
     log.add('-f');
 
-    // Latest active pointer can trigger the drag1-update
+    // Latest active pointer can trigger the drag1-update.
     tester.route(pointer6.move(const Offset(0.0, 100.0)));
     log.add('-g');
     tester.route(pointer6.move(const Offset(70.0, 70.0)));
     log.add('-h');
 
-    // Release the latest active pointer
+    // Release the latest active pointer.
     tester.route(pointer6.up());
     log.add('-i');
 
-    // Current latest active pointer is pointer5
+    // Current latest active pointer is pointer5.
 
-    // Latest active pointer can trigger the drag1-update
+    // Latest active pointer can trigger the drag1-update.
     tester.route(pointer5.move(const Offset(0.0, 100.0)));
     log.add('-j');
     tester.route(pointer5.move(const Offset(70.0, 70.0)));

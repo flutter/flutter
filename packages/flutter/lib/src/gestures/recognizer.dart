@@ -48,27 +48,28 @@ enum DragStartBehavior {
   start,
 }
 
-/// Configuration of multi-finger drag strategy on the multi-touch devices.
+/// Configuration of multi-finger drag strategy on multi-touch devices.
 ///
 /// When dragging with only one finger, there's no difference in behavior
 /// between the two settings.
 ///
 /// Used by [DragGestureRecognizer.multitouchDragStrategy].
 enum MultitouchDragStrategy {
-  /// Only the latest active point is tracked by the recognizer.
+  /// Only the latest active pointer is tracked by the recognizer.
   ///
   /// If the tracked pointer is released, the latest of the remaining active
   /// pointers will continue to be tracked.
   ///
   /// This is the behavior typically seen on Android.
-  trackLatestActivePointer,
+  latestPointer,
 
-  /// All active pointers will be tracked individually.
+  /// All active pointers will be tracked together. The scrolling offset
+  /// is the sum of the offsets of all active pointers.
   ///
   /// When a [Scrollable] drives scrolling by this drag strategy, the scrolling
   /// speed will be doubled or triple, depending on how many fingers are dragging
   /// at the same time.
-  trackAllActivePointers,
+  sumAllPointers,
 }
 
 /// Signature for `allowedButtonsFilter` in [GestureRecognizer].

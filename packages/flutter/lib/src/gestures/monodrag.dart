@@ -74,7 +74,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragGestureRecognizer({
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.multitouchDragStrategy = MultitouchDragStrategy.trackLatestActivePointer,
+    this.multitouchDragStrategy = MultitouchDragStrategy.latestPointer,
     this.velocityTrackerBuilder = _defaultBuilder,
     this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
@@ -113,16 +113,18 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   DragStartBehavior dragStartBehavior;
 
   /// {@template flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
-  /// Configuration the multi-finger drag strategy on the multi-touch devices.
+  /// Configure the multi-finger drag strategy on multi-touch devices.
   ///
-  /// If set to [MultitouchDragStrategy.trackLatestActivePointer], the drag gesture recognizer
+  /// If set to [MultitouchDragStrategy.latestPointer], the drag gesture recognizer
   /// will only track the latest active(accepted by this recognizer) pointer, which
-  /// appears to be only one finger dragging. If set to [MultitouchDragStrategy.trackAllActivePointers],
-  /// all active pointers will be tracked individually and every finger drag
-  /// will take effect.
+  /// appears to be only one finger dragging.
+  ///
+  /// If set to [MultitouchDragStrategy.sumAllPointers],
+  /// all active pointers will be tracked together and the scrolling offset
+  /// is the sum of the offsets of all active pointers
   /// {@endtemplate}
   ///
-  /// By default, the strategy is [MultitouchDragStrategy.trackLatestActivePointer].
+  /// By default, the strategy is [MultitouchDragStrategy.latestPointer].
   ///
   /// See also:
   ///
@@ -381,9 +383,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   bool _shouldTrackMoveEvent(int pointer) {
     final bool result;
     switch (multitouchDragStrategy) {
-      case MultitouchDragStrategy.trackAllActivePointers:
+      case MultitouchDragStrategy.sumAllPointers:
         result = true;
-      case MultitouchDragStrategy.trackLatestActivePointer:
+      case MultitouchDragStrategy.latestPointer:
         result = _acceptedActivePointers.length <= 1 || pointer == _acceptedActivePointers.last;
     }
     return result;

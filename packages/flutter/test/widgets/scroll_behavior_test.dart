@@ -158,7 +158,7 @@ void main() {
   testWidgetsWithLeakTracking('ScrollBehavior multitouchDragStrategy test', (WidgetTester tester) async {
     const ScrollBehavior behavior1 = ScrollBehavior();
     final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
-      multitouchDragStrategy: MultitouchDragStrategy.trackAllActivePointers
+      multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers
     );
     final ScrollController controller = ScrollController();
     addTearDown(() => controller.dispose());
