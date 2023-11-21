@@ -108,7 +108,7 @@ class AndroidEGLSurface {
   const EGLDisplay display_;
   const EGLContext context_;
   std::unique_ptr<AndroidEGLSurfaceDamage> damage_;
-  PFNEGLPRESENTATIONTIMEANDROIDPROC presentation_time_proc_;
+  PFNEGLPRESENTATIONTIMEANDROIDPROC presentation_time_proc_ = nullptr;
 };
 
 }  // namespace flutter

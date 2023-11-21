@@ -16,7 +16,7 @@ namespace flutter {
 /// A |Display| that listens to refresh rate changes.
 class AndroidDisplay : public Display {
  public:
-  AndroidDisplay(std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+  explicit AndroidDisplay(std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
   ~AndroidDisplay() = default;
 
   // |Display|

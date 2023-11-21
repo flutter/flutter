@@ -71,7 +71,6 @@ AndroidContextGLSkia::AndroidContextGLSkia(
     uint8_t msaa_samples)
     : AndroidContext(AndroidRenderingAPI::kOpenGLES),
       environment_(std::move(environment)),
-      config_(nullptr),
       task_runners_(task_runners) {
   if (!environment_->IsValid()) {
     FML_LOG(ERROR) << "Could not create an Android GL environment.";

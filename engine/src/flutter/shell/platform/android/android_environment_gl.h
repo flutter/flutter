@@ -28,7 +28,7 @@ class AndroidEnvironmentGL
 
  private:
   EGLDisplay display_;
-  bool valid_;
+  bool valid_ = false;
 
   FML_FRIEND_MAKE_REF_COUNTED(AndroidEnvironmentGL);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(AndroidEnvironmentGL);

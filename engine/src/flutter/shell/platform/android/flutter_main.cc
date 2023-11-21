@@ -59,7 +59,7 @@ fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 }  // anonymous namespace
 
 FlutterMain::FlutterMain(const flutter::Settings& settings)
-    : settings_(settings), vm_service_uri_callback_() {}
+    : settings_(settings) {}
 
 FlutterMain::~FlutterMain() = default;
 

@@ -25,7 +25,7 @@ class FlutterMain {
 
  private:
   const flutter::Settings settings_;
-  DartServiceIsolate::CallbackHandle vm_service_uri_callback_;
+  DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
 
   explicit FlutterMain(const flutter::Settings& settings);
 
