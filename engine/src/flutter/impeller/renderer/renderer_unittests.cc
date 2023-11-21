@@ -33,6 +33,7 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
+#include "impeller/renderer/render_target.h"
 #include "impeller/renderer/renderer.h"
 #include "impeller/renderer/sampler_library.h"
 #include "impeller/renderer/surface.h"
@@ -1255,6 +1256,21 @@ TEST_P(RendererTest, StencilMask) {
     return true;
   };
   OpenPlaygroundHere(callback);
+}
+
+TEST_P(RendererTest, CanPreAllocateCommands) {
+  auto context = GetContext();
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto render_target_cache = std::make_shared<RenderTargetAllocator>(
+      GetContext()->GetResourceAllocator());
+
+  auto render_target =
+      RenderTarget::CreateOffscreen(*context, *render_target_cache, {100, 100});
+  auto render_pass = cmd_buffer->CreateRenderPass(render_target);
+
+  render_pass->ReserveCommands(100u);
+
+  EXPECT_EQ(render_pass->GetCommands().capacity(), 100u);
 }
 
 }  // namespace testing

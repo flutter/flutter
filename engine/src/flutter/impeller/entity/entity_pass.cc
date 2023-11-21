@@ -835,8 +835,9 @@ bool EntityPass::OnRender(
   TRACE_EVENT0("impeller", "EntityPass::OnRender");
 
   auto context = renderer.GetContext();
-  InlinePassContext pass_context(
-      context, pass_target, GetTotalPassReads(renderer), collapsed_parent_pass);
+  InlinePassContext pass_context(context, pass_target,
+                                 GetTotalPassReads(renderer), GetElementCount(),
+                                 collapsed_parent_pass);
   if (!pass_context.IsValid()) {
     VALIDATION_LOG << SPrintF("Pass context invalid (Depth=%d)", pass_depth);
     return false;
