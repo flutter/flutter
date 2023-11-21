@@ -437,8 +437,8 @@ class AndroidLicenseValidator extends DoctorValidator {
     final String sdkManagerPath = androidSdk.sdkManagerPath ?? '';
 
     final bool failedDueToJdkIncompatibility = androidSdkStderr.join().contains(
-      RegExp(r'.*java\.lang\.UnsupportedClassVersionError.*SdkManagerCli '
-        r'has been compiled by a more recent version of the Java Runtime.*'));
+      RegExp(r'java\.lang\.UnsupportedClassVersionError.*SdkManagerCli '
+        r'has been compiled by a more recent version of the Java Runtime'));
 
     if (failedDueToJdkIncompatibility) {
       return 'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "exited code $exitCode".\n'
