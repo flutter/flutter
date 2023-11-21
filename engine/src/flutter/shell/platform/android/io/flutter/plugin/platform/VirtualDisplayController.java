@@ -10,6 +10,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
@@ -128,6 +129,16 @@ class VirtualDisplayController {
   }
 
   public void resize(final int width, final int height, final Runnable onNewSizeFrameAvailable) {
+    // When 'hot reload', although the resize method is triggered, the size of the native View has
+    // not changed.
+    if (width == getRenderTargetWidth() && height == getRenderTargetHeight()) {
+      getView().postDelayed(onNewSizeFrameAvailable, 0);
+      return;
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      resize31(getView(), width, height, onNewSizeFrameAvailable);
+      return;
+    }
     boolean isFocused = getView().isFocused();
     final SingleViewPresentation.PresentationState presentationState = presentation.detachState();
     // We detach the surface to prevent it being destroyed when releasing the vd.
@@ -197,6 +208,15 @@ class VirtualDisplayController {
     presentation.detachState();
     virtualDisplay.release();
     renderTarget.release();
+  }
+
+  @TargetApi(31)
+  private void resize31(
+      View embeddedView, int width, int height, final Runnable onNewSizeFrameAvailable) {
+    renderTarget.resize(width, height);
+    // On Android versions 31+ resizing of a Virtual Display's Presentation is natively supported.
+    virtualDisplay.resize(width, height, densityDpi);
+    embeddedView.postDelayed(onNewSizeFrameAvailable, 0);
   }
 
   /** See {@link PlatformView#onFlutterViewAttached(View)} */
