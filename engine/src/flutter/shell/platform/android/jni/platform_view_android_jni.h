@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
+#include <utility>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
@@ -179,7 +181,7 @@ class PlatformViewAndroidJNI {
   ///
   struct OverlayMetadata {
     OverlayMetadata(int id, fml::RefPtr<AndroidNativeWindow> window)
-        : id(id), window(window){};
+        : id(id), window(std::move(window)){};
 
     ~OverlayMetadata() = default;
 

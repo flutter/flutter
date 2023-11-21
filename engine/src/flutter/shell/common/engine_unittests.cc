@@ -207,8 +207,8 @@ class EngineTest : public testing::FixtureTest {
  public:
   EngineTest()
       : thread_host_("EngineTest",
-                     ThreadHost::Type::Platform | ThreadHost::Type::IO |
-                         ThreadHost::Type::UI | ThreadHost::Type::RASTER),
+                     ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                         ThreadHost::Type::kUi | ThreadHost::Type::kRaster),
         task_runners_({
             "EngineTest",
             thread_host_.platform_thread->GetTaskRunner(),  // platform

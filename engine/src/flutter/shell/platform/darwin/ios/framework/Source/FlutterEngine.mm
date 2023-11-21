@@ -793,11 +793,11 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   // initialized.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
-  uint32_t threadHostType = flutter::ThreadHost::Type::UI | flutter::ThreadHost::Type::RASTER |
-                            flutter::ThreadHost::Type::IO;
+  uint32_t threadHostType = flutter::ThreadHost::Type::kUi | flutter::ThreadHost::Type::kRaster |
+                            flutter::ThreadHost::Type::kIo;
 
   if ([FlutterEngine isProfilerEnabled]) {
-    threadHostType = threadHostType | flutter::ThreadHost::Type::Profiler;
+    threadHostType = threadHostType | flutter::ThreadHost::Type::kProfiler;
   }
 
   flutter::ThreadHost::ThreadHostConfig host_config(threadLabel.UTF8String, threadHostType,
@@ -805,17 +805,17 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   host_config.ui_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::UI, threadLabel.UTF8String),
+                                    flutter::ThreadHost::Type::kUi, threadLabel.UTF8String),
                                 fml::Thread::ThreadPriority::kDisplay);
 
   host_config.raster_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::RASTER, threadLabel.UTF8String),
+                                    flutter::ThreadHost::Type::kRaster, threadLabel.UTF8String),
                                 fml::Thread::ThreadPriority::kRaster);
 
   host_config.io_config =
       fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::IO, threadLabel.UTF8String),
+                                    flutter::ThreadHost::Type::kIo, threadLabel.UTF8String),
                                 fml::Thread::ThreadPriority::kNormal);
 
   return (flutter::ThreadHost){host_config};

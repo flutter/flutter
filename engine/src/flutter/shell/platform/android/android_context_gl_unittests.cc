@@ -36,8 +36,8 @@ TEST(AndroidContextGl, Create) {
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
 
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      thread_label,
-      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
+      thread_label, ThreadHost::Type::kUi | ThreadHost::Type::kRaster |
+                        ThreadHost::Type::kIo));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context = std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
@@ -76,8 +76,8 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNotNull) {
   std::string thread_label =
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      thread_label,
-      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
+      thread_label, ThreadHost::Type::kUi | ThreadHost::Type::kRaster |
+                        ThreadHost::Type::kIo));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto android_context = std::make_shared<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
@@ -101,7 +101,7 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNull) {
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
 
   auto mask =
-      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO;
+      ThreadHost::Type::kUi | ThreadHost::Type::kRaster | ThreadHost::Type::kIo;
   flutter::ThreadHost::ThreadHostConfig host_config(mask);
 
   ThreadHost thread_host(host_config);
@@ -125,8 +125,8 @@ TEST(AndroidContextGl, DISABLED_MSAAx4) {
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
 
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      thread_label,
-      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
+      thread_label, ThreadHost::Type::kUi | ThreadHost::Type::kRaster |
+                        ThreadHost::Type::kIo));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context = std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 4);
@@ -147,8 +147,8 @@ TEST(AndroidContextGl, EnsureMakeCurrentChecksCurrentContextStatus) {
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
 
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      thread_label,
-      ThreadHost::Type::UI | ThreadHost::Type::RASTER | ThreadHost::Type::IO));
+      thread_label, ThreadHost::Type::kUi | ThreadHost::Type::kRaster |
+                        ThreadHost::Type::kIo));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context = std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES, environment, task_runners, 0);
