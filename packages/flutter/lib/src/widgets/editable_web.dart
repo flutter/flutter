@@ -728,11 +728,13 @@ class _EditableWebState extends State<EditableWeb> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: sizedBoxHeight,
-      child: HtmlElementView.fromTagName(
-        tagName: _isMultiline ? 'textarea' : 'input',
-        onElementCreated: (Object element) {
-          initializePlatformView(element as html.HtmlElement);
-        },
+      child: ExcludeFocus(
+        child: HtmlElementView.fromTagName(
+          tagName: _isMultiline ? 'textarea' : 'input',
+          onElementCreated: (Object element) {
+            initializePlatformView(element as html.HtmlElement);
+          },
+        ),
       ),
     );
   }
@@ -846,7 +848,6 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void show() {
-    print('show being called');
     _currentInputElement!.focus();
   }
 
