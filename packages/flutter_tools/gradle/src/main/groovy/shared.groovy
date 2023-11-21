@@ -1,7 +1,7 @@
 import groovy.json.JsonSlurper
 
+@Singleton
 class NativePluginLoader {
-    NativePluginLoader() {}
 
     // This string must match _kFlutterPluginsHasNativeBuildKey defined in
     // packages/flutter_tools/lib/src/flutter_plugins.dart.
@@ -110,5 +110,5 @@ class NativePluginLoader {
 
 // TODO(135392): Remove and use declarative form when migrated
 ext {
-    nativePluginLoader = new NativePluginLoader()
+    nativePluginLoader = NativePluginLoader.instance
 }
