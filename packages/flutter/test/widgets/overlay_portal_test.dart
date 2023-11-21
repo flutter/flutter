@@ -388,6 +388,63 @@ void main() {
     expect(find.byWidget(target), findsOneWidget);
   });
 
+  testWidgetsWithLeakTracking('show/hide notifies listeners', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
+    final List<bool> valuesSeen = [];
+    void portalListener() {
+      valuesSeen.add(controller.isShowing);
+    }
+    late final OverlayEntry overlayEntry;
+    addTearDown(() {
+      controller.removeListener(portalListener);
+      overlayEntry..remove()..dispose();
+    });
+    controller.addListener(portalListener);
+
+    const Widget target = SizedBox();
+    final Widget widget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          overlayEntry = OverlayEntry(
+            builder: (BuildContext context) {
+              return OverlayPortal(
+                controller: controller,
+                overlayChildBuilder: (BuildContext context) => target,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    await tester.pump();
+    expect(valuesSeen.isEmpty, true);
+
+    controller.show();
+    await tester.pump();
+    expect(valuesSeen, [true]);
+
+    // Calls that do not trigger a state change do not fire listeners.
+    controller.show();
+    await tester.pump();
+    expect(valuesSeen, <bool>[true]);
+
+    controller.hide();
+    await tester.pump();
+    expect(valuesSeen, <bool>[true, false]);
+
+    // Calls that do not trigger a state change do not fire listeners.
+    controller.hide();
+    await tester.pump();
+    expect(valuesSeen, <bool>[true, false]);
+
+    controller.show();
+    await tester.pump();
+    expect(valuesSeen, <bool>[true, false, true]);
+  });
+
   testWidgetsWithLeakTracking('overlayChildBuilder is not evaluated until show is called', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(() => overlayEntry..remove()..dispose());

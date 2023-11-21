@@ -1372,7 +1372,10 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 /// [OverlayPortalController.show] and [OverlayPortalController.hide] can be
 /// called even before the controller is assigned to any [OverlayPortal], but
 /// they typically should not be called while the widget tree is being rebuilt.
-class OverlayPortalController {
+///
+/// [OverlayPortalController] notifies listeners when
+/// [OverlayPortalController.isShowing] changes.
+class OverlayPortalController with ChangeNotifier {
   /// Creates an [OverlayPortalController], optionally with a String identifier
   /// `debugLabel`.
   OverlayPortalController({ String? debugLabel }) : _debugLabel = debugLabel;
@@ -1416,7 +1419,12 @@ class OverlayPortalController {
   void show() {
     final _OverlayPortalState? state = _attachTarget;
     if (state != null) {
+      final bool wasShowing = isShowing;
       state.show(_now());
+      if (wasShowing != isShowing) {
+        // Only log if the state was changed.
+        notifyListeners();
+      }
     } else {
       _zOrderIndex = _now();
     }
@@ -1433,7 +1441,12 @@ class OverlayPortalController {
   void hide() {
     final _OverlayPortalState? state = _attachTarget;
     if (state != null) {
+      final bool wasShowing = isShowing;
       state.hide();
+      if (wasShowing != isShowing) {
+        // Only log if the state was changed.
+        notifyListeners();
+      }
     } else {
       assert(_zOrderIndex != null);
       _zOrderIndex = null;
