@@ -1581,7 +1581,7 @@ Future<void> _runCustomerTesting() async {
     );
   }
   await runCommand(
-    Platform.isWindows? 'cmd': './ci.sh',
+    Platform.isWindows? 'powershell.exe': './ci.sh',
     Platform.isWindows? <String>['ci.bat'] : <String>[],
     workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
   );
