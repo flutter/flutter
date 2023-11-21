@@ -301,6 +301,7 @@ Future<T> runInContext<T>(
       MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
