@@ -1,9 +1,6 @@
-//
-//  DummyPlatformView.swift
-//  Runner
-//
-//  Created by Jonah Williams on 11/21/23.
-//
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import Foundation
 
@@ -36,8 +33,6 @@ class FLNativeViewFactory: NSObject, FlutterPlatformViewFactory {
 }
 
 class SolidColorView: UIView {
-  private var _started: Bool = false;
-
   override init(frame: CGRect) {
     super.init(frame: frame)
     setupView()
