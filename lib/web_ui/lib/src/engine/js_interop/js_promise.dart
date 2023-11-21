@@ -25,7 +25,7 @@ JSPromise createPromise(JSFunction executor) =>
   );
 
 
-JSPromise futureToPromise<T extends JSAny>(Future<T> future) {
+JSPromise futureToPromise<T extends JSAny?>(Future<T> future) {
   return createPromise((JSFunction resolver, JSFunction rejecter) {
     future.then(
       (T value) => resolver.call(null, value),
