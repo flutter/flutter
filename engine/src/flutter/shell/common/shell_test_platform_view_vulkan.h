@@ -50,7 +50,7 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
     GrDirectContext* GetContext() override;
 
    private:
-    bool valid_;
+    bool valid_ = false;
     fml::RefPtr<vulkan::VulkanProcTable> vk_;
     std::shared_ptr<ShellTestExternalViewEmbedder>
         shell_test_external_view_embedder_;
