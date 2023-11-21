@@ -169,6 +169,7 @@ void main() {
   FakeCommand exportArchiveCommand({
     String exportOptionsPlist =  '/ExportOptions.plist',
     File? cachePlist,
+    bool deleteExportOptionsPlist = false,
   }) {
     return FakeCommand(
       command: <String>[
@@ -189,6 +190,9 @@ void main() {
         // Save it somewhere else so test expectations can be run on it.
         if (cachePlist != null) {
           cachePlist.writeAsStringSync(fileSystem.file(_exportOptionsPlist).readAsStringSync());
+        }
+        if (deleteExportOptionsPlist) {
+          fileSystem.file(_exportOptionsPlist).deleteSync();
         }
       }
     );
@@ -383,6 +387,37 @@ void main() {
     expect(testLogger.statusText, contains('Building App Store IPA'));
     expect(testLogger.errorText, contains('Encountered error while creating the IPA:'));
     expect(testLogger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build ignores deletion failure if generatedExportPlist does not exist', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(
+        exportOptionsPlist: _exportOptionsPlist,
+        cachePlist: cachedExportOptionsPlist,
+        deleteExportOptionsPlist: true,
+      ),
+    ]);
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
+    );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
