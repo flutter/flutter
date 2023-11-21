@@ -202,7 +202,7 @@ class InkSparkle extends InteractiveInkFeature {
     // Creates an element of randomness so that ink emanating from the same
     // pixel have slightly different rings and sparkles.
     assert((){
-      // In tests builds, randomness can cause flakes. So if a seed has not
+      // In tests, randomness can cause flakes. So if a seed has not
       // already been specified (i.e. for the purpose of the test), set it to
       // the constant turbulence seed.
       turbulenceSeed ??= _InkSparkleFactory.constantSeed;
