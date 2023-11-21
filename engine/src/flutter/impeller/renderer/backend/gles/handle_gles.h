@@ -78,7 +78,11 @@ inline std::ostream& operator<<(std::ostream& out,
   if (handle.IsDead()) {
     out << "DEAD";
   } else {
-    out << handle.name.value().id;
+    if (handle.name.has_value()) {
+      out << handle.name.value().id;
+    } else {
+      out << "UNNAMED";
+    }
   }
   out << ")";
   return out;
