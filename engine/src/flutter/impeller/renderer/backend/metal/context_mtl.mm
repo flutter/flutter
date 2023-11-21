@@ -12,6 +12,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/sync_switch.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
