@@ -731,7 +731,7 @@ class _TabBarScrollController extends ScrollController {
 ///  * [TabBar.secondary], for a secondary tab bar.
 ///  * [TabBarView], which displays page views that correspond to each tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+///  * https://m3.material.io/components/tabs/overview, the Material 3
 ///     tab bar specification.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design primary tab bar.
@@ -797,7 +797,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [TabBar], for a primary tab bar.
   ///  * [TabBarView], which displays page views that correspond to each tab.
   ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-  ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+  ///  * https://m3.material.io/components/tabs/overview, the Material 3
   ///     tab bar specification.
   const TabBar.secondary({
     super.key,
