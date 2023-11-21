@@ -499,13 +499,9 @@ action("android_jar") {
       "--native_lib",
       rebase_path("$validation_layer_out_dir/libVkLayer_khronos_validation.so"),
     ]
-    if (current_cpu == "arm64") {
-      args += [
-        "--native_lib",
-        rebase_path("$android_libcpp_root/libs/arm64-v8a/libc++_shared.so",
-                    root_build_dir),
-      ]
-    } else {
+    if (current_cpu != "arm64") {
+      # This may not be necessarily required anymore. It was kept to maintain
+      # old behavior.
       assert(false, "Validation layers not supported for arch.")
     }
   }
