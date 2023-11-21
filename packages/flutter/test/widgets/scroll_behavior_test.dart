@@ -202,11 +202,11 @@ void main() {
     await gesture2.moveBy(const Offset(0, -50));
     await tester.pump();
 
-    // The default multitouchDragStrategy should be MultitouchDragStrategy.trackLatestActivePointer
+    // The default multitouchDragStrategy should be MultitouchDragStrategy.latestPointer.
     // Only the latest active pointer be tracked.
     expect(controller.position.pixels, 50.0);
 
-    // Change to MultitouchDragStrategy.trackAllActivePointers
+    // Change to MultitouchDragStrategy.sumAllPointers.
     await tester.pumpWidget(buildFrame(behavior2));
 
     await gesture1.moveBy(const Offset(0, -50));
