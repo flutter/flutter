@@ -6,39 +6,6 @@ import 'widget_tester.dart';
 
 
 
-WidgetTesterCallback maybeWrapWithLeakTracking(
-  String description,
-  WidgetTesterCallback callback,
-  LeakTesting? leakTesting,
-) {
-  final LeakTesting settings = leakTesting ?? LeakTesting.settings;
-
-  if (settings.ignore) {
-    return callback;
-  }
-
-  if (!checkPlatformAndMayBePrintWarning(platformName: defaultTargetPlatform.name, isBrowser: kIsWeb)) {
-    return callback;
-  }
-
-  _setUpLeakTracking();
-
-  Future<void> wrappedCallBack(WidgetTester tester) async {
-    final PhaseSettings phase = PhaseSettings(
-      name: description,
-      leakDiagnosticConfig: settings.leakDiagnosticConfig,
-      ignoredLeaks: settings.ignoredLeaks,
-      baselining: settings.baselining,
-      ignoreLeaks: settings.ignore,
-    );
-
-    LeakTracking.phase = phase;
-    await callback(tester);
-    LeakTracking.phase = const PhaseSettings.ignored();
-  }
-
-  return wrappedCallBack;
-}
 
 
 /////////////
@@ -63,6 +30,10 @@ void mayBeSetupLeakTrackingForTest(LeakTesting settings, String testDescription)
   );
 
   LeakTracking.phase = phase;
+}
+
+void ignoreAllLeaks() {
+  LeakTracking.phase = const PhaseSettings.ignored();
 }
 
 void _dispatchFlutterEventToLeakTracker(ObjectEvent event) {
