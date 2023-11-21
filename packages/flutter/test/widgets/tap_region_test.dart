@@ -52,11 +52,10 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder, {int buttons = kPrimaryButton}) async {
+    Future<void> click(Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
-        buttons: buttons,
       );
       await gesture.up();
       await gesture.removePointer();
@@ -73,15 +72,6 @@ void main() {
         }));
     tappedOutside.clear();
 
-    await click(find.text('No Group'), buttons: kSecondaryButton);
-    expect(
-        tappedOutside,
-        unorderedEquals(<String>{
-          'Group 1 A',
-          'Group 1 B',
-        }));
-    tappedOutside.clear();
-
     await click(find.text('Group 1 A'));
     expect(
         tappedOutside,
@@ -90,23 +80,7 @@ void main() {
         }));
     tappedOutside.clear();
 
-    await click(find.text('Group 1 A'), buttons: kSecondaryButton);
-    expect(
-        tappedOutside,
-        equals(<String>{
-          'No Group',
-        }));
-    tappedOutside.clear();
-
     await click(find.text('Group 1 B'));
-    expect(
-        tappedOutside,
-        equals(<String>{
-          'No Group',
-        }));
-    tappedOutside.clear();
-
-    await click(find.text('Group 1 B'), buttons: kSecondaryButton);
     expect(
         tappedOutside,
         equals(<String>{
@@ -124,20 +98,7 @@ void main() {
         }));
     tappedOutside.clear();
 
-    await click(find.text('Outside'), buttons: kSecondaryButton);
-    expect(
-        tappedOutside,
-        unorderedEquals(<String>{
-          'No Group',
-          'Group 1 A',
-          'Group 1 B',
-        }));
-    tappedOutside.clear();
-
     await click(find.text('Outside Surface'));
-    expect(tappedOutside, isEmpty);
-
-    await click(find.text('Outside Surface'), buttons: kSecondaryButton);
     expect(tappedOutside, isEmpty);
   });
 
@@ -191,11 +152,10 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder, {int buttons = kPrimaryButton}) async {
+    Future<void> click(Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
-        buttons: buttons,
       );
       await gesture.up();
       await gesture.removePointer();
@@ -214,16 +174,6 @@ void main() {
     expect(propagatedTaps, equals(0));
     tappedOutside.clear();
 
-    await click(find.text('No Group'), buttons: kSecondaryButton);
-    expect(
-        tappedOutside,
-        unorderedEquals(<String>{
-          'Group 1 A',
-          'Group 1 B',
-        }));
-    expect(propagatedTaps, equals(0));
-    tappedOutside.clear();
-
     await click(find.text('Group 1 A'));
     expect(
         tappedOutside,
@@ -233,25 +183,7 @@ void main() {
     expect(propagatedTaps, equals(0));
     tappedOutside.clear();
 
-    await click(find.text('Group 1 A'), buttons: kSecondaryButton);
-    expect(
-        tappedOutside,
-        equals(<String>{
-          'No Group',
-        }));
-    expect(propagatedTaps, equals(0));
-    tappedOutside.clear();
-
     await click(find.text('Group 1 B'));
-    expect(
-        tappedOutside,
-        equals(<String>{
-          'No Group',
-        }));
-    expect(propagatedTaps, equals(0));
-    tappedOutside.clear();
-
-    await click(find.text('Group 1 B'), buttons: kSecondaryButton);
     expect(
         tappedOutside,
         equals(<String>{
@@ -271,21 +203,7 @@ void main() {
     expect(propagatedTaps, equals(0));
     tappedOutside.clear();
 
-    await click(find.text('Outside'), buttons: kTertiaryButton);
-    expect(
-        tappedOutside,
-        unorderedEquals(<String>{
-          'No Group',
-          'Group 1 A',
-          'Group 1 B',
-        }));
-    expect(propagatedTaps, equals(0));
-    tappedOutside.clear();
-
     await click(find.text('Outside Surface'));
-    expect(tappedOutside, isEmpty);
-
-    await click(find.text('Outside Surface'), buttons: kTertiaryButton);
     expect(tappedOutside, isEmpty);
   });
 
@@ -331,11 +249,10 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder, {int buttons = kPrimaryButton}) async {
+    Future<void> click(Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
-        buttons: buttons,
       );
       await gesture.up();
       await gesture.removePointer();
@@ -351,24 +268,7 @@ void main() {
         }));
     tappedInside.clear();
 
-    await click(find.text('No Group'), buttons: kSecondaryButton);
-    expect(
-        tappedInside,
-        unorderedEquals(<String>{
-          'No Group',
-        }));
-    tappedInside.clear();
-
     await click(find.text('Group 1 A'));
-    expect(
-        tappedInside,
-        equals(<String>{
-          'Group 1 A',
-          'Group 1 B',
-        }));
-    tappedInside.clear();
-
-    await click(find.text('Group 1 A'), buttons: kTertiaryButton);
     expect(
         tappedInside,
         equals(<String>{
@@ -386,27 +286,11 @@ void main() {
         }));
     tappedInside.clear();
 
-    await click(find.text('Group 1 B'), buttons: kSecondaryButton);
-    expect(
-        tappedInside,
-        equals(<String>{
-          'Group 1 A',
-          'Group 1 B',
-        }));
-    tappedInside.clear();
-
     await click(find.text('Outside'));
     expect(tappedInside, isEmpty);
     tappedInside.clear();
 
-    await click(find.text('Outside'), buttons: kSecondaryButton);
-    expect(tappedInside, isEmpty);
-    tappedInside.clear();
-
     await click(find.text('Outside Surface'));
-    expect(tappedInside, isEmpty);
-
-    await click(find.text('Outside Surface'), buttons: kTertiaryButton);
     expect(tappedInside, isEmpty);
   });
 
@@ -465,11 +349,10 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder, {int buttons = kPrimaryButton}) async {
+    Future<void> click(Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
-        buttons: buttons,
       );
       await gesture.up();
       await gesture.removePointer();
@@ -478,12 +361,6 @@ void main() {
     expect(tappedInside, isEmpty);
 
     await click(find.byKey(noGroupKey));
-    expect(tappedInside, isEmpty); // No hittable children, so no hit.
-
-    await click(find.byKey(noGroupKey), buttons: kSecondaryButton);
-    expect(tappedInside, isEmpty); // No hittable children, so no hit.
-
-    await click(find.byKey(noGroupKey), buttons: kTertiaryButton);
     expect(tappedInside, isEmpty); // No hittable children, so no hit.
 
     await click(find.byKey(group1AKey));
@@ -498,23 +375,7 @@ void main() {
     );
     tappedInside.clear();
 
-    await click(find.byKey(group1AKey), buttons: kSecondaryButton);
-    // No hittable children, but set to opaque, so it hits, triggering the
-    // group.
-    expect(
-      tappedInside,
-      equals(<String>{
-        'Group 1 A',
-        'Group 1 B',
-      }),
-    );
-    tappedInside.clear();
-
     await click(find.byKey(group1BKey));
-    expect(tappedInside, isEmpty); // No hittable children while translucent, so no hit.
-    tappedInside.clear();
-
-    await click(find.byKey(group1BKey), buttons: kTertiaryButton);
     expect(tappedInside, isEmpty); // No hittable children while translucent, so no hit.
     tappedInside.clear();
   });
@@ -550,11 +411,10 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder, {int buttons = kPrimaryButton}) async {
+    Future<void> click(Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
-        buttons: buttons,
       );
       await gesture.up();
       await gesture.removePointer();
@@ -564,26 +424,9 @@ void main() {
 
     await click(find.text('Group 1 A'));
     expect(tappedOutside, isEmpty);
-
-    await click(find.text('Group 1 A'), buttons: kSecondaryButton);
-    expect(tappedOutside, isEmpty);
-
     await click(find.text('Group 1 B'));
     expect(tappedOutside, isEmpty);
-
-    await click(find.text('Group 1 B'), buttons: kTertiaryButton);
-    expect(tappedOutside, isEmpty);
-
     await click(find.text('Outside'));
-    expect(
-        tappedOutside,
-        equals(<String>[
-          'Group 1 A',
-          'Group 1 B',
-        ]));
-    tappedOutside.clear();
-
-    await click(find.text('Outside'), buttons: kSecondaryButton);
     expect(
         tappedOutside,
         equals(<String>[
@@ -624,15 +467,7 @@ void main() {
     expect(tappedOutside, equals(<String>['Group 2 A']));
     tappedOutside.clear();
 
-    await click(find.text('Group 1 A'), buttons: kSecondaryButton);
-    expect(tappedOutside, equals(<String>['Group 2 A']));
-    tappedOutside.clear();
-
     await click(find.text('Group 2 A'));
-    expect(tappedOutside, equals(<String>['Group 1 A']));
-    tappedOutside.clear();
-
-    await click(find.text('Group 2 A'), buttons: kTertiaryButton);
     expect(tappedOutside, equals(<String>['Group 1 A']));
     tappedOutside.clear();
 
@@ -644,14 +479,579 @@ void main() {
           'Group 2 A',
         ]));
     tappedOutside.clear();
+  });
 
-    await click(find.text('Outside'), buttons: kSecondaryButton);
+  testWidgetsWithLeakTracking('TapRegionSurface detects outside right click', (WidgetTester tester) async {
+    final Set<String> tappedOutside = <String>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  const Text('Outside'),
+                  TapRegion(
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryButton,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedOutside, isEmpty);
+
+    await click(find.text('No Group'));
     expect(
         tappedOutside,
-        equals(<String>[
+        unorderedEquals(<String>{
           'Group 1 A',
-          'Group 2 A',
-        ]));
+          'Group 1 B',
+        }));
     tappedOutside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    tappedOutside.clear();
+
+    await click(find.text('Outside'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'No Group',
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    tappedOutside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(tappedOutside, isEmpty);
+  });
+
+  testWidgetsWithLeakTracking('TapRegionSurface detects outside middle click', (WidgetTester tester) async {
+    final Set<String> tappedOutside = <String>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  const Text('Outside'),
+                  TapRegion(
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kTertiaryButton,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedOutside, isEmpty);
+
+    await click(find.text('No Group'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    tappedOutside.clear();
+
+    await click(find.text('Outside'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'No Group',
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    tappedOutside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(tappedOutside, isEmpty);
+  });
+
+  testWidgetsWithLeakTracking('TapRegionSurface consumes outside right click when asked', (WidgetTester tester) async {
+    final Set<String> tappedOutside = <String>{};
+    int propagatedTaps = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      propagatedTaps += 1;
+                    },
+                    child: const Text('Outside'),
+                  ),
+                  TapRegion(
+                    consumeOutsideTaps: true,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    consumeOutsideTaps: true,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryButton
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedOutside, isEmpty);
+    expect(propagatedTaps, equals(0));
+
+    await click(find.text('No Group'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Outside'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'No Group',
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(tappedOutside, isEmpty);
+  });
+
+  testWidgetsWithLeakTracking('TapRegionSurface consumes outside middle click when asked', (WidgetTester tester) async {
+    final Set<String> tappedOutside = <String>{};
+    int propagatedTaps = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      propagatedTaps += 1;
+                    },
+                    child: const Text('Outside'),
+                  ),
+                  TapRegion(
+                    consumeOutsideTaps: true,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    consumeOutsideTaps: true,
+                    onTapOutside: (PointerEvent event) {
+                      tappedOutside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kTertiaryButton,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedOutside, isEmpty);
+    expect(propagatedTaps, equals(0));
+
+    await click(find.text('No Group'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(
+        tappedOutside,
+        equals(<String>{
+          'No Group',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Outside'));
+    expect(
+        tappedOutside,
+        unorderedEquals(<String>{
+          'No Group',
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    expect(propagatedTaps, equals(0));
+    tappedOutside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(tappedOutside, isEmpty);
+  });
+
+  testWidgetsWithLeakTracking('TapRegionSurface detects inside right click', (WidgetTester tester) async {
+    final Set<String> tappedInside = <String>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  const Text('Outside'),
+                  TapRegion(
+                    onTapInside: (PointerEvent event) {
+                      tappedInside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapInside: (PointerEvent event) {
+                      tappedInside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapInside: (PointerEvent event) {
+                      tappedInside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryButton,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedInside, isEmpty);
+
+    await click(find.text('No Group'));
+    expect(
+        tappedInside,
+        unorderedEquals(<String>{
+          'No Group',
+        }));
+    tappedInside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(
+        tappedInside,
+        equals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    tappedInside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(
+        tappedInside,
+        equals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    tappedInside.clear();
+
+    await click(find.text('Outside'));
+    expect(tappedInside, isEmpty);
+    tappedInside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(tappedInside, isEmpty);
+  });
+
+  testWidgetsWithLeakTracking('TapRegionSurface detects inside middle click', (WidgetTester tester) async {
+    final Set<String> tappedInside = <String>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const Text('Outside Surface'),
+            TapRegionSurface(
+              child: Row(
+                children: <Widget>[
+                  const Text('Outside'),
+                  TapRegion(
+                    onTapInside: (PointerEvent event) {
+                      tappedInside.add('No Group');
+                    },
+                    child: const Text('No Group'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapInside: (PointerEvent event) {
+                      tappedInside.add('Group 1 A');
+                    },
+                    child: const Text('Group 1 A'),
+                  ),
+                  TapRegion(
+                    groupId: 1,
+                    onTapInside: (PointerEvent event) {
+                      tappedInside.add('Group 1 B');
+                    },
+                    child: const Text('Group 1 B'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    Future<void> click(Finder finder) async {
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(finder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kTertiaryButton,
+      );
+      await gesture.up();
+      await gesture.removePointer();
+    }
+
+    expect(tappedInside, isEmpty);
+
+    await click(find.text('No Group'));
+    expect(
+        tappedInside,
+        unorderedEquals(<String>{
+          'No Group',
+        }));
+    tappedInside.clear();
+
+    await click(find.text('Group 1 A'));
+    expect(
+        tappedInside,
+        equals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    tappedInside.clear();
+
+    await click(find.text('Group 1 B'));
+    expect(
+        tappedInside,
+        equals(<String>{
+          'Group 1 A',
+          'Group 1 B',
+        }));
+    tappedInside.clear();
+
+    await click(find.text('Outside'));
+    expect(tappedInside, isEmpty);
+    tappedInside.clear();
+
+    await click(find.text('Outside Surface'));
+    expect(tappedInside, isEmpty);
   });
 }
