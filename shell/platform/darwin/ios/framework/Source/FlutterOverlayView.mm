@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
+#include <CoreGraphics/CGColorSpace.h>
+#include <Metal/Metal.h>
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
@@ -18,7 +20,9 @@
 
 // This is mostly a duplication of FlutterView.
 // TODO(amirh): once GL support is in evaluate if we can merge this with FlutterView.
-@implementation FlutterOverlayView
+@implementation FlutterOverlayView {
+  fml::CFRef<CGColorSpaceRef> _colorSpaceRef;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
   NSAssert(NO, @"FlutterOverlayView must init or initWithContentsScale");
@@ -42,15 +46,24 @@
   return self;
 }
 
-- (instancetype)initWithContentsScale:(CGFloat)contentsScale {
+- (instancetype)initWithContentsScale:(CGFloat)contentsScale
+                          pixelFormat:(MTLPixelFormat)pixelFormat {
   self = [self init];
 
   if ([self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
     self.layer.allowsGroupOpacity = NO;
     self.layer.contentsScale = contentsScale;
     self.layer.rasterizationScale = contentsScale;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+    CAMetalLayer* layer = (CAMetalLayer*)self.layer;
+#pragma clang diagnostic pop
+    layer.pixelFormat = pixelFormat;
+    if (pixelFormat == MTLPixelFormatRGBA16Float) {
+      self->_colorSpaceRef = fml::CFRef(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
+      layer.colorspace = self->_colorSpaceRef;
+    }
   }
-
   return self;
 }
 
