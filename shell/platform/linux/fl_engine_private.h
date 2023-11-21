@@ -21,7 +21,9 @@ G_BEGIN_DECLS
  */
 
 typedef enum {
+  // NOLINTBEGIN(readability-identifier-naming)
   FL_ENGINE_ERROR_FAILED,
+  // NOLINTEND(readability-identifier-naming)
 } FlEngineError;
 
 GQuark fl_engine_error_quark(void) G_GNUC_CONST;

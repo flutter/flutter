@@ -40,26 +40,26 @@ MockBinaryMessenger::operator FlBinaryMessenger*() {
 }
 
 bool MockBinaryMessenger::HasMessageHandler(const gchar* channel) const {
-  return message_handlers.at(channel) != nullptr;
+  return message_handlers_.at(channel) != nullptr;
 }
 
 void MockBinaryMessenger::SetMessageHandler(
     const gchar* channel,
     FlBinaryMessengerMessageHandler handler,
     gpointer user_data) {
-  message_handlers[channel] = handler;
-  user_datas[channel] = user_data;
+  message_handlers_[channel] = handler;
+  user_datas_[channel] = user_data;
 }
 
 void MockBinaryMessenger::ReceiveMessage(const gchar* channel,
                                          GBytes* message) {
-  FlBinaryMessengerMessageHandler handler = message_handlers[channel];
-  if (response_handles[channel] == nullptr) {
-    response_handles[channel] = FL_BINARY_MESSENGER_RESPONSE_HANDLE(
+  FlBinaryMessengerMessageHandler handler = message_handlers_[channel];
+  if (response_handles_[channel] == nullptr) {
+    response_handles_[channel] = FL_BINARY_MESSENGER_RESPONSE_HANDLE(
         fl_mock_binary_messenger_response_handle_new());
   }
-  handler(instance_, channel, message, response_handles[channel],
-          user_datas[channel]);
+  handler(instance_, channel, message, response_handles_[channel],
+          user_datas_[channel]);
 }
 
 static void fl_mock_binary_messenger_iface_init(

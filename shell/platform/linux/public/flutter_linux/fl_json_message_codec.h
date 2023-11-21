@@ -27,9 +27,11 @@ G_BEGIN_DECLS
 #define FL_JSON_MESSAGE_CODEC_ERROR fl_json_message_codec_error_quark()
 
 typedef enum {
+  // NOLINTBEGIN(readability-identifier-naming)
   FL_JSON_MESSAGE_CODEC_ERROR_INVALID_UTF8,
   FL_JSON_MESSAGE_CODEC_ERROR_INVALID_JSON,
   FL_JSON_MESSAGE_CODEC_ERROR_INVALID_OBJECT_KEY_TYPE,
+  // NOLINTEND(readability-identifier-naming)
 } FlJsonMessageCodecError;
 
 GQuark fl_json_message_codec_error_quark(void) G_GNUC_CONST;
