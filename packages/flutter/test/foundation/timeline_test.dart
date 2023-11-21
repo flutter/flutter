@@ -73,6 +73,7 @@ void main() {
     final int start = FlutterTimeline.now - 1;
     FlutterTimeline.timeSync('TEST', () {
       final Stopwatch watch = Stopwatch()..start(); // flutter_ignore: stopwatch (see analyze.dart)
+      // Ignore context: Used safely for benchmarking.
       while (watch.elapsedMilliseconds < 5) {}
       watch.stop();
     });
