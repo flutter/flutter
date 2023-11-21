@@ -160,7 +160,7 @@ Future<CommandResult> runCommand(String executable, List<String> arguments, {
   void Function(String, io.Process)? outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
+  final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
 
   final Command command = await startCommand(executable, arguments,
     workingDirectory: workingDirectory,
