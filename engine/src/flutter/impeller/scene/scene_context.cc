@@ -40,11 +40,24 @@ SceneContext::SceneContext(std::shared_ptr<Context> context)
     return;
   }
 
-  pipelines_[{PipelineKey{GeometryType::kUnskinned, MaterialType::kUnlit}}] =
+  auto unskinned_variant =
       MakePipelineVariants<UnskinnedVertexShader, UnlitFragmentShader>(
           *context_);
-  pipelines_[{PipelineKey{GeometryType::kSkinned, MaterialType::kUnlit}}] =
+  if (!unskinned_variant) {
+    FML_LOG(ERROR) << "Could not create unskinned pipeline variant.";
+    return;
+  }
+  pipelines_[{PipelineKey{GeometryType::kUnskinned, MaterialType::kUnlit}}] =
+      std::move(unskinned_variant);
+
+  auto skinned_variant =
       MakePipelineVariants<SkinnedVertexShader, UnlitFragmentShader>(*context_);
+  if (!skinned_variant) {
+    FML_LOG(ERROR) << "Could not create skinned pipeline variant.";
+    return;
+  }
+  pipelines_[{PipelineKey{GeometryType::kSkinned, MaterialType::kUnlit}}] =
+      std::move(skinned_variant);
 
   {
     impeller::TextureDescriptor texture_descriptor;
