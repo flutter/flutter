@@ -25,7 +25,7 @@ class SamplerGLES final : public Sampler,
  private:
   friend class SamplerLibraryGLES;
 
-  SamplerGLES(SamplerDescriptor desc);
+  explicit SamplerGLES(SamplerDescriptor desc);
 
   // |Sampler|
   bool IsValid() const override;
