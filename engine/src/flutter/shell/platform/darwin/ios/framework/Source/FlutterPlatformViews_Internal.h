@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 
+#include <Metal/Metal.h>
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/shell.h"
@@ -167,9 +168,9 @@ class FlutterPlatformViewLayerPool {
 
   // Gets a layer from the pool if available, or allocates a new one.
   // Finally, it marks the layer as used. That is, it increments `available_layer_index_`.
-  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(
-      GrDirectContext* gr_context,
-      const std::shared_ptr<IOSContext>& ios_context);
+  std::shared_ptr<FlutterPlatformViewLayer> GetLayer(GrDirectContext* gr_context,
+                                                     const std::shared_ptr<IOSContext>& ios_context,
+                                                     MTLPixelFormat pixel_format);
 
   // Gets the layers in the pool that aren't currently used.
   // This method doesn't mark the layers as unused.
@@ -320,7 +321,8 @@ class FlutterPlatformViewsController {
                                                      EmbedderViewSlice* slice,
                                                      SkRect rect,
                                                      int64_t view_id,
-                                                     int64_t overlay_id);
+                                                     int64_t overlay_id,
+                                                     MTLPixelFormat pixel_format);
   // Removes overlay views and platform views that aren't needed in the current frame.
   // Must run on the platform thread.
   void RemoveUnusedLayers();

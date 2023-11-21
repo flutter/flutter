@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#include <Metal/Metal.h>
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
@@ -43,6 +44,17 @@
   return UIScreen.mainScreen;
 }
 
+- (MTLPixelFormat)pixelFormat {
+  if ([self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
+// It is a known Apple bug that CAMetalLayer incorrectly reports its supported
+// SDKs. It is, in fact, available since iOS 8.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+    CAMetalLayer* layer = (CAMetalLayer*)self.layer;
+    return layer.pixelFormat;
+  }
+  return MTLPixelFormatBGRA8Unorm;
+}
 - (BOOL)isWideGamutSupported {
   if (![_delegate isUsingImpeller]) {
     return NO;

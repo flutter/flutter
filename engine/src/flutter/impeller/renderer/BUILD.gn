@@ -122,6 +122,7 @@ impeller_component("renderer_unittests") {
   testonly = true
 
   sources = [
+    "blit_pass_unittests.cc",
     "capabilities_unittests.cc",
     "device_buffer_unittests.cc",
     "host_buffer_unittests.cc",

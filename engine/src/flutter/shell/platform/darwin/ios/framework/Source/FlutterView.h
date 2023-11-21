@@ -5,6 +5,7 @@
 #ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTER_VIEW_H_
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTER_VIEW_H_
 
+#include <Metal/Metal.h>
 #import <UIKit/UIKit.h>
 
 #include <memory>
@@ -47,6 +48,7 @@
                  enableWideGamut:(BOOL)isWideGamutEnabled NS_DESIGNATED_INITIALIZER;
 
 - (UIScreen*)screen;
+- (MTLPixelFormat)pixelFormat;
 
 // Set by FlutterEngine or FlutterViewController to override software rendering.
 @property(class, nonatomic) BOOL forceSoftwareRendering;
