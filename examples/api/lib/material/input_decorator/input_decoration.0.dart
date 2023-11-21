@@ -28,7 +28,7 @@ class InputDecorationExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const TextField(
+    return TextField(
       decoration: InputDecoration(
         icon: Icon(Icons.send),
         hintText: 'Hint Text',

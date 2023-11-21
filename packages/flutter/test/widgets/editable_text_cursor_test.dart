@@ -181,7 +181,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Cursor animates on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(),
         ),
@@ -232,7 +232,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Cursor does not animate on non-iOS platforms', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(child: TextField(maxLines: 3)),
       ),
     );
@@ -251,7 +251,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Cursor does not animate on Android', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-    const Widget widget = MaterialApp(
+    final Widget widget = MaterialApp(
       home: Material(
         child: TextField(
           maxLines: 3,
@@ -292,7 +292,7 @@ void main() {
   testWidgetsWithLeakTracking('Cursor does not animates when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-    const Widget widget = MaterialApp(
+    final Widget widget = MaterialApp(
       home: Material(
         child: TextField(
           maxLines: 3,
@@ -332,7 +332,7 @@ void main() {
   testWidgetsWithLeakTracking('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     EditableText.debugDeterministicCursor = true;
-    const Widget widget = MaterialApp(
+    final Widget widget = MaterialApp(
       home: Material(
         child: TextField(
           maxLines: 3,
@@ -449,7 +449,7 @@ void main() {
   );
 
   testWidgetsWithLeakTracking('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
-    const Widget widget = MaterialApp(
+    final Widget widget = MaterialApp(
       home: Material(
         child: TextField(
           showCursor: false,
@@ -507,7 +507,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Cursor radius is 2.0', (WidgetTester tester) async {
-    const Widget widget = MaterialApp(
+    final Widget widget = MaterialApp(
       home: Material(
         child: TextField(
           maxLines: 3,

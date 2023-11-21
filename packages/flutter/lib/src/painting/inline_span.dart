@@ -175,7 +175,7 @@ List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanti
 ///         baseline: TextBaseline.alphabetic,
 ///         child: ConstrainedBox(
 ///           constraints: const BoxConstraints(maxWidth: 100),
-///           child: const TextField(),
+///           child: TextField(),
 ///         )
 ///       ),
 ///       const TextSpan(

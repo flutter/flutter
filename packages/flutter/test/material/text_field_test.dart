@@ -261,14 +261,14 @@ void main() {
 
   testWidgetsWithLeakTracking('text field selection toolbar should hide when the user starts typing', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           body: Center(
             child: SizedBox(
               width: 100,
               height: 100,
               child: TextField(
-                decoration: InputDecoration(hintText: 'Placeholder'),
+                decoration: const InputDecoration(hintText: 'Placeholder'),
               ),
             ),
           ),
@@ -771,7 +771,7 @@ void main() {
     const Color cursorColor = Colors.red;
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: DefaultSelectionStyle(
             selectionColor: selectionColor,
@@ -789,11 +789,11 @@ void main() {
 
   testWidgetsWithLeakTracking('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(
             autofocus: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               error: Text('error'),
               errorStyle: TextStyle(color: Colors.teal),
             ),
@@ -806,11 +806,11 @@ void main() {
     expect(state.widget.cursorColor, Colors.teal);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(
             autofocus: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               errorText: 'error',
               errorStyle: TextStyle(color: Colors.teal),
             ),
@@ -828,7 +828,7 @@ void main() {
     // True
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(autofocus: true, cursorOpacityAnimates: true),
         ),
@@ -841,7 +841,7 @@ void main() {
     // False
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(autofocus: true, cursorOpacityAnimates: false),
         ),
@@ -976,8 +976,8 @@ void main() {
   testWidgetsWithLeakTracking('Cursor blinks', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-          decoration: InputDecoration(
+        child: TextField(
+          decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
         ),
@@ -1044,7 +1044,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(),
         ),
@@ -1060,7 +1060,7 @@ void main() {
   testWidgetsWithLeakTracking('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(),
+        child: TextField(),
       ),
     );
 
@@ -1073,8 +1073,8 @@ void main() {
   testWidgetsWithLeakTracking('cursor has expected radius value', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-          cursorRadius: Radius.circular(3.0),
+        child: TextField(
+          cursorRadius: const Radius.circular(3.0),
         ),
       ),
     );
@@ -1087,7 +1087,7 @@ void main() {
   testWidgetsWithLeakTracking('clipBehavior has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(),
+        child: TextField(),
       ),
     );
 
@@ -1138,12 +1138,12 @@ void main() {
     final Widget widget = Theme(
       data: ThemeData(useMaterial3: false),
       child: overlay(
-        child: const RepaintBoundary(
-          key: ValueKey<int>(1),
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
           child: TextField(
             cursorColor: Colors.blue,
             cursorWidth: 15,
-            cursorRadius: Radius.circular(3.0),
+            cursorRadius: const Radius.circular(3.0),
           ),
         ),
       ),
@@ -1167,12 +1167,12 @@ void main() {
     final Widget widget = Theme(
       data: ThemeData(useMaterial3: false),
       child: overlay(
-        child: const RepaintBoundary(
-          key: ValueKey<int>(1),
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
           child: TextField(
             cursorColor: Colors.blue,
             cursorWidth: 15,
-            cursorRadius: Radius.circular(3.0),
+            cursorRadius: const Radius.circular(3.0),
           ),
         ),
       ),
@@ -1239,7 +1239,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: const Scaffold(
+        home: Scaffold(
           body: Center(
             child: SizedBox(
               width: 100,
@@ -1247,7 +1247,7 @@ void main() {
               child: Opacity(
                 opacity: 0.5,
                 child: TextField(
-                  decoration: InputDecoration(hintText: 'Placeholder'),
+                  decoration: const InputDecoration(hintText: 'Placeholder'),
                 ),
               ),
             ),
@@ -1669,7 +1669,7 @@ void main() {
   testWidgetsWithLeakTracking('Overflowing a line with spaces stops the cursor at the end (rtl direction)', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
+        child: TextField(
           textDirection: TextDirection.rtl,
           maxLines: null,
         ),
@@ -1696,9 +1696,9 @@ void main() {
   testWidgetsWithLeakTracking('mobile obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
+        child: TextField(
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
         ),
@@ -1736,9 +1736,9 @@ void main() {
   testWidgetsWithLeakTracking('desktop obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
+        child: TextField(
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Placeholder',
           ),
         ),
@@ -2081,7 +2081,7 @@ void main() {
 
   testWidgetsWithLeakTracking('does not paint toolbar when no options available', (WidgetTester tester) async {
     await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Material(
             child: TextField(
               readOnly: true,
@@ -2102,7 +2102,7 @@ void main() {
 
   testWidgetsWithLeakTracking('text field build empty toolbar when no options available', (WidgetTester tester) async {
     await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Material(
             child: TextField(
               readOnly: true,
@@ -4479,7 +4479,7 @@ void main() {
             ),
           ],
         ),
-        body: const TextField(),
+        body: TextField(),
       ),
     );
 
@@ -5167,8 +5167,8 @@ void main() {
       Theme(
         data: ThemeData(useMaterial3: false),
         child: overlay(
-          child: const TextField(
-            decoration: InputDecoration(
+          child: TextField(
+            decoration: const InputDecoration(
               errorText: 'error text',
               helperText: 'helper text',
             ),
@@ -5186,8 +5186,8 @@ void main() {
       overlay(
         child: Theme(
           data: themeData,
-          child: const TextField(
-            decoration: InputDecoration(
+          child: TextField(
+            decoration: const InputDecoration(
               helperText: 'helper text',
             ),
           ),
@@ -5362,8 +5362,8 @@ void main() {
       overlay(
         child: Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -5410,8 +5410,8 @@ void main() {
       overlay(
         child: Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -5473,8 +5473,8 @@ void main() {
       overlay(
         child: Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -5528,8 +5528,8 @@ void main() {
       overlay(
         child: Column(
           children: <Widget>[
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              decoration: const InputDecoration(
                 labelText: 'First',
               ),
             ),
@@ -5565,8 +5565,8 @@ void main() {
   testWidgetsWithLeakTracking('Icon is separated from input/label by 16+12', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const TextField(
-          decoration: InputDecoration(
+        child: TextField(
+          decoration: const InputDecoration(
             icon: Icon(Icons.phone),
             labelText: 'label',
             filled: true,
@@ -5588,8 +5588,8 @@ void main() {
       Theme(
         data: ThemeData(useMaterial3: false),
         child: overlay(
-          child: const TextField(
-            decoration: InputDecoration.collapsed(
+          child: TextField(
+            decoration: const InputDecoration.collapsed(
               hintText: 'hint',
             ),
             strutStyle: StrutStyle.disabled,
@@ -5604,7 +5604,7 @@ void main() {
   testWidgetsWithLeakTracking('Can align to center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const SizedBox(
+        child: SizedBox(
           width: 300.0,
           child: TextField(
             textAlign: TextAlign.center,
@@ -5639,7 +5639,7 @@ void main() {
   testWidgetsWithLeakTracking('Can align to center within center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: const SizedBox(
+        child: SizedBox(
           width: 300.0,
           child: Center(
             child: TextField(
@@ -6544,7 +6544,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('setting maxLength shows counter', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
             child: TextField(
@@ -6564,7 +6564,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('maxLength counter measures surrogate pairs as one character', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
             child: TextField(
@@ -6585,7 +6585,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('maxLength counter measures grapheme clusters as one character', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
             child: TextField(
@@ -6606,7 +6606,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('setting maxLength to TextField.noMaxLength shows only entered length', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
             child: TextField(
@@ -6652,7 +6652,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
               child: TextField(
@@ -6671,7 +6671,7 @@ void main() {
   testWidgetsWithLeakTracking('Disabled text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
@@ -6712,7 +6712,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
@@ -6902,7 +6902,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
@@ -8485,7 +8485,7 @@ void main() {
   }, skip: isBrowser); // [intended] see above.
 
   testWidgetsWithLeakTracking('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
-    const Widget textField = TextField();
+    final Widget textField = TextField();
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -8564,7 +8564,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: const Material(
+        home: Material(
           child: TextField(
             textDirection: TextDirection.rtl,
           ),
@@ -8585,7 +8585,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
-        home: const Material(
+        home: Material(
           child: TextField(
             textDirection: TextDirection.ltr,
           ),
@@ -13342,7 +13342,7 @@ void main() {
   testWidgetsWithLeakTracking('default TextField debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-    const TextField().debugFillProperties(builder);
+    TextField().debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -13355,11 +13355,11 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
-    const TextField(
-      decoration: InputDecoration(labelText: 'foo'),
+    TextField(
+      decoration: const InputDecoration(labelText: 'foo'),
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.done,
-      style: TextStyle(color: Color(0xff00ff00)),
+      style: const TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
       autofocus: true,
@@ -13373,10 +13373,10 @@ void main() {
       cursorWidth: 1.0,
       cursorHeight: 1.0,
       cursorRadius: Radius.zero,
-      cursorColor: Color(0xff00ff00),
+      cursorColor: const Color(0xff00ff00),
       keyboardAppearance: Brightness.dark,
       scrollPadding: EdgeInsets.zero,
-      scrollPhysics: ClampingScrollPhysics(),
+      scrollPhysics: const ClampingScrollPhysics(),
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
@@ -13415,7 +13415,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(),
             ),
@@ -13440,10 +13440,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
               ),
             ),
           ),
@@ -13460,10 +13460,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
                 strutStyle: StrutStyle.disabled,
               ),
             ),
@@ -13485,7 +13485,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(
                 maxLines: 6,
@@ -13509,11 +13509,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(
                 maxLines: 6,
-                strutStyle: StrutStyle(
+                strutStyle: const StrutStyle(
                   // The small strut is overtaken by the larger
                   // TextStyle fontSize.
                   fontSize: 5,
@@ -13540,11 +13540,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(
                 maxLines: 6,
-                strutStyle: StrutStyle(
+                strutStyle: const StrutStyle(
                   fontSize: 25,
                 ),
               ),
@@ -13569,11 +13569,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(
                 maxLines: 3,
-                strutStyle: StrutStyle(
+                strutStyle: const StrutStyle(
                   fontSize: 8,
                   forceStrutHeight: true,
                 ),
@@ -13598,12 +13598,12 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
-          home: const Material(
+          home: Material(
             child: Center(
               child: TextField(
                 maxLines: 3,
-                style: TextStyle(fontSize: 10),
-                strutStyle: StrutStyle(
+                style: const TextStyle(fontSize: 10),
+                strutStyle: const StrutStyle(
                   fontSize: 18,
                   forceStrutHeight: true,
                 ),
@@ -13628,7 +13628,7 @@ void main() {
       overlay(
         child: Theme(
           data: ThemeData(useMaterial3: false),
-          child: const SizedBox(
+          child: SizedBox(
             width: 300.0,
             child: TextField(
               textAlign: TextAlign.center,
@@ -13671,7 +13671,7 @@ void main() {
       overlay(
         child: Theme(
           data: ThemeData(useMaterial3: false),
-          child: const SizedBox(
+          child: SizedBox(
             width: 300.0,
             child: TextField(
               textAlign: TextAlign.center,
@@ -14148,7 +14148,7 @@ void main() {
             controller: scrollController,
             children: <Widget>[
               Container(height: 579), // Push field almost off screen.
-              const TextField(),
+              TextField(),
               Container(height: 1000),
             ],
           ),
@@ -14216,7 +14216,7 @@ void main() {
     testWidgetsWithLeakTracking('By default, TextField is at least kMinInteractiveDimension high', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(),
-        home: const Scaffold(
+        home: Scaffold(
           body: Center(
             child: TextField(),
           ),
@@ -14230,10 +14230,10 @@ void main() {
     testWidgetsWithLeakTracking("When text is very small, TextField still doesn't go below kMinInteractiveDimension height", (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(),
-        home: const Scaffold(
+        home: Scaffold(
           body: Center(
             child: TextField(
-              style: TextStyle(fontSize: 2.0),
+              style: const TextStyle(fontSize: 2.0),
             ),
           ),
         ),
@@ -14246,10 +14246,10 @@ void main() {
     testWidgetsWithLeakTracking('When isDense, TextField can go below kMinInteractiveDimension height', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(),
-        home: const Scaffold(
+        home: Scaffold(
           body: Center(
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 isDense: true,
               ),
             ),
@@ -14413,10 +14413,10 @@ void main() {
           },
           child: Material(
             child: ListView(
-              children: const <Widget>[
-                Padding(padding: EdgeInsets.symmetric(vertical: 200)),
+              children: <Widget>[
+                const Padding(padding: EdgeInsets.symmetric(vertical: 200)),
                 TextField(),
-                Padding(padding: EdgeInsets.symmetric(vertical: 800)),
+                const Padding(padding: EdgeInsets.symmetric(vertical: 800)),
               ],
             ),
           ),
@@ -14560,13 +14560,13 @@ void main() {
 
   testWidgetsWithLeakTracking('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: TextField(
               mouseCursor: SystemMouseCursors.grab,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 // Add an icon so that the left edge is not the text area
                 icon: Icon(Icons.person),
               ),
@@ -14590,12 +14590,12 @@ void main() {
 
     // Test default cursor
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 icon: Icon(Icons.person),
               ),
             ),
@@ -14611,13 +14611,13 @@ void main() {
 
     // Test default cursor when disabled
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: TextField(
               enabled: false,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 icon: Icon(Icons.person),
               ),
             ),
@@ -14635,12 +14635,12 @@ void main() {
     testWidgetsWithLeakTracking('TextField icons change mouse cursor when hovered', (WidgetTester tester) async {
     // Test default cursor in icons area.
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: MouseRegion(
             cursor: SystemMouseCursors.forbidden,
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 icon: Icon(Icons.label),
                 prefixIcon: Icon(Icons.cabin),
                 suffixIcon: Icon(Icons.person),
@@ -15135,11 +15135,11 @@ void main() {
 
   testWidgetsWithLeakTracking('autofill info has hint text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'placeholder text'
               ),
             ),
@@ -15158,7 +15158,7 @@ void main() {
 
   testWidgetsWithLeakTracking('TextField at rest does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home:  Material(
           child: Center(
             child: TextField(),
@@ -16327,7 +16327,7 @@ void main() {
 
     group('defaults', () {
       testWidgetsWithLeakTracking('should build Magnifier on Android', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
+        await tester.pumpWidget(MaterialApp(
           home: Scaffold(body: TextField()))
         );
 
@@ -16347,7 +16347,7 @@ void main() {
 
       testWidgetsWithLeakTracking('should build CupertinoMagnifier on iOS',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
+        await tester.pumpWidget(MaterialApp(
           home: Scaffold(body: TextField()))
         );
 
@@ -16367,7 +16367,7 @@ void main() {
 
       testWidgetsWithLeakTracking('should build nothing on Android and iOS',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
+        await tester.pumpWidget(MaterialApp(
           home: Scaffold(body: TextField()))
         );
 
@@ -16907,9 +16907,9 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 builderContext = context;
-                return const TextField(
+                return TextField(
                   autofocus: true,
-                  spellCheckConfiguration: SpellCheckConfiguration(),
+                  spellCheckConfiguration: const SpellCheckConfiguration(),
                 );
               },
             ),
@@ -16973,12 +16973,12 @@ void main() {
         );
     }
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           body: Center(
             child: TextField(
               autofocus: true,
-              spellCheckConfiguration: SpellCheckConfiguration(),
+              spellCheckConfiguration: const SpellCheckConfiguration(),
             ),
           ),
         ),

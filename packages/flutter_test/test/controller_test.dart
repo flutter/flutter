@@ -1494,7 +1494,7 @@ class _SemanticsTestWidget extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            const _SemanticsTestCard(
+             _SemanticsTestCard(
               label: 'TextField',
               widget: TextField(),
             ),

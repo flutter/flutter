@@ -128,7 +128,7 @@ import 'text_editing_intents.dart';
 ///                     },
 ///                   ),
 ///                 },
-///                 child: const TextField(
+///                 child: TextField(
 ///                   maxLines: 2,
 ///                   decoration: InputDecoration(
 ///                     hintText: 'Up/down increment/decrement here.',
@@ -136,7 +136,7 @@ import 'text_editing_intents.dart';
 ///                 ),
 ///               ),
 ///             ),
-///             const TextField(
+///             TextField(
 ///               maxLines: 2,
 ///               decoration: InputDecoration(
 ///                 hintText: 'Up/down behave normally here.',

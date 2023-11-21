@@ -41,7 +41,7 @@ class FilledTextFieldExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const TextField(
+    return TextField(
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.search),
         suffixIcon: Icon(Icons.clear),
@@ -63,7 +63,7 @@ class OutlinedTextFieldExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const TextField(
+    return TextField(
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.search),
         suffixIcon: Icon(Icons.clear),

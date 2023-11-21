@@ -72,7 +72,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextField(autofocus: true),
         ),
       ),
@@ -121,7 +121,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextField(autofocus: true),
         ),
       ),
@@ -175,7 +175,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextField(autofocus: true),
         ),
       ),
@@ -232,7 +232,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
             child: TextField(autofocus: true),
@@ -289,7 +289,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
-        home: const Material(
+        home: Material(
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
             child: TextField(cursorColor: cursorColor),

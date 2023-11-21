@@ -104,7 +104,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
@@ -126,7 +126,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(),
@@ -242,7 +242,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
@@ -514,8 +514,8 @@ void main() {
         home: Material(
           child: ListView(
             children: <Widget>[
-              const TextField(),
-              const TextField(),
+              TextField(),
+              TextField(),
               TextField(
                 focusNode: focusNodeA,
               ),
@@ -572,7 +572,7 @@ class _APage extends Page<void> {
   @override
   Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
     settings: this,
-    pageBuilder: (_, __, ___) => const TextField(autofocus: true),
+    pageBuilder: (_, __, ___) => TextField(autofocus: true),
   );
 }
 

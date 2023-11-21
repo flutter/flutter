@@ -1797,7 +1797,7 @@ void main() {
       // Pushes one page.
       navigatorKey.currentState!.push<void>(
         MaterialPageRoute<void>(
-          builder: (BuildContext context) => const Material(child: TextField()),
+          builder: (BuildContext context) => Material(child: TextField()),
         ),
       );
       await tester.pumpAndSettle();

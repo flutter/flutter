@@ -502,7 +502,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/23666
     Widget materialAppWithViewInsets(double viewInsetsHeight) {
       final Widget scaffold = Scaffold(
-        body: const TextField(),
+        body: TextField(),
         floatingActionButton: FloatingActionButton(
           tooltip: tooltipText,
           onPressed: () { /* do nothing */ },

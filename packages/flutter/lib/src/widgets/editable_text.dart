@@ -1123,26 +1123,26 @@ class EditableText extends StatefulWidget {
   ///
   /// Input that occupies a single line and scrolls horizontally as needed.
   /// ```dart
-  /// const TextField()
+  /// TextField()
   /// ```
   ///
   /// Input whose height grows from one line up to as many lines as needed for
   /// the text that was entered. If a height limit is imposed by its parent, it
   /// will scroll vertically when its height reaches that limit.
   /// ```dart
-  /// const TextField(maxLines: null)
+  /// TextField(maxLines: null)
   /// ```
   ///
   /// The input's height is large enough for the given number of lines. If
   /// additional lines are entered the input scrolls vertically.
   /// ```dart
-  /// const TextField(maxLines: 2)
+  /// TextField(maxLines: 2)
   /// ```
   ///
   /// Input whose height grows with content between a min and max. An infinite
   /// max is possible with `maxLines: null`.
   /// ```dart
-  /// const TextField(minLines: 2, maxLines: 4)
+  /// TextField(minLines: 2, maxLines: 4)
   /// ```
   ///
   /// See also:
@@ -1186,7 +1186,7 @@ class EditableText extends StatefulWidget {
   /// point the height limit is reached. If additional lines are entered it will
   /// scroll vertically.
   /// ```dart
-  /// const TextField(minLines:2, maxLines: 4)
+  /// TextField(minLines:2, maxLines: 4)
   /// ```
   ///
   /// Defaults to null.

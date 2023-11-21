@@ -96,5 +96,5 @@ void main() {
 }
 
 TextEditingValue getFieldValue(WidgetTester tester) {
-  return (tester.widget(find.byType(TextField)) as TextField).controller!.value;
+  return (tester.widget(find.byType(TextField)) as TextField).controller.value;
 }

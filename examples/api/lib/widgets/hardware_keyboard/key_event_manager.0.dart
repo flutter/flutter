@@ -56,12 +56,12 @@ class FallbackDemoState extends State<FallbackDemo> {
             const Text('This area handles key presses that are unhandled by any shortcuts, by '
                 'displaying them below. Try text shortcuts such as Ctrl-A!'),
             Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
-            const TextField(decoration: InputDecoration(label: Text('Text field 1'))),
+            TextField(decoration: InputDecoration(label: Text('Text field 1'))),
             Shortcuts(
               shortcuts: <ShortcutActivator, Intent>{
                 const SingleActivator(LogicalKeyboardKey.keyQ): VoidCallbackIntent(() {}),
               },
-              child: const TextField(
+              child: TextField(
                 decoration: InputDecoration(
                   label: Text('This field also considers key Q as a shortcut (that does nothing).'),
                 ),

@@ -39,12 +39,12 @@ class _UnfocusExampleState extends State<UnfocusExample> {
           children: <Widget>[
             Wrap(
               children: List<Widget>.generate(4, (int index) {
-                return const SizedBox(
+                return SizedBox(
                   width: 200,
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      decoration: InputDecoration(border: OutlineInputBorder()),
+                      decoration: const InputDecoration(border: OutlineInputBorder()),
                     ),
                   ),
                 );

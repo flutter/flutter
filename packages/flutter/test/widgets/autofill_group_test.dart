@@ -14,11 +14,11 @@ void main() {
     const Key outerKey = Key('outer');
     const Key innerKey = Key('inner');
 
-    const TextField client1 = TextField(autofillHints: <String>['1']);
-    const TextField client2 = TextField(autofillHints: <String>['2']);
+    final TextField client1 = TextField(autofillHints: const <String>['1']);
+    final TextField client2 = TextField(autofillHints: const <String>['2']);
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           body: AutofillGroup(
             key: outerKey,
@@ -48,8 +48,8 @@ void main() {
   testWidgetsWithLeakTracking('new clients can be added & removed to a scope', (WidgetTester tester) async {
     const Key scopeKey = Key('scope');
 
-    const TextField client1 = TextField(autofillHints: <String>['1']);
-    TextField client2 = const TextField(autofillHints: null);
+    final TextField client1 = TextField(autofillHints: const <String>['1']);
+    TextField client2 = TextField(autofillHints: null);
 
     late StateSetter setState;
 
@@ -77,7 +77,7 @@ void main() {
     expect(scopeState.autofillClients.toList(), <State<TextField>>[clientState1]);
 
     // Add to scope.
-    setState(() { client2 = const TextField(autofillHints: <String>['2']); });
+    setState(() { client2 = TextField(autofillHints: const <String>['2']); });
 
     await tester.pump();
 
@@ -86,7 +86,7 @@ void main() {
     expect(scopeState.autofillClients.length, 2);
 
     // Remove from scope again.
-    setState(() { client2 = const TextField(autofillHints: null); });
+    setState(() { client2 = TextField(autofillHints: null); });
 
     await tester.pump();
 
@@ -98,8 +98,8 @@ void main() {
     const Key innerKey = Key('inner');
     final GlobalKey keyClient3 = GlobalKey();
 
-    const TextField client1 = TextField(autofillHints: <String>['1']);
-    const TextField client2 = TextField(autofillHints: <String>['2']);
+    final TextField client1 = TextField(autofillHints: const <String>['1']);
+    final TextField client2 = TextField(autofillHints: const <String>['2']);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -136,7 +136,7 @@ void main() {
             child: Column(children: <Widget>[
               client1,
               TextField(key: keyClient3, autofillHints: const <String>['3']),
-              const AutofillGroup(
+              AutofillGroup(
                 key: innerKey,
                 child: Column(children: <Widget>[client2]),
               ),
@@ -157,9 +157,9 @@ void main() {
     const Key group1 = Key('group1');
     const Key group2 = Key('group2');
     const Key group3 = Key('group3');
-    const TextField placeholder = TextField(autofillHints: <String>[AutofillHints.name]);
+    final TextField placeholder = TextField(autofillHints: const <String>[AutofillHints.name]);
 
-    List<Widget> children = const <Widget> [
+    List<Widget> children = <Widget> [
       AutofillGroup(
         key: group1,
         child: AutofillGroup(child: placeholder),
@@ -193,7 +193,7 @@ void main() {
 
     // Remove the first topmost group group1. Should commit.
     setState(() {
-      children = const <Widget> [
+      children = <Widget> [
         AutofillGroup(key: group2, onDisposeAction: AutofillContextAction.cancel, child: placeholder),
         AutofillGroup(
           key: group3,
@@ -213,7 +213,7 @@ void main() {
 
     // Remove the topmost group group2. Should cancel.
     setState(() {
-      children = const <Widget> [
+      children = <Widget> [
         AutofillGroup(
           key: group3,
           child: AutofillGroup(child: placeholder),
@@ -232,7 +232,7 @@ void main() {
 
     // Remove the inner group within group3. No action.
     setState(() {
-      children = const <Widget> [
+      children = <Widget> [
         AutofillGroup(
           key: group3,
           child: placeholder,

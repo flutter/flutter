@@ -420,7 +420,7 @@ mixin CommandHandlerFactory {
         includePlaceholders: false,
       );
     } else if (widget.runtimeType == TextField) {
-      text = (widget as TextField).controller?.text;
+      text = (widget as TextField).controller.text;
     } else if (widget.runtimeType == TextFormField) {
       text = (widget as TextFormField).controller.text;
     } else if (widget.runtimeType == EditableText) {

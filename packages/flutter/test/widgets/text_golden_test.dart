@@ -629,17 +629,17 @@ void main() {
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
-                  child: const Text.rich(
+                  child: Text.rich(
                     TextSpan(
                       text: 'My name is: ',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
                           child: SizedBox(width: 70, height: 25, child: TextField()),
                         ),
-                        TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
+                        const TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
                           child: SizedBox(width: 70, height: 25, child: TextField()),
                         ),
@@ -676,14 +676,14 @@ void main() {
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
-                  child: const Text.rich(
+                  child: Text.rich(
                     TextSpan(
                       text: 'outer',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                       ),
                       children: <InlineSpan>[
-                        WidgetSpan(
+                        const WidgetSpan(
                           child: Text.rich(
                             TextSpan(
                               text: 'inner',
@@ -747,11 +747,11 @@ void main() {
                             ),
                           ),
                         ),
-                        TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
+                        const TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
                           child: SizedBox(width: 70, height: 25, child: TextField()),
                         ),
-                        WidgetSpan(
+                        const WidgetSpan(
                           child: SizedBox(
                             width: 50.0,
                             height: 55.0,

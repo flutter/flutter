@@ -30,10 +30,10 @@ class _MainWidget extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          const TextField(
-            key: Key('enabled text field'),
+          TextField(
+            key: const Key('enabled text field'),
             autofocus: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Email',
               suffixText: '@gmail.com',
               hintText: 'Enter your email',

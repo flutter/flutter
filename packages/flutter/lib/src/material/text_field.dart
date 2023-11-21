@@ -107,11 +107,15 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// field (e.g., by pressing a button on the soft keyboard), the text field
 /// calls the [onSubmitted] callback.
 ///
+/// When a [controller] is specified, its [TextEditingController.text]
+/// defines the [initialValue].
 /// To control the text that is displayed in the text field, use the
-/// [controller]. For example, to set the initial value of the text field, use
-/// a [controller] that already contains some text. The [controller] can also
+/// [controller]. For example, the [controller] can
 /// control the selection and composing region (and to observe changes to the
 /// text, selection, and composing region).
+///
+/// If a [controller] is not specified, [initialValue] can be used to give
+/// the automatically generated controller an initial value.
 ///
 /// By default, a text field has a [decoration] that draws a divider below the
 /// text field. You can use the [decoration] property to control the decoration,
@@ -209,6 +213,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
+	/// When a [controller] is specified, [initialValue] must be null (the
+  /// default). If [controller] is null, then a [TextEditingController]
+  /// will be constructed automatically and its `text` will be initialized
+  /// to [initialValue] or the empty string.
+  ///
   /// If [decoration] is non-null (which is the default), the text field requires
   /// one of its ancestors to be a [Material] widget.
   ///
@@ -251,9 +260,10 @@ class TextField extends StatefulWidget {
   ///
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
-  const TextField({
+  TextField({
     super.key,
-    this.controller,
+    TextEditingController? controller,
+		String? initialValue,
     this.focusNode,
     this.undoController,
     this.decoration = const InputDecoration(),
@@ -320,7 +330,8 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
-  }) : assert(obscuringCharacter.length == 1),
+  }) : assert(initialValue == null || controller == null),
+	     assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(maxLines == null || maxLines > 0),
@@ -343,7 +354,9 @@ class TextField extends StatefulWidget {
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.',
        ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
+       enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText) {
+			   this.controller = controller ?? TextEditingController(text: initialValue);
+			 }
 
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
@@ -365,7 +378,7 @@ class TextField extends StatefulWidget {
   /// Controls the text being edited.
   ///
   /// If null, this widget will create its own [TextEditingController].
-  final TextEditingController? controller;
+  late final TextEditingController controller;
 
   /// Defines the keyboard focus for this widget.
   ///
@@ -934,8 +947,7 @@ class TextField extends StatefulWidget {
 }
 
 class _TextFieldState extends State<TextField> with RestorationMixin implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
-  RestorableTextEditingController? _controller;
-  TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
+  TextEditingController get _effectiveController => widget.controller;
 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
@@ -1048,9 +1060,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void initState() {
     super.initState();
     _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
-    if (widget.controller == null) {
-      _createLocalController();
-    }
     _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
@@ -1074,13 +1083,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller == null && oldWidget.controller != null) {
-      _createLocalController(oldWidget.controller!.value);
-    } else if (widget.controller != null && oldWidget.controller == null) {
-      unregisterFromRestoration(_controller!);
-      _controller!.dispose();
-      _controller = null;
-    }
 
     if (widget.focusNode != oldWidget.focusNode) {
       (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
@@ -1098,24 +1100,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    if (_controller != null) {
-      _registerController();
-    }
-  }
-
-  void _registerController() {
-    assert(_controller != null);
-    registerForRestoration(_controller!, 'controller');
-  }
-
-  void _createLocalController([TextEditingValue? value]) {
-    assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
-    if (!restorePending) {
-      _registerController();
-    }
   }
 
   @override
@@ -1125,7 +1109,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void dispose() {
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
-    _controller?.dispose();
     super.dispose();
   }
 

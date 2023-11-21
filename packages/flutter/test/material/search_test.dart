@@ -40,7 +40,7 @@ void main() {
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
 
     expect(
-      textField.controller!.selection,
+      textField.controller.selection,
       TextSelection(
         baseOffset: delegate.query.length,
         extentOffset: delegate.query.length,
@@ -1101,7 +1101,7 @@ void main() {
 
     final Finder textFieldFinder = find.byType(TextField);
     final TextField textField = tester.widget<TextField>(textFieldFinder);
-    expect(textField.controller!.text.length, 0);
+    expect(textField.controller.text.length, 0);
 
     mockClipboard.handleMethodCall(const MethodCall(
       'Clipboard.setData',
@@ -1117,7 +1117,7 @@ void main() {
 
     await tester.tap(find.text('Paste'));
     await tester.pump();
-    expect(textField.controller!.text.length, 15);
+    expect(textField.controller.text.length, 15);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
 

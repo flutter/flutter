@@ -941,7 +941,7 @@ void main() {
 
     testWidgets('Passes if text field does not have label', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(_boilerplate(const TextField()));
+      await tester.pumpWidget(_boilerplate(TextField()));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
       expect(result.passed, true);
       handle.dispose();

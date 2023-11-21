@@ -28,8 +28,8 @@ class InputDecorationExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const TextField(
-      decoration: InputDecoration(
+    return TextField(
+      decoration: const InputDecoration(
         hintText: 'Hint Text',
         errorText: 'Error Text',
         border: OutlineInputBorder(),

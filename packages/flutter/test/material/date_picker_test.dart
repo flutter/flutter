@@ -1373,7 +1373,7 @@ void main() {
     testWidgetsWithLeakTracking('Toggle to calendar mode keeps selected date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final TextField field = textField(tester);
-        field.controller!.clear();
+        field.controller.clear();
 
         await tester.enterText(find.byType(TextField), '12/25/2016');
         await tester.tap(find.byIcon(Icons.calendar_today));
@@ -1386,7 +1386,7 @@ void main() {
     testWidgetsWithLeakTracking('Entered text returns date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final TextField field = textField(tester);
-        field.controller!.clear();
+        field.controller.clear();
 
         await tester.enterText(find.byType(TextField), '12/25/2016');
         await tester.tap(find.text('OK'));
@@ -1398,7 +1398,7 @@ void main() {
       errorFormatText = 'oops';
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final TextField field = textField(tester);
-        field.controller!.clear();
+        field.controller.clear();
 
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), '1225');
@@ -1414,7 +1414,7 @@ void main() {
       errorFormatText = 'oops';
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final TextField field = textField(tester);
-        field.controller!.clear();
+        field.controller.clear();
 
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), '20 days, 3 months, 2003');
@@ -1431,7 +1431,7 @@ void main() {
       errorInvalidText = 'oops';
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final TextField field = textField(tester);
-        field.controller!.clear();
+        field.controller.clear();
 
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), '08/10/1969');
@@ -1447,7 +1447,7 @@ void main() {
       // This is a regression test for https://github.com/flutter/flutter/issues/126397.
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         final TextField field = textField(tester);
-        field.controller!.clear();
+        field.controller.clear();
 
         // Enter some text to trigger autovalidate.
         await tester.enterText(find.byType(TextField), 'xyz');
@@ -1458,7 +1458,7 @@ void main() {
         expect(find.text('Invalid format.'), findsOneWidget);
 
         // Clear the text.
-        field.controller!.clear();
+        field.controller.clear();
 
         // Enter an invalid date that is too long while autovalidate is still on.
         await tester.enterText(find.byType(TextField), '10/05/2023666777889');

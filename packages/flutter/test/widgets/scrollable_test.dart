@@ -1219,10 +1219,10 @@ void main() {
       home: Scaffold(
         body: ListView(
           key: key,
-          children: const <Widget>[
+          children: <Widget>[
             TextField(
               autofocus: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 prefixText: 'prefix',
               ),
             ),

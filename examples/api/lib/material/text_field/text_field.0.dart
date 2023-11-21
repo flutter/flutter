@@ -11,11 +11,11 @@ class ObscuredTextFieldSample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       width: 250,
       child: TextField(
         obscureText: true,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           border: OutlineInputBorder(),
           labelText: 'Password',
         ),

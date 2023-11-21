@@ -28,9 +28,9 @@ class LabelExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: TextField(
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           label: Text.rich(
             TextSpan(
               children: <InlineSpan>[

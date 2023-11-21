@@ -904,11 +904,11 @@ void main() {
       return result;
     }
 
-    const Widget testWidget = MaterialApp(
+    final Widget testWidget = MaterialApp(
       home: Material(
         child: Center(
           child: TextField(
-            key: ValueKey<String>('foo'),
+            key: const ValueKey<String>('foo'),
             autofocus: true,
           ),
         ),

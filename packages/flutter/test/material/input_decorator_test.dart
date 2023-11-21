@@ -2088,10 +2088,10 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgetsWithLeakTracking('InputDecorator iconColor/prefixIconColor/suffixIconColor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               icon: Icon(Icons.cabin),
               prefixIcon: Icon(Icons.sailing),
               suffixIcon: Icon(Icons.close),
@@ -5882,13 +5882,13 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
     const Key key = Key('textField');
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: TextField(
               key: key,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 fillColor: Colors.white,
                 filled: true,
                 border: UnderlineInputBorder(
@@ -6573,14 +6573,14 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
   testWidgetsWithLeakTracking('min intrinsic height for TextField with no content padding', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/75509
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
           child: IntrinsicHeight(
             child: Column(
               children: <Widget>[
                 TextField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Label Text',
                     helperText: 'Helper Text',
                     contentPadding: EdgeInsets.zero,

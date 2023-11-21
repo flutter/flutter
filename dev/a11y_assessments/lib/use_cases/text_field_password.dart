@@ -29,19 +29,19 @@ class _MainWidget extends StatelessWidget {
         title: const Text('TextField password'),
       ),
       body: ListView(
-        children: const <Widget>[
+        children: <Widget>[
           TextField(
-            key: Key('enabled password'),
+            key: const Key('enabled password'),
             autofocus: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
             ),
             obscureText: true,
           ),
           TextField(
-            key: Key('disabled password'),
-            decoration: InputDecoration(
+            key: const Key('disabled password'),
+            decoration: const InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
             ),

@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('enterText works', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: TextField(),
         ),
@@ -35,7 +35,7 @@ void main() {
 
   testWidgets('receiveAction() forwards exception when exception occurs during action processing', (WidgetTester tester) async {
     // Setup a widget that can receive focus so that we can open the keyboard.
-    const Widget widget = MaterialApp(
+    final Widget widget = MaterialApp(
       home: Material(
         child: TextField(),
       ),
