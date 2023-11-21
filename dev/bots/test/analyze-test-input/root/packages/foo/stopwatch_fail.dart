@@ -8,7 +8,7 @@ void main() {
   Stopwatch();
 
   // Identify more than one in a file.
-  final Stopwatch
+ Stopwatch myStopwatch;
   myStopwatch = Stopwatch();
   myStopwatch.reset();
 }

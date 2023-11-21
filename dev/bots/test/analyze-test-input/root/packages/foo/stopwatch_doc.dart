@@ -13,7 +13,6 @@
 /// Stopwatch();
 /// ```
 /// {@end-tool}
-///
 String? foo;
 // Other comments
 // Stopwatch();
