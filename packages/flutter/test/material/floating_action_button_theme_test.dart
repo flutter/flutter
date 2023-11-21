@@ -251,7 +251,6 @@ void main() {
   });
 
   testWidgets('Material3: FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
-    const ColorScheme colorScheme = ColorScheme.light();
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
