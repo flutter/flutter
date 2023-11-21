@@ -98,9 +98,17 @@ void main() {
         ),
       ),
       home: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () { },
-          child: const Icon(Icons.add),
+        floatingActionButton: Row(
+          children: <Widget>[
+            FloatingActionButtonOld(
+              onPressed: () { },
+              child: const Icon(Icons.add),
+            ),
+            FloatingActionButton(
+              onPressed: () { },
+              child: const Icon(Icons.add),
+            ),
+          ],
         ),
       ),
     ));
@@ -122,6 +130,15 @@ void main() {
     expect(style.shape!.resolve(enabled), shape);
     expect(style.overlayColor!.resolve(pressed), splashColor);
     expect(buttonConstraints, constraints);
+
+    expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
+    expect(_getRichTextOld(tester).text.style!.color, foregroundColor);
+    expect(_getRawMaterialButton(tester).elevation, elevation);
+    expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
+    expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
+    expect(_getRawMaterialButton(tester).shape, shape);
+    expect(_getRawMaterialButton(tester).splashColor, splashColor);
+    expect(_getRawMaterialButton(tester).constraints, constraints);
   });
 
   testWidgets('FloatingActionButton values take priority over FloatingActionButtonThemeData values when both properties are specified', (WidgetTester tester) async {
@@ -442,6 +459,24 @@ SizedBox _getIconSize(WidgetTester tester) {
         matching: find.byType(Icon),
       ),
       matching: find.byType(SizedBox),
+    ),
+  );
+}
+
+RawMaterialButton _getRawMaterialButton(WidgetTester tester) {
+  return tester.widget<RawMaterialButton>(
+    find.descendant(
+      of: find.byType(FloatingActionButtonOld),
+      matching: find.byType(RawMaterialButton),
+    ),
+  );
+}
+
+RichText _getRichTextOld(WidgetTester tester) {
+  return tester.widget<RichText>(
+    find.descendant(
+      of: find.byType(FloatingActionButtonOld),
+      matching: find.byType(RichText),
     ),
   );
 }
