@@ -16,8 +16,7 @@ static constexpr int kClockType = CLOCK_MONOTONIC;
 
 MessageLoopLinux::MessageLoopLinux()
     : epoll_fd_(FML_HANDLE_EINTR(::epoll_create(1 /* unused */))),
-      timer_fd_(::timerfd_create(kClockType, TFD_NONBLOCK | TFD_CLOEXEC)),
-      running_(false) {
+      timer_fd_(::timerfd_create(kClockType, TFD_NONBLOCK | TFD_CLOEXEC)) {
   FML_CHECK(epoll_fd_.is_valid());
   FML_CHECK(timer_fd_.is_valid());
   bool added_source = AddOrRemoveTimerSource(true);

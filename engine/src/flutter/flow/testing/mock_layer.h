@@ -27,13 +27,13 @@ class MockLayer : public Layer {
  public:
   explicit MockLayer(const SkPath& path, DlPaint paint = DlPaint());
 
-  static std::shared_ptr<MockLayer> Make(SkPath path,
+  static std::shared_ptr<MockLayer> Make(const SkPath& path,
                                          DlPaint paint = DlPaint()) {
-    return std::make_shared<MockLayer>(std::move(path), std::move(paint));
+    return std::make_shared<MockLayer>(path, std::move(paint));
   }
 
-  static std::shared_ptr<MockLayer> MakeOpacityCompatible(SkPath path) {
-    auto mock_layer = std::make_shared<MockLayer>(std::move(path), DlPaint());
+  static std::shared_ptr<MockLayer> MakeOpacityCompatible(const SkPath& path) {
+    auto mock_layer = std::make_shared<MockLayer>(path, DlPaint());
     mock_layer->set_fake_opacity_compatible(true);
     return mock_layer;
   }

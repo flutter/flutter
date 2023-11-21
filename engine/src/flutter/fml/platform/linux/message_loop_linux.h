@@ -17,7 +17,7 @@ class MessageLoopLinux : public MessageLoopImpl {
  private:
   fml::UniqueFD epoll_fd_;
   fml::UniqueFD timer_fd_;
-  bool running_;
+  bool running_ = false;
 
   MessageLoopLinux();
 
