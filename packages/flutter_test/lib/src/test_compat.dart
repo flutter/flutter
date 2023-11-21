@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' show Timeout;
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
@@ -16,9 +17,7 @@ import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_im
 import 'package:test_api/src/backend/state.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/test.dart';
-
-import 'leak_tracking.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
 
 // ignore: deprecated_member_use
 export 'package:test_api/fake.dart' show Fake;

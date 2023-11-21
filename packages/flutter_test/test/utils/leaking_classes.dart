@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class LeakTrackedClass {
   LeakTrackedClass() {
