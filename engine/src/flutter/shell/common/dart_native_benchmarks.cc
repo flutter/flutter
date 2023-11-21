@@ -44,8 +44,8 @@ BENCHMARK_F(DartNativeBenchmarks, TimeToFirstNativeMessageFromIsolateInNewVM)
     DartVMRef vm_ref = DartVMRef::Create(settings);
 
     ThreadHost thread_host("io.flutter.test.DartNativeBenchmarks.",
-                           ThreadHost::Type::Platform | ThreadHost::Type::IO |
-                               ThreadHost::Type::UI);
+                           ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                               ThreadHost::Type::kUi);
     TaskRunners task_runners(
         "test",
         thread_host.platform_thread->GetTaskRunner(),  // platform
@@ -81,8 +81,8 @@ BENCHMARK_F(DartNativeBenchmarks, MultipleDartToNativeMessages)
     DartVMRef vm_ref = DartVMRef::Create(settings);
 
     ThreadHost thread_host("io.flutter.test.DartNativeBenchmarks.",
-                           ThreadHost::Type::Platform | ThreadHost::Type::IO |
-                               ThreadHost::Type::UI);
+                           ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
+                               ThreadHost::Type::kUi);
     TaskRunners task_runners(
         "test",
         thread_host.platform_thread->GetTaskRunner(),  // platform

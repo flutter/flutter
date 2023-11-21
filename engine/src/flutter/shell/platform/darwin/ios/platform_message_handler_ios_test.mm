@@ -52,7 +52,7 @@ class MockPlatformMessageResponse : public PlatformMessageResponse {
 
 - (void)testSetAndCallHandler {
   ThreadHost thread_host("io.flutter.test." + std::string(self.name.UTF8String),
-                         ThreadHost::Type::RASTER | ThreadHost::Type::IO | ThreadHost::Type::UI);
+                         ThreadHost::Type::kRaster | ThreadHost::Type::kIo | ThreadHost::Type::kUi);
   TaskRunners task_runners(
       "test", GetCurrentTaskRunner(), thread_host.raster_thread->GetTaskRunner(),
       thread_host.ui_thread->GetTaskRunner(), thread_host.io_thread->GetTaskRunner());
@@ -78,7 +78,7 @@ class MockPlatformMessageResponse : public PlatformMessageResponse {
 
 - (void)testSetClearAndCallHandler {
   ThreadHost thread_host("io.flutter.test." + std::string(self.name.UTF8String),
-                         ThreadHost::Type::RASTER | ThreadHost::Type::IO | ThreadHost::Type::UI);
+                         ThreadHost::Type::kRaster | ThreadHost::Type::kIo | ThreadHost::Type::kUi);
   TaskRunners task_runners(
       "test", GetCurrentTaskRunner(), thread_host.raster_thread->GetTaskRunner(),
       thread_host.ui_thread->GetTaskRunner(), thread_host.io_thread->GetTaskRunner());
@@ -106,7 +106,7 @@ class MockPlatformMessageResponse : public PlatformMessageResponse {
 
 - (void)testSetAndCallHandlerTaskQueue {
   ThreadHost thread_host("io.flutter.test." + std::string(self.name.UTF8String),
-                         ThreadHost::Type::RASTER | ThreadHost::Type::IO | ThreadHost::Type::UI);
+                         ThreadHost::Type::kRaster | ThreadHost::Type::kIo | ThreadHost::Type::kUi);
   TaskRunners task_runners(
       "test", GetCurrentTaskRunner(), thread_host.raster_thread->GetTaskRunner(),
       thread_host.ui_thread->GetTaskRunner(), thread_host.io_thread->GetTaskRunner());

@@ -21,8 +21,8 @@ class Fixture : public testing::FixtureTest {
 
 static void BM_PlatformMessageResponseDartComplete(benchmark::State& state) {
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      "test", ThreadHost::Type::Platform | ThreadHost::Type::RASTER |
-                  ThreadHost::Type::IO | ThreadHost::Type::UI));
+      "test", ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
+                  ThreadHost::Type::kIo | ThreadHost::Type::kUi));
   TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
                            thread_host.raster_thread->GetTaskRunner(),
                            thread_host.ui_thread->GetTaskRunner(),
@@ -69,8 +69,8 @@ static void BM_PlatformMessageResponseDartComplete(benchmark::State& state) {
 
 static void BM_PathVolatilityTracker(benchmark::State& state) {
   ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      "test", ThreadHost::Type::Platform | ThreadHost::Type::RASTER |
-                  ThreadHost::Type::IO | ThreadHost::Type::UI));
+      "test", ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
+                  ThreadHost::Type::kIo | ThreadHost::Type::kUi));
   TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
                            thread_host.raster_thread->GetTaskRunner(),
                            thread_host.ui_thread->GetTaskRunner(),

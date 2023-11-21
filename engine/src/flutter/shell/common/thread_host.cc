@@ -16,43 +16,43 @@ std::string ThreadHost::ThreadHostConfig::MakeThreadName(
     Type type,
     const std::string& prefix) {
   switch (type) {
-    case Type::Platform:
+    case Type::kPlatform:
       return prefix + ".platform";
-    case Type::UI:
+    case Type::kUi:
       return prefix + ".ui";
-    case Type::IO:
+    case Type::kIo:
       return prefix + ".io";
-    case Type::RASTER:
+    case Type::kRaster:
       return prefix + ".raster";
-    case Type::Profiler:
+    case Type::kProfiler:
       return prefix + ".profiler";
   }
 }
 
 void ThreadHost::ThreadHostConfig::SetIOConfig(const ThreadConfig& config) {
-  type_mask |= ThreadHost::Type::IO;
+  type_mask |= ThreadHost::Type::kIo;
   io_config = config;
 }
 
 void ThreadHost::ThreadHostConfig::SetUIConfig(const ThreadConfig& config) {
-  type_mask |= ThreadHost::Type::UI;
+  type_mask |= ThreadHost::Type::kUi;
   ui_config = config;
 }
 
 void ThreadHost::ThreadHostConfig::SetPlatformConfig(
     const ThreadConfig& config) {
-  type_mask |= ThreadHost::Type::Platform;
+  type_mask |= ThreadHost::Type::kPlatform;
   platform_config = config;
 }
 
 void ThreadHost::ThreadHostConfig::SetRasterConfig(const ThreadConfig& config) {
-  type_mask |= ThreadHost::Type::RASTER;
+  type_mask |= ThreadHost::Type::kRaster;
   raster_config = config;
 }
 
 void ThreadHost::ThreadHostConfig::SetProfilerConfig(
     const ThreadConfig& config) {
-  type_mask |= ThreadHost::Type::Profiler;
+  type_mask |= ThreadHost::Type::kProfiler;
   profiler_config = config;
 }
 
@@ -78,27 +78,27 @@ ThreadHost::ThreadHost(const std::string& name_prefix, uint64_t mask)
 
 ThreadHost::ThreadHost(const ThreadHostConfig& host_config)
     : name_prefix(host_config.name_prefix) {
-  if (host_config.isThreadNeeded(ThreadHost::Type::Platform)) {
+  if (host_config.isThreadNeeded(ThreadHost::Type::kPlatform)) {
     platform_thread =
-        CreateThread(Type::Platform, host_config.platform_config, host_config);
+        CreateThread(Type::kPlatform, host_config.platform_config, host_config);
   }
 
-  if (host_config.isThreadNeeded(ThreadHost::Type::UI)) {
-    ui_thread = CreateThread(Type::UI, host_config.ui_config, host_config);
+  if (host_config.isThreadNeeded(ThreadHost::Type::kUi)) {
+    ui_thread = CreateThread(Type::kUi, host_config.ui_config, host_config);
   }
 
-  if (host_config.isThreadNeeded(ThreadHost::Type::RASTER)) {
+  if (host_config.isThreadNeeded(ThreadHost::Type::kRaster)) {
     raster_thread =
-        CreateThread(Type::RASTER, host_config.raster_config, host_config);
+        CreateThread(Type::kRaster, host_config.raster_config, host_config);
   }
 
-  if (host_config.isThreadNeeded(ThreadHost::Type::IO)) {
-    io_thread = CreateThread(Type::IO, host_config.io_config, host_config);
+  if (host_config.isThreadNeeded(ThreadHost::Type::kIo)) {
+    io_thread = CreateThread(Type::kIo, host_config.io_config, host_config);
   }
 
-  if (host_config.isThreadNeeded(ThreadHost::Type::Profiler)) {
+  if (host_config.isThreadNeeded(ThreadHost::Type::kProfiler)) {
     profiler_thread =
-        CreateThread(Type::Profiler, host_config.profiler_config, host_config);
+        CreateThread(Type::kProfiler, host_config.profiler_config, host_config);
   }
 }
 

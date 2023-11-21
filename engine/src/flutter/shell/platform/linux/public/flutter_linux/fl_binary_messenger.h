@@ -27,6 +27,8 @@ G_BEGIN_DECLS
 #define FL_BINARY_MESSENGER_ERROR fl_binary_messenger_codec_error_quark()
 
 typedef enum {
+  // Part of the public API, so fixing the name is a breaking change.
+  // NOLINTNEXTLINE(readability-identifier-naming)
   FL_BINARY_MESSENGER_ERROR_ALREADY_RESPONDED,
 } FlBinaryMessengerError;
 
