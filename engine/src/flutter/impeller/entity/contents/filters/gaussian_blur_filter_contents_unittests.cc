@@ -135,13 +135,10 @@ TEST_P(GaussianBlurFilterContentsTest, RenderCoverageMatchesGetCoverage) {
     EXPECT_TRUE(result_coverage.has_value());
     EXPECT_TRUE(contents_coverage.has_value());
     if (result_coverage.has_value() && contents_coverage.has_value()) {
-      // TODO(gaaclarke): This test won't pass until the blur_radius is used to
-      //                  expand the coverage. See note inside of
-      //                  gaussian_blur_filter_contents.cc.
-      // EXPECT_TRUE(RectNear(result_coverage.value(),
-      //                      contents_coverage.value()));
+      EXPECT_TRUE(RectNear(contents_coverage.value(),
+                           Rect::MakeLTRB(-1, -1, 101, 101)));
       EXPECT_TRUE(
-          RectNear(result_coverage.value(), Rect::MakeLTRB(0, 0, 100, 100)));
+          RectNear(result_coverage.value(), Rect::MakeLTRB(-1, -1, 101, 101)));
     }
   }
 }
@@ -170,15 +167,10 @@ TEST_P(GaussianBlurFilterContentsTest,
     EXPECT_TRUE(result_coverage.has_value());
     EXPECT_TRUE(contents_coverage.has_value());
     if (result_coverage.has_value() && contents_coverage.has_value()) {
-      // TODO(gaaclarke): This test won't pass until the blur_radius is used to
-      //                  expand the coverage. See note inside of
-      //                  gaussian_blur_filter_contents.cc.
-      // EXPECT_TRUE(RectNear(result_coverage.value(),
-      //                      contents_coverage.value()));
       EXPECT_TRUE(RectNear(contents_coverage.value(),
                            Rect::MakeLTRB(99, 199, 201, 301)));
-      EXPECT_TRUE(RectNear(result_coverage.value(),
-                           Rect::MakeLTRB(100, 200, 200, 300)));
+      EXPECT_TRUE(
+          RectNear(result_coverage.value(), Rect::MakeLTRB(99, 199, 201, 301)));
     }
   }
 }
@@ -208,15 +200,10 @@ TEST_P(GaussianBlurFilterContentsTest,
     EXPECT_TRUE(result_coverage.has_value());
     EXPECT_TRUE(contents_coverage.has_value());
     if (result_coverage.has_value() && contents_coverage.has_value()) {
-      // TODO(gaaclarke): This test won't pass until the blur_radius is used to
-      //                  expand the coverage. See note inside of
-      //                  gaussian_blur_filter_contents.cc.
-      // EXPECT_TRUE(RectNear(result_coverage.value(),
-      //                      contents_coverage.value()));
       EXPECT_TRUE(RectNear(contents_coverage.value(),
                            Rect::MakeLTRB(99, 99, 401, 501)));
-      EXPECT_TRUE(RectNear(result_coverage.value(),
-                           Rect::MakeLTRB(100, 100, 400, 500)));
+      EXPECT_TRUE(
+          RectNear(result_coverage.value(), Rect::MakeLTRB(99, 99, 401, 501)));
     }
   }
 }
