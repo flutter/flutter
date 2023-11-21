@@ -5,8 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker/leak_tracker.dart';
-import 'package:leak_tracker_testing/leak_tracker_testing.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'utils/leaking_classes.dart';
 
@@ -18,7 +17,7 @@ late final String _test5TrackingOnWithDisposalStackTrace;
 
 void main() {
   late final Leaks reportedLeaks;
-  experimentalCollectedLeaksReporter = (Leaks leaks) => reportedLeaks = leaks;
+  collectedLeaksReporter = (Leaks leaks) => reportedLeaks = leaks;
   LeakTesting.settings = LeakTesting.settings.copyWith(ignoredLeaks: const IgnoredLeaks(), ignore: false);
 
   group('Group', () {

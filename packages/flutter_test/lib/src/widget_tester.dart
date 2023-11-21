@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' as test_package;
@@ -116,6 +117,16 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
+/// The argument [experimentalLeakTesting] is experimental and is not recommended
+/// for use outside of the Flutter framework.
+/// When [experimentalLeakTesting] is set, it is used for leak tracking.
+/// Otherwise [LeakTesting.settings] is used.
+/// Adjust [LeakTesting.settings] in flutter_test_config.dart
+/// (see https://github.com/flutter/flutter/blob/master/packages/flutter_test/lib/flutter_test.dart)
+/// for the entire package or folder, or in the test's main for a test file.
+/// To turn off leak tracking just for one test, set [experimentalLeakTesting] to
+/// `LeakTrackingForTests.ignore()`.
+///
 /// ## Sample code
 ///
 /// ```dart
@@ -135,10 +146,12 @@ void testWidgets(
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
   int? retry,
+  LeakTesting? experimentalLeakTesting,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
+  callback = _wrapWithLeakTracking(description, callback, experimentalLeakTesting);
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
     // IDEs may make assumptions about the format of this suffix in order to
@@ -181,6 +194,24 @@ void testWidgets(
       retry: retry,
     );
   }
+}
+
+WidgetTesterCallback _wrapWithLeakTracking(
+  String description,
+  WidgetTesterCallback callback,
+  LeakTesting? leakTesting,
+) {
+  // It is important to resolve settings outside of callback, to take
+  // value of LeakTesting.settings at the moment of this function execution,
+  // not at the moment of callback execution.
+  final LeakTesting settings = leakTesting ?? LeakTesting.settings;
+
+  Future<void> wrappedCallBack(WidgetTester tester) async {
+    mayBeSetupLeakTrackingForTest(settings, description);
+    await callback(tester);
+    ignoreAllLeaks();
+  }
+  return wrappedCallBack;
 }
 
 /// An abstract base class for describing test environment variants.
