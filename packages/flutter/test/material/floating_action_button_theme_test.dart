@@ -61,8 +61,6 @@ void main() {
       maxHeight: maximumSize.height,
     );
 
-    // The color scheme values are guaranteed to be non null since the default
-    // [ThemeData] creates it with [ColorScheme.fromSwatch].
     expect(style.backgroundColor!.resolve(enabled), expectedThemeData.colorScheme.secondary);
     expect(_getRichText(tester).text.style!.color, expectedThemeData.colorScheme.onSecondary);
 
