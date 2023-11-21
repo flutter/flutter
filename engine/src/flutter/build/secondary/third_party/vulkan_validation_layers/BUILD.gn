@@ -464,7 +464,7 @@ foreach(layer_info, layers) {
     }
     if (is_android) {
       libs = [
-        "c++",  # Note: C++ added by Flutter.
+        "c++_static",  # Note: C++ added by Flutter.
         "log",
         "nativewindow",
       ]
