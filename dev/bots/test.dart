@@ -1581,9 +1581,9 @@ Future<void> _runCustomerTesting() async {
     );
   }
   await runCommand(
-    Platform.isWindows? 'ci.bat': './ci.sh',
-    <String>[ ],
-    workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
+    Platform.isWindows? 'call': './ci.sh',
+    Platform.isWindows? <String>['ci.bat'] : <String>[],
+    workingDirectory: flutterRoot, 'dev', 'customer_testing'),
   );
 }
 
