@@ -365,6 +365,7 @@ class KernelCompiler {
     ];
 
     _logger.printTrace(command.join(' '));
+
     final Process server = await _processManager.start(command);
 
     server.stderr
