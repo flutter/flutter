@@ -87,8 +87,7 @@ AndroidEGLSurface::AndroidEGLSurface(EGLSurface surface,
     : surface_(surface),
       display_(display),
       context_(context),
-      damage_(std::make_unique<AndroidEGLSurfaceDamage>()),
-      presentation_time_proc_(nullptr) {
+      damage_(std::make_unique<AndroidEGLSurfaceDamage>()) {
   damage_->init(display_, context);
 }
 
