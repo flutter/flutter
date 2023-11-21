@@ -389,15 +389,16 @@ class AndroidLicenseValidator extends DoctorValidator {
         ),
       );
 
-      final Stream<List<int>> stderrBroadcast = process.stderr.asBroadcastStream();
       final List<String> stderrLines = <String>[];
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {
         await Future.wait<void>(<Future<void>>[
           _stdio.addStdoutStream(process.stdout),
-          _stdio.addStderrStream(stderrBroadcast),
-          stderrBroadcast.transform(utf8.decoder).forEach(stderrLines.add),
+          process.stderr.forEach((List<int> event) {
+            _stdio.stderr.add(event);
+            stderrLines.add(utf8.decode(event));
+          }),
         ]);
       } on Exception catch (err, stack) {
         _logger.printTrace('Echoing stdout or stderr from the license subprocess failed:');
