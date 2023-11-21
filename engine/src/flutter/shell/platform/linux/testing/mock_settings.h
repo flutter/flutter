@@ -18,6 +18,10 @@ class MockSettings {
   MockSettings();
   ~MockSettings();
 
+  // This was an existing use of operator overloading. It's against our style
+  // guide but enabling clang tidy on header files is a higher priority than
+  // fixing this.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator FlSettings*();
 
   MOCK_METHOD(FlClockFormat,

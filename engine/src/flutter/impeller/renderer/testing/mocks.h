@@ -105,7 +105,7 @@ class MockRenderPass : public RenderPass {
 class MockCommandBuffer : public CommandBuffer {
  public:
   explicit MockCommandBuffer(std::weak_ptr<const Context> context)
-      : CommandBuffer(context) {}
+      : CommandBuffer(std::move(context)) {}
   MOCK_METHOD(bool, IsValid, (), (const, override));
   MOCK_METHOD(void, SetLabel, (const std::string& label), (const, override));
   MOCK_METHOD(std::shared_ptr<BlitPass>, OnCreateBlitPass, (), (override));

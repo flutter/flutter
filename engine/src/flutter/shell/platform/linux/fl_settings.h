@@ -19,8 +19,10 @@ G_DECLARE_INTERFACE(FlSettings, fl_settings, FL, SETTINGS, GObject)
  * Available clock formats.
  */
 typedef enum {
+  // NOLINTBEGIN(readability-identifier-naming)
   FL_CLOCK_FORMAT_12H,
   FL_CLOCK_FORMAT_24H,
+  // NOLINTEND(readability-identifier-naming)
 } FlClockFormat;
 
 /**
@@ -31,8 +33,10 @@ typedef enum {
  * Available color schemes.
  */
 typedef enum {
+  // NOLINTBEGIN(readability-identifier-naming)
   FL_COLOR_SCHEME_LIGHT,
   FL_COLOR_SCHEME_DARK,
+  // NOLINTEND(readability-identifier-naming)
 } FlColorScheme;
 
 /**
