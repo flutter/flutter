@@ -390,7 +390,7 @@ void main() {
 
   testWidgetsWithLeakTracking('show/hide notifies listeners', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
-    final List<bool> valuesSeen = <booL>[];
+    final List<bool> valuesSeen = <bool>[];
     void portalListener() {
       valuesSeen.add(controller.isShowing);
     }
