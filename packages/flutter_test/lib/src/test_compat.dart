@@ -263,17 +263,19 @@ void tearDownAll(dynamic Function() body) {
 bool _isTearDownForTestFileConfigured = false;
 /// Configures `tearDownAll` after all user defined `tearDownAll` in the test file.
 ///
-/// This function should be invoked before any function, invoked by user.
+/// This function should be invoked in the body of first function, invoked by user in the test file.
 void _configureTearDownForTestFile() {
   if (_isTearDownForTestFileConfigured) {
     return;
   }
-  tearDownAll(() {
-    maybeTearDownLeakTracking();
-  });
+  _declarer.tearDownAll(_tearDownForTestFile);
   _isTearDownForTestFileConfigured = true;
 }
 
+/// Tear down that should happen after all user defined tear down.
+void _tearDownForTestFile() {
+  maybeTearDownLeakTracking();
+}
 
 /// A reporter that prints each test on its own line.
 ///
