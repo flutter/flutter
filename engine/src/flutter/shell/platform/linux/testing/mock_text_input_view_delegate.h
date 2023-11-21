@@ -20,6 +20,7 @@ class MockTextInputViewDelegate {
   MockTextInputViewDelegate();
   ~MockTextInputViewDelegate();
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator FlTextInputViewDelegate*();
 
   MOCK_METHOD(void,

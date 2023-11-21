@@ -49,6 +49,7 @@ typedef struct {
   bool mandatory;
 } LayoutGoal;
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::vector<LayoutGoal> layout_goals;
 
 #endif  // KEYBOARD_MAP_H_
