@@ -664,7 +664,6 @@ class InkResponse extends StatelessWidget {
       hoverDuration: hoverDuration,
       child: child,
     );
-    debugPrint('_InkResponseStateWidget: ${stateWidget.toStringDeep()}');
     return stateWidget;
   }
 
@@ -1005,7 +1004,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
               resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
           }
         }
-        debugPrint('resolvedOverlayColor: $resolvedOverlayColor');
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
@@ -1306,7 +1304,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
-    debugPrint('Building $widget');
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     Color getHighlightColorForType(_HighlightType type) {
@@ -1329,11 +1326,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
     for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
-      debugPrint('InkWell[${type.name}]: ${_highlights[type]?.color}');
     }
 
     _currentSplash?.color = widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;
-    debugPrint('InkWell current splash: ${_currentSplash?.color}');
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,

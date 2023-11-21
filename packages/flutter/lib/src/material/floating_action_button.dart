@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'elevated_button.dart';
 import 'floating_action_button_theme.dart';
@@ -578,8 +579,6 @@ class FloatingActionButton extends StatelessWidget {
           child: resolvedChild)
       : resolvedChild;
 
-    debugPrint('splashColor: $splashColor');
-
     final MaterialStateProperty<Color?> resolvedOverlayColor = MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
@@ -617,6 +616,9 @@ class FloatingActionButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         foregroundColor: foregroundColor,
         backgroundColor: backgroundColor,
+        // Have to specify a transparent surface tint to match what
+        // RawMaterialButton was doing.
+        surfaceTintColor: Colors.transparent,
         textStyle: extendedTextStyle,
         padding: EdgeInsets.zero,
         minimumSize: Size(sizeConstraints.minWidth, sizeConstraints.minHeight),
