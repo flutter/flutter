@@ -60,6 +60,7 @@ class BundleBuilder {
         kTargetFile: mainPath,
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
+        if (platform == TargetPlatform.darwin) kDarwinNativeAssets: 'false',
       },
       artifacts: globals.artifacts!,
       fileSystem: globals.fs,

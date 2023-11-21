@@ -967,6 +967,10 @@ const String kSdkRoot = 'SdkRoot';
 /// Whether to enable Dart obfuscation and where to save the symbol map.
 const String kDartObfuscation = 'DartObfuscation';
 
+/// Whether to enable Native Assets for the Darwin target platform.
+/// Used for hotfix https://github.com/flutter/flutter/issues/138519
+const String kDarwinNativeAssets = 'DarwinNativeAssets';
+
 /// An output directory where one or more code-size measurements may be written.
 const String kCodeSizeDirectory = 'CodeSizeDirectory';
 
