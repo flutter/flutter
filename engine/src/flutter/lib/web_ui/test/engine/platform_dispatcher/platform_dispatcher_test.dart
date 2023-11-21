@@ -210,10 +210,11 @@ void testMain() {
       final EngineFlutterView view22 =
           EngineFlutterView(22, dispatcher, createDomHTMLDivElement());
 
-      dispatcher
-        ..registerView(view20)
-        ..registerView(view21)
-        ..registerView(view22);
+      // Add this again when views don't register themselves upon instantiation.
+      // dispatcher
+      //   ..registerView(view20)
+      //   ..registerView(view21)
+      //   ..registerView(view22);
 
       expect(view20.isDisposed, isFalse);
       expect(view21.isDisposed, isFalse);

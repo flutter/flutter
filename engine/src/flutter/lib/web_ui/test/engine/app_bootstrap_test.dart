@@ -103,4 +103,30 @@ void testMain() {
     expect(initCalled, 1, reason: 'initEngine should have been called.');
     expect(runCalled, 2, reason: 'runApp should have been called.');
   });
+
+  group('FlutterApp', () {
+    test('has addView/removeView methods', () async {
+      final AppBootstrap bootstrap = AppBootstrap(
+        initializeEngine: mockInit,
+        runApp: mockRunApp,
+      );
+
+      final FlutterEngineInitializer engineInitializer = bootstrap.prepareEngineInitializer();
+
+      final Object appInitializer = await promiseToFuture<Object>(callMethod<Object>(
+        engineInitializer,
+        'initializeEngine',
+        <Object?>[]
+      ));
+      final Object maybeApp = await promiseToFuture<Object>(callMethod<Object>(
+        appInitializer,
+        'runApp',
+        <Object?>[]
+      ));
+
+      expect(maybeApp, isA<FlutterApp>());
+      expect(getJsProperty<dynamic>(maybeApp, 'addView'), isA<Function>());
+      expect(getJsProperty<dynamic>(maybeApp, 'removeView'), isA<Function>());
+    });
+  });
 }

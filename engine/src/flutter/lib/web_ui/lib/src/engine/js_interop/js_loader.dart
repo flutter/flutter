@@ -94,14 +94,3 @@ abstract class RunAppFnParameters {
 
 /// Typedef for the function that runs the flutter app main entrypoint.
 typedef RunAppFn = Future<FlutterApp> Function([RunAppFnParameters?]);
-
-// FlutterApp
-
-/// A class that exposes the public API of a running Flutter Web App running.
-@JS()
-@anonymous
-@staticInterop
-abstract class FlutterApp {
-  /// Cleans a Flutter app
-  external factory FlutterApp();
-}

@@ -136,27 +136,28 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     EngineFlutterDisplay.instance,
   ];
 
+  final FlutterViewManager viewManager = FlutterViewManager();
+
   /// Adds [view] to the platform dispatcher's registry of [views].
   void registerView(EngineFlutterView view) {
-    viewData[view.viewId] = view;
+    viewManager.registerView(view);
   }
 
   /// Removes [view] from the platform dispatcher's registry of [views].
   ///
   /// Nothing happens if the view is not already registered.
   void unregisterView(EngineFlutterView view) {
-    viewData.remove(view.viewId);
+    viewManager.unregisterView(view.viewId);
   }
 
   /// The current list of windows.
   @override
-  Iterable<EngineFlutterView> get views => viewData.values;
-  final Map<int, EngineFlutterView> viewData = <int, EngineFlutterView>{};
+  Iterable<EngineFlutterView> get views => viewManager.views;
 
   /// Returns the [EngineFlutterView] with the provided ID if one exists, or null
   /// otherwise.
   @override
-  EngineFlutterView? view({required int id}) => viewData[id];
+  EngineFlutterView? view({required int id}) => viewManager[id];
 
   /// The [FlutterView] provided by the engine if the platform is unable to
   /// create windows, or, for backwards compatibility.
@@ -184,7 +185,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// * [PlatformDisptacher.views] for a list of all [FlutterView]s provided
   ///   by the platform.
   @override
-  EngineFlutterWindow? get implicitView => viewData[kImplicitViewId] as EngineFlutterWindow?;
+  EngineFlutterWindow? get implicitView => viewManager[kImplicitViewId] as EngineFlutterWindow?;
 
   /// A callback that is invoked whenever the platform's [devicePixelRatio],
   /// [physicalSize], [padding], [viewInsets], or [systemGestureInsets]
@@ -608,7 +609,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
           return;
         }
         arguments as Map<dynamic, dynamic>;
-        viewData[flutterViewId]!.platformViewMessageHandler.handlePlatformViewCall(method, arguments, callback!);
+        viewManager[flutterViewId]!.platformViewMessageHandler.handlePlatformViewCall(method, arguments, callback!);
         return;
 
       case 'flutter/accessibility':
