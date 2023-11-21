@@ -185,15 +185,15 @@ flutter::ThreadHost Engine::CreateThreadHost(
 
   thread_host_config.SetRasterConfig(
       {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-           flutter::ThreadHost::Type::RASTER, name_prefix),
+           flutter::ThreadHost::Type::kRaster, name_prefix),
        fml::Thread::ThreadPriority::kRaster});
   thread_host_config.SetUIConfig(
       {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-           flutter::ThreadHost::Type::UI, name_prefix),
+           flutter::ThreadHost::Type::kUi, name_prefix),
        fml::Thread::ThreadPriority::kDisplay});
   thread_host_config.SetIOConfig(
       {flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-           flutter::ThreadHost::Type::IO, name_prefix),
+           flutter::ThreadHost::Type::kIo, name_prefix),
        fml::Thread::ThreadPriority::kNormal});
 
   return flutter::ThreadHost(thread_host_config);

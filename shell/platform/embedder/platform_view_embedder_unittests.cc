@@ -94,7 +94,7 @@ class MockResponse : public PlatformMessageResponse {
 
 TEST(PlatformViewEmbedderTest, HasPlatformMessageHandler) {
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
-                         ThreadHost::Type::Platform);
+                         ThreadHost::Type::kPlatform);
   flutter::TaskRunners task_runners = flutter::TaskRunners(
       "HasPlatformMessageHandler", thread_host.platform_thread->GetTaskRunner(),
       nullptr, nullptr, nullptr);
@@ -116,7 +116,7 @@ TEST(PlatformViewEmbedderTest, HasPlatformMessageHandler) {
 
 TEST(PlatformViewEmbedderTest, Dispatches) {
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
-                         ThreadHost::Type::Platform);
+                         ThreadHost::Type::kPlatform);
   flutter::TaskRunners task_runners = flutter::TaskRunners(
       "HasPlatformMessageHandler", thread_host.platform_thread->GetTaskRunner(),
       nullptr, nullptr, nullptr);
@@ -161,7 +161,7 @@ TEST(PlatformViewEmbedderTest, Dispatches) {
 
 TEST(PlatformViewEmbedderTest, DeletionDisabledDispatch) {
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
-                         ThreadHost::Type::Platform);
+                         ThreadHost::Type::kPlatform);
   flutter::TaskRunners task_runners = flutter::TaskRunners(
       "HasPlatformMessageHandler", thread_host.platform_thread->GetTaskRunner(),
       nullptr, nullptr, nullptr);

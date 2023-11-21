@@ -54,7 +54,7 @@ class GpuSurfaceTexture {
   GpuSurfaceTexture(FlutterDesktopGpuSurfaceType surface_type,
                     ObtainDescriptorCallback obtain_descriptor_callback)
       : surface_type_(surface_type),
-        obtain_descriptor_callback_(obtain_descriptor_callback) {}
+        obtain_descriptor_callback_(std::move(obtain_descriptor_callback)) {}
 
   // Returns the callback-provided FlutterDesktopGpuSurfaceDescriptor that
   // contains the surface handle. The intended surface size is specified by
