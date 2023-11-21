@@ -219,7 +219,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       child!.layout(constraints, parentUsesSize: sizedByChild);
     }
     _size = sizedByChild && child != null ? child!.size : constraints.smallest;
-    assert(_size.isFinite);
+    assert(size.isFinite);
+    assert(constraints.isSatisfiedBy(size));
   }
 
   /// Determines the set of render objects located at the given position.

@@ -4,6 +4,7 @@
 
 import 'dart:ui' show ViewConstraints;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -132,6 +133,33 @@ void main() {
     view.configuration = ViewConfiguration(constraints: ViewConstraints.tight(const Size(200, 300)), devicePixelRatio: 2.0);
     PipelineOwner().rootNode = view;
     view.prepareInitialFrame();
+  });
+
+  test('Constraints are derived from configuration', () {
+    const ViewConfiguration config = ViewConfiguration(
+      constraints: ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
+      devicePixelRatio: 3.0,
+    );
+    const BoxConstraints constraints = BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4);
+
+    // Configuration set via setter.
+    final RenderView view = RenderView(
+      view: RendererBinding.instance.platformDispatcher.views.single,
+    );
+    expect(() => view.constraints, throwsA(isA<StateError>().having(
+      (StateError e) => e.message,
+      'message',
+      contains('RenderView has not been given a configuration yet'),
+    )));
+    view.configuration = config;
+    expect(view.constraints, constraints);
+
+    // Configuration set in constructor.
+    final RenderView view2 = RenderView(
+      view: RendererBinding.instance.platformDispatcher.views.single,
+      configuration: config,
+    );
+    expect(view2.constraints, constraints);
   });
 }
 

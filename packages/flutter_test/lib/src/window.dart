@@ -800,7 +800,6 @@ class TestFlutterView implements FlutterView {
     platformDispatcher.onMetricsChanged?.call();
   }
 
-
   /// The system gesture insets to use for this test.
   ///
   /// Defaults to the value provided by [FlutterView.systemGestureInsets].
