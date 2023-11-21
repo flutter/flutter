@@ -390,7 +390,7 @@ void main() {
 
   testWidgetsWithLeakTracking('show/hide notifies listeners', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
-    final List<bool> valuesSeen = [];
+    final List<bool> valuesSeen = <booL>[];
     void portalListener() {
       valuesSeen.add(controller.isShowing);
     }
@@ -424,7 +424,7 @@ void main() {
 
     controller.show();
     await tester.pump();
-    expect(valuesSeen, [true]);
+    expect(valuesSeen, <bool>[true]);
 
     // Calls that do not trigger a state change do not fire listeners.
     controller.show();
