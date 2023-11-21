@@ -263,7 +263,8 @@ void tearDownAll(dynamic Function() body) {
 bool _isTearDownForTestFileConfigured = false;
 /// Configures `tearDownAll` after all user defined `tearDownAll` in the test file.
 ///
-/// This function should be invoked in the body of first function, invoked by user in the test file.
+/// This function should be invoked in all functions, that may be invoked by user in the test file,
+/// to be invoked before any other `tearDownAll`.
 void _configureTearDownForTestFile() {
   if (_isTearDownForTestFileConfigured) {
     return;
