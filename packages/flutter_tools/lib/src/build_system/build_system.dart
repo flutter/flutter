@@ -788,6 +788,7 @@ class _BuildInstance {
   final Map<String, ExceptionMeasurement> exceptionMeasurements = <String, ExceptionMeasurement>{};
 
   Future<bool> invokeTarget(Node node) async {
+    print('visiting ${node.target.runtimeType}');
     final List<bool> results = await Future.wait(node.dependencies.map(invokeTarget));
     if (results.any((bool result) => !result)) {
       return false;

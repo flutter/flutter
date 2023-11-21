@@ -12,6 +12,7 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
+import '../../features.dart' show featureFlags;
 import '../../globals.dart' as globals show xcode;
 import '../build_system.dart';
 import '../depfile.dart';
@@ -145,11 +146,14 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Target> get dependencies => const <Target>[
-    NativeAssets(),
-    GenerateLocalizationsTarget(),
-    DartPluginRegistrantTarget(),
+  List<Target> get dependencies => <Target>[
+    if (nativeAssetsEnabled) const NativeAssets(),
+    const GenerateLocalizationsTarget(),
+    const DartPluginRegistrantTarget(),
   ];
+
+  // TODO(fujino): direct inject featureFlags.
+  bool get nativeAssetsEnabled => featureFlags.isNativeAssetsEnabled;
 
   @override
   Future<void> build(Environment environment) async {
@@ -184,10 +188,13 @@ class KernelSnapshot extends Target {
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
-    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
-    final String nativeAssets = nativeAssetsFile.path;
-    if (!await nativeAssetsFile.exists()) {
-      throwToolExit("$nativeAssets doesn't exist.");
+    String? nativeAssets;
+    if (nativeAssetsEnabled) {
+      final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
+      nativeAssets = nativeAssetsFile.path;
+      if (!await nativeAssetsFile.exists()) {
+        throwToolExit("$nativeAssets doesn't exist.");
+      }
     }
     environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
 

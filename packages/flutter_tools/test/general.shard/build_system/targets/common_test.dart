@@ -79,7 +79,8 @@ format-version:
 native-assets: {}
 ''';
 
-  testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
+  // TODO(fujino): make this and similar tests testWithoutContext once featureFlags direct injected
+  testUsingContext('KernelSnapshot handles null result from kernel compilation', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
