@@ -89,11 +89,12 @@ Future<Command> startCommand(String executable, List<String> arguments, {
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
 }) async {
+  final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
   print('RUNNING: cd $cyan$relativeWorkingDir$reset; $green$commandDescription$reset');
 
   final Stopwatch time = Stopwatch()..start();
+  print('workingDirectory: $workingDirectory, executable: $executable, arguments: $arguments');
   final io.Process process = await io.Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
