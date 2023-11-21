@@ -131,10 +131,12 @@ size_t Base64::Encode(const void* srcv, size_t length, void* dstv) {
     c = (c >> 6 | b << 2) & 0x3F;
     b = (b >> 4 | a << 4) & 0x3F;
     a = a >> 2;
+    // NOLINTBEGIN(clang-analyzer-core.NullDereference)
     *dst++ = encode[a];
     *dst++ = encode[b];
     *dst++ = encode[c];
     *dst++ = encode[d];
+    // NOLINTEND(clang-analyzer-core.NullDereference)
   }
   if (remainder > 0) {
     int k1 = 0;
@@ -145,10 +147,12 @@ size_t Base64::Encode(const void* srcv, size_t length, void* dstv) {
       k1 = b >> 4;
       k2 = (b << 2) & 0x3F;
     }
+    // NOLINTBEGIN(clang-analyzer-core.NullDereference)
     *dst++ = encode[a >> 2];
     *dst++ = encode[(k1 | a << 4) & 0x3F];
     *dst++ = encode[k2];
     *dst++ = encode[EncodePad];
+    // NOLINTEND(clang-analyzer-core.NullDereference)
   }
   return EncodedSize(length);
 }
