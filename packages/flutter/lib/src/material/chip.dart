@@ -1554,12 +1554,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     required this.enableAnimation,
     this.avatarBorder,
   }) : _theme = theme,
-       _textDirection = textDirection {
-    checkmarkAnimation.addListener(markNeedsPaint);
-    avatarDrawerAnimation.addListener(markNeedsLayout);
-    deleteDrawerAnimation.addListener(markNeedsLayout);
-    enableAnimation.addListener(markNeedsPaint);
-  }
+       _textDirection = textDirection;
 
   bool? value;
   bool? isEnabled;
@@ -2097,6 +2092,24 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     } else {
       context.paintChild(child, _boxParentData(child).offset + offset);
     }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    checkmarkAnimation.addListener(markNeedsPaint);
+    avatarDrawerAnimation.addListener(markNeedsLayout);
+    deleteDrawerAnimation.addListener(markNeedsLayout);
+    enableAnimation.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    checkmarkAnimation.removeListener(markNeedsPaint);
+    avatarDrawerAnimation.removeListener(markNeedsLayout);
+    deleteDrawerAnimation.removeListener(markNeedsLayout);
+    enableAnimation.removeListener(markNeedsPaint);
+    super.detach();
   }
 
   @override
