@@ -16,7 +16,9 @@ import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_im
 import 'package:test_api/src/backend/state.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/test.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/test.dart';
+
+import 'leak_tracking.dart'; // ignore: implementation_imports
 
 // ignore: deprecated_member_use
 export 'package:test_api/fake.dart' show Fake;
@@ -163,6 +165,7 @@ void test(
   Map<String, dynamic>? onPlatform,
   int? retry,
 }) {
+  _configureTearDownForTestFile();
   _declarer.test(
     description.toString(),
     body,
@@ -186,6 +189,7 @@ void test(
 /// of running the group's tests.
 @isTestGroup
 void group(Object description, void Function() body, { dynamic skip, int? retry }) {
+  _configureTearDownForTestFile();
   _declarer.group(description.toString(), body, skip: skip, retry: retry);
 }
 
@@ -201,6 +205,7 @@ void group(Object description, void Function() body, { dynamic skip, int? retry 
 /// Each callback at the top level or in a given group will be run in the order
 /// they were declared.
 void setUp(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.setUp(body);
 }
 
@@ -218,6 +223,7 @@ void setUp(dynamic Function() body) {
 ///
 /// See also [addTearDown], which adds tear-downs to a running test.
 void tearDown(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.tearDown(body);
 }
 
@@ -235,6 +241,7 @@ void tearDown(dynamic Function() body) {
 /// prefer [setUp], and only use [setUpAll] if the callback is prohibitively
 /// slow.
 void setUpAll(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.setUpAll(body);
 }
 
@@ -250,7 +257,22 @@ void setUpAll(dynamic Function() body) {
 /// prefer [tearDown], and only use [tearDownAll] if the callback is
 /// prohibitively slow.
 void tearDownAll(dynamic Function() body) {
+  _configureTearDownForTestFile();
   _declarer.tearDownAll(body);
+}
+
+bool _isTearDownForTestFileConfigured = false;
+/// Configures `tearDownAll` after all user defined `tearDownAll` in the test file.
+///
+/// This function should be invoked before any function, invoked by user.
+void _configureTearDownForTestFile() {
+  if (_isTearDownForTestFileConfigured) {
+    return;
+  }
+  tearDownAll(() {
+    maybeTearDownLeakTracking();
+  });
+  _isTearDownForTestFileConfigured = true;
 }
 
 
