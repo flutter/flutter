@@ -16,6 +16,10 @@ class MockIMContext {
  public:
   ~MockIMContext();
 
+  // This was an existing use of operator overloading. It's against our style
+  // guide but enabling clang tidy on header files is a higher priority than
+  // fixing this.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   operator GtkIMContext*();
 
   MOCK_METHOD(void,

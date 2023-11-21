@@ -30,10 +30,12 @@ G_BEGIN_DECLS
 #define FL_MESSAGE_CODEC_ERROR fl_message_codec_error_quark()
 
 typedef enum {
+  // NOLINTBEGIN(readability-identifier-naming)
   FL_MESSAGE_CODEC_ERROR_FAILED,
   FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA,
   FL_MESSAGE_CODEC_ERROR_ADDITIONAL_DATA,
   FL_MESSAGE_CODEC_ERROR_UNSUPPORTED_TYPE,
+  // NOLINTEND(readability-identifier-naming)
 } FlMessageCodecError;
 
 GQuark fl_message_codec_error_quark(void) G_GNUC_CONST;

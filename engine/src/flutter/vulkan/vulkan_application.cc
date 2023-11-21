@@ -20,13 +20,13 @@ VulkanApplication::VulkanApplication(
     uint32_t application_version,
     uint32_t api_version,
     bool enable_validation_layers)
-    : vk(p_vk),
+    : vk_(p_vk),
       api_version_(api_version),
       valid_(false),
       enable_validation_layers_(enable_validation_layers) {
   // Check if we want to enable debugging.
   std::vector<VkExtensionProperties> supported_extensions =
-      GetSupportedInstanceExtensions(vk);
+      GetSupportedInstanceExtensions(vk_);
   bool enable_instance_debugging =
       enable_validation_layers_ &&
       ExtensionSupported(supported_extensions,
@@ -59,7 +59,7 @@ VulkanApplication::VulkanApplication(
   // Configure layers.
 
   const std::vector<std::string> enabled_layers =
-      InstanceLayersToEnable(vk, enable_validation_layers_);
+      InstanceLayersToEnable(vk_, enable_validation_layers_);
 
   const char* layers[enabled_layers.size()];
 
@@ -94,14 +94,14 @@ VulkanApplication::VulkanApplication(
 
   VkInstance instance = VK_NULL_HANDLE;
 
-  if (VK_CALL_LOG_ERROR(vk.CreateInstance(&create_info, nullptr, &instance)) !=
+  if (VK_CALL_LOG_ERROR(vk_.CreateInstance(&create_info, nullptr, &instance)) !=
       VK_SUCCESS) {
     FML_DLOG(INFO) << "Could not create application instance.";
     return;
   }
 
   // Now that we have an instance, set up instance proc table entries.
-  if (!vk.SetupInstanceProcAddresses(VulkanHandle<VkInstance>(instance))) {
+  if (!vk_.SetupInstanceProcAddresses(VulkanHandle<VkInstance>(instance))) {
     FML_DLOG(INFO) << "Could not set up instance proc addresses.";
     return;
   }
@@ -109,11 +109,11 @@ VulkanApplication::VulkanApplication(
   instance_ = VulkanHandle<VkInstance>{instance, [this](VkInstance i) {
                                          FML_DLOG(INFO)
                                              << "Destroying Vulkan instance";
-                                         vk.DestroyInstance(i, nullptr);
+                                         vk_.DestroyInstance(i, nullptr);
                                        }};
 
   if (enable_instance_debugging) {
-    auto debug_report = std::make_unique<VulkanDebugReport>(vk, instance_);
+    auto debug_report = std::make_unique<VulkanDebugReport>(vk_, instance_);
     if (!debug_report->IsValid()) {
       FML_DLOG(INFO) << "Vulkan debugging was enabled but could not be set up "
                         "for this instance.";
@@ -150,8 +150,8 @@ std::vector<VkPhysicalDevice> VulkanApplication::GetPhysicalDevices() const {
   }
 
   uint32_t device_count = 0;
-  if (VK_CALL_LOG_ERROR(vk.EnumeratePhysicalDevices(instance_, &device_count,
-                                                    nullptr)) != VK_SUCCESS) {
+  if (VK_CALL_LOG_ERROR(vk_.EnumeratePhysicalDevices(instance_, &device_count,
+                                                     nullptr)) != VK_SUCCESS) {
     FML_DLOG(INFO) << "Could not enumerate physical device.";
     return {};
   }
@@ -166,7 +166,7 @@ std::vector<VkPhysicalDevice> VulkanApplication::GetPhysicalDevices() const {
 
   physical_devices.resize(device_count);
 
-  if (VK_CALL_LOG_ERROR(vk.EnumeratePhysicalDevices(
+  if (VK_CALL_LOG_ERROR(vk_.EnumeratePhysicalDevices(
           instance_, &device_count, physical_devices.data())) != VK_SUCCESS) {
     FML_DLOG(INFO) << "Could not enumerate physical device.";
     return {};
@@ -179,7 +179,7 @@ std::unique_ptr<VulkanDevice>
 VulkanApplication::AcquireFirstCompatibleLogicalDevice() const {
   for (auto device_handle : GetPhysicalDevices()) {
     auto logical_device = std::make_unique<VulkanDevice>(
-        vk, VulkanHandle<VkPhysicalDevice>(device_handle),
+        vk_, VulkanHandle<VkPhysicalDevice>(device_handle),
         enable_validation_layers_);
     if (logical_device->IsValid()) {
       return logical_device;

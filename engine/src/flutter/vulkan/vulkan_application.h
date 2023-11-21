@@ -44,7 +44,7 @@ class VulkanApplication {
   std::unique_ptr<VulkanDevice> AcquireFirstCompatibleLogicalDevice() const;
 
  private:
-  VulkanProcTable& vk;
+  VulkanProcTable& vk_;
   VulkanHandle<VkInstance> instance_;
   uint32_t api_version_;
   std::unique_ptr<VulkanDebugReport> debug_report_;
