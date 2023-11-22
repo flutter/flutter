@@ -1137,7 +1137,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "const BufferView&",
+        .type_name = "BufferView",
         .argument_name = "view",
     });
   }
@@ -1156,7 +1156,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "const BufferView&",
+        .type_name = "BufferView",
         .argument_name = "view",
     });
   }
@@ -1175,11 +1175,11 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "const std::shared_ptr<const Texture>&",
+        .type_name = "std::shared_ptr<const Texture>",
         .argument_name = "texture",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "const std::shared_ptr<const Sampler>&",
+        .type_name = "std::shared_ptr<const Sampler>",
         .argument_name = "sampler",
     });
   }
@@ -1198,7 +1198,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "const std::shared_ptr<const Texture>&",
+        .type_name = "std::shared_ptr<const Texture>",
         .argument_name = "texture",
     });
   }
@@ -1217,7 +1217,7 @@ std::vector<Reflector::BindPrototype> Reflector::ReflectBindPrototypes(
         .argument_name = "command",
     });
     proto.args.push_back(BindPrototypeArgument{
-        .type_name = "const std::shared_ptr<const Sampler>&",
+        .type_name = "std::shared_ptr<const Sampler>",
         .argument_name = "sampler",
     });
   }
