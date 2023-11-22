@@ -1273,6 +1273,25 @@ TEST_P(RendererTest, CanPreAllocateCommands) {
   EXPECT_EQ(render_pass->GetCommands().capacity(), 100u);
 }
 
+TEST_P(RendererTest, CanLookupRenderTargetProperties) {
+  auto context = GetContext();
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto render_target_cache = std::make_shared<RenderTargetAllocator>(
+      GetContext()->GetResourceAllocator());
+
+  auto render_target =
+      RenderTarget::CreateOffscreen(*context, *render_target_cache, {100, 100});
+  auto render_pass = cmd_buffer->CreateRenderPass(render_target);
+
+  EXPECT_EQ(render_pass->GetSampleCount(), render_target.GetSampleCount());
+  EXPECT_EQ(render_pass->GetRenderTargetPixelFormat(),
+            render_target.GetRenderTargetPixelFormat());
+  EXPECT_EQ(render_pass->HasStencilAttachment(),
+            render_target.GetStencilAttachment().has_value());
+  EXPECT_EQ(render_pass->GetRenderTargetSize(),
+            render_target.GetRenderTargetSize());
+}
+
 }  // namespace testing
 }  // namespace impeller
 
