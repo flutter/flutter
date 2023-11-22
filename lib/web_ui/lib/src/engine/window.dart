@@ -31,6 +31,8 @@ const bool debugPrintPlatformMessages = false;
 /// The view ID for the implicit flutter view provided by the platform.
 const int kImplicitViewId = 0;
 
+int _nextViewId = kImplicitViewId + 1;
+
 /// Represents all views in the Flutter Web Engine.
 ///
 /// In addition to everything defined in [ui.FlutterView], this class adds
@@ -41,7 +43,6 @@ base class EngineFlutterView implements ui.FlutterView {
   /// The [hostElement] parameter specifies the container in the DOM into which
   /// the Flutter view will be rendered.
   factory EngineFlutterView(
-    int viewId,
     EnginePlatformDispatcher platformDispatcher,
     DomElement hostElement,
   ) = _EngineFlutterViewImpl;
@@ -55,12 +56,16 @@ base class EngineFlutterView implements ui.FlutterView {
     DomElement? hostElement,
   )   : embeddingStrategy = EmbeddingStrategy.create(hostElement: hostElement),
         dimensionsProvider = DimensionsProvider.create(hostElement: hostElement) {
-    platformDispatcher.registerView(this);
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
     embeddingStrategy.attachGlassPane(dom.rootElement);
     registerHotRestartListener(dispose);
   }
+
+  static EngineFlutterWindow implicit(
+    EnginePlatformDispatcher platformDispatcher,
+    DomElement? hostElement,
+  ) => EngineFlutterWindow._(platformDispatcher, hostElement);
 
   @override
   final int viewId;
@@ -80,8 +85,10 @@ base class EngineFlutterView implements ui.FlutterView {
   /// tree and any event listeners.
   @mustCallSuper
   void dispose() {
+    if (isDisposed) {
+      return;
+    }
     isDisposed = true;
-    platformDispatcher.unregisterView(this);
     dimensionsProvider.close();
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
@@ -186,19 +193,17 @@ base class EngineFlutterView implements ui.FlutterView {
 
 final class _EngineFlutterViewImpl extends EngineFlutterView {
   _EngineFlutterViewImpl(
-    super.viewId,
-    super.platformDispatcher,
-    super.hostElement,
-  ) : super._();
+    EnginePlatformDispatcher platformDispatcher,
+    DomElement hostElement,
+  ) : super._(_nextViewId++, platformDispatcher, hostElement);
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
 final class EngineFlutterWindow extends EngineFlutterView implements ui.SingletonFlutterWindow {
-  EngineFlutterWindow(
-    super.viewId,
-    super.platformDispatcher,
-    super.hostElement,
-  ) : super._() {
+  EngineFlutterWindow._(
+    EnginePlatformDispatcher platformDispatcher,
+    DomElement? hostElement,
+  ) : super._(kImplicitViewId, platformDispatcher, hostElement) {
     if (ui_web.isCustomUrlStrategySet) {
       _browserHistory = createHistoryForExistingState(ui_web.urlStrategy);
     }
@@ -616,11 +621,14 @@ EngineFlutterWindow? _window;
 EngineFlutterWindow ensureImplicitViewInitialized({
   DomElement? hostElement,
 }) {
-  return _window ??= EngineFlutterWindow(
-    kImplicitViewId,
-    EnginePlatformDispatcher.instance,
-    hostElement,
-  );
+  if (_window == null) {
+    _window = EngineFlutterView.implicit(
+      EnginePlatformDispatcher.instance,
+      hostElement,
+    );
+    EnginePlatformDispatcher.instance.viewManager.registerView(_window!);
+  }
+  return _window!;
 }
 
 /// The Web implementation of [ui.ViewPadding].
