@@ -193,17 +193,17 @@ void Canvas::DrawPaint(const Paint& paint) {
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Scalar corner_radius,
                                      const Paint& paint) {
-  Paint new_paint = paint;
-  if (new_paint.color_source.GetType() != ColorSource::Type::kColor ||
-      new_paint.style != Paint::Style::kFill) {
+  if (paint.color_source.GetType() != ColorSource::Type::kColor ||
+      paint.style != Paint::Style::kFill) {
     return false;
   }
 
-  if (!new_paint.mask_blur_descriptor.has_value() ||
-      new_paint.mask_blur_descriptor->style !=
-          FilterContents::BlurStyle::kNormal) {
+  if (!paint.mask_blur_descriptor.has_value() ||
+      paint.mask_blur_descriptor->style != FilterContents::BlurStyle::kNormal) {
     return false;
   }
+
+  Paint new_paint = paint;
 
   // For symmetrically mask blurred solid RRects, absorb the mask blur and use
   // a faster SDF approximation.
