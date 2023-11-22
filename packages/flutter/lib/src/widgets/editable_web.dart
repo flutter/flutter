@@ -35,6 +35,7 @@ class EditableWeb extends StatefulWidget {
     this.currentAutofillScope, // contains a bunch of things like obscureText, readOnly, autofillHints, etc.
     required this.scrollTop,
     required this.scrollLeft,
+    required this.textEditingValue,
   });
 
   final TextStyle? textStyle;
@@ -61,6 +62,7 @@ class EditableWeb extends StatefulWidget {
   final AutofillScope? currentAutofillScope;
   final double scrollTop;
   final double scrollLeft;
+  final String textEditingValue;
 
   @override
   State<EditableWeb> createState() => _EditableWebState();
@@ -567,6 +569,7 @@ class _EditableWebState extends State<EditableWeb> {
 
   void setInputElementAttributes(html.InputElement inputEl) {
     // set attributes
+    inputEl.value = widget.textEditingValue;
     inputEl.readOnly = widget.textInputConfiguration.readOnly;
 
     if (widget.textInputConfiguration.obscureText) {
@@ -592,6 +595,7 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   void setTextAreaElementAttributes(html.TextAreaElement textAreaEl) {
+    textAreaEl.value = widget.textEditingValue;
     textAreaEl.rows = _maxLines;
     textAreaEl.readOnly = widget.textInputConfiguration.readOnly;
     _textAreaElement = textAreaEl;

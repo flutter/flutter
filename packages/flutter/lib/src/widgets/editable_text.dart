@@ -4895,6 +4895,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                               Positioned.fill(
                                 child: EditableWeb(
                                   textStyle: inlineSpan.style,
+                                  textEditingValue: _value.text,
                                   cursorColor: _cursorColor,
                                   showCursor: EditableText.debugDeterministicCursor
                                       ? ValueNotifier<bool>(widget.showCursor)
