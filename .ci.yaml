@@ -4441,7 +4441,6 @@ targets:
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
     # TODO(vashworth): Take out of bringup once https://github.com/flutter/flutter/issues/138194 is resolved.
-    bringup: true
     timeout: 60
     properties:
       tags: >
