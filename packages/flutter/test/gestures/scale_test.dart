@@ -1357,7 +1357,7 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('ScaleStartDetails and ScaleUpdateDetails callbacks should contain thier event.timestamp', (GestureTester tester) {
+  testGesture('ScaleStartDetails and ScaleUpdateDetails callbacks should contain their event.timestamp', (GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
