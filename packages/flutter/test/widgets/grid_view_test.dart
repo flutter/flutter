@@ -983,6 +983,7 @@ void main() {
   testWidgets(
       'SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent corrected',
       (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138871
     const SliverGridDelegateWithFixedCrossAxisCount delegate =
         SliverGridDelegateWithFixedCrossAxisCount(
       crossAxisCount: 3,
@@ -1015,6 +1016,7 @@ void main() {
   testWidgets(
       'SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent corrected',
       (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138871
     const SliverGridDelegateWithMaxCrossAxisExtent delegate =
         SliverGridDelegateWithMaxCrossAxisExtent(
       maxCrossAxisExtent: 100,
