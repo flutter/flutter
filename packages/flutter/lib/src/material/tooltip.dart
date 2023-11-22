@@ -306,12 +306,22 @@ class Tooltip extends StatefulWidget {
   /// does not affect mouse pointer devices.
   ///
   /// Defaults to 1.5 seconds for long press and tap released
+  ///
+  /// See also:
+  ///
+  ///  * [exitDuration], which allows configuring the time untill a pointer
+  /// dissapears when hovering.
   final Duration? showDuration;
 
   /// The length of time that a pointer must have stopped hovering over a
   /// tooltip's widget before the tooltip will be hidden.
   ///
   /// Defaults to 100 milliseconds.
+  ///
+  /// See also:
+  ///
+  ///  * [showDuration], which allows configuring the length of time that a
+  /// tooltip will be visible after touch events are released.
   final Duration? exitDuration;
 
   /// Whether the tooltip can be dismissed by tap.

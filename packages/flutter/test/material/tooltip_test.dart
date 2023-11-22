@@ -2174,7 +2174,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsOneWidget,
-      reason: 'Tooltip should be wait before exitDuration expires before being hidden');
+      reason: 'Tooltip should wait untill exitDuration expires before being hidden');
 
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
