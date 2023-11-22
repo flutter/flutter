@@ -4,6 +4,9 @@
 
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "../export.h"
+#include "DartTypes.h"
+#include "TextStyle.h"
+#include "include/core/SkScalar.h"
 
 using namespace skia::textlayout;
 
@@ -56,6 +59,49 @@ SKWASM_EXPORT int32_t paragraph_getPositionForOffset(Paragraph* paragraph,
     *outAffinity = position.affinity;
   }
   return position.position;
+}
+
+SKWASM_EXPORT bool paragraph_getClosestGlyphInfoAtCoordinate(
+    Paragraph* paragraph,
+    SkScalar offsetX,
+    SkScalar offsetY,
+    // Out parameters:
+    SkRect* graphemeLayoutBounds,   // 1 SkRect
+    size_t* graphemeCodeUnitRange,  // 2 size_ts: [start, end]
+    bool* booleanFlags) {           // 1 boolean: isLTR
+  Paragraph::GlyphInfo glyphInfo;
+  if (!paragraph->getClosestUTF16GlyphInfoAt(offsetX, offsetY, &glyphInfo)) {
+    return false;
+  }
+  // This is more verbose than memcpying the whole struct but ideally we don't
+  // want to depend on the exact memory layout of the struct.
+  std::memcpy(graphemeLayoutBounds, &glyphInfo.fGraphemeLayoutBounds,
+              sizeof(SkRect));
+  std::memcpy(graphemeCodeUnitRange, &glyphInfo.fGraphemeClusterTextRange,
+              2 * sizeof(size_t));
+  booleanFlags[0] =
+      glyphInfo.fDirection == skia::textlayout::TextDirection::kLtr;
+  return true;
+}
+
+SKWASM_EXPORT bool paragraph_getGlyphInfoAt(
+    Paragraph* paragraph,
+    size_t index,
+    // Out parameters:
+    SkRect* graphemeLayoutBounds,   // 1 SkRect
+    size_t* graphemeCodeUnitRange,  // 2 size_ts: [start, end]
+    bool* booleanFlags) {           // 1 boolean: isLTR
+  Paragraph::GlyphInfo glyphInfo;
+  if (!paragraph->getGlyphInfoAtUTF16Offset(index, &glyphInfo)) {
+    return false;
+  }
+  std::memcpy(graphemeLayoutBounds, &glyphInfo.fGraphemeLayoutBounds,
+              sizeof(SkRect));
+  std::memcpy(graphemeCodeUnitRange, &glyphInfo.fGraphemeClusterTextRange,
+              2 * sizeof(size_t));
+  booleanFlags[0] =
+      glyphInfo.fDirection == skia::textlayout::TextDirection::kLtr;
+  return true;
 }
 
 SKWASM_EXPORT void paragraph_getWordBoundary(

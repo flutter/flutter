@@ -72,6 +72,24 @@ external int paragraphGetPositionForOffset(
   Pointer<Int32> outAffinity,
 );
 
+@Native<Bool Function(ParagraphHandle, Float, Float, RawRect, Pointer<Uint32>, Pointer<Bool>)>(symbol: 'paragraph_getClosestGlyphInfoAtCoordinate')
+external bool paragraphGetClosestGlyphInfoAtCoordinate(
+  ParagraphHandle handle,
+  double offsetX, double offsetY,
+  RawRect graphemeLayoutBounds,          // 4 floats, [LTRB]
+  Pointer<Uint32> graphemeCodeUnitRange, // 2 `size_t`s, start and end.
+  Pointer<Bool> booleanFlags,            // 1 boolean, isLTR.
+);
+
+@Native<Bool Function(ParagraphHandle, Uint32, RawRect, Pointer<Uint32>, Pointer<Bool>)>(symbol: 'paragraph_getGlyphInfoAt')
+external bool paragraphGetGlyphInfoAt(
+  ParagraphHandle handle,
+  int codeUnitOffset,
+  RawRect graphemeLayoutBounds,          // 4 floats, [LTRB]
+  Pointer<Uint32> graphemeCodeUnitRange, // 2 `size_t`s, start and end.
+  Pointer<Bool> booleanFlags,            // 1 boolean, isLTR.
+);
+
 @Native<Void Function(
   ParagraphHandle,
   UnsignedInt,

@@ -75,6 +75,15 @@ class ParagraphSkia : public Paragraph {
   PositionWithAffinity GetGlyphPositionAtCoordinate(double dx,
                                                     double dy) override;
 
+  bool GetGlyphInfoAt(
+      unsigned offset,
+      skia::textlayout::Paragraph::GlyphInfo* glyphInfo) const override;
+
+  bool GetClosestGlyphInfoAtCoordinate(
+      double dx,
+      double dy,
+      skia::textlayout::Paragraph::GlyphInfo* glyphInfo) const override;
+
   Range<size_t> GetWordBoundary(size_t offset) override;
 
  private:
