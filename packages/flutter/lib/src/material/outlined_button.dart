@@ -545,6 +545,9 @@ class _OutlinedButtonDefaultsM3 extends ButtonStyle {
     if (states.contains(MaterialState.disabled)) {
       return BorderSide(color: _colors.onSurface.withOpacity(0.12));
     }
+    if (states.contains(MaterialState.focused)) {
+      return BorderSide(color: _colors.primary);
+    }
     return BorderSide(color: _colors.outline);
   });
 
