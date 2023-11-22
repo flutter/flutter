@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/features.dart';
 
@@ -32,10 +33,10 @@ void main() {
   late Artifacts artifacts;
   late FileSystem fileSystem;
   late BufferLogger logger;
-  late TestFeatureFlags featureFlags;
+  final TestFeatureFlags featureFlagsWithNativeAssets = TestFeatureFlags(isNativeAssetsEnabled: true);
+  final TestFeatureFlags featureFlagsWithoutNativeAssets = TestFeatureFlags();
 
   setUp(() {
-    featureFlags = TestFeatureFlags(isNativeAssetsEnabled: true);
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
@@ -135,7 +136,29 @@ native-assets: {}
     );
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
+  });
+
+  testUsingContext('KernelSnapshot will depend on NativeAssets if the feature is enabled', () async {
+    expect(featureFlagsWithoutNativeAssets.isNativeAssetsEnabled, isFalse);
+
+    expect(
+      const KernelSnapshot().dependencies,
+      contains(const NativeAssets()),
+    );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => featureFlagsWithNativeAssets,
+  });
+
+  testUsingContext('KernelSnapshot will not depend on NativeAssets if the feature is disabled', () async {
+    expect(featureFlagsWithoutNativeAssets.isNativeAssetsEnabled, isFalse);
+
+    expect(
+      const KernelSnapshot().dependencies,
+      isNot(contains(const NativeAssets())),
+    );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => featureFlagsWithoutNativeAssets,
   });
 
   testUsingContext('KernelSnapshot does use track widget creation on profile builds', () async {
@@ -183,7 +206,7 @@ native-assets: {}
 
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
   });
 
   testUsingContext('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () async {
@@ -232,7 +255,7 @@ native-assets: {}
 
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
   });
 
   testUsingContext('KernelSnapshot correctly forwards FrontendServerStarterPath', () async {
@@ -281,7 +304,7 @@ native-assets: {}
 
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
   });
 
   testUsingContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
@@ -332,7 +355,7 @@ native-assets: {}
 
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
   });
 
   testUsingContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
@@ -381,7 +404,7 @@ native-assets: {}
 
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
   });
 
   testUsingContext('KernelSnapshot forces platform linking on debug for darwin target platforms', () async {
@@ -431,7 +454,7 @@ native-assets: {}
 
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
   });
 
   testUsingContext('KernelSnapshot does use track widget creation on debug builds', () async {
@@ -490,7 +513,7 @@ native-assets: {}
 
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => featureFlags,
+    FeatureFlags: () => featureFlagsWithNativeAssets,
   });
 
   testUsingContext('AotElfProfile Produces correct output directory', () async {
