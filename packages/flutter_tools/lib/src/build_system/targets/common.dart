@@ -127,14 +127,14 @@ class KernelSnapshot extends Target {
   String get name => 'kernel_snapshot';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/native_assets.yaml'),
-    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
-    Source.artifact(Artifact.platformKernelDill),
-    Source.artifact(Artifact.engineDartBinary),
-    Source.artifact(Artifact.engineDartAotRuntime),
-    Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
+  List<Source> get inputs => <Source>[
+    if (nativeAssetsEnabled) const Source.pattern('{BUILD_DIR}/native_assets.yaml'),
+    const Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
+    const Source.artifact(Artifact.platformKernelDill),
+    const Source.artifact(Artifact.engineDartBinary),
+    const Source.artifact(Artifact.engineDartAotRuntime),
+    const Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ];
 
   @override
