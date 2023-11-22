@@ -212,7 +212,8 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('NestedScrollView always scrolls outer scrollable first, (double precision errors, #136199)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView always scrolls outer scrollable first', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/136199
     final Key innerKey = UniqueKey();
     final Key outerKey = UniqueKey();
 
