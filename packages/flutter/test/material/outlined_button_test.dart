@@ -259,6 +259,8 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Does OutlinedButton work with focus', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
     const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -267,9 +269,9 @@ void main() {
 
     final FocusNode focusNode = FocusNode(debugLabel: 'OutlinedButton Node');
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: OutlinedButton(
+      MaterialApp(
+        theme: theme,
+        home: OutlinedButton(
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
@@ -287,10 +289,21 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
 
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(Material),
+    );
+
+    final Material material = tester.widget<Material>(buttonMaterial);
+
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colors.primary)));
+
     focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does OutlinedButton work with autofocus', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
     const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -299,9 +312,9 @@ void main() {
 
     final FocusNode focusNode = FocusNode(debugLabel: 'OutlinedButton Node');
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: OutlinedButton(
+      MaterialApp(
+        theme: theme,
+        home: OutlinedButton(
           autofocus: true,
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
@@ -319,6 +332,15 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
 
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(Material),
+    );
+
+    final Material material = tester.widget<Material>(buttonMaterial);
+
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colors.primary)));
     focusNode.dispose();
   });
 
