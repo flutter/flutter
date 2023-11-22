@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "ย้ายไปต้นรายการ",
+  "reorderItemToEnd": "ย้ายไปท้ายรายการ",
+  "reorderItemUp": "ย้ายขึ้น",
+  "reorderItemDown": "ย้ายลง",
+  "reorderItemLeft": "ย้ายไปทางซ้าย",
+  "reorderItemRight": "ย้ายไปทางขวา"
+}
