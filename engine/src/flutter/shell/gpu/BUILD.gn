@@ -105,7 +105,6 @@ if (is_mac) {
              ":gpu_surface_metal",
              "//flutter/impeller/fixtures",
              "//flutter/fml",
-             "//flutter/fml/dart",
              "//flutter/runtime",
              "//flutter/runtime:libdart",
              "//flutter/testing",

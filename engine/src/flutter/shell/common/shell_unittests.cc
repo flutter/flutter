@@ -28,7 +28,6 @@
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
-#include "flutter/fml/dart/dart_converter.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -2207,52 +2206,6 @@ TEST_F(ShellTest, Screenshot) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, CanConvertToAndFromMappings) {
-  const size_t buffer_size = 2 << 20;
-
-  uint8_t* buffer = static_cast<uint8_t*>(::malloc(buffer_size));
-  // NOLINTNEXTLINE(clang-analyzer-unix.Malloc)
-  ASSERT_TRUE(buffer != nullptr);
-  ASSERT_TRUE(MemsetPatternSetOrCheck(
-      buffer, buffer_size, MemsetPatternOp::kMemsetPatternOpSetBuffer));
-
-  std::unique_ptr<fml::Mapping> mapping =
-      std::make_unique<fml::MallocMapping>(buffer, buffer_size);
-
-  ASSERT_EQ(mapping->GetSize(), buffer_size);
-
-  fml::AutoResetWaitableEvent latch;
-  AddNativeCallback(
-      "SendFixtureMapping", CREATE_NATIVE_ENTRY([&](auto args) {
-        auto mapping_from_dart =
-            tonic::DartConverter<std::unique_ptr<fml::Mapping>>::FromDart(
-                Dart_GetNativeArgument(args, 0));
-        ASSERT_NE(mapping_from_dart, nullptr);
-        ASSERT_EQ(mapping_from_dart->GetSize(), buffer_size);
-        ASSERT_TRUE(MemsetPatternSetOrCheck(
-            const_cast<uint8_t*>(mapping_from_dart->GetMapping()),  // buffer
-            mapping_from_dart->GetSize(),                           // size
-            MemsetPatternOp::kMemsetPatternOpCheckBuffer            // op
-            ));
-        latch.Signal();
-      }));
-
-  AddNativeCallback(
-      "GetFixtureMapping", CREATE_NATIVE_ENTRY([&](auto args) {
-        tonic::DartConverter<tonic::DartConverterMapping>::SetReturnValue(
-            args, mapping);
-      }));
-
-  auto settings = CreateSettingsForFixture();
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("canConvertMappings");
-  std::unique_ptr<Shell> shell = CreateShell(settings);
-  ASSERT_NE(shell.get(), nullptr);
-  RunEngine(shell.get(), std::move(configuration));
-  latch.Wait();
-  DestroyShell(std::move(shell));
-}
-
 // Compares local times as seen by the dart isolate and as seen by this test
 // fixture, to a resolution of 1 hour.
 //
@@ -2298,35 +2251,6 @@ TEST_F(ShellTest, LocaltimesMatch) {
       << "Local times in the dart isolate and the local time seen by the test "
       << "differ by more than 1 hour, but are expected to be about equal";
 
-  DestroyShell(std::move(shell));
-}
-
-TEST_F(ShellTest, CanDecompressImageFromAsset) {
-  fml::AutoResetWaitableEvent latch;
-  AddNativeCallback("NotifyWidthHeight", CREATE_NATIVE_ENTRY([&](auto args) {
-                      auto width = tonic::DartConverter<int>::FromDart(
-                          Dart_GetNativeArgument(args, 0));
-                      auto height = tonic::DartConverter<int>::FromDart(
-                          Dart_GetNativeArgument(args, 1));
-                      ASSERT_EQ(width, 100);
-                      ASSERT_EQ(height, 100);
-                      latch.Signal();
-                    }));
-
-  AddNativeCallback(
-      "GetFixtureImage", CREATE_NATIVE_ENTRY([](auto args) {
-        auto fixture = OpenFixtureAsMapping("shelltest_screenshot.png");
-        tonic::DartConverter<tonic::DartConverterMapping>::SetReturnValue(
-            args, fixture);
-      }));
-
-  auto settings = CreateSettingsForFixture();
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("canDecompressImageFromAsset");
-  std::unique_ptr<Shell> shell = CreateShell(settings);
-  ASSERT_NE(shell.get(), nullptr);
-  RunEngine(shell.get(), std::move(configuration));
-  latch.Wait();
   DestroyShell(std::move(shell));
 }
 

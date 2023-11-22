@@ -245,7 +245,6 @@ if (enable_unittests) {
     public_deps = [
       "//flutter/common/graphics",
       "//flutter/flow",
-      "//flutter/fml/dart",
       "//flutter/runtime",
       "//flutter/shell/common",
       "//flutter/testing",

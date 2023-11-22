@@ -221,29 +221,6 @@ void callNotifyDestroyed() {
 external void notifyMessage(String string);
 
 @pragma('vm:entry-point')
-void canConvertMappings() {
-  sendFixtureMapping(getFixtureMapping());
-}
-
-@pragma('vm:external-name', 'GetFixtureMapping')
-external List<int> getFixtureMapping();
-@pragma('vm:external-name', 'SendFixtureMapping')
-external void sendFixtureMapping(List<int> list);
-
-@pragma('vm:entry-point')
-void canDecompressImageFromAsset() {
-  decodeImageFromList(
-    Uint8List.fromList(getFixtureImage()),
-    (Image result) {
-      notifyWidthHeight(result.width, result.height);
-    },
-  );
-}
-
-@pragma('vm:external-name', 'GetFixtureImage')
-external List<int> getFixtureImage();
-
-@pragma('vm:entry-point')
 void canRegisterImageDecoders() {
   decodeImageFromList(
     // The test ImageGenerator will always behave the same regardless of input.
