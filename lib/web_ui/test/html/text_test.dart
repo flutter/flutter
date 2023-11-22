@@ -105,7 +105,7 @@ Future<void> testMain() async {
     expect(paragraph.numberOfLines, 1);
 
     expect(paragraph.getLineMetricsAt(-1), isNull);
-    expect(paragraph.getLineMetricsAt(0), isNotNull);
+    expect(paragraph.getLineMetricsAt(0)?.lineNumber, 0);
     expect(paragraph.getLineMetricsAt(1), isNull);
 
     expect(paragraph.getLineNumberAt(-1), isNull);
@@ -114,6 +114,68 @@ Future<void> testMain() async {
     // The last 3 characters on the first line are ellipsized with BBB.
     expect(paragraph.getLineNumberAt(7), isNull);
   });
+
+  test('Basic glyph metrics', () {
+    const double fontSize = 10;
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: fontSize,
+      maxLines: 1,
+      ellipsis: 'BBB',
+    ))..addText('A' * 100);
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 100.0));
+
+    expect(paragraph.getGlyphInfoAt(-1), isNull);
+
+    // The last 3 characters on the first line are ellipsized with BBB.
+    expect(paragraph.getGlyphInfoAt(0)?.graphemeClusterCodeUnitRange, const TextRange(start: 0, end: 1));
+    expect(paragraph.getGlyphInfoAt(6)?.graphemeClusterCodeUnitRange, const TextRange(start: 6, end: 7));
+    expect(paragraph.getGlyphInfoAt(7), isNull);
+    expect(paragraph.getGlyphInfoAt(200), isNull);
+  });
+
+  test('Basic glyph metrics - hit test', () {
+    const double fontSize = 10.0;
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontSize: fontSize,
+      fontFamily: 'FlutterTest',
+    ))..addText('Test\nTest');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+
+    final GlyphInfo? bottomRight = paragraph.getClosestGlyphInfoForOffset(const Offset(99.0, 99.0));
+    final GlyphInfo? last = paragraph.getGlyphInfoAt(8);
+    expect(bottomRight, equals(last));
+    expect(bottomRight, isNot(paragraph.getGlyphInfoAt(0)));
+
+    expect(bottomRight?.graphemeClusterLayoutBounds, const Rect.fromLTWH(30, 10, 10, 10));
+    expect(bottomRight?.graphemeClusterCodeUnitRange, const TextRange(start: 8, end: 9));
+    expect(bottomRight?.writingDirection, TextDirection.ltr);
+  });
+
+  test('Glyph metrics with grapheme split into different runs', () {
+    const double fontSize = 10;
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: fontSize,
+      maxLines: 1,
+    ))..addText('A') // The base charater A.
+      ..addText('̀'); // The diacritical grave accent, which should combine with the base character to form a single grapheme.
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+
+    expect(paragraph.getGlyphInfoAt(0)?.graphemeClusterCodeUnitRange, const TextRange(start: 0, end: 2));
+    expect(paragraph.getGlyphInfoAt(0)?.graphemeClusterLayoutBounds, const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0));
+    expect(paragraph.getGlyphInfoAt(1)?.graphemeClusterCodeUnitRange, const TextRange(start: 0, end: 2));
+    expect(paragraph.getGlyphInfoAt(1)?.graphemeClusterLayoutBounds, const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0));
+
+    final GlyphInfo? bottomRight = paragraph.getClosestGlyphInfoForOffset(const Offset(99.0, 99.0));
+    expect(bottomRight?.graphemeClusterCodeUnitRange, const TextRange(start: 0, end: 2));
+    expect(bottomRight?.graphemeClusterLayoutBounds, const Rect.fromLTWH(0.0, 0.0, 10.0, 10.0));
+  }, skip: domIntl.v8BreakIterator == null); // Intended: Intl.v8breakiterator is needed for correctly breaking grapheme clusters.
 
   test('Can disable rounding hack', () {
     if (!ParagraphBuilder.shouldDisableRoundingHack) {
