@@ -168,6 +168,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods!,
@@ -300,6 +301,7 @@ Future<T> runInContext<T>(
       MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
@@ -382,6 +384,7 @@ Future<T> runInContext<T>(
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
         fileSystem: globals.fs,
+        analytics: globals.analytics,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

@@ -15,10 +15,12 @@ import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 enum _StdioStream {
   stdout,
@@ -31,6 +33,7 @@ void main() {
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;
   late TestUsage usage;
+  late FakeAnalytics fakeAnalytics;
 
   void pretendPodVersionFails() {
     fakeProcessManager.addCommand(
@@ -72,6 +75,10 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     usage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
     cocoaPodsUnderTest = CocoaPods(
       fileSystem: fileSystem,
       processManager: fakeProcessManager,
@@ -79,6 +86,7 @@ void main() {
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       usage: usage,
+      analytics: fakeAnalytics,
     );
     fileSystem.file(fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
@@ -197,6 +205,7 @@ void main() {
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         usage: usage,
+        analytics: fakeAnalytics,
       );
 
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
@@ -232,6 +241,7 @@ void main() {
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
         usage: usage,
+        analytics: fakeAnalytics,
       );
 
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('project'));
@@ -545,6 +555,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
             contains('enable-libffi-alloc'),
           );
           expect(usage.events, contains(const TestUsageEvent('pod-install-failure', 'arm-ffi')));
+          expect(fakeAnalytics.sentEvents, contains(Event.appleUsageEvent(workflow: 'pod-install-failure', parameter: 'arm-ffi')));
         });
       }
       testToolExitsWithCocoapodsMessage(_StdioStream.stdout);
@@ -779,6 +790,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager, version: Version(14, 3, 0)),
         usage: usage,
+        analytics: fakeAnalytics,
       );
 
       final bool didInstall = await cocoaPodsUnderTestXcode143.processPods(

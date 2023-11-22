@@ -8,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/error_handling_io.dart';
@@ -335,6 +336,7 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Usage usage,
+    required Analytics analytics,
     String? engineVersion,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
@@ -376,6 +378,7 @@ class Environment {
       processManager: processManager,
       platform: platform,
       usage: usage,
+      analytics: analytics,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -397,6 +400,7 @@ class Environment {
     String? engineVersion,
     Platform? platform,
     Usage? usage,
+    Analytics? analytics,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
     required Logger logger,
@@ -417,6 +421,7 @@ class Environment {
       processManager: processManager,
       platform: platform ?? FakePlatform(),
       usage: usage ?? TestUsage(),
+      analytics: analytics ?? NoOpAnalytics(),
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
@@ -436,6 +441,7 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.usage,
+    required this.analytics,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
@@ -517,6 +523,8 @@ class Environment {
   final FileSystem fileSystem;
 
   final Usage usage;
+
+  final Analytics analytics;
 
   /// The version of the current engine, or `null` if built with a local engine.
   final String? engineVersion;
