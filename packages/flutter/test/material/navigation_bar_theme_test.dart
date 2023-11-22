@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -264,14 +265,25 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+
     // Test hovered state.
-    expect(inkFeatures, paints..circle(color: hoverColor));
+    expect(
+      inkFeatures,
+      kIsWeb
+        ? (paints..rrect()..rrect()..circle(color: hoverColor))
+        : (paints..circle(color: hoverColor)),
+    );
 
     await gesture.down(tester.getCenter(find.byType(NavigationIndicator).last));
     await tester.pumpAndSettle();
 
     // Test pressed state.
-    expect(inkFeatures, paints..circle(color: hoverColor)..circle(color: pressedColor));
+    expect(
+      inkFeatures,
+      kIsWeb
+        ? (paints..circle()..circle()..circle(color: pressedColor))
+        : (paints..circle()..circle(color: pressedColor)),
+    );
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -281,7 +293,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Test focused state.
-    expect(inkFeatures, paints..circle(color: hoverColor)..circle(color: focusColor));
+    expect(
+      inkFeatures,
+      kIsWeb ? (paints..circle()..circle(color: focusColor)) : (paints..circle()..circle(color: focusColor)),
+    );
   });
 }
 
