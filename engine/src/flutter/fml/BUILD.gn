@@ -387,7 +387,6 @@ if (enable_unittests) {
     deps = [
       ":fml_fixtures",
       "//flutter/fml",
-      "//flutter/fml/dart",
       "//flutter/runtime",
       "//flutter/runtime:libdart",
       "//flutter/testing",
