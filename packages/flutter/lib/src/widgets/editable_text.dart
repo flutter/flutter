@@ -2160,12 +2160,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
   TextSelectionOverlay? _selectionOverlay;
-  TextEditingValue? _valueWhenShowToolbarOnScreenScheduled;
   ScrollNotificationObserverState? _scrollNotificationObserver;
-  bool _toolbarVisibleAtScrollStart = false;
-  bool _showToolbarOnScreenScheduled = false;
+  TextEditingValue? _valueWhenToolbarShowScheduled;
   bool _internalScrolling = false;
-  final bool _webContextMenuEnabled = kIsWeb && BrowserContextMenu.enabled;
+
+  bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
 
   final GlobalKey _scrollableKey = GlobalKey();
   ScrollController? _internalScrollController;
@@ -3652,8 +3651,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  final bool _platformSupportsFadeOnScroll = defaultTargetPlatform == TargetPlatform.android
-                                          || defaultTargetPlatform == TargetPlatform.iOS;
+  final bool _platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
+    TargetPlatform.android => true,
+    TargetPlatform.iOS => true,
+    TargetPlatform.fuchsia => false,
+    TargetPlatform.linux => false,
+    TargetPlatform.macOS => false,
+    TargetPlatform.windows => false,
+  };
 
   void _onEditableScroll() {
     if (!_platformSupportsFadeOnScroll || _webContextMenuEnabled) {
@@ -3676,40 +3681,36 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // When the scroll begins and the toolbar is visible, hide it
     // until scrolling ends.
     //
-    // When scrolling ends and the toolbar was present at the
-    // beginning of the scroll we should re-show the toolbar only
-    // if the selection endpoints are within the viewport at the
-    // end of the scroll. If not then we should schedule the
-    // toolbar to be shown when we scroll the selection back into
-    // view.
-    //
-    // A scheduled toolbar will only be shown if the editing state
-    // did not change between the time the toolbar was first
-    // scheduled to be shown to when it is ready to be shown.
+    // The selection and renderEditable need to be visible within the current
+    // viewport for the toolbar to show when scrolling ends. If they are not 
+    // then the toolbar is shown when they are scrolled back into view, unless
+    // invalidated by a change in TextEditingValue.
     if (notification is ScrollStartNotification) {
-      _toolbarVisibleAtScrollStart = _selectionOverlay != null && _selectionOverlay!.toolbarIsVisible;
-      if (_toolbarVisibleAtScrollStart) {
+      if (_valueWhenToolbarShowScheduled != null) {
+        return;
+      }
+      final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+      _valueWhenToolbarShowScheduled = toolbarIsVisible ? _value : null;
+      if (_valueWhenToolbarShowScheduled != null) {
         hideToolbar(false);
       }
     } else if (notification is ScrollEndNotification) {
+      _internalScrolling = false;
+      if (_valueWhenToolbarShowScheduled == null) {
+        return;
+      }
+      if (_valueWhenToolbarShowScheduled != _value) {
+        // Value has changed so we should invalidate any toolbar scheduling.
+        _valueWhenToolbarShowScheduled = null;
+        return;
+      }
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
       final bool renderEditableInView = renderEditable.getTransformTo(null) != Matrix4.zero();
-      if ((_toolbarVisibleAtScrollStart || _showToolbarOnScreenScheduled) && (selectionIsVisible && renderEditableInView)) {
-        _toolbarVisibleAtScrollStart = false;
-        if (_showToolbarOnScreenScheduled) {
-          _showToolbarOnScreenScheduled = false;
-          if (_valueWhenShowToolbarOnScreenScheduled == _value) {
-            showToolbar();
-          }
-          _valueWhenShowToolbarOnScreenScheduled = null;
-        } else {
-          showToolbar();
-        }
-      } else if (_toolbarVisibleAtScrollStart) {
-        _showToolbarOnScreenScheduled = true;
-        _valueWhenShowToolbarOnScreenScheduled = _value;
+
+      if (selectionIsVisible && renderEditableInView) {
+        showToolbar();
+        _valueWhenToolbarShowScheduled = null;
       }
-      _internalScrolling = false;
     }
   }
 
