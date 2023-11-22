@@ -163,7 +163,7 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
     return {{ proto.args.0.argument_name }}.BindResource({% for arg in proto.args %}
   {% if loop.is_first %}
 {{to_shader_stage(shader_stage)}}, kResource{{ proto.name }}, kMetadata{{ proto.name }}, {% else %}
-{{ arg.argument_name }}{% if not loop.is_last %}, {% endif %}
+std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
   {% endif %}
   {% endfor %});
   }
