@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <cstring>
 
-#include "flutter/fml/logging.h"
 #include "impeller/base/validation.h"
 
 namespace impeller {
