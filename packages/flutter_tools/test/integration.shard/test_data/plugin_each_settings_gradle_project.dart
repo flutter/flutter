@@ -7,8 +7,9 @@
 import 'deferred_components_config.dart';
 import 'plugin_project.dart';
 
-/// Project to test the legacy `settings.gradle` which uses the
-/// `.flutter-plugins` file to load EACH plugin.
+/// Project to test the deprecated `settings.gradle` (PluginEach) that apps were
+/// created with until Flutter v1.22.0.
+/// It uses the `.flutter-plugins` file to load EACH plugin.
 class PluginEachSettingsGradleProject extends PluginProject {
   @override
   DeferredComponentsConfig get deferredComponents =>
@@ -34,9 +35,10 @@ plugins.each { name, path ->
   ''';
 }
 
-/// Project to test the legacy `settings.gradle` which uses the
-/// `.flutter-plugins` file to include EACH plugin,
-/// but does not set the plugins project directory.
+/// Project to test the deprecated `settings.gradle` (PluginEach) that apps were
+/// created with until Flutter v1.22.0.
+/// It uses the `.flutter-plugins` file to get EACH plugin.
+/// It is compromised by removing the 'include' statement of the plugins.
 class PluginCompromisedEachSettingsGradleProject extends PluginProject {
   @override
   DeferredComponentsConfig get deferredComponents =>

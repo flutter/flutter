@@ -125,8 +125,9 @@ void main() {
   });
 
   // TODO(54566): Remove test when issue is resolved.
-  /// Test with [PluginEachSettingsGradleProject] with a legacy settings.gradle
-  /// which uses the `.flutter-plugins` file to load EACH plugin.
+  /// Test project with a `settings.gradle` (PluginEach) that apps were created
+  /// with until Flutter v1.22.0.
+  /// It uses the `.flutter-plugins` file to load EACH plugin.
   test(
       'skip plugin if it does not support the Android platform with a _plugin.each_ settings.gradle',
       () async {
@@ -141,8 +142,10 @@ void main() {
   });
 
   // TODO(54566): Remove test when issue is resolved.
-  /// Test with [PluginEachSettingsGradleProject] with a legacy settings.gradle
-  /// which uses the `.flutter-plugins` file to load EACH plugin.
+  /// Test project with a `settings.gradle` (PluginEach) that apps were created
+  /// with until Flutter v1.22.0.
+  /// It uses the `.flutter-plugins` file to load EACH plugin.
+  /// The plugin includes a functional 'android' folder.
   test(
       'skip plugin with android folder if it does not support the Android platform with a _plugin.each_ settings.gradle',
       () async {
@@ -157,8 +160,12 @@ void main() {
   });
 
   // TODO(54566): Remove test when issue is resolved.
-  /// Test with [PluginEachSettingsGradleProject] with a compromised legacy settings.gradle
-  /// which uses the `.flutter-plugins` file to load EACH plugin.
+  /// Test project with a `settings.gradle` (PluginEach) that apps were created
+  /// with until Flutter v1.22.0.
+  /// It is compromised by removing the 'include' statement of the plugins.
+  /// As the "'.flutter-plugins'" keyword is still present, the framework
+  /// assumes that all plugins are included, which is not the case.
+  /// Therefore it should throw an error.
   test(
       'skip plugin if it does not support the Android platform with a compromised _plugin.each_ settings.gradle',
       () async {
