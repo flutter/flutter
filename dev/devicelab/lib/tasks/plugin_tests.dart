@@ -53,6 +53,7 @@ class PluginTest {
     // Supporting `flutter test` would require invoking a native build.
     final bool runFlutterTest = template != 'plugin_ffi';
     try {
+      await evalFlutter('config', options: const <String>['--enable-native-assets']);
       section('Create plugin');
       final _FlutterProject plugin = await _FlutterProject.create(
           tempDir, options, buildTarget,
