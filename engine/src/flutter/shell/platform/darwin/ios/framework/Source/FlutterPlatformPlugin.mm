@@ -10,6 +10,8 @@
 #import <UIKit/UIKit.h>
 
 #include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
@@ -154,10 +156,38 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 
 - (void)showShareViewController:(NSString*)content {
   UIViewController* engineViewController = [_engine.get() viewController];
+
   NSArray* itemsToShare = @[ content ?: [NSNull null] ];
   UIActivityViewController* activityViewController =
       [[[UIActivityViewController alloc] initWithActivityItems:itemsToShare
                                          applicationActivities:nil] autorelease];
+
+  if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+    // On iPad, the share screen is presented in a popover view, and requires a
+    // sourceView and sourceRect
+    FlutterTextInputPlugin* _textInputPlugin = [_engine.get() textInputPlugin];
+    UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
+
+    // firstRectForRange cannot be used here as it's current implementation does
+    // not always return the full rect of the range.
+    CGRect firstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.start];
+    CGRect transformedFirstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:firstRect];
+    CGRect lastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.end];
+    CGRect transformedLastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:lastRect];
+
+    activityViewController.popoverPresentationController.sourceView = engineViewController.view;
+    // In case of RTL Language, get the minimum x coordinate
+    activityViewController.popoverPresentationController.sourceRect =
+        CGRectMake(fmin(transformedFirstRect.origin.x, transformedLastRect.origin.x),
+                   transformedFirstRect.origin.y,
+                   abs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
+                   transformedFirstRect.size.height);
+  }
+
   [engineViewController presentViewController:activityViewController animated:YES completion:nil];
 }
 

@@ -163,6 +163,10 @@ FLUTTER_DARWIN_EXPORT
 - (instancetype)initWithFrame:(CGRect)frame NS_UNAVAILABLE;
 - (instancetype)initWithOwner:(FlutterTextInputPlugin*)textInputPlugin NS_DESIGNATED_INITIALIZER;
 
+// TODO(louisehsu): These are being exposed to support Share in FlutterPlatformPlugin
+// Consider moving that feature into FlutterTextInputPlugin to avoid exposing extra methods
+- (CGRect)localRectFromFrameworkTransform:(CGRect)incomingRect;
+- (CGRect)caretRectForPosition:(UITextPosition*)position;
 @end
 
 @interface UIView (FindFirstResponder)
