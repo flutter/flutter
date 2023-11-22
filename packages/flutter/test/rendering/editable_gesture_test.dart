@@ -8,10 +8,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding = _GestureBindingSpy();
+  setUp(() => _GestureBindingSpy());
 
-  testWidgets('attach and detach correctly handle gesture', (_) async {
-    assert(WidgetsBinding.instance == binding);
+  test('attach and detach correctly handle gesture', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final RenderEditable editable = RenderEditable(
       backgroundCursorColor: Colors.grey,
