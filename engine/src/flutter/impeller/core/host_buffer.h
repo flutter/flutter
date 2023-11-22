@@ -16,9 +16,7 @@
 
 namespace impeller {
 
-class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
-                         public Allocation,
-                         public Buffer {
+class HostBuffer final : public Buffer {
  public:
   static std::shared_ptr<HostBuffer> Create();
 
@@ -116,14 +114,39 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
   void Reset();
 
   //----------------------------------------------------------------------------
-  /// @brief Returns the size of the HostBuffer in memory in bytes.
+  /// @brief Returns the capacity of the HostBuffer in memory in bytes.
   size_t GetSize() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief Returns the size of the currently allocated HostBuffer memory in
+  ///        bytes.
+  size_t GetLength() const;
+
  private:
-  mutable std::shared_ptr<DeviceBuffer> device_buffer_;
-  mutable size_t device_buffer_generation_ = 0u;
-  size_t generation_ = 1u;
-  std::string label_;
+  struct HostBufferState : public Buffer, public Allocation {
+    std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
+        Allocator& allocator) const override;
+
+    [[nodiscard]] std::pair<uint8_t*, Range> Emplace(const void* buffer,
+                                                     size_t length);
+
+    std::pair<uint8_t*, Range> Emplace(size_t length,
+                                       size_t align,
+                                       const EmplaceProc& cb);
+
+    std::pair<uint8_t*, Range> Emplace(const void* buffer,
+                                       size_t length,
+                                       size_t align);
+
+    void Reset();
+
+    mutable std::shared_ptr<DeviceBuffer> device_buffer;
+    mutable size_t device_buffer_generation = 0u;
+    size_t generation = 1u;
+    std::string label;
+  };
+
+  std::shared_ptr<HostBufferState> state_ = std::make_shared<HostBufferState>();
 
   // |Buffer|
   std::shared_ptr<const DeviceBuffer> GetDeviceBuffer(
