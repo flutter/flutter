@@ -12,7 +12,6 @@ import 'dart:ui' as ui show
   ParagraphConstraints,
   ParagraphStyle,
   PlaceholderAlignment,
-  TextHeightBehavior,
   TextStyle;
 
 import 'package:flutter/foundation.dart';
@@ -488,7 +487,7 @@ class TextPainter {
     Locale? locale,
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
+    TextHeightBehavior? textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
@@ -537,7 +536,7 @@ class TextPainter {
     Locale? locale,
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
+    TextHeightBehavior? textHeightBehavior,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -589,7 +588,7 @@ class TextPainter {
     Locale? locale,
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
+    TextHeightBehavior? textHeightBehavior,
     double minWidth = 0.0,
     double maxWidth = double.infinity,
   }) {
@@ -894,9 +893,9 @@ class TextPainter {
   }
 
   /// {@macro dart.ui.textHeightBehavior}
-  ui.TextHeightBehavior? get textHeightBehavior => _textHeightBehavior;
-  ui.TextHeightBehavior? _textHeightBehavior;
-  set textHeightBehavior(ui.TextHeightBehavior? value) {
+  TextHeightBehavior? get textHeightBehavior => _textHeightBehavior;
+  TextHeightBehavior? _textHeightBehavior;
+  set textHeightBehavior(TextHeightBehavior? value) {
     if (_textHeightBehavior == value) {
       return;
     }
