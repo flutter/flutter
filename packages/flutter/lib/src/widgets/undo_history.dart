@@ -187,9 +187,14 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
       return;
     }
 
+    final T nextValue = widget.undoStackModifier?.call(widget.value.value) ?? widget.value.value;
+    if (nextValue == _lastValue) {
+      return;
+    }
+
     _lastValue = widget.undoStackModifier?.call(widget.value.value) ?? widget.value.value;
 
-    _throttleTimer = _throttledPush(_lastValue as T);
+    _throttleTimer = _throttledPush(nextValue);
   }
 
   void _handleFocus() {
