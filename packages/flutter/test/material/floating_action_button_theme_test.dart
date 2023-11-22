@@ -69,7 +69,7 @@ void main() {
     expect(style.elevation!.resolve(pressed), 12);
     expect(style.shape!.resolve(enabled), const CircleBorder());
     expect(style.overlayColor!.resolve(pressed), ThemeData().splashColor);
-    expect(buttonConstraints, const BoxConstraints.tightFor(width: 56.0, height: 56.0));
+    expect(buttonConstraints, const BoxConstraints.tightFor(width: 64.0, height: 64.0));
     expect(_getIconSize(tester).width, 24.0);
     expect(_getIconSize(tester).height, 24.0);
   });

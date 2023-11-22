@@ -80,12 +80,12 @@ enum _FloatingActionButtonType {
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
 ///  * <https://material.io/design/components/buttons-floating-action-button.html>
 ///  * <https://m3.material.io/components/floating-action-button>
-class FloatingActionButton extends StatelessWidget {
+class FloatingActionButtonOld extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
   /// The [elevation], [highlightElevation], and [disabledElevation] parameters,
   /// if specified, must be non-negative.
-  const FloatingActionButton({
+  const FloatingActionButtonOld({
     super.key,
     this.child,
     this.tooltip,
@@ -128,7 +128,7 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
   /// and [disabledElevation] parameters, if specified, must be non-negative.
-  const FloatingActionButton.small({
+  const FloatingActionButtonOld.small({
     super.key,
     this.child,
     this.tooltip,
@@ -171,7 +171,7 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
   /// and [disabledElevation] parameters, if specified, must be non-negative.
-  const FloatingActionButton.large({
+  const FloatingActionButtonOld.large({
     super.key,
     this.child,
     this.tooltip,
@@ -215,7 +215,7 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// See also:
   ///  * <https://m3.material.io/components/extended-fab>
-  const FloatingActionButton.extended({
+  const FloatingActionButtonOld.extended({
     super.key,
     this.tooltip,
     this.foregroundColor,
