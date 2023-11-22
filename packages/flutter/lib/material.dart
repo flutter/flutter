@@ -91,7 +91,6 @@ export 'src/material/filter_chip.dart';
 export 'src/material/flexible_space_bar.dart';
 export 'src/material/floating_action_button.dart';
 export 'src/material/floating_action_button_location.dart';
-export 'src/material/floating_action_button_old.dart';
 export 'src/material/floating_action_button_theme.dart';
 export 'src/material/flutter_logo.dart';
 export 'src/material/grid_tile.dart';
