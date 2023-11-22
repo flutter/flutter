@@ -2507,7 +2507,6 @@ targets:
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
