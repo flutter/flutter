@@ -1597,10 +1597,11 @@ class TestGridLayout implements SliverGridLayout {
   @override
   SliverGridGeometry getGeometryForChildIndex(int index) {
     return SliverGridGeometry(
-        crossAxisOffset: 20.0 + 20 * index,
-        crossAxisExtent: 20,
-        mainAxisExtent: 20,
-        scrollOffset: 0);
+      crossAxisOffset: 20.0 + 20 * index,
+      crossAxisExtent: 20,
+      mainAxisExtent: 20,
+      scrollOffset: 0,
+    );
   }
 
   @override
