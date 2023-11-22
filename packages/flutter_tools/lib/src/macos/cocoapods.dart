@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
@@ -93,11 +94,13 @@ class CocoaPods {
     required Logger logger,
     required Platform platform,
     required Usage usage,
+    required Analytics analytics,
   }) : _fileSystem = fileSystem,
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
       _logger = logger,
       _usage = usage,
+      _analytics = analytics,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
       _operatingSystemUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
@@ -113,6 +116,7 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Usage _usage;
+  final Analytics _analytics;
 
   Future<String?>? _versionText;
 
@@ -384,6 +388,10 @@ class CocoaPods {
         'arm-ffi',
         flutterUsage: _usage,
       ).send();
+      _analytics.send(Event.appleUsageEvent(
+        workflow: 'pod-install-failure',
+        parameter: 'arm-ffi',
+      ));
       _logger.printError(
         'Error: To set up CocoaPods for ARM macOS, run:\n'
         '  sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc\n',

@@ -143,7 +143,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage),
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage, globals.analytics),
     XcodeBuildSystemMigration(app.project, globals.logger),
     ProjectBaseConfigurationMigration(app.project, globals.logger),
     ProjectBuildLocationMigration(app.project, globals.logger),

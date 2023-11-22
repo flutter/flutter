@@ -1621,6 +1621,7 @@ abstract class FlutterCommand extends Command<void> {
       commandPath: commandPath,
       result: commandResult.toString(),
       maxRss: maxRss,
+      commandHasTerminal: globals.stdio.hasTerminal,
     ));
 
     // Send timing.
@@ -1706,6 +1707,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         processManager: globals.processManager,
         platform: globals.platform,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );

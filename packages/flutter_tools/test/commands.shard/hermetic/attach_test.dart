@@ -162,6 +162,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -225,6 +226,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
       });
@@ -294,6 +296,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
       });
@@ -363,6 +366,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -433,6 +437,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -507,6 +512,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -581,6 +587,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 

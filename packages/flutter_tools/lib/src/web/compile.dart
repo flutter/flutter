@@ -110,6 +110,7 @@ class WebBuilder {
             processManager: _processManager,
             platform: globals.platform,
             usage: _flutterUsage,
+            analytics: _analytics,
             cacheDir: globals.cache.getRoot(),
             engineVersion: globals.artifacts!.isLocalEngine ? null : _flutterVersion.engineRevision,
             flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
