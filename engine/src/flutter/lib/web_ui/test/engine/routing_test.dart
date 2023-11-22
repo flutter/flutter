@@ -11,7 +11,6 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
-import '../common/test_initialization.dart';
 import 'history_test.dart';
 
 const MethodCodec codec = JSONMethodCodec();
@@ -28,26 +27,19 @@ void main() {
 }
 
 void testMain() {
-  EngineFlutterWindow? savedWindow;
   late EngineFlutterWindow myWindow;
 
-  setUpAll(() async {
-    await bootstrapAndRunApp();
-  });
+  final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher.instance;
 
   setUp(() {
-    savedWindow = EnginePlatformDispatcher.instance.implicitView;
-    myWindow = EngineFlutterWindow(0, EnginePlatformDispatcher.instance, createDomHTMLDivElement());
+    myWindow = EngineFlutterView.implicit(dispatcher, createDomHTMLDivElement());
+    dispatcher.viewManager.registerView(myWindow);
   });
 
   tearDown(() async {
+    dispatcher.viewManager.unregisterView(myWindow.viewId);
     await myWindow.resetHistory();
-
-    // Restore the original implicit view.
-    EnginePlatformDispatcher.instance.unregisterView(myWindow);
-    if (savedWindow != null) {
-      EnginePlatformDispatcher.instance.registerView(savedWindow!);
-    }
+    myWindow.dispose();
   });
 
   // For now, web always has an implicit view provided by the web engine.

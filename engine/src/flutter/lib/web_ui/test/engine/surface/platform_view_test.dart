@@ -14,8 +14,7 @@ import '../../common/matchers.dart';
 import '../../common/test_initialization.dart';
 
 const MethodCodec codec = StandardMethodCodec();
-final EngineFlutterWindow window = EngineFlutterWindow(
-  0,
+final EngineFlutterWindow window = EngineFlutterView.implicit(
   EnginePlatformDispatcher.instance,
   createDomHTMLDivElement(),
 );
