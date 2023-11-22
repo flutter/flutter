@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
-import 'package:test/fake.dart';
 import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 import '../src/common.dart';
@@ -25,19 +24,24 @@ void main() {
   });
 
   group('FlutterPlatform', () {
+    late SuitePlatform fakeSuitePlatform;
+    setUp(() {
+      fakeSuitePlatform = SuitePlatform(Runtime.vm);
+    });
+
     testUsingContext('ensureConfiguration throws an error if an '
-      'explicitObservatoryPort is specified and more than one test file', () async {
+      'explicitVmServicePort is specified and more than one test file', () async {
       final FlutterPlatform flutterPlatform = FlutterPlatform(
         shellPath: '/',
         debuggingOptions: DebuggingOptions.enabled(
           BuildInfo.debug,
           hostVmServicePort: 1234,
         ),
-        enableObservatory: false,
+        enableVmService: false,
       );
-      flutterPlatform.loadChannel('test1.dart', FakeSuitePlatform());
+      flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
-      expect(() => flutterPlatform.loadChannel('test2.dart', FakeSuitePlatform()), throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -49,11 +53,11 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         shellPath: '/',
         precompiledDillPath: 'example.dill',
-        enableObservatory: false,
+        enableVmService: false,
       );
-      flutterPlatform.loadChannel('test1.dart', FakeSuitePlatform());
+      flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
-      expect(() => flutterPlatform.loadChannel('test2.dart', FakeSuitePlatform()), throwsToolExit());
+      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform), throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -87,7 +91,7 @@ void main() {
           disableServiceAuthCodes: true,
           hostVmServicePort: 200,
         ),
-        enableObservatory: true,
+        enableVmService: true,
         machine: true,
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
@@ -107,7 +111,7 @@ void main() {
       expect(flutterPlatform.debuggingOptions.startPaused, equals(true));
       expect(flutterPlatform.debuggingOptions.disableServiceAuthCodes, equals(true));
       expect(flutterPlatform.debuggingOptions.hostVmServicePort, equals(200));
-      expect(flutterPlatform.enableObservatory, equals(true));
+      expect(flutterPlatform.enableVmService, equals(true));
       expect(flutterPlatform.machine, equals(true));
       expect(flutterPlatform.host, InternetAddress.loopbackIPv6);
       expect(flutterPlatform.precompiledDillPath, equals('def'));
@@ -119,5 +123,3 @@ void main() {
     });
   });
 }
-
-class FakeSuitePlatform extends Fake implements SuitePlatform { }

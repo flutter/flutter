@@ -8,7 +8,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+<<<<<<< HEAD
 import '../rendering/mock_canvas.dart';
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 import '../widgets/semantics_tester.dart';
 
 void main() {

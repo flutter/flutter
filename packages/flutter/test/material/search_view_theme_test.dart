@@ -5,6 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 void main() {
   test('SearchViewThemeData copyWith, ==, hashCode basics', () {
@@ -44,7 +48,11 @@ void main() {
     expect(theme.data.dividerColor, null);
   });
 
+<<<<<<< HEAD
   testWidgets('Default SearchViewThemeData debugFillProperties', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Default SearchViewThemeData debugFillProperties', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData().debugFillProperties(builder);
 
@@ -56,7 +64,11 @@ void main() {
     expect(description, <String>[]);
   });
 
+<<<<<<< HEAD
   testWidgets('SearchViewThemeData implements debugFillProperties', (
+=======
+  testWidgetsWithLeakTracking('SearchViewThemeData implements debugFillProperties', (
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData(

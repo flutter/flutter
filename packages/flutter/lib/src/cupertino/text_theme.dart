@@ -116,7 +116,7 @@ class CupertinoTextThemeData with Diagnosticable {
   /// Create a [CupertinoTextThemeData].
   ///
   /// The [primaryColor] is used to derive TextStyle defaults of other attributes
-  /// such as [navActionTextStyle] and [actionTextStyle], it must not be null when
+  /// such as [navActionTextStyle] and [actionTextStyle]. It must not be null when
   /// either [navActionTextStyle] or [actionTextStyle] is null. Defaults to
   /// [CupertinoColors.systemBlue].
   ///
@@ -260,6 +260,41 @@ class CupertinoTextThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('pickerTextStyle', pickerTextStyle, defaultValue: defaultData.pickerTextStyle));
     properties.add(DiagnosticsProperty<TextStyle>('dateTimePickerTextStyle', dateTimePickerTextStyle, defaultValue: defaultData.dateTimePickerTextStyle));
   }
+
+  @override
+  bool operator == (Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CupertinoTextThemeData
+      && other._defaults == _defaults
+      && other._primaryColor == _primaryColor
+      && other._textStyle == _textStyle
+      && other._actionTextStyle == _actionTextStyle
+      && other._tabLabelTextStyle == _tabLabelTextStyle
+      && other._navTitleTextStyle == _navTitleTextStyle
+      && other._navLargeTitleTextStyle == _navLargeTitleTextStyle
+      && other._navActionTextStyle == _navActionTextStyle
+      && other._pickerTextStyle == _pickerTextStyle
+      && other._dateTimePickerTextStyle == _dateTimePickerTextStyle;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    _defaults,
+    _primaryColor,
+    _textStyle,
+    _actionTextStyle,
+    _tabLabelTextStyle,
+    _navTitleTextStyle,
+    _navLargeTitleTextStyle,
+    _navActionTextStyle,
+    _pickerTextStyle,
+    _dateTimePickerTextStyle,
+  );
 }
 
 
@@ -268,8 +303,7 @@ class _TextThemeDefaultsBuilder {
   const _TextThemeDefaultsBuilder(
     this.labelColor,
     this.inactiveGrayColor,
-  ) : assert(labelColor != null),
-      assert(inactiveGrayColor != null);
+  );
 
   final Color labelColor;
   final Color inactiveGrayColor;
@@ -297,4 +331,20 @@ class _TextThemeDefaultsBuilder {
       ? this
       : _TextThemeDefaultsBuilder(resolvedLabelColor, resolvedInactiveGray);
   }
+
+  @override
+  bool operator == (Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _TextThemeDefaultsBuilder
+      && other.labelColor == labelColor
+      && other.inactiveGrayColor == inactiveGrayColor;
+  }
+
+  @override
+  int get hashCode => Object.hash(labelColor, inactiveGrayColor);
 }

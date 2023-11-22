@@ -139,6 +139,7 @@ Future<bool> runXcodeTests({
   required String platformDirectory,
   required String destination,
   required String testName,
+  String configuration = 'Release',
   bool skipCodesign = false,
 }) async {
   final Map<String, String> environment = Platform.environment;
@@ -161,7 +162,7 @@ Future<bool> runXcodeTests({
       '-scheme',
       'Runner',
       '-configuration',
-      'Release',
+      configuration,
       '-destination',
       destination,
       '-resultBundlePath',

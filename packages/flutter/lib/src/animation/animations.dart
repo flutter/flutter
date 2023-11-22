@@ -255,8 +255,8 @@ class ProxyAnimation extends Animation<double>
 /// If the parent animation is running forward from 0.0 to 1.0, this animation
 /// is running in reverse from 1.0 to 0.0.
 ///
-/// Using a [ReverseAnimation] is different from simply using a [Tween] with a
-/// begin of 1.0 and an end of 0.0 because the tween does not change the status
+/// Using a [ReverseAnimation] is different from using a [Tween] with a
+/// `begin` of 1.0 and an `end` of 0.0 because the tween does not change the status
 /// or direction of the animation.
 ///
 /// See also:
@@ -269,10 +269,7 @@ class ReverseAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
 
   /// Creates a reverse animation.
-  ///
-  /// The parent argument must not be null.
-  ReverseAnimation(this.parent)
-    : assert(parent != null);
+  ReverseAnimation(this.parent);
 
   /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
@@ -310,7 +307,6 @@ class ReverseAnimation extends Animation<double>
   double get value => 1.0 - parent.value;
 
   AnimationStatus _reverseStatus(AnimationStatus status) {
-    assert(status != null);
     switch (status) {
       case AnimationStatus.forward: return AnimationStatus.reverse;
       case AnimationStatus.reverse: return AnimationStatus.forward;
@@ -378,14 +374,11 @@ class ReverseAnimation extends Animation<double>
 ///    [Curve].
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   /// Creates a curved animation.
-  ///
-  /// The parent and curve arguments must not be null.
   CurvedAnimation({
     required this.parent,
     required this.curve,
     this.reverseCurve,
-  }) : assert(parent != null),
-       assert(curve != null) {
+  }) {
     _updateCurveDirection(parent.status);
     parent.addStatusListener(_updateCurveDirection);
   }
@@ -427,13 +420,10 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         _curveDirection = null;
-        break;
       case AnimationStatus.forward:
         _curveDirection ??= AnimationStatus.forward;
-        break;
       case AnimationStatus.reverse:
         _curveDirection ??= AnimationStatus.reverse;
-        break;
     }
   }
 
@@ -518,7 +508,7 @@ class TrainHoppingAnimation extends Animation<double>
     Animation<double> this._currentTrain,
     this._nextTrain, {
     this.onSwitchedTrain,
-  }) : assert(_currentTrain != null) {
+  }) {
     if (_nextTrain != null) {
       if (_currentTrain!.value == _nextTrain!.value) {
         _currentTrain = _nextTrain;
@@ -574,10 +564,8 @@ class TrainHoppingAnimation extends Animation<double>
       switch (_mode!) {
         case _TrainHoppingMode.minimize:
           hop = _nextTrain!.value <= _currentTrain!.value;
-          break;
         case _TrainHoppingMode.maximize:
           hop = _nextTrain!.value >= _currentTrain!.value;
-          break;
       }
       if (hop) {
         _currentTrain!
@@ -639,13 +627,13 @@ class TrainHoppingAnimation extends Animation<double>
 /// animation otherwise.
 abstract class CompoundAnimation<T> extends Animation<T>
   with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
-  /// Creates a CompoundAnimation. Both arguments must be non-null. Either can
-  /// be a CompoundAnimation itself to combine multiple animations.
+  /// Creates a [CompoundAnimation].
+  ///
+  /// Either argument can be a [CompoundAnimation] itself to combine multiple animations.
   CompoundAnimation({
     required this.first,
     required this.next,
-  }) : assert(first != null),
-       assert(next != null);
+  });
 
   /// The first sub-animation. Its status takes precedence if neither are
   /// animating.
@@ -729,8 +717,8 @@ class AnimationMean extends CompoundAnimation<double> {
 class AnimationMax<T extends num> extends CompoundAnimation<T> {
   /// Creates an [AnimationMax].
   ///
-  /// Both arguments must be non-null. Either can be an [AnimationMax] itself
-  /// to combine multiple animations.
+  /// Either argument can be an [AnimationMax] itself to combine multiple
+  /// animations.
   AnimationMax(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
@@ -744,8 +732,8 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
 class AnimationMin<T extends num> extends CompoundAnimation<T> {
   /// Creates an [AnimationMin].
   ///
-  /// Both arguments must be non-null. Either can be an [AnimationMin] itself
-  /// to combine multiple animations.
+  /// Either argument can be an [AnimationMin] itself to combine multiple
+  /// animations.
   AnimationMin(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override

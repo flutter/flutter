@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
@@ -53,11 +54,11 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
+  Tolerance toleranceFor(ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
 void main() {
-  testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
     await tester.pumpWidget(
       MediaQuery(
@@ -184,7 +185,7 @@ void main() {
 
   });
 
-  testWidgets('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         cacheExtent: 0.0,
@@ -193,7 +194,7 @@ void main() {
             itemExtent: 100.0,
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                return Container(
+                return ColoredBox(
                   color: Colors.blue,
                   child: Text(index.toString()),
                 );
@@ -209,8 +210,8 @@ void main() {
     await tester.pump();
 
     // Screen is 600px high. Moved bottom item 500px up. It's now at the top.
-    expect(tester.getTopLeft(find.widgetWithText(Container, '5')).dy, 0.0);
-    expect(tester.getBottomLeft(find.widgetWithText(Container, '10')).dy, 600.0);
+    expect(tester.getTopLeft(find.widgetWithText(ColoredBox, '5')).dy, 0.0);
+    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '10')).dy, 600.0);
 
     // Stop returning the first 3 items.
     await tester.pumpWidget(MaterialApp(
@@ -222,7 +223,7 @@ void main() {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 if (index > 3) {
-                  return Container(
+                  return ColoredBox(
                     color: Colors.blue,
                     child: Text(index.toString()),
                   );
@@ -242,10 +243,10 @@ void main() {
     // Move up by 4 items, meaning item 1 would have been at the top but
     // 0 through 3 no longer exist, so item 4, 3 items down, is the first one.
     // Item 4 is also shifted to the top.
-    expect(tester.getTopLeft(find.widgetWithText(Container, '4')).dy, 0.0);
+    expect(tester.getTopLeft(find.widgetWithText(ColoredBox, '4')).dy, 0.0);
 
     // Because the screen is still 600px, item 9 is now visible at the bottom instead
     // of what's supposed to be item 6 had we not re-shifted.
-    expect(tester.getBottomLeft(find.widgetWithText(Container, '9')).dy, 600.0);
+    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '9')).dy, 600.0);
   });
 }

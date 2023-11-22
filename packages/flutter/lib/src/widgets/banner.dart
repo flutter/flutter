@@ -54,9 +54,6 @@ enum BannerLocation {
 /// Paints a [Banner].
 class BannerPainter extends CustomPainter {
   /// Creates a banner painter.
-  ///
-  /// The [message], [textDirection], [location], and [layoutDirection]
-  /// arguments must not be null.
   BannerPainter({
     required this.message,
     required this.textDirection,
@@ -64,12 +61,7 @@ class BannerPainter extends CustomPainter {
     required this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(textDirection != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null),
-       super(repaint: PaintingBinding.instance.systemFonts);
+  }) : super(repaint: PaintingBinding.instance.systemFonts);
 
   /// The message to show in the banner.
   final String message;
@@ -169,8 +161,6 @@ class BannerPainter extends CustomPainter {
   bool hitTest(Offset position) => false;
 
   double _translationX(double width) {
-    assert(location != null);
-    assert(layoutDirection != null);
     switch (layoutDirection) {
       case TextDirection.rtl:
         switch (location) {
@@ -198,7 +188,6 @@ class BannerPainter extends CustomPainter {
   }
 
   double _translationY(double height) {
-    assert(location != null);
     switch (location) {
       case BannerLocation.bottomStart:
       case BannerLocation.bottomEnd:
@@ -210,8 +199,6 @@ class BannerPainter extends CustomPainter {
   }
 
   double get _rotation {
-    assert(location != null);
-    assert(layoutDirection != null);
     switch (layoutDirection) {
       case TextDirection.rtl:
         switch (location) {
@@ -246,8 +233,6 @@ class BannerPainter extends CustomPainter {
 ///    debug mode, to show a banner that says "DEBUG".
 class Banner extends StatelessWidget {
   /// Creates a banner.
-  ///
-  /// The [message] and [location] arguments must not be null.
   const Banner({
     super.key,
     this.child,
@@ -257,10 +242,7 @@ class Banner extends StatelessWidget {
     this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
-  }) : assert(message != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null);
+  });
 
   /// The widget to show behind the banner.
   ///

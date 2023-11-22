@@ -101,24 +101,19 @@ class SourceVisitor implements ResolvedFiles {
       case Environment.kProjectDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.projectDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kBuildDirectory:
         segments.addAll(environment.fileSystem.path.split(
           environment.buildDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kCacheDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kFlutterRootDirectory:
         // flutter root will not contain a symbolic link.
         segments.addAll(
           environment.fileSystem.path.split(environment.flutterRootDir.absolute.path));
-        break;
       case Environment.kOutputDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.outputDir.resolveSymbolicLinksSync()));
-        break;
       default:
         throw InvalidPatternException(pattern);
     }
@@ -183,7 +178,7 @@ class SourceVisitor implements ResolvedFiles {
       .getArtifactPath(artifact, platform: platform, mode: mode);
     if (environment.fileSystem.isDirectorySync(path)) {
       sources.addAll(<File>[
-        for (FileSystemEntity entity in environment.fileSystem.directory(path).listSync(recursive: true))
+        for (final FileSystemEntity entity in environment.fileSystem.directory(path).listSync(recursive: true))
           if (entity is File)
             entity,
       ]);
@@ -211,7 +206,7 @@ class SourceVisitor implements ResolvedFiles {
     final FileSystemEntity entity = environment.artifacts.getHostArtifact(artifact);
     if (entity is Directory) {
       sources.addAll(<File>[
-        for (FileSystemEntity entity in entity.listSync(recursive: true))
+        for (final FileSystemEntity entity in entity.listSync(recursive: true))
           if (entity is File)
             entity,
       ]);

@@ -77,9 +77,9 @@ void main() {
 
         late Process run;
         await inDirectory(path.join(tempDir.path, 'app'), () async {
-          run = await startProcess(
-            path.join(flutterDirectory.path, 'bin', 'flutter'),
-            flutterCommandArgs('run', <String>['--$mode']),
+          run = await startFlutter(
+            'run',
+            options: <String>['--$mode'],
           );
         });
 

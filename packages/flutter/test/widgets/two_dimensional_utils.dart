@@ -17,6 +17,10 @@ final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBu
   maxYIndex: 5,
   builder: (BuildContext context, ChildVicinity vicinity) {
     return Container(
+<<<<<<< HEAD
+=======
+      key: ValueKey<ChildVicinity>(vicinity),
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
         ? Colors.amber[100]
         : (vicinity.xIndex.isOdd && vicinity.yIndex.isOdd
@@ -193,6 +197,21 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
   RenderBox? testGetChildFor(ChildVicinity vicinity) => getChildFor(vicinity);
 
   @override
+<<<<<<< HEAD
+=======
+  TestExtendedParentData parentDataOf(RenderBox child) {
+    return child.parentData! as TestExtendedParentData;
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! TestExtendedParentData) {
+      child.parentData = TestExtendedParentData();
+    }
+  }
+
+  @override
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   void layoutChildSequence() {
     // Really simple table implementation for testing.
     // Every child is 200x200 square
@@ -393,18 +412,31 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     final TwoDimensionalChildListDelegate listDelegate = delegate as TwoDimensionalChildListDelegate;
     final int rowCount;
     final int columnCount;
+<<<<<<< HEAD
     rowCount = listDelegate.children.length - 1;
     columnCount = listDelegate.children[0].length - 1;
+=======
+    rowCount = listDelegate.children.length;
+    columnCount = listDelegate.children[0].length;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
     final int leadingColumn = math.max((horizontalPixels / 200).floor(), 0);
     final int leadingRow = math.max((verticalPixels / 200).floor(), 0);
     final int trailingColumn = math.min(
       ((horizontalPixels + viewportDimension.width) / 200).ceil(),
+<<<<<<< HEAD
       columnCount,
     );
     final int trailingRow = math.min(
       ((verticalPixels + viewportDimension.height) / 200).ceil(),
       rowCount,
+=======
+      columnCount - 1,
+    );
+    final int trailingRow = math.min(
+      ((verticalPixels + viewportDimension.height) / 200).ceil(),
+      rowCount - 1,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     );
 
     double xLayoutOffset = (leadingColumn * 200) - horizontalOffset.pixels;
@@ -420,7 +452,87 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
       }
       xLayoutOffset += 200;
     }
+<<<<<<< HEAD
     verticalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.height);
     horizontalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.width);
   }
 }
+=======
+
+    verticalOffset.applyContentDimensions(
+      0.0,
+      math.max(200 * rowCount - viewportDimension.height, 0.0),
+    );
+    horizontalOffset.applyContentDimensions(
+      0,
+      math.max(200 * columnCount - viewportDimension.width, 0.0),
+    );
+  }
+}
+
+class KeepAliveCheckBox extends StatefulWidget {
+  const KeepAliveCheckBox({ super.key });
+
+  @override
+  KeepAliveCheckBoxState createState() => KeepAliveCheckBoxState();
+}
+
+class KeepAliveCheckBoxState extends State<KeepAliveCheckBox> with AutomaticKeepAliveClientMixin {
+  bool checkValue = false;
+
+  @override
+  bool get wantKeepAlive => _wantKeepAlive;
+  bool _wantKeepAlive = false;
+  set wantKeepAlive(bool value) {
+    if (_wantKeepAlive != value) {
+      _wantKeepAlive = value;
+      updateKeepAlive();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Checkbox(
+      value: checkValue,
+      onChanged: (bool? value) {
+        if (checkValue != value) {
+          setState(() {
+            checkValue = value!;
+            wantKeepAlive = value;
+          });
+        }
+      },
+    );
+  }
+}
+
+// TwoDimensionalViewportParentData already mixes in KeepAliveParentDataMixin,
+// and so should be compatible with both the KeepAlive and
+// TestParentDataWidget ParentDataWidgets.
+// This ParentData is set up above as part of the
+// RenderSimpleBuilderTableViewport for testing.
+class TestExtendedParentData extends TwoDimensionalViewportParentData {
+  int? testValue;
+}
+
+class TestParentDataWidget extends ParentDataWidget<TestExtendedParentData> {
+  const TestParentDataWidget({
+    super.key,
+    required super.child,
+    this.testValue,
+  });
+
+  final int? testValue;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is TestExtendedParentData);
+    final TestExtendedParentData parentData = renderObject.parentData! as TestExtendedParentData;
+    parentData.testValue = testValue;
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => SimpleBuilderTableViewport;
+}
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a

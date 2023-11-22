@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/integration_test_device.dart';
 import 'package:flutter_tools/src/test/test_device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -58,7 +59,7 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
   },
 );
 
-final Uri observatoryUri = Uri.parse('http://localhost:1234');
+final Uri vmServiceUri = Uri.parse('http://localhost:1234');
 
 void main() {
   late FakeVmServiceHost fakeVmServiceHost;
@@ -71,7 +72,7 @@ void main() {
         'ephemeral',
         'ephemeral',
         type: PlatformType.android,
-        launchResult: LaunchResult.succeeded(observatoryUri: observatoryUri),
+        launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
       ),
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
@@ -126,7 +127,7 @@ void main() {
   testUsingContext('Can start the entrypoint', () async {
     await testDevice.start('entrypointPath');
 
-    expect(await testDevice.observatoryUri, observatoryUri);
+    expect(await testDevice.vmServiceUri, vmServiceUri);
     expect(testDevice.finished, doesNotComplete);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
@@ -135,6 +136,7 @@ void main() {
       Restart? restart,
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
+      FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions? compression,
       Device? device,
@@ -154,6 +156,7 @@ void main() {
       Restart? restart,
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
+      FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions? compression,
       Device? device,
@@ -161,7 +164,7 @@ void main() {
     }) async => fakeVmServiceHost.vmService,
   });
 
-  testUsingContext('when the device starts without providing an observatory URI', () async {
+  testUsingContext('when the device starts without providing an vmService URI', () async {
     final TestDevice testDevice = IntegrationTestTestDevice(
       id: 1,
       device: FakeDevice(
@@ -184,6 +187,7 @@ void main() {
       Restart? restart,
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
+      FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions? compression,
       Device? device,
@@ -213,6 +217,7 @@ void main() {
       Restart? restart,
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
+      FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions? compression,
       Device? device,
@@ -230,6 +235,7 @@ void main() {
       Restart? restart,
       CompileExpression? compileExpression,
       GetSkSLMethod? getSkSLMethod,
+      FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions? compression,
       Device? device,

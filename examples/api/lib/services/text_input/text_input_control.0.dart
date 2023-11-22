@@ -2,33 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for TextInputControl
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TextInputControl].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TextInputControlExampleApp());
+
+class TextInputControlExampleApp extends StatelessWidget {
+  const TextInputControlExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: MyStatefulWidget(),
-   );
+      home: TextInputControlExample(),
+    );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class TextInputControlExample extends StatefulWidget {
+  const TextInputControlExample({super.key});
 
   @override
   MyStatefulWidgetState createState() => MyStatefulWidgetState();
 }
 
-class MyStatefulWidgetState extends State<MyStatefulWidget> {
+class MyStatefulWidgetState extends State<TextInputControlExample> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 

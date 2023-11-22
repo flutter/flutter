@@ -22,7 +22,7 @@ void main() {
     // Jump 25% into the transition (total length = 300ms)
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container).first);
-    expect(heroSize.width.roundToDouble(), 171.0);
+    expect(heroSize.width.roundToDouble(), 170.0);
     expect(heroSize.height.roundToDouble(), 73.0);
 
     // Jump to 50% into the transition.
@@ -61,7 +61,7 @@ void main() {
     // Jump to 75% into the transition.
     await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
     heroSize = tester.getSize(find.byType(Container).first);
-    expect(heroSize.width.roundToDouble(), 171.0);
+    expect(heroSize.width.roundToDouble(), 170.0);
     expect(heroSize.height.roundToDouble(), 73.0);
 
     // Jump to 100% into the transition.

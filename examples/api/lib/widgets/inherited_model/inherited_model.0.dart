@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [InheritedModel].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [InheritedModel].
 
 enum LogoAspect { backgroundColor, large }
 
@@ -42,8 +42,7 @@ class LogoModel extends InheritedModel<LogoAspect> {
 
   @override
   bool updateShouldNotify(LogoModel oldWidget) {
-    return backgroundColor != oldWidget.backgroundColor ||
-      large != oldWidget.large;
+    return backgroundColor != oldWidget.backgroundColor || large != oldWidget.large;
   }
 
   @override
@@ -97,7 +96,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
                     ),
                   );
                   setState(() {
-                    if (color == Colors.blue){
+                    if (color == Colors.blue) {
                       color = Colors.red;
                     } else {
                       color = Colors.blue;

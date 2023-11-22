@@ -20,7 +20,7 @@ void validateBuild(AndroidBuildInfo androidBuildInfo) {
   }
   if (buildInfo.mode.isPrecompiled && androidBuildInfo.targetArchs.contains(AndroidArch.x86)) {
     throwToolExit(
-      'Cannot build ${androidBuildInfo.buildInfo.mode.name} mode for x86 ABI.\n'
+      'Cannot build ${androidBuildInfo.buildInfo.mode.cliName} mode for x86 ABI.\n'
       'For more information see $kSupportedAbis .'
     );
   }

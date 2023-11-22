@@ -632,6 +632,7 @@ Information about project "Runner":
     expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)), 'HELLO');
     expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)), 'Hello');
   });
+
   testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
     expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false), 'Hello'), 'Debug-Hello');
     expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false), 'Hello'), 'Profile-Hello');
@@ -753,7 +754,7 @@ Information about project "Runner":
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      localIosArtifacts = Artifacts.test(localEngine: 'out/ios_profile_arm64');
+      localIosArtifacts = Artifacts.testLocalEngine(localEngine: 'out/ios_profile_arm64', localEngineHost: 'out/host_release');
       macOS = FakePlatform(operatingSystem: 'macos');
       fs.file(xcodebuild).createSync(recursive: true);
     });
@@ -937,7 +938,7 @@ Build settings for action build and target plugin2:
     }
 
     testUsingOsxContext('exits when armv7 local engine is set', () async {
-      localIosArtifacts = Artifacts.test(localEngine: 'out/ios_profile_arm');
+      localIosArtifacts = Artifacts.testLocalEngine(localEngine: 'out/ios_profile_arm', localEngineHost: 'out/host_release');
       const BuildInfo buildInfo = BuildInfo.debug;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
       await expectLater(() =>
@@ -970,7 +971,7 @@ Build settings for action build and target plugin2:
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
       expect(buildPhaseScriptContents.contains('export "ARCHS=arm64"'), isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => Artifacts.test(localEngine: 'out/host_profile_arm64'),
+      Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/host_profile_arm64', localEngineHost: 'out/host_release'),
       Platform: () => macOS,
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -997,7 +998,7 @@ Build settings for action build and target plugin2:
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
       expect(buildPhaseScriptContents.contains('export "ARCHS=x86_64"'), isTrue);
     }, overrides: <Type, Generator>{
-      Artifacts: () => Artifacts.test(localEngine: 'out/host_profile'),
+      Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/host_profile', localEngineHost: 'out/host_release'),
       Platform: () => macOS,
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -1082,7 +1083,7 @@ Build settings for action build and target plugin2:
         final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
         expect(buildPhaseScriptContents.contains('ARCHS=x86_64'), isTrue);
       }, overrides: <Type, Generator>{
-        Artifacts: () => Artifacts.test(localEngine: 'out/ios_debug_sim_unopt'),
+        Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/ios_debug_sim_unopt', localEngineHost: 'out/host_debug_unopt'),
         Platform: () => macOS,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1108,7 +1109,7 @@ Build settings for action build and target plugin2:
         final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
         expect(buildPhaseScriptContents.contains('ARCHS=arm64'), isTrue);
       }, overrides: <Type, Generator>{
-        Artifacts: () => Artifacts.test(localEngine: 'out/ios_debug_sim_arm64'),
+        Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/ios_debug_sim_arm64', localEngineHost: 'out/host_debug_unopt'),
         Platform: () => macOS,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1304,6 +1305,51 @@ flutter:
         expectedBuildName: '1.0.0',
         expectedBuildNumber: '1',
       );
+    });
+
+    group('CoreDevice', () {
+      testUsingContext('sets CONFIGURATION_BUILD_DIR when configurationBuildDir is set', () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          configurationBuildDir: 'path/to/project/build/ios/iphoneos'
+        );
+
+        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        expect(config.existsSync(), isTrue);
+
+        final String contents = config.readAsStringSync();
+        expect(contents, contains('CONFIGURATION_BUILD_DIR=path/to/project/build/ios/iphoneos'));
+      }, overrides: <Type, Generator>{
+        Artifacts: () => localIosArtifacts,
+        // Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('does not set CONFIGURATION_BUILD_DIR when configurationBuildDir is not set', () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+        );
+
+        final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+        expect(config.existsSync(), isTrue);
+
+        final String contents = config.readAsStringSync();
+        expect(contents.contains('CONFIGURATION_BUILD_DIR'), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => localIosArtifacts,
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
     });
   });
 }

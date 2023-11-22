@@ -4,14 +4,16 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('English translations exist for all CupertinoLocalization properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('English translations exist for all CupertinoLocalization properties', (WidgetTester tester) async {
     const CupertinoLocalizations localizations = DefaultCupertinoLocalizations();
 
     expect(localizations.datePickerYear(2018), isNotNull);
     expect(localizations.datePickerMonth(1), isNotNull);
     expect(localizations.datePickerDayOfMonth(1), isNotNull);
+    expect(localizations.datePickerDayOfMonth(1, 1), isNotNull);
     expect(localizations.datePickerHour(0), isNotNull);
     expect(localizations.datePickerHourSemanticsLabel(0), isNotNull);
     expect(localizations.datePickerMinute(0), isNotNull);
@@ -32,9 +34,10 @@ void main() {
 
     expect(localizations.modalBarrierDismissLabel, isNotNull);
     expect(localizations.searchTextFieldPlaceholderLabel, isNotNull);
+    expect(localizations.noSpellCheckReplacementsLabel, isNotNull);
   });
 
-  testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoLocalizations.of throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 

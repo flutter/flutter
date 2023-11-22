@@ -5,14 +5,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('SemanticNode.rect is clipped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticNode.rect is clipped', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
         child: SizedBox(
@@ -20,7 +21,7 @@ void main() {
           child: Flex(
             clipBehavior: Clip.hardEdge,
             direction: Axis.horizontal,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(
                 width: 75.0,
                 child: Text('1'),
@@ -67,10 +68,10 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SemanticsNode is not removed if out of bounds and merged into something within bounds', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticsNode is not removed if out of bounds and merged into something within bounds', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
         child: SizedBox(
@@ -79,14 +80,14 @@ void main() {
             clipBehavior: Clip.hardEdge,
             direction: Axis.horizontal,
             children: <Widget>[
-              const SizedBox(
+              SizedBox(
                 width: 75.0,
                 child: Text('1'),
               ),
               MergeSemantics(
                 child: Flex(
                   direction: Axis.horizontal,
-                  children: const <Widget>[
+                  children: <Widget>[
                     SizedBox(
                       width: 75.0,
                       child: Text('2'),

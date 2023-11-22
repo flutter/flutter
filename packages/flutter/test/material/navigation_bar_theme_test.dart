@@ -5,11 +5,16 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+<<<<<<< HEAD
+=======
+library;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
@@ -17,7 +22,13 @@ void main() {
     expect(const NavigationBarThemeData().hashCode, const NavigationBarThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  test('NavigationBarThemeData lerp special cases', () {
+    expect(NavigationBarThemeData.lerp(null, null, 0), null);
+    const NavigationBarThemeData data = NavigationBarThemeData();
+    expect(identical(NavigationBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
+  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
@@ -29,7 +40,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData(
       height: 200.0,
@@ -61,7 +72,7 @@ void main() {
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
   });
 
-  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -133,7 +144,7 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -167,7 +178,11 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
+<<<<<<< HEAD
   testWidgets('Custom label style renders ink ripple properly', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Custom label style renders ink ripple properly', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
       return MaterialApp(
         theme: ThemeData(

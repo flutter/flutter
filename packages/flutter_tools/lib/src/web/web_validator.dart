@@ -39,7 +39,7 @@ abstract class ChromiumValidator extends DoctorValidator {
       );
     }
     return ValidationResult(
-      ValidationType.installed,
+      ValidationType.success,
       messages,
     );
   }

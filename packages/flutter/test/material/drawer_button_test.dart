@@ -5,9 +5,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
 
 void main() {
   testWidgets('DrawerButton control test', (WidgetTester tester) async {
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+void main() {
+  testWidgetsWithLeakTracking('DrawerButton control test', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -28,7 +35,11 @@ void main() {
     expect(find.byType(Drawer), findsOneWidget);
   });
 
+<<<<<<< HEAD
   testWidgets('DrawerButton onPressed overrides default end drawer open behaviour',
+=======
+  testWidgetsWithLeakTracking('DrawerButton onPressed overrides default end drawer open behaviour',
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
@@ -57,7 +68,11 @@ void main() {
     expect(customCallbackWasCalled, true);
   });
 
+<<<<<<< HEAD
   testWidgets('DrawerButton icon', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('DrawerButton icon', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final Key androidKey = UniqueKey();
     final Key iOSKey = UniqueKey();
     final Key linuxKey = UniqueKey();
@@ -111,7 +126,11 @@ void main() {
     expect(windowsIcon.icon == androidIcon.icon, isTrue);
   });
 
+<<<<<<< HEAD
   testWidgets('DrawerButton color', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('DrawerButton color', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -132,7 +151,11 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
+<<<<<<< HEAD
   testWidgets('DrawerButton semantics', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('DrawerButton semantics', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const MaterialApp(
@@ -169,7 +192,11 @@ void main() {
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
+<<<<<<< HEAD
   testWidgets('EndDrawerButton control test', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('EndDrawerButton control test', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -190,7 +217,11 @@ void main() {
     expect(find.byType(Drawer), findsOneWidget);
   });
 
+<<<<<<< HEAD
   testWidgets('EndDrawerButton semantics', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('EndDrawerButton semantics', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const MaterialApp(
@@ -226,7 +257,11 @@ void main() {
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
+<<<<<<< HEAD
   testWidgets('EndDrawerButton color', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('EndDrawerButton color', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -247,7 +282,11 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
+<<<<<<< HEAD
   testWidgets('EndDrawerButton onPressed overrides default end drawer open behaviour',
+=======
+  testWidgetsWithLeakTracking('EndDrawerButton onPressed overrides default end drawer open behaviour',
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(

@@ -133,6 +133,14 @@ Future<bool> runTests({
           if (verbose) {
             print('Running tests...');
           }
+          if (instructions.iterations != null && instructions.iterations! < repeat) {
+            if (verbose) {
+              final String s = instructions.iterations == 1 ? '' : 's';
+              print('Limiting to ${instructions.iterations} round$s rather than $repeat rounds because of "iterations" directive.');
+            }
+            repeat = instructions.iterations!;
+          }
+          final Stopwatch stopwatch = Stopwatch()..start();
           for (int iteration = 0; iteration < repeat; iteration += 1) {
             if (verbose && repeat > 1) {
               print('Round ${iteration + 1} of $repeat.');
@@ -146,8 +154,9 @@ Future<bool> runTests({
               }
             }
           }
+          stopwatch.stop();
           if (verbose && success) {
-            print('Tests finished.');
+            print('Tests finished in ${(stopwatch.elapsed.inSeconds / repeat).toStringAsFixed(2)} seconds per iteration.');
           }
         }
       }

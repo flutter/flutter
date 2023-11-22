@@ -26,8 +26,6 @@ class FakeFrameInfo implements FrameInfo {
   @override
   Image get image => _image;
 
-  int get imageHandleCount => image.debugGetOpenHandleStackTraces()!.length;
-
   FakeFrameInfo clone() {
     return FakeFrameInfo(
       _duration,

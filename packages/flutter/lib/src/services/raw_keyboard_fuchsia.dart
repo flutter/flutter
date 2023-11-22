@@ -22,15 +22,11 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Fuchsia.
-  ///
-  /// The [hidUsage], [codePoint], and [modifiers] arguments must not be null.
   const RawKeyEventDataFuchsia({
     this.hidUsage = 0,
     this.codePoint = 0,
     this.modifiers = 0,
-  }) : assert(hidUsage != null),
-       assert(codePoint != null),
-       assert(modifiers != null);
+  });
 
   /// The USB HID usage.
   ///
@@ -107,7 +103,6 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    assert(side != null);
     switch (key) {
       case ModifierKey.controlModifier:
         return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);

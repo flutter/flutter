@@ -5,11 +5,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
+<<<<<<< HEAD
   testWidgets('Performing SemanticsAction.showOnScreen does not crash if node no longer exist', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Performing SemanticsAction.showOnScreen does not crash if node no longer exist', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     // Regression test for https://github.com/flutter/flutter/issues/100358.
 
     final SemanticsTester semantics = SemanticsTester(tester);

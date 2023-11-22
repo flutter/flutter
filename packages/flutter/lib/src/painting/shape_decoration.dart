@@ -68,16 +68,13 @@ class ShapeDecoration extends Decoration {
   ///
   /// The [color] and [gradient] properties are mutually exclusive, one (or
   /// both) of them must be null.
-  ///
-  /// The [shape] must not be null.
   const ShapeDecoration({
     this.color,
     this.image,
     this.gradient,
     this.shadows,
     required this.shape,
-  }) : assert(!(color != null && gradient != null)),
-       assert(shape != null);
+  }) : assert(!(color != null && gradient != null));
 
   /// Creates a shape decoration configured to match a [BoxDecoration].
   ///
@@ -91,7 +88,6 @@ class ShapeDecoration extends Decoration {
   /// transition from a [BoxShape.circle] to [BoxShape.rectangle]).
   factory ShapeDecoration.fromBoxDecoration(BoxDecoration source) {
     final ShapeBorder shape;
-    assert(source.shape != null);
     switch (source.shape) {
       case BoxShape.circle:
         if (source.border != null) {
@@ -100,7 +96,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = const CircleBorder();
         }
-        break;
       case BoxShape.rectangle:
         if (source.borderRadius != null) {
           assert(source.border == null || source.border!.isUniform);
@@ -111,7 +106,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = source.border ?? const Border();
         }
-        break;
     }
     return ShapeDecoration(
       color: source.color,
@@ -161,8 +155,7 @@ class ShapeDecoration extends Decoration {
   /// Shapes can be stacked (using the `+` operator). The color, gradient, and
   /// image are drawn into the inner-most shape specified.
   ///
-  /// The [shape] property specifies the outline (border) of the decoration. The
-  /// shape must not be null.
+  /// The [shape] property specifies the outline (border) of the decoration.
   ///
   /// ## Directionality-dependent shapes
   ///
@@ -227,9 +220,8 @@ class ShapeDecoration extends Decoration {
   ///    and which use [ShapeDecoration.lerp] when interpolating two
   ///    [ShapeDecoration]s or a [ShapeDecoration] to or from null.
   static ShapeDecoration? lerp(ShapeDecoration? a, ShapeDecoration? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a != null && b != null) {
       if (t == 0.0) {
@@ -242,7 +234,7 @@ class ShapeDecoration extends Decoration {
     return ShapeDecoration(
       color: Color.lerp(a?.color, b?.color, t),
       gradient: Gradient.lerp(a?.gradient, b?.gradient, t),
-      image: t < 0.5 ? a!.image : b!.image, // TODO(ianh): cross-fade the image
+      image: DecorationImage.lerp(a?.image, b?.image, t),
       shadows: BoxShadow.lerpList(a?.shadows, b?.shadows, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t)!,
     );
@@ -299,8 +291,7 @@ class ShapeDecoration extends Decoration {
 /// An object that paints a [ShapeDecoration] into a canvas.
 class _ShapeDecorationPainter extends BoxPainter {
   _ShapeDecorationPainter(this._decoration, VoidCallback onChanged)
-    : assert(_decoration != null),
-      super(onChanged);
+    : super(onChanged);
 
   final ShapeDecoration _decoration;
 
@@ -318,7 +309,6 @@ class _ShapeDecorationPainter extends BoxPainter {
   VoidCallback get onChanged => super.onChanged!;
 
   void _precache(Rect rect, TextDirection? textDirection) {
-    assert(rect != null);
     if (rect == _lastRect && textDirection == _lastTextDirection) {
       return;
     }
@@ -409,7 +399,6 @@ class _ShapeDecorationPainter extends BoxPainter {
 
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;

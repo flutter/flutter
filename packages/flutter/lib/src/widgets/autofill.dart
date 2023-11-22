@@ -64,13 +64,11 @@ enum AutofillContextAction {
 ///   clean up actions to be run when a topmost [AutofillGroup] is disposed.
 class AutofillGroup extends StatefulWidget {
   /// Creates a scope for autofillable input fields.
-  ///
-  /// The [child] argument must not be null.
   const AutofillGroup({
     super.key,
     required this.child,
     this.onDisposeAction = AutofillContextAction.commit,
-  }) : assert(child != null);
+  });
 
   /// Returns the [AutofillGroupState] of the closest [AutofillGroup] widget
   /// which encloses the given context, or null if one cannot be found.
@@ -189,7 +187,6 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// * [EditableTextState.didChangeDependencies], where this method is called
   ///   to update the current [AutofillScope] when needed.
   void register(AutofillClient client) {
-    assert(client != null);
     _clients.putIfAbsent(client.autofillId, () => client);
   }
 
@@ -207,7 +204,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   ///   from the current [AutofillScope] when the widget is about to be removed
   ///   from the tree.
   void unregister(String autofillId) {
-    assert(autofillId != null && _clients.containsKey(autofillId));
+    assert(_clients.containsKey(autofillId));
     _clients.remove(autofillId);
   }
 
@@ -229,16 +226,14 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   void dispose() {
     super.dispose();
 
-    if (!_isTopmostAutofillGroup || widget.onDisposeAction == null) {
+    if (!_isTopmostAutofillGroup) {
       return;
     }
     switch (widget.onDisposeAction) {
       case AutofillContextAction.cancel:
         TextInput.finishAutofillContext(shouldSave: false);
-        break;
       case AutofillContextAction.commit:
         TextInput.finishAutofillContext();
-        break;
     }
   }
 }

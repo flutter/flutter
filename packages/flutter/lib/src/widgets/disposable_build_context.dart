@@ -26,10 +26,9 @@ class DisposableBuildContext<T extends State> {
   ///
   /// Creators must call [dispose] when the [State] is disposed.
   ///
-  /// The [State] must not be null, and [State.mounted] must be true.
+  /// [State.mounted] must be true.
   DisposableBuildContext(T this._state)
-      : assert(_state != null),
-        assert(_state.mounted, 'A DisposableBuildContext was given a BuildContext for an Element that is not mounted.');
+      : assert(_state.mounted, 'A DisposableBuildContext was given a BuildContext for an Element that is not mounted.');
 
   T? _state;
 

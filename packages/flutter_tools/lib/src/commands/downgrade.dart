@@ -47,15 +47,15 @@ class DowngradeCommand extends FlutterCommand {
       'working-directory',
       hide: !verboseHelp,
       help: 'Override the downgrade working directory. '
-            'This is only intended to enable integration testing of the tool itself.'
+            'This is only intended to enable integration testing of the tool itself. '
+            'It allows one to use the flutter tool from one checkout to downgrade a '
+            'different checkout.'
     );
     argParser.addFlag(
       'prompt',
       defaultsTo: true,
       hide: !verboseHelp,
-      help: 'Show the downgrade prompt. '
-            'The ability to disable this using "--no-prompt" is only provided for '
-            'integration testing of the tool itself.'
+      help: 'Show the downgrade prompt.'
     );
   }
 
@@ -91,16 +91,19 @@ class DowngradeCommand extends FlutterCommand {
     _fileSystem ??= globals.fs;
     String workingDirectory = Cache.flutterRoot!;
     if (argResults!.wasParsed('working-directory')) {
-      workingDirectory = stringArgDeprecated('working-directory')!;
-      _flutterVersion = FlutterVersion(workingDirectory: workingDirectory);
+      workingDirectory = stringArg('working-directory')!;
+      _flutterVersion = FlutterVersion(
+        fs: _fileSystem!,
+        flutterRoot: workingDirectory,
+      );
     }
 
     final String currentChannel = _flutterVersion!.channel;
     final Channel? channel = getChannelForName(currentChannel);
     if (channel == null) {
       throwToolExit(
-        'Flutter is not currently on a known channel. Use "flutter channel <name>" '
-        'to switch to an official channel.',
+        'Flutter is not currently on a known channel. '
+        'Use "flutter channel" to switch to an official channel. '
       );
     }
     final PersistentToolState persistentToolState = _persistentToolState!;
@@ -127,7 +130,7 @@ class DowngradeCommand extends FlutterCommand {
     // If there is a terminal attached, prompt the user to confirm the downgrade.
     final Stdio stdio = _stdio!;
     final Terminal terminal = _terminal!;
-    if (stdio.hasTerminal && boolArgDeprecated('prompt')) {
+    if (stdio.hasTerminal && boolArg('prompt')) {
       terminal.usesTerminalUi = true;
       final String result = await terminal.promptForCharInput(
         const <String>['y', 'n'],
@@ -153,13 +156,14 @@ class DowngradeCommand extends FlutterCommand {
     } on ProcessException catch (error) {
       throwToolExit(
         'Unable to downgrade Flutter: The tool could not update to the version '
-        '$humanReadableVersion. This may be due to git not being installed or an '
-        'internal error. Please ensure that git is installed on your computer and '
-        'retry again.\nError: $error.'
+        '$humanReadableVersion.\n'
+        'Error: $error'
       );
     }
     try {
       await processUtils.run(
+        // The `--` bit (because it's followed by nothing) means that we don't actually change
+        // anything in the working tree, which avoids the need to first go into detached HEAD mode.
         <String>['git', 'checkout', currentChannel, '--'],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -167,9 +171,8 @@ class DowngradeCommand extends FlutterCommand {
     } on ProcessException catch (error) {
       throwToolExit(
         'Unable to downgrade Flutter: The tool could not switch to the channel '
-        '$currentChannel. This may be due to git not being installed or an '
-        'internal error. Please ensure that git is installed on your computer '
-        'and retry again.\nError: $error.'
+        '$currentChannel.\n'
+        'Error: $error'
       );
     }
     await FlutterVersion.resetFlutterVersionFreshnessCheck();

@@ -124,9 +124,8 @@ class ExpansionTileThemeData with Diagnosticable {
 
   /// Linearly interpolate between ExpansionTileThemeData objects.
   static ExpansionTileThemeData? lerp(ExpansionTileThemeData? a, ExpansionTileThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ExpansionTileThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
@@ -211,14 +210,11 @@ class ExpansionTileThemeData with Diagnosticable {
 ///    [ExpansionTileTheme] for [ExpansionTile]s below the overall [Theme].
 class ExpansionTileTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
-  ///
-  /// The [data] and [child] arguments must not be null.
   const ExpansionTileTheme({
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// Specifies color, alignment, and text style values for
   /// descendant [ExpansionTile] widgets.

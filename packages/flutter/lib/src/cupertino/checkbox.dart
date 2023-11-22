@@ -57,8 +57,11 @@ class CupertinoCheckbox extends StatefulWidget {
   ///   can only be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
+<<<<<<< HEAD
   ///
   /// The values of [tristate] and [autofocus] must not be null.
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   const CupertinoCheckbox({
     super.key,
     required this.value,

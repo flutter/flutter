@@ -28,8 +28,12 @@ export 'package:flutter/physics.dart' show Tolerance;
 /// information about the Scrollable in order to be initialized.
 @immutable
 class ScrollableDetails {
+<<<<<<< HEAD
   /// Creates a set of details describing the [Scrollable]. The [direction]
   /// cannot be null.
+=======
+  /// Creates a set of details describing the [Scrollable].
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   const ScrollableDetails({
     required this.direction,
     this.controller,
@@ -338,8 +342,11 @@ enum ScrollIncrementType {
 /// for the scrollable.
 class ScrollIncrementDetails {
   /// A const constructor for a [ScrollIncrementDetails].
+<<<<<<< HEAD
   ///
   /// All of the arguments must not be null, and are required.
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   const ScrollIncrementDetails({
     required this.type,
     required this.metrics,
@@ -405,8 +412,13 @@ class ScrollAction extends ContextAction<ScrollIntent> {
   ///
   /// Must not be called when the position is null, or when any of the position
   /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
+<<<<<<< HEAD
   /// null. The type and state arguments must not be null, and the widget must
   /// have already been laid out so that the position fields are valid.
+=======
+  /// null. The widget must have already been laid out so that the position
+  /// fields are valid.
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(state.position.hasPixels);
     assert(state.resolvedPhysics == null || state.resolvedPhysics!.shouldAcceptUserOffset(state.position));

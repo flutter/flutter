@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,10 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   ByteData makeByteData(String str) {
-    final List<int> list = utf8.encode(str);
-    final ByteBuffer buffer =
-        list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
-    return ByteData.view(buffer);
+    return ByteData.sublistView(utf8.encode(str));
   }
 
   test('default binary messenger calls callback once', () async {
@@ -53,7 +49,7 @@ void main() {
 
   test('can check the mock handler', () {
     Future<ByteData?> handler(ByteData? call) => Future<ByteData?>.value();
-    final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger;
+    final TestDefaultBinaryMessenger messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
     expect(messenger.checkMockMessageHandler('test_channel', null), true);
     expect(messenger.checkMockMessageHandler('test_channel', handler), false);

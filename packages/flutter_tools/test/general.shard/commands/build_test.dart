@@ -5,7 +5,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -75,7 +74,6 @@ void main() {
         ),
       ),
       AttachCommand(
-        artifacts: Artifacts.test(),
         stdio: FakeStdio(),
         logger: logger,
         terminal: FakeTerminal(),
@@ -105,21 +103,11 @@ void main() {
       nullSafetyMode: NullSafetyMode.unsound,
       treeShakeIcons: false,
     );
-    const BuildInfo sound = BuildInfo(
-      BuildMode.debug,
-      '',
-      treeShakeIcons: false,
-    );
 
     final BufferLogger logger = BufferLogger.test();
     FakeBuildSubCommand(logger).test(unsound);
     expect(logger.statusText,
         contains('Building without sound null safety ⚠️'));
-
-    logger.clear();
-    FakeBuildSubCommand(logger).test(sound);
-    expect(logger.statusText,
-        contains('💪 Building with sound null safety 💪'));
   });
 
   testUsingContext('Include only supported sub commands', () {

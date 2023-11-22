@@ -160,12 +160,10 @@ class _PointDemoState extends State<_PointDemo> {
         setState(() {
           _begin = _begin! + details.delta;
         });
-        break;
       case _DragTarget.end:
         setState(() {
           _end = _end! + details.delta;
         });
-        break;
     }
   }
 
@@ -322,12 +320,10 @@ class _RectangleDemoState extends State<_RectangleDemo> {
         setState(() {
           _begin = _begin?.shift(details.delta);
         });
-        break;
       case _DragTarget.end:
         setState(() {
           _end = _end?.shift(details.delta);
         });
-        break;
     }
   }
 

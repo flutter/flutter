@@ -27,9 +27,6 @@ const int _kCombiningCharacterMask = 0x7fffffff;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataAndroid extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
-  ///
-  /// The [flags], [codePoint], [keyCode], [scanCode], and [metaState] arguments
-  /// must not be null.
   const RawKeyEventDataAndroid({
     this.flags = 0,
     this.codePoint = 0,
@@ -42,11 +39,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.productId = 0,
     this.deviceId = 0,
     this.repeatCount = 0,
-  }) : assert(flags != null),
-       assert(codePoint != null),
-       assert(keyCode != null),
-       assert(scanCode != null),
-       assert(metaState != null);
+  });
 
   /// The current set of additional flags for this event.
   ///
@@ -227,7 +220,6 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    assert(side != null);
     switch (key) {
       case ModifierKey.controlModifier:
         return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);

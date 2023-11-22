@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 int buildCount = 0;
 CupertinoThemeData? actualTheme;
@@ -46,15 +47,16 @@ void main() {
     actualIconTheme = null;
   });
 
-  testWidgets('Default theme has defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default theme has defaults', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData());
 
     expect(theme.brightness, isNull);
     expect(theme.primaryColor, CupertinoColors.activeBlue);
     expect(theme.textTheme.textStyle.fontSize, 17.0);
+    expect(theme.applyThemeToAll, false);
   });
 
-  testWidgets('Theme attributes cascade', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Theme attributes cascade', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
       primaryColor: CupertinoColors.systemRed,
     ));
@@ -62,7 +64,7 @@ void main() {
     expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemRed.color));
   });
 
-  testWidgets('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData(
       brightness: Brightness.dark,
       textTheme: CupertinoTextThemeData(
@@ -76,7 +78,7 @@ void main() {
     expect(theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.black));
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Reading themes creates dependencies',
     (WidgetTester tester) async {
       // Reading the theme creates a dependency.
@@ -117,15 +119,17 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'copyWith works',
     (WidgetTester tester) async {
       const CupertinoThemeData originalTheme = CupertinoThemeData(
         brightness: Brightness.dark,
+        applyThemeToAll: true,
       );
 
       final CupertinoThemeData theme = await testTheme(tester, originalTheme.copyWith(
         primaryColor: CupertinoColors.systemGreen,
+        applyThemeToAll: false,
       ));
 
       expect(theme.brightness, Brightness.dark);
@@ -133,10 +137,12 @@ void main() {
       // Now check calculated derivatives.
       expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemGreen.darkColor));
       expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
+
+      expect(theme.applyThemeToAll, false);
     },
   );
 
-  testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
     const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
     const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
@@ -153,7 +159,7 @@ void main() {
     expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });
 
-  testWidgets('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
     IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
 
     expect(buildCount, 1);
@@ -164,7 +170,7 @@ void main() {
     expect(iconTheme.color, CupertinoColors.activeOrange);
   });
 
-  testWidgets('CupertinoTheme diagnostics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoTheme diagnostics', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CupertinoThemeData().debugFillProperties(builder);
 
@@ -181,6 +187,7 @@ void main() {
           'primaryContrastingColor',
           'barBackgroundColor',
           'scaffoldBackgroundColor',
+          'applyThemeToAll',
           'textStyle',
           'actionTextStyle',
           'tabLabelTextStyle',
@@ -195,7 +202,7 @@ void main() {
     );
   });
 
-  testWidgets('CupertinoTheme.toStringDeep uses single-line style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoTheme.toStringDeep uses single-line style', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/47651.
     expect(
       const CupertinoTheme(
@@ -206,20 +213,30 @@ void main() {
     );
   });
 
+  testWidgetsWithLeakTracking('CupertinoThemeData equality', (WidgetTester tester) async {
+    const CupertinoThemeData a = CupertinoThemeData(brightness: Brightness.dark);
+    final CupertinoThemeData b = a.copyWith();
+    final CupertinoThemeData c = a.copyWith(brightness: Brightness.light);
+    expect(a, equals(b));
+    expect(b, equals(a));
+    expect(a, isNot(equals(c)));
+    expect(c, isNot(equals(a)));
+    expect(b, isNot(equals(c)));
+    expect(c, isNot(equals(b)));
+  });
+
   late Brightness currentBrightness;
   void colorMatches(Color? componentColor, CupertinoDynamicColor expectedDynamicColor) {
     switch (currentBrightness) {
       case Brightness.light:
         expect(componentColor, isSameColorAs(expectedDynamicColor.color));
-        break;
       case Brightness.dark:
         expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
-        break;
     }
   }
 
   void dynamicColorsTestGroup() {
-    testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
       final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
       final CupertinoThemeData theme = await testTheme(tester, data);
 
@@ -227,7 +244,7 @@ void main() {
       colorMatches(theme.primaryColor, CupertinoColors.systemRed);
     });
 
-    testWidgets('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
       const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
       final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: primaryColor);
 

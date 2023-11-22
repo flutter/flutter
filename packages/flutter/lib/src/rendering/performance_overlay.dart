@@ -59,19 +59,12 @@ enum PerformanceOverlayOption {
 /// to true.
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
-  ///
-  /// The [optionsMask], [rasterizerThreshold], [checkerboardRasterCacheImages],
-  /// and [checkerboardOffscreenLayers] arguments must not be null.
   RenderPerformanceOverlay({
     int optionsMask = 0,
     int rasterizerThreshold = 0,
     bool checkerboardRasterCacheImages = false,
     bool checkerboardOffscreenLayers = false,
-  }) : assert(optionsMask != null),
-       assert(rasterizerThreshold != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       _optionsMask = optionsMask,
+  }) : _optionsMask = optionsMask,
        _rasterizerThreshold = rasterizerThreshold,
        _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
        _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
@@ -81,7 +74,6 @@ class RenderPerformanceOverlay extends RenderBox {
   int get optionsMask => _optionsMask;
   int _optionsMask;
   set optionsMask(int value) {
-    assert(value != null);
     if (value == _optionsMask) {
       return;
     }
@@ -95,7 +87,6 @@ class RenderPerformanceOverlay extends RenderBox {
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
   set rasterizerThreshold(int value) {
-    assert(value != null);
     if (value == _rasterizerThreshold) {
       return;
     }
@@ -107,7 +98,6 @@ class RenderPerformanceOverlay extends RenderBox {
   bool get checkerboardRasterCacheImages => _checkerboardRasterCacheImages;
   bool _checkerboardRasterCacheImages;
   set checkerboardRasterCacheImages(bool value) {
-    assert(value != null);
     if (value == _checkerboardRasterCacheImages) {
       return;
     }
@@ -119,7 +109,6 @@ class RenderPerformanceOverlay extends RenderBox {
   bool get checkerboardOffscreenLayers => _checkerboardOffscreenLayers;
   bool _checkerboardOffscreenLayers;
   set checkerboardOffscreenLayers(bool value) {
-    assert(value != null);
     if (value == _checkerboardOffscreenLayers) {
       return;
     }

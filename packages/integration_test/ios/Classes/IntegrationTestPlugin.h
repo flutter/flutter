@@ -22,9 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (copy, readonly) NSDictionary<NSString *, UIImage *> *capturedScreenshotsByName;
 
 /** Fetches the singleton instance of the plugin. */
-+ (IntegrationTestPlugin *)instance;
-
-- (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger;
++ (instancetype)instance;
 
 - (instancetype)init NS_UNAVAILABLE;
 

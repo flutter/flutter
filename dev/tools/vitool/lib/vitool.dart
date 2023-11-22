@@ -156,16 +156,12 @@ class PathCommandAnimation {
     switch (type) {
       case 'M':
         dartCommandClass = '_PathMoveTo';
-        break;
       case 'C':
         dartCommandClass = '_PathCubicTo';
-        break;
       case 'L':
         dartCommandClass = '_PathLineTo';
-        break;
       case 'Z':
         dartCommandClass = '_PathClose';
-        break;
       default:
         throw Exception('unsupported path command: $type');
     }

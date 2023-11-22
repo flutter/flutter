@@ -90,6 +90,12 @@ void main() {
     expect(copy.maxHeight, moreOrLessEquals(97.0));
   });
 
+  test('BoxConstraints.lerp identical a,b', () {
+    expect(BoxConstraints.lerp(null, null, 0), null);
+    const BoxConstraints constraints = BoxConstraints();
+    expect(identical(BoxConstraints.lerp(constraints, constraints, 0.5), constraints), true);
+  });
+
   test('BoxConstraints lerp with unbounded width', () {
     const BoxConstraints constraints1 = BoxConstraints(
       minWidth: double.infinity,

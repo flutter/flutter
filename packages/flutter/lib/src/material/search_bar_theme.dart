@@ -8,6 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+<<<<<<< HEAD
+=======
+import '../../services.dart';
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 import 'material_state.dart';
 import 'theme.dart';
 
@@ -47,6 +51,10 @@ class SearchBarThemeData with Diagnosticable {
     this.textStyle,
     this.hintStyle,
     this.constraints,
+<<<<<<< HEAD
+=======
+    this.textCapitalization,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   });
 
   /// Overrides the default value of the [SearchBar.elevation].
@@ -82,6 +90,12 @@ class SearchBarThemeData with Diagnosticable {
   /// Overrides the value of size constraints for [SearchBar].
   final BoxConstraints? constraints;
 
+<<<<<<< HEAD
+=======
+  /// Overrides the value of [SearchBar.textCapitalization].
+  final TextCapitalization? textCapitalization;
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SearchBarThemeData copyWith({
@@ -96,6 +110,10 @@ class SearchBarThemeData with Diagnosticable {
     MaterialStateProperty<TextStyle?>? textStyle,
     MaterialStateProperty<TextStyle?>? hintStyle,
     BoxConstraints? constraints,
+<<<<<<< HEAD
+=======
+    TextCapitalization? textCapitalization,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   }) {
     return SearchBarThemeData(
       elevation: elevation ?? this.elevation,
@@ -109,6 +127,10 @@ class SearchBarThemeData with Diagnosticable {
       textStyle: textStyle ?? this.textStyle,
       hintStyle: hintStyle ?? this.hintStyle,
       constraints: constraints ?? this.constraints,
+<<<<<<< HEAD
+=======
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     );
   }
 
@@ -131,6 +153,10 @@ class SearchBarThemeData with Diagnosticable {
       textStyle: MaterialStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),
       hintStyle: MaterialStateProperty.lerp<TextStyle?>(a?.hintStyle, b?.hintStyle, t, TextStyle.lerp),
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
+<<<<<<< HEAD
+=======
+      textCapitalization: t < 0.5 ? a?.textCapitalization : b?.textCapitalization,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     );
   }
 
@@ -147,6 +173,10 @@ class SearchBarThemeData with Diagnosticable {
     textStyle,
     hintStyle,
     constraints,
+<<<<<<< HEAD
+=======
+    textCapitalization,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   );
 
   @override
@@ -168,7 +198,12 @@ class SearchBarThemeData with Diagnosticable {
       && other.padding == padding
       && other.textStyle == textStyle
       && other.hintStyle == hintStyle
+<<<<<<< HEAD
       && other.constraints == constraints;
+=======
+      && other.constraints == constraints
+      && other.textCapitalization == textCapitalization;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   }
 
   @override
@@ -185,6 +220,10 @@ class SearchBarThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('hintStyle', hintStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+<<<<<<< HEAD
+=======
+    properties.add(DiagnosticsProperty<TextCapitalization>('textCapitalization', textCapitalization, defaultValue: null));
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments

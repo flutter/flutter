@@ -71,10 +71,6 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder] and [image] may have their own FilterQuality settings via [filterQuality]
   /// and [placeholderFilterQuality].
   ///
-  /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
-  /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
-  /// [matchTextDirection] arguments must not be null.
-  ///
   /// If [excludeFromSemantics] is true, then [imageSemanticLabel] will be ignored.
   const FadeInImage({
     super.key,
@@ -97,15 +93,7 @@ class FadeInImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-  }) : assert(placeholder != null),
-       assert(image != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null);
+  });
 
   /// Creates a widget that uses a placeholder image stored in memory while
   /// loading the final image from the network.
@@ -162,18 +150,7 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : assert(placeholder != null),
-       assert(image != null),
-       assert(placeholderScale != null),
-       assert(imageScale != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
+  }) : placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -196,10 +173,6 @@ class FadeInImage extends StatefulWidget {
   /// The image will be rendered to the constraints of the layout or [width]
   /// and [height] regardless of these parameters. These parameters are primarily
   /// intended to reduce the memory usage of [ImageCache].
-  ///
-  /// The [placeholder], [image], [imageScale], [fadeOutDuration],
-  /// [fadeOutCurve], [fadeInDuration], [fadeInCurve], [alignment], [repeat],
-  /// and [matchTextDirection] arguments must not be null.
   ///
   /// See also:
   ///
@@ -235,19 +208,9 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : assert(placeholder != null),
-       assert(image != null),
-       placeholder = placeholderScale != null
+  }) : placeholder = placeholderScale != null
          ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
          : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
-       assert(imageScale != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
 
   /// Image displayed while the target [image] is loading.
@@ -401,7 +364,6 @@ class _FadeInImageState extends State<FadeInImage> {
     required FilterQuality filterQuality,
     required Animation<double> opacity,
   }) {
-    assert(image != null);
     return Image(
       image: image,
       errorBuilder: errorBuilder,
@@ -477,14 +439,7 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
     required this.fadeInDuration,
     required this.fadeInCurve,
     required this.wasSynchronouslyLoaded,
-  }) : assert(target != null),
-       assert(placeholder != null),
-       assert(isTargetLoaded != null),
-       assert(fadeOutDuration != null),
-       assert(fadeOutCurve != null),
-       assert(fadeInDuration != null),
-       assert(fadeInCurve != null),
-       assert(!wasSynchronouslyLoaded || isTargetLoaded),
+  }) : assert(!wasSynchronouslyLoaded || isTargetLoaded),
        super(duration: fadeInDuration + fadeOutDuration);
 
   final Widget target;

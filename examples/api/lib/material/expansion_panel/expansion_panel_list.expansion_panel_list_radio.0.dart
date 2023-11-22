@@ -2,24 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ExpansionPanelList.ExpansionPanelList.radio].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ExpansionPanelList.ExpansionPanelList.radio].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ExpansionPanelListRadioExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ExpansionPanelListRadioExampleApp extends StatelessWidget {
+  const ExpansionPanelListRadioExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('ExpansionPanelList.radio Sample')),
+        body: const ExpansionPanelListRadioExample(),
       ),
     );
   }
@@ -48,14 +45,14 @@ List<Item> generateItems(int numberOfItems) {
   });
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ExpansionPanelListRadioExample extends StatefulWidget {
+  const ExpansionPanelListRadioExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ExpansionPanelListRadioExample> createState() => _ExpansionPanelListRadioExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadioExample> {
   final List<Item> _data = generateItems(8);
 
   @override
@@ -80,13 +77,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             },
             body: ListTile(
                 title: Text(item.expandedValue),
-                subtitle:
-                    const Text('To delete this panel, tap the trash can icon'),
+                subtitle: const Text('To delete this panel, tap the trash can icon'),
                 trailing: const Icon(Icons.delete),
                 onTap: () {
                   setState(() {
-                    _data
-                        .removeWhere((Item currentItem) => item == currentItem);
+                    _data.removeWhere((Item currentItem) => item == currentItem);
                   });
                 }));
       }).toList(),

@@ -6,8 +6,10 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -142,6 +144,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         AndroidSdk: () => null,
+        Java: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
@@ -173,6 +176,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -204,6 +208,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -235,6 +240,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -268,6 +274,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -319,6 +326,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
+      Java: () => null,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       Usage: () => testUsage,
@@ -373,6 +381,7 @@ void main() {
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      Java: () => null,
       ProcessManager: () => processManager,
       Usage: () => testUsage,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -419,6 +428,7 @@ void main() {
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      Java: () => null,
       ProcessManager: () => processManager,
       Usage: () => testUsage,
       AndroidStudio: () => FakeAndroidStudio(),
@@ -451,4 +461,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+
+  @override
+  Version get version => Version(2021, 3, 1);
 }

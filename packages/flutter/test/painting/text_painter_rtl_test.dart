@@ -16,7 +16,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'ABC DEF\nGHI',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -42,7 +42,7 @@ void main() {
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
            //      0       12345678      9      101234567       18     90123456       27
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
@@ -175,7 +175,7 @@ void main() {
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
            //      0       12345678      9      101234567       18     90123456       27
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     final TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 28);
@@ -266,7 +266,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'A\u05D0', // A, Alef
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     final TextSpan textSpan = painter.text! as TextSpan;
     expect(textSpan.text!.length, 2);
@@ -333,14 +333,14 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
         TextSpan(
           text: 'hello', // width 50
         ),
         TextSpan(
           text: 'lovely', // width 120
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontSize: 20.0),
         ),
         TextSpan(
           text: 'world', // width 50
@@ -368,14 +368,14 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
         TextSpan(
           text: 'hello', // width 50
         ),
         TextSpan(
           text: '\u062C\u0645\u064A\u0644', // width 80
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontSize: 20.0),
         ),
         TextSpan(
           text: 'world', // width 50
@@ -425,14 +425,14 @@ void main() {
       ..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
         TextSpan(
           text: 'hello', // width 50
         ),
         TextSpan(
           text: '\u062C\u0645\u064A\u0644', // width 80
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontSize: 20.0),
         ),
         TextSpan(
           text: 'world', // width 50
@@ -463,7 +463,7 @@ void main() {
     final String pyramid = rlo(lro(rlo(lro(rlo('')))));
     painter.text = TextSpan(
       text: pyramid,
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: const TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -494,7 +494,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'ABC\u05D0\u05D1\u05D2DEF', // A B C Alef Bet Gimel D E F -- but the Hebrew letters are RTL
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -578,7 +578,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: '\u05D0\u05D1\u05D2ABC\u05D3\u05D4\u05D5',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontSize: 10.0),
     );
     painter.layout();
 
@@ -624,7 +624,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: ' ',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 100.0),
+      style: TextStyle(fontSize: 100.0),
       children: <TextSpan>[
         TextSpan(
           text: ' ',
@@ -685,10 +685,10 @@ void main() {
       ..textDirection = TextDirection.ltr;
     painter.text = const TextSpan(
       text: '',
-      style: TextStyle(fontFamily: 'Ahem', fontSize: 100.0, height: 1.0),
+      style: TextStyle(fontFamily: 'FlutterTest', fontSize: 100.0, height: 1.0),
     );
     painter.layout();
-    expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), moreOrLessEquals(80.0, epsilon: 0.001));
+    expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 75.0);
     painter.dispose();
   });
 }

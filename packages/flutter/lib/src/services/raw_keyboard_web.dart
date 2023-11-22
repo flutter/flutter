@@ -27,16 +27,13 @@ String? _unicodeChar(String key) {
 @immutable
 class RawKeyEventDataWeb extends RawKeyEventData {
   /// Creates a key event data structure specific for Web.
-  ///
-  /// The [code] and [metaState] arguments must not be null.
   const RawKeyEventDataWeb({
     required this.code,
     required this.key,
     this.location = 0,
     this.metaState = modifierNone,
     this.keyCode = 0,
-  })  : assert(code != null),
-        assert(metaState != null);
+  });
 
   /// The `KeyboardEvent.code` corresponding to this event.
   ///

@@ -409,7 +409,6 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
   OutlinedBorder? resolve(Set<MaterialState> states);
 }
 
-
 /// Defines a [TextStyle] that is also a [MaterialStateProperty].
 ///
 /// This class exists to enable widgets with [TextStyle] valued properties
@@ -603,6 +602,8 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 /// on a widget's interactive "state", which is defined as a set
 /// of [MaterialState]s.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=CylXr3AF3uU}
+///
 /// Material state properties represent values that depend on a widget's material
 /// "state". The state is encoded as a set of [MaterialState] values, like
 /// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
@@ -631,7 +632,6 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// {@macro flutter.material.MaterialStateProperty.implementations}
 abstract class MaterialStateProperty<T> {
-
   /// Returns a value of type `T` that depends on [states].
   ///
   /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
@@ -735,11 +735,21 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 ///
 /// Used by widgets that expose their internal state for the sake of
 /// extensions that add support for additional states. See
-/// [TextButton.statesController] for example.
+/// [TextButton] for an example.
 ///
 /// The controller's [value] is its current set of states. Listeners
 /// are notified whenever the [value] changes. The [value] should only be
 /// changed with [update]; it should not be modified directly.
+///
+/// The controller's [value] represents the set of states that a
+/// widget's visual properties, typically [MaterialStateProperty]
+/// values, are resolved against. It is _not_ the intrinsic state of
+/// the widget. The widget is responsible for ensuring that the
+/// controller's [value] tracks its intrinsic state. For example one
+/// cannot request the keyboard focus for a widget by adding
+/// [MaterialState.focused] to its controller. When the widget gains the
+/// or loses the focus it will [update] its controller's [value] and
+/// notify listeners of the change.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});

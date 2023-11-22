@@ -8,7 +8,7 @@
 // while the _AnimatedIconData interface which used to deliver the icon data is
 // kept private.
 
-part of material_animated_icons;
+part of material_animated_icons; // ignore: use_string_in_part_of_directives
 
 /// Identifier for the supported Material Design animated icons.
 ///
@@ -24,8 +24,7 @@ part of material_animated_icons;
 /// See also:
 ///
 ///  * [Icons], for the list of available static Material Icons.
-abstract class AnimatedIcons {
-
+abstract final class AnimatedIcons {
   /// The Material Design add to event icon animation.
   ///
   /// {@animation 72 72 https://flutter.github.io/assets-for-api-docs/assets/widgets/add_event.mp4}

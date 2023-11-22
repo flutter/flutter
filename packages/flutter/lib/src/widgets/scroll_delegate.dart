@@ -395,8 +395,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// {@template flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
+<<<<<<< HEAD
   /// Typically, children in lazy list are wrapped in [AutomaticKeepAlive]
   /// widgets so that children can use [KeepAliveNotification]s to preserve
+=======
+  /// Typically, lazily laid out children are wrapped in [AutomaticKeepAlive]
+  /// widgets so that the children can use [KeepAliveNotification]s to preserve
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   /// their state when they would otherwise be garbage collected off-screen.
   ///
   /// This feature (and [addRepaintBoundaries]) must be disabled if the children
@@ -670,6 +675,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     }
     // Lazily fill the [_keyToIndex].
     if (!_keyToIndex!.containsKey(key)) {
+<<<<<<< HEAD
       int index = _keyToIndex![null]!;
       while (index < children.length) {
         final Widget child = children[index];
@@ -679,13 +685,30 @@ class SliverChildListDelegate extends SliverChildDelegate {
         if (child.key == key) {
           // Record current index for next function call.
           _keyToIndex![null] = index + 1;
+=======
+      int index = _keyToIndex[null]!;
+      while (index < children.length) {
+        final Widget child = children[index];
+        if (child.key != null) {
+          _keyToIndex[child.key] = index;
+        }
+        if (child.key == key) {
+          // Record current index for next function call.
+          _keyToIndex[null] = index + 1;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
           return index;
         }
         index += 1;
       }
+<<<<<<< HEAD
       _keyToIndex![null] = index;
     } else {
       return _keyToIndex![key];
+=======
+      _keyToIndex[null] = index;
+    } else {
+      return _keyToIndex[key];
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     }
     return null;
   }
@@ -863,7 +886,10 @@ Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
   return ErrorWidget.builder(details);
 }
 
+<<<<<<< HEAD
 // TODO(Piinks): Come back and add keep alive support, https://github.com/flutter/flutter/issues/126297
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 /// A delegate that supplies children for scrolling in two dimensions.
 ///
 /// A [TwoDimensionalScrollView] lazily constructs its box children to avoid
@@ -929,10 +955,18 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// Creates a delegate that supplies children for a [TwoDimensionalScrollView]
   /// using the given builder callback.
   TwoDimensionalChildBuilderDelegate({
+<<<<<<< HEAD
     this.addRepaintBoundaries = true,
     required this.builder,
     int? maxXIndex,
     int? maxYIndex,
+=======
+    required this.builder,
+    int? maxXIndex,
+    int? maxYIndex,
+    this.addRepaintBoundaries = true,
+    this.addAutomaticKeepAlives = true,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   }) : assert(maxYIndex == null || maxYIndex >= -1),
        assert(maxXIndex == null || maxXIndex >= -1),
        _maxYIndex = maxYIndex,
@@ -1030,6 +1064,12 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
   final bool addRepaintBoundaries;
 
+<<<<<<< HEAD
+=======
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
+  final bool addAutomaticKeepAlives;
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   @override
   Widget? build(BuildContext context, ChildVicinity vicinity) {
     // If we have exceeded explicit upper bounds, return null.
@@ -1052,6 +1092,12 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     if (addRepaintBoundaries) {
       child = RepaintBoundary(child: child);
     }
+<<<<<<< HEAD
+=======
+    if (addAutomaticKeepAlives) {
+      child = AutomaticKeepAlive(child: _SelectionKeepAlive(child: child));
+    }
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     return child;
   }
 
@@ -1097,6 +1143,10 @@ class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
   /// null.
   TwoDimensionalChildListDelegate({
     this.addRepaintBoundaries = true,
+<<<<<<< HEAD
+=======
+    this.addAutomaticKeepAlives = true,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     required this.children,
   });
 
@@ -1116,6 +1166,12 @@ class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
   final bool addRepaintBoundaries;
 
+<<<<<<< HEAD
+=======
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
+  final bool addAutomaticKeepAlives;
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   @override
   Widget? build(BuildContext context, ChildVicinity vicinity) {
     // If we have exceeded explicit upper bounds, return null.
@@ -1130,7 +1186,13 @@ class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
     if (addRepaintBoundaries) {
       child = RepaintBoundary(child: child);
     }
+<<<<<<< HEAD
 
+=======
+    if (addAutomaticKeepAlives) {
+      child = AutomaticKeepAlive(child: _SelectionKeepAlive(child: child));
+    }
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     return child;
   }
 

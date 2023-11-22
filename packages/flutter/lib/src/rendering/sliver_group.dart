@@ -129,8 +129,15 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
     RenderSliver? child = firstChild;
 
     while (child != null) {
+<<<<<<< HEAD
       final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
       context.paintChild(child, offset + childParentData.paintOffset);
+=======
+      if (child.geometry!.visible) {
+        final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+        context.paintChild(child, offset + childParentData.paintOffset);
+      }
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       child = childAfter(child);
     }
   }
@@ -295,8 +302,15 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
     RenderSliver? child = lastChild;
 
     while (child != null) {
+<<<<<<< HEAD
       final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
       context.paintChild(child, offset + childParentData.paintOffset);
+=======
+      if (child.geometry!.visible) {
+        final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+        context.paintChild(child, offset + childParentData.paintOffset);
+      }
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       child = childBefore(child);
     }
   }

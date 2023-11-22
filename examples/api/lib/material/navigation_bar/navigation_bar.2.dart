@@ -71,6 +71,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return WillPopScope(
       onWillPop: () async {
         final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
@@ -79,6 +80,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
         }
         navigator.pop();
         return false;
+=======
+    return NavigatorPopHandler(
+      onPop: () {
+        final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
+        navigator.pop();
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       },
       child: Scaffold(
         body: SafeArea(
@@ -178,7 +185,11 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
+<<<<<<< HEAD
                 showDialog(
+=======
+                showDialog<void>(
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
                   context: context,
                   useRootNavigator: false,
                   builder: _buildDialog,
@@ -190,9 +201,15 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
+<<<<<<< HEAD
                 showDialog(
                   context: context,
                   useRootNavigator: true,
+=======
+                showDialog<void>(
+                  context: context,
+                  useRootNavigator: true, // ignore: avoid_redundant_argument_values
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
                   builder: _buildDialog,
                 );
               },
@@ -204,7 +221,11 @@ class RootPage extends StatelessWidget {
                 return ElevatedButton(
                   style: buttonStyle,
                   onPressed: () {
+<<<<<<< HEAD
                     showBottomSheet(
+=======
+                    showBottomSheet<void>(
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
                       context: context,
                       builder: (BuildContext context) {
                         return Container(

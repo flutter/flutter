@@ -17,16 +17,7 @@ class StockConfiguration {
     required this.debugShowRainbow,
     required this.showPerformanceOverlay,
     required this.showSemanticsDebugger,
-  }) : assert(stockMode != null),
-       assert(backupMode != null),
-       assert(debugShowGrid != null),
-       assert(debugShowSizes != null),
-       assert(debugShowBaselines != null),
-       assert(debugShowLayers != null),
-       assert(debugShowPointers != null),
-       assert(debugShowRainbow != null),
-       assert(showPerformanceOverlay != null),
-       assert(showSemanticsDebugger != null);
+  });
 
   final StockMode stockMode;
   final BackupMode backupMode;

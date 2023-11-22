@@ -4,9 +4,16 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+
+// Examples can assume:
+// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+// import 'package:flutter/services.dart';
+// import 'dart:ui_web' as ui_web;
+// void handleFrameworkMessage(String name, ByteData? data, PlatformMessageResponseCallback? callback) { }
 
 /// A registrar for Flutter plugins implemented in Dart.
 ///
@@ -31,6 +38,11 @@ import 'package:flutter/services.dart';
 ///     final MyPlugin instance = MyPlugin();
 ///     channel.setMethodCallHandler(instance.handleMethodCall);
 ///   }
+///
+///   Future<dynamic> handleMethodCall(MethodCall call) async {
+///     // ...
+///   }
+///
 ///   // ...
 /// }
 /// ```
@@ -57,13 +69,11 @@ class Registrar extends BinaryMessenger {
   /// previously-registered handler and replaces it with the handler
   /// from this object.
   ///
-  /// This method uses a function called `webOnlySetPluginHandler` in
-  /// the [dart:ui] library. That function is only available when
+  /// This method uses a function called `setPluginHandler` in
+  /// the [dart:ui_web] library. That function is only available when
   /// compiling for the web.
   void registerMessageHandler() {
-    // The `ui.webOnlySetPluginHandler` function below is only defined in the Web dart:ui.
-    // ignore: undefined_function, avoid_dynamic_calls
-    ui.webOnlySetPluginHandler(handleFrameworkMessage);
+    ui_web.setPluginHandler(handleFrameworkMessage);
   }
 
   /// Receives a platform message from the framework.
@@ -101,7 +111,7 @@ class Registrar extends BinaryMessenger {
   /// the following:
   ///
   /// ```dart
-  /// ui.webOnlySetPluginHandler(webPluginRegistrar.handleFrameworkMessage);
+  /// ui_web.setPluginHandler(handleFrameworkMessage);
   /// ```
   Future<void> handleFrameworkMessage(
     String channel,

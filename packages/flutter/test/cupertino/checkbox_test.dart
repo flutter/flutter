@@ -7,8 +7,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
 
 import '../rendering/mock_canvas.dart';
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -16,7 +21,11 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+<<<<<<< HEAD
   testWidgets('CupertinoCheckbox semantics', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('CupertinoCheckbox semantics', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -156,7 +165,11 @@ void main() {
     handle.dispose();
   });
 
+<<<<<<< HEAD
   testWidgets('Can wrap CupertinoCheckbox with Semantics', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Can wrap CupertinoCheckbox with Semantics', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -184,7 +197,11 @@ void main() {
     handle.dispose();
   });
 
+<<<<<<< HEAD
   testWidgets('CupertinoCheckbox tristate: true', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('CupertinoCheckbox tristate: true', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     bool? checkBoxValue;
 
     await tester.pumpWidget(
@@ -228,7 +245,11 @@ void main() {
     expect(checkBoxValue, null);
   });
 
+<<<<<<< HEAD
   testWidgets('has semantics for tristate', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('has semantics for tristate', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       CupertinoApp(
@@ -295,7 +316,11 @@ void main() {
     semantics.dispose();
   });
 
+<<<<<<< HEAD
   testWidgets('has semantic events', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('has semantic events', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     dynamic semanticEvent;
     bool? checkboxValue = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
@@ -335,7 +360,11 @@ void main() {
     semanticsTester.dispose();
   });
 
+<<<<<<< HEAD
   testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool enabled = true}) {
@@ -372,7 +401,11 @@ void main() {
     expect(value, isTrue);
   });
 
+<<<<<<< HEAD
   testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Checkbox respects shape and side', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     const RoundedRectangleBorder roundedRectangleBorder =
         RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
 

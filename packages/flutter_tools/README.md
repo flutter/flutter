@@ -67,14 +67,16 @@ Please avoid setting any other timeouts.
 #### Using local engine builds in integration tests
 
 The integration tests can be configured to use a specific local engine
-variant by setting the `FLUTTER_LOCAL_ENGINE` environment variable to the
-name of the local engine (e.g. "android_debug_unopt"). If the local engine build
-requires a source path, this can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH`
-environment variable. This second variable is not necessary if the `flutter` and
-`engine` checkouts are in adjacent directories.
+variant by setting the `FLUTTER_LOCAL_ENGINE` and `FLUTTER_LOCAL_ENGINE_HOST`
+environment svariable to the name of the local engines (e.g. `android_debug_unopt`
+and `host_debug_unopt`). If the local engine build requires a source path, this
+can be provided by setting the `FLUTTER_LOCAL_ENGINE_SRC_PATH` environment
+variable. This second variable is not necessary if the `flutter` and `engine`
+checkouts are in adjacent directories.
 
 ```shell
 export FLUTTER_LOCAL_ENGINE=android_debug_unopt
+export FLUTTER_LOCAL_ENGINE_HOST=host_debug_unopt
 flutter test test/integration.shard/some_test_case
 ```
 

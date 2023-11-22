@@ -22,9 +22,7 @@ import 'version.dart';
 
 const String kCandidateOption = 'candidate-branch';
 const String kDartRevisionOption = 'dart-revision';
-const String kEngineCherrypicksOption = 'engine-cherrypicks';
 const String kEngineUpstreamOption = 'engine-upstream';
-const String kFrameworkCherrypicksOption = 'framework-cherrypicks';
 const String kFrameworkMirrorOption = 'framework-mirror';
 const String kFrameworkUpstreamOption = 'framework-upstream';
 const String kEngineMirrorOption = 'engine-mirror';
@@ -34,6 +32,16 @@ const String kVersionOverrideOption = 'version-override';
 const String kGithubUsernameOption = 'github-username';
 
 /// Command to print the status of the current Flutter release.
+///
+/// This command has many required options which the user must provide
+/// via command line arguments (or optionally environment variables).
+///
+/// This command is the one with the worst user experience (as the user has to
+/// carefully type out many different options into their terminal) and the one
+/// that would benefit the most from a GUI frontend. This command will
+/// optionally read its options from an environment variable to facilitate a workflow
+/// in which configuration is provided by editing a bash script that sets environment
+/// variables and then invokes the conductor tool.
 class StartCommand extends Command<void> {
   StartCommand({
     required this.checkouts,
@@ -69,16 +77,6 @@ class StartCommand extends Command<void> {
       kStateOption,
       defaultsTo: defaultPath,
       help: 'Path to persistent state file. Defaults to $defaultPath',
-    );
-    argParser.addMultiOption(
-      kEngineCherrypicksOption,
-      help: 'Engine cherrypick hashes to be applied.',
-      defaultsTo: <String>[],
-    );
-    argParser.addMultiOption(
-      kFrameworkCherrypicksOption,
-      help: 'Framework cherrypick hashes to be applied.',
-      defaultsTo: <String>[],
     );
     argParser.addOption(
       kDartRevisionOption,
@@ -151,16 +149,6 @@ class StartCommand extends Command<void> {
       argumentResults,
       platform.environment,
     )!;
-    final List<String> frameworkCherrypickRevisions = getValuesFromEnvOrArgs(
-      kFrameworkCherrypicksOption,
-      argumentResults,
-      platform.environment,
-    );
-    final List<String> engineCherrypickRevisions = getValuesFromEnvOrArgs(
-      kEngineCherrypicksOption,
-      argumentResults,
-      platform.environment,
-    );
     final String? dartRevision = getValueFromEnvOrArgs(
       kDartRevisionOption,
       argumentResults,
@@ -191,11 +179,9 @@ class StartCommand extends Command<void> {
       candidateBranch: candidateBranch,
       checkouts: checkouts,
       dartRevision: dartRevision,
-      engineCherrypickRevisions: engineCherrypickRevisions,
       engineMirror: engineMirror,
       engineUpstream: engineUpstream,
       conductorVersion: conductorVersion,
-      frameworkCherrypickRevisions: frameworkCherrypickRevisions,
       frameworkMirror: frameworkMirror,
       frameworkUpstream: frameworkUpstream,
       processManager: processManager,
@@ -216,10 +202,8 @@ class StartContext extends Context {
   StartContext({
     required this.candidateBranch,
     required this.dartRevision,
-    required this.engineCherrypickRevisions,
     required this.engineMirror,
     required this.engineUpstream,
-    required this.frameworkCherrypickRevisions,
     required this.frameworkMirror,
     required this.frameworkUpstream,
     required this.conductorVersion,
@@ -258,10 +242,8 @@ class StartContext extends Context {
 
   final String candidateBranch;
   final String? dartRevision;
-  final List<String> engineCherrypickRevisions;
   final String engineMirror;
   final String engineUpstream;
-  final List<String> frameworkCherrypickRevisions;
   final String frameworkMirror;
   final String frameworkUpstream;
   final String conductorVersion;
@@ -326,31 +308,7 @@ class StartContext extends Context {
       await engine.updateDartRevision(dartRevision!);
       await engine.commit('Update Dart SDK to $dartRevision', addFirst: true);
     }
-    final List<pb.Cherrypick> engineCherrypicks = (await _sortCherrypicks(
-      repository: engine,
-      cherrypicks: engineCherrypickRevisions,
-      upstreamRef: EngineRepository.defaultBranch,
-      releaseRef: candidateBranch,
-    ))
-        .map((String revision) => pb.Cherrypick(
-              trunkRevision: revision,
-              state: pb.CherrypickState.PENDING,
-            ))
-        .toList();
 
-    for (final pb.Cherrypick cherrypick in engineCherrypicks) {
-      final String revision = cherrypick.trunkRevision;
-      final bool success = await engine.canCherryPick(revision);
-      stdio.printTrace(
-        'Attempt to cherrypick $revision ${success ? 'succeeded' : 'failed'}',
-      );
-      if (success) {
-        await engine.cherryPick(revision);
-        cherrypick.state = pb.CherrypickState.COMPLETED;
-      } else {
-        cherrypick.state = pb.CherrypickState.PENDING_WITH_CONFLICT;
-      }
-    }
     final String engineHead = await engine.reverseParse('HEAD');
     state.engine = pb.Repository(
       candidateBranch: candidateBranch,
@@ -358,38 +316,12 @@ class StartContext extends Context {
       startingGitHead: engineHead,
       currentGitHead: engineHead,
       checkoutPath: (await engine.checkoutDirectory).path,
-      cherrypicks: engineCherrypicks,
       dartRevision: dartRevision,
       upstream: pb.Remote(name: 'upstream', url: engine.upstreamRemote.url),
       mirror: pb.Remote(name: 'mirror', url: engine.mirrorRemote!.url),
     );
 
     await framework.newBranch(workingBranchName);
-    final List<pb.Cherrypick> frameworkCherrypicks = (await _sortCherrypicks(
-      repository: framework,
-      cherrypicks: frameworkCherrypickRevisions,
-      upstreamRef: FrameworkRepository.defaultBranch,
-      releaseRef: candidateBranch,
-    ))
-        .map((String revision) => pb.Cherrypick(
-              trunkRevision: revision,
-              state: pb.CherrypickState.PENDING,
-            ))
-        .toList();
-
-    for (final pb.Cherrypick cherrypick in frameworkCherrypicks) {
-      final String revision = cherrypick.trunkRevision;
-      final bool success = await framework.canCherryPick(revision);
-      stdio.printTrace(
-        'Attempt to cherrypick $cherrypick ${success ? 'succeeded' : 'failed'}',
-      );
-      if (success) {
-        await framework.cherryPick(revision);
-        cherrypick.state = pb.CherrypickState.COMPLETED;
-      } else {
-        cherrypick.state = pb.CherrypickState.PENDING_WITH_CONFLICT;
-      }
-    }
 
     // Get framework version
     final Version lastVersion = Version.fromString(await framework.getFullTag(
@@ -436,7 +368,6 @@ class StartContext extends Context {
       startingGitHead: frameworkHead,
       currentGitHead: frameworkHead,
       checkoutPath: (await framework.checkoutDirectory).path,
-      cherrypicks: frameworkCherrypicks,
       upstream: pb.Remote(name: 'upstream', url: framework.upstreamRemote.url),
       mirror: pb.Remote(name: 'mirror', url: framework.mirrorRemote!.url),
     );
@@ -463,16 +394,12 @@ class StartContext extends Context {
           z: 0,
           type: VersionType.stable,
         );
-        break;
       case ReleaseType.STABLE_HOTFIX:
         nextVersion = Version.increment(lastVersion, 'z');
-        break;
       case ReleaseType.BETA_INITIAL:
         nextVersion = Version.fromCandidateBranch(candidateBranch);
-        break;
       case ReleaseType.BETA_HOTFIX:
         nextVersion = Version.increment(lastVersion, 'n');
-        break;
     }
     return nextVersion;
   }
@@ -519,75 +446,5 @@ class StartContext extends Context {
     final Version nextVersion = Version.increment(requestedVersion, 'n');
     stdio.printStatus('The actual release will be version $nextVersion.');
     return nextVersion;
-  }
-
-  // To minimize merge conflicts, sort the commits by rev-list order.
-  Future<List<String>> _sortCherrypicks({
-    required Repository repository,
-    required List<String> cherrypicks,
-    required String upstreamRef,
-    required String releaseRef,
-  }) async {
-    if (cherrypicks.isEmpty) {
-      return cherrypicks;
-    }
-
-    // Input cherrypick hashes that failed to be parsed by git.
-    final List<String> unknownCherrypicks = <String>[];
-    // Full 40-char hashes parsed by git.
-    final List<String> validatedCherrypicks = <String>[];
-    // Final, validated, sorted list of cherrypicks to be applied.
-    final List<String> sortedCherrypicks = <String>[];
-    for (final String cherrypick in cherrypicks) {
-      try {
-        final String fullRef = await repository.reverseParse(cherrypick);
-        validatedCherrypicks.add(fullRef);
-      } on GitException {
-        // Catch this exception so that we can validate the rest.
-        unknownCherrypicks.add(cherrypick);
-      }
-    }
-
-    final String branchPoint = await repository.branchPoint(
-      '${repository.upstreamRemote.name}/$upstreamRef',
-      '${repository.upstreamRemote.name}/$releaseRef',
-    );
-
-    // `git rev-list` returns newest first, so reverse this list
-    final List<String> upstreamRevlist = (await repository.revList(<String>[
-      '--ancestry-path',
-      '$branchPoint..$upstreamRef',
-    ]))
-        .reversed
-        .toList();
-
-    stdio.printStatus('upstreamRevList:\n${upstreamRevlist.join('\n')}\n');
-    stdio.printStatus(
-        'validatedCherrypicks:\n${validatedCherrypicks.join('\n')}\n');
-    for (final String upstreamRevision in upstreamRevlist) {
-      if (validatedCherrypicks.contains(upstreamRevision)) {
-        validatedCherrypicks.remove(upstreamRevision);
-        sortedCherrypicks.add(upstreamRevision);
-        if (unknownCherrypicks.isEmpty && validatedCherrypicks.isEmpty) {
-          return sortedCherrypicks;
-        }
-      }
-    }
-
-    // We were given input cherrypicks that were not present in the upstream
-    // rev-list
-    stdio.printError(
-      'The following ${repository.name} cherrypicks were not found in the '
-      'upstream $upstreamRef branch:',
-    );
-    for (final String cp in <String>[
-      ...validatedCherrypicks,
-      ...unknownCherrypicks
-    ]) {
-      stdio.printError('\t$cp');
-    }
-    throw ConductorException(
-      '${validatedCherrypicks.length + unknownCherrypicks.length} unknown cherrypicks provided!',
-    );
   }
 }

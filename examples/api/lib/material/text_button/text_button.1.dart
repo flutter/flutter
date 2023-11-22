@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [TextButton].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [TextButton].
 
 void main() {
   runApp(const MaterialApp(home: Home()));
@@ -26,7 +26,6 @@ class SelectableButton extends StatefulWidget {
 
   @override
   State<SelectableButton> createState() => _SelectableButtonState();
-
 }
 
 class _SelectableButtonState extends State<SelectableButton> {
@@ -35,9 +34,7 @@ class _SelectableButtonState extends State<SelectableButton> {
   @override
   void initState() {
     super.initState();
-    statesController = MaterialStatesController(<MaterialState>{
-      if (widget.selected) MaterialState.selected
-    });
+    statesController = MaterialStatesController(<MaterialState>{if (widget.selected) MaterialState.selected});
   }
 
   @override
@@ -60,7 +57,7 @@ class _SelectableButtonState extends State<SelectableButton> {
 }
 
 class Home extends StatefulWidget {
-  const Home({ super.key });
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -94,7 +91,9 @@ class _HomeState extends State<Home> {
             ),
           ),
           onPressed: () {
-            setState(() { selected = !selected; });
+            setState(() {
+              selected = !selected;
+            });
           },
           child: const Text('toggle selected'),
         ),

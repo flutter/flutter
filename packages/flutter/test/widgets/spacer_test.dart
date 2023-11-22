@@ -4,11 +4,12 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Spacer takes up space.', (WidgetTester tester) async {
-    await tester.pumpWidget(Column(
-      children: const <Widget>[
+  testWidgetsWithLeakTracking('Spacer takes up space.', (WidgetTester tester) async {
+    await tester.pumpWidget(const Column(
+      children: <Widget>[
         SizedBox(width: 10.0, height: 10.0),
         Spacer(),
         SizedBox(width: 10.0, height: 10.0),
@@ -19,14 +20,14 @@ void main() {
     expect(spacerRect.topLeft, const Offset(400.0, 10.0));
   });
 
-  testWidgets('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
     const Spacer spacer1 = Spacer();
     const Spacer spacer2 = Spacer();
     const Spacer spacer3 = Spacer(flex: 2);
     const Spacer spacer4 = Spacer(flex: 4);
-    await tester.pumpWidget(Row(
+    await tester.pumpWidget(const Row(
       textDirection: TextDirection.rtl,
-      children: const <Widget>[
+      children: <Widget>[
         SizedBox(width: 10.0, height: 10.0),
         spacer1,
         SizedBox(width: 10.0, height: 10.0),
@@ -53,11 +54,11 @@ void main() {
     expect(spacer4Rect.left, moreOrLessEquals(10.0, epsilon: 0.1));
   });
 
-  testWidgets('Spacer takes up space.', (WidgetTester tester) async {
-    await tester.pumpWidget(UnconstrainedBox(
+  testWidgetsWithLeakTracking('Spacer takes up space.', (WidgetTester tester) async {
+    await tester.pumpWidget(const UnconstrainedBox(
       constrainedAxis: Axis.vertical,
       child: Column(
-        children: const <Widget>[
+        children: <Widget>[
           SizedBox(width: 20.0, height: 10.0),
           Spacer(),
           SizedBox(width: 10.0, height: 10.0),

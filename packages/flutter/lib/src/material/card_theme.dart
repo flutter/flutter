@@ -110,11 +110,11 @@ class CardTheme with Diagnosticable {
 
   /// Linearly interpolate between two Card themes.
   ///
-  /// The argument `t` must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static CardTheme lerp(CardTheme? a, CardTheme? b, double t) {
-    assert(t != null);
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return CardTheme(
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       color: Color.lerp(a?.color, b?.color, t),

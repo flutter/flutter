@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Stepper.controlsBuilder].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Stepper.controlsBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ControlsBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ControlsBuilderExampleApp extends StatelessWidget {
+  const ControlsBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('Stepper Sample')),
+        body: const ControlsBuilderExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ControlsBuilderExample extends StatelessWidget {
+  const ControlsBuilderExample({super.key});
 
   @override
   Widget build(BuildContext context) {

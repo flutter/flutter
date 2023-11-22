@@ -23,8 +23,6 @@ import 'ticker_provider.dart';
 ///  * [SizeTransition], which changes its size based on an [Animation].
 class AnimatedSize extends StatefulWidget {
   /// Creates a widget that animates its size to match that of its child.
-  ///
-  /// The [curve] and [duration] arguments must not be null.
   const AnimatedSize({
     super.key,
     this.child,
@@ -32,13 +30,8 @@ class AnimatedSize extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.reverseDuration,
-    @Deprecated(
-      'This field is now ignored. '
-      'This feature was deprecated after v2.2.0-10.1.pre.'
-    )
-    TickerProvider? vsync,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(clipBehavior != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -82,7 +75,7 @@ class AnimatedSize extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
@@ -114,7 +107,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
     this.reverseDuration,
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(clipBehavior != null);
+  });
 
   final AlignmentGeometry alignment;
   final Curve curve;

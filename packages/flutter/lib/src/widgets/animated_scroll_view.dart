@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_physics.dart';
 import 'scroll_view.dart';
 import 'sliver.dart';
@@ -27,6 +29,35 @@ import 'ticker_provider.dart';
 /// items are removed or added to the list.
 ///
 /// ** See code in examples/api/lib/widgets/animated_list/animated_list.0.dart **
+/// {@end-tool}
+///
+/// By default, [AnimatedList] will automatically pad the limits of the
+/// list's scrollable to avoid partial obstructions indicated by
+/// [MediaQuery]'s padding. To avoid this behavior, override with a
+/// zero [padding] property.
+///
+/// {@tool snippet}
+/// The following example demonstrates how to override the default top and
+/// bottom padding using [MediaQuery.removePadding].
+///
+/// ```dart
+/// Widget myWidget(BuildContext context) {
+///   return MediaQuery.removePadding(
+///     context: context,
+///     removeTop: true,
+///     removeBottom: true,
+///     child: AnimatedList(
+///       initialItemCount: 50,
+///       itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///         return Card(
+///           color: Colors.amber,
+///           child: Center(child: Text('$index')),
+///         );
+///       }
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -52,8 +83,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.shrinkWrap = false,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
-  }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0);
+  }) : assert(initialItemCount >= 0);
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -74,7 +104,6 @@ class AnimatedList extends _AnimatedScrollView {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [AnimatedList] ancestor is found.
   static AnimatedListState of(BuildContext context) {
-    assert(context != null);
     final AnimatedListState? result = AnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -116,7 +145,6 @@ class AnimatedList extends _AnimatedScrollView {
   ///  * [of], a similar function that will throw if no [AnimatedList] ancestor
   ///    is found.
   static AnimatedListState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<AnimatedListState>();
   }
 
@@ -129,6 +157,10 @@ class AnimatedList extends _AnimatedScrollView {
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
 /// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
+/// is needed.
+///
+/// When multiple items are inserted with [insertAllItems] an animation begins running.
+/// The animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
 /// is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
@@ -174,6 +206,7 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
       ),
+      widget.scrollDirection,
     );
   }
 }
@@ -192,6 +225,38 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
 /// items are removed or added to the grid.
 ///
 /// ** See code in examples/api/lib/widgets/animated_grid/animated_grid.0.dart **
+/// {@end-tool}
+///
+/// By default, [AnimatedGrid] will automatically pad the limits of the
+/// grid's scrollable to avoid partial obstructions indicated by
+/// [MediaQuery]'s padding. To avoid this behavior, override with a
+/// zero [padding] property.
+///
+/// {@tool snippet}
+/// The following example demonstrates how to override the default top and
+/// bottom padding using [MediaQuery.removePadding].
+///
+/// ```dart
+/// Widget myWidget(BuildContext context) {
+///   return MediaQuery.removePadding(
+///     context: context,
+///     removeTop: true,
+///     removeBottom: true,
+///     child: AnimatedGrid(
+///       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+///         crossAxisCount: 3,
+///       ),
+///       initialItemCount: 50,
+///       itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+///         return Card(
+///           color: Colors.amber,
+///           child: Center(child: Text('$index')),
+///         );
+///       }
+///     ),
+///   );
+/// }
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -217,8 +282,7 @@ class AnimatedGrid extends _AnimatedScrollView {
     super.physics,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedGrid.gridDelegate}
   /// A delegate that controls the layout of the children within the
@@ -252,7 +316,6 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [AnimatedGrid] ancestor is found.
   static AnimatedGridState of(BuildContext context) {
-    assert(context != null);
     final AnimatedGridState? result = AnimatedGrid.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -294,7 +357,6 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///  * [of], a similar function that will throw if no [AnimatedGrid] ancestor
   ///    is found.
   static AnimatedGridState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<AnimatedGridState>();
   }
 
@@ -354,6 +416,7 @@ class AnimatedGridState extends _AnimatedScrollViewState<AnimatedGrid> {
         itemBuilder: widget.itemBuilder,
         initialItemCount: widget.initialItemCount,
       ),
+      widget.scrollDirection,
     );
   }
 }
@@ -373,8 +436,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
     this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
   /// Called, as needed, to build children widgets.
@@ -403,9 +465,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   /// {@endtemplate}
   final int initialItemCount;
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
+  /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.
@@ -493,6 +553,13 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
   }
 
+  /// Insert multiple items at [index] and start an animation that will be passed
+  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
+  /// are visible.
+  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
+    _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
+  }
+
   /// Remove the item at `index` and start an animation that will be passed to
   /// `builder` when the item is visible.
   ///
@@ -513,7 +580,48 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
-  Widget _wrap(Widget sliver) {
+  /// Remove all the items and start an animation that will be passed to
+  /// `builder` when the items are visible.
+  ///
+  /// Items are removed immediately. However, the
+  /// items will still appear for `duration`, and during that time
+  /// `builder` must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.clear] method: it
+  /// removes all the items in the list.
+  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    _sliverAnimatedMultiBoxKey.currentState!.removeAllItems(builder, duration: duration);
+  }
+
+  Widget _wrap(Widget sliver, Axis direction) {
+    EdgeInsetsGeometry? effectivePadding = widget.padding;
+    if (widget.padding == null) {
+      final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
+      if (mediaQuery != null) {
+        // Automatically pad sliver with padding from MediaQuery.
+        final EdgeInsets mediaQueryHorizontalPadding =
+            mediaQuery.padding.copyWith(top: 0.0, bottom: 0.0);
+        final EdgeInsets mediaQueryVerticalPadding =
+            mediaQuery.padding.copyWith(left: 0.0, right: 0.0);
+        // Consume the main axis padding with SliverPadding.
+        effectivePadding = direction == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
+        // Leave behind the cross axis padding.
+        sliver = MediaQuery(
+          data: mediaQuery.copyWith(
+            padding: direction == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
+          ),
+          child: sliver,
+        );
+      }
+    }
+
+    if (effectivePadding != null) {
+      sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
+    }
     return CustomScrollView(
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
@@ -522,12 +630,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       physics: widget.physics,
       clipBehavior: widget.clipBehavior,
       shrinkWrap: widget.shrinkWrap,
-      slivers: <Widget>[
-        SliverPadding(
-          padding: widget.padding ?? EdgeInsets.zero,
-          sliver: sliver,
-        ),
-      ],
+      slivers: <Widget>[ sliver ],
     );
   }
 }
@@ -630,8 +733,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
     required super.itemBuilder,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
-  }) : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  }) : assert(initialItemCount >= 0);
 
   @override
   SliverAnimatedListState createState() => SliverAnimatedListState();
@@ -655,7 +757,6 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedList] ancestor is found.
   static SliverAnimatedListState of(BuildContext context) {
-    assert(context != null);
     final SliverAnimatedListState? result = SliverAnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -695,7 +796,6 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [of], a similar function that will throw if no [SliverAnimatedList]
   ///    ancestor is found.
   static SliverAnimatedListState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<SliverAnimatedListState>();
   }
 }
@@ -782,8 +882,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
     required this.gridDelegate,
     super.findChildIndexCallback,
     super.initialItemCount = 0,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(initialItemCount >= 0);
 
   @override
   SliverAnimatedGridState createState() => SliverAnimatedGridState();
@@ -807,7 +906,6 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedGrid] ancestor is found.
   static SliverAnimatedGridState of(BuildContext context) {
-    assert(context != null);
     final SliverAnimatedGridState? result = context.findAncestorStateOfType<SliverAnimatedGridState>();
     assert(() {
       if (result == null) {
@@ -844,7 +942,6 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   ///  * [of], a similar function that will throw if no [SliverAnimatedGrid]
   ///    ancestor is found.
   static SliverAnimatedGridState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<SliverAnimatedGridState>();
   }
 }
@@ -908,8 +1005,7 @@ abstract class _SliverAnimatedMultiBoxAdaptor extends StatefulWidget {
     required this.itemBuilder,
     this.findChildIndexCallback,
     this.initialItemCount = 0,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null && initialItemCount >= 0);
+  })  : assert(initialItemCount >= 0);
 
   /// {@macro flutter.widgets.AnimatedScrollView.itemBuilder}
   final AnimatedItemBuilder itemBuilder;
@@ -1022,8 +1118,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
   void insertItem(int index, { Duration duration = _kDuration }) {
-    assert(index != null && index >= 0);
-    assert(duration != null);
+    assert(index >= 0);
 
     final int itemIndex = _indexToItemIndex(index);
     assert(itemIndex >= 0 && itemIndex <= _itemsCount);
@@ -1061,6 +1156,15 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     });
   }
 
+  /// Insert multiple items at [index] and start an animation that will be passed
+  /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
+  /// are visible.
+  void insertAllItems(int index, int length, { Duration duration = _kDuration }) {
+    for (int i = 0; i < length; i++) {
+      insertItem(index + i, duration: duration);
+    }
+  }
+
   /// Remove the item at [index] and start an animation that will be passed
   /// to [builder] when the item is visible.
   ///
@@ -1074,9 +1178,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// decreases the length of items by one and shifts
   /// all items at or before [index] towards the beginning of the list of items.
   void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    assert(index != null && index >= 0);
-    assert(builder != null);
-    assert(duration != null);
+    assert(index >= 0);
 
     final int itemIndex = _indexToItemIndex(index);
     assert(itemIndex >= 0 && itemIndex < _itemsCount);
@@ -1110,5 +1212,20 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
 
       setState(() => _itemsCount -= 1);
     });
+  }
+
+  /// Remove all the items and start an animation that will be passed to
+  /// `builder` when the items are visible.
+  ///
+  /// Items are removed immediately. However, the
+  /// items will still appear for `duration` and during that time
+  /// `builder` must construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.clear] method: it
+  /// removes all the items in the list.
+  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    for (int i = _itemsCount - 1 ; i >= 0; i--) {
+      removeItem(i, builder, duration: duration);
+    }
   }
 }

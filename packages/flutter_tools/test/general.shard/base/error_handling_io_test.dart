@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
@@ -963,7 +962,8 @@ void main() {
         platform: windowsPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo". The flutter tool cannot access the file or directory.\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
       expect(() async => processManager.run(<String>['foo']),
@@ -1021,7 +1021,8 @@ void main() {
         platform: linuxPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
 
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -1085,7 +1086,8 @@ void main() {
         platform: macOSPlatform,
       );
 
-      const String expectedMessage = 'The flutter tool cannot access the file';
+      const String expectedMessage = 'Flutter failed to run "foo".\n'
+          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.';
 
       expect(() async => processManager.start(<String>['foo']),
              throwsToolExit(message: expectedMessage));
@@ -1113,9 +1115,9 @@ void main() {
 
     testWithoutContext('when bad CPU type', () async {
       final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
-        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
-        const FakeCommand(command: <String>['foo'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
+        const FakeCommand(command: <String>['foo', '--bar'], exception: ProcessException('', <String>[], '', ebadarch)),
       ]);
 
       final ProcessManager processManager = ErrorHandlingProcessManager(
@@ -1123,13 +1125,14 @@ void main() {
         platform: macOSPlatform,
       );
 
-      const String expectedMessage = 'Flutter requires the Rosetta translation environment';
+      const String expectedMessage = 'Flutter failed to run "foo --bar".\n'
+          'The binary was built with the incorrect architecture to run on this machine.';
 
-      expect(() async => processManager.start(<String>['foo']),
+      expect(() async => processManager.start(<String>['foo', '--bar']),
           throwsToolExit(message: expectedMessage));
-      expect(() async => processManager.run(<String>['foo']),
+      expect(() async => processManager.run(<String>['foo', '--bar']),
           throwsToolExit(message: expectedMessage));
-      expect(() => processManager.runSync(<String>['foo']),
+      expect(() => processManager.runSync(<String>['foo', '--bar']),
           throwsToolExit(message: expectedMessage));
     });
   });
@@ -1289,7 +1292,7 @@ class FakeExistsFile extends Fake implements File {
 
 class FakeFileSystem extends Fake implements FileSystem {
   @override
-  p.Context get path => p.Context();
+  Context get path => Context();
 
   @override
   Directory get currentDirectory {

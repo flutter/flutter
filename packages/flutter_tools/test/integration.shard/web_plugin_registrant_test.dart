@@ -9,6 +9,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/test_flutter_command_runner.dart';
+import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
@@ -79,19 +81,17 @@ void main() {
     ),
   });
 
-  testUsingContext('generated plugin registrant passes analysis without null safety', () async {
+  testUsingContext('generated plugin registrant passes analysis with null safety', () async {
     await _createProject(projectDir, <String>[]);
     // We need a dependency so the plugin registrant is not completely empty.
     await _editPubspecFile(projectDir,
       _composeEditors(<PubspecEditor>[
         _addDependencyEditor('shared_preferences', version: '^2.0.0'),
 
-        // This turns null safety off
-        _setDartSDKVersionEditor('>=2.11.0 <3.0.0'),
+        _setDartSDKVersionEditor('>=2.12.0 <4.0.0'),
       ]));
 
-    // The generated main.dart file has a bunch of stuff that is invalid without null safety, so
-    // replace it with a no-op dummy main file. We aren't testing it in this scenario anyway.
+    // Replace main file with a no-op dummy. We aren't testing it in this scenario anyway.
     await _replaceMainFile(projectDir, 'void main() {}');
 
     // The plugin registrant is created on build...
@@ -276,7 +276,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
   printOnFailure('Output of dart ${snapshotArgs.join(" ")}:');
   printOnFailure(snapshotResult.stdout.toString());
   printOnFailure(snapshotResult.stderr.toString());
-  expect(snapshotResult.exitCode, 0);
+  expect(snapshotResult, const ProcessResultMatcher());
 }
 
 Future<void> _restoreFlutterToolsSnapshot() async {
@@ -358,11 +358,11 @@ PubspecEditor _setDartSDKVersionEditor(String version) {
         for (i++; i < lines.length; i++) {
           final String innerLine = lines[i];
           final String sdkLine = "  sdk: '$version'";
-          if(innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
+          if (innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
             lines.insert(i, sdkLine);
             break;
           }
-          if(innerLine.startsWith('  sdk:')) {
+          if (innerLine.startsWith('  sdk:')) {
             lines[i] = sdkLine;
             break;
           }
@@ -412,14 +412,11 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
   ];
 
   final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
     args,
     workingDirectory: target is Directory ? target.path : target.dirname,
   );
-  printOnFailure('Output of flutter analyze:');
-  printOnFailure(exec.stdout.toString());
-  printOnFailure(exec.stderr.toString());
-  expect(exec.exitCode, 0);
+  expect(exec, const ProcessResultMatcher());
 }
 
 Future<void> _buildWebProject(Directory workingDir) async {
@@ -446,17 +443,14 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
   );
 
   final List<String> args = <String>[
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
     flutterToolsSnapshotPath,
     ...flutterCommandArgs
   ];
 
-  final ProcessResult exec = await Process.run(
-    globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+  final ProcessResult exec = await globals.processManager.run(
     args,
     workingDirectory: workingDir.path,
   );
-  printOnFailure('Output of flutter ${flutterCommandArgs.join(" ")}:');
-  printOnFailure(exec.stdout.toString());
-  printOnFailure(exec.stderr.toString());
-  expect(exec.exitCode, 0);
+  expect(exec, const ProcessResultMatcher());
 }

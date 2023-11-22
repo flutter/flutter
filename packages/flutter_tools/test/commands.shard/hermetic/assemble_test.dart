@@ -192,7 +192,7 @@ void main() {
     ));
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
   }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
+    Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/host_release', localEngineHost: 'out/host_release'),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -291,6 +291,24 @@ void main() {
     });
   });
 
+  testUsingContext('test --dart-define-from-file option with err file format', () {
+    globals.fs.directory('config').createSync();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    ));
+
+    expect(commandRunner.run(<String>['assemble',
+      '-o Output',
+      'debug_macos_bundle_flutter_assets',
+      '--dart-define=k=v',
+      '--dart-define-from-file=config']),
+        throwsToolExit(message: 'Did not find the file passed to "--dart-define-from-file". Path: config'));
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('test --dart-define-from-file option with err json format', () async {
     await globals.fs.file('config.json').writeAsString(
         '''
@@ -317,6 +335,4 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
-
-
 }

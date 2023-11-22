@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Align smoke test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Align smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Align(
         alignment: const Alignment(0.50, 0.50),
@@ -38,7 +39,7 @@ void main() {
     );
   });
 
-  testWidgets('Align control test (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Align control test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -62,7 +63,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
-  testWidgets('Align control test (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Align control test (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
@@ -86,7 +87,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
-  testWidgets('Shrink wraps in finite space', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Shrink wraps in finite space', (WidgetTester tester) async {
     final GlobalKey alignKey = GlobalKey();
     await tester.pumpWidget(
       SingleChildScrollView(
@@ -105,14 +106,14 @@ void main() {
     expect(size.height, equals(10.0));
   });
 
-  testWidgets('Align widthFactor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Align widthFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             Align(
               widthFactor: 0.5,
               child: SizedBox(
@@ -128,14 +129,14 @@ void main() {
     expect(box.size.width, equals(50.0));
   });
 
-  testWidgets('Align heightFactor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Align heightFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const <Widget>[
+          children: <Widget>[
             Align(
               heightFactor: 0.5,
               child: SizedBox(

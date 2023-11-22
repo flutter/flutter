@@ -174,7 +174,7 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 ///    the render tree.
 ///  * [TapRegionRegistry.of], which can find the nearest ancestor
 ///    [RenderTapRegionSurface], which is a [TapRegionRegistry].
-class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior with TapRegionRegistry {
+class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implements TapRegionRegistry {
   final Expando<BoxHitTestResult> _cachedResults = Expando<BoxHitTestResult>();
   final Set<RenderTapRegion> _registeredRegions = <RenderTapRegion>{};
   final Map<Object?, Set<RenderTapRegion>> _groupIdToRegions = <Object?, Set<RenderTapRegion>>{};

@@ -41,7 +41,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, moreOrLessEquals(130, epsilon: 1.0));
+    expect(widget1TransientTopLeft.dx, moreOrLessEquals(158, epsilon: 1.0));
 
     await tester.pumpAndSettle();
 
@@ -66,7 +66,7 @@ void main() {
     expect(widget2TopLeft.dx, greaterThan(widget1InitialTopLeft.dx));
 
     // Will need to be changed if the animation curve or duration changes.
-    expect(widget1TransientTopLeft.dx, moreOrLessEquals(249, epsilon: 1.0));
+    expect(widget1TransientTopLeft.dx, moreOrLessEquals(220, epsilon: 1.0));
 
     await tester.pumpAndSettle();
 
@@ -549,7 +549,7 @@ class RtlOverrideWidgetsDelegate extends LocalizationsDelegate<WidgetsLocalizati
   bool shouldReload(LocalizationsDelegate<WidgetsLocalizations> oldDelegate) => false;
 }
 
-class RtlOverrideWidgetsLocalization implements WidgetsLocalizations {
+class RtlOverrideWidgetsLocalization extends DefaultWidgetsLocalizations {
   const RtlOverrideWidgetsLocalization();
   @override
   TextDirection get textDirection => TextDirection.rtl;

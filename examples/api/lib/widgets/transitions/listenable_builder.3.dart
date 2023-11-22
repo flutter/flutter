@@ -39,7 +39,11 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
         appBar: AppBar(title: const Text('ListenableBuilder Example')),
         body: ListBody(listNotifier: _listNotifier),
         floatingActionButton: FloatingActionButton(
+<<<<<<< HEAD
           onPressed: () => _listNotifier.add(_random.nextInt(1 << 32)), // 1 << 32 is the maximum supported value
+=======
+          onPressed: () => _listNotifier.add(_random.nextInt(1 << 31)), // 1 << 31 is the maximum supported value
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
           child: const Icon(Icons.add),
         ),
       ),

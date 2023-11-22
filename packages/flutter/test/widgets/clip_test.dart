@@ -6,12 +6,13 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'test_border.dart' show TestBorder;
 
 final List<String> log = <String>[];
@@ -58,7 +59,7 @@ class NotifyClipper<T> extends CustomClipper<T> {
 }
 
 void main() {
-  testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: ClipRect(
@@ -77,7 +78,7 @@ void main() {
     expect(find.byType(FittedBox), findsOneWidget);
   });
 
-  testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRect());
 
     final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
@@ -99,7 +100,7 @@ void main() {
     expect(clipRRect.borderRadius, equals(BorderRadius.zero));
   });
 
-  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipRRect());
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
@@ -115,7 +116,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipOval());
 
     final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
@@ -131,7 +132,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const ClipPath());
 
     final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
@@ -147,7 +148,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipPath', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipPath', (WidgetTester tester) async {
     await tester.pumpWidget(
       ClipPath(
         clipper: PathClipper(),
@@ -168,7 +169,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ClipOval', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipOval', (WidgetTester tester) async {
     await tester.pumpWidget(
       ClipOval(
         child: GestureDetector(
@@ -188,7 +189,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Transparent ClipOval hit test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Transparent ClipOval hit test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Opacity(
         opacity: 0.0,
@@ -211,7 +212,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ClipRect', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRect', (WidgetTester tester) async {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
@@ -334,7 +335,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('debugPaintSizeEnabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugPaintSizeEnabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ClipRect(
         child: Placeholder(),
@@ -356,11 +357,11 @@ void main() {
     debugPaintSizeEnabled = false;
   });
 
-  testWidgets('ClipRect painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -370,9 +371,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipRect(
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -399,7 +400,7 @@ void main() {
     );
   });
 
-  testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: Stack(
@@ -438,11 +439,11 @@ void main() {
     );
   });
 
-  testWidgets('ClipRRect painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -458,9 +459,9 @@ void main() {
                       bottomLeft: Radius.elliptical(2.5, 12.0),
                       bottomRight: Radius.elliptical(15.0, 6.0),
                     ),
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -487,11 +488,11 @@ void main() {
     );
   });
 
-  testWidgets('ClipOval painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipOval painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -501,9 +502,9 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipOval(
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -530,11 +531,11 @@ void main() {
     );
   });
 
-  testWidgets('ClipPath painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipPath painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -549,9 +550,9 @@ void main() {
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
                     ),
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.red,
-                      child: Container(
+                      child: ColoredBox(
                         color: Colors.white,
                         child: RepaintBoundary(
                           child: Center(
@@ -581,7 +582,7 @@ void main() {
   Center genPhysicalModel(Clip clipBehavior) {
     return Center(
       child: RepaintBoundary(
-        child: Container(
+        child: ColoredBox(
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
@@ -594,7 +595,7 @@ void main() {
                   borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                   color: Colors.red,
                   clipBehavior: clipBehavior,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.white,
                     child: RepaintBoundary(
                       child: Center(
@@ -615,7 +616,7 @@ void main() {
     );
   }
 
-  testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -623,7 +624,7 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -633,7 +634,7 @@ void main() {
 
   // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
   // round corners.
-  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -641,11 +642,11 @@ void main() {
     );
   });
 
-  testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default PhysicalModel painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -657,7 +658,7 @@ void main() {
                   child: PhysicalModel(
                     borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                     color: Colors.red,
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.white,
                       child: RepaintBoundary(
                         child: Center(
@@ -686,7 +687,7 @@ void main() {
   Center genPhysicalShape(Clip clipBehavior) {
     return Center(
       child: RepaintBoundary(
-        child: Container(
+        child: ColoredBox(
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
@@ -703,7 +704,7 @@ void main() {
                   ),
                   clipBehavior: clipBehavior,
                   color: Colors.red,
-                  child: Container(
+                  child: ColoredBox(
                     color: Colors.white,
                     child: RepaintBoundary(
                       child: Center(
@@ -724,7 +725,7 @@ void main() {
     );
   }
 
-  testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -732,7 +733,7 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -740,7 +741,7 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -748,11 +749,11 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PhysicalShape painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
-          child: Container(
+          child: ColoredBox(
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
@@ -768,7 +769,7 @@ void main() {
                       ),
                     ),
                     color: Colors.red,
-                    child: Container(
+                    child: ColoredBox(
                       color: Colors.white,
                       child: RepaintBoundary(
                         child: Center(
@@ -794,7 +795,7 @@ void main() {
     );
   });
 
-  testWidgets('ClipPath.shape', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipPath.shape', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
     Widget buildClipPath() {
@@ -851,8 +852,9 @@ void main() {
     ]);
   });
 
-  testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CustomClipper reclips when notified', (WidgetTester tester) async {
     final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    addTearDown(clip.dispose);
 
     await tester.pumpWidget(
       ClipRect(
@@ -884,7 +886,7 @@ void main() {
     );
   });
 
-  testWidgets('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
 
@@ -911,7 +913,7 @@ void main() {
     }
   });
 
-  testWidgets('ClipRRect is direction-aware', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ClipRRect is direction-aware', (WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
     TextDirection textDirection = TextDirection.ltr;

@@ -30,6 +30,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace "dev.flutter.flutter_api_samples"
     compileSdkVersion flutter.compileSdkVersion
 
     compileOptions {

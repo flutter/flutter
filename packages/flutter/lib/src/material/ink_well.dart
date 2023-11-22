@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -35,16 +36,14 @@ import 'theme.dart';
 /// class.
 abstract class InteractiveInkFeature extends InkFeature {
   /// Creates an InteractiveInkFeature.
-  ///
-  /// The [controller] and [referenceBox] arguments must not be null.
   InteractiveInkFeature({
     required super.controller,
     required super.referenceBox,
     required Color color,
+    ShapeBorder? customBorder,
     super.onRemoved,
-  }) : assert(controller != null),
-       assert(referenceBox != null),
-       _color = color;
+  }) : _color = color,
+       _customBorder = customBorder;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
@@ -66,6 +65,17 @@ abstract class InteractiveInkFeature extends InkFeature {
       return;
     }
     _color = value;
+    controller.markNeedsPaint();
+  }
+
+  /// The ink's optional custom border.
+  ShapeBorder? get customBorder => _customBorder;
+  ShapeBorder? _customBorder;
+  set customBorder(ShapeBorder? value) {
+    if (value == _customBorder) {
+      return;
+    }
+    _customBorder = value;
     controller.markNeedsPaint();
   }
 
@@ -111,12 +121,6 @@ abstract class InteractiveInkFeature extends InkFeature {
     BorderRadius borderRadius = BorderRadius.zero,
     RectCallback? clipCallback,
   }) {
-    assert(canvas != null);
-    assert(transform != null);
-    assert(paint != null);
-    assert(center != null);
-    assert(radius != null);
-    assert(borderRadius != null);
 
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     canvas.save();
@@ -290,9 +294,6 @@ class InkResponse extends StatelessWidget {
   /// Creates an area of a [Material] that responds to touch.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
-  ///
-  /// The [containedInkWell], [highlightShape], [enableFeedback],
-  /// and [excludeFromSemantics] arguments must not be null.
   const InkResponse({
     super.key,
     this.child,
@@ -302,6 +303,10 @@ class InkResponse extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onSecondaryTap,
+    this.onSecondaryTapUp,
+    this.onSecondaryTapDown,
+    this.onSecondaryTapCancel,
     this.onHighlightChanged,
     this.onHover,
     this.mouseCursor,
@@ -323,12 +328,8 @@ class InkResponse extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+    this.hoverDuration,
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -354,6 +355,21 @@ class InkResponse extends StatelessWidget {
 
   /// Called when the user long-presses on this part of the material.
   final GestureLongPressCallback? onLongPress;
+
+  /// Called when the user taps this part of the material with a secondary button.
+  final GestureTapCallback? onSecondaryTap;
+
+  /// Called when the user taps down on this part of the material with a
+  /// secondary button.
+  final GestureTapDownCallback? onSecondaryTapDown;
+
+  /// Called when the user releases a secondary button tap that was started on
+  /// this part of the material. [onSecondaryTap] is called immediately after.
+  final GestureTapUpCallback? onSecondaryTapUp;
+
+  /// Called when the user cancels a secondary button tap that was started on
+  /// this part of the material.
+  final GestureTapCallback? onSecondaryTapCancel;
 
   /// Called when this part of the material either becomes highlighted or stops
   /// being highlighted.
@@ -602,6 +618,11 @@ class InkResponse extends StatelessWidget {
   /// {@endtemplate}
   final MaterialStatesController? statesController;
 
+  /// The duration of the animation that animates the hover effect.
+  ///
+  /// The default is 50ms.
+  final Duration? hoverDuration;
+
   @override
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
@@ -612,6 +633,10 @@ class InkResponse extends StatelessWidget {
       onTapCancel: onTapCancel,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
+      onSecondaryTap: onSecondaryTap,
+      onSecondaryTapUp: onSecondaryTapUp,
+      onSecondaryTapDown: onSecondaryTapDown,
+      onSecondaryTapCancel: onSecondaryTapCancel,
       onHighlightChanged: onHighlightChanged,
       onHover: onHover,
       mouseCursor: mouseCursor,
@@ -636,6 +661,7 @@ class InkResponse extends StatelessWidget {
       getRectCallback: getRectCallback,
       debugCheckContext: debugCheckContext,
       statesController: statesController,
+      hoverDuration: hoverDuration,
       child: child,
     );
   }
@@ -664,6 +690,10 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onSecondaryTap,
+    this.onSecondaryTapUp,
+    this.onSecondaryTapDown,
+    this.onSecondaryTapCancel,
     this.onHighlightChanged,
     this.onHover,
     this.mouseCursor,
@@ -688,12 +718,8 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.getRectCallback,
     required this.debugCheckContext,
     this.statesController,
-  }) : assert(containedInkWell != null),
-       assert(highlightShape != null),
-       assert(enableFeedback != null),
-       assert(excludeFromSemantics != null),
-       assert(autofocus != null),
-       assert(canRequestFocus != null);
+    this.hoverDuration,
+  });
 
   final Widget? child;
   final GestureTapCallback? onTap;
@@ -702,6 +728,10 @@ class _InkResponseStateWidget extends StatefulWidget {
   final GestureTapCallback? onTapCancel;
   final GestureTapCallback? onDoubleTap;
   final GestureLongPressCallback? onLongPress;
+  final GestureTapCallback? onSecondaryTap;
+  final GestureTapUpCallback? onSecondaryTapUp;
+  final GestureTapDownCallback? onSecondaryTapDown;
+  final GestureTapCallback? onSecondaryTapCancel;
   final ValueChanged<bool>? onHighlightChanged;
   final ValueChanged<bool>? onHover;
   final MouseCursor? mouseCursor;
@@ -726,6 +756,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final _GetRectCallback? getRectCallback;
   final _CheckContext debugCheckContext;
   final MaterialStatesController? statesController;
+  final Duration? hoverDuration;
 
   @override
   _InkResponseState createState() => _InkResponseState();
@@ -740,6 +771,10 @@ class _InkResponseStateWidget extends StatefulWidget {
       if (onTapDown != null) 'tap down',
       if (onTapUp != null) 'tap up',
       if (onTapCancel != null) 'tap cancel',
+      if (onSecondaryTap != null) 'secondary tap',
+      if (onSecondaryTapUp != null) 'secondary tap up',
+      if (onSecondaryTapDown != null) 'secondary tap down',
+      if (onSecondaryTapCancel != null) 'secondary tap cancel'
     ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('mouseCursor', mouseCursor));
@@ -770,8 +805,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: simulateTap),
-    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: simulateTap),
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: activateOnIntent),
+    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: activateOnIntent),
   };
   MaterialStatesController? internalStatesController;
 
@@ -779,9 +814,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
 
+  static const Duration _activationDuration = Duration(milliseconds: 100);
+  Timer? _activationTimer;
+
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
-    assert(childState != null);
     final bool lastAnyPressed = _anyChildInkResponsePressed;
     if (value) {
       _activeChildren.add(childState);
@@ -794,6 +831,25 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
+
+  void activateOnIntent(Intent? intent) {
+    _activationTimer?.cancel();
+    _activationTimer = null;
+    _startNewSplash(context: context);
+    _currentSplash?.confirm();
+    _currentSplash = null;
+    if (widget.onTap != null) {
+      if (widget.enableFeedback) {
+        Feedback.forTap(context);
+      }
+      widget.onTap?.call();
+    }
+    // Delay the call to `updateHighlight` to simulate a pressed delay
+    // and give MaterialStatesController listeners a chance to react.
+    _activationTimer = Timer(_activationDuration, () {
+      updateHighlight(_HighlightType.pressed, value: false);
+    });
+  }
 
   void simulateTap([Intent? intent]) {
     _startNewSplash(context: context);
@@ -838,25 +894,34 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       initStatesController();
     }
-    if (widget.customBorder != oldWidget.customBorder ||
-        widget.radius != oldWidget.radius ||
-        widget.borderRadius != oldWidget.borderRadius ||
-        widget.highlightShape != oldWidget.highlightShape) {
-      final InkHighlight? hoverHighLight = _highlights[_HighlightType.hover];
-      if (hoverHighLight != null) {
-        hoverHighLight.dispose();
+    if (widget.radius != oldWidget.radius ||
+        widget.highlightShape != oldWidget.highlightShape ||
+        widget.borderRadius != oldWidget.borderRadius) {
+      final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
+      if (hoverHighlight != null) {
+        hoverHighlight.dispose();
         updateHighlight(_HighlightType.hover, value: _hovering, callOnHover: false);
       }
-      final InkHighlight? focusHighLight = _highlights[_HighlightType.focus];
-      if (focusHighLight != null) {
-        focusHighLight.dispose();
+      final InkHighlight? focusHighlight = _highlights[_HighlightType.focus];
+      if (focusHighlight != null) {
+        focusHighlight.dispose();
         // Do not call updateFocusHighlights() here because it is called below
       }
+    }
+    if (widget.customBorder != oldWidget.customBorder) {
+      _updateHighlightsAndSplashes();
     }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
       if (!enabled) {
         statesController.update(MaterialState.pressed, false);
+        // Remove the existing hover highlight immediately when enabled is false.
+        // Do not rely on updateHighlight or InkHighlight.deactivate to not break
+        // the expected lifecycle which is updating _hovering when the mouse exit.
+        // Manually updating _hovering here or calling InkHighlight.deactivate
+        // will lead to onHover not being called or call when it is not allowed.
+        final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
+        hoverHighlight?.dispose();
       }
       // Don't call widget.onHover because many widgets, including the button
       // widgets, apply setState to an ancestor context from onHover.
@@ -870,6 +935,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     FocusManager.instance.removeHighlightModeListener(handleFocusHighlightModeChange);
     statesController.removeListener(handleStatesControllerChange);
     internalStatesController?.dispose();
+    _activationTimer?.cancel();
+    _activationTimer = null;
     super.dispose();
   }
 
@@ -882,7 +949,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         return const Duration(milliseconds: 200);
       case _HighlightType.hover:
       case _HighlightType.focus:
-        return const Duration(milliseconds: 50);
+        return widget.hoverDuration ?? const Duration(milliseconds: 50);
     }
   }
 
@@ -897,12 +964,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (type) {
       case _HighlightType.pressed:
         statesController.update(MaterialState.pressed, value);
-        break;
       case _HighlightType.hover:
         if (callOnHover) {
           statesController.update(MaterialState.hovered, value);
         }
-        break;
       case _HighlightType.focus:
         // see handleFocusUpdate()
         break;
@@ -924,20 +989,17 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           switch (type) {
             case _HighlightType.pressed:
               resolvedOverlayColor = widget.highlightColor ?? theme.highlightColor;
-              break;
             case _HighlightType.focus:
               resolvedOverlayColor = widget.focusColor ?? theme.focusColor;
-              break;
             case _HighlightType.hover:
               resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
-              break;
           }
         }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
-          color: resolvedOverlayColor,
+          color: enabled ? resolvedOverlayColor : resolvedOverlayColor.withAlpha(0),
           shape: widget.highlightShape,
           radius: widget.radius,
           borderRadius: widget.borderRadius,
@@ -959,18 +1021,32 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (type) {
       case _HighlightType.pressed:
         widget.onHighlightChanged?.call(value);
-        break;
       case _HighlightType.hover:
         if (callOnHover) {
           widget.onHover?.call(value);
         }
-        break;
       case _HighlightType.focus:
         break;
     }
   }
 
-  InteractiveInkFeature _createInkFeature(Offset globalPosition) {
+  void _updateHighlightsAndSplashes() {
+    for (final InkHighlight? highlight in _highlights.values) {
+      if (highlight != null) {
+        highlight.customBorder = widget.customBorder;
+      }
+    }
+    if (_currentSplash != null) {
+      _currentSplash!.customBorder = widget.customBorder;
+    }
+    if (_splashes != null && _splashes!.isNotEmpty) {
+      for (final InteractiveInkFeature inkFeature in _splashes!) {
+        inkFeature.customBorder = widget.customBorder;
+      }
+    }
+  }
+
+  InteractiveInkFeature _createSplash(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
@@ -1018,7 +1094,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _shouldShowFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && _hasFocus;
@@ -1032,10 +1108,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         showFocus = false;
-        break;
       case FocusHighlightMode.traditional:
         showFocus = _shouldShowFocus;
-        break;
     }
     updateHighlight(_HighlightType.focus, value: showFocus);
   }
@@ -1052,16 +1126,29 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     widget.onFocusChange?.call(hasFocus);
   }
 
-  void handleTapDown(TapDownDetails details) {
+  void handleAnyTapDown(TapDownDetails details) {
     if (_anyChildInkResponsePressed) {
       return;
     }
     _startNewSplash(details: details);
+  }
+
+  void handleTapDown(TapDownDetails details) {
+    handleAnyTapDown(details);
     widget.onTapDown?.call(details);
   }
 
   void handleTapUp(TapUpDetails details) {
     widget.onTapUp?.call(details);
+  }
+
+  void handleSecondaryTapDown(TapDownDetails details) {
+    handleAnyTapDown(details);
+    widget.onSecondaryTapDown?.call(details);
+  }
+
+  void handleSecondaryTapUp(TapUpDetails details) {
+    widget.onSecondaryTapUp?.call(details);
   }
 
   void _startNewSplash({TapDownDetails? details, BuildContext? context}) {
@@ -1076,7 +1163,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       globalPosition = details!.globalPosition;
     }
     statesController.update(MaterialState.pressed, true); // ... before creating the splash
-    final InteractiveInkFeature splash = _createInkFeature(globalPosition);
+    final InteractiveInkFeature splash = _createSplash(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes!.add(splash);
     _currentSplash?.cancel();
@@ -1122,6 +1209,20 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
+  void handleSecondaryTap() {
+    _currentSplash?.confirm();
+    _currentSplash = null;
+    updateHighlight(_HighlightType.pressed, value: false);
+    widget.onSecondaryTap?.call();
+  }
+
+  void handleSecondaryTapCancel() {
+    _currentSplash?.cancel();
+    _currentSplash = null;
+    widget.onSecondaryTapCancel?.call();
+    updateHighlight(_HighlightType.pressed, value: false);
+  }
+
   @override
   void deactivate() {
     if (_splashes != null) {
@@ -1142,10 +1243,26 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool isWidgetEnabled(_InkResponseStateWidget widget) {
-    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null || widget.onTapDown != null;
+    return _primaryButtonEnabled(widget) || _secondaryButtonEnabled(widget);
+  }
+
+  bool _primaryButtonEnabled(_InkResponseStateWidget widget) {
+    return widget.onTap != null
+      || widget.onDoubleTap != null
+      || widget.onLongPress != null
+      || widget.onTapUp != null
+      || widget.onTapDown != null;
+  }
+
+  bool _secondaryButtonEnabled(_InkResponseStateWidget widget) {
+    return widget.onSecondaryTap != null
+      || widget.onSecondaryTapUp != null
+      || widget.onSecondaryTapDown != null;
   }
 
   bool get enabled => isWidgetEnabled(widget);
+  bool get _primaryEnabled => _primaryButtonEnabled(widget);
+  bool get _secondaryEnabled => _secondaryButtonEnabled(widget);
 
   void handleMouseEnter(PointerEnterEvent event) {
     _hovering = true;
@@ -1166,7 +1283,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool get _canRequestFocus {
-    final NavigationMode mode = MediaQuery.maybeOf(context)?.navigationMode ?? NavigationMode.traditional;
+    final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
         return enabled && widget.canRequestFocus;
@@ -1222,19 +1339,26 @@ class _InkResponseState extends State<_InkResponseStateWidget>
             cursor: effectiveMouseCursor,
             onEnter: handleMouseEnter,
             onExit: handleMouseExit,
-            child: Semantics(
-              onTap: widget.excludeFromSemantics || widget.onTap == null ? null : simulateTap,
-              onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : simulateLongPress,
-              child: GestureDetector(
-                onTapDown: enabled ? handleTapDown : null,
-                onTapUp: enabled ? handleTapUp : null,
-                onTap: enabled ? handleTap : null,
-                onTapCancel: enabled ? handleTapCancel : null,
-                onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
-                onLongPress: widget.onLongPress != null ? handleLongPress : null,
-                behavior: HitTestBehavior.opaque,
-                excludeFromSemantics: true,
-                child: widget.child,
+            child: DefaultSelectionStyle.merge(
+              mouseCursor: effectiveMouseCursor,
+              child: Semantics(
+                onTap: widget.excludeFromSemantics || widget.onTap == null ? null : simulateTap,
+                onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : simulateLongPress,
+                child: GestureDetector(
+                  onTapDown: _primaryEnabled ? handleTapDown : null,
+                  onTapUp: _primaryEnabled ? handleTapUp : null,
+                  onTap: _primaryEnabled ? handleTap : null,
+                  onTapCancel: _primaryEnabled ? handleTapCancel : null,
+                  onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
+                  onLongPress: widget.onLongPress != null ? handleLongPress : null,
+                  onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
+                  onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp: null,
+                  onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
+                  onSecondaryTapCancel: _secondaryEnabled ? handleSecondaryTapCancel : null,
+                  behavior: HitTestBehavior.opaque,
+                  excludeFromSemantics: true,
+                  child: widget.child,
+                ),
               ),
             ),
           ),
@@ -1326,9 +1450,6 @@ class InkWell extends InkResponse {
   /// Creates an ink well.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
-  ///
-  /// The [enableFeedback], and [excludeFromSemantics] arguments
-  /// must not be null.
   const InkWell({
     super.key,
     super.child,
@@ -1338,6 +1459,10 @@ class InkWell extends InkResponse {
     super.onTapDown,
     super.onTapUp,
     super.onTapCancel,
+    super.onSecondaryTap,
+    super.onSecondaryTapUp,
+    super.onSecondaryTapDown,
+    super.onSecondaryTapCancel,
     super.onHighlightChanged,
     super.onHover,
     super.mouseCursor,
@@ -1357,6 +1482,7 @@ class InkWell extends InkResponse {
     super.onFocusChange,
     super.autofocus,
     super.statesController,
+    super.hoverDuration,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,

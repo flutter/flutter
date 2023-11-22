@@ -5,11 +5,19 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 import 'semantics_tester.dart';
 
 void main() {
+<<<<<<< HEAD
   testWidgets('Semantics can merge sibling group', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Semantics can merge sibling group', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final SemanticsTester semantics = SemanticsTester(tester);
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
@@ -74,7 +82,11 @@ void main() {
     semantics.dispose();
   });
 
+<<<<<<< HEAD
   testWidgets('Semantics can drop semantics config', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Semantics can drop semantics config', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final SemanticsTester semantics = SemanticsTester(tester);
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
@@ -132,7 +144,11 @@ void main() {
     semantics.dispose();
   });
 
+<<<<<<< HEAD
   testWidgets('Semantics throws when mark the same config twice case 1', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Semantics throws when mark the same config twice case 1', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
     const SemanticsTag third = SemanticsTag('3');
@@ -178,7 +194,11 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
+<<<<<<< HEAD
   testWidgets('Semantics throws when mark the same config twice case 2', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Semantics throws when mark the same config twice case 2', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
     const SemanticsTag third = SemanticsTag('3');
@@ -224,7 +244,11 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
+<<<<<<< HEAD
   testWidgets('RenderObject with semantics child delegate will mark correct boundary dirty', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('RenderObject with semantics child delegate will mark correct boundary dirty', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final UniqueKey inner = UniqueKey();
     final UniqueKey boundaryParent = UniqueKey();
     final UniqueKey grandBoundaryParent = UniqueKey();

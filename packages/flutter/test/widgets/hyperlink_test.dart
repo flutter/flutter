@@ -5,9 +5,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Can tap a hyperlink', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can tap a hyperlink', (WidgetTester tester) async {
     bool didTapLeft = false;
     final TapGestureRecognizer tapLeft = TapGestureRecognizer()
       ..onTap = () {

@@ -5,9 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder parent size', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     final Key childKey = UniqueKey();
     final Key parentKey = UniqueKey();
@@ -38,7 +39,7 @@ void main() {
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
-  testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey1 = UniqueKey();
@@ -88,7 +89,7 @@ void main() {
     expect(childSliver2.geometry, parentSliver2.geometry);
   });
 
-  testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder stateful child', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -134,7 +135,7 @@ void main() {
     expect(childBox.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgets('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
     late StateSetter setState;
     double childWidth = 10.0;
     double childHeight = 20.0;
@@ -203,7 +204,7 @@ void main() {
     expect(parentSliver.geometry!.paintExtent, 600);
   });
 
-  testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder stateful parent', (WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -247,7 +248,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -270,7 +271,7 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -294,7 +295,7 @@ void main() {
     expect(built, 2);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,
@@ -325,7 +326,7 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
     (WidgetTester tester) async {
       int built = 0;
@@ -360,7 +361,7 @@ void main() {
     },
   );
 
-  testWidgets('nested SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('nested SliverLayoutBuilder', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey = UniqueKey();
@@ -405,10 +406,11 @@ void main() {
     expect(parentSliver1.geometry, parentSliver2.geometry);
   });
 
-  testWidgets('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
     final Key childKey1 = UniqueKey();
     final Key childKey2 = UniqueKey();
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -461,8 +463,9 @@ void main() {
     );
   });
 
-  testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     List<int> hitCounts = <int> [0, 0, 0];
 
     await tester.pumpWidget(
@@ -589,7 +592,7 @@ void main() {
     expect(hitCounts, const <int> [0, 0, 0]);
   });
 
-  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
     int builderInvocationCount = 0;
 
     Future<void> pumpTestWidget(Size size) async {
@@ -665,7 +668,7 @@ void main() {
     expect(spy.performResizeCount, 2);
   });
 
-  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
     Size? childSize;
     int buildCount = 0;
 

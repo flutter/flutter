@@ -132,6 +132,15 @@ class LinearBorderEdge {
 ///
 /// Convenience constructors are included for the common case where just one edge is specified:
 /// [LinearBorder.start], [LinearBorder.end], [LinearBorder.top], [LinearBorder.bottom].
+<<<<<<< HEAD
+=======
+///
+/// {@tool dartpad}
+/// This example shows how to draw different kinds of [LinearBorder]s.
+///
+/// ** See code in examples/api/lib/painting/linear_border/linear_border.0.dart **
+/// {@end-tool}
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 class LinearBorder extends OutlinedBorder {
   /// Creates a rectangular box border that's rendered as zero to four lines.
   const LinearBorder({

@@ -145,6 +145,7 @@
   "keyboardKeySelect": "Select",
   "keyboardKeyShift": "Shift",
   "keyboardKeySpace": "Space",
+<<<<<<< HEAD
   "expansionTileExpandedHint": "double tap to collapse'",
   "expansionTileCollapsedHint": "double tap to expand",
   "expansionTileExpandedTapHint": "Collapse",
@@ -152,4 +153,17 @@
   "expandedHint": "Collapsed",
   "collapsedHint": "Expanded",
   "scanTextButtonLabel": "Scan text"
+=======
+  "expansionTileExpandedHint": "tapiwch ddwywaith i grebachu",
+  "expansionTileCollapsedHint": "tapiwch ddwywaith i ehangu",
+  "expansionTileExpandedTapHint": "Crebachu",
+  "expansionTileCollapsedTapHint": "Ehangwch am ragor o fanylion",
+  "expandedHint": "Wedi'i grebachu",
+  "collapsedHint": "Wedi'i ehangu",
+  "scanTextButtonLabel": "Sganio testun",
+  "menuDismissLabel": "Diystyru'r ddewislen",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 }

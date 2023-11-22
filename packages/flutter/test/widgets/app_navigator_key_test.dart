@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Route<void> generateRoute(RouteSettings settings) => PageRouteBuilder<void>(
   settings: settings,
@@ -13,7 +14,7 @@ Route<void> generateRoute(RouteSettings settings) => PageRouteBuilder<void>(
 );
 
 void main() {
-  testWidgets('WidgetsApp.navigatorKey', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('WidgetsApp.navigatorKey', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(WidgetsApp(
       navigatorKey: key,

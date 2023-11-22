@@ -6,8 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+<<<<<<< HEAD
 /// Flutter code sample for [SearchAnchor] that demonstrates fetching the
 /// suggestions asynchronously and debouncing the network calls.
+=======
+/// Flutter code sample for [SearchAnchor].
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 const Duration fakeAPIDuration = Duration(seconds: 1);
 const Duration debounceDuration = Duration(milliseconds: 500);

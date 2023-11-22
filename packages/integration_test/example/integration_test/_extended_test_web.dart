@@ -17,7 +17,8 @@ import 'package:integration_test/integration_test.dart';
 import 'package:integration_test_example/main.dart' as app;
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('verify text', (WidgetTester tester) async {
     // Build our app and trigger a frame.
@@ -27,7 +28,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Take a screenshot.
-    await binding.takeScreenshot('platform_name');
+    await binding.takeScreenshot(
+      'platform_name',
+      // The optional parameter 'args' can be used to pass values to the
+      // [integrationDriver.onScreenshot] handler
+      // (see test_driver/extended_integration_test.dart). For example, you
+      // could look up environment variables in this test that were passed to
+      // the run command via `--dart-define=`, and then pass the values to the
+      // [integrationDriver.onScreenshot] handler through this 'args' map.
+      <String, Object?>{
+        'someArgumentKey': 'someArgumentValue',
+      },
+    );
 
     // Verify that platform is retrieved.
     expect(
@@ -49,7 +61,20 @@ void main() {
     await tester.pumpAndSettle();
 
     // Multiple methods can take screenshots. Screenshots are taken with the
-    // same order the methods run.
-    await binding.takeScreenshot('platform_name_2');
+    // same order the methods run.  We pass an argument that can be looked up
+    // from the [onScreenshot] handler in
+    // [test_driver/extended_integration_test.dart].
+    await binding.takeScreenshot(
+      'platform_name_2',
+      // The optional parameter 'args' can be used to pass values to the
+      // [integrationDriver.onScreenshot] handler
+      // (see test_driver/extended_integration_test.dart). For example, you
+      // could look up environment variables in this test that were passed to
+      // the run command via `--dart-define=`, and then pass the values to the
+      // [integrationDriver.onScreenshot] handler through this 'args' map.
+      <String, Object?>{
+        'someArgumentKey': 'someArgumentValue',
+      },
+    );
   });
 }

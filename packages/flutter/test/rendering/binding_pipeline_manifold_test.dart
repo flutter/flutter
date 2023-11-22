@@ -13,20 +13,35 @@ void main() {
 
   tearDown(() {
     final List<PipelineOwner> children = <PipelineOwner>[];
+<<<<<<< HEAD
     RendererBinding.instance.pipelineOwner.visitChildren((PipelineOwner child) {
       children.add(child);
     });
     children.forEach(RendererBinding.instance.pipelineOwner.dropChild);
+=======
+    RendererBinding.instance.rootPipelineOwner.visitChildren((PipelineOwner child) {
+      children.add(child);
+    });
+    children.forEach(RendererBinding.instance.rootPipelineOwner.dropChild);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   });
 
   test("BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update", () {
     final PipelineOwner child = PipelineOwner();
+<<<<<<< HEAD
     RendererBinding.instance.pipelineOwner.adoptChild(child);
+=======
+    RendererBinding.instance.rootPipelineOwner.adoptChild(child);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
     final RenderObject renderObject = TestRenderObject();
     child.rootNode = renderObject;
     renderObject.scheduleInitialLayout();
+<<<<<<< HEAD
     RendererBinding.instance.pipelineOwner.flushLayout();
+=======
+    RendererBinding.instance.rootPipelineOwner.flushLayout();
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
     MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount = 0;
     renderObject.markNeedsLayout();
@@ -37,20 +52,35 @@ void main() {
     final PipelineOwner child = PipelineOwner(
       onSemanticsUpdate: (_) { },
     );
+<<<<<<< HEAD
     RendererBinding.instance.pipelineOwner.adoptChild(child);
 
     expect(child.semanticsOwner, isNull);
     expect(RendererBinding.instance.pipelineOwner.semanticsOwner, isNull);
+=======
+    RendererBinding.instance.rootPipelineOwner.adoptChild(child);
+
+    expect(child.semanticsOwner, isNull);
+    expect(RendererBinding.instance.rootPipelineOwner.semanticsOwner, isNull);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
     final SemanticsHandle handle = SemanticsBinding.instance.ensureSemantics();
 
     expect(child.semanticsOwner, isNotNull);
+<<<<<<< HEAD
     expect(RendererBinding.instance.pipelineOwner.semanticsOwner, isNotNull);
+=======
+    expect(RendererBinding.instance.rootPipelineOwner.semanticsOwner, isNotNull);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
     handle.dispose();
 
     expect(child.semanticsOwner, isNull);
+<<<<<<< HEAD
     expect(RendererBinding.instance.pipelineOwner.semanticsOwner, isNull);
+=======
+    expect(RendererBinding.instance.rootPipelineOwner.semanticsOwner, isNull);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   });
 }
 

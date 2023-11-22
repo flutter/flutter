@@ -104,6 +104,13 @@ class XCResult {
         issueDiscarder: issueDiscarders,
       ));
     }
+
+    final Object? actionsMap = resultJson['actions'];
+    if (actionsMap is Map<String, Object?>) {
+      final List<XCResultIssue> actionIssues = _parseActionIssues(actionsMap, issueDiscarders: issueDiscarders);
+      issues.addAll(actionIssues);
+    }
+
     return XCResult._(issues: issues);
   }
 
@@ -383,3 +390,84 @@ List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
   }
   return issues;
 }
+
+List<XCResultIssue> _parseActionIssues(
+  Map<String, Object?> actionsMap, {
+  required List<XCResultIssueDiscarder> issueDiscarders,
+}) {
+  // Example of json:
+  // {
+  //   "actions" : {
+  //     "_values" : [
+  //       {
+  //         "actionResult" : {
+  //           "_type" : {
+  //             "_name" : "ActionResult"
+  //           },
+  //           "issues" : {
+  //             "_type" : {
+  //               "_name" : "ResultIssueSummaries"
+  //             },
+  //             "testFailureSummaries" : {
+  //               "_type" : {
+  //                 "_name" : "Array"
+  //               },
+  //               "_values" : [
+  //                 {
+  //                   "_type" : {
+  //                     "_name" : "TestFailureIssueSummary",
+  //                     "_supertype" : {
+  //                       "_name" : "IssueSummary"
+  //                     }
+  //                   },
+  //                   "issueType" : {
+  //                     "_type" : {
+  //                       "_name" : "String"
+  //                     },
+  //                     "_value" : "Uncategorized"
+  //                   },
+  //                   "message" : {
+  //                     "_type" : {
+  //                       "_name" : "String"
+  //                     },
+  //                     "_value" : "Unable to find a destination matching the provided destination specifier:\n\t\t{ id:1234D567-890C-1DA2-34E5-F6789A0123C4 }\n\n\tIneligible destinations for the \"Runner\" scheme:\n\t\t{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 17.0 is not installed. To use with Xcode, first download and install the platform }"
+  //                   }
+  //                 }
+  //               ]
+  //             }
+  //           }
+  //         }
+  //       }
+  //     ]
+  //   }
+  // }
+  final List<XCResultIssue> issues = <XCResultIssue>[];
+    final Object? actionsValues = actionsMap['_values'];
+    if (actionsValues is! List<Object?>) {
+      return issues;
+    }
+
+    for (final Object? actionValue in actionsValues) {
+      if (actionValue is!Map<String, Object?>) {
+        continue;
+      }
+      final Object? actionResult = actionValue['actionResult'];
+      if (actionResult is! Map<String, Object?>) {
+        continue;
+      }
+      final Object? actionResultIssues = actionResult['issues'];
+      if (actionResultIssues is! Map<String, Object?>) {
+        continue;
+      }
+      final Object? testFailureSummaries = actionResultIssues['testFailureSummaries'];
+      if (testFailureSummaries is Map<String, Object?>) {
+        issues.addAll(_parseIssuesFromIssueSummariesJson(
+          type: XCResultIssueType.error,
+          issueSummariesJson: testFailureSummaries,
+          issueDiscarder: issueDiscarders,
+        ));
+      }
+    }
+
+    return issues;
+  }

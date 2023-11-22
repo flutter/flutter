@@ -2,8 +2,7 @@
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yourcompany.integration_ui">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application

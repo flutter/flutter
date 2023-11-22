@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:channels/main.dart';
+<<<<<<< HEAD
 import 'package:flutter/gestures.dart';
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,9 +17,12 @@ String getStatus(WidgetTester tester) => tester.widget<Text>(statusField).data!;
 
 void main() {
   testWidgets('step through', (WidgetTester tester) async {
+<<<<<<< HEAD
     // TODO(goderbauer): Remove this once https://github.com/flutter/flutter/issues/116663 is diagnosed.
     debugPrintHitTestResults = true;
 
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(const TestApp());
     await tester.pumpAndSettle();
 
@@ -37,9 +43,12 @@ void main() {
       }
     }
 
+<<<<<<< HEAD
     // TODO(goderbauer): Remove this once https://github.com/flutter/flutter/issues/116663 is diagnosed.
     debugPrintHitTestResults = false;
 
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final String status = getStatus(tester);
     if (status != 'complete') {
       fail('Failed at step $step with status $status');

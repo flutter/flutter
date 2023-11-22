@@ -144,7 +144,11 @@ _flutter.loader = null;
 
       const serviceWorkerActivation = navigator.serviceWorker
         .register(url)
+<<<<<<< HEAD
         .then(this._getNewServiceWorker)
+=======
+        .then((serviceWorkerRegistration) => this._getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion))
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
         .then(this._waitForServiceWorkerActivation);
 
       // Timeout race promise
@@ -156,11 +160,16 @@ _flutter.loader = null;
     }
 
     /**
+<<<<<<< HEAD
      * Returns the latest service worker for the given `serviceWorkerRegistrationPromise`.
+=======
+     * Returns the latest service worker for the given `serviceWorkerRegistration`.
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
      *
      * This might return the current service worker, if there's no new service worker
      * awaiting to be installed/updated.
      *
+<<<<<<< HEAD
      * @param {Promise<ServiceWorkerRegistration>} serviceWorkerRegistrationPromise
      * @returns {Promise<ServiceWorker>}
      */
@@ -182,10 +191,32 @@ _flutter.loader = null;
       } else {
         console.debug("Loading from existing service worker.");
         return reg.active;
+=======
+     * @param {ServiceWorkerRegistration} serviceWorkerRegistration
+     * @param {String} serviceWorkerVersion
+     * @returns {Promise<ServiceWorker>}
+     */
+    async _getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion) {
+      if (!serviceWorkerRegistration.active && (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting)) {
+        // No active web worker and we have installed or are installing
+        // one for the first time. Simply wait for it to activate.
+        console.debug("Installing/Activating first service worker.");
+        return serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting;
+      } else if (!serviceWorkerRegistration.active.scriptURL.endsWith(serviceWorkerVersion)) {
+        // When the app updates the serviceWorkerVersion changes, so we
+        // need to ask the service worker to update.
+        const newRegistration = await serviceWorkerRegistration.update();
+        console.debug("Updating service worker.");
+        return newRegistration.installing || newRegistration.waiting || newRegistration.active;
+      } else {
+        console.debug("Loading from existing service worker.");
+        return serviceWorkerRegistration.active;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       }
     }
 
     /**
+<<<<<<< HEAD
      * Returns a Promise that resolves when the `latestServiceWorker` changes its
      * state to "activated".
      *
@@ -203,6 +234,21 @@ _flutter.loader = null;
         } else {
           console.debug("Service worker already active.");
           return Promise.resolve();
+=======
+     * Returns a Promise that resolves when the `serviceWorker` changes its
+     * state to "activated".
+     *
+     * @param {ServiceWorker} serviceWorker
+     * @returns {Promise<void>}
+     */
+    async _waitForServiceWorkerActivation(serviceWorker) {
+      if (!serviceWorker || serviceWorker.state == "activated") {
+        if (!serviceWorker) {
+          throw new Error("Cannot activate a null service worker!");
+        } else {
+          console.debug("Service worker already active.");
+          return;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
         }
       }
       return new Promise((resolve, _) => {

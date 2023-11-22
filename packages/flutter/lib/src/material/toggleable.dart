@@ -232,13 +232,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     switch (value) {
       case false:
         onChanged!(true);
-        break;
       case true:
         onChanged!(tristate ? null : false);
-        break;
       case null:
         onChanged!(false);
-        break;
     }
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
   }
@@ -305,7 +302,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// build method - potentially after wrapping it in other widgets.
   Widget buildToggleable({
     FocusNode? focusNode,
-    Function(bool)? onFocusChange,
+    ValueChanged<bool>? onFocusChange,
     bool autofocus = false,
     required MaterialStateProperty<MouseCursor> mouseCursor,
     required Size size,

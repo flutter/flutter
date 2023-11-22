@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcresult.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -77,7 +77,7 @@ void main() {
         expect(() async => iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.usb,
+          DeviceConnectionInterface.attached,
         ), throwsA(anything));
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -100,7 +100,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.usb,
+          DeviceConnectionInterface.attached,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -123,7 +123,7 @@ void main() {
         await iMobileDevice.takeScreenshot(
           outputFile,
           '1234',
-          IOSDeviceConnectionInterface.network,
+          DeviceConnectionInterface.wireless,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
@@ -242,6 +242,44 @@ Error launching application on iPhone.''',
       expect(
         logger.errorText,
         contains(noProvisioningProfileInstruction),
+      );
+    });
+
+    testWithoutContext('fallback to stdout: Ineligible destinations', () async {
+      final Map<String, String> buildSettingsWithDevTeam = <String, String>{
+        'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
+        'DEVELOPMENT_TEAM': 'a team',
+      };
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stderr: '''
+Launching lib/main.dart on iPhone in debug mode...
+Signing iOS app for device deployment using developer identity: "iPhone Developer: test@flutter.io (1122334455)"
+Running Xcode build...                                1.3s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+               		{ id:1234D567-890C-1DA2-34E5-F6789A0123C4 }
+
+               	Ineligible destinations for the "Runner" scheme:
+               		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 17.0 is not installed. To use with Xcode, first download and install the platform }
+
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettingsWithDevTeam,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult, testUsage, logger);
+      expect(
+        logger.errorText,
+        contains(missingPlatformInstructions('iOS 17.0')),
       );
     });
 

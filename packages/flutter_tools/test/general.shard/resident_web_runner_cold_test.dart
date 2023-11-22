@@ -189,7 +189,7 @@ class FakeWebDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     return true;
@@ -197,7 +197,7 @@ class FakeWebDevice extends Fake implements Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant ApplicationPackage? package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,

@@ -2,37 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Form].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Form].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FormExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class FormExampleApp extends StatelessWidget {
+  const FormExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('Form Sample')),
+        body: const FormExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class FormExample extends StatefulWidget {
+  const FormExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<FormExample> createState() => _FormExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _FormExampleState extends State<FormExample> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override

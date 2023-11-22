@@ -12,12 +12,13 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -675,135 +676,92 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    group('findAllTargetDevices', () {
+    group('findTargetDevice', () {
       final FakeDevice device1 = FakeDevice('device1', 'device1');
       final FakeDevice device2 = FakeDevice('device2', 'device2');
-      group('when specified device id', () {
-        testUsingContext('returns device when device is found', () async {
-          testDeviceManager.specifiedDeviceId = 'device-id';
-          testDeviceManager.addDevice(device1);
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, <Device>[device1]);
-        });
 
-        testUsingContext('show error when no device found', () async {
-          testDeviceManager.specifiedDeviceId = 'device-id';
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, null);
-          expect(testLogger.statusText, contains(UserMessages().flutterNoMatchingDevice('device-id')));
-        });
-
-        testUsingContext('show error when multiple devices found', () async {
-          testDeviceManager.specifiedDeviceId = 'device-id';
-          testDeviceManager.addDevice(device1);
-          testDeviceManager.addDevice(device2);
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, null);
-          expect(testLogger.statusText, contains(UserMessages().flutterFoundSpecifiedDevices(2, 'device-id')));
-        });
+      testUsingContext('no device found', () async {
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, isNull);
       });
 
-      group('when specified all', () {
-        testUsingContext('can return one device', () async {
-          testDeviceManager.specifiedDeviceId = 'all';
-          testDeviceManager.addDevice(device1);
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, <Device>[device1]);
-        });
-
-        testUsingContext('can return multiple devices', () async {
-          testDeviceManager.specifiedDeviceId = 'all';
-          testDeviceManager.addDevice(device1);
-          testDeviceManager.addDevice(device2);
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, <Device>[device1, device2]);
-        });
-
-        testUsingContext('show error when no device found', () async {
-          testDeviceManager.specifiedDeviceId = 'all';
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, null);
-          expect(testLogger.statusText, contains(UserMessages().flutterNoDevicesFound));
-        });
+      testUsingContext('finds single device', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, device1);
       });
 
-      group('when device not specified', () {
-        testUsingContext('returns one device when only one device connected', () async {
-          testDeviceManager.addDevice(device1);
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, <Device>[device1]);
-        });
+      testUsingContext('finds multiple devices', () async {
+        testDeviceManager.addAttachedDevice(device1);
+        testDeviceManager.addAttachedDevice(device2);
+        testDeviceManager.specifiedDeviceId = 'all';
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final Device? device = await flutterCommand.findTargetDevice();
+        expect(device, isNull);
+        expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
+      });
+    });
 
-        testUsingContext('show error when no device found', () async {
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, null);
-          expect(testLogger.statusText, contains(UserMessages().flutterNoSupportedDevices));
-        });
+    group('--flavor', () {
+      late _TestDeviceManager testDeviceManager;
+      late Logger logger;
+      late FileSystem fileSystem;
 
-        testUsingContext('show error when multiple devices found and not connected to terminal', () async {
-          testDeviceManager.addDevice(device1);
-          testDeviceManager.addDevice(device2);
-          final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-          final List<Device>? devices = await flutterCommand.findAllTargetDevices();
-          expect(devices, null);
-          expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDeviceWithAllOption));
-        }, overrides: <Type, Generator>{
-          AnsiTerminal: () => FakeTerminal(stdinHasTerminal: false),
-        });
+      setUp(() {
+        logger = BufferLogger.test();
+        testDeviceManager = _TestDeviceManager(logger: logger);
+        fileSystem = MemoryFileSystem.test();
+      });
 
-        // Prompt to choose device when multiple devices found and connected to terminal
-        group('show prompt', () {
-          late FakeTerminal terminal;
-          setUp(() {
-            terminal = FakeTerminal();
-          });
+      testUsingContext("tool exits when FLUTTER_APP_FLAVOR is already set in user's environment", () async {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
 
-          testUsingContext('choose first device', () async {
-            testDeviceManager.addDevice(device1);
-            testDeviceManager.addDevice(device2);
-            terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '1');
-            final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-            final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+        final FakeDevice device = FakeDevice('name', 'id');
+        testDeviceManager.devices = <Device>[device];
+        final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
+        final CommandRunner<void> runner =  createTestCommandRunner(command);
 
-            expect(devices, <Device>[device1]);
-          }, overrides: <Type, Generator>{
-            AnsiTerminal: () => terminal,
-          });
+        expect(runner.run(<String>['run', '--no-pub', '--no-hot', '--flavor=strawberry']),
+          throwsToolExit(message: 'FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.'));
 
-          testUsingContext('choose second device', () async {
-            testDeviceManager.addDevice(device1);
-            testDeviceManager.addDevice(device2);
-            terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '2');
-            final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
-            final List<Device>? devices = await flutterCommand.findAllTargetDevices();
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Platform: () => FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_APP_FLAVOR': 'I was already set'
+          }
+        ),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
 
-            expect(devices, <Device>[device2]);
-          }, overrides: <Type, Generator>{
-            AnsiTerminal: () => terminal,
-          });
+      testUsingContext('tool exits when FLUTTER_APP_FLAVOR is set in --dart-define or --dart-define-from-file', () async {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        fileSystem.file('config.json')..createSync()..writeAsStringSync('{"FLUTTER_APP_FLAVOR": "strawberry"}');
 
-          testUsingContext('exits without choosing device', () async {
-            testDeviceManager.addDevice(device1);
-            testDeviceManager.addDevice(device2);
-            terminal.setPrompt(<String>['1', '2', 'q', 'Q'], 'q');
-            final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final FakeDevice device = FakeDevice('name', 'id');
+        testDeviceManager.devices = <Device>[device];
+        final _TestRunCommandThatOnlyValidates command = _TestRunCommandThatOnlyValidates();
+        final CommandRunner<void> runner =  createTestCommandRunner(command);
 
-            await expectLater(
-              flutterCommand.findAllTargetDevices(),
-              throwsToolExit(),
-            );
-          }, overrides: <Type, Generator>{
-            AnsiTerminal: () => terminal,
-          });
-        });
+        expect(runner.run(<String>['run', '--dart-define=FLUTTER_APP_FLAVOR=strawberry', '--no-pub', '--no-hot', '--flavor=strawberry']),
+          throwsToolExit(message: 'FLUTTER_APP_FLAVOR is used by the framework and cannot be set using --dart-define or --dart-define-from-file'));
+
+        expect(runner.run(<String>['run', '--dart-define-from-file=config.json', '--no-pub', '--no-hot', '--flavor=strawberry']),
+          throwsToolExit(message: 'FLUTTER_APP_FLAVOR is used by the framework and cannot be set using --dart-define or --dart-define-from-file'));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Platform: () => FakePlatform(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
   });
@@ -951,42 +909,30 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
 }
 
-class FakeTerminal extends Fake implements AnsiTerminal {
-  FakeTerminal({this.stdinHasTerminal = true});
+class _TestDeviceManager extends DeviceManager {
+  _TestDeviceManager({required super.logger});
+  List<Device> devices = <Device>[];
 
   @override
-  final bool stdinHasTerminal;
-
-  @override
-  bool usesTerminalUi = true;
-
-  void setPrompt(List<String> characters, String result) {
-    _nextPrompt = characters;
-    _nextResult = result;
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
   }
+}
 
-  List<String>? _nextPrompt;
-  late String _nextResult;
-
+class _TestRunCommandThatOnlyValidates extends RunCommand {
   @override
-  Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    Logger? logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
-  }) async {
-    expect(acceptedCharacters, _nextPrompt);
-    return _nextResult;
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
   }
 }

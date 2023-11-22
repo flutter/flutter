@@ -5,14 +5,15 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SystemChrome overlay style test', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -70,7 +71,7 @@ void main() {
   test('setPreferredOrientations control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -89,7 +90,7 @@ void main() {
   test('setApplicationSwitcherDescription control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -108,7 +109,7 @@ void main() {
   test('setApplicationSwitcherDescription missing plugin', () async {
     final List<ByteData?> log = <ByteData>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
       log.add(message);
       return null;
     });
@@ -120,27 +121,11 @@ void main() {
     expect(log, isNotEmpty);
   });
 
-  test('setEnabledSystemUIOverlays control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
-
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      log.add(methodCall);
-      return null;
-    });
-
-    await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
-
-    expect(log, hasLength(1));
-    expect(log.single, isMethodCall(
-      'SystemChrome.setEnabledSystemUIOverlays',
-      arguments: <String>['SystemUiOverlay.top'],
-    ));
-  });
 
   test('setEnabledSystemUIMode control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -169,7 +154,7 @@ void main() {
   test('setEnabledSystemUIMode passes correct overlays for manual configuration', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -186,7 +171,7 @@ void main() {
   test('setSystemUIChangeCallback control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });

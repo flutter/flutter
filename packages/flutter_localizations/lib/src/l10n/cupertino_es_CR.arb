@@ -1,4 +1,7 @@
 {
+  "lookUpButtonLabel": "Mirar hacia arriba",
+  "noSpellCheckReplacementsLabel": "No se encontraron reemplazos",
+  "menuDismissLabel": "Descartar menú",
   "searchTextFieldPlaceholderLabel": "Buscar",
   "tabSemanticsLabel": "Pestaña $tabIndex de $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour en punto",

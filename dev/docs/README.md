@@ -13,7 +13,16 @@ SDK.
 This site hosts Flutter's API documentation. Other documentation can be found at
 the following locations:
 
-* [flutter.dev](https://flutter.dev) (main site)
+* [flutter.dev](https://flutter.dev) (main Flutter site)
+* [Stable channel API Docs](https://api.flutter.dev)
+* [Main channel API Docs](https://master-api.flutter.dev)
+* Engine Embedder API documentation:
+  * [Android Embedder](../javadoc/index.html)
+  * [iOS Embedder](../ios-embedder/index.html)
+  * [macOS Embedder](../macos-embedder/index.html)
+  * [Linux Embedder](../linux-embedder/index.html)
+  * [Windows Embedder](../windows-embedder/index.html)
+  * [Web Embedder](dart-ui_web/dart-ui_web-library.html)
 * [Installation](https://flutter.dev/docs/get-started/install)
 * [Codelabs](https://flutter.dev/docs/codelabs)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)

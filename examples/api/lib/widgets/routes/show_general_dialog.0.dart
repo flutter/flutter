@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [showGeneralDialog].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [showGeneralDialog].
 
 void main() => runApp(const GeneralDialogApp());
 
@@ -38,8 +38,8 @@ class GeneralDialogExample extends StatelessWidget {
     );
   }
 
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  @pragma('vm:entry-point')
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (
         BuildContext context,

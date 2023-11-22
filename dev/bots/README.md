@@ -73,9 +73,8 @@ The typical cycle for editing a recipe is:
    the existing expected output to match the new output. Verify completely new test
    cases by altering the `GenTests` method of the recipe. The recipe is required
    to have 100% test coverage.
-4. Run `led get-builder 'luci.flutter.staging:BUILDER_NAME' | led edit -p 'revision="GIT_HASH"' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
-   `GIT_HASH` is the hash to build (which is important for the engine but not
-   for the framework).
+4. Run `led get-builder 'luci.flutter.staging:BUILDER_NAME' | led edit -pa git_ref='refs/pull/<PR number>/head' | led edit -pa git_url='https://github.com/flutter/<repo>' | led edit-recipe-bundle | led launch`, where `BUILDER_NAME` is the builder name (e.g. `Linux Engine`), and
+   `git_ref`/`git_url` is the ref/url of the intended changes to build.
    * If `led` fails, ensure that your `depot_tools` checkout is up to date.
 5. To submit a CL, you need a local branch first (`git checkout -b [some branch name]`).
 6. Upload the patch (`git commit`, `git cl upload`), and open the outputted URL to the CL.

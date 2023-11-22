@@ -49,9 +49,8 @@ class ElevatedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolate between two elevated button themes.
   static ElevatedButtonThemeData? lerp(ElevatedButtonThemeData? a, ElevatedButtonThemeData? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ElevatedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
@@ -92,13 +91,11 @@ class ElevatedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [ElevatedButton]s below the overall [Theme].
 class ElevatedButtonTheme extends InheritedTheme {
   /// Create a [ElevatedButtonTheme].
-  ///
-  /// The [data] parameter must not be null.
   const ElevatedButtonTheme({
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The configuration of this theme.
   final ElevatedButtonThemeData data;

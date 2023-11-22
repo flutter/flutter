@@ -27,13 +27,10 @@ import 'sliver_fixed_extent_list.dart';
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverFillViewport({
     required super.childManager,
     double viewportFraction = 1.0,
-  }) : assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
+  }) : assert(viewportFraction > 0.0),
        _viewportFraction = viewportFraction;
 
   @override
@@ -47,7 +44,6 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
-    assert(value != null);
     if (_viewportFraction == value) {
       return;
     }
@@ -146,10 +142,8 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
-          break;
         case Axis.vertical:
           childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
-          break;
       }
 
       // If the childExtent is greater than the computed extent, we want to use
@@ -223,10 +217,8 @@ class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapte
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child!.getMaxIntrinsicWidth(constraints.crossAxisExtent);
-          break;
         case Axis.vertical:
           childExtent = child!.getMaxIntrinsicHeight(constraints.crossAxisExtent);
-          break;
       }
 
       // If the childExtent is greater than the computed extent, we want to use

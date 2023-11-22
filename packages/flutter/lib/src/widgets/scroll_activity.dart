@@ -63,6 +63,8 @@ abstract class ScrollActivity {
   ScrollActivityDelegate get delegate => _delegate;
   ScrollActivityDelegate _delegate;
 
+  bool _isDisposed = false;
+
   /// Updates the activity's link to the [ScrollActivityDelegate].
   ///
   /// This should only be called when an activity is being moved from a defunct
@@ -134,7 +136,9 @@ abstract class ScrollActivity {
 
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    _isDisposed = true;
+  }
 
   @override
   String toString() => describeIdentity(this);
@@ -226,17 +230,13 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 class ScrollDragController implements Drag {
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
-  ///
-  /// The [delegate] and `details` arguments must not be null.
   ScrollDragController({
     required ScrollActivityDelegate delegate,
     required DragStartDetails details,
     this.onDragCanceled,
     this.carriedVelocity,
     this.motionStartDistanceThreshold,
-  }) : assert(delegate != null),
-       assert(details != null),
-       assert(
+  }) : assert(
          motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
          'motionStartDistanceThreshold must be a positive number or null',
        ),
@@ -406,7 +406,7 @@ class ScrollDragController implements Drag {
       // substantially lower than the carried momentum.
       final bool isVelocityNotSubstantiallyLessThanCarriedMomentum =
         velocity.abs() > carriedVelocity!.abs() * momentumRetainVelocityThresholdFactor;
-      if(isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
+      if (isFlingingInSameDirection && isVelocityNotSubstantiallyLessThanCarriedMomentum) {
         velocity += carriedVelocity!;
       }
     }
@@ -523,8 +523,6 @@ class DragScrollActivity extends ScrollActivity {
 ///    animation parameters.
 class BallisticScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on a [simulation].
-  ///
-  /// The [delegate], [simulation], and [vsync] arguments must not be null.
   BallisticScrollActivity(
     super.delegate,
     Simulation simulation,
@@ -537,7 +535,7 @@ class BallisticScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateWith(simulation)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late AnimationController _controller;
@@ -571,7 +569,11 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(0.0);
+    // Check if the activity was disposed before going ballistic because _end might be called
+    // if _controller is disposed just after completion.
+    if (!_isDisposed) {
+      delegate.goBallistic(0.0);
+    }
   }
 
   @override
@@ -612,8 +614,6 @@ class BallisticScrollActivity extends ScrollActivity {
 class DrivenScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on animation
   /// parameters.
-  ///
-  /// All of the parameters must be non-null.
   DrivenScrollActivity(
     super.delegate, {
     required double from,
@@ -621,11 +621,7 @@ class DrivenScrollActivity extends ScrollActivity {
     required Duration duration,
     required Curve curve,
     required TickerProvider vsync,
-  }) : assert(from != null),
-       assert(to != null),
-       assert(duration != null),
-       assert(duration > Duration.zero),
-       assert(curve != null) {
+  }) : assert(duration > Duration.zero) {
     _completer = Completer<void>();
     _controller = AnimationController.unbounded(
       value: from,
@@ -634,7 +630,7 @@ class DrivenScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateTo(to, duration: duration, curve: curve)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late final Completer<void> _completer;
@@ -654,7 +650,11 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(velocity);
+    // Check if the activity was disposed before going ballistic because _end might be called
+    // if _controller is disposed just after completion.
+    if (!_isDisposed) {
+      delegate.goBallistic(velocity);
+    }
   }
 
   @override

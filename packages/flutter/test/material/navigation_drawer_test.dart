@@ -4,14 +4,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Navigation drawer updates destinations when tapped',
+  testWidgetsWithLeakTracking('Navigation drawer updates destinations when tapped',
       (WidgetTester tester) async {
     int mutatedIndex = -1;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
-    widgetSetup(tester, 3000, windowHeight: 3000);
+    widgetSetup(tester, 3000, viewHeight: 3000);
     final Widget widget = _buildWidget(
       scaffoldKey,
       NavigationDrawer(
@@ -23,7 +24,7 @@ void main() {
           ),
           NavigationDrawerDestination(
             icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-            label: Text('Alarm',style: theme.textTheme.bodySmall),
+            label: Text('Alarm', style: theme.textTheme.bodySmall),
           ),
         ],
         onDestinationSelected: (int i) {
@@ -49,7 +50,7 @@ void main() {
     expect(mutatedIndex, 0);
   });
 
-  testWidgets('NavigationDrawer can update background color',
+  testWidgetsWithLeakTracking('NavigationDrawer can update background color',
       (WidgetTester tester) async {
     const Color color = Colors.yellow;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -68,7 +69,7 @@ void main() {
             ),
             NavigationDrawerDestination(
               icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm',style: theme.textTheme.bodySmall),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
             ),
           ],
           onDestinationSelected: (int i) {},
@@ -82,7 +83,7 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-  testWidgets('NavigationDrawer can update elevation',
+  testWidgetsWithLeakTracking('NavigationDrawer can update elevation',
       (WidgetTester tester) async {
     const double elevation = 42.0;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -97,7 +98,7 @@ void main() {
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-          label: Text('Alarm',style: theme.textTheme.bodySmall),
+          label: Text('Alarm', style: theme.textTheme.bodySmall),
         ),
       ],
     );
@@ -114,37 +115,77 @@ void main() {
     expect(_getMaterial(tester).elevation, equals(elevation));
   });
 
-  testWidgets(
-      'NavigationDrawer uses proper defaults when no parameters are given',
+  testWidgetsWithLeakTracking(
+    'NavigationDrawer uses proper defaults when no parameters are given',
       (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
-    // M3 settings from the token database.
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
-        Theme(
-          data: ThemeData.light().copyWith(useMaterial3: true),
-          child: NavigationDrawer(
-            children: <Widget>[
-              Text('Headline', style: theme.textTheme.bodyLarge),
+        NavigationDrawer(
+          children: <Widget>[
+            Text('Headline', style: theme.textTheme.bodyLarge),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.ac_unit),
+              label: Text('AC'),
+            ),
+            const NavigationDrawerDestination(
+              icon: Icon(Icons.access_alarm),
+              label: Text('Alarm'),
+            ),
+          ],
+          onDestinationSelected: (int i) {},
+        ),
+        useMaterial3: theme.useMaterial3,
+      ),
+    );
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Test drawer Material.
+    expect(_getMaterial(tester).color, theme.colorScheme.surface);
+    expect(_getMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(_getMaterial(tester).shadowColor, Colors.transparent);
+    expect(_getMaterial(tester).elevation, 1);
+    // Test indicator decoration.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+    // Test selected and unselected icon colors.
+    expect(_iconStyle(tester, Icons.ac_unit)?.color, theme.colorScheme.onSecondaryContainer);
+    expect(_iconStyle(tester, Icons.access_alarm)?.color, theme.colorScheme.onSurfaceVariant);
+    // Test selected and unselected label colors.
+    expect(_labelStyle(tester, 'AC')?.color, theme.colorScheme.onSecondaryContainer);
+    expect(_labelStyle(tester, 'Alarm')?.color, theme.colorScheme.onSurfaceVariant);
+    // Test that the icon and label are the correct size.
+    RenderBox iconBox = tester.renderObject(find.byIcon(Icons.ac_unit));
+    expect(iconBox.size, const Size(24.0, 24.0));
+    iconBox = tester.renderObject(find.byIcon(Icons.access_alarm));
+    expect(iconBox.size, const Size(24.0, 24.0));
+  });
+
+  testWidgetsWithLeakTracking('Navigation drawer is scrollable', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 500, viewHeight: 300);
+    await tester.pumpWidget(
+      _buildWidget(
+        scaffoldKey,
+        NavigationDrawer(
+          children: <Widget>[
+            for (int i = 0; i < 100; i++)
               NavigationDrawerDestination(
-                icon: Icon(Icons.ac_unit, color: theme.iconTheme.color),
-                label: Text('AC', style: theme.textTheme.bodySmall),
+                icon: const Icon(Icons.ac_unit),
+                label: Text('Label$i'),
               ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-                label: Text('Alarm',style: theme.textTheme.bodySmall),
-              ),
-            ],
-            onDestinationSelected: (int i) {},
-          ),
+          ],
+          onDestinationSelected: (int i) {},
         ),
       ),
     );
     scaffoldKey.currentState!.openDrawer();
     await tester.pump(const Duration(seconds: 1));
 
+<<<<<<< HEAD
     expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
     expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 1);
@@ -183,6 +224,18 @@ void main() {
     expect(find.text('Label7'), findsNothing);
     expect(find.text('Label8'), findsNothing);
 
+=======
+    expect(find.text('Label0'), findsOneWidget);
+    expect(find.text('Label1'), findsOneWidget);
+    expect(find.text('Label2'), findsOneWidget);
+    expect(find.text('Label3'), findsOneWidget);
+    expect(find.text('Label4'), findsOneWidget);
+    expect(find.text('Label5'), findsOneWidget);
+    expect(find.text('Label6'), findsNothing);
+    expect(find.text('Label7'), findsNothing);
+    expect(find.text('Label8'), findsNothing);
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.dragFrom(const Offset(0, 200), const Offset(0.0, -200));
     await tester.pump();
 
@@ -199,10 +252,17 @@ void main() {
     expect(find.text('Label10'), findsNothing);
    });
 
+<<<<<<< HEAD
   testWidgets('Safe Area test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const double windowHeight = 300;
     widgetSetup(tester, 500, windowHeight: windowHeight);
+=======
+  testWidgetsWithLeakTracking('Safe Area test', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const double viewHeight = 300;
+    widgetSetup(tester, 500, viewHeight: viewHeight);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -213,7 +273,11 @@ void main() {
             key: scaffoldKey,
             drawer: NavigationDrawer(
                   children: <Widget>[
+<<<<<<< HEAD
                     for(int i = 0; i < 10; i++)
+=======
+                    for (int i = 0; i < 10; i++)
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
                       NavigationDrawerDestination(
                         icon: const Icon(Icons.ac_unit),
                         label: Text('Label$i'),
@@ -237,10 +301,17 @@ void main() {
     );
 
     // No Safe area padding at the bottom.
+<<<<<<< HEAD
     expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, windowHeight);
    });
 
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
+=======
+    expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, viewHeight);
+   });
+
+  testWidgetsWithLeakTracking('Navigation drawer semantics', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
     Widget widget({int selectedIndex = 0}) {
@@ -256,7 +327,7 @@ void main() {
             ),
             NavigationDrawerDestination(
               icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm',style: theme.textTheme.bodySmall),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
             ),
           ],
         ),
@@ -309,11 +380,136 @@ void main() {
       ),
     );
   });
+
+  testWidgetsWithLeakTracking('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = RoundedRectangleBorder();
+
+    Widget buildNavigationDrawer({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: NavigationDrawer(
+            indicatorColor: indicatorColor,
+            indicatorShape: indicatorShape,
+            children: <Widget>[
+              Text('Headline', style: theme.textTheme.bodyLarge),
+              const NavigationDrawerDestination(
+                icon: Icon(Icons.ac_unit),
+                label: Text('AC'),
+              ),
+              const NavigationDrawerDestination(
+                icon: Icon(Icons.access_alarm),
+                label: Text('Alarm'),
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+          body: Container(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationDrawer());
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+    // Test that InkWell for hover, focus and pressed use default shape.
+    expect(_getInkWell(tester)?.customBorder, const StadiumBorder());
+
+    await tester.pumpWidget(buildNavigationDrawer(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
+    // Test that InkWell for hover, focus and pressed use custom shape.
+    expect(_getInkWell(tester)?.customBorder, shape);
+  });
+
+  testWidgetsWithLeakTracking('NavigationDrawer.tilePadding defaults to EdgeInsets.symmetric(horizontal: 12.0)', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 3000, viewHeight: 3000);
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        children: const <Widget>[
+          NavigationDrawerDestination(
+            icon: Icon(Icons.ac_unit),
+            label: Text('AC'),
+          ),
+        ],
+        onDestinationSelected: (int i) {},
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState?.openDrawer();
+    await tester.pump();
+    final NavigationDrawer drawer = tester.widget(find.byType(NavigationDrawer));
+    expect(drawer.tilePadding, const EdgeInsets.symmetric(horizontal: 12.0));
+  });
+
+  testWidgetsWithLeakTracking('Destinations respect their disabled state', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    int selectedIndex = 0;
+
+    widgetSetup(tester, 800);
+
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        children: const <Widget>[
+          NavigationDrawerDestination(
+            icon: Icon(Icons.ac_unit),
+            label: Text('AC'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.access_alarm),
+            label: Text('Alarm'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.accessible),
+            label: Text('Accessible'),
+            enabled: false,
+          ),
+        ],
+        onDestinationSelected: (int i) {
+          selectedIndex = i;
+        },
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump();
+
+    expect(find.text('AC'), findsOneWidget);
+    expect(find.text('Alarm'), findsOneWidget);
+    expect(find.text('Accessible'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Alarm'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Accessible'));
+    expect(selectedIndex, 1);
+
+    tester.pumpAndSettle();
+  });
 }
 
-Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child) {
+Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, { bool? useMaterial3 }) {
   return MaterialApp(
-    theme: ThemeData.light(),
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Scaffold(
       key: scaffoldKey,
       drawer: child,
@@ -329,7 +525,14 @@ Material _getMaterial(WidgetTester tester) {
   );
 }
 
-ShapeDecoration? _indicator(WidgetTester tester) {
+InkWell? _getInkWell(WidgetTester tester) {
+  return tester.firstWidget<InkWell>(
+    find.descendant(
+        of: find.byType(NavigationDrawer), matching: find.byType(InkWell)),
+  );
+}
+
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
       .firstWidget<Container>(
         find.descendant(
@@ -340,11 +543,22 @@ ShapeDecoration? _indicator(WidgetTester tester) {
       .decoration as ShapeDecoration?;
 }
 
-void widgetSetup(WidgetTester tester, double windowWidth,
-    {double? windowHeight}) {
-  final double height = windowHeight ?? 1000;
-  tester.binding.window.devicePixelRatioTestValue = 2;
-  final double dpi = tester.binding.window.devicePixelRatio;
-  tester.binding.window.physicalSizeTestValue =
-      Size(windowWidth * dpi, height * dpi);
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
+TextStyle? _labelStyle(WidgetTester tester, String label) {
+  final RichText labelRichText = tester.widget<RichText>(
+    find.descendant(of: find.text(label), matching: find.byType(RichText)),
+  );
+  return labelRichText.text.style;
+}
+
+void widgetSetup(WidgetTester tester, double viewWidth, {double viewHeight = 1000}) {
+  tester.view.devicePixelRatio = 2;
+  final double dpi = tester.view.devicePixelRatio;
+  tester.view.physicalSize = Size(viewWidth * dpi, viewHeight * dpi);
 }

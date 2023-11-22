@@ -6,12 +6,16 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/daemon.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_devices.dart';
 
 void main() {
   late BufferLogger bufferLogger;
@@ -45,7 +49,7 @@ void main() {
       final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
         clientDaemonConnection,
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort) async =>
+        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
             fakeServerSocket,
       );
       final int result = await portForwarder.forward(100);
@@ -97,7 +101,7 @@ void main() {
           },
         ),
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort) async =>
+        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
             fakeServerSocket,
       );
       final int result = await portForwarder.forward(100);
@@ -116,7 +120,7 @@ void main() {
         clientDaemonConnection,
         deviceId: 'device_id',
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort) async =>
+        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
             fakeServerSocket,
       );
 
@@ -170,7 +174,7 @@ void main() {
           clientDaemonConnection,
           deviceId: 'device_id',
           logger: bufferLogger,
-          createSocketServer: (Logger logger, int? hostPort) async =>
+          createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
               fakeServerSocket,
         );
 
@@ -223,28 +227,94 @@ void main() {
         await pumpEventQueue();
       });
     });
+
+    testWithoutContext('disposes multiple sockets correctly', () async {
+      final FakeServerSocket fakeServerSocket = FakeServerSocket(200);
+      final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
+        clientDaemonConnection,
+        logger: bufferLogger,
+        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
+            fakeServerSocket,
+      );
+      final int result = await portForwarder.forward(100);
+      expect(result, 200);
+
+      final FakeSocket fakeSocket1 = FakeSocket();
+      final FakeSocket fakeSocket2 = FakeSocket();
+      fakeServerSocket.controller.add(fakeSocket1);
+      fakeServerSocket.controller.add(fakeSocket2);
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+      final DaemonMessage message1 = await broadcastOutput.first;
+
+      expect(message1.data['id'], isNotNull);
+      expect(message1.data['method'], 'proxy.connect');
+      expect(message1.data['params'], <String, Object?>{'port': 100});
+
+      const String id1 = 'random_id1';
+      serverDaemonConnection.sendResponse(message1.data['id']!, id1);
+
+      final DaemonMessage message2 = await broadcastOutput.first;
+
+      expect(message2.data['id'], isNotNull);
+      expect(message2.data['id'], isNot(message1.data['id']));
+      expect(message2.data['method'], 'proxy.connect');
+      expect(message2.data['params'], <String, Object?>{'port': 100});
+
+      const String id2 = 'random_id2';
+      serverDaemonConnection.sendResponse(message2.data['id']!, id2);
+
+      await pumpEventQueue();
+
+      // Closes the socket after port forwarder dispose.
+      expect(fakeSocket1.closeCalled, false);
+      expect(fakeSocket2.closeCalled, false);
+      await portForwarder.dispose();
+      expect(fakeSocket1.closeCalled, true);
+      expect(fakeSocket2.closeCalled, true);
+    });
   });
 
+  final Map<String, Object> fakeDevice = <String, Object>{
+    'name': 'device-name',
+    'id': 'device-id',
+    'category': 'mobile',
+    'platformType': 'android',
+    'platform': 'android-arm',
+    'emulator': true,
+    'ephemeral': false,
+    'sdk': 'Test SDK (1.2.3)',
+    'capabilities': <String, Object>{
+      'hotReload': true,
+      'hotRestart': true,
+      'screenshot': false,
+      'fastStart': false,
+      'flutterExit': true,
+      'hardwareRendering': true,
+      'startPaused': true,
+    },
+  };
+  final Map<String, Object> fakeDevice2 = <String, Object>{
+    'name': 'device-name2',
+    'id': 'device-id2',
+    'category': 'mobile',
+    'platformType': 'android',
+    'platform': 'android-arm',
+    'emulator': true,
+    'ephemeral': false,
+    'sdk': 'Test SDK (1.2.3)',
+    'capabilities': <String, Object>{
+      'hotReload': true,
+      'hotRestart': true,
+      'screenshot': false,
+      'fastStart': false,
+      'flutterExit': true,
+      'hardwareRendering': true,
+      'startPaused': true,
+    },
+  };
   group('ProxiedDevice', () {
-    final Map<String, Object> fakeDevice = <String, Object>{
-      'name': 'device-name',
-      'id': 'device-id',
-      'category': 'mobile',
-      'platformType': 'android',
-      'platform': 'android-arm',
-      'emulator': true,
-      'ephemeral': false,
-      'sdk': 'Test SDK (1.2.3)',
-      'capabilities': <String, Object>{
-        'hotReload': true,
-        'hotRestart': true,
-        'screenshot': false,
-        'fastStart': false,
-        'flutterExit': true,
-        'hardwareRendering': true,
-        'startPaused': true,
-      },
-    };
     testWithoutContext('calls stopApp without application package if not passed', () async {
       bufferLogger = BufferLogger.test();
       final ProxiedDevices proxiedDevices = ProxiedDevices(
@@ -257,6 +327,206 @@ void main() {
       expect(message.data['id'], isNotNull);
       expect(message.data['method'], 'device.stopApp');
       expect(message.data['params'], <String, Object?>{'deviceId': 'device-id', 'userIdentifier': 'user-id'});
+    });
+  });
+
+  group('ProxiedDevices', () {
+    testWithoutContext('devices respects the filter passed in', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final FakeDeviceDiscoveryFilter fakeFilter = FakeDeviceDiscoveryFilter();
+
+      final FakeDevice supportedDevice = FakeDevice('Device', 'supported');
+      fakeFilter.filteredDevices = <Device>[
+        supportedDevice,
+      ];
+
+      final Future<List<Device>> resultFuture = proxiedDevices.devices(filter: fakeFilter);
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.discoverDevices');
+
+      serverDaemonConnection.sendResponse(message.data['id']!, <Map<String, Object?>>[
+        fakeDevice,
+        fakeDevice2,
+      ]);
+
+      final List<Device> result = await resultFuture;
+      expect(result.length, 1);
+      expect(result.first.id, supportedDevice.id);
+
+      expect(fakeFilter.devices!.length, 2);
+      expect(fakeFilter.devices![0].id, fakeDevice['id']);
+      expect(fakeFilter.devices![1].id, fakeDevice2['id']);
+    });
+
+    testWithoutContext('publishes the devices on deviceNotifier after startPolling', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      proxiedDevices.startPolling();
+
+      final ItemListNotifier<Device>? deviceNotifier = proxiedDevices.deviceNotifier;
+      expect(deviceNotifier, isNotNull);
+
+      final List<Device> devicesAdded = <Device>[];
+      deviceNotifier!.onAdded.listen((Device device) {
+        devicesAdded.add(device);
+      });
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.discoverDevices');
+
+      serverDaemonConnection.sendResponse(message.data['id']!, <Map<String, Object?>>[
+        fakeDevice,
+        fakeDevice2,
+      ]);
+
+      await pumpEventQueue();
+
+      expect(devicesAdded.length, 2);
+      expect(devicesAdded[0].id, fakeDevice['id']);
+      expect(devicesAdded[1].id, fakeDevice2['id']);
+    });
+  });
+
+  group('ProxiedDartDevelopmentService', () {
+    testWithoutContext('forwards start and shutdown to remote', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      portForwarder.originalRemotePortReturnValue = 200;
+      portForwarder.forwardReturnValue = 400;
+      final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+      );
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+      final Future<void> startFuture = dds.startDartDevelopmentService(
+        Uri.parse('http://127.0.0.1:100/fake'),
+        disableServiceAuthCodes: true,
+        hostPort: 150,
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startDartDevelopmentService');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+        'vmServiceUri': 'http://127.0.0.1:200/fake',
+        'disableServiceAuthCodes': true,
+      });
+
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'http://127.0.0.1:300/remote');
+
+      await startFuture;
+      expect(portForwarder.receivedLocalForwardedPort, 100);
+      expect(portForwarder.forwardedDevicePort, 300);
+      expect(portForwarder.forwardedHostPort, 150);
+      expect(portForwarder.forwardedIpv6, false);
+
+      expect(dds.uri, Uri.parse('http://127.0.0.1:400/remote'));
+
+      unawaited(dds.shutdown());
+
+      final DaemonMessage shutdownMessage = await broadcastOutput.first;
+      expect(shutdownMessage.data['id'], isNotNull);
+      expect(shutdownMessage.data['method'], 'device.shutdownDartDevelopmentService');
+    });
+
+    testWithoutContext('starts a local dds if the VM service port is not a forwarded port', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      final FakeDartDevelopmentService localDds = FakeDartDevelopmentService();
+      localDds.uri = Uri.parse('http://127.0.0.1:450/local');
+      final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+        localDds: localDds,
+      );
+
+      expect(localDds.startCalled, false);
+      await dds.startDartDevelopmentService(
+        Uri.parse('http://127.0.0.1:100/fake'),
+        disableServiceAuthCodes: true,
+        hostPort: 150,
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      expect(localDds.startCalled, true);
+      expect(portForwarder.receivedLocalForwardedPort, 100);
+      expect(portForwarder.forwardedDevicePort, null);
+
+      expect(dds.uri, Uri.parse('http://127.0.0.1:450/local'));
+
+      expect(localDds.shutdownCalled, false);
+      await dds.shutdown();
+      expect(localDds.shutdownCalled, true);
+
+      await serverDaemonConnection.dispose();
+      expect(await serverDaemonConnection.incomingCommands.isEmpty, true);
+    });
+
+    testWithoutContext('starts a local dds if the remote VM does not support starting DDS', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      portForwarder.originalRemotePortReturnValue = 200;
+      final FakeDartDevelopmentService localDds = FakeDartDevelopmentService();
+      localDds.uri = Uri.parse('http://127.0.0.1:450/local');
+      final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+        localDds: localDds,
+      );
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+      final Future<void> startFuture = dds.startDartDevelopmentService(
+        Uri.parse('http://127.0.0.1:100/fake'),
+        disableServiceAuthCodes: true,
+        hostPort: 150,
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      expect(localDds.startCalled, false);
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startDartDevelopmentService');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+        'vmServiceUri': 'http://127.0.0.1:200/fake',
+        'disableServiceAuthCodes': true,
+      });
+
+      serverDaemonConnection.sendErrorResponse(startMessage.data['id']!, 'command not understood: device.startDartDevelopmentService', StackTrace.current);
+
+      await startFuture;
+      expect(localDds.startCalled, true);
+      expect(portForwarder.receivedLocalForwardedPort, 100);
+      expect(portForwarder.forwardedDevicePort, null);
+
+      expect(dds.uri, Uri.parse('http://127.0.0.1:450/local'));
+
+      expect(localDds.shutdownCalled, false);
+      await dds.shutdown();
+      expect(localDds.shutdownCalled, true);
     });
   });
 }
@@ -335,6 +605,7 @@ class FakeSocket extends Fake implements Socket {
   @override
   Future<void> close() async {
     closeCalled = true;
+    doneCompleter.complete(true);
   }
 
   @override
@@ -372,4 +643,69 @@ class FakeDaemonConnection extends Fake implements DaemonConnection {
     }
     throw Exception('"$method" request failed');
   }
+}
+
+class FakeDeviceDiscoveryFilter extends Fake implements DeviceDiscoveryFilter {
+  List<Device>? filteredDevices;
+  List<Device>? devices;
+
+  @override
+  Future<List<Device>> filterDevices(List<Device> devices) async {
+    this.devices = devices;
+    return filteredDevices!;
+  }
+}
+
+class FakeProxiedPortForwarder extends Fake implements ProxiedPortForwarder {
+  int? originalRemotePortReturnValue;
+  int? receivedLocalForwardedPort;
+
+  int? forwardReturnValue;
+  int? forwardedDevicePort;
+  int? forwardedHostPort;
+  bool? forwardedIpv6;
+
+  @override
+  int? originalRemotePort(int localForwardedPort) {
+    receivedLocalForwardedPort = localForwardedPort;
+    return originalRemotePortReturnValue;
+  }
+
+  @override
+  Future<int> forward(int devicePort, {int? hostPort, bool? ipv6}) async {
+    forwardedDevicePort = devicePort;
+    forwardedHostPort = hostPort;
+    forwardedIpv6 = ipv6;
+    return forwardReturnValue!;
+  }
+}
+
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  bool startCalled = false;
+  Uri? startUri;
+
+  bool shutdownCalled = false;
+
+  @override
+  Future<void> get done => _completer.future;
+  final Completer<void> _completer = Completer<void>();
+
+  @override
+  Uri? uri;
+
+  @override
+  Future<void> startDartDevelopmentService(
+    Uri vmServiceUri, {
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
+  }) async {
+    startCalled = true;
+    startUri = vmServiceUri;
+  }
+
+  @override
+  Future<void> shutdown() async => shutdownCalled = true;
 }

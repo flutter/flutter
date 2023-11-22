@@ -20,10 +20,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Glue the SettingsController to the MaterialApp.
     //
-    // The AnimatedBuilder Widget listens to the SettingsController for changes.
+    // The ListenableBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    return AnimatedBuilder(
-      animation: settingsController,
+    return ListenableBuilder(
+      listenable: settingsController,
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
           // Providing a restorationScopeId allows the Navigator built by the

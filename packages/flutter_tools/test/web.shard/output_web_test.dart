@@ -86,5 +86,5 @@ void main() {
     await start();
     await flutter.stop();
     expect(containsDartUriWarning, isFalse);
-  });
+  }, skip: true); // Skipping for 'https://github.com/flutter/flutter/issues/124214'
 }

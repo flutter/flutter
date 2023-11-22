@@ -5,14 +5,15 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can hit test flex children of stacks', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Container(
+        child: ColoredBox(
           color: const Color(0xFF00FF00),
           child: Stack(
             children: <Widget>[
@@ -47,11 +48,11 @@ void main() {
     expect(didReceiveTap, isTrue);
   });
 
-  testWidgets('Flexible defaults to loose', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Flexible defaults to loose', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Row(
+      const Row(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Flexible(child: SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
@@ -61,14 +62,14 @@ void main() {
     expect(box.size.width, 100.0);
   });
 
-  testWidgets("Doesn't overflow because of floating point accumulated error", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Doesn't overflow because of floating point accumulated error", (WidgetTester tester) async {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: SizedBox(
           height: 400.0,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
@@ -81,11 +82,11 @@ void main() {
       ),
     );
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: SizedBox(
           height: 199.0,
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
               Expanded(child: SizedBox()),
@@ -99,12 +100,12 @@ void main() {
     );
   });
 
-  testWidgets('Error information is printed correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Error information is printed correctly', (WidgetTester tester) async {
     // We run this twice, the first time without an error, so that the second time
     // we only get a single exception. Otherwise we'd get two, the one we want and
     // an extra one when we discover we never computed a size.
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Column(),
         ],
@@ -133,12 +134,18 @@ void main() {
     expect(message, contains('\nSee also:'));
   });
 
-  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(direction: Axis.vertical));
+  testWidgetsWithLeakTracking('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(const Flex(direction: Axis.vertical));
     final RenderFlex renderObject = tester.allRenderObjects.whereType<RenderFlex>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
 
-    await tester.pumpWidget(Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
+    await tester.pumpWidget(const Flex(direction: Axis.vertical, clipBehavior: Clip.antiAlias));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  test('Flex/Column/Row can be const-constructed', () {
+    const Flex(direction: Axis.vertical);
+    const Column();
+    const Row();
   });
 }

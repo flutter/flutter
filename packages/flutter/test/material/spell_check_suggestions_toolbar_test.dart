@@ -6,6 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 // Vertical position at which to anchor the toolbar for testing.
 const double _kAnchor = 200;
@@ -47,7 +51,11 @@ void main() {
     );
   }
 
+<<<<<<< HEAD
   testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
     await tester.pumpWidget(
       MaterialApp(
@@ -64,7 +72,11 @@ void main() {
     expect(toolbarY, equals(_kAnchor));
   });
 
+<<<<<<< HEAD
   testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor.
     const double expectedToolbarY = _kAnchor - _kTestToolbarOverlap;
 
@@ -83,7 +95,11 @@ void main() {
     expect(toolbarY, equals(expectedToolbarY));
   });
 
+<<<<<<< HEAD
   testWidgets('more than three suggestions throws an error', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('more than three suggestions throws an error', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     Future<void> pumpToolbar(List<String> suggestions) async {
       await tester.pumpWidget(
         MaterialApp(

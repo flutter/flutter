@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('WidgetsApp test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.WidgetsAppExampleApp(),
     );
 
     expect(find.text('Hello World'), findsOneWidget);

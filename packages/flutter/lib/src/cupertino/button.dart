@@ -50,8 +50,6 @@ class CupertinoButton extends StatefulWidget {
     this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       assert(disabledColor != null),
-       assert(alignment != null),
        _filled = false;
 
   /// Creates an iOS-style button with a filled background.
@@ -71,8 +69,6 @@ class CupertinoButton extends StatefulWidget {
     this.alignment = Alignment.center,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       assert(disabledColor != null),
-       assert(alignment != null),
        color = null,
        _filled = true;
 
@@ -99,7 +95,7 @@ class CupertinoButton extends StatefulWidget {
   /// Ignored if the [CupertinoButton] doesn't also have a [color].
   ///
   /// Defaults to [CupertinoColors.quaternarySystemFill] when [color] is
-  /// specified. Must not be null.
+  /// specified.
   final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.

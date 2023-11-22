@@ -88,9 +88,9 @@ Future<void> main() async {
         section('Flutter run (mode: $mode)');
         late Process run;
         await inDirectory(path.join(tempDir.path, 'app'), () async {
-          run = await startProcess(
-            path.join(flutterDirectory.path, 'bin', 'flutter'),
-            flutterCommandArgs('run', <String>['--$mode', '--verbose']),
+          run = await startFlutter(
+            'run',
+            options: <String>['--$mode', '--verbose'],
           );
         });
 

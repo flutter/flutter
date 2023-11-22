@@ -136,7 +136,11 @@ class GridBuilder extends StatefulWidget {
   });
 
   final bool isSelectionMode;
+<<<<<<< HEAD
   final Function(bool)? onSelectionChange;
+=======
+  final ValueChanged<bool>? onSelectionChange;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   final List<bool> selectedList;
 
   @override
@@ -189,7 +193,11 @@ class ListBuilder extends StatefulWidget {
 
   final bool isSelectionMode;
   final List<bool> selectedList;
+<<<<<<< HEAD
   final Function(bool)? onSelectionChange;
+=======
+  final ValueChanged<bool>? onSelectionChange;
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
   @override
   State<ListBuilder> createState() => _ListBuilderState();

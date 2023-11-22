@@ -4,8 +4,12 @@
 
 import 'package:flutter/material.dart';
 
+<<<<<<< HEAD
 /// Flutter code sample for [SearchAnchor] that shows how to fetch the suggestions
 /// from a remote API.
+=======
+/// Flutter code sample for [SearchAnchor].
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 const Duration fakeAPIDuration = Duration(seconds: 1);
 
@@ -60,7 +64,11 @@ class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor > {
           final List<String> options = (await _FakeAPI.search(_searchingWithQuery!)).toList();
 
           // If another search happened after this one, throw away these options.
+<<<<<<< HEAD
           // Use the previous options intead and wait for the newer request to
+=======
+          // Use the previous options instead and wait for the newer request to
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
           // finish.
           if (_searchingWithQuery != controller.text) {
             return _lastOptions;

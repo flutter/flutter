@@ -2,10 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+<<<<<<< HEAD
+=======
+import 'dart:convert';
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestAssetBundle extends AssetBundle {
+<<<<<<< HEAD
   @override
   Future<ByteData> load(String key) async {
     if (key == 'AssetManifest.bin') {
@@ -30,6 +36,48 @@ class TestAssetBundle extends AssetBundle {
       return data;
     }
 
+=======
+  static const Map<String, List<Object>> _binManifestData = <String, List<Object>>{
+    'assets/foo.png': <Object>[
+      <String, Object>{
+        'asset': 'assets/foo.png',
+      },
+      <String, Object>{
+        'asset': 'assets/2x/foo.png',
+        'dpr': 2.0
+      },
+    ],
+    'assets/bar.png': <Object>[
+      <String, Object>{
+        'asset': 'assets/bar.png',
+      },
+    ],
+  };
+
+  @override
+  Future<ByteData> load(String key) async {
+    if (key == 'AssetManifest.bin') {
+      final ByteData data = const StandardMessageCodec().encodeMessage(_binManifestData)!;
+      return data;
+    }
+
+    if (key == 'AssetManifest.bin.json') {
+      // Encode the manifest data that will be used by the app
+      final ByteData data = const StandardMessageCodec().encodeMessage(_binManifestData)!;
+      // Simulate the behavior of NetworkAssetBundle.load here, for web tests
+      return ByteData.sublistView(
+        utf8.encode(
+          json.encode(
+            base64.encode(
+              // Encode only the actual bytes of the buffer, and no more...
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)
+            )
+          )
+        )
+      );
+    }
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     throw ArgumentError('Unexpected key');
   }
 

@@ -13,6 +13,14 @@
   - '**/animation/*'
   - '**/*animation*'
 
+<<<<<<< HEAD
+=======
+'a: desktop':
+  - '**/linux/**/*'
+  - '**/macos/**/*'
+  - '**/windows/**/*'
+
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 'a: internationalization':
   - packages/flutter_localizations/**/*
 
@@ -72,6 +80,10 @@ framework:
   - packages/flutter_goldens_client/**/*
   - packages/flutter_test/**/*
   - packages/integration_test/**/*
+<<<<<<< HEAD
+=======
+  - examples/api/**/*
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 'f: integration_test':
   - packages/integration_test/**/*
@@ -79,6 +91,7 @@ framework:
 platform-ios:
   - packages/flutter_tools/lib/src/ios/**/*
 
+<<<<<<< HEAD
 team:
   - '**/pubspec.yaml'
   - '**/fix_data.yaml'
@@ -94,6 +107,12 @@ team:
   - examples/flutter_gallery/**/*
 
 tech-debt:
+=======
+'customer: gallery':
+  - examples/flutter_gallery/**/*
+
+'c: tech-debt':
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   - '**/fix_data.yaml'
   - '**/*.expect'
   - '**/*test_fixes*'

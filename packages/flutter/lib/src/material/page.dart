@@ -20,6 +20,9 @@ import 'theme.dart';
 /// fullscreen modal dialog. On iOS, those routes animate from the bottom to the
 /// top rather than horizontally.
 ///
+/// If `barrierDismissible` is true, then pressing the escape key on the keyboard
+/// will cause the current route to be popped with null as the value.
+///
 /// The type `T` specifies the return type of the route which can be supplied as
 /// the route is popped from the stack via [Navigator.pop] by providing the
 /// optional `result` argument.
@@ -31,18 +34,14 @@ import 'theme.dart';
 ///  * [MaterialPage], which is a [Page] of this class.
 class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
-  ///
-  /// The values of [builder], [maintainState], and [PageRoute.fullscreenDialog]
-  /// must not be null.
   MaterialPageRoute({
     required this.builder,
     super.settings,
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
-  }) : assert(builder != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null) {
+    super.barrierDismissible = false,
+  }) {
     assert(opaque);
   }
 
@@ -109,15 +108,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     final Widget result = buildContent(context);
-    assert(() {
-      if (result == null) {
-        throw FlutterError(
-          'The builder for route "${settings.name}" returned null.\n'
-          'Route builders must never return null.',
-        );
-      }
-      return true;
-    }());
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
@@ -163,9 +153,7 @@ class MaterialPage<T> extends Page<T> {
     super.name,
     super.arguments,
     super.restorationId,
-  }) : assert(child != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null);
+  });
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
@@ -193,8 +181,7 @@ class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTran
   _PageBasedMaterialPageRoute({
     required MaterialPage<T> page,
     super.allowSnapshotting,
-  }) : assert(page != null),
-       super(settings: page) {
+  }) : super(settings: page) {
     assert(opaque);
   }
 

@@ -235,4 +235,14 @@ void main() {
   scrollBehavior.buildViewportChrome(context, child, axisDirection);
   final CupertinoScrollBehavior cupertinoScrollBehavior = CupertinoScrollBehavior();
   cupertinoScrollBehavior.buildViewportChrome(context, child, axisDirection);
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOverride(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/122555
+  final ScrollableDetails details = ScrollableDetails(
+    direction: AxisDirection.down,
+    clipBehavior: Clip.none,
+  );
+  final Clip clip = details.clipBehavior;
 }

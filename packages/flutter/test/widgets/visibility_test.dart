@@ -5,8 +5,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
@@ -30,7 +30,7 @@ class _TestStateState extends State<TestState> {
 }
 
 void main() {
-  testWidgets('Visibility', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Visibility', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<String> log = <String>[];
 
@@ -54,6 +54,20 @@ void main() {
             label: 'a true',
             textDirection: TextDirection.rtl,
             actions: <SemanticsAction>[SemanticsAction.tap],
+          ),
+        ],
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    );
+
+    final Matcher expectedSemanticsWhenPresentWithIgnorePointer = hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            label: 'a true',
+            textDirection: TextDirection.rtl,
           ),
         ],
       ),
@@ -218,10 +232,10 @@ void main() {
     expect(find.byType(Placeholder), findsNothing);
     expect(find.byType(Visibility), paintsNothing);
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
-    expect(semantics, expectedSemanticsWhenPresent);
-    expect(log, <String>['created new state']);
+    expect(semantics, expectedSemanticsWhenPresentWithIgnorePointer);
+    expect(log, <String>[]);
     await tester.tap(find.byType(Visibility), warnIfMissed: false);
-    expect(log, <String>['created new state']);
+    expect(log, <String>[]);
     log.clear();
 
     await tester.pumpWidget(Center(
@@ -426,7 +440,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Visibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Visibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Visibility(
         maintainSize: true,
@@ -442,7 +456,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
   });
 
-  testWidgets('SliverVisibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverVisibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -471,4 +485,108 @@ void main() {
     expect(tester.layers, isNot(contains(isA<OpacityLayer>())));
     expect(tester.layers.last, isA<PictureLayer>());
   });
+
+  testWidgetsWithLeakTracking('Visibility.of returns correct value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: _ShowVisibility(),
+      ),
+    );
+    expect(find.text('is visible ? true', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          maintainState: true,
+          child: _ShowVisibility(),
+        ),
+      ),
+    );
+    expect(find.text('is visible ? true', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          visible: false,
+          maintainState: true,
+          child: _ShowVisibility(),
+        ),
+      ),
+    );
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgetsWithLeakTracking('Visibility.of works when multiple Visibility widgets are in hierarchy', (WidgetTester tester) async {
+    bool didChangeDependencies = false;
+    void handleDidChangeDependencies() {
+      didChangeDependencies = true;
+    }
+
+    Widget newWidget({required bool ancestorIsVisible, required bool descendantIsVisible}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Visibility(
+          visible: ancestorIsVisible,
+          maintainState: true,
+          child: Center(
+            child: Visibility(
+              visible: descendantIsVisible,
+              maintainState: true,
+              child: _ShowVisibility(
+                onDidChangeDependencies: handleDidChangeDependencies,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: true, descendantIsVisible: true));
+    expect(didChangeDependencies, isTrue);
+    expect(find.text('is visible ? true', skipOffstage: false), findsOneWidget);
+    didChangeDependencies = false;
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: true, descendantIsVisible: false));
+    expect(didChangeDependencies, isTrue);
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+    didChangeDependencies = false;
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: true, descendantIsVisible: false));
+    expect(didChangeDependencies, isFalse);
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: false, descendantIsVisible: false));
+    expect(didChangeDependencies, isTrue);
+    didChangeDependencies = false;
+
+    await tester.pumpWidget(newWidget(ancestorIsVisible: false, descendantIsVisible: true));
+    expect(didChangeDependencies, isTrue);
+    expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
+  });
+}
+
+class _ShowVisibility extends StatefulWidget {
+  const _ShowVisibility({this.onDidChangeDependencies});
+
+  final VoidCallback? onDidChangeDependencies;
+
+  @override
+  State<_ShowVisibility> createState() => _ShowVisibilityState();
+}
+
+class _ShowVisibilityState extends State<_ShowVisibility> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.onDidChangeDependencies != null) {
+      widget.onDidChangeDependencies!();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('is visible ? ${Visibility.of(context)}');
+  }
 }

@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "Барлығын таңдау",
   "tabSemanticsLabel": "Қойынды: $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Жабу",
-  "searchTextFieldPlaceholderLabel": "Іздеу"
+  "searchTextFieldPlaceholderLabel": "Іздеу",
+  "noSpellCheckReplacementsLabel": "Ауыстыратын ешнәрсе табылмады.",
+  "menuDismissLabel": "Мәзірді жабу",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

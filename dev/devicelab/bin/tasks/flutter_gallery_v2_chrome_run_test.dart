@@ -53,9 +53,9 @@ class NewGalleryChromeRunTest {
       ]);
 
       final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
-      final Process process = await startProcess(
-        path.join(flutterDirectory.path, 'bin', 'flutter'),
-        flutterCommandArgs('run', options),
+      final Process process = await startFlutter(
+        'run',
+        options: options,
       );
 
       final Completer<void> stdoutDone = Completer<void>();

@@ -13,13 +13,13 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
 import 'build_system/targets/common.dart';
+import 'build_system/targets/scene_importer.dart';
 import 'build_system/targets/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
 import 'devfs.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
-
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
@@ -84,18 +84,12 @@ class BundleBuilder {
       }
       throwToolExit('Failed to build bundle.');
     }
-    if (depfilePath != null) {
-      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      final File outputDepfile = globals.fs.file(depfilePath);
-      if (!outputDepfile.parent.existsSync()) {
-        outputDepfile.parent.createSync(recursive: true);
-      }
-      final DepfileService depfileService = DepfileService(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-      depfileService.writeToFile(depfile, outputDepfile);
+    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final File outputDepfile = globals.fs.file(depfilePath);
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
     }
+    environment.depFileService.writeToFile(depfile, outputDepfile);
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -158,6 +152,13 @@ Future<void> writeBundle(
     artifacts: globals.artifacts!,
   );
 
+  final SceneImporter sceneImporter = SceneImporter(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts!,
+  );
+
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
@@ -188,7 +189,11 @@ Future<void> writeBundle(
                 target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
-              break;
+            case AssetKind.model:
+              doCopy = !await sceneImporter.importScene(
+                input: input,
+                outputPath: file.path,
+              );
           }
           if (doCopy) {
             input.copySync(file.path);

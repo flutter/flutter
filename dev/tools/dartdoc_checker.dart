@@ -4,9 +4,31 @@
 
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-/// Scans the dartdoc HTML output in the provided `htmlOutputPath` for
+/// Makes sure that the path we were given contains some of the expected
+/// libraries.
+@visibleForTesting
+const List<String> dartdocDirectiveCanaryLibraries = <String>[
+  'animation',
+  'cupertino',
+  'material',
+  'widgets',
+  'rendering',
+  'flutter_driver',
+];
+
+/// Makes sure that the path we were given contains some of the expected
+/// HTML files.
+@visibleForTesting
+const List<String> dartdocDirectiveCanaryFiles = <String>[
+  'Widget-class.html',
+  'Material-class.html',
+  'Canvas-class.html',
+];
+
+/// Scans the dartdoc HTML output in the provided `dartDocDir` for
 /// unresolved dartdoc directives (`{@foo x y}`).
 ///
 /// Dartdoc usually replaces those directives with other content. However,
@@ -22,27 +44,14 @@ import 'package:path/path.dart' as path;
 /// ```
 /// void foo({@required int bar});
 /// ```
-void checkForUnresolvedDirectives(String htmlOutputPath) {
-  final Directory dartDocDir = Directory(htmlOutputPath);
+void checkForUnresolvedDirectives(Directory dartDocDir) {
   if (!dartDocDir.existsSync()) {
     throw Exception('Directory with dartdoc output (${dartDocDir.path}) does not exist.');
   }
 
-  // Makes sure that the path we were given contains some of the expected
-  // libraries and HTML files.
-  final List<String> canaryLibraries = <String>[
-    'animation',
-    'cupertino',
-    'material',
-    'widgets',
-    'rendering',
-    'flutter_driver',
-  ];
-  final List<String> canaryFiles = <String>[
-    'Widget-class.html',
-    'Material-class.html',
-    'Canvas-class.html',
-  ];
+  // Make a copy since this will be mutated
+  final List<String> canaryLibraries = dartdocDirectiveCanaryLibraries.toList();
+  final List<String> canaryFiles = dartdocDirectiveCanaryFiles.toList();
 
   print('Scanning for unresolved dartdoc directives...');
 
@@ -112,5 +121,5 @@ void main(List<String> args) {
   if (!Directory(args.single).existsSync()) {
     throw Exception('The dartdoc HTML output directory ${args.single} does not exist.');
   }
-  checkForUnresolvedDirectives(args.single);
+  checkForUnresolvedDirectives(Directory(args.single));
 }

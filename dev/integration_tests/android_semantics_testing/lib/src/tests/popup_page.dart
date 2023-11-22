@@ -77,9 +77,9 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
                       return AlertDialog(
                         key: const ValueKey<String>(alertKeyValue),
                         title: const Text('Title text', key: ValueKey<String>('$alertKeyValue.Title')),
-                        content: SingleChildScrollView(
+                        content: const SingleChildScrollView(
                           child: ListBody(
-                            children: const <Widget>[
+                            children: <Widget>[
                               Text('Body text line 1.', key: ValueKey<String>('$alertKeyValue.Body1')),
                               Text('Body text line 2.', key: ValueKey<String>('$alertKeyValue.Body2')),
                             ],

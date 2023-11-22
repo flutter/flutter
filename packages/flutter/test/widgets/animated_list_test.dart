@@ -5,10 +5,11 @@
 import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgets('SliverAnimatedList.builder respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAnimatedList.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -47,7 +48,7 @@ void main() {
     expect(finderCalled, true);
   });
 
-  testWidgets('AnimatedList', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedList', (WidgetTester tester) async {
     Widget builder(BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
         height: 100.0,
@@ -96,10 +97,37 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('removing item'), findsNothing);
+
+    // Test for insertAllItems
+    listKey.currentState!.insertAllItems(0, 2);
+    await tester.pump();
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsOneWidget);
+
+    // Test for removeAllItems
+    listKey.currentState!.removeAllItems(
+      (BuildContext context, Animation<double> animation) {
+        return const SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing item')),
+        );
+      },
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing item'), findsWidgets);
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('item 2'), findsNothing);
+    expect(find.text('item 3'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('removing item'), findsNothing);
   });
 
   group('SliverAnimatedList', () {
-    testWidgets('initialItemCount', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('initialItemCount', (WidgetTester tester) async {
       final Map<int, Animation<double>> animations = <int, Animation<double>>{};
 
       await tester.pumpWidget(
@@ -132,7 +160,7 @@ void main() {
       expect(animations[1]!.value, 1.0);
     });
 
-    testWidgets('insert', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('insert', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
@@ -217,7 +245,65 @@ void main() {
       expect(itemBottom(2), 300.0);
     });
 
-    testWidgets('remove', (WidgetTester tester) async {
+    // Test for insertAllItems with SliverAnimatedList
+    testWidgetsWithLeakTracking('insertAll', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                key: listKey,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return SizeTransition(
+                    key: ValueKey<int>(index),
+                    sizeFactor: animation,
+                    child: SizedBox(
+                      height: 100.0,
+                      child: Center(child: Text('item $index')),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
+      double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+      double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+
+      listKey.currentState!.insertAllItems(
+        0,
+        2,
+        duration: const Duration(milliseconds: 100),
+      );
+      await tester.pump();
+
+      // Newly inserted item 0 & 1's height should animate from 0 to 100
+      expect(itemHeight(0), 0.0);
+      expect(itemHeight(1), 0.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemHeight(0), 50.0);
+      expect(itemHeight(1), 50.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemHeight(0), 100.0);
+      expect(itemHeight(1), 100.0);
+
+      // The list now contains two fully expanded items at the top:
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(itemTop(0), 0.0);
+      expect(itemBottom(0), 100.0);
+      expect(itemTop(1), 100.0);
+      expect(itemBottom(1), 200.0);
+    });
+
+    // Test for removeAllItems with SliverAnimatedList
+    testWidgetsWithLeakTracking('remove', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
       final List<int> items = <int>[0, 1, 2];
 
@@ -293,7 +379,58 @@ void main() {
       expect(itemBottom(2), 200.0);
     });
 
-    testWidgets('works in combination with other slivers', (WidgetTester tester) async {
+    // Test for removeAllItems with SliverAnimatedList
+    testWidgetsWithLeakTracking('removeAll', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+      final List<int> items = <int>[0, 1, 2];
+
+      Widget buildItem(BuildContext context, int item, Animation<double> animation) {
+        return SizeTransition(
+          key: ValueKey<int>(item),
+          sizeFactor: animation,
+          child: SizedBox(
+            height: 100.0,
+            child: Center(
+              child: Text('item $item', textDirection: TextDirection.ltr),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedList(
+                key: listKey,
+                initialItemCount: 3,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return buildItem(context, items[index], animation);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(find.text('item 2'), findsOneWidget);
+
+      items.clear();
+      listKey.currentState!.removeAllItems((BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
+        duration: const Duration(milliseconds: 100),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('item 0'), findsNothing);
+      expect(find.text('item 1'), findsNothing);
+      expect(find.text('item 2'), findsNothing);
+    });
+
+    testWidgetsWithLeakTracking('works in combination with other slivers', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
@@ -358,7 +495,7 @@ void main() {
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
     });
 
-    testWidgets('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
       final List<int> items = <int>[0, 1, 2, 3];
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
@@ -420,7 +557,7 @@ void main() {
     });
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'AnimatedList.of() and maybeOf called with a context that does not contain AnimatedList',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
@@ -465,7 +602,7 @@ void main() {
     },
   );
 
-  testWidgets('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
     const Clip clipBehavior = Clip.none;
 
     await tester.pumpWidget(
@@ -489,9 +626,12 @@ void main() {
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
 
-  testWidgets('AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/115040
     final ScrollController controller = ScrollController();
+
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -512,6 +652,42 @@ void main() {
     );
 
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).shrinkWrap, true);
+  });
+
+  testWidgetsWithLeakTracking('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
+    const EdgeInsets padding = EdgeInsets.all(30.0);
+    EdgeInsets? innerMediaQueryPadding;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(30.0),
+          ),
+          child: AnimatedList(
+            initialItemCount: 3,
+            itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+              innerMediaQueryPadding = MediaQuery.paddingOf(context);
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+    final Offset topLeft = tester.getTopLeft(find.byType(Placeholder).first);
+    // Automatically apply the top padding into sliver.
+    expect(topLeft, Offset(0.0, padding.top));
+
+    // Scroll to the bottom.
+    await tester.drag(find.byType(AnimatedList), const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(find.byType(Placeholder).last);
+    // Automatically apply the bottom padding into sliver.
+    expect(bottomLeft, Offset(0.0, 600.0 - padding.bottom));
+
+    // Verify that the left/right padding is not applied.
+    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
   });
 }
 

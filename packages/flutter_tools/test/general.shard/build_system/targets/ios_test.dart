@@ -31,6 +31,7 @@ const List<String> _kSharedConfig = <String>[
   '-rpath',
   '-Xlinker',
   '@loader_path/Frameworks',
+  '-fapplication-extension',
   '-install_name',
   '@rpath/App.framework/App',
   '-isysroot',
@@ -95,11 +96,19 @@ void main() {
         '-rpath',
         '-Xlinker',
         '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name',
         '@rpath/App.framework/App',
         '-isysroot',
         'path/to/iPhoneSimulator.sdk',
         '-o',
+        appFrameworkPath,
+      ]),
+      FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
         appFrameworkPath,
       ]),
       FakeCommand(command: <String>[
@@ -137,6 +146,13 @@ void main() {
             '.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc')),
         ..._kSharedConfig,
         '-o',
+        appFrameworkPath,
+      ]),
+      FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
         appFrameworkPath,
       ]),
       FakeCommand(command: <String>[
@@ -193,7 +209,14 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommand(
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
+        frameworkDirectoryBinary.path,
+      ]),
       FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -202,7 +225,7 @@ void main() {
         '--timestamp=none',
         frameworkDirectoryBinary.path,
       ]),
-    );
+    ]);
 
     await const DebugIosApplicationBundle().build(environment);
     expect(processManager, hasNoRemainingExpectations);
@@ -267,6 +290,13 @@ void main() {
         '--include=/./shader_lib',
       ]),
       FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
+        frameworkDirectoryBinary.path,
+      ]),
+      FakeCommand(command: <String>[
         'codesign',
         '--force',
         '--sign',
@@ -322,7 +352,14 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommand(
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
+        frameworkDirectoryBinary.path,
+      ]),
       FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -330,7 +367,7 @@ void main() {
         'ABC123',
         frameworkDirectoryBinary.path,
       ]),
-    );
+    ]);
 
     await const ReleaseIosApplicationBundle().build(environment);
     expect(processManager, hasNoRemainingExpectations);
@@ -370,7 +407,14 @@ void main() {
 
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-    processManager.addCommand(
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
+        frameworkDirectoryBinary.path,
+      ]),
       FakeCommand(command: <String>[
         'codesign',
         '--force',
@@ -378,7 +422,7 @@ void main() {
         '-',
         frameworkDirectoryBinary.path,
       ]),
-    );
+    ]);
 
     await const ReleaseIosApplicationBundle().build(environment);
     expect(usage.events, contains(const TestUsageEvent('assemble', 'ios-archive', label: 'success')));
@@ -465,6 +509,7 @@ void main() {
     late FakeCommand copyPhysicalFrameworkCommand;
     late FakeCommand lipoCommandNonFatResult;
     late FakeCommand lipoVerifyArm64Command;
+    late FakeCommand xattrCommand;
     late FakeCommand adHocCodesignCommand;
 
     setUp(() {
@@ -492,6 +537,14 @@ void main() {
         binary.path,
         '-verify_arch',
         'arm64',
+      ]);
+
+      xattrCommand = FakeCommand(command: <String>[
+        'xattr',
+        '-r',
+        '-d',
+        'com.apple.FinderInfo',
+        binary.path,
       ]);
 
       adHocCodesignCommand = FakeCommand(command: <String>[
@@ -537,6 +590,7 @@ void main() {
           '-verify_arch',
           'x86_64',
         ]),
+        xattrCommand,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
@@ -683,6 +737,7 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
+        xattrCommand,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
@@ -732,6 +787,7 @@ void main() {
           'armv7',
           binary.path,
         ]),
+        xattrCommand,
         adHocCodesignCommand,
       ]);
 
@@ -809,6 +865,7 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
+        xattrCommand,
         adHocCodesignCommand,
       ]);
       await const DebugUnpackIOS().build(environment);
@@ -837,6 +894,7 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
+        xattrCommand,
         FakeCommand(command: <String>[
             'codesign',
             '--force',
@@ -884,6 +942,7 @@ void main() {
         copyPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
+        xattrCommand,
         FakeCommand(command: <String>[
           'codesign',
           '--force',

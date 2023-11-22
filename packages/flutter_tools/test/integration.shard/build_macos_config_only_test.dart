@@ -36,6 +36,7 @@ void main() {
     ];
     final ProcessResult firstRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
 
+<<<<<<< HEAD
     printOnFailure('Output of flutter build macOS:');
     final String firstRunStdout = firstRunResult.stdout.toString();
     printOnFailure('First run stdout: $firstRunStdout');
@@ -43,6 +44,9 @@ void main() {
 
     expect(firstRunResult.exitCode, 0);
     expect(firstRunStdout, contains('Running pod install'));
+=======
+    expect(firstRunResult, const ProcessResultMatcher(stdoutPattern: 'Running pod install'));
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
     final File generatedConfig = fileSystem.file(fileSystem.path.join(
       workingDirectory,
@@ -73,10 +77,15 @@ void main() {
 
     // Run again with no changes.
     final ProcessResult secondRunResult = await processManager.run(buildCommand, workingDirectory: workingDirectory);
+<<<<<<< HEAD
     final String secondRunStdout = secondRunResult.stdout.toString();
     printOnFailure('Second run stdout: $secondRunStdout');
     printOnFailure('Second run stderr: ${secondRunResult.stderr}');
 
     expect(secondRunResult.exitCode, 0);
+=======
+
+    expect(secondRunResult, const ProcessResultMatcher());
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   }, skip: !platform.isMacOS); // [intended] macOS builds only work on macos.
 }

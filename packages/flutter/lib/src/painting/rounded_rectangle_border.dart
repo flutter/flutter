@@ -25,13 +25,10 @@ import 'circle_border.dart';
 ///    describe a rounded rectangle.
 class RoundedRectangleBorder extends OutlinedBorder {
   /// Creates a rounded rectangle border.
-  ///
-  /// The arguments must not be null.
   const RoundedRectangleBorder({
     super.side,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null);
+  });
 
   /// The radii for each corner.
   final BorderRadiusGeometry borderRadius;
@@ -46,7 +43,6 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is RoundedRectangleBorder) {
       return RoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -66,7 +62,6 @@ class RoundedRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is RoundedRectangleBorder) {
       return RoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -136,7 +131,6 @@ class RoundedRectangleBorder extends OutlinedBorder {
           final RRect outer = borderRect.inflate(side.strokeOutset);
           canvas.drawDRRect(outer, inner, paint);
         }
-        break;
     }
   }
 
@@ -165,9 +159,7 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
     this.borderRadius = BorderRadius.zero,
     required this.circularity,
     required this.eccentricity,
-  }) : assert(side != null),
-       assert(borderRadius != null),
-       assert(circularity != null);
+  });
 
   final BorderRadiusGeometry borderRadius;
   final double circularity;
@@ -185,7 +177,6 @@ class _RoundedRectangleToCircleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is RoundedRectangleBorder) {
       return _RoundedRectangleToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),

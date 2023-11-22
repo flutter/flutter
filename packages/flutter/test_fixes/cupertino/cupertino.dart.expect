@@ -235,4 +235,14 @@ void main() {
   scrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
   final CupertinoScrollBehavior cupertinoScrollBehavior = CupertinoScrollBehavior();
   cupertinoScrollBehavior.buildOverscrollIndicator(context, child, axisDirection);
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/122555
+  final ScrollableDetails details = ScrollableDetails(
+    direction: AxisDirection.down,
+    decorationClipBehavior: Clip.none,
+  );
+  final Clip clip = details.decorationClipBehavior;
 }

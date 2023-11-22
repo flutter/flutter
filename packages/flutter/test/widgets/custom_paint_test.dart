@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({ required this.log, this.name });
@@ -40,7 +41,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 }
 
 void main() {
-  testWidgets('Control test for custom painting', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Control test for custom painting', (WidgetTester tester) async {
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
@@ -62,7 +63,7 @@ void main() {
     expect(log, equals(<String>['background', 'child', 'foreground']));
   });
 
-  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Throws FlutterError on custom painter incorrect restore/save calls', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
@@ -118,7 +119,7 @@ void main() {
     expect(error.toStringDeep(), contains('2 more times'));
   });
 
-  testWidgets('CustomPaint sizing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CustomPaint sizing', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
     await tester.pumpWidget(Center(
@@ -147,13 +148,13 @@ void main() {
     expect(target.currentContext!.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, child: const SizedBox(height: 0.0, width: 0.0)),
+      child: CustomPaint(key: target, child: const SizedBox.shrink()),
     ));
     expect(target.currentContext!.size, Size.zero);
 
   });
 
-  testWidgets('Raster cache hints', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Raster cache hints', (WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
     final List<String?> log = <String?>[];

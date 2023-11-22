@@ -91,10 +91,17 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
         return;
       }
 
+<<<<<<< HEAD
       if (_androidStudio == null || _androidStudio!.version == null) {
         logger.printTrace(androidStudioNotFound);
         return;
       } else if (_androidStudio!.version!.major < androidStudioFlamingo.major) {
+=======
+      if (_androidStudio == null || _androidStudio.version == null) {
+        logger.printTrace(androidStudioNotFound);
+        return;
+      } else if (_androidStudio.version!.major < androidStudioFlamingo.major) {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
         logger.printTrace(androidStudioVersionBelowFlamingo);
         return;
       }

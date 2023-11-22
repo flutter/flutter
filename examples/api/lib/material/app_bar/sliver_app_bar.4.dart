@@ -51,7 +51,11 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
                   color: index.isOdd ? Colors.white : Colors.black12,
                   height: 100.0,
                   child: Center(
+<<<<<<< HEAD
                     child: Text('$index', textScaleFactor: 5),
+=======
+                    child: Text('$index', textScaler: const TextScaler.linear(5.0)),
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
                   ),
                 );
               },

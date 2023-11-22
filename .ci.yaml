@@ -50,7 +50,8 @@ platform_properties:
         ]
       os: Linux
       device_type: "msm8952"
-  linux_samsung_s10:
+
+  linux_pixel_7pro:
     properties:
       dependencies: >-
         [
@@ -59,7 +60,8 @@ platform_properties:
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
       os: Linux
-      device_type: "SM-G973U1"
+      device_type: "Pixel 7 Pro"
+
   linux_samsung_a02:
     properties:
       dependencies: >-
@@ -70,42 +72,80 @@ platform_properties:
         ]
       os: Linux
       device_type: "SM-A025V"
+
   mac:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12
       device_type: none
-      cpu: x86 # TODO(jmagman): https://github.com/flutter/flutter/issues/112130
-      xcode: 14a5294e # xcode 14.0 beta 5
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e300c"
+        }
   mac_arm64:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12
       device_type: none
       cpu: arm64
-      xcode: 14a5294e # xcode 14.0 beta 5
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e300c"
+        }
+  mac_benchmark:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "apple_signing", "version": "version:to_2024"}
+        ]
+      device_type: none
+      mac_model: "Macmini8,1"
+      os: Mac-12
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e300c"
+        }
   mac_x64:
     properties:
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 14a5294e # xcode 14.0 beta 5
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e300c"
+        }
+  mac_build_test:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"},
+          {"dependency": "apple_signing", "version": "version:to_2024"}
+        ]
+      os: Mac-12
+      device_type: none
+      cpu: x86
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e300c"
+        }
   mac_android:
     properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       os: Mac-12
@@ -125,26 +165,38 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+          {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
       os: Mac-12
       cpu: x86
       device_os: iOS-16
+<<<<<<< HEAD
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+=======
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e300c"
+        }
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   mac_arm64_ios:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "none"}
         ]
       os: Mac-12
       cpu: arm64
       device_os: iOS-16
+<<<<<<< HEAD
       xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+=======
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e300c"
+        }
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   windows:
     properties:
       dependencies: >-
@@ -153,13 +205,23 @@ platform_properties:
         ]
       os: Windows-10
       device_type: none
+  windows_arm64:
+    properties:
+      # The arch can be removed after https://github.com/flutter/flutter/issues/135722.
+      arch: arm
+      dependencies: >-
+        [
+          {"dependency": "certs", "version": "version:9563bb"}
+        ]
+      os: Windows
+      cpu: arm64
   windows_android:
     properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "certs", "version": "version:9563bb"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       os: Windows-10
@@ -175,10 +237,30 @@ targets:
       validation: analyze
       validation_name: Analyze
 
+  - name: Linux analyzer_benchmark
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      test_timeout_secs: "3600"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      cores: "32"
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: analyzer_benchmark
+
   - name: Linux coverage
-    bringup: true
+    presubmit: false
     recipe: flutter/coverage
     timeout: 120
+    enabled_branches:
+      # Don't run this on release branches
+      - master
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
@@ -204,7 +286,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "android_virtual_device", "version": "31"}
+          {"dependency": "android_virtual_device", "version": "34"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
         ["framework","hostonly","linux"]
@@ -212,17 +295,16 @@ targets:
 
   - name: Linux build_tests_1_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "version:3.16.1"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
@@ -237,11 +319,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "version:3.16.1"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
@@ -251,17 +333,16 @@ targets:
 
   - name: Linux build_tests_3_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "version:3.16.1"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"}
         ]
       shard: build_tests
@@ -275,6 +356,7 @@ targets:
     properties:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      backfill: "false"
     runIf:
       - .ci.yaml
 
@@ -292,7 +374,9 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/flutter
     presubmit: false
-    timeout: 60
+    timeout: 90 # https://github.com/flutter/flutter/issues/120901
+    dimensions:
+      os: "Linux"
     properties:
       cores: "32"
       dependencies: >-
@@ -302,15 +386,18 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
+      backfill: "false"
       validation: docs
       validation_name: Docs
       firebase_project: master-docs-flutter-dev
       release_ref: refs/heads/master
       release_build: "true"
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux docs_test
     recipe: flutter/flutter
-    timeout: 60
+    timeout: 90 # https://github.com/flutter/flutter/issues/120901
     properties:
       cores: "32"
       dependencies: >-
@@ -324,25 +411,63 @@ targets:
       validation: docs
       validation_name: Docs
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_test/
-      - packages/flutter_drive/
-      - packages/flutter_localizations/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_test/**
+      - packages/flutter_drive/**
+      - packages/flutter_localizations/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux engine_dependency_proxy_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: engine_dependency_proxy_test
+    runIf:
+      - dev/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux firebase_abstract_method_smoke_test
+    bringup: false
+    presubmit: false
     recipe: firebaselab/firebaselab
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"}
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
         ["firebaselab"]
       task_name: abstract_method_smoke_test
+      physical_devices: >-
+        [
+          "--device", "model=panther,version=33",
+          "--device", "model=redfin,version=30"
+        ]
+      # TODO(flutter/flutter#123331): This device is flaking.
+      # "--device", "model=Nexus6P,version=25",
+      virtual_devices: >-
+        [
+          "--device", "model=Nexus5,version=21",
+          "--device", "model=Nexus5,version=22",
+          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus5,version=24",
+          "--device", "model=Nexus6P,version=26",
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
+        ]
 
   - name: Linux firebase_android_embedding_v2_smoke_test
     recipe: firebaselab/firebaselab
@@ -350,11 +475,28 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"}
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
         ["firebaselab"]
       task_name: android_embedding_v2_smoke_test
+      physical_devices: >-
+        [
+          "--device", "model=redfin,version=30",
+          "--device", "model=griffin,version=24"
+        ]
+      # TODO(flutter/flutter#123331): This device is flaking.
+      # "--device", "model=Nexus6P,version=25",
+      virtual_devices: >-
+        [
+          "--device", "model=Nexus5,version=21",
+          "--device", "model=Nexus5,version=22",
+          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=26",
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
+        ]
 
   - name: Linux firebase_release_smoke_test
     recipe: firebaselab/firebaselab
@@ -362,11 +504,40 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"}
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
         ["firebaselab"]
       task_name: release_smoke_test
+      physical_devices: >-
+        [
+          "--device", "model=redfin,version=30",
+          "--device", "model=griffin,version=24"
+        ]
+      # TODO(flutter/flutter#123331): This device is flaking.
+      # "--device", "model=Nexus6P,version=25",
+      virtual_devices: >-
+        [
+          "--device", "model=Nexus5,version=21",
+          "--device", "model=Nexus5,version=22",
+          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus6P,version=26",
+          "--device", "model=Nexus6P,version=27",
+          "--device", "model=NexusLowRes,version=29"
+        ]
+
+  - name: Linux flutter_packaging_test
+    recipe: packaging/packaging
+    timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
@@ -385,23 +556,23 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: framework_tests
       subshard: libraries
       tags: >
         ["framework","hostonly","shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux framework_tests_slow
@@ -410,23 +581,24 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:33v6"}
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
       shard: framework_tests
       subshard: slow
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux framework_tests_misc
@@ -435,11 +607,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "version:3.16.1"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:33v6"}
         ]
       shard: framework_tests
@@ -447,16 +619,17 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - examples/api/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux framework_tests_widgets
@@ -465,23 +638,23 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: framework_tests
       subshard: widgets
       tags: >
         ["framework","hostonly","shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux fuchsia_precache
@@ -500,7 +673,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -518,7 +691,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -536,7 +709,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -554,7 +727,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -572,7 +745,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -590,7 +763,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -609,7 +782,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -627,7 +800,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -646,7 +819,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -665,12 +838,72 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: plugin_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux plugin_test_linux
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: plugin_test_linux
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux run_debug_test_linux
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: run_debug_test_linux
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux run_release_test_linux
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: run_release_test_linux
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -689,10 +922,10 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux technical_debt__cost
@@ -703,7 +936,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -718,6 +951,7 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
+      - bin/internal/engine.version
       - .ci.yaml
 
   - name: Linux tool_integration_tests_1_4
@@ -728,10 +962,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "1_4"
@@ -739,9 +975,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_integration_tests_2_4
@@ -752,10 +988,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "2_4"
@@ -763,9 +1001,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_integration_tests_3_4
@@ -776,10 +1014,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "3_4"
@@ -787,9 +1027,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_integration_tests_4_4
@@ -800,10 +1040,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: tool_integration_tests
       subshard: "4_4"
@@ -811,9 +1053,9 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_tests_commands
@@ -831,9 +1073,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux tool_tests_general
@@ -851,9 +1093,9 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_benchmarks_canvaskit
@@ -864,7 +1106,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"}
         ]
       tags: >
         ["devicelab","hostonly", "linux"]
@@ -877,11 +1119,29 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"}
         ]
       tags: >
         ["devicelab"]
       task_name: web_benchmarks_html
+    runIf:
+      - dev/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_benchmarks_skwasm
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"}
+        ]
+      tags: >
+        ["devicelab"]
+      task_name: web_benchmarks_skwasm
     runIf:
       - dev/**
       - bin/**
@@ -894,17 +1154,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_long_running_tests
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_2_5
@@ -914,17 +1176,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_long_running_tests
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_3_5
@@ -934,17 +1198,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_long_running_tests
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_4_5
@@ -954,17 +1220,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_long_running_tests
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_long_running_tests_5_5
@@ -974,17 +1242,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_long_running_tests
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_0
@@ -994,17 +1264,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_1
@@ -1014,17 +1286,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_2
@@ -1034,17 +1308,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_3
@@ -1054,17 +1330,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_4
@@ -1074,17 +1352,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_5
@@ -1094,17 +1374,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_6
@@ -1114,17 +1396,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_tests_7_last
@@ -1134,17 +1418,19 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tests
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
       - .ci.yaml
 
   - name: Linux web_canvaskit_tests_0
@@ -1154,17 +1440,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_1
     recipe: flutter/flutter_drone
@@ -1173,17 +1462,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_2
     recipe: flutter/flutter_drone
@@ -1192,17 +1484,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_3
     recipe: flutter/flutter_drone
@@ -1211,17 +1506,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_4
     recipe: flutter/flutter_drone
@@ -1230,17 +1528,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_5
     recipe: flutter/flutter_drone
@@ -1249,17 +1550,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_6
     recipe: flutter/flutter_drone
@@ -1268,17 +1572,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_canvaskit_tests_7_last
     recipe: flutter/flutter_drone
@@ -1287,17 +1594,20 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_canvaskit_tests
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/
-      - bin/
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
 
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
@@ -1306,37 +1616,39 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tool_tests
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
-      - dev/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
-
-  - name: Linux_android analyzer_benchmark
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: analyzer_benchmark
 
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
+    dimensions:
+      kvm: "1"
+      cores: "8"
+      machine_type: "n1-standard-8"
     properties:
+      device_type: "none"
       tags: >
-        ["devicelab" ,"android", "linux"]
+        ["devicelab", "linux"]
       task_name: android_defines_test
+      dependencies: >-
+        [
+          {"dependency": "android_virtual_device", "version": "34"}
+        ]
 
   - name: Linux_android android_obfuscate_test
     recipe: devicelab/devicelab_drone
@@ -1349,7 +1661,7 @@ targets:
 
   - name: Linux_android android_semantics_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/114360
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/124636
     presubmit: false
     timeout: 60
     properties:
@@ -1396,7 +1708,6 @@ targets:
   - name: Linux_android animated_complex_image_filtered_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -1421,14 +1732,72 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: backdrop_filter_perf__e2e_summary
 
-  - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
+  - name: Linux_pixel_7pro backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: backdrop_filter_perf__timeline_summary
+
+  - name: Linux_pixel_7pro draw_atlas_perf_opengles__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+     # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: draw_atlas_perf_opengles__timeline_summary
+
+  - name: Linux_pixel_7pro draw_atlas_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: draw_atlas_perf__timeline_summary
+
+  - name: Linux_pixel_7pro dynamic_path_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: dynamic_path_tessellation_perf__timeline_summary
+
+  - name: Linux_pixel_7pro static_path_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: static_path_tessellation_perf__timeline_summary
+
+  - name: Linux_pixel_7pro hello_world_impeller
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: hello_world_impeller
 
   - name: Linux_android basic_material_app_android__compile
     recipe: devicelab/devicelab_drone
@@ -1502,19 +1871,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: shader_mask_cache_perf__e2e_summary
 
-  - name: Linux_android complex_layout_android__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: complex_layout_android__compile
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:11"}
-        ]
-
   - name: Linux_android complex_layout_android__scroll_smoothness
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -1567,13 +1923,13 @@ targets:
           {"dependency": "open_jdk", "version": "version:11"}
         ]
 
-  - name: Linux_samsung_s10 complex_layout_scroll_perf__timeline_summary
+  - name: Linux_pixel_7pro complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: complex_layout_scroll_perf__timeline_summary
       dependencies: >-
         [
@@ -1615,13 +1971,13 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: cubic_bezier_perf__e2e_summary
 
-  - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
+  - name: Linux_pixel_7pro cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: cubic_bezier_perf__timeline_summary
 
   - name: Linux_android cull_opacity_perf__e2e_summary
@@ -1633,13 +1989,13 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: cull_opacity_perf__e2e_summary
 
-  - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
+  - name: Linux_pixel_7pro cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: cull_opacity_perf__timeline_summary
 
   - name: Linux_android devtools_profile_start_test
@@ -1706,7 +2062,6 @@ targets:
       task_name: fast_scroll_large_images__memory
 
   - name: Linux_android flavors_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -1787,13 +2142,13 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_v2_chrome_run_test
 
-  - name: Linux_android flutter_gallery_v2_web_compile_test
+  - name: Linux flutter_gallery_v2_web_compile_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "hostonly", "linux"]
       task_name: flutter_gallery_v2_web_compile_test
 
   - name: Linux_android flutter_test_performance
@@ -1840,6 +2195,15 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: fullscreen_textfield_perf__e2e_summary
+
+  - name: Linux_android very_long_picture_scrolling_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 120
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: very_long_picture_scrolling_perf__e2e_summary
 
   - name: Linux_android hello_world__memory
     recipe: devicelab/devicelab_drone
@@ -1896,13 +2260,13 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
 
-  - name: Linux_samsung_s10 imagefiltered_transform_animation_perf__timeline_summary
+  - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
 
   - name: Linux_android image_list_reported_duration
@@ -1980,8 +2344,10 @@ targets:
   - name: Linux_android list_text_layout_impeller_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
+      ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_impeller_perf__e2e_summary
@@ -2004,15 +2370,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: old_gallery__transition_perf
 
-  - name: Linux_android new_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: new_gallery__transition_perf
-
   - name: Linux_build_test flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone_build_test
     presubmit: false
@@ -2023,7 +2380,7 @@ targets:
       task_name: flutter_gallery__transition_perf
       artifact: gallery__transition_perf
       drone_dimensions: >
-        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
+        ["device_os=N","os=Linux", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
@@ -2035,7 +2392,7 @@ targets:
       task_name: flutter_gallery__transition_perf_e2e
       artifact: gallery__transition_perf_e2e
       drone_dimensions: >
-        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
+        ["device_os=N","os=Linux", "device_type=msm8952"]
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
@@ -2047,7 +2404,7 @@ targets:
       task_name: flutter_gallery__transition_perf_hybrid
       artifact: gallery__transition_perf_hybrid
       drone_dimensions: >
-        ["device_os=N","os=Ubuntu", "device_type=msm8952"]
+        ["device_os=N","os=Linux", "device_type=msm8952"]
 
   - name: Linux_android flutter_gallery__transition_perf_with_semantics
     recipe: devicelab/devicelab_drone
@@ -2058,34 +2415,83 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_with_semantics
 
-  - name: Linux_samsung_s10 new_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
-      task_name: new_gallery__transition_perf
-
-  - name: Linux_android new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112577
+  # MotoG4, Skia
+  - name: Linux_android new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "android", "linux"]
-      task_name: new_gallery_impeller__transition_perf
+      task_name: new_gallery__transition_perf
 
-  - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112573
+  # Pixel 7 Pro, Skia
+  - name: Linux_pixel_7pro new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery__transition_perf
+
+  # Samsung A02, Skia
+  - name: Linux_samsung_a02 new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "a02"]
+      task_name: new_gallery__transition_perf
+
+  # Moto G4, Impeller (OpenGL)
+  - name: Linux_android new_gallery_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux"]
       task_name: new_gallery_impeller__transition_perf
+
+  # Pixel 7 Pro, Impeller (Vulkan)
+  - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery_impeller__transition_perf
+
+  # Samsung A02, Impeller (OpenGL)
+  - name: Linux_samsung_a02 new_gallery_impeller__transition_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "a02"]
+      task_name: new_gallery_impeller__transition_perf
+
+  # Pixel 7 Pro, Impeller (OpenGL)
+  - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery_opengles_impeller__transition_perf
 
   - name: Linux_android picture_cache_perf__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -2096,13 +2502,13 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: picture_cache_perf__e2e_summary
 
-  - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
+  - name: Linux_pixel_7pro picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: picture_cache_perf__timeline_summary
 
   - name: Linux_android android_picture_cache_complexity_scoring_perf__timeline_summary
@@ -2114,7 +2520,17 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
 
+  - name: Linux_android slider_perf_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: slider_perf_android
+
   - name: Linux_android platform_channels_benchmarks
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135105
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2150,14 +2566,36 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: platform_views_scroll_perf__timeline_summary
 
-  - name: Linux_samsung_s10 platform_views_scroll_perf__timeline_summary
+  - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf__timeline_summary
+
+  - name: Linux_android platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: platform_views_scroll_perf_impeller__timeline_summary
+
+  - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_android platform_view__start_up
     recipe: devicelab/devicelab_drone
@@ -2177,16 +2615,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: routing_test
 
-  - name: Linux_android spell_check_test
-    bringup: true
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: spell_check_test
-
   - name: Linux_android service_extensions_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2205,13 +2633,13 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: textfield_perf__e2e_summary
 
-  - name: Linux_samsung_s10 textfield_perf__timeline_summary
+  - name: Linux_pixel_7pro textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: textfield_perf__timeline_summary
 
   - name: Linux_android tiles_scroll_perf__timeline_summary
@@ -2227,13 +2655,13 @@ targets:
           {"dependency": "open_jdk", "version": "version:11"}
         ]
 
-  - name: Linux_android web_size__compile_test
+  - name: Linux web_size__compile_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "hostonly", "linux"]
       task_name: web_size__compile_test
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
@@ -2282,6 +2710,7 @@ targets:
       task_name: opacity_peephole_fade_transition_text_perf__e2e_summary
 
   - name: Linux_android opacity_peephole_grid_of_alpha_savelayers_perf__e2e_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/135118
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2335,6 +2764,134 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_choreographer_do_frame_test
 
+  - name: Linux_android animated_blur_backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: animated_blur_backdrop_filter_perf__timeline_summary
+
+  - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: animated_blur_backdrop_filter_perf__timeline_summary
+
+  - name: Linux_pixel_7pro animated_advanced_blend_perf_opengles__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: animated_advanced_blend_perf_opengles__timeline_summary
+
+  - name: Linux_pixel_7pro animated_advanced_blend_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: animated_advanced_blend_perf__timeline_summary
+
+  - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: animated_advanced_blend_perf_ios__timeline_summary
+
+  - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: animated_blur_backdrop_filter_perf_opengles__timeline_summary
+
+  - name: Linux_pixel_7pro draw_vertices_perf_opengles__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: draw_vertices_perf_opengles__timeline_summary
+
+  - name: Linux_pixel_7pro draw_vertices_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    # Uses Impeller.
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: draw_vertices_perf__timeline_summary
+
+  - name: Mac_ios draw_vertices_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: draw_vertices_perf_ios__timeline_summary
+
+  - name: Mac_ios draw_atlas_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: draw_atlas_perf_ios__timeline_summary
+
+  - name: Mac_ios static_path_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: static_path_tessellation_perf_ios__timeline_summary
+
+  - name: Mac_ios dynamic_path_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: dynamic_path_tessellation_perf_ios__timeline_summary
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
@@ -2347,59 +2904,31 @@ targets:
       validation: analyze
       validation_name: Analyze
 
-  - name: Staging_build_linux framework_tests_misc
-    presubmit: false
-    bringup: true
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      ignore_flakiness: "true"
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
-          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "version:3.16.1"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "android_sdk", "version": "version:33v6"}
-        ]
-      shard: framework_tests
-      subshard: misc
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-    runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
-      - .ci.yaml
-
-  - name: Mac basic_material_app_macos__compile
+  - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"}
+          {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
+      task_name: animated_complex_opacity_perf_macos__e2e_summary
+
+  - name: Mac_benchmark basic_material_app_macos__compile
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
       task_name: basic_material_app_macos__compile
 
   - name: Mac build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
+      add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2430,15 +2959,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
       subshard: "1_4"
@@ -2450,15 +2977,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
       subshard: "2_4"
@@ -2470,15 +2995,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
       subshard: "3_4"
@@ -2490,48 +3013,40 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: build_tests
       subshard: "4_4"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac complex_layout_macos__compile
+  - name: Mac_benchmark complex_layout_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: complex_layout_macos__compile
-
-  - name: Mac complex_layout_macos__start_up
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: complex_layout_macos__start_up
+
+  - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
+    presubmit: false
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      task_name: complex_layout_scroll_perf_macos__timeline_summary
 
   - name: Mac customer_testing
     enabled_branches:
@@ -2539,7 +3054,6 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
-      add_recipes_cq: "true"
       validation: customer_testing
       validation_name: Customer testing
       tags: >
@@ -2551,7 +3065,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2563,54 +3076,67 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac flutter_gallery_macos__compile
+  - name: Mac_benchmark flutter_gallery_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__compile
 
-  - name: Mac flutter_gallery_macos__start_up
+  - name: Mac_benchmark flutter_gallery_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_gallery_macos__start_up
 
-  - name: Mac flutter_view_macos__start_up
+  - name: Mac flutter_packaging_test
+    recipe: packaging/packaging
+    timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 flutter_packaging_test
+    recipe: packaging/packaging
+    timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_benchmark flutter_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: flutter_view_macos__start_up
 
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: framework_tests
       subshard: libraries
@@ -2635,10 +3161,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:33v6"}
         ]
       shard: framework_tests
@@ -2647,6 +3172,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
+      - examples/api/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -2662,9 +3188,10 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      cpu: x86 # https://github.com/flutter/flutter/issues/119880
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: framework_tests
       subshard: widgets
@@ -2700,28 +3227,20 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac hello_world_macos__compile
+  - name: Mac_benchmark hello_world_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: hello_world_macos__compile
 
   - name: Mac integration_ui_test_test_macos
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2789,7 +3308,6 @@ targets:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2815,18 +3333,21 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac platform_view_macos__start_up
+  - name: Mac_benchmark platform_view_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
+      task_name: platform_view_macos__start_up
+
+  - name: Mac platform_channel_sample_test_macos
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: platform_view_macos__start_up
+      task_name: platform_channel_sample_test_macos
 
   - name: Mac plugin_dependencies_test
     recipe: devicelab/devicelab_drone
@@ -2836,7 +3357,6 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2854,7 +3374,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2906,12 +3425,28 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: plugin_test_ios
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac plugin_test_macos
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: plugin_test_macos
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2924,7 +3459,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -2938,15 +3472,11 @@ targets:
       - .ci.yaml
 
   - name: Mac_arm64 tool_host_cross_arch_tests
-    bringup: true # Mac_arm64 variant https://github.com/flutter/flutter/pull/109889
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      ignore_flakiness: "true"
-      cpu: arm64
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -2964,15 +3494,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "1_4"
@@ -2990,15 +3518,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "2_4"
@@ -3016,15 +3542,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "3_4"
@@ -3042,15 +3566,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: tool_integration_tests
       subshard: "4_4"
@@ -3102,12 +3624,9 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+    presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14a5294e"}
-        ]
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       validation: verify_binaries_codesigned
@@ -3117,12 +3636,18 @@ targets:
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
     recipe: flutter/flutter
+<<<<<<< HEAD
     timeout: 60
     properties:
       dependencies: >-
         [
           {"dependency": "xcode", "version": "14a5294e"}
         ]
+=======
+    presubmit: false
+    timeout: 60
+    properties:
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       validation: verify_binaries_codesigned
@@ -3132,13 +3657,12 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      cpu: x86 # https://github.com/flutter/flutter/issues/110113
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:98.1"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tool_tests
       subshard: "1_1"
@@ -3226,6 +3750,28 @@ targets:
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
 
+  - name: Mac_android run_debug_test_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    runIf:
+      - dev/**
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac"]
+      task_name: run_debug_test_android
+
+  - name: Mac_arm64_android run_debug_test_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    runIf:
+      - dev/**
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "arm64"]
+      task_name: run_debug_test_android
+
   - name: Mac_android run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3266,15 +3812,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: backdrop_filter_perf_ios__timeline_summary
 
-  - name: Mac_ios backdrop_filter_perf_impeller_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: backdrop_filter_perf_impeller_ios__timeline_summary
-
   - name: Mac_ios basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3292,15 +3829,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: channels_integration_test_ios
-
-  - name: Mac_ios complex_layout_ios__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: complex_layout_ios__compile
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3323,30 +3851,11 @@ targets:
   - name: Mac_ios complex_layout_scroll_perf_bad_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: complex_layout_scroll_perf_bad_ios__timeline_summary
-
-  - name: Mac_ios complex_layout_scroll_perf_bad_impeller_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: complex_layout_scroll_perf_bad_impeller_ios__timeline_summary
-
-  - name: Mac_ios complex_layout_scroll_perf_impeller_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: complex_layout_scroll_perf_impeller_ios__timeline_summary
 
   - name: Mac_ios color_filter_and_fade_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
@@ -3357,15 +3866,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: color_filter_and_fade_perf_ios__e2e_summary
 
-  - name: Mac_ios color_filter_and_fade_perf_impeller_ios__e2e_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: color_filter_and_fade_perf_impeller_ios__e2e_summary
-
   - name: Mac_ios imagefiltered_transform_animation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3375,17 +3875,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: imagefiltered_transform_animation_perf_ios__timeline_summary
 
-  - name: Mac_ios imagefiltered_transform_animation_perf_impeller_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: imagefiltered_transform_animation_perf_impeller_ios__timeline_summary
-
   - name: Mac_ios external_ui_integration_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/106806
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3439,6 +3929,20 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
+
+  - name: Mac_ios flutter_gallery_ios__start_up_xcode_debug
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: flutter_gallery_ios__start_up_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
+    bringup: true
 
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -3507,6 +4011,20 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
 
+  - name: Mac_ios integration_ui_ios_driver_xcode_debug
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: integration_ui_ios_driver_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
+    bringup: true
+
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3534,22 +4052,30 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_textfield
 
-  - name: Mac_ios ios_app_with_extensions_test
+  - name: Mac_x64 ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: ios_app_with_extensions_test
 
-  - name: Mac_arm64_ios ios_app_with_extensions_test
+  - name: Mac_arm64 ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac", "arm64"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
 
   - name: Mac_ios ios_content_validation_test
@@ -3618,22 +4144,44 @@ targets:
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
 
-  - name: Mac_ios microbenchmarks_impeller_ios
+  # TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
+  - name: Mac_ios microbenchmarks_ios_xcode_debug
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/106753
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: microbenchmarks_impeller_ios
+      task_name: microbenchmarks_ios_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
+    bringup: true
+
+  - name: Mac_ios native_assets_ios_simulator
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: native_assets_ios_simulator
+
+  - name: Mac_ios native_assets_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: native_assets_ios
 
   - name: Mac_ios native_platform_view_ui_tests_ios
     recipe: devicelab/devicelab_drone
@@ -3653,23 +4201,14 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_ios__transition_perf
 
-  - name: Mac_ios new_gallery_impeller_ios__transition_perf
+  - name: Mac_ios new_gallery_skia_ios__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: new_gallery_impeller_ios__transition_perf
-
-  - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: ios_picture_cache_complexity_scoring_perf__timeline_summary
+      task_name: new_gallery_skia_ios__transition_perf
 
   - name: Mac_ios platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
@@ -3725,14 +4264,14 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_ios__timeline_summary
 
-  - name: Mac_ios platform_views_scroll_perf_impeller_ios__timeline_summary
+  - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: platform_views_scroll_perf_impeller_ios__timeline_summary
+      task_name: platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3752,14 +4291,14 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: simple_animation_perf_ios
 
-  - name: Mac_ios simple_animation_perf_impeller_ios
+  - name: Mac_ios wide_gamut_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: simple_animation_perf_impeller_ios
+      task_name: wide_gamut_ios
 
   - name: Mac_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
@@ -3788,14 +4327,14 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: fullscreen_textfield_perf_ios__e2e_summary
 
-  - name: Mac_ios fullscreen_textfield_perf_impeller_ios__e2e_summary
+  - name: Mac_ios very_long_picture_scrolling_perf_ios__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    timeout: 60
+    timeout: 120
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: fullscreen_textfield_perf_impeller_ios__e2e_summary
+      task_name: very_long_picture_scrolling_perf_ios__e2e_summary
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3806,51 +4345,43 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
 
-  - name: Mac_ios tiles_scroll_perf_impeller_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: tiles_scroll_perf_impeller_ios__timeline_summary
-
-  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
-    recipe: devicelab/devicelab_drone
+  - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
+    recipe: devicelab/devicelab_drone_build_test
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
+      drone_dimensions: >
+        ["device_os=iOS-16","os=Mac-12", "cpu=x86"]
 
-  - name: Mac_ios flutter_gallery__transition_perf_e2e_impeller_ios
+  - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery__transition_perf_e2e_impeller_ios
+      task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
-  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
+  - name: Mac_ios draw_points_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
+      task_name: draw_points_perf_ios__timeline_summary
 
   - name: Mac_ios spell_check_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: spell_check_test
+      task_name: spell_check_test_ios
 
   - name: Mac native_ui_tests_macos
     recipe: devicelab/devicelab_drone
@@ -3858,7 +4389,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3873,11 +4403,9 @@ targets:
   - name: Mac channels_integration_test
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3889,13 +4417,43 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac run_release_test_macos
+  - name: Mac run_debug_test_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14a5294e"},
+          {"dependency": "gems", "version": "v3.3.14"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: run_debug_test_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac_arm64_ios run_debug_test_macos
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac", "arm64"]
+      task_name: run_debug_test_macos
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Mac run_release_test_macos
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3921,7 +4479,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows build_tests_1_3
+  - name: Windows build_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3929,17 +4487,17 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "1_3"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_2_3
+  - name: Windows build_tests_2_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3947,17 +4505,17 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "2_3"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_3_3
+  - name: Windows build_tests_3_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3965,13 +4523,49 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "3_3"
+      subshard: "3_5"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
+  - name: Windows build_tests_4_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: build_tests
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
+  - name: Windows build_tests_5_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: build_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
@@ -3981,7 +4575,6 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
-      add_recipes_cq: "true"
       validation: customer_testing
       validation_name: Customer testing
       tags: >
@@ -3993,23 +4586,23 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: framework_tests
       subshard: libraries
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Windows framework_tests_misc
@@ -4018,9 +4611,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:33v6"}
         ]
       shard: framework_tests
@@ -4028,16 +4621,17 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - examples/api/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Windows framework_tests_widgets
@@ -4046,23 +4640,23 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: framework_tests
       subshard: widgets
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
-      - dev/
-      - packages/flutter/
-      - packages/flutter_driver/
-      - packages/integration_test/
-      - packages/flutter_localizations/
-      - packages/fuchsia_remote_debug_protocol/
-      - packages/flutter_test/
-      - packages/flutter_goldens/
-      - packages/flutter_tools/
-      - bin/
+      - dev/**
+      - packages/flutter/**
+      - packages/flutter_driver/**
+      - packages/integration_test/**
+      - packages/flutter_localizations/**
+      - packages/fuchsia_remote_debug_protocol/**
+      - packages/flutter_test/**
+      - packages/flutter_goldens/**
+      - packages/flutter_tools/**
+      - bin/**
       - .ci.yaml
 
   - name: Windows gradle_plugin_bundle_test
@@ -4072,7 +4666,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -4097,13 +4691,14 @@ targets:
       task_name: hot_mode_dev_cycle_win_target__benchmark
 
   - name: Windows module_custom_host_app_name_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/134644
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -4122,7 +4717,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -4141,7 +4736,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -4173,7 +4768,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -4186,19 +4781,109 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/112939
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
       task_name: plugin_test
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows plugin_test_windows
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: plugin_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows run_debug_test_windows
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: run_debug_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows_arm64 run_debug_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: run_debug_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows run_release_test_windows
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      task_name: run_release_test_windows
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Windows_arm64 run_release_test_windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: run_release_test_windows
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4213,9 +4898,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -4237,9 +4922,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -4261,9 +4946,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -4285,9 +4970,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -4309,9 +4994,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -4333,9 +5018,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: tool_integration_tests
@@ -4396,9 +5081,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tool_tests
       subshard: "1_2"
@@ -4417,9 +5102,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:96.2"},
+          {"dependency": "chrome_and_driver", "version": "version:117.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       shard: web_tool_tests
       subshard: "2_2"
@@ -4433,6 +5118,7 @@ targets:
 
   - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4456,6 +5142,20 @@ targets:
         ]
       task_name: hello_world_win_desktop__compile
 
+  - name: Windows_arm64 hello_world_win_desktop__compile
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: hello_world_win_desktop__compile
+
   - name: Windows flutter_gallery_win_desktop__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4463,6 +5163,20 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__compile
+
+  - name: Windows_arm64 flutter_gallery_win_desktop__compile
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4482,7 +5196,21 @@ targets:
         ]
       task_name: flutter_gallery_win_desktop__start_up
 
-  - name: Windows complex_layout_win_desktop__compile
+  - name: Windows_arm64 flutter_gallery_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_gallery_win_desktop__start_up
+
+  - name: Windows complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4493,15 +5221,16 @@ targets:
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
-      task_name: complex_layout_win_desktop__compile
+      task_name: complex_layout_win_desktop__start_up
 
-  - name: Windows complex_layout_win_desktop__start_up
+  - name: Windows_arm64 complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "hostonly", "windows"]
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4521,6 +5250,20 @@ targets:
         ]
       task_name: flutter_view_win_desktop__start_up
 
+  - name: Windows_arm64 flutter_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: flutter_view_win_desktop__start_up
+
   - name: Windows platform_view_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4528,6 +5271,20 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: platform_view_win_desktop__start_up
+
+  - name: Windows_arm64 platform_view_win_desktop__start_up
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -4552,22 +5309,8 @@ targets:
         ["devicelab", "android", "windows"]
       task_name: channels_integration_test_win
 
-  - name: Windows_android complex_layout_win__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "windows"]
-      task_name: complex_layout_win__compile
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:11"}
-        ]
-
   - name: Windows_android flavors_test_win
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/107681
     presubmit: false
     timeout: 60
     properties:
@@ -4602,6 +5345,18 @@ targets:
         ["devicelab", "android", "windows"]
       task_name: windows_chrome_dev_mode
 
+  - name: Windows flutter_packaging_test
+    recipe: packaging/packaging
+    timeout: 60
+    enabled_branches:
+      - master
+      - beta
+      - stable
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4615,6 +5370,20 @@ targets:
         ["devicelab", "hostonly", "windows"]
       task_name: windows_startup_test
 
+  - name: Windows_arm64 windows_startup_test
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: windows_startup_test
+
   - name: Windows flutter_tool_startup__windows
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4622,7 +5391,17 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: flutter_tool_startup__windows
+      task_name: flutter_tool_startup
+
+  - name: Windows_arm64 flutter_tool_startup__windows
+    recipe: devicelab/devicelab_drone
+    bringup: true # https://github.com/flutter/flutter/issues/134083
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
+      task_name: flutter_tool_startup
 
   - name: Linux flutter_tool_startup__linux
     recipe: devicelab/devicelab_drone
@@ -4631,18 +5410,17 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: flutter_tool_startup__linux
+      task_name: flutter_tool_startup
 
-  - name: Mac flutter_tool_startup__macos
-    recipe: devicelab/devicelab_drone
+  - name: Mac_benchmark flutter_tool_startup__macos
     presubmit: false
+    recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: flutter_tool_startup__macos
+      task_name: flutter_tool_startup
 
   - name: Linux flutter_packaging
+<<<<<<< HEAD
     recipe: packaging_v2/packaging_v2
     timeout: 60
     scheduler: release
@@ -4651,10 +5429,20 @@ targets:
       - beta
       - stable
       - main
+=======
+    recipe: packaging/packaging
+    timeout: 60
+    scheduler: release
+    bringup: true # https://github.com/flutter/flutter/issues/126286
+    enabled_branches:
+      - beta
+      - stable
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+<<<<<<< HEAD
 
   - name: Mac flutter_packaging
     recipe: packaging_v2/packaging_v2
@@ -4665,10 +5453,23 @@ targets:
       - beta
       - stable
       - main
+=======
+    drone_dimensions:
+      - os=Linux
+
+  - name: Mac flutter_packaging
+    recipe: packaging/packaging
+    timeout: 60
+    scheduler: release
+    enabled_branches:
+      - beta
+      - stable
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+<<<<<<< HEAD
     dimensions:
       cpu: "x86"
 
@@ -4681,26 +5482,57 @@ targets:
       - beta
       - stable
       - main
+=======
+    drone_dimensions:
+      - os=Mac
+      - cpu=x86
+
+
+  - name: Mac_arm64 flutter_packaging
+    recipe: packaging/packaging
+    timeout: 60
+    scheduler: release
+    enabled_branches:
+      - beta
+      - stable
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+<<<<<<< HEAD
     dimensions:
       cpu: "arm64"
 
   - name: Windows flutter_packaging
     recipe: packaging_v2/packaging_v2
+=======
+    drone_dimensions:
+      - os=Mac
+      - cpu=arm64
+
+  - name: Windows flutter_packaging
+    recipe: packaging/packaging
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     timeout: 60
     scheduler: release
     bringup: true
     enabled_branches:
       - beta
       - stable
+<<<<<<< HEAD
       - main
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+<<<<<<< HEAD
+=======
+    drone_dimensions:
+      - os=Windows
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 
   - name: Linux docs_deploy_beta
@@ -4709,7 +5541,10 @@ targets:
     bringup: true
     enabled_branches:
       - beta
+<<<<<<< HEAD
       - main
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     presubmit: false
     timeout: 60
     properties:
@@ -4724,6 +5559,11 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: master-docs-flutter-dev
+<<<<<<< HEAD
+=======
+    drone_dimensions:
+      - os=Linux
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
   - name: Linux docs_deploy_stable
     recipe: flutter/flutter
@@ -4745,3 +5585,8 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: docs-flutter-dev
+<<<<<<< HEAD
+=======
+    drone_dimensions:
+      - os=Linux
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a

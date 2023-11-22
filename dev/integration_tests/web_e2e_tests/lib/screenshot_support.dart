@@ -25,7 +25,7 @@ Future<void> runTestWithScreenshots({
 
   test.integrationDriver(
     driver: driver,
-    onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
+    onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
       // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120
       return true;
     },

@@ -26,6 +26,7 @@ ThemeData _buildDarkTheme() {
     background: const Color(0xFF202124),
   );
   final ThemeData base = ThemeData(
+    useMaterial3: false,
     brightness: Brightness.dark,
     colorScheme: colorScheme,
     primaryColor: primaryColor,
@@ -50,6 +51,7 @@ ThemeData _buildLightTheme() {
     error: const Color(0xFFB00020),
   );
   final ThemeData base = ThemeData(
+    useMaterial3: false,
     brightness: Brightness.light,
     colorScheme: colorScheme,
     primaryColor: primaryColor,

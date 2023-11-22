@@ -6,11 +6,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SemanticsNode ids are stable', (WidgetTester tester) async {
     // Regression test for b/151732341.
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Directionality(

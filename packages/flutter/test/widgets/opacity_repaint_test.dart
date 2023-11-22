@@ -5,9 +5,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
 
 void main() {
   testWidgets('RenderOpacity avoids repainting and does not drop layer at fully opaque', (WidgetTester tester) async {
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+void main() {
+  testWidgetsWithLeakTracking('RenderOpacity avoids repainting and does not drop layer at fully opaque', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       const ColoredBox(
@@ -46,7 +53,11 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
+<<<<<<< HEAD
   testWidgets('RenderOpacity allows opacity layer to be dropped at 0 opacity', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('RenderOpacity allows opacity layer to be dropped at 0 opacity', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     RenderTestObject.paintCount = 0;
 
     await tester.pumpWidget(

@@ -64,8 +64,6 @@ abstract class InheritedTheme extends InheritedWidget {
   /// the wrapped `child` - unless this method is called again to re-wrap the
   /// child.
   static Widget captureAll(BuildContext context, Widget child, {BuildContext? to}) {
-    assert(child != null);
-    assert(context != null);
 
     return capture(from: context, to: to).wrap(child);
   }
@@ -88,7 +86,6 @@ abstract class InheritedTheme extends InheritedWidget {
   /// This method can be expensive if there are many widgets between `from` and
   /// `to` (it walks the element tree between those nodes).
   static CapturedThemes capture({ required BuildContext from, required BuildContext? to }) {
-    assert(from != null);
 
     if (from == to) {
       // Nothing to capture.
@@ -148,7 +145,7 @@ class _CaptureAll extends StatelessWidget {
   const _CaptureAll({
     required this.themes,
     required this.child,
-  }) : assert(themes != null), assert(child != null);
+  });
 
   final List<InheritedTheme> themes;
   final Widget child;

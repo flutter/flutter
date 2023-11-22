@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
@@ -18,31 +19,31 @@ class TestPaintingContext implements PaintingContext {
 }
 
 void main() {
-  testWidgets('Can construct an empty Stack', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can construct an empty Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(),
       ),
     );
   });
 
-  testWidgets('Can construct an empty Centered Stack', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can construct an empty Centered Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(child: Stack()),
       ),
     );
   });
 
-  testWidgets('Can change position data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can change position data', (WidgetTester tester) async {
     const Key key = Key('container');
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.topLeft,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             left: 10.0,
             child: SizedBox(
@@ -68,9 +69,9 @@ void main() {
     expect(parentData.height, isNull);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.topLeft,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             right: 10.0,
             child: SizedBox(
@@ -93,14 +94,14 @@ void main() {
     expect(parentData.height, isNull);
   });
 
-  testWidgets('Can remove parent data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can remove parent data', (WidgetTester tester) async {
     const Key key = Key('container');
     const SizedBox sizedBox = SizedBox(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[ Positioned(left: 10.0, child: sizedBox) ],
+        children: <Widget>[ Positioned(left: 10.0, child: sizedBox) ],
       ),
     );
     Element containerElement = tester.element(find.byKey(key));
@@ -115,9 +116,9 @@ void main() {
     expect(parentData.height, isNull);
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[ sizedBox ],
+        children: <Widget>[ sizedBox ],
       ),
     );
     containerElement = tester.element(find.byKey(key));
@@ -131,17 +132,17 @@ void main() {
     expect(parentData.height, isNull);
   });
 
-  testWidgets('Can align non-positioned children (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can align non-positioned children (LTR)', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -159,12 +160,12 @@ void main() {
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -177,17 +178,17 @@ void main() {
     expect(child1RenderObjectParentData.offset, equals(const Offset(10.0, 10.0)));
   });
 
-  testWidgets('Can align non-positioned children (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can align non-positioned children (RTL)', (WidgetTester tester) async {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: Stack(
             alignment: Alignment.center,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -205,12 +206,12 @@ void main() {
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(key: child0Key, width: 20.0, height: 20.0),
               SizedBox(key: child1Key, width: 10.0, height: 10.0),
             ],
@@ -223,25 +224,25 @@ void main() {
     expect(child1RenderObjectParentData.offset, equals(const Offset(0.0, 10.0)));
   });
 
-  testWidgets('Can construct an empty IndexedStack', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can construct an empty IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: IndexedStack(),
       ),
     );
   });
 
-  testWidgets('Can construct an empty Centered IndexedStack', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can construct an empty Centered IndexedStack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(child: IndexedStack()),
       ),
     );
   });
 
-  testWidgets('Can construct an IndexedStack', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can construct an IndexedStack', (WidgetTester tester) async {
     const int itemCount = 3;
     late List<int> itemsPainted;
 
@@ -264,20 +265,32 @@ void main() {
       );
     }
 
+    void expectFindsChild(int n) {
+      for (int i = 0; i < 3; i++) {
+        expect(find.text('$i', skipOffstage: false), findsOneWidget);
+
+        if (i == n) {
+          expect(find.text('$i'), findsOneWidget);
+        } else {
+          expect(find.text('$i'), findsNothing);
+        }
+      }
+    }
+
     await tester.pumpWidget(buildFrame(0));
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
+    expectFindsChild(0);
     expect(itemsPainted, equals(<int>[0]));
 
     await tester.pumpWidget(buildFrame(1));
+      expectFindsChild(1);
     expect(itemsPainted, equals(<int>[1]));
 
     await tester.pumpWidget(buildFrame(2));
+      expectFindsChild(2);
     expect(itemsPainted, equals(<int>[2]));
   });
 
-  testWidgets('Can hit test an IndexedStack', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can hit test an IndexedStack', (WidgetTester tester) async {
     const Key key = Key('indexedStack');
     const int itemCount = 3;
     late List<int> itemsTapped;
@@ -308,7 +321,42 @@ void main() {
     expect(itemsTapped, <int>[2]);
   });
 
-  testWidgets('Can set width and height', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IndexedStack sets non-selected indexes to visible=false', (WidgetTester tester) async {
+    Widget buildStack({required int itemCount, required int? selectedIndex}) {
+      final List<Widget> children = List<Widget>.generate(itemCount, (int i) {
+        return _ShowVisibility(index: i);
+      });
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(
+          index: selectedIndex,
+          children: children,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: null));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 0));
+    expect(find.text('index 0 is visible ? true', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 1));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? true', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 2));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? true', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgetsWithLeakTracking('Can set width and height', (WidgetTester tester) async {
     const Key key = Key('container');
 
     const BoxDecoration kBoxDecoration = BoxDecoration(
@@ -316,9 +364,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             left: 10.0,
             width: 11.0,
@@ -348,9 +396,9 @@ void main() {
     expect(renderBox.size.height, equals(12.0));
 
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Positioned(
             right: 10.0,
             width: 11.0,
@@ -376,19 +424,19 @@ void main() {
     expect(renderBox.size.height, equals(12.0));
   });
 
-  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
+  testWidgetsWithLeakTracking('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
+    await tester.pumpWidget(const Stack(textDirection: TextDirection.ltr));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
   });
 
-  testWidgets('Clip.none is respected by describeApproximateClip', (WidgetTester tester) async {
-    await tester.pumpWidget(Stack(
+  testWidgetsWithLeakTracking('Clip.none is respected by describeApproximateClip', (WidgetTester tester) async {
+    await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
-      children: const <Widget>[Positioned(left: 1000, right: 2000, child: SizedBox(width: 2000, height: 2000))],
+      children: <Widget>[Positioned(left: 1000, right: 2000, child: SizedBox(width: 2000, height: 2000))],
     ));
     final RenderStack renderObject = tester.allRenderObjects.whereType<RenderStack>().first;
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
@@ -408,7 +456,7 @@ void main() {
     expect(visited, true);
   });
 
-  testWidgets('IndexedStack with null index', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IndexedStack with null index', (WidgetTester tester) async {
     bool? tapped;
 
     await tester.pumpWidget(
@@ -438,13 +486,47 @@ void main() {
     expect(tapped, isNull);
   });
 
-  testWidgets('Stack clip test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IndexedStack reports hidden children as offstage', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[
+      for (int i = 0; i < 5; i++) Text('child $i'),
+    ];
+
+    Future<void> pumpIndexedStack(int? activeIndex) async{
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: IndexedStack(
+            index: activeIndex,
+            children: children,
+          ),
+        )
+      );
+    }
+
+    final Finder finder = find.byType(Text);
+    final Finder finderIncludingOffstage = find.byType(Text, skipOffstage: false);
+
+    await pumpIndexedStack(null);
+    expect(finder, findsNothing); // IndexedStack with null index shows nothing
+    expect(finderIncludingOffstage, findsNWidgets(5));
+
+    for (int i = 0; i < 5; i++) {
+      await pumpIndexedStack(i);
+
+      expect(finder, findsOneWidget);
+      expect(finderIncludingOffstage, findsNWidgets(5));
+
+      expect(find.text('child $i'), findsOneWidget);
+    }
+  });
+
+  testWidgetsWithLeakTracking('Stack clip test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(
                 width: 100.0,
                 height: 100.0,
@@ -469,12 +551,12 @@ void main() {
     expect(context.invocations.first.memberName, equals(#pushClipRect));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
             clipBehavior: Clip.none,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(
                 width: 100.0,
                 height: 100.0,
@@ -499,7 +581,7 @@ void main() {
     expect(context.invocations.first.memberName, equals(#paintChild));
   });
 
-  testWidgets('Stack sizing: default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Stack sizing: default', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     await tester.pumpWidget(
       Directionality(
@@ -529,7 +611,7 @@ void main() {
     expect(logs, <String>['BoxConstraints(0.0<=w<=3.0, 0.0<=h<=7.0)']);
   });
 
-  testWidgets('Stack sizing: explicit', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Stack sizing: explicit', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget buildStack(StackFit sizing) {
       return Directionality(
@@ -571,7 +653,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Positioned.directional control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Positioned.directional control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -608,7 +690,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(key)), const Offset(50.0, 0.0));
   });
 
-  testWidgets('PositionedDirectional control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PositionedDirectional control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Directionality(
@@ -643,31 +725,31 @@ void main() {
     expect(tester.getTopLeft(find.byKey(key)), const Offset(50.0, 0.0));
   });
 
-  testWidgets('Can change the text direction of a Stack', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can change the text direction of a Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.center,
       ),
     );
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         textDirection: TextDirection.rtl,
       ),
     );
     await tester.pumpWidget(
-      Stack(
+      const Stack(
         alignment: Alignment.center,
       ),
     );
   });
 
-  testWidgets('Alignment with partially-positioned children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Alignment with partially-positioned children', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.rtl,
         child: Stack(
           alignment: Alignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -692,11 +774,11 @@ void main() {
     expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           alignment: Alignment.center,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -721,11 +803,11 @@ void main() {
     expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           alignment: Alignment.bottomRight,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -750,11 +832,11 @@ void main() {
     expect(tester.getRect(find.byType(SizedBox).at(8)), const Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           alignment: Alignment.topLeft,
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(width: 100.0, height: 100.0),
             Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
             Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
@@ -781,35 +863,41 @@ void main() {
 
   testWidgets('Stack error messages', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Stack(),
+      const Stack(),
     );
+    final String exception = tester.takeException().toString();
+
     expect(
-      tester.takeException().toString(),
+      exception, startsWith(
       'No Directionality widget found.\n'
       "Stack widgets require a Directionality widget ancestor to resolve the 'alignment' argument.\n"
       "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction.\n"
       'The specific widget that could not find a Directionality ancestor was:\n'
       '  Stack\n'
-      'The ownership chain for the affected widget is: "Stack ← [root]"\n'
+      'The ownership chain for the affected widget is: "Stack ← ', // Omitted full ownership chain because it is not relevant for the test.
+    ));
+    expect(
+      exception, endsWith(
+      '← [root]"\n' // End of ownership chain.
       'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
       'top of your application widget tree. It determines the ambient reading direction and is used, for '
       'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
       'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'
       'Instead of providing a Directionality widget, another solution would be passing a non-directional '
       "'alignment', or an explicit 'textDirection', to the Stack.",
-    );
+    ));
   });
 
-  testWidgets('Can update clipBehavior of IndexedStack',
+  testWidgetsWithLeakTracking('Can update clipBehavior of IndexedStack',
       (WidgetTester tester) async {
-    await tester.pumpWidget(IndexedStack(textDirection: TextDirection.ltr));
+    await tester.pumpWidget(const IndexedStack(textDirection: TextDirection.ltr));
     final RenderIndexedStack renderObject =
       tester.renderObject<RenderIndexedStack>(find.byType(IndexedStack));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // Update clipBehavior to Clip.antiAlias
 
-    await tester.pumpWidget(IndexedStack(
+    await tester.pumpWidget(const IndexedStack(
       textDirection: TextDirection.ltr,
       clipBehavior: Clip.antiAlias,
     ));
@@ -818,7 +906,7 @@ void main() {
     expect(renderIndexedObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('IndexedStack sizing: explicit', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IndexedStack sizing: explicit', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget buildIndexedStack(StackFit sizing) {
       return Directionality(
@@ -859,4 +947,15 @@ void main() {
       'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
     ]);
   });
+}
+
+class _ShowVisibility extends StatelessWidget {
+  const _ShowVisibility({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('index $index is visible ? ${Visibility.of(context)}');
+  }
 }

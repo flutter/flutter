@@ -6,6 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
   ? LogicalKeyboardKey.metaLeft
@@ -13,8 +17,14 @@ final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.m
 
 void main() {
   group('ScrollableDetails', (){
+<<<<<<< HEAD
     final ScrollController controller = ScrollController();
     test('copyWith / == / hashCode', () {
+=======
+    test('copyWith / == / hashCode', () {
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       final ScrollableDetails details = ScrollableDetails(
         direction: AxisDirection.down,
         controller: controller,
@@ -42,6 +52,11 @@ void main() {
     });
 
     test('toString', (){
+<<<<<<< HEAD
+=======
+      final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
       const ScrollableDetails bareDetails = ScrollableDetails(
         direction: AxisDirection.right,
       );
@@ -86,8 +101,14 @@ void main() {
     });
   });
 
+<<<<<<< HEAD
   testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+=======
+  testWidgetsWithLeakTracking("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -152,8 +173,14 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
+<<<<<<< HEAD
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+=======
+  testWidgetsWithLeakTracking('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -223,8 +250,14 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
+<<<<<<< HEAD
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+=======
+  testWidgetsWithLeakTracking('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -283,8 +316,14 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
+<<<<<<< HEAD
   testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+=======
+  testWidgetsWithLeakTracking('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -346,9 +385,17 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
+<<<<<<< HEAD
   testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+=======
+  testWidgetsWithLeakTracking('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    addTearDown(focusNode.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -420,9 +467,17 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
+<<<<<<< HEAD
   testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+=======
+  testWidgetsWithLeakTracking('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    addTearDown(focusNode.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -479,8 +534,14 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: KeySimulatorTransitModeVariant.all());
 
+<<<<<<< HEAD
   testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+=======
+  testWidgetsWithLeakTracking('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
     await tester.pumpWidget(
       MaterialApp(
@@ -550,7 +611,11 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
+<<<<<<< HEAD
   testWidgets('Can scroll using intents only', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Can scroll using intents only', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(

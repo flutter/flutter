@@ -72,7 +72,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       return const UnderlineTabIndicator();
     }
 
-    switch(_demoStyle) {
+    switch (_demoStyle) {
       case TabsDemoStyle.iconsAndText:
         return ShapeDecoration(
           shape: const RoundedRectangleBorder(

@@ -18,4 +18,10 @@ void main() {
   renderListWheelViewport = RenderListWheelViewport(clipToSize: false);
   renderListWheelViewport = RenderListWheelViewport(error: '');
   renderListWheelViewport.clipToSize;
+
+  // Change made in https://github.com/flutter/flutter/pull/128522
+  RenderParagraph(textScaleFactor: math.min(123, 456));
+  RenderParagraph();
+  RenderEditable(textScaleFactor: math.min(123, 456));
+  RenderEditable();
 }

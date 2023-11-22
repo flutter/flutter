@@ -5,9 +5,12 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+<<<<<<< HEAD
 import '../rendering/mock_canvas.dart';
 
 
+=======
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
 const BorderSide borderSide = BorderSide(width: 4, color: Color(0x0f00ff00));
 

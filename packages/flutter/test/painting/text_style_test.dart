@@ -450,6 +450,13 @@ void main() {
   });
 
   test('backgroundColor', () {
+    // TODO(matanlurey): Remove when https://github.com/flutter/engine/pull/44705 rolls into the framework.
+    // Currently, dithering is disabled by default, but it's about to be flipped (enabled by default),
+    // and deprecated. This avoids #44705 causing a breakage in this test.
+    //
+    // ignore: deprecated_member_use
+    Paint.enableDithering = true;
+
     const TextStyle s1 = TextStyle();
     expect(s1.backgroundColor, isNull);
     expect(s1.toString(), 'TextStyle(<all styles inherited>)');
@@ -459,7 +466,16 @@ void main() {
     expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
 
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
+
+    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/133698 is resolved.
+    // There are 5+ implementations of Paint, so we should either align the toString() or stop
+    // testing it, IMO.
+    if (kIsWeb) {
+      // The web implementation never includes "dither: ..." as a property.
+      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
+    } else {
+      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00); dither: true)'));
+    }
   });
 
   test('TextStyle background and backgroundColor combos', () {
@@ -503,9 +519,9 @@ void main() {
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75)!.background!.color, blue);
   });
 
-  test('TextStyle strut textScaleFactor', () {
+  test('TextStyle strut textScaler', () {
     const TextStyle style0 = TextStyle(fontSize: 10);
-    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
+    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaler: const TextScaler.linear(2.5));
 
     const TextStyle style1 = TextStyle(fontSize: 25);
     final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle();
@@ -553,6 +569,12 @@ void main() {
     expect(const TextStyle().merge(const TextStyle(fontFamily: 'fontFamily', package: 'bar')).fontFamily, 'packages/bar/fontFamily');
     expect(const TextStyle().apply(fontFamily: 'fontFamily', package: 'foo').fontFamily, 'packages/foo/fontFamily');
     expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').apply(fontFamily: 'fontFamily', package: 'bar').fontFamily, 'packages/bar/fontFamily');
+  });
+
+  test('TextStyle.lerp identical a,b', () {
+    expect(TextStyle.lerp(null, null, 0), null);
+    const TextStyle style = TextStyle();
+    expect(identical(TextStyle.lerp(style, style, 0.5), style), true);
   });
 
   test('Throws when lerping between inherit:true and inherit:false with unspecified fields', () {

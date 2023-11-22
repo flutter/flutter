@@ -40,8 +40,12 @@ import 'image.dart';
 class DecoratedSliver extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
+<<<<<<< HEAD
   /// The [decoration] and [position] arguments must not be null. By default the
   /// decoration paints behind the child.
+=======
+  /// By default the decoration paints behind the child.
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   const DecoratedSliver({
     super.key,
     required this.decoration,

@@ -5,15 +5,15 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Activity indicator animate property works', (WidgetTester tester) async {
     await tester.pumpWidget(buildCupertinoActivityIndicator());
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
 
@@ -29,7 +29,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgets('Activity indicator dark mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Activity indicator dark mode', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -37,9 +37,9 @@ void main() {
           data: const MediaQueryData(),
           child: RepaintBoundary(
             key: key,
-            child: Container(
+            child: const ColoredBox(
               color: CupertinoColors.white,
-              child: const CupertinoActivityIndicator(
+              child: CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
               ),
@@ -60,9 +60,9 @@ void main() {
           data: const MediaQueryData(platformBrightness: Brightness.dark),
           child: RepaintBoundary(
             key: key,
-            child: Container(
+            child: const ColoredBox(
               color: CupertinoColors.black,
-              child: const CupertinoActivityIndicator(
+              child: CupertinoActivityIndicator(
                 animating: false,
                 radius: 35,
               ),
@@ -78,15 +78,15 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 0% in progress', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Activity indicator 0% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(
+            child: CupertinoActivityIndicator.partiallyRevealed(
               progress: 0,
             ),
           ),
@@ -100,15 +100,15 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 30% in progress', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Activity indicator 30% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(
+            child: CupertinoActivityIndicator.partiallyRevealed(
               progress: 0.5,
             ),
           ),
@@ -122,15 +122,15 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 100% in progress', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Activity indicator 100% in progress', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator.partiallyRevealed(),
+            child: CupertinoActivityIndicator.partiallyRevealed(),
           ),
         ),
       ),
@@ -143,7 +143,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/41345.
-  testWidgets('has the correct corner radius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has the correct corner radius', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoActivityIndicator(animating: false, radius: 100),
     );
@@ -159,15 +159,15 @@ void main() {
     );
   });
 
-  testWidgets('Can specify color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can specify color', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
           key: key,
-          child: Container(
+          child: const ColoredBox(
             color: CupertinoColors.white,
-            child: const CupertinoActivityIndicator(
+            child: CupertinoActivityIndicator(
               animating: false,
               color: Color(0xFF5D3FD3),
               radius: 100,

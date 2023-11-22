@@ -51,7 +51,6 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   bool autoUncompress = true,
   BytesReceivedCallback? onBytesReceived,
 }) {
-  assert(autoUncompress != null);
   final Completer<Uint8List> completer = Completer<Uint8List>.sync();
 
   final _OutputBuffer output = _OutputBuffer();
@@ -66,12 +65,10 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
         // We need to un-compress the bytes as they come in.
         sink = gzip.decoder.startChunkedConversion(output);
       }
-      break;
     case HttpClientResponseCompressionState.decompressed:
       // response.contentLength will not match our bytes stream, so we declare
       // that we don't know the expected content length.
       expectedContentLength = null;
-      break;
     case HttpClientResponseCompressionState.notCompressed:
       // Fall-through.
       break;

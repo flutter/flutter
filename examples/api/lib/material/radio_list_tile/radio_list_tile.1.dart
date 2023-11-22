@@ -2,115 +2,77 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [RadioListTile].
-
-import 'package:flutter/gestures.dart';
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RadioListTile].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RadioListTileApp());
 
-  static const String _title = 'Flutter Code Sample';
+class RadioListTileApp extends StatelessWidget {
+  const RadioListTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
-      ),
+      theme: ThemeData(useMaterial3: true),
+      home: const RadioListTileExample(),
     );
   }
 }
 
-class LinkedLabelRadio extends StatelessWidget {
-  const LinkedLabelRadio({
-    super.key,
-    required this.label,
-    required this.padding,
-    required this.groupValue,
-    required this.value,
-    required this.onChanged,
-  });
+enum Groceries { pickles, tomato, lettuce }
 
-  final String label;
-  final EdgeInsets padding;
-  final bool groupValue;
-  final bool value;
-  final ValueChanged<bool> onChanged;
+class RadioListTileExample extends StatefulWidget {
+  const RadioListTileExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: Row(
-        children: <Widget>[
-          Radio<bool>(
-              groupValue: groupValue,
-              value: value,
-              onChanged: (bool? newValue) {
-                onChanged(newValue!);
-              }),
-          RichText(
-            text: TextSpan(
-              text: label,
-              style: const TextStyle(
-                color: Colors.blueAccent,
-                decoration: TextDecoration.underline,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  debugPrint('Label has been tapped.');
-                },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  State<RadioListTileExample> createState() => _RadioListTileExampleState();
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
-
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  bool _isRadioSelected = false;
+class _RadioListTileExampleState extends State<RadioListTileExample> {
+  Groceries? _groceryItem = Groceries.pickles;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('RadioListTile Sample')),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          LinkedLabelRadio(
-            label: 'First tappable label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: true,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
+          RadioListTile<Groceries>(
+            value: Groceries.pickles,
+            groupValue: _groceryItem,
+            onChanged: (Groceries? value) {
               setState(() {
-                _isRadioSelected = newValue;
+                _groceryItem = value;
               });
             },
+            title: const Text('Pickles'),
+            subtitle: const Text('Supporting text'),
           ),
-          LinkedLabelRadio(
-            label: 'Second tappable label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: false,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
+          RadioListTile<Groceries>(
+            value: Groceries.tomato,
+            groupValue: _groceryItem,
+            onChanged: (Groceries? value) {
               setState(() {
-                _isRadioSelected = newValue;
+                _groceryItem = value;
               });
             },
+            title: const Text('Tomato'),
+            subtitle: const Text(
+                'Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.'),
+          ),
+          RadioListTile<Groceries>(
+            value: Groceries.lettuce,
+            groupValue: _groceryItem,
+            onChanged: (Groceries? value) {
+              setState(() {
+                _groceryItem = value;
+              });
+            },
+            title: const Text('Lettuce'),
+            subtitle: const Text(
+                "Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text."),
+            isThreeLine: true,
           ),
         ],
       ),

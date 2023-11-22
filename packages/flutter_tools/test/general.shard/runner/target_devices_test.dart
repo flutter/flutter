@@ -2885,6 +2885,12 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   final bool supportsColor;
 
   @override
+<<<<<<< HEAD
+=======
+  bool get isCliAnimationEnabled => supportsColor;
+
+  @override
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
   bool usesTerminalUi = true;
 
   @override

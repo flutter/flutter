@@ -112,6 +112,9 @@ class RadioThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static RadioThemeData lerp(RadioThemeData? a, RadioThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return RadioThemeData(
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       fillColor: MaterialStateProperty.lerp<Color?>(a?.fillColor, b?.fillColor, t, Color.lerp),

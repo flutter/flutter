@@ -207,19 +207,15 @@ class CircleAvatar extends StatelessWidget {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         case Brightness.dark:
           effectiveBackgroundColor = theme.primaryColorLight;
-          break;
         case Brightness.light:
           effectiveBackgroundColor = theme.primaryColorDark;
-          break;
       }
     } else if (effectiveForegroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
         case Brightness.dark:
           textStyle = textStyle.copyWith(color: theme.primaryColorLight);
-          break;
         case Brightness.light:
           textStyle = textStyle.copyWith(color: theme.primaryColorDark);
-          break;
       }
     }
     final double minDiameter = _minDiameter;
@@ -256,10 +252,9 @@ class CircleAvatar extends StatelessWidget {
       child: child == null
           ? null
           : Center(
-              child: MediaQuery(
-                // Need to ignore the ambient textScaleFactor here so that the
-                // text doesn't escape the avatar when the textScaleFactor is large.
-                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              // Need to disable text scaling here so that the text doesn't
+              // escape the avatar when the textScaleFactor is large.
+              child: MediaQuery.withNoTextScaling(
                 child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(

@@ -5,9 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
     final AnimatedContainer container = AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
       decoration: const BoxDecoration(color: Color(0xFF00FF00)),
@@ -24,7 +25,7 @@ void main() {
     expect(container, hasOneLineDescription);
   });
 
-  testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer control test', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     const BoxDecoration decorationA = BoxDecoration(
@@ -77,26 +78,32 @@ void main() {
         ' │ decoration: BoxDecoration:\n'
         ' │   color: Color(0xff0000ff)\n'
         ' │ configuration: ImageConfiguration(bundle:\n'
-        ' │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
+        ' │   PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform:\n'
         ' │   android)\n'
         ' │\n'
-        ' └─child: RenderLimitedBox#00000\n'
+        ' └─child: RenderPadding#00000\n'
         '   │ parentData: <none> (can use size)\n'
         '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   │ size: Size(800.0, 600.0)\n'
-        '   │ maxWidth: 0.0\n'
-        '   │ maxHeight: 0.0\n'
+        '   │ padding: EdgeInsets.zero\n'
         '   │\n'
-        '   └─child: RenderConstrainedBox#00000\n'
-        '       parentData: <none> (can use size)\n'
-        '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        '       size: Size(800.0, 600.0)\n'
-        '       additionalConstraints: BoxConstraints(biggest)\n',
+        '   └─child: RenderLimitedBox#00000\n'
+        '     │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
+        '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '     │ size: Size(800.0, 600.0)\n'
+        '     │ maxWidth: 0.0\n'
+        '     │ maxHeight: 0.0\n'
+        '     │\n'
+        '     └─child: RenderConstrainedBox#00000\n'
+        '         parentData: <none> (can use size)\n'
+        '         constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '         size: Size(800.0, 600.0)\n'
+        '         additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
   });
 
-  testWidgets('AnimatedContainer overanimate test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer overanimate test', (WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -133,7 +140,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('AnimatedContainer padding visual-to-directional animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer padding visual-to-directional animation', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -175,7 +182,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(700.0, 0.0));
   });
 
-  testWidgets('AnimatedContainer alignment visual-to-directional animation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer alignment visual-to-directional animation', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -217,7 +224,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 400.0));
   });
 
-  testWidgets('Animation rerun', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Animation rerun', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: AnimatedContainer(
@@ -285,7 +292,7 @@ void main() {
     expect(text.size.height, equals(100.0));
   });
 
-  testWidgets('AnimatedContainer sets transformAlignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer sets transformAlignment', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -333,7 +340,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(target)), const Offset(400.0, 300.0));
   });
 
-  testWidgets('AnimatedContainer sets clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedContainer sets clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedContainer(
         decoration: const BoxDecoration(

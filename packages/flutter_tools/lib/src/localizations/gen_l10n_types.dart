@@ -27,7 +27,7 @@ import 'message_parser.dart';
 // * <https://pub.dev/packages/intl>
 // * <https://pub.dev/documentation/intl/latest/intl/DateFormat-class.html>
 // * <https://api.dartlang.org/stable/2.7.0/dart-core/DateTime-class.html>
-const Set<String> _validDateFormats = <String>{
+const Set<String> validDateFormats = <String>{
   'd',
   'E',
   'EEEE',
@@ -94,6 +94,7 @@ const Set<String> _validNumberFormats = <String>{
   'compactLong',
   'currency',
   'decimalPattern',
+  'decimalPatternDigits',
   'decimalPercentPattern',
   'percentPattern',
   'scientificPattern',
@@ -118,6 +119,7 @@ const Set<String> _numberFormatsWithNamedParameters = <String>{
   'compactSimpleCurrency',
   'compactLong',
   'currency',
+  'decimalPatternDigits',
   'decimalPercentPattern',
   'simpleCurrency',
 };
@@ -185,7 +187,7 @@ class L10nMissingPlaceholderException extends L10nParserException {
 //   }
 // }
 class OptionalParameter {
-  const OptionalParameter(this.name, this.value) : assert(name != null), assert(value != null);
+  const OptionalParameter(this.name, this.value);
 
   final String name;
   final Object value;
@@ -226,9 +228,7 @@ class OptionalParameter {
 //
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
-    : assert(resourceId != null),
-      assert(name != null),
-      example = _stringAttribute(resourceId, name, attributes, 'example'),
+    : example = _stringAttribute(resourceId, name, attributes, 'example'),
       type = _stringAttribute(resourceId, name, attributes, 'type'),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
@@ -244,13 +244,14 @@ class Placeholder {
   String? type;
   bool isPlural = false;
   bool isSelect = false;
+  bool isDateTime = false;
+  bool requiresDateFormatting = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
-  bool get requiresDateFormatting => type == 'DateTime';
   bool get requiresNumFormatting => <String>['int', 'num', 'double'].contains(type) && format != null;
   bool get hasValidNumberFormat => _validNumberFormats.contains(format);
   bool get hasNumberFormatWithParameters => _numberFormatsWithNamedParameters.contains(format);
-  bool get hasValidDateFormat => _validDateFormats.contains(format);
+  bool get hasValidDateFormat => validDateFormats.contains(format);
 
   static String? _stringAttribute(
     String resourceId,
@@ -335,12 +336,11 @@ class Message {
     this.resourceId,
     bool isResourceAttributeRequired,
     {
+      this.useRelaxedSyntax = false,
       this.useEscaping = false,
       this.logger,
     }
-  ) : assert(templateBundle != null),
-      assert(allBundles != null),
-      assert(resourceId != null && resourceId.isNotEmpty),
+  ) : assert(resourceId.isNotEmpty),
       value = _value(templateBundle.resources, resourceId),
       description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
       placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
@@ -353,13 +353,25 @@ class Message {
       filenames[bundle.locale] = bundle.file.basename;
       final String? translation = bundle.translationFor(resourceId);
       messages[bundle.locale] = translation;
-      parsedMessages[bundle.locale] = translation == null ? null : Parser(
-        resourceId,
-        bundle.file.basename,
-        translation,
-        useEscaping: useEscaping,
-        logger: logger
-      ).parse();
+      List<String>? validPlaceholders;
+      if (useRelaxedSyntax) {
+        validPlaceholders = placeholders.entries.map((MapEntry<String, Placeholder> e) => e.key).toList();
+      }
+      try {
+        parsedMessages[bundle.locale] = translation == null ? null : Parser(
+          resourceId,
+          bundle.file.basename,
+          translation,
+          useEscaping: useEscaping,
+          placeholders: validPlaceholders,
+          logger: logger,
+        ).parse();
+      } on L10nParserException catch (error) {
+        logger?.printError(error.toString());
+        // Treat it as an untranslated message in case we can't parse.
+        parsedMessages[bundle.locale] = null;
+        hadErrors = true;
+      }
     }
     // Infer the placeholders
     _inferPlaceholders(filenames);
@@ -372,7 +384,9 @@ class Message {
   final Map<LocaleInfo, Node?> parsedMessages;
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
+  final bool useRelaxedSyntax;
   final Logger? logger;
+  bool hadErrors = false;
 
   bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
 
@@ -482,7 +496,12 @@ class Message {
       final List<Node> traversalStack = <Node>[parsedMessages[locale]!];
       while (traversalStack.isNotEmpty) {
         final Node node = traversalStack.removeLast();
-        if (<ST>[ST.placeholderExpr, ST.pluralExpr, ST.selectExpr].contains(node.type)) {
+        if (<ST>[
+          ST.placeholderExpr,
+          ST.pluralExpr,
+          ST.selectExpr,
+          ST.argumentExpr
+        ].contains(node.type)) {
           final String identifier = node.children[1].value!;
           Placeholder? placeholder = getPlaceholder(identifier);
           if (placeholder == null) {
@@ -493,6 +512,14 @@ class Message {
             placeholder.isPlural = true;
           } else if (node.type == ST.selectExpr) {
             placeholder.isSelect = true;
+          } else if (node.type == ST.argumentExpr) {
+            placeholder.isDateTime = true;
+          } else {
+            // Here the node type must be ST.placeholderExpr.
+            // A DateTime placeholder must require date formatting.
+            if (placeholder.type == 'DateTime') {
+              placeholder.requiresDateFormatting = true;
+            }
           }
         }
         traversalStack.addAll(node.children);
@@ -504,9 +531,16 @@ class Message {
         ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
     );
 
+    bool atMostOneOf(bool x, bool y, bool z) {
+      return x && !y && !z
+        || !x && y && !z
+        || !x && !y && z
+        || !x && !y && !z;
+    }
+
     for (final Placeholder placeholder in placeholders.values) {
-      if (placeholder.isPlural && placeholder.isSelect) {
-        throw L10nException('Placeholder is used as both a plural and select in certain languages.');
+      if (!atMostOneOf(placeholder.isPlural, placeholder.isDateTime, placeholder.isSelect)) {
+        throw L10nException('Placeholder is used as plural/select/datetime in certain languages.');
       } else if (placeholder.isPlural) {
         if (placeholder.type == null) {
           placeholder.type = 'num';
@@ -520,20 +554,30 @@ class Message {
         } else if (placeholder.type != 'String') {
           throw L10nException("Placeholders used in selects must be of type 'String'");
         }
+      } else if (placeholder.isDateTime) {
+        if (placeholder.type == null) {
+          placeholder.type = 'DateTime';
+        } else if (placeholder.type != 'DateTime') {
+          throw L10nException("Placeholders used in datetime expressions much be of type 'DateTime'");
+        }
       }
       placeholder.type ??= 'Object';
     }
   }
 }
 
-// Represents the contents of one ARB file.
+/// Represents the contents of one ARB file.
 class AppResourceBundle {
+  /// Assuming that the caller has verified that the file exists and is readable.
   factory AppResourceBundle(File file) {
-    assert(file != null);
-    // Assuming that the caller has verified that the file exists and is readable.
-    Map<String, Object?> resources;
+    final Map<String, Object?> resources;
     try {
-      resources = json.decode(file.readAsStringSync()) as Map<String, Object?>;
+      final String content = file.readAsStringSync().trim();
+      if (content.isEmpty) {
+        resources = <String, Object?>{};
+      } else {
+        resources = json.decode(content) as Map<String, Object?>;
+      }
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
@@ -548,7 +592,7 @@ class AppResourceBundle {
 
     for (int index = 0; index < fileName.length; index += 1) {
       // If an underscore was found, check if locale string follows.
-      if (fileName[index] == '_' && fileName[index + 1] != null) {
+      if (fileName[index] == '_') {
         // If Locale.tryParse fails, it returns null.
         final Locale? parserResult = Locale.tryParse(fileName.substring(index + 1));
         // If the parserResult is not an actual locale identifier, end the loop.
@@ -613,26 +657,31 @@ class AppResourceBundle {
 // Represents all of the ARB files in [directory] as [AppResourceBundle]s.
 class AppResourceBundleCollection {
   factory AppResourceBundleCollection(Directory directory) {
-    assert(directory != null);
     // Assuming that the caller has verified that the directory is readable.
 
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
     final Map<LocaleInfo, AppResourceBundle> localeToBundle = <LocaleInfo, AppResourceBundle>{};
     final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
-    final List<File> files = directory.listSync().whereType<File>().toList()..sort(sortFilesByPath);
+    // We require the list of files to be sorted so that
+    // "languageToLocales[bundle.locale.languageCode]" is not null
+    // by the time we handle locales with country codes.
+    final List<File> files = directory
+      .listSync()
+      .whereType<File>()
+      .where((File e) => filenameRE.hasMatch(e.path))
+      .toList()
+      ..sort(sortFilesByPath);
     for (final File file in files) {
-      if (filenameRE.hasMatch(file.path)) {
-        final AppResourceBundle bundle = AppResourceBundle(file);
-        if (localeToBundle[bundle.locale] != null) {
-          throw L10nException(
-            "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
-            'Ensure that there is exactly one arb file for each locale.'
-          );
-        }
-        localeToBundle[bundle.locale] = bundle;
-        languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
-        languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
+      final AppResourceBundle bundle = AppResourceBundle(file);
+      if (localeToBundle[bundle.locale] != null) {
+        throw L10nException(
+          "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
+          'Ensure that there is exactly one arb file for each locale.'
+        );
       }
+      localeToBundle[bundle.locale] = bundle;
+      languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
+      languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
     }
 
     languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {

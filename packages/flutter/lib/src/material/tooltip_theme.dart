@@ -149,10 +149,9 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
-    assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
@@ -263,13 +262,11 @@ class TooltipThemeData with Diagnosticable {
 class TooltipTheme extends InheritedTheme {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
-  ///
-  /// The data argument must not be null.
   const TooltipTheme({
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;

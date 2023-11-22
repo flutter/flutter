@@ -34,6 +34,12 @@ class TextSelectionToolbarAnchors {
       renderBox.localToGlobal(Offset.zero),
       renderBox.localToGlobal(renderBox.size.bottomRight(Offset.zero)),
     );
+
+    if (editingRegion.left.isNaN || editingRegion.top.isNaN
+      || editingRegion.right.isNaN || editingRegion.bottom.isNaN) {
+      return const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero);
+    }
+
     final bool isMultiline = selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy >
         endGlyphHeight / 2;
 

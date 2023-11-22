@@ -52,7 +52,7 @@ void main() {
 
   test('debugInvertOversizedImages', () async {
     debugInvertOversizedImages = true;
-    expect(PaintingBinding.instance.window.devicePixelRatio != 1.0, true);
+    expect(PaintingBinding.instance.platformDispatcher.views.any((ui. FlutterView view) => view.devicePixelRatio > 1.0), isTrue);
     final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
     final List<String> messages = <String>[];
@@ -102,7 +102,7 @@ void main() {
 
     expect(
       messages.single,
-      'Image TestImage has a display size of 300×150 but a decode size of 300×300, which uses an additional 234KB.\n\n'
+      'Image TestImage has a display size of 300×150 but a decode size of 300×300, which uses an additional 234KB (assuming a device pixel ratio of ${3.0}).\n\n'
       'Consider resizing the asset ahead of time, supplying a cacheWidth parameter of 300, a cacheHeight parameter of 150, or using a ResizeImage.',
     );
 
@@ -180,7 +180,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
     expect(imageSizeInfo.imageSize, const Size(300, 300));
-    expect(imageSizeInfo.displaySize, const Size(200, 100) * PaintingBinding.instance.window.devicePixelRatio);
+    expect(imageSizeInfo.displaySize, const Size(200, 100) * tester.view.devicePixelRatio);
 
     // Make sure that we don't report an identical image size info if we
     // redraw in the next frame.
@@ -219,7 +219,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
     expect(imageSizeInfo.imageSize, const Size(300, 300));
-    expect(imageSizeInfo.displaySize, const Size(200, 100) * PaintingBinding.instance.window.devicePixelRatio);
+    expect(imageSizeInfo.displaySize, const Size(200, 100) * tester.view.devicePixelRatio);
 
     // Make sure that we don't report an identical image size info if we
     // redraw in the next frame.
@@ -237,7 +237,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, 'test.png');
     expect(imageSizeInfo.imageSize, const Size(300, 300));
-    expect(imageSizeInfo.displaySize, const Size(200, 150) * PaintingBinding.instance.window.devicePixelRatio);
+    expect(imageSizeInfo.displaySize, const Size(200, 150) * tester.view.devicePixelRatio);
 
     debugOnPaintImage = null;
   });
@@ -261,7 +261,7 @@ void main() {
     expect(imageSizeInfo, isNotNull);
     expect(imageSizeInfo.source, '<Unknown Image(300×200)>');
     expect(imageSizeInfo.imageSize, const Size(300, 200));
-    expect(imageSizeInfo.displaySize, const Size(200, 100) * PaintingBinding.instance.window.devicePixelRatio);
+    expect(imageSizeInfo.displaySize, const Size(200, 100) * tester.view.devicePixelRatio);
 
     debugOnPaintImage = null;
   });

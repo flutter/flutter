@@ -11,17 +11,18 @@
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
 @Tags(<String>['reduced-test-set', 'no-shuffle'])
+library;
 
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -66,6 +67,7 @@ Widget buildDropdown({
     Color? focusColor,
     Color? dropdownColor,
     double? menuMaxHeight,
+    EdgeInsetsGeometry? padding,
   }) {
   final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
     return DropdownMenuItem<String>(
@@ -100,6 +102,7 @@ Widget buildDropdown({
         itemHeight: itemHeight,
         alignment: alignment,
         menuMaxHeight: menuMaxHeight,
+        padding: padding,
       ),
     );
   }
@@ -126,6 +129,7 @@ Widget buildDropdown({
     itemHeight: itemHeight,
     alignment: alignment,
     menuMaxHeight: menuMaxHeight,
+    padding: padding,
   );
 }
 
@@ -155,39 +159,45 @@ Widget buildFrame({
   Color? dropdownColor,
   bool isFormField = false,
   double? menuMaxHeight,
+  EdgeInsetsGeometry? padding,
   Alignment dropdownAlignment = Alignment.center,
+  bool? useMaterial3,
 }) {
-  return TestApp(
-    textDirection: textDirection,
-    mediaSize: mediaSize,
-    child: Material(
-      child: Align(
-        alignment: dropdownAlignment,
-        child: RepaintBoundary(
-          child: buildDropdown(
-            isFormField: isFormField,
-            buttonKey: buttonKey,
-            value: value,
-            hint: hint,
-            disabledHint: disabledHint,
-            onChanged: onChanged,
-            onTap: onTap,
-            icon: icon,
-            iconSize: iconSize,
-            iconDisabledColor: iconDisabledColor,
-            iconEnabledColor: iconEnabledColor,
-            isDense: isDense,
-            isExpanded: isExpanded,
-            underline: underline,
-            focusNode: focusNode,
-            autofocus: autofocus,
-            focusColor: focusColor,
-            dropdownColor: dropdownColor,
-            items: items,
-            selectedItemBuilder: selectedItemBuilder,
-            itemHeight: itemHeight,
-            alignment: alignment,
-            menuMaxHeight: menuMaxHeight,
+  return Theme(
+    data: ThemeData(useMaterial3: useMaterial3),
+    child: TestApp(
+      textDirection: textDirection,
+      mediaSize: mediaSize,
+      child: Material(
+        child: Align(
+          alignment: dropdownAlignment,
+          child: RepaintBoundary(
+            child: buildDropdown(
+              isFormField: isFormField,
+              buttonKey: buttonKey,
+              value: value,
+              hint: hint,
+              disabledHint: disabledHint,
+              onChanged: onChanged,
+              onTap: onTap,
+              icon: icon,
+              iconSize: iconSize,
+              iconDisabledColor: iconDisabledColor,
+              iconEnabledColor: iconEnabledColor,
+              isDense: isDense,
+              isExpanded: isExpanded,
+              underline: underline,
+              focusNode: focusNode,
+              autofocus: autofocus,
+              focusColor: focusColor,
+              dropdownColor: dropdownColor,
+              items: items,
+              selectedItemBuilder: selectedItemBuilder,
+              itemHeight: itemHeight,
+              alignment: alignment,
+              menuMaxHeight: menuMaxHeight,
+              padding: padding,
+            ),
           ),
         ),
       ),
@@ -201,6 +211,7 @@ Widget buildDropdownWithHint({
   bool enableSelectedItemBuilder = false,
 }){
   return buildFrame(
+    useMaterial3: false,
     mediaSize: const Size(800, 600),
     itemHeight: 100.0,
     alignment: alignment,
@@ -208,7 +219,7 @@ Widget buildDropdownWithHint({
     selectedItemBuilder: enableSelectedItemBuilder
       ? (BuildContext context) {
           return menuItems.map<Widget>((String item) {
-            return Container(
+            return ColoredBox(
               color: const Color(0xff00ff00),
               child: Text(item),
             );
@@ -245,7 +256,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
+        data: MediaQueryData.fromView(View.of(context)).copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -280,6 +291,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
   const String text = 'foo';
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: isFormField
             ? Form(
@@ -329,7 +341,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormF
 void main() {
   testWidgets('Default dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -341,7 +353,7 @@ void main() {
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged);
+    Widget build() => buildFrame(buttonKey: buttonKey, isExpanded: true, onChanged: onChanged, useMaterial3: false);
     await tester.pumpWidget(build());
     final Finder buttonFinder = find.byKey(buttonKey);
     assert(tester.renderObject(buttonFinder).attached);
@@ -374,7 +386,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three'), warnIfMissed: false);
+    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -400,7 +412,7 @@ void main() {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          data: MediaQueryData.fromView(tester.view),
           child: Navigator(
             initialRoute: '/',
             onGenerateRoute: (RouteSettings settings) {
@@ -433,7 +445,7 @@ void main() {
 
     expect(value, equals('three'));
 
-    await tester.tap(find.text('three'), warnIfMissed: false);
+    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -552,7 +564,7 @@ void main() {
     // Initial value of null displays hint
     expect(value, equals(null));
     expect(getIndex(), 4);
-    await tester.tap(find.text('Select Value'), warnIfMissed: false);
+    await tester.tap(find.text('Select Value', skipOffstage: false), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pumpAndSettle();
@@ -603,6 +615,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/66870
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(),
           body: Column(
@@ -639,7 +652,7 @@ void main() {
     );
     await tester.tap(find.text('First Item'));
     await tester.pump();
-    final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item')).toList()[1];
+    final RenderBox secondItem = tester.renderObjectList<RenderBox>(find.text('Second Item', skipOffstage: false)).toList()[1];
     expect(secondItem.localToGlobal(Offset.zero).dx, equals(150.0));
     expect(secondItem.localToGlobal(Offset.zero).dy, equals(176.0));
   });
@@ -677,14 +690,10 @@ void main() {
 
     // We should have two copies of item 5, one in the menu and one in the
     // button itself.
-    expect(tester.elementList(find.text('5')), hasLength(2));
-
-    // We should only have one copy of item 19, which is in the button itself.
-    // The copy in the menu shouldn't be in the tree because it's off-screen.
-    expect(tester.elementList(find.text('19')), hasLength(1));
+    expect(tester.elementList(find.text('5', skipOffstage: false)), hasLength(2));
 
     expect(value, 4);
-    await tester.tap(find.byWidget(button), warnIfMissed: false);
+    await tester.tap(find.byWidget(button, skipOffstage: false), warnIfMissed: false);
     expect(value, 4);
     // this waits for the route's completer to complete, which calls handleChanged
     await tester.idle();
@@ -695,7 +704,7 @@ void main() {
     testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
 
-      Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged);
+      Widget build() => buildFrame(buttonKey: buttonKey, textDirection: textDirection, onChanged: onChanged, useMaterial3: false);
 
       await tester.pumpWidget(build());
       final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
@@ -716,17 +725,14 @@ void main() {
       expect(itemBoxes.length, equals(2));
       for (final RenderBox itemBox in itemBoxes) {
         assert(itemBox.attached);
-        assert(textDirection != null);
         switch (textDirection) {
           case TextDirection.rtl:
             expect(
               buttonBox.localToGlobal(buttonBox.size.bottomRight(Offset.zero)),
               equals(itemBox.localToGlobal(itemBox.size.bottomRight(Offset.zero))),
             );
-            break;
           case TextDirection.ltr:
             expect(buttonBox.localToGlobal(Offset.zero), equals(itemBox.localToGlobal(Offset.zero)));
-            break;
         }
         expect(buttonBox.size.height, equals(itemBox.size.height));
       }
@@ -1104,7 +1110,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     // Tap on item 'one', which must appear over the button.
-    await tester.tap(find.byKey(buttonKey), warnIfMissed: false);
+    await tester.tap(find.byKey(buttonKey, skipOffstage: false), warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
@@ -1144,13 +1150,11 @@ void main() {
       tester.element(find.byType(ListView)).visitAncestorElements((Element element) {
         if (element.toString().startsWith('_DropdownMenu')) {
           final RenderBox box = element.findRenderObject()! as RenderBox;
-          assert(box != null);
           menuRect = box.localToGlobal(Offset.zero) & box.size;
           return false;
         }
         return true;
       });
-      assert(menuRect != null);
       return menuRect;
     }
 
@@ -1174,7 +1178,7 @@ void main() {
       await tester.pumpAndSettle();
       menuRect = getMenuRect();
       buttonRect = getExpandedButtonRect();
-      await tester.tap(find.byType(dropdownButtonType), warnIfMissed: false);
+      await tester.tap(find.byType(dropdownButtonType, skipOffstage: false), warnIfMissed: false);
     }
 
     // Dropdown button is along the top of the app. The top of the menu is
@@ -1327,6 +1331,9 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
+          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+          label: 'Dismiss',
+          textDirection: TextDirection.ltr,
           children: <TestSemantics>[
             TestSemantics(
               flags: <SemanticsFlag>[
@@ -1537,7 +1544,7 @@ void main() {
   });
 
   testWidgets(
-    'DropdowwnButton hint displays when the items list is empty, '
+    'DropdownButton hint displays when the items list is empty, '
     'items is null, and disabledHint is null',
     (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
@@ -1757,7 +1764,7 @@ void main() {
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
-        find.widgetWithText(Row, '25'),
+        find.widgetWithText(Row, '25', skipOffstage: false),
       );
       // DropdownButton should be the height of the largest item (hint inclusive)
       expect(dropdownButtonRenderBox.size.height, 125);
@@ -1831,7 +1838,7 @@ void main() {
       ));
 
       final RenderBox dropdownButtonRenderBox = tester.renderObject<RenderBox>(
-        find.widgetWithText(Row, '25'),
+        find.widgetWithText(Row, '25', skipOffstage: false),
       );
       // DropdownButton should be the height of the largest item (hint inclusive)
       expect(dropdownButtonRenderBox.size.height, 125);
@@ -1855,9 +1862,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1891,9 +1896,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1928,9 +1931,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -1965,9 +1966,7 @@ void main() {
     double getMenuScroll() {
       double scrollPosition;
       final ScrollController scrollController = PrimaryScrollController.of(tester.element(find.byType(ListView)));
-      assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
-      assert(scrollPosition != null);
       return scrollPosition;
     }
 
@@ -2155,7 +2154,7 @@ void main() {
 
     // Initially shows the hint text
     expect(find.text('Please select an item'), findsOneWidget);
-    await tester.tap(find.text('Please select an item'), warnIfMissed: false);
+    await tester.tap(find.text('Please select an item', skipOffstage: false), warnIfMissed: false);
     await tester.pumpAndSettle();
     await tester.tap(find.text('1'));
     await tester.pumpAndSettle();
@@ -2201,10 +2200,10 @@ void main() {
     }
 
     final Finder dropdownIcon = find.byType(Icon);
-    final Finder item30 = find.byKey(const ValueKey<double>(30));
-    final Finder item40 = find.byKey(const ValueKey<double>(40));
-    final Finder item50 = find.byKey(const ValueKey<double>(50));
-    final Finder item60 = find.byKey(const ValueKey<double>(60));
+    final Finder item30 = find.byKey(const ValueKey<double>(30), skipOffstage: false);
+    final Finder item40 = find.byKey(const ValueKey<double>(40), skipOffstage: false);
+    final Finder item50 = find.byKey(const ValueKey<double>(50), skipOffstage: false);
+    final Finder item60 = find.byKey(const ValueKey<double>(60), skipOffstage: false);
 
     // Only the DropdownButton is visible. It contains the selected item
     // and a dropdown arrow icon.
@@ -2380,7 +2379,7 @@ void main() {
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
 
     // Show the popup menu.
-    await tester.tap(find.text('-item0-'), warnIfMissed: false);
+    await tester.tap(find.text('-item0-', skipOffstage: false), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('-item0-')).dx, 8);
@@ -2390,12 +2389,12 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final UniqueKey buttonKey = UniqueKey();
     final FocusNode focusNode = FocusNode(debugLabel: 'DropdownButton');
-    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true, useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f000000)));
 
-    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00), useMaterial3: false));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(find.byType(Material), paints..rect(rect: const Rect.fromLTRB(348.0, 276.0, 452.0, 324.0), color: const Color(0x1f00ff00)));
   });
@@ -2704,6 +2703,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
@@ -2768,7 +2768,7 @@ void main() {
 
     // Scrolling to the top again has removed the one the focus was on from the
     // tree, causing it to lose focus.
-    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isFalse);
+    expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91), skipOffstage: false).last)).hasPrimaryFocus, isFalse);
   });
 
   testWidgets('DropdownButton onTap callback can request focus', (WidgetTester tester) async {
@@ -2909,7 +2909,7 @@ void main() {
     expect(dropdownButtonTapCounter, 1); // Should not change.
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three'), warnIfMissed: false);
+    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     expect(value, equals('three'));
@@ -2975,7 +2975,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('three'), warnIfMissed: false);
+    await tester.tap(find.text('three', skipOffstage: false), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
@@ -2991,7 +2991,7 @@ void main() {
     expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
 
     // Tap dropdown button again.
-    await tester.tap(find.text('two'), warnIfMissed: false);
+    await tester.tap(find.text('two', skipOffstage: false), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Should not change.
@@ -3169,15 +3169,15 @@ void main() {
     // The default item height is 48.0 pixels and needs two items padding since
     // the menu requires empty space surrounding the menu. Finally, the constraint height
     // is 47.0 pixels for the menu rendering.
-    tester.binding.window.physicalSizeTestValue = const Size(800.0, 48.0 * 3 - 1.0);
-    tester.binding.window.devicePixelRatioTestValue = 1;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
-    addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
+    tester.view.physicalSize = const Size(800.0, 48.0 * 3 - 1.0);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(
@@ -3346,7 +3346,7 @@ void main() {
     // Should be center-center aligned, the icon size is 24.0 pixels.
     expect(
       buttonBox.localToGlobal(Offset((buttonBox.size.width -24.0) / 2.0, buttonBox.size.height / 2.0)),
-      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
+      offsetMoreOrLessEquals(selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0))),
     );
 
     // Open dropdown.
@@ -3362,10 +3362,10 @@ void main() {
       Offset(selectedItemBoxInMenu.size.width / 2.0, selectedItemBoxInMenu.size.height / 2.0)
     );
 
-    expect(center.dx, menuRect.topCenter.dx,);
+    expect(center.dx, moreOrLessEquals(menuRect.topCenter.dx));
     expect(
       center.dy,
-      selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)).dy,
+      moreOrLessEquals(selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)).dy),
     );
   });
 
@@ -3513,8 +3513,9 @@ void main() {
     await tester.pumpAndSettle(); // finish the menu animation
 
     // The inherited ScrollBehavior should not apply Scrollbars since they are
-    // already built in to the widget.
-    expect(find.byType(CupertinoScrollbar), findsNothing);
+    // already built in to the widget. For iOS platform, ScrollBar directly returns
+    // CupertinoScrollbar
+    expect(find.byType(CupertinoScrollbar), debugDefaultTargetPlatformOverride == TargetPlatform.iOS ? findsOneWidget : findsNothing);
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
 
@@ -3525,6 +3526,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(
@@ -3686,50 +3688,50 @@ void main() {
       alignment: AlignmentDirectional.centerStart,
       isExpanded: false,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: false,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: false,
     ));
-    expect(tester.getBottomLeft(find.text(hintText)).dx, 348.0);
-    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: false,
     ));
-    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: false,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: false,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: false,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 334.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 334.0);
 
     // DropdownButton with `isExpanded: true`
     // AlignmentDirectional.centerStart (default)
@@ -3737,50 +3739,50 @@ void main() {
       alignment: AlignmentDirectional.centerStart,
       isExpanded: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: true,
     ));
-    expect(tester.getBottomLeft(find.text(hintText)).dx, 0.0);
-    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: true,
     ));
-    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: true,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: true,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: true,
     ));
-    expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
-    expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
+    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
+    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dy, 350.0);
   });
 
   testWidgets('DropdownButton hint alignment with selectedItemBuilder', (WidgetTester tester) async {
@@ -3792,56 +3794,56 @@ void main() {
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 348.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getBottomLeft(find.text(hintText)).dx, 348.0);
-    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 348.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: false,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 428.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 334.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 428.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 334.0);
 
     // DropdownButton with `isExpanded: true`
     // AlignmentDirectional.centerStart (default)
@@ -3850,56 +3852,56 @@ void main() {
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.topStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topStart,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopLeft(find.text(hintText)).dx, 0.0);
-    expect(tester.getTopLeft(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
+    expect(tester.getTopLeft(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.bottomStart
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomStart,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getBottomLeft(find.text(hintText)).dx, 0.0);
-    expect(tester.getBottomLeft(find.text(hintText)).dy, 350.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dx, 0.0);
+    expect(tester.getBottomLeft(find.text(hintText,skipOffstage: false)).dy, 350.0);
     // AlignmentDirectional.center
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.center,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getCenter(find.text(hintText)).dx, 388.0);
-    expect(tester.getCenter(find.text(hintText)).dy, 300.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dx, 388.0);
+    expect(tester.getCenter(find.text(hintText,skipOffstage: false)).dy, 300.0);
     // AlignmentDirectional.topEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.topEnd,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 250.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 250.0);
     // AlignmentDirectional.centerEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.centerEnd,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getTopRight(find.text(hintText)).dx, 776.0);
-    expect(tester.getTopRight(find.text(hintText)).dy, 292.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
+    expect(tester.getTopRight(find.text(hintText,skipOffstage: false)).dy, 292.0);
     // AlignmentDirectional.bottomEnd
     await tester.pumpWidget(buildDropdownWithHint(
       alignment: AlignmentDirectional.bottomEnd,
       isExpanded: true,
       enableSelectedItemBuilder: true,
     ));
-    expect(tester.getBottomRight(find.text(hintText)).dx, 776.0);
-    expect(tester.getBottomRight(find.text(hintText)).dy, 350.0);
+    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dx, 776.0);
+    expect(tester.getBottomRight(find.text(hintText,skipOffstage: false)).dy, 350.0);
   });
 
   testWidgets('BorderRadius property clips dropdown button and dropdown menu', (WidgetTester tester) async {
@@ -3939,5 +3941,29 @@ void main() {
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
     expect(renderClip.borderRadius, BorderRadius.circular(radius));
+  });
+
+  testWidgets('Size of DropdownButton with padding', (WidgetTester tester) async {
+    const double padVertical = 5;
+    const double padHorizontal = 10;
+    final Key buttonKey = UniqueKey();
+    EdgeInsets? padding;
+
+    Widget build() => buildFrame(buttonKey: buttonKey, onChanged: onChanged, padding: padding);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxNoPadding = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxNoPadding.attached);
+    final Size noPaddingSize = Size.copy(buttonBoxNoPadding.size);
+
+    padding = const EdgeInsets.symmetric(vertical: padVertical, horizontal: padHorizontal);
+    await tester.pumpWidget(build());
+    final RenderBox buttonBoxPadded = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBoxPadded.attached);
+    final Size paddedSize = Size.copy(buttonBoxPadded.size);
+
+    // dropdowns with padding should be that much larger than with no padding
+    expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
+    expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
 }

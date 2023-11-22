@@ -7,6 +7,10 @@ import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+<<<<<<< HEAD
+=======
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
 
 void main() {
   late AppLifecycleListener listener;
@@ -47,13 +51,21 @@ void main() {
         'There were ${TestAppLifecycleListener.registerCount} listeners that were not disposed of in tests.');
   });
 
+<<<<<<< HEAD
   testWidgets('Default Diagnostics', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Default Diagnostics', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     listener = TestAppLifecycleListener(binding: tester.binding);
     expect(listener.toString(),
         equalsIgnoringHashCodes('TestAppLifecycleListener#00000(binding: <AutomatedTestWidgetsFlutterBinding>)'));
   });
 
+<<<<<<< HEAD
   testWidgets('Diagnostics', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Diagnostics', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     Future<AppExitResponse> handleExitRequested() async {
       return AppExitResponse.cancel;
     }
@@ -69,7 +81,11 @@ void main() {
             'TestAppLifecycleListener#00000(binding: <AutomatedTestWidgetsFlutterBinding>, onStateChange, onExitRequested)'));
   });
 
+<<<<<<< HEAD
   testWidgets('listens to AppLifecycleState', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('listens to AppLifecycleState', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final List<AppLifecycleState> states = <AppLifecycleState>[tester.binding.lifecycleState!];
     void stateChange(AppLifecycleState state) {
       states.add(state);
@@ -95,7 +111,11 @@ void main() {
         ]));
   });
 
+<<<<<<< HEAD
   testWidgets('Triggers correct state transition callbacks', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Triggers correct state transition callbacks', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     final List<String> transitions = <String>[];
     listener = TestAppLifecycleListener(
       binding: WidgetsBinding.instance,
@@ -148,7 +168,11 @@ void main() {
     await setAppLifeCycleState(AppLifecycleState.detached);
   });
 
+<<<<<<< HEAD
   testWidgets('Receives exit requests', (WidgetTester tester) async {
+=======
+  testWidgetsWithLeakTracking('Receives exit requests', (WidgetTester tester) async {
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     bool exitRequested = false;
     Future<AppExitResponse> handleExitRequested() async {
       exitRequested = true;

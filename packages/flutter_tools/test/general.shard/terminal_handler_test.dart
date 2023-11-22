@@ -400,6 +400,52 @@ void main() {
       await terminalHandler.processTerminalInput('L');
     });
 
+    testWithoutContext('f - debugDumpFocusTree', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ]);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpLayerTree with web target', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object>{
+            'data': 'FOCUS TREE',
+          }
+        ),
+      ], web: true);
+      await terminalHandler.processTerminalInput('f');
+
+      expect(terminalHandler.logger.statusText, contains('FOCUS TREE'));
+    });
+
+    testWithoutContext('f - debugDumpFocusTree with service protocol and profile mode is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], buildMode: BuildMode.profile);
+      await terminalHandler.processTerminalInput('f');
+    });
+
+    testWithoutContext('f - debugDumpFocusTree without service protocol is skipped', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], supportsServiceProtocol: false);
+      await terminalHandler.processTerminalInput('f');
+    });
+
     testWithoutContext('o,O - debugTogglePlatform', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         // Request 1.
@@ -418,10 +464,10 @@ void main() {
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
             'isolateId': '1',
-            'value': 'fuchsia',
+            'value': 'windows',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia',
+            'value': 'windows',
           },
         ),
         // Request 2.
@@ -450,7 +496,7 @@ void main() {
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
 
-      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to windows'));
       expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
     });
 
@@ -472,10 +518,10 @@ void main() {
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
             'isolateId': '1',
-            'value': 'fuchsia',
+            'value': 'windows',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia',
+            'value': 'windows',
           },
         ),
         // Request 2.
@@ -504,7 +550,7 @@ void main() {
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
 
-      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to windows'));
       expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
     });
 
@@ -969,38 +1015,14 @@ void main() {
     expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
   });
 
-  testWithoutContext('s, can take screenshot on debug device that does not support screenshot', () async {
+  testWithoutContext('s, will not take screenshot on non-web device without screenshot tooling support', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
-      listViews,
-      FakeVmServiceRequest(
-        method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object?>{
-          'isolateId': fakeUnpausedIsolate.id,
-          'enabled': 'false',
-        },
-      ),
-      FakeVmServiceRequest(
-        method: '_flutter.screenshot',
-        args: <String, Object>{},
-        jsonResponse: <String, Object>{
-          'screenshot': base64.encode(<int>[1, 2, 3, 4]),
-        },
-      ),
-      FakeVmServiceRequest(
-        method: 'ext.flutter.debugAllowBanner',
-        args: <String, Object?>{
-          'isolateId': fakeUnpausedIsolate.id,
-          'enabled': 'true',
-        },
-      ),
-    ], logger: logger, fileSystem: fileSystem);
+    final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[], logger: logger, fileSystem: fileSystem);
 
     await terminalHandler.processTerminalInput('s');
 
-    expect(logger.statusText, contains('Screenshot written to flutter_01.png (0kB)'));
-    expect(fileSystem.currentDirectory.childFile('flutter_01.png').readAsBytesSync(), <int>[1, 2, 3, 4]);
+    expect(logger.statusText, isNot(contains('Screenshot written to')));
   });
 
   testWithoutContext('s, can take screenshot on debug web device that does not support screenshot', () async {
@@ -1085,66 +1107,6 @@ void main() {
 
     expect(logger.statusText, '\n');
     expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
-  });
-
-  testWithoutContext('s, bails taking screenshot on debug device if debugAllowBanner throws RpcError', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final TerminalHandler terminalHandler = setUpTerminalHandler(
-      <FakeVmServiceRequest>[
-        listViews,
-        FakeVmServiceRequest(
-          method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object?>{
-            'isolateId': fakeUnpausedIsolate.id,
-            'enabled': 'false',
-          },
-          // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
-        ),
-      ],
-      logger: logger,
-      fileSystem: fileSystem,
-    );
-
-    await terminalHandler.processTerminalInput('s');
-
-    expect(logger.errorText, contains('Error'));
-  });
-
-  testWithoutContext('s, bails taking screenshot on debug device if flutter.screenshot throws RpcError, restoring banner', () async {
-    final BufferLogger logger = BufferLogger.test();
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final TerminalHandler terminalHandler = setUpTerminalHandler(
-      <FakeVmServiceRequest>[
-        listViews,
-        FakeVmServiceRequest(
-          method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object?>{
-            'isolateId': fakeUnpausedIsolate.id,
-            'enabled': 'false',
-          },
-        ),
-        const FakeVmServiceRequest(
-          method: '_flutter.screenshot',
-          // Failed response,
-          errorCode: RPCErrorCodes.kInternalError,
-        ),
-        FakeVmServiceRequest(
-          method: 'ext.flutter.debugAllowBanner',
-          args: <String, Object?>{
-            'isolateId': fakeUnpausedIsolate.id,
-            'enabled': 'true',
-          },
-        ),
-      ],
-      logger: logger,
-      fileSystem: fileSystem,
-    );
-
-    await terminalHandler.processTerminalInput('s');
-
-    expect(logger.errorText, contains('Error'));
   });
 
   testWithoutContext('s, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner', () async {
@@ -1423,19 +1385,18 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
         ..isRunningDebug = true
         ..isRunningProfile = false
         ..isRunningRelease = false;
-      break;
     case BuildMode.profile:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = true
         ..isRunningRelease = false;
-      break;
     case BuildMode.release:
       residentRunner
         ..isRunningDebug = false
         ..isRunningProfile = false
         ..isRunningRelease = true;
-      break;
+    case _:
+      // NOOP
   }
   return TerminalHandler(
     residentRunner,
@@ -1451,7 +1412,6 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;
-  String? receivedCommand;
 
   @override
   Future<void> cleanupAfterSignal() async { }
@@ -1518,7 +1478,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

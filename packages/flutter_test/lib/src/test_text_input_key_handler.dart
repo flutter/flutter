@@ -26,7 +26,7 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   final int client;
 
   Future<void> _sendSelectors(List<String> selectors) async {
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
@@ -50,6 +50,8 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
           alt: true, shift: pressShift): <String>['deleteWordBackward:'],
       SingleActivator(LogicalKeyboardKey.backspace,
           meta: true, shift: pressShift): <String>['deleteToBeginningOfLine:'],
+      SingleActivator(LogicalKeyboardKey.backspace, control: true, shift: pressShift):
+          <String>['deleteBackwardByDecomposingPreviousCharacter:'],
       SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): <String>[
         'deleteForward:'
       ],

@@ -33,7 +33,7 @@ Future<TaskResult> flutterToolStartupBenchmarkTask() async {
     ).run())
         .asMap('flutter_tool_startup_test'),
 
-    // `flutter test -d foo_device` in dir woth no `test` folder.
+    // `flutter test -d foo_device` in dir with no `test` folder.
     ...(await _Benchmark(
       projectDirectory,
       'test startup with specified device',

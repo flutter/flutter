@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "Hamısını seçin",
   "tabSemanticsLabel": "Tab $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "İmtina edin",
-  "searchTextFieldPlaceholderLabel": "Axtarın"
+  "searchTextFieldPlaceholderLabel": "Axtarın",
+  "noSpellCheckReplacementsLabel": "Əvəzləmə Tapılmadı",
+  "menuDismissLabel": "Menyunu qapadın",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

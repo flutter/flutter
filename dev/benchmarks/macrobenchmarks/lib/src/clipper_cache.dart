@@ -23,11 +23,6 @@ class _ClipperCachePageState extends State<ClipperCachePage>
   @override
   void initState() {
     super.initState();
-    const double itemHeight = 140;
-    _topMargin = (window.physicalSize.height / window.devicePixelRatio - itemHeight * 3) / 2;
-    if (_topMargin < 0) {
-      _topMargin = 0;
-    }
     _controller.addListener(() {
       if (_controller.offset < 10) {
         _controller.animateTo(_animateOffset, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
@@ -38,6 +33,18 @@ class _ClipperCachePageState extends State<ClipperCachePage>
     Timer(const Duration(milliseconds: 500), () {
       _controller.animateTo(_animateOffset, duration: const Duration(milliseconds: 1000), curve: Curves.ease);
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    const double itemHeight = 140;
+    final FlutterView view = View.of(context);
+    _topMargin = (view.physicalSize.height / view.devicePixelRatio - itemHeight * 3) / 2;
+    if (_topMargin < 0) {
+      _topMargin = 0;
+    }
   }
 
   @override

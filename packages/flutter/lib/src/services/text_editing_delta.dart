@@ -56,17 +56,11 @@ bool _debugTextRangeIsValid(TextRange range, String text) {
 ///    to true.
 abstract class TextEditingDelta with Diagnosticable {
   /// Creates a delta for a given change to the editing state.
-  ///
-  /// {@template flutter.services.TextEditingDelta}
-  /// The [oldText], [selection], and [composing] arguments must not be null.
-  /// {@endtemplate}
   const TextEditingDelta({
     required this.oldText,
     required this.selection,
     required this.composing,
-  }) : assert(oldText != null),
-       assert(selection != null),
-       assert(composing != null);
+  });
 
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
@@ -95,7 +89,7 @@ abstract class TextEditingDelta with Diagnosticable {
     // 'world'{replacementDestinationEnd, replacementDestinationStart + replacementSourceEnd}
     // can be considered an insertion. In this case we inserted 'd'.
     //
-    // Similarly for a a deletion, say we are currently composing the word: 'worl'.
+    // Similarly for a deletion, say we are currently composing the word: 'worl'.
     // Our current state is 'world|' with the cursor at the end of 'd'. If we
     // press backspace to delete the character 'd', the platform will tell us 'world'
     // was replaced with 'worl' at range (0,5). Here we can check if the text found
@@ -253,8 +247,6 @@ abstract class TextEditingDelta with Diagnosticable {
 class TextEditingDeltaInsertion extends TextEditingDelta {
   /// Creates an insertion delta for a given change to the editing state.
   ///
-  /// {@macro flutter.services.TextEditingDelta}
-  ///
   /// {@template flutter.services.TextEditingDelta.optIn}
   /// See also:
   ///
@@ -279,7 +271,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     assert(_debugTextRangeIsValid(TextRange.collapsed(insertionOffset), newText), 'Applying TextEditingDeltaInsertion failed, the insertionOffset: $insertionOffset is not within the bounds of $newText of length: ${newText.length}');
@@ -306,8 +298,6 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
 class TextEditingDeltaDeletion extends TextEditingDelta {
   /// Creates a deletion delta for a given change to the editing state.
   ///
-  /// {@macro flutter.services.TextEditingDelta}
-  ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaDeletion({
     required super.oldText,
@@ -325,7 +315,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     assert(_debugTextRangeIsValid(deletedRange, newText), 'Applying TextEditingDeltaDeletion failed, the deletedRange: $deletedRange is not within the bounds of $newText of length: ${newText.length}');
@@ -358,8 +348,6 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   /// A replacement can occur in cases such as auto-correct, suggestions, and
   /// when a selection is replaced by a single character.
   ///
-  /// {@macro flutter.services.TextEditingDelta}
-  ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaReplacement({
     required super.oldText,
@@ -381,7 +369,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     String newText = oldText;
     assert(_debugTextRangeIsValid(replacedRange, newText), 'Applying TextEditingDeltaReplacement failed, the replacedRange: $replacedRange is not within the bounds of $newText of length: ${newText.length}');
@@ -415,8 +403,6 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   /// handles. There are no changes to the text, but there are updates to the selection
   /// and potentially the composing region as well.
   ///
-  /// {@macro flutter.services.TextEditingDelta}
-  ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaNonTextUpdate({
     required super.oldText,
@@ -427,7 +413,7 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   @override
   TextEditingValue apply(TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
-    // policy and apply the delta to the oldText. This is due to the asyncronous
+    // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
     assert(_debugTextRangeIsValid(selection, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the selection range: $selection is not within the bounds of $oldText of length: ${oldText.length}');
     assert(_debugTextRangeIsValid(composing, oldText), 'Applying TextEditingDeltaNonTextUpdate failed, the composing region: $composing is not within the bounds of $oldText of length: ${oldText.length}');

@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group(ActionDispatcher, () {
-    testWidgets('ActionDispatcher invokes actions when asked.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ActionDispatcher invokes actions when asked.', (WidgetTester tester) async {
       await tester.pumpWidget(Container());
       bool invoked = false;
       const ActionDispatcher dispatcher = ActionDispatcher();
@@ -48,7 +49,7 @@ void main() {
 
     setUp(clear);
 
-    testWidgets('Actions widget can invoke actions with default dispatcher', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Actions widget can invoke actions with default dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -74,7 +75,8 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
-    testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke', (WidgetTester tester) async {
+
+    testWidgetsWithLeakTracking('Actions widget can invoke actions with default dispatcher and maybeInvoke', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -101,7 +103,7 @@ void main() {
       expect(invoked, isTrue);
     });
 
-    testWidgets('maybeInvoke returns null when no action is found', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('maybeInvoke returns null when no action is found', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -128,7 +130,7 @@ void main() {
       expect(invoked, isFalse);
     });
 
-    testWidgets('invoke throws when no action is found', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('invoke throws when no action is found', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -155,7 +157,7 @@ void main() {
       expect(invoked, isFalse);
     });
 
-    testWidgets('Actions widget can invoke actions with custom dispatcher', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Actions widget can invoke actions with custom dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
@@ -186,7 +188,7 @@ void main() {
       expect(invokedIntent, equals(intent));
     });
 
-    testWidgets('Actions can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Actions can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
@@ -223,7 +225,7 @@ void main() {
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
 
-    testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
@@ -259,7 +261,7 @@ void main() {
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
 
-    testWidgets('Actions widget can be found with of', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Actions widget can be found with of', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
 
@@ -276,7 +278,7 @@ void main() {
       expect(dispatcher, equals(testDispatcher));
     });
 
-    testWidgets('Action can be found with find', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Action can be found with find', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
       bool invoked = false;
@@ -323,7 +325,7 @@ void main() {
       expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
 
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -337,6 +339,8 @@ void main() {
       );
       bool hovering = false;
       bool focusing = false;
+
+      addTearDown(focusNode.dispose);
 
       Future<void> buildTest(bool enabled) async {
         await tester.pumpWidget(
@@ -393,7 +397,7 @@ void main() {
       expect(focusing, isFalse);
     });
 
-    testWidgets('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
       await tester.pumpWidget(
         MouseRegion(
           cursor: SystemMouseCursors.forbidden,
@@ -426,7 +430,7 @@ void main() {
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     });
 
-    testWidgets('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final Object sentinel = Object();
       bool invoked = false;
@@ -457,7 +461,7 @@ void main() {
       expect(invoked, isTrue);
     });
 
-    testWidgets('ContextAction can return null', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ContextAction can return null', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       const TestIntent intent = TestIntent();
       final TestContextAction testAction = TestContextAction();
@@ -484,7 +488,7 @@ void main() {
       expect(testAction.capturedContexts.single, containerKey.currentContext);
     });
 
-    testWidgets('Disabled actions stop propagation to an ancestor', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Disabled actions stop propagation to an ancestor', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
@@ -533,7 +537,7 @@ void main() {
   });
 
   group('Listening', () {
-    testWidgets('can listen to enabled state of Actions', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can listen to enabled state of Actions', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked1 = false;
       bool invoked2 = false;
@@ -755,7 +759,11 @@ void main() {
       );
     });
 
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+    tearDown(() async {
+      focusNode.dispose();
+    });
+
+    testWidgetsWithLeakTracking('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -789,7 +797,7 @@ void main() {
       expect(focusing, isFalse);
     });
 
-    testWidgets('FocusableActionDetector shows focus highlight appropriately when focused and disabled', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FocusableActionDetector shows focus highlight appropriately when focused and disabled', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -820,7 +828,7 @@ void main() {
       expect(focusing, isTrue);
     });
 
-    testWidgets('FocusableActionDetector can be used without callbacks', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FocusableActionDetector can be used without callbacks', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -854,18 +862,20 @@ void main() {
       expect(focusing, isFalse);
     });
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'FocusableActionDetector can prevent its descendants from being focusable',
       (WidgetTester tester) async {
         final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
 
+        addTearDown(buttonNode.dispose);
+
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
-              child: MaterialButton(
+              child: ElevatedButton(
+                onPressed: () {},
                 focusNode: buttonNode,
                 child: const Text('Test'),
-                onPressed: () {},
               ),
             ),
           ),
@@ -881,10 +891,10 @@ void main() {
           MaterialApp(
             home: FocusableActionDetector(
               descendantsAreFocusable: false,
-              child: MaterialButton(
+              child: ElevatedButton(
+                onPressed: () {},
                 focusNode: buttonNode,
                 child: const Text('Test'),
-                onPressed: () {},
               ),
             ),
           ),
@@ -898,26 +908,34 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'FocusableActionDetector can prevent its descendants from being traversable',
           (WidgetTester tester) async {
         final FocusNode buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
         final FocusNode buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
+        final FocusNode skipTraversalNode = FocusNode(skipTraversal: true);
+
+        addTearDown(() {
+          buttonNode1.dispose();
+          buttonNode2.dispose();
+          skipTraversalNode.dispose();
+        });
 
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: skipTraversalNode,
               child: Column(
                 children: <Widget>[
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode1,
                     child: const Text('Node 1'),
-                    onPressed: () {},
                   ),
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode2,
                     child: const Text('Node 2'),
-                    onPressed: () {},
                   ),
                 ],
               ),
@@ -937,18 +955,19 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: skipTraversalNode,
               descendantsAreTraversable: false,
               child: Column(
                 children: <Widget>[
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode1,
                     child: const Text('Node 1'),
-                    onPressed: () {},
                   ),
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode2,
                     child: const Text('Node 2'),
-                    onPressed: () {},
                   ),
                 ],
               ),
@@ -967,7 +986,7 @@ void main() {
       },
     );
 
-    testWidgets('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: FocusableActionDetector(
@@ -1073,7 +1092,7 @@ void main() {
   });
 
   group('Action subclasses', () {
-    testWidgets('CallbackAction passes correct intent when invoked.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('CallbackAction passes correct intent when invoked.', (WidgetTester tester) async {
       late Intent passedIntent;
       final TestAction action = TestAction(onInvoke: (Intent intent) {
         passedIntent = intent;
@@ -1083,7 +1102,8 @@ void main() {
       action._testInvoke(intent);
       expect(passedIntent, equals(intent));
     });
-    testWidgets('VoidCallbackAction', (WidgetTester tester) async {
+
+    testWidgetsWithLeakTracking('VoidCallbackAction', (WidgetTester tester) async {
       bool called = false;
       void testCallback() {
         called = true;
@@ -1093,10 +1113,20 @@ void main() {
       action.invoke(intent);
       expect(called, isTrue);
     });
+    testWidgetsWithLeakTracking('Base Action class default toKeyEventResult delegates to consumesKey', (WidgetTester tester) async {
+      expect(
+        DefaultToKeyEventResultAction(consumesKey: false).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        KeyEventResult.skipRemainingHandlers,
+      );
+      expect(
+        DefaultToKeyEventResultAction(consumesKey: true).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        KeyEventResult.handled,
+      );
+    });
   });
 
   group('Diagnostics', () {
-    testWidgets('default Intent debugFillProperties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default Intent debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       // ignore: invalid_use_of_protected_member
@@ -1111,7 +1141,8 @@ void main() {
 
       expect(description, isEmpty);
     });
-    testWidgets('default Actions debugFillProperties', (WidgetTester tester) async {
+
+    testWidgetsWithLeakTracking('default Actions debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Actions(
@@ -1136,7 +1167,8 @@ void main() {
         ]),
       );
     });
-    testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
+
+    testWidgetsWithLeakTracking('Actions implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Actions(
@@ -1175,7 +1207,7 @@ void main() {
       invokingContext = null;
     });
 
-    testWidgets('Basic usage', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Basic usage', (WidgetTester tester) async {
       late BuildContext invokingContext2;
       late BuildContext invokingContext3;
       await tester.pumpWidget(
@@ -1240,7 +1272,7 @@ void main() {
       expect(invocations, <String>['action1.invoke']);
     });
 
-    testWidgets('Does not break after use', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Does not break after use', (WidgetTester tester) async {
       late BuildContext invokingContext2;
       late BuildContext invokingContext3;
       await tester.pumpWidget(
@@ -1307,7 +1339,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Does not override if not overridable', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Does not override if not overridable', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
@@ -1350,7 +1382,7 @@ void main() {
       ]);
     });
 
-    testWidgets('The final override controls isEnabled', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('The final override controls isEnabled', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
@@ -1437,7 +1469,7 @@ void main() {
       expect(invocations, <String>[]);
     });
 
-    testWidgets('The override can choose to defer isActionEnabled to the overridable', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('The override can choose to defer isActionEnabled to the overridable', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
@@ -1527,7 +1559,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Throws on infinite recursions', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Throws on infinite recursions', (WidgetTester tester) async {
       late StateSetter setState;
       BuildContext? action2LookupContext;
       await tester.pumpWidget(
@@ -1586,7 +1618,7 @@ void main() {
       expect(exception?.toString(), contains('debugAssertIsEnabledMutuallyRecursive'));
     });
 
-    testWidgets('Throws on invoking invalid override', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Throws on invoking invalid override', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context) {
@@ -1624,7 +1656,7 @@ void main() {
       );
     });
 
-    testWidgets('Make an overridable action overridable', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Make an overridable action overridable', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
@@ -1680,7 +1712,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Overriding Actions can change the intent', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Overriding Actions can change the intent', (WidgetTester tester) async {
       final List<String> newLogChannel = <String>[];
       await tester.pumpWidget(
         Builder(
@@ -1730,7 +1762,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Override non-context overridable Actions with a ContextAction', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Override non-context overridable Actions with a ContextAction', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
@@ -1783,7 +1815,7 @@ void main() {
       expect(LogInvocationContextAction.invokeContext, invokingContext);
     });
 
-    testWidgets('Override a ContextAction with a regular Action', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Override a ContextAction with a regular Action', (WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
           builder: (BuildContext context1) {
@@ -1855,8 +1887,7 @@ class ThirdTestIntent extends SecondTestIntent {
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
     required OnInvokeCallback onInvoke,
-  })  : assert(onInvoke != null),
-        super(onInvoke: onInvoke);
+  })  : super(onInvoke: onInvoke);
 
   @override
   bool isEnabled(TestIntent intent) => enabled;
@@ -1999,4 +2030,22 @@ class RedirectOutputAction extends LogInvocationAction {
 
   @override
   void invoke(LogIntent intent) => super.invoke(LogIntent(log: newLog));
+}
+
+class DefaultToKeyEventResultIntent extends Intent {
+  const DefaultToKeyEventResultIntent();
+}
+
+class DefaultToKeyEventResultAction extends Action<DefaultToKeyEventResultIntent> {
+  DefaultToKeyEventResultAction({
+    required bool consumesKey
+  }) : _consumesKey = consumesKey;
+
+  final bool _consumesKey;
+
+  @override
+  bool consumesKey(DefaultToKeyEventResultIntent intent) => _consumesKey;
+
+  @override
+  void invoke(DefaultToKeyEventResultIntent intent) {}
 }

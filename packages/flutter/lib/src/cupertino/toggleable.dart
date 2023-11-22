@@ -111,7 +111,11 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// build method - potentially after wrapping it in other widgets.
   Widget buildToggleable({
     FocusNode? focusNode,
+<<<<<<< HEAD
     Function(bool)? onFocusChange,
+=======
+    ValueChanged<bool>? onFocusChange,
+>>>>>>> db7ef5bf9f59442b0e200a90587e8fa5e0c6336a
     bool autofocus = false,
     required Size size,
     required CustomPainter painter,

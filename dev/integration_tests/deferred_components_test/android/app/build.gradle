@@ -36,6 +36,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+    namespace "io.flutter.integration.deferred_components_test"
     compileSdkVersion flutter.compileSdkVersion
 
     sourceSets {

@@ -6,11 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -96,13 +97,13 @@ class RenderTest extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (!_isSemanticBoundary) {
+    if (!isSemanticBoundary) {
       return;
     }
 
     config
-      ..isSemanticBoundary = _isSemanticBoundary
-      ..label = _label
+      ..isSemanticBoundary = isSemanticBoundary
+      ..label = label
       ..textDirection = TextDirection.ltr;
 
   }

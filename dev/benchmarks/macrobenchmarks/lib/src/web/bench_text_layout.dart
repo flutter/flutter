@@ -203,6 +203,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 
   @override
   Future<void> setUpAll() async {
+    super.setUpAll();
     registerEngineBenchmarkValueListener('text_layout', (num value) {
       _textLayoutMicros += value;
     });
@@ -340,9 +341,7 @@ class ColorItem extends StatelessWidget {
     required this.index,
     required this.color,
     this.prefix = '',
-  })  : assert(index != null),
-        assert(color != null),
-        assert(prefix != null);
+  });
 
   final int index;
   final Color color;

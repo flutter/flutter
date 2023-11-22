@@ -74,9 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 abstract class DeltaMode {
-  static const int kPixel = 0x00;
   static const int kLine = 0x01;
-  static const int kPage = 0x02;
 }
 
 void dispatchMouseWheelEvent(int mouseX, int mouseY,

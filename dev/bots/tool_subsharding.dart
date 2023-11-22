@@ -38,42 +38,65 @@ class TestSpecs {
   }
 }
 
-/// Intended to parse the output file of `dart test --file-reporter json:file_name
-Map<int, TestSpecs> generateMetrics(File metrics) {
-  final Map<int, TestSpecs> allTestSpecs = <int, TestSpecs>{};
-  if (!metrics.existsSync()) {
-    return allTestSpecs;
-  }
+class TestFileReporterResults {
+  TestFileReporterResults._({
+    required this.allTestSpecs,
+    required this.hasFailedTests,
+    required this.errors,
+  });
 
-  bool success = false;
-  for(final String metric in metrics.readAsLinesSync()) {
-    final Map<String, dynamic> entry = json.decode(metric) as Map<String, dynamic>;
-    if (entry.containsKey('suite')) {
-      final Map<dynamic, dynamic> suite = entry['suite'] as Map<dynamic, dynamic>;
-      allTestSpecs[suite['id'] as int] = TestSpecs(
-        path: suite['path'] as String,
-        startTime: entry['time'] as int,
-      );
-    } else if (_isMetricDone(entry, allTestSpecs)) {
-      final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
-      final int suiteID = group['suiteID'] as int;
-      final TestSpecs testSpec = allTestSpecs[suiteID]!;
-      testSpec.endTime = entry['time'] as int;
-    } else if (entry.containsKey('success') && entry['success'] == true) {
-      success = true;
+  /// Intended to parse the output file of `dart test --file-reporter json:file_name
+  factory TestFileReporterResults.fromFile(File metrics) {
+    if (!metrics.existsSync()) {
+      throw Exception('${metrics.path} does not exist');
     }
+
+    final Map<int, TestSpecs> testSpecs = <int, TestSpecs>{};
+    bool hasFailedTests = true;
+    final List<String> errors = <String>[];
+
+    for (final String metric in metrics.readAsLinesSync()) {
+      final Map<String, Object?> entry = json.decode(metric) as Map<String, Object?>;
+      if (entry.containsKey('suite')) {
+        final Map<String, Object?> suite = entry['suite']! as Map<String, Object?>;
+        addTestSpec(suite, entry['time']! as int, testSpecs);
+      } else if (isMetricDone(entry, testSpecs)) {
+        final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
+        final int suiteID = group['suiteID']! as int;
+        addMetricDone(suiteID, entry['time']! as int, testSpecs);
+      } else if (entry.containsKey('error')) {
+        final String stackTrace = entry.containsKey('stackTrace') ? entry['stackTrace']! as String : '';
+        errors.add('${entry['error']}\n $stackTrace');
+      } else if (entry.containsKey('success') && entry['success'] == true) {
+        hasFailedTests = false;
+      }
+    }
+
+    return TestFileReporterResults._(allTestSpecs: testSpecs, hasFailedTests: hasFailedTests, errors: errors);
   }
 
-  if (!success) { // means that not all tests succeeded therefore no metrics are stored
-    return <int, TestSpecs>{};
-  }
-  return allTestSpecs;
-}
+  final Map<int, TestSpecs> allTestSpecs;
+  final bool hasFailedTests;
+  final List<String> errors;
 
-bool _isMetricDone(Map<String, dynamic> entry, Map<int, TestSpecs> allTestSpecs) {
-  if (entry.containsKey('group') && entry['type'] as String == 'group') {
-    final Map<dynamic, dynamic> group = entry['group'] as Map<dynamic, dynamic>;
-    return allTestSpecs.containsKey(group['suiteID'] as int);
+
+  static void addTestSpec(Map<String, Object?> suite, int time, Map<int, TestSpecs> allTestSpecs) {
+    allTestSpecs[suite['id']! as int] = TestSpecs(
+      path: suite['path']! as String,
+      startTime: time,
+    );
   }
-  return false;
+
+  static void addMetricDone(int suiteID, int time, Map<int, TestSpecs> allTestSpecs) {
+    final TestSpecs testSpec = allTestSpecs[suiteID]!;
+    testSpec.endTime = time;
+  }
+
+  static bool isMetricDone(Map<String, Object?> entry, Map<int, TestSpecs> allTestSpecs) {
+    if (entry.containsKey('group') && entry['type']! as String == 'group') {
+      final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
+      return allTestSpecs.containsKey(group['suiteID']! as int);
+    }
+    return false;
+  }
 }

@@ -11,7 +11,8 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 // Examples can assume:
 // late BuildContext context;
 
-/// Asserts that the given context has a [Material] ancestor.
+/// Asserts that the given context has a [Material] ancestor within the closest
+/// [LookupBoundary].
 ///
 /// Used by many Material Design widgets to make sure that they are
 /// only used in contexts where they can print ink onto some material.
@@ -32,12 +33,17 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
-    if (context.widget is! Material && context.findAncestorWidgetOfExactType<Material>() == null) {
+    if (LookupBoundary.findAncestorWidgetOfExactType<Material>(context) == null) {
+      final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Material>(context);
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No Material widget found.'),
+        ErrorSummary('No Material widget found${hiddenByBoundary ? ' within the closest LookupBoundary' : ''}.'),
+        if (hiddenByBoundary)
+          ErrorDescription(
+            'There is an ancestor Material widget, but it is hidden by a LookupBoundary.'
+          ),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require a Material '
-          'widget ancestor.\n'
+          'widget ancestor within the closest LookupBoundary.\n'
           'In Material Design, most widgets are conceptually "printed" on '
           "a sheet of material. In Flutter's material library, that "
           'material is represented by the Material widget. It is the '

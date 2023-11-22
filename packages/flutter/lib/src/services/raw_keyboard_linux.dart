@@ -22,9 +22,6 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for Linux.
-  ///
-  /// The [keyHelper], [scanCode], [unicodeScalarValues], [keyCode], and [modifiers],
-  /// arguments must not be null.
   const RawKeyEventDataLinux({
     required this.keyHelper,
     this.unicodeScalarValues = 0,
@@ -33,12 +30,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     this.modifiers = 0,
     required this.isDown,
     this.specifiedLogicalKey,
-  }) : assert(scanCode != null),
-       assert(unicodeScalarValues != null),
-       assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0),
-       assert(keyCode != null),
-       assert(modifiers != null),
-       assert(keyHelper != null);
+  }) : assert((unicodeScalarValues & ~LogicalKeyboardKey.valueMask) == 0);
 
   /// A helper class that abstracts the fetching of the toolkit-specific mappings.
   ///
@@ -284,25 +276,19 @@ class GLFWKeyHelper implements KeyHelper {
       case shiftLeftKeyCode:
       case shiftRightKeyCode:
         modifierChange = modifierShift;
-        break;
       case controlLeftKeyCode:
       case controlRightKeyCode:
         modifierChange = modifierControl;
-        break;
       case altLeftKeyCode:
       case altRightKeyCode:
         modifierChange = modifierAlt;
-        break;
       case metaLeftKeyCode:
       case metaRightKeyCode:
         modifierChange = modifierMeta;
-        break;
       case capsLockKeyCode:
         modifierChange = modifierCapsLock;
-        break;
       case numLockKeyCode:
         modifierChange = modifierNumericPad;
-        break;
       default:
         break;
     }
@@ -427,26 +413,20 @@ class GtkKeyHelper implements KeyHelper {
       case shiftLeftKeyCode:
       case shiftRightKeyCode:
         modifierChange = modifierShift;
-        break;
       case controlLeftKeyCode:
       case controlRightKeyCode:
         modifierChange = modifierControl;
-        break;
       case altLeftKeyCode:
       case altRightKeyCode:
         modifierChange = modifierMod1;
-        break;
       case metaLeftKeyCode:
       case metaRightKeyCode:
         modifierChange = modifierMeta;
-        break;
       case capsLockKeyCode:
       case shiftLockKeyCode:
         modifierChange = modifierCapsLock;
-        break;
       case numLockKeyCode:
         modifierChange = modifierMod2;
-        break;
       default:
         break;
     }
