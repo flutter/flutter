@@ -4309,7 +4309,7 @@ class InputDecorationTheme with Diagnosticable {
       floatingLabelAlignment: floatingLabelAlignment ?? this.floatingLabelAlignment,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
-      iconColor: iconColor,
+      iconColor: iconColor ?? this.iconColor,
       isCollapsed: isCollapsed ?? this.isCollapsed,
       prefixStyle: prefixStyle ?? this.prefixStyle,
       prefixIconColor: prefixIconColor ?? this.prefixIconColor,
