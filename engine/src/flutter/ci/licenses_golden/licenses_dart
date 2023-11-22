@@ -1,4 +1,4 @@
-Signature: e9fc8b014d8b5d0f8700dec0de3ea55c
+Signature: 6ebbe6243883db60059d44b5929051c9
 
 ====================================================================================================
 LIBRARY: dart
@@ -3944,6 +3944,7 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_r
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_allow_interop_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/seal_native_object.js + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/records.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/convert_utf_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_interop_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_interop_unsafe_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_types.dart + ../../../third_party/dart/LICENSE
@@ -4004,6 +4005,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_run
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_allow_interop_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/preambles/seal_native_object.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/records.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/convert_utf_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_interop_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_interop_unsafe_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_shared/lib/js_types.dart
