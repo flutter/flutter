@@ -206,6 +206,35 @@ class CanvasParagraph implements ui.Paragraph {
   }
 
   @override
+  ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) => _layoutService.getClosestGlyphInfo(offset);
+
+  @override
+  ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
+    final int? lineNumber = _findLine(codeUnitOffset, 0, numberOfLines);
+    if (lineNumber == null) {
+      return null;
+    }
+    final ParagraphLine line = lines[lineNumber];
+    final ui.TextRange? range = line.getCharacterRangeAt(codeUnitOffset);
+    if (range == null) {
+      return null;
+    }
+    assert(line.overlapsWith(range.start, range.end));
+    for (final LayoutFragment fragment in line.fragments) {
+      if (fragment.overlapsWith(range.start, range.end)) {
+        // If the grapheme cluster is split into multiple fragments (which really
+        // shouldn't happen but currently if they are in different TextSpans they
+        // don't combine), use the layout box of the first base character as its
+        // layout box has a better chance to be not that far-off.
+        final ui.TextBox textBox = fragment.toTextBox(start: range.start, end: range.end);
+        return ui.GlyphInfo(textBox.toRect(), range, textBox.direction);
+      }
+    }
+    assert(false, 'This should not be reachable.');
+    return null;
+  }
+
+  @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
     final int characterPosition;
     switch (position.affinity) {
@@ -249,11 +278,18 @@ class CanvasParagraph implements ui.Paragraph {
   int? getLineNumberAt(int codeUnitOffset) => _findLine(codeUnitOffset, 0, lines.length);
 
   int? _findLine(int codeUnitOffset, int startLine, int endLine) {
-    if (endLine <= startLine || codeUnitOffset < lines[startLine].startIndex || lines[endLine - 1].endIndex <= codeUnitOffset) {
+    assert(endLine <= lines.length);
+    final bool isOutOfBounds = endLine <= startLine
+                            || codeUnitOffset < lines[startLine].startIndex
+                            || (endLine < numberOfLines && lines[endLine].startIndex <= codeUnitOffset);
+    if (isOutOfBounds) {
       return null;
     }
+
     if (endLine == startLine + 1) {
-      return startLine;
+      assert(lines[startLine].startIndex <= codeUnitOffset);
+      assert(endLine == numberOfLines || codeUnitOffset < lines[endLine].startIndex);
+      return codeUnitOffset >= lines[startLine].visibleEndIndex ? null : startLine;
     }
     // endLine >= startLine + 2 thus we have
     // startLine + 1 <= midIndex <= endLine - 1

@@ -189,6 +189,38 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   });
 
   @override
+  ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
+    return withStackScope((StackScope scope) {
+      final Pointer<Float> outRect = scope.allocFloatArray(4);
+      final Pointer<Uint32> outRange = scope.allocUint32Array(2);
+      final Pointer<Bool> outBooleanFlags = scope.allocBoolArray(1);
+      return paragraphGetGlyphInfoAt(handle, codeUnitOffset, outRect, outRange, outBooleanFlags)
+        ? ui.GlyphInfo(
+          scope.convertRectFromNative(outRect),
+          ui.TextRange(start: outRange[0], end: outRange[1]),
+          outBooleanFlags[0] ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+        )
+        : null;
+    });
+  }
+
+  @override
+  ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
+    return withStackScope((StackScope scope) {
+      final Pointer<Float> outRect = scope.allocFloatArray(4);
+      final Pointer<Uint32> outRange = scope.allocUint32Array(2);
+      final Pointer<Bool> outBooleanFlags = scope.allocBoolArray(1);
+      return paragraphGetClosestGlyphInfoAtCoordinate(handle, offset.dx, offset.dy, outRect, outRange, outBooleanFlags)
+        ? ui.GlyphInfo(
+          scope.convertRectFromNative(outRect),
+          ui.TextRange(start: outRange[0], end: outRange[1]),
+          outBooleanFlags[0] ? ui.TextDirection.ltr : ui.TextDirection.rtl,
+        )
+        : null;
+    });
+  }
+
+  @override
   ui.TextRange getWordBoundary(ui.TextPosition position) => withStackScope((StackScope scope) {
     final Pointer<Int32> outRange = scope.allocInt32Array(2);
     paragraphGetWordBoundary(handle, position.offset, outRange);

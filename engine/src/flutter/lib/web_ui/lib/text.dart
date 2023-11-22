@@ -220,6 +220,31 @@ class FontVariation {
   String toString() => "FontVariation('$axis', $value)";
 }
 
+final class GlyphInfo {
+  GlyphInfo(this.graphemeClusterLayoutBounds, this.graphemeClusterCodeUnitRange, this.writingDirection);
+
+  final Rect graphemeClusterLayoutBounds;
+  final TextRange graphemeClusterCodeUnitRange;
+  final TextDirection writingDirection;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is GlyphInfo
+        && graphemeClusterLayoutBounds == other.graphemeClusterLayoutBounds
+        && graphemeClusterCodeUnitRange == other.graphemeClusterCodeUnitRange
+        && writingDirection == other.writingDirection;
+  }
+
+  @override
+  int get hashCode => Object.hash(graphemeClusterLayoutBounds, graphemeClusterCodeUnitRange, writingDirection);
+
+  @override
+  String toString() => 'Glyph($graphemeClusterLayoutBounds, textRange: $graphemeClusterCodeUnitRange, direction: $writingDirection)';
+}
+
 // The order of this enum must match the order of the values in RenderStyleConstants.h's ETextAlign.
 enum TextAlign {
   left,
@@ -691,6 +716,8 @@ abstract class Paragraph {
       {BoxHeightStyle boxHeightStyle = BoxHeightStyle.tight,
       BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight});
   TextPosition getPositionForOffset(Offset offset);
+  GlyphInfo? getGlyphInfoAt(int codeUnitOffset);
+  GlyphInfo? getClosestGlyphInfoForOffset(Offset offset);
   TextRange getWordBoundary(TextPosition position);
   TextRange getLineBoundary(TextPosition position);
   List<TextBox> getBoxesForPlaceholders();

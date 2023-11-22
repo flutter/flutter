@@ -120,8 +120,51 @@ Dart_Handle Paragraph::getPositionForOffset(double dx, double dy) {
   return tonic::DartConverter<decltype(result)>::ToDart(result);
 }
 
-Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
-  txt::Paragraph::Range<size_t> point = m_paragraph_->GetWordBoundary(offset);
+Dart_Handle glyphInfoFrom(
+    Dart_Handle constructor,
+    const skia::textlayout::Paragraph::GlyphInfo& glyphInfo) {
+  std::array<Dart_Handle, 7> arguments = {
+      Dart_NewDouble(glyphInfo.fGraphemeLayoutBounds.fLeft),
+      Dart_NewDouble(glyphInfo.fGraphemeLayoutBounds.fTop),
+      Dart_NewDouble(glyphInfo.fGraphemeLayoutBounds.fRight),
+      Dart_NewDouble(glyphInfo.fGraphemeLayoutBounds.fBottom),
+      Dart_NewInteger(glyphInfo.fGraphemeClusterTextRange.start),
+      Dart_NewInteger(glyphInfo.fGraphemeClusterTextRange.end),
+      Dart_NewBoolean(glyphInfo.fDirection ==
+                      skia::textlayout::TextDirection::kLtr),
+  };
+  return Dart_InvokeClosure(constructor, arguments.size(), arguments.data());
+}
+
+Dart_Handle Paragraph::getGlyphInfoAt(unsigned utf16Offset,
+                                      Dart_Handle constructor) const {
+  skia::textlayout::Paragraph::GlyphInfo glyphInfo;
+  const bool found = m_paragraph_->GetGlyphInfoAt(utf16Offset, &glyphInfo);
+  if (!found) {
+    return Dart_Null();
+  }
+  Dart_Handle handle = glyphInfoFrom(constructor, glyphInfo);
+  tonic::CheckAndHandleError(handle);
+  return handle;
+}
+
+Dart_Handle Paragraph::getClosestGlyphInfo(double dx,
+                                           double dy,
+                                           Dart_Handle constructor) const {
+  skia::textlayout::Paragraph::GlyphInfo glyphInfo;
+  const bool found =
+      m_paragraph_->GetClosestGlyphInfoAtCoordinate(dx, dy, &glyphInfo);
+  if (!found) {
+    return Dart_Null();
+  }
+  Dart_Handle handle = glyphInfoFrom(constructor, glyphInfo);
+  tonic::CheckAndHandleError(handle);
+  return handle;
+}
+
+Dart_Handle Paragraph::getWordBoundary(unsigned utf16Offset) {
+  txt::Paragraph::Range<size_t> point =
+      m_paragraph_->GetWordBoundary(utf16Offset);
   std::vector<size_t> result = {point.start, point.end};
   return tonic::DartConverter<decltype(result)>::ToDart(result);
 }

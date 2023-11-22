@@ -591,6 +591,107 @@ mixin _FragmentBox on _CombinedFragment, _FragmentMetrics, _FragmentPosition {
     }
     return x;
   }
+
+  // [start, end).map((index) => line.graphemeStarts[index]) gives an ascending
+  // list of UTF16 offsets of graphemes that start in this fragment.
+  //
+  // Returns null if this fragment contains no grapheme starts.
+  late final (int, int)? graphemeStartIndexRange = _getBreaksRange();
+  (int, int)? _getBreaksRange() {
+    if (end == start) {
+      return null;
+    }
+    final List<int> lineGraphemeBreaks = line.graphemeStarts;
+    assert(end > start);
+    assert(line.graphemeStarts.isNotEmpty);
+    final int startIndex = line.graphemeStartIndexBefore(start, 0, lineGraphemeBreaks.length);
+    final int endIndex = end == start + 1
+      ? startIndex + 1
+      : line.graphemeStartIndexBefore(end - 1, startIndex, lineGraphemeBreaks.length) + 1;
+    final int firstGraphemeStart = lineGraphemeBreaks[startIndex];
+    return firstGraphemeStart > start
+      ? (endIndex == startIndex + 1 ? null : (startIndex + 1, endIndex))
+      : (startIndex, endIndex);
+  }
+
+  /// Whether the first codepoints of this fragment is not a valid grapheme start,
+  /// and belongs in the the previous fragment.
+  ///
+  /// This is the result of a known bug: in rare circumstances, a grapheme is
+  /// split into different fragments. To workaround this we ignore the trailing
+  /// part of the grapheme during hit-testing, by adjusting the leading offset of
+  /// a fragment to the leading edge of the first grapheme start in that fragment.
+  //
+  // TODO(LongCatIsLooong): Grapheme clusters should not be separately even
+  // when they are in different runs. Also document the recommendation to use
+  // U+25CC or U+00A0 for showing nonspacing marks in isolation.
+  bool get hasLeadingBrokenGrapheme {
+    final int? graphemeStartIndexRangeStart = graphemeStartIndexRange?.$1;
+    return graphemeStartIndexRangeStart == null || line.graphemeStarts[graphemeStartIndexRangeStart] != start;
+  }
+
+  /// Returns the GlyphInfo within the range [line.graphemeStarts[startIndex], line.graphemeStarts[endIndex]),
+  /// that's visually closeset to the given horizontal offset `x` (in the paragraph's coordinates).
+  ui.GlyphInfo _getClosestCharacterInRange(double x, int startIndex, int endIndex) {
+    final List<int> graphemeStartIndices = line.graphemeStarts;
+    final ui.TextRange fullRange = ui.TextRange(start: graphemeStartIndices[startIndex], end: graphemeStartIndices[endIndex]);
+    final ui.TextBox fullBox = toTextBox(start: fullRange.start, end: fullRange.end);
+    if (startIndex + 1 == endIndex) {
+      return ui.GlyphInfo(fullBox.toRect(), fullRange, fullBox.direction);
+    }
+    assert(startIndex + 1 < endIndex);
+    final ui.TextBox(:double left, :double right) = fullBox;
+
+    // The toTextBox call is potentially expensive so we'll try reducing the
+    // search steps with a binary search.
+    //
+    // x ∈ (left, right),
+    if (left < x && x < right) {
+      final int midIndex = (startIndex + endIndex) ~/ 2;
+      // endIndex >= startIndex + 2, so midIndex >= start + 1
+      final ui.GlyphInfo firstHalf = _getClosestCharacterInRange(x, startIndex, midIndex);
+      if (firstHalf.graphemeClusterLayoutBounds.left < x && x < firstHalf.graphemeClusterLayoutBounds.right) {
+        return firstHalf;
+      }
+      // startIndex <= endIndex - 2, so midIndex <= endIndex - 1
+      final ui.GlyphInfo secondHalf = _getClosestCharacterInRange(x, midIndex, endIndex);
+      if (secondHalf.graphemeClusterLayoutBounds.left < x && x < secondHalf.graphemeClusterLayoutBounds.right) {
+        return secondHalf;
+      }
+      // Neither box clips the given x. This is supposed to be rare.
+      final double distanceToFirst = (x - x.clamp(firstHalf.graphemeClusterLayoutBounds.left, firstHalf.graphemeClusterLayoutBounds.right)).abs();
+      final double distanceToSecond = (x - x.clamp(secondHalf.graphemeClusterLayoutBounds.left, secondHalf.graphemeClusterLayoutBounds.right)).abs();
+      return distanceToFirst > distanceToSecond ? firstHalf : secondHalf;
+    }
+
+    // x ∉ (left, right), it's either the first character or the last, since
+    // there can only be one writing direction in the fragment.
+    final ui.TextRange range = switch ((fullBox.direction, x <= left)) {
+      (ui.TextDirection.ltr, true) || (ui.TextDirection.rtl, false) => ui.TextRange(
+        start: graphemeStartIndices[startIndex],
+        end: graphemeStartIndices[startIndex + 1],
+      ),
+      (ui.TextDirection.ltr, false) || (ui.TextDirection.rtl, true) => ui.TextRange(
+        start: graphemeStartIndices[endIndex - 1],
+        end: graphemeStartIndices[endIndex],
+      ),
+    };
+    assert(!range.isCollapsed);
+    final ui.TextBox box = toTextBox(start: range.start, end: range.end);
+    return ui.GlyphInfo(box.toRect(), range, box.direction);
+  }
+
+  /// Returns the GlyphInfo of the character in the fragment that is closest to
+  /// the given offset x.
+  ui.GlyphInfo getClosestCharacterBox(double x) {
+    assert(end > start);
+    assert(graphemeStartIndexRange != null);
+    // The force ! is safe here because this method is only called by
+    // LayoutService.getClosestGlyphInfo which checks this fragment has at least
+    // one grapheme start before calling this method.
+    final (int rangeStart, int rangeEnd) = graphemeStartIndexRange!;
+    return _getClosestCharacterInRange(x, rangeStart, rangeEnd);
+  }
 }
 
 class EllipsisFragment extends LayoutFragment {

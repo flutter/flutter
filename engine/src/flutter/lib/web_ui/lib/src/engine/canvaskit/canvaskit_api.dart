@@ -3196,6 +3196,29 @@ extension SkLineMetricsExtension on SkLineMetrics {
 @JS()
 @anonymous
 @staticInterop
+class SkGlyphClusterInfo {}
+
+extension SkGlyphClusterInfoExtension on SkGlyphClusterInfo {
+  @JS('graphemeLayoutBounds')
+  external JSArray get _bounds;
+
+  @JS('dir')
+  external SkTextDirection get _direction;
+
+  @JS('graphemeClusterTextRange')
+  external SkTextRange get _textRange;
+
+  ui.GlyphInfo get _glyphInfo {
+    final List<JSNumber> list = _bounds.toDart.cast<JSNumber>();
+    final ui.Rect bounds = ui.Rect.fromLTRB(list[0].toDartDouble, list[1].toDartDouble, list[2].toDartDouble, list[3].toDartDouble);
+    final ui.TextRange textRange = ui.TextRange(start: _textRange.start.toInt(), end: _textRange.end.toInt());
+    return ui.GlyphInfo(bounds, textRange, ui.TextDirection.values[_direction.value.toInt()]);
+  }
+}
+
+@JS()
+@anonymous
+@staticInterop
 class SkRectWithDirection {}
 
 extension SkRectWithDirectionExtension on SkRectWithDirection {
@@ -3294,6 +3317,14 @@ extension SkParagraphExtension on SkParagraph {
     double x,
     double y,
   ) => _getGlyphPositionAtCoordinate(x.toJS, y.toJS);
+
+  @JS('getGlyphInfoAt')
+  external SkGlyphClusterInfo? _getGlyphInfoAt(JSNumber position);
+  ui.GlyphInfo? getGlyphInfoAt(double position) => _getGlyphInfoAt(position.toJS)?._glyphInfo;
+
+  @JS('getClosestGlyphInfoAtCoordinate')
+  external SkGlyphClusterInfo? _getClosestGlyphInfoAtCoordinate(JSNumber x, JSNumber y);
+  ui.GlyphInfo? getClosestGlyphInfoAt(double x, double y) => _getClosestGlyphInfoAtCoordinate(x.toJS, y.toJS)?._glyphInfo;
 
   @JS('getWordBoundary')
   external SkTextRange _getWordBoundary(JSNumber position);

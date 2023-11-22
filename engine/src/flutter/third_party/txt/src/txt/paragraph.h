@@ -21,6 +21,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "line_metrics.h"
 #include "paragraph_style.h"
+#include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/modules/skparagraph/include/Metrics.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
@@ -174,6 +175,15 @@ class Paragraph {
   // with the top left corner as the origin, and +y direction as down.
   virtual PositionWithAffinity GetGlyphPositionAtCoordinate(double dx,
                                                             double dy) = 0;
+
+  virtual bool GetGlyphInfoAt(
+      unsigned offset,
+      skia::textlayout::Paragraph::GlyphInfo* glyphInfo) const = 0;
+
+  virtual bool GetClosestGlyphInfoAtCoordinate(
+      double dx,
+      double dy,
+      skia::textlayout::Paragraph::GlyphInfo* glyphInfo) const = 0;
 
   // Finds the first and last glyphs that define a word containing the glyph at
   // index offset.

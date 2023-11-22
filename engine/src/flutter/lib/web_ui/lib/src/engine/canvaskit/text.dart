@@ -659,6 +659,18 @@ class CkParagraph implements ui.Paragraph {
   }
 
   @override
+  ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
+    assert(!_disposed, 'Paragraph has been disposed.');
+    return skiaObject.getClosestGlyphInfoAt(offset.dx, offset.dy);
+  }
+
+  @override
+  ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
+    assert(!_disposed, 'Paragraph has been disposed.');
+    return skiaObject.getGlyphInfoAt(codeUnitOffset.toDouble());
+  }
+
+  @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
     assert(!_disposed, 'Paragraph has been disposed.');
     final int characterPosition;
