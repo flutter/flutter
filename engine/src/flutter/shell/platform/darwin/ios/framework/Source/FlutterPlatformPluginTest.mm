@@ -166,6 +166,44 @@ FLUTTER_ASSERT_ARC
   [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
+- (void)testShareScreenInvokedOnIPad {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
+
+  XCTestExpectation* presentExpectation =
+      [self expectationWithDescription:@"Share view controller presented on iPad"];
+
+  FlutterViewController* engineViewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                      nibName:nil
+                                                                                       bundle:nil];
+  FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+  OCMStub([mockEngineViewController
+      presentViewController:[OCMArg isKindOfClass:[UIActivityViewController class]]
+                   animated:YES
+                 completion:nil]);
+
+  id mockTraitCollection = OCMClassMock([UITraitCollection class]);
+  OCMStub([mockTraitCollection userInterfaceIdiom]).andReturn(UIUserInterfaceIdiomPad);
+
+  FlutterPlatformPlugin* plugin =
+      [[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakNSObject()];
+  FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+  FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Share.invoke"
+                                                                    arguments:@"Test"];
+  FlutterResult result = ^(id result) {
+    OCMVerify([mockEngineViewController
+        presentViewController:[OCMArg isKindOfClass:[UIActivityViewController class]]
+                     animated:YES
+                   completion:nil]);
+    [presentExpectation fulfill];
+  };
+  [mockPlugin handleMethodCall:methodCall result:result];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
 - (void)testClipboardHasCorrectStrings {
   [UIPasteboard generalPasteboard].string = nil;
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
