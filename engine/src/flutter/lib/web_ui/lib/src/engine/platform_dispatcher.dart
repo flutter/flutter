@@ -104,12 +104,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _disconnectFontSizeObserver();
     _removeLocaleChangedListener();
     HighContrastSupport.instance.removeListener(_updateHighContrast);
-
-    // We need to call `toList()` in order to avoid concurrent modification inside
-    // the loop (`view.dispose()` removes itself from the view map).
-    for (final EngineFlutterView view in views.toList()) {
-      view.dispose();
-    }
+    viewManager.dispose();
   }
 
   /// Receives all events related to platform configuration changes.
@@ -136,19 +131,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     EngineFlutterDisplay.instance,
   ];
 
-  final FlutterViewManager viewManager = FlutterViewManager();
-
-  /// Adds [view] to the platform dispatcher's registry of [views].
-  void registerView(EngineFlutterView view) {
-    viewManager.registerView(view);
-  }
-
-  /// Removes [view] from the platform dispatcher's registry of [views].
-  ///
-  /// Nothing happens if the view is not already registered.
-  void unregisterView(EngineFlutterView view) {
-    viewManager.unregisterView(view.viewId);
-  }
+  late final FlutterViewManager viewManager = FlutterViewManager(this);
 
   /// The current list of windows.
   @override

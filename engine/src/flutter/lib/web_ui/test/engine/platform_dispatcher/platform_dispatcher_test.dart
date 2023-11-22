@@ -203,27 +203,26 @@ void testMain() {
 
     test('disposes all its views', () {
       final EnginePlatformDispatcher dispatcher = EnginePlatformDispatcher();
-      final EngineFlutterView view20 =
-          EngineFlutterView(20, dispatcher, createDomHTMLDivElement());
-      final EngineFlutterView view21 =
-          EngineFlutterView(21, dispatcher, createDomHTMLDivElement());
-      final EngineFlutterView view22 =
-          EngineFlutterView(22, dispatcher, createDomHTMLDivElement());
+      final EngineFlutterView view1 =
+          EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final EngineFlutterView view2 =
+          EngineFlutterView(dispatcher, createDomHTMLDivElement());
+      final EngineFlutterView view3 =
+          EngineFlutterView(dispatcher, createDomHTMLDivElement());
 
-      // Add this again when views don't register themselves upon instantiation.
-      // dispatcher
-      //   ..registerView(view20)
-      //   ..registerView(view21)
-      //   ..registerView(view22);
+      dispatcher.viewManager
+        ..registerView(view1)
+        ..registerView(view2)
+        ..registerView(view3);
 
-      expect(view20.isDisposed, isFalse);
-      expect(view21.isDisposed, isFalse);
-      expect(view22.isDisposed, isFalse);
+      expect(view1.isDisposed, isFalse);
+      expect(view2.isDisposed, isFalse);
+      expect(view3.isDisposed, isFalse);
 
       dispatcher.dispose();
-      expect(view20.isDisposed, isTrue);
-      expect(view21.isDisposed, isTrue);
-      expect(view22.isDisposed, isTrue);
+      expect(view1.isDisposed, isTrue);
+      expect(view2.isDisposed, isTrue);
+      expect(view3.isDisposed, isTrue);
     });
   });
 }
