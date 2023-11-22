@@ -8,7 +8,6 @@
 #include <limits>
 #include <memory>
 
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
 namespace impeller {

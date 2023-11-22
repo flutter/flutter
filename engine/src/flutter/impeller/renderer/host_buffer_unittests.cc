@@ -12,7 +12,7 @@ TEST(HostBufferTest, TestInitialization) {
   ASSERT_TRUE(HostBuffer::Create());
   // Newly allocated buffers don't touch the heap till they have to.
   ASSERT_EQ(HostBuffer::Create()->GetLength(), 0u);
-  ASSERT_EQ(HostBuffer::Create()->GetReservedLength(), 0u);
+  ASSERT_EQ(HostBuffer::Create()->GetSize(), 0u);
 }
 
 TEST(HostBufferTest, CanEmplace) {
