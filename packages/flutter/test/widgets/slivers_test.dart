@@ -232,6 +232,69 @@ void main() {
     expect(find.text('BOTTOM'), findsOneWidget);
   });
 
+  testWidgetsWithLeakTracking('Sliver grid can replace intermediate items', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138749.
+    // The bug happens when items in between first and last item changed while
+    // the sliver layout only display a item in the middle of the list.
+    final List<int> items = <int>[0, 1, 2, 3, 4, 5];
+    final List<int> replacedItems = <int>[0, 2, 9, 10, 11, 12, 5];
+    Future<void> pumpSliverGrid(bool replace) async {
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverGrid(
+                    gridDelegate: TestGridDelegate(replace),
+                    delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                        final int item = replace
+                            ? replacedItems[index]
+                            : items[index];
+                        return Container(
+                          key: ValueKey<int>(item),
+                          alignment: Alignment.center,
+                          child: Text('item $item'),
+                        );
+                      },
+                      childCount: replace ? 7 : 6,
+                      findChildIndexCallback: (Key key) {
+                        final int item = (key as ValueKey<int>).value;
+                        final int index = replace
+                            ? replacedItems.indexOf(item)
+                            : items.indexOf(item);
+                        return index >= 0 ? index : null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpSliverGrid(false);
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsOneWidget);
+    expect(find.text('item 4'), findsOneWidget);
+
+    await pumpSliverGrid(true);
+    // The TestGridDelegate only show child at index 1 when not expand.
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsNothing);
+    expect(find.text('item 4'), findsNothing);
+  });
+
   testWidgetsWithLeakTracking('SliverFixedExtentList correctly clears garbage', (WidgetTester tester) async {
     final List<String> items = <String>['1', '2', '3', '4', '5', '6'];
     await testSliverFixedExtentList(tester, items);
@@ -1503,4 +1566,57 @@ class KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin
 class _NullBuildContext implements BuildContext {
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class TestGridDelegate implements SliverGridDelegate {
+  TestGridDelegate(this.replace);
+
+  final bool replace;
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    return TestGridLayout(replace);
+  }
+
+  @override
+  bool shouldRelayout(covariant TestGridDelegate oldDelegate) {
+    return true;
+  }
+}
+
+class TestGridLayout implements SliverGridLayout {
+  TestGridLayout(this.replace);
+
+  final bool replace;
+
+  @override
+  double computeMaxScrollOffset(int childCount) {
+    return 200;
+  }
+
+  @override
+  SliverGridGeometry getGeometryForChildIndex(int index) {
+    return SliverGridGeometry(
+      crossAxisOffset: 20.0 + 20 * index,
+      crossAxisExtent: 20,
+      mainAxisExtent: 20,
+      scrollOffset: 0,
+    );
+  }
+
+  @override
+  int getMaxChildIndexForScrollOffset(double scrollOffset) {
+    if (replace) {
+      return 1;
+    }
+    return 5;
+  }
+
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset) {
+    if (replace) {
+      return 1;
+    }
+    return 0;
+  }
 }
