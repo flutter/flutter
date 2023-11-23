@@ -250,6 +250,7 @@ class Icon extends StatelessWidget {
 
     final List<Shadow>? iconShadows = shadows ?? iconTheme.shadows;
 
+    final IconData? icon = this.icon;
     if (icon == null) {
       return Semantics(
         label: semanticLabel,
@@ -263,30 +264,34 @@ class Icon extends StatelessWidget {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     }
 
+    final TextStyle fontStyle = TextStyle(
+      fontVariations: <FontVariation>[
+        if (iconFill != null) FontVariation('FILL', iconFill),
+        if (iconWeight != null) FontVariation('wght', iconWeight),
+        if (iconGrade != null) FontVariation('GRAD', iconGrade),
+        if (iconOpticalSize != null) FontVariation('opsz', iconOpticalSize),
+      ],
+      inherit: false,
+      color: iconColor,
+      fontSize: iconSize,
+      fontFamily: icon.fontFamily,
+      package: icon.fontPackage,
+      fontFamilyFallback: icon.fontFamilyFallback,
+      shadows: iconShadows,
+      height: 1.0,  // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+      leadingDistribution: TextLeadingDistribution.even,
+    );
+
     Widget iconWidget = RichText(
       overflow: TextOverflow.visible, // Never clip.
       textDirection: textDirection, // Since we already fetched it for the assert...
       text: TextSpan(
-        text: String.fromCharCode(icon!.codePoint),
-        style: TextStyle(
-          fontVariations: <FontVariation>[
-            if (iconFill != null) FontVariation('FILL', iconFill),
-            if (iconWeight != null) FontVariation('wght', iconWeight),
-            if (iconGrade != null) FontVariation('GRAD', iconGrade),
-            if (iconOpticalSize != null) FontVariation('opsz', iconOpticalSize),
-          ],
-          inherit: false,
-          color: iconColor,
-          fontSize: iconSize,
-          fontFamily: icon!.fontFamily,
-          package: icon!.fontPackage,
-          fontFamilyFallback: icon!.fontFamilyFallback,
-          shadows: iconShadows,
-        ),
+        text: String.fromCharCode(icon.codePoint),
+        style: fontStyle,
       ),
     );
 
-    if (icon!.matchTextDirection) {
+    if (icon.matchTextDirection) {
       switch (textDirection) {
         case TextDirection.rtl:
           iconWidget = Transform(
