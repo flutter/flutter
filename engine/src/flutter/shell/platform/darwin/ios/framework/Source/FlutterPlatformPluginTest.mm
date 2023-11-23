@@ -408,4 +408,93 @@ FLUTTER_ASSERT_ARC
   [bundleMock stopMocking];
 }
 
+- (void)testStatusBarHiddenUpdate {
+  id bundleMock = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"])
+      .andReturn(@NO);
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
+  // Enabling system UI overlays to update status bar.
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
+
+  // Update to hidden.
+  FlutterPlatformPlugin* plugin = [engine platformPlugin];
+
+  XCTestExpectation* enableSystemUIOverlaysCalled =
+      [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
+  FlutterResult resultSet = ^(id result) {
+    [enableSystemUIOverlaysCalled fulfill];
+  };
+  FlutterMethodCall* methodCallSet =
+      [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
+                                        arguments:@[ @"SystemUiOverlay.bottom" ]];
+  [plugin handleMethodCall:methodCallSet result:resultSet];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+#if not APPLICATION_EXTENSION_API_ONLY
+  OCMVerify([mockApplication setStatusBarHidden:YES]);
+#endif
+
+  // Update to shown.
+  XCTestExpectation* enableSystemUIOverlaysCalled2 =
+      [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
+  FlutterResult resultSet2 = ^(id result) {
+    [enableSystemUIOverlaysCalled2 fulfill];
+  };
+  FlutterMethodCall* methodCallSet2 =
+      [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
+                                        arguments:@[ @"SystemUiOverlay.top" ]];
+  [plugin handleMethodCall:methodCallSet2 result:resultSet2];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+#if not APPLICATION_EXTENSION_API_ONLY
+  OCMVerify([mockApplication setStatusBarHidden:NO]);
+#endif
+
+  [flutterViewController deregisterNotifications];
+  [mockApplication stopMocking];
+  [bundleMock stopMocking];
+}
+
+- (void)testStatusBarStyle {
+  id bundleMock = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"])
+      .andReturn(@NO);
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  std::unique_ptr<fml::WeakNSObjectFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakNSObjectFactory<FlutterEngine>>(engine);
+  XCTAssertFalse(flutterViewController.prefersStatusBarHidden);
+
+  FlutterPlatformPlugin* plugin = [engine platformPlugin];
+
+  XCTestExpectation* enableSystemUIModeCalled =
+      [self expectationWithDescription:@"setSystemUIOverlayStyle"];
+  FlutterResult resultSet = ^(id result) {
+    [enableSystemUIModeCalled fulfill];
+  };
+  FlutterMethodCall* methodCallSet =
+      [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setSystemUIOverlayStyle"
+                                        arguments:@{@"statusBarBrightness" : @"Brightness.dark"}];
+  [plugin handleMethodCall:methodCallSet result:resultSet];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+
+#if not APPLICATION_EXTENSION_API_ONLY
+  OCMVerify([mockApplication setStatusBarStyle:UIStatusBarStyleLightContent]);
+#endif
+
+  [flutterViewController deregisterNotifications];
+  [mockApplication stopMocking];
+  [bundleMock stopMocking];
+}
+
 @end
