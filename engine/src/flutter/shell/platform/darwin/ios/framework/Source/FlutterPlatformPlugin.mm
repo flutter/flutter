@@ -43,7 +43,7 @@ const char* const kOverlayStyleUpdateNotificationKey =
 using namespace flutter;
 
 static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
-#if APPLICATION_EXTENSION_API_ONLY
+#if not APPLICATION_EXTENSION_API_ONLY
   [UIApplication sharedApplication].statusBarHidden = hidden;
 #else
   FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
@@ -51,7 +51,7 @@ static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
 }
 
 static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
-#if APPLICATION_EXTENSION_API_ONLY
+#if not APPLICATION_EXTENSION_API_ONLY
   // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
   // in favor of delegating to the view controller.
   [[UIApplication sharedApplication] setStatusBarStyle:style];
