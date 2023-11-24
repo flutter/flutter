@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'multi_view_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('Widgets in view update as expected', (WidgetTester tester) async {
@@ -208,15 +208,4 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
-}
-
-class FakeView extends TestFlutterView{
-  FakeView(FlutterView view, { this.viewId = 100 }) : super(
-    view: view,
-    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-    display: view.display as TestDisplay,
-  );
-
-  @override
-  final int viewId;
 }
