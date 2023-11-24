@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/card/card.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Card has clip applied', (WidgetTester tester) async {
+  testWidgets('Card Smoke Test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CardExampleApp(),
     );
