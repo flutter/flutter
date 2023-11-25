@@ -3704,8 +3704,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _valueWhenToolbarShowScheduled = null;
         return;
       }
+
+      final Rect renderEditableBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), renderEditable.paintBounds);
+      final Size screenSize = MediaQuery.of(context).size;
+      final Rect viewportRect = Rect.fromLTWH(0.0, 0.0, screenSize.width, screenSize.height);
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
-      final bool renderEditableInView = renderEditable.getTransformTo(null) != Matrix4.zero();
+      final bool renderEditableInView = !renderEditableBounds.hasNaN && viewportRect.overlaps(renderEditableBounds);
 
       if (selectionIsVisible && renderEditableInView) {
         showToolbar();
