@@ -1085,7 +1085,7 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
-    this.enabled,
+    this.enabled = true,
     this.autoFocus = false,
   });
 
@@ -1210,10 +1210,7 @@ class SearchBar extends StatefulWidget {
 
   /// If false the text field is "disabled": it ignores taps and its
   /// [decoration] is rendered in grey.
-  ///
-  /// If non-null this property overrides the [decoration]'s
-  /// [InputDecoration.enabled] property.
-  final bool? enabled;
+  final bool enabled;
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autoFocus;
