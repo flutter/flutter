@@ -4,6 +4,7 @@
 
 #include "flutter/lib/gpu/texture.h"
 
+#include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "fml/mapping.h"
 #include "impeller/core/allocator.h"
@@ -15,12 +16,16 @@
 namespace flutter {
 namespace gpu {
 
-IMPLEMENT_WRAPPERTYPEINFO(gpu, Texture);
+IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, Texture);
 
 Texture::Texture(std::shared_ptr<impeller::Texture> texture)
     : texture_(std::move(texture)) {}
 
 Texture::~Texture() = default;
+
+std::shared_ptr<impeller::Texture> Texture::GetTexture() {
+  return texture_;
+}
 
 void Texture::SetCoordinateSystem(
     impeller::TextureCoordinateSystem coordinate_system) {
@@ -78,9 +83,11 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            bool enable_shader_read_usage,
                                            bool enable_shader_write_usage) {
   impeller::TextureDescriptor desc;
-  desc.storage_mode = static_cast<impeller::StorageMode>(storage_mode);
+  desc.storage_mode = flutter::gpu::ToImpellerStorageMode(
+      static_cast<flutter::gpu::FlutterGPUStorageMode>(storage_mode));
   desc.size = {width, height};
-  desc.format = static_cast<impeller::PixelFormat>(format);
+  desc.format = flutter::gpu::ToImpellerPixelFormat(
+      static_cast<flutter::gpu::FlutterGPUPixelFormat>(format));
   desc.usage = 0;
   if (enable_render_target_usage) {
     desc.usage |= static_cast<impeller::TextureUsageMask>(
@@ -113,8 +120,9 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
     return false;
   }
 
-  texture->SetCoordinateSystem(
-      static_cast<impeller::TextureCoordinateSystem>(coordinate_system));
+  texture->SetCoordinateSystem(flutter::gpu::ToImpellerTextureCoordinateSystem(
+      static_cast<flutter::gpu::FlutterGPUTextureCoordinateSystem>(
+          coordinate_system)));
 
   auto res = fml::MakeRefCounted<flutter::gpu::Texture>(std::move(texture));
   res->AssociateWithDartWrapper(wrapper);
@@ -126,7 +134,9 @@ void InternalFlutterGpu_Texture_SetCoordinateSystem(
     flutter::gpu::Texture* wrapper,
     int coordinate_system) {
   return wrapper->SetCoordinateSystem(
-      static_cast<impeller::TextureCoordinateSystem>(coordinate_system));
+      flutter::gpu::ToImpellerTextureCoordinateSystem(
+          static_cast<flutter::gpu::FlutterGPUTextureCoordinateSystem>(
+              coordinate_system)));
 }
 
 bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,

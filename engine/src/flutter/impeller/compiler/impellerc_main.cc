@@ -8,15 +8,12 @@
 #include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
-#include "impeller/base/strings.h"
 #include "impeller/compiler/compiler.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
 #include "impeller/compiler/types.h"
 #include "impeller/compiler/utilities.h"
-#include "third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp"
 
 namespace impeller {
 namespace compiler {
@@ -88,7 +85,8 @@ bool Main(const fml::CommandLine& command_line) {
 
   // Generate SkSL if needed.
   std::shared_ptr<fml::Mapping> sksl_mapping;
-  if (switches.iplr && TargetPlatformBundlesSkSL(switches.target_platform)) {
+  if (switches.iplr && TargetPlatformBundlesSkSL(switches.target_platform) &&
+      switches.iplr_bundle.empty()) {
     SourceOptions sksl_options = options;
     sksl_options.target_platform = TargetPlatform::kSkSL;
 

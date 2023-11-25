@@ -22,6 +22,8 @@ class Texture : public RefCountedDartWrappable<Texture> {
 
   ~Texture() override;
 
+  std::shared_ptr<impeller::Texture> GetTexture();
+
   void SetCoordinateSystem(impeller::TextureCoordinateSystem coordinate_system);
 
   bool Overwrite(const tonic::DartByteData& source_bytes);

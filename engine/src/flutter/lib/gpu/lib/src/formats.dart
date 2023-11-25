@@ -6,6 +6,10 @@
 
 part of flutter_gpu;
 
+// ATTENTION! ATTENTION! ATTENTION!
+// All enum classes defined in this file must exactly match the contents and
+// order of the corresponding enums defined in `gpu/formats.h`.
+
 /// Specifies where an allocation resides and how it may be used.
 enum StorageMode {
   /// Allocations can be mapped onto the hosts address space and also be used by
@@ -58,4 +62,46 @@ enum TextureCoordinateSystem {
   /// Default coordinate system.
   /// (0, 0) is the top-left of the image with +Y going down.
   renderToTexture,
+}
+
+enum BlendFactor {
+  zero,
+  one,
+  sourceColor,
+  oneMinusSourceColor,
+  sourceAlpha,
+  oneMinusSourceAlpha,
+  destinationColor,
+  oneMinusDestinationColor,
+  destinationAlpha,
+  oneMinusDestinationAlpha,
+  sourceAlphaSaturated,
+  blendColor,
+  oneMinusBlendColor,
+  blendAlpha,
+  oneMinusBlendAlpha,
+}
+
+enum BlendOperation {
+  add,
+  subtract,
+  reverseSubtract,
+}
+
+enum LoadAction {
+  dontCare,
+  load,
+  clear,
+}
+
+enum StoreAction {
+  dontCare,
+  store,
+  multisampleResolve,
+  storeAndMultisampleResolve,
+}
+
+enum ShaderStage {
+  vertex,
+  fragment,
 }

@@ -5572,20 +5572,39 @@ ORIGIN: ../../../flutter/impeller/typographer/typeface.cc + ../../../flutter/LIC
 ORIGIN: ../../../flutter/impeller/typographer/typeface.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/typographer_context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/typographer_context.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/command_buffer.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/command_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/device_buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/device_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/export.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/export.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/fixtures.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/fixtures.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/formats.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/formats.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/host_buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/host_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/lib/gpu.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/lib/src/buffer.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/src/command_buffer.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/lib/src/context.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/lib/src/formats.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/src/render_pass.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/src/render_pipeline.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/src/shader.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/src/shader_library.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/lib/src/smoketest.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/lib/src/texture.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/render_pass.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/render_pass.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/render_pipeline.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/render_pipeline.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/shader.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/shader.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/shader_library.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/shader_library.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/smoketest.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/smoketest.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/texture.cc + ../../../flutter/LICENSE
@@ -8348,20 +8367,39 @@ FILE: ../../../flutter/impeller/typographer/typeface.cc
 FILE: ../../../flutter/impeller/typographer/typeface.h
 FILE: ../../../flutter/impeller/typographer/typographer_context.cc
 FILE: ../../../flutter/impeller/typographer/typographer_context.h
+FILE: ../../../flutter/lib/gpu/command_buffer.cc
+FILE: ../../../flutter/lib/gpu/command_buffer.h
 FILE: ../../../flutter/lib/gpu/context.cc
 FILE: ../../../flutter/lib/gpu/context.h
 FILE: ../../../flutter/lib/gpu/device_buffer.cc
 FILE: ../../../flutter/lib/gpu/device_buffer.h
 FILE: ../../../flutter/lib/gpu/export.cc
 FILE: ../../../flutter/lib/gpu/export.h
+FILE: ../../../flutter/lib/gpu/fixtures.cc
+FILE: ../../../flutter/lib/gpu/fixtures.h
+FILE: ../../../flutter/lib/gpu/formats.cc
+FILE: ../../../flutter/lib/gpu/formats.h
 FILE: ../../../flutter/lib/gpu/host_buffer.cc
 FILE: ../../../flutter/lib/gpu/host_buffer.h
 FILE: ../../../flutter/lib/gpu/lib/gpu.dart
 FILE: ../../../flutter/lib/gpu/lib/src/buffer.dart
+FILE: ../../../flutter/lib/gpu/lib/src/command_buffer.dart
 FILE: ../../../flutter/lib/gpu/lib/src/context.dart
 FILE: ../../../flutter/lib/gpu/lib/src/formats.dart
+FILE: ../../../flutter/lib/gpu/lib/src/render_pass.dart
+FILE: ../../../flutter/lib/gpu/lib/src/render_pipeline.dart
+FILE: ../../../flutter/lib/gpu/lib/src/shader.dart
+FILE: ../../../flutter/lib/gpu/lib/src/shader_library.dart
 FILE: ../../../flutter/lib/gpu/lib/src/smoketest.dart
 FILE: ../../../flutter/lib/gpu/lib/src/texture.dart
+FILE: ../../../flutter/lib/gpu/render_pass.cc
+FILE: ../../../flutter/lib/gpu/render_pass.h
+FILE: ../../../flutter/lib/gpu/render_pipeline.cc
+FILE: ../../../flutter/lib/gpu/render_pipeline.h
+FILE: ../../../flutter/lib/gpu/shader.cc
+FILE: ../../../flutter/lib/gpu/shader.h
+FILE: ../../../flutter/lib/gpu/shader_library.cc
+FILE: ../../../flutter/lib/gpu/shader_library.h
 FILE: ../../../flutter/lib/gpu/smoketest.cc
 FILE: ../../../flutter/lib/gpu/smoketest.h
 FILE: ../../../flutter/lib/gpu/texture.cc

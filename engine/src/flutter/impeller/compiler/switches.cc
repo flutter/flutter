@@ -63,6 +63,9 @@ void Switches::PrintHelp(std::ostream& stream) {
          << std::endl;
   stream << "[optional] --iplr (causes --sl file to be emitted in iplr format)"
          << std::endl;
+  stream << "[optional] --iplr-bundle=<bundle_spec> (causes --sl file to be "
+            "emitted in the iplr bundle format)"
+         << std::endl;
   stream << "[optional] --reflection-json=<reflection_json_file>" << std::endl;
   stream << "[optional] --reflection-header=<reflection_header_file>"
          << std::endl;
@@ -121,6 +124,7 @@ Switches::Switches(const fml::CommandLine& command_line)
       input_type(SourceTypeFromCommandLine(command_line)),
       sl_file_name(command_line.GetOptionValueWithDefault("sl", "")),
       iplr(command_line.HasOption("iplr")),
+      iplr_bundle(command_line.GetOptionValueWithDefault("iplr-bundle", "")),
       spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")),
       reflection_json_name(
           command_line.GetOptionValueWithDefault("reflection-json", "")),

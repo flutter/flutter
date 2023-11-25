@@ -94,6 +94,16 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return result.isValid ? result : null;
   }
 
+  /// Create a new command buffer that can be used to submit GPU commands.
+  CommandBuffer createCommandBuffer() {
+    return CommandBuffer._(this);
+  }
+
+  RenderPipeline createRenderPipeline(
+      Shader vertexShader, Shader fragmentShader) {
+    return RenderPipeline._(this, vertexShader, fragmentShader);
+  }
+
   /// Associates the default Impeller context with this Context.
   @Native<Handle Function(Handle)>(
       symbol: 'InternalFlutterGpu_Context_InitializeDefault')

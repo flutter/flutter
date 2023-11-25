@@ -16,7 +16,7 @@
 namespace flutter {
 
 // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-IMPLEMENT_WRAPPERTYPEINFO(gpu, FlutterGpuTestClass);
+IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, FlutterGpuTestClass);
 
 // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
 FlutterGpuTestClass::~FlutterGpuTestClass() = default;

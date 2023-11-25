@@ -143,15 +143,6 @@ impeller_component("renderer_unittests") {
   }
 }
 
-test_fixtures("renderer_dart_fixtures") {
-  dart_main = "../fixtures/dart_tests.dart"
-
-  fixtures = [
-    "../fixtures/bay_bridge.jpg",
-    "../fixtures/boston.jpg",
-  ]
-}
-
 impeller_component("renderer_dart_unittests") {
   testonly = true
 
@@ -159,8 +150,8 @@ impeller_component("renderer_dart_unittests") {
 
   deps = [
     ":renderer",
-    ":renderer_dart_fixtures",
-    "../fixtures:shader_fixtures",
+    "../fixtures:flutter_gpu_fixtures",
+    "../fixtures:flutter_gpu_shaders",
     "../playground:playground_test",
     "//flutter/lib/gpu",
     "//flutter/runtime:runtime",

@@ -21,6 +21,8 @@ class HostBuffer : public RefCountedDartWrappable<HostBuffer> {
 
   ~HostBuffer() override;
 
+  std::shared_ptr<impeller::HostBuffer> GetBuffer();
+
   size_t EmplaceBytes(const tonic::DartByteData& byte_data);
 
  private:
