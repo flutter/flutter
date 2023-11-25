@@ -3682,7 +3682,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // until scrolling ends.
     //
     // The selection and renderEditable need to be visible within the current
-    // viewport for the toolbar to show when scrolling ends. If they are not 
+    // viewport for the toolbar to show when scrolling ends. If they are not
     // then the toolbar is shown when they are scrolled back into view, unless
     // invalidated by a change in TextEditingValue.
     if (notification is ScrollStartNotification) {
