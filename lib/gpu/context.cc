@@ -6,7 +6,7 @@
 
 #include <future>
 
-#include "dart_api.h"
+#include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
 #include "tonic/converter/dart_converter.h"
@@ -14,7 +14,7 @@
 namespace flutter {
 namespace gpu {
 
-IMPLEMENT_WRAPPERTYPEINFO(gpu, Context);
+IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, Context);
 
 std::shared_ptr<impeller::Context> Context::default_context_;
 
@@ -76,21 +76,22 @@ Dart_Handle InternalFlutterGpu_Context_InitializeDefault(Dart_Handle wrapper) {
   return Dart_Null();
 }
 
-///
 extern int InternalFlutterGpu_Context_GetDefaultColorFormat(
     flutter::gpu::Context* wrapper) {
-  return static_cast<int>(
-      wrapper->GetContext()->GetCapabilities()->GetDefaultColorFormat());
+  return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(
+      wrapper->GetContext()->GetCapabilities()->GetDefaultColorFormat()));
 }
 
 extern int InternalFlutterGpu_Context_GetDefaultStencilFormat(
     flutter::gpu::Context* wrapper) {
-  return static_cast<int>(
-      wrapper->GetContext()->GetCapabilities()->GetDefaultStencilFormat());
+  return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(
+      wrapper->GetContext()->GetCapabilities()->GetDefaultStencilFormat()));
 }
 
 extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
     flutter::gpu::Context* wrapper) {
-  return static_cast<int>(
-      wrapper->GetContext()->GetCapabilities()->GetDefaultDepthStencilFormat());
+  return static_cast<int>(flutter::gpu::FromImpellerPixelFormat(
+      wrapper->GetContext()
+          ->GetCapabilities()
+          ->GetDefaultDepthStencilFormat()));
 }

@@ -29,6 +29,8 @@ class RenderPass {
  public:
   virtual ~RenderPass();
 
+  const std::weak_ptr<const Context>& GetContext() const;
+
   const RenderTarget& GetRenderTarget() const;
 
   ISize GetRenderTargetSize() const;
@@ -100,8 +102,6 @@ class RenderPass {
   std::vector<Command> commands_;
 
   RenderPass(std::weak_ptr<const Context> context, const RenderTarget& target);
-
-  const std::weak_ptr<const Context>& GetContext() const;
 
   virtual void OnSetLabel(std::string label) = 0;
 
