@@ -11,11 +11,15 @@
 namespace flutter {
 namespace gpu {
 
-IMPLEMENT_WRAPPERTYPEINFO(gpu, HostBuffer);
+IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, HostBuffer);
 
 HostBuffer::HostBuffer() : host_buffer_(impeller::HostBuffer::Create()) {}
 
 HostBuffer::~HostBuffer() = default;
+
+std::shared_ptr<impeller::HostBuffer> HostBuffer::GetBuffer() {
+  return host_buffer_;
+}
 
 size_t HostBuffer::EmplaceBytes(const tonic::DartByteData& byte_data) {
   auto view =

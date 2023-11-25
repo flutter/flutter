@@ -319,7 +319,7 @@ std::shared_ptr<fml::Mapping> RuntimeStageData::CreateMapping() const {
                             shader_->GetMapping() + shader_->GetSize()};
   }
   // It is not an error for the SkSL to be ommitted.
-  if (sksl_->GetSize() > 0u) {
+  if (sksl_ && sksl_->GetSize() > 0u) {
     runtime_stage.sksl = {sksl_->GetMapping(),
                           sksl_->GetMapping() + sksl_->GetSize()};
   }

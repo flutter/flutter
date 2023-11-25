@@ -22,6 +22,8 @@ class DeviceBuffer : public RefCountedDartWrappable<DeviceBuffer> {
 
   ~DeviceBuffer() override;
 
+  std::shared_ptr<impeller::DeviceBuffer> GetBuffer();
+
   bool Overwrite(const tonic::DartByteData& source_bytes,
                  size_t destination_offset_in_bytes);
 

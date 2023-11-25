@@ -282,6 +282,7 @@ template("impellerc") {
              ])
 
   # Optional: invoker.iplr Causes --sl output to be in iplr format.
+  # Optional: invoker.iplr_bundle specifies a Flutter GPU shader bundle configuration.
   # Optional: invoker.defines specifies a list of valueless macro definitions.
   # Optional: invoker.intermediates_subdir specifies the subdirectory in which
   #           to put intermediates.
@@ -374,6 +375,9 @@ template("impellerc") {
       ]
       if (iplr) {
         args += [ "--iplr" ]
+      }
+      if (defined(invoker.iplr_bundle)) {
+        args += [ "--iplr-bundle=${invoker.iplr_bundle}" ]
       }
 
       outputs = [
