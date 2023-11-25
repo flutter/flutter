@@ -613,10 +613,10 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
         .childDirectory('app')
         .childFile('build.gradle');
     globals.printBox(
-      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdkVersion.\n'
-      'Fix this issue by bumping the compileSdkVersion in ${gradleFile.path}:\n'
+      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
+      'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
       'android {\n'
-      '  compileSdkVersion ${minCompileSdkVersionMatch?.group(1)}\n'
+      '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
       '}',
       title: _boxTitle,
     );

@@ -1580,10 +1580,10 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Placeholder(),
     ));
-    final _TestInheritedElement buttonBarTheme =
-        _TestInheritedElement(const ButtonBarTheme(
-        data: ButtonBarThemeData(
-          alignment: MainAxisAlignment.center,
+    final _TestInheritedElement navigationBarTheme =
+        _TestInheritedElement(const NavigationBarTheme(
+        data: NavigationBarThemeData(
+          indicatorColor: Color(0xff00ff00),
         ),
       child: Placeholder(),
     ));
@@ -1592,7 +1592,7 @@ void main() {
     element
       ..dependOnInheritedElement(focusTraversalOrder)
       ..dependOnInheritedElement(directionality)
-      ..dependOnInheritedElement(buttonBarTheme);
+      ..dependOnInheritedElement(navigationBarTheme);
 
     // Dependencies will be sorted by [debugFillProperties].
     element.debugFillProperties(builder);
@@ -1607,7 +1607,7 @@ void main() {
 
     final Set<InheritedElement> dependencies = dependenciesProperty.value!;
     expect(dependencies.length, equals(3));
-    expect(dependenciesProperty.toDescription(), '[ButtonBarTheme, Directionality, FocusTraversalOrder]');
+    expect(dependenciesProperty.toDescription(), '[Directionality, FocusTraversalOrder, NavigationBarTheme]');
   });
 
   testWidgetsWithLeakTracking('BuildOwner.globalKeyCount keeps track of in-use global keys', (WidgetTester tester) async {
