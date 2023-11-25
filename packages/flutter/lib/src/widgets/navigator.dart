@@ -6022,7 +6022,10 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
       _route?.restorationScopeId.removeListener(notifyListeners);
       _route = null;
       notifyListeners();
-      onComplete?.call(result as T);
+     if(result !=null ) {
+       onComplete?.call(result as T);
+     }
+     }
     });
   }
 
