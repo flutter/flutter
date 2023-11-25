@@ -871,4 +871,21 @@ void main() {
 
     expect(synchronouslyCalled, false);
   });
+
+  test('ImageStreamCompleterHandle dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+            () {
+              final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
+              addTearDown(streamController.close);
+              final ImageStreamCompleterHandle imageStreamCompleterHandle = FakeEventReportingImageStreamCompleter(
+                chunkEvents: streamController.stream,
+              ).keepAlive();
+              imageStreamCompleterHandle.dispose();
+            },
+        ImageStreamCompleterHandle,
+      ),
+      areCreateAndDispose,
+    );
+  });
 }

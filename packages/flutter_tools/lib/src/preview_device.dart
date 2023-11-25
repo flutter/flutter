@@ -123,6 +123,11 @@ class PreviewDevice extends Device {
   final Artifacts _artifacts;
   final File _previewBinary;
 
+  /// The set of plugins that are allowed to be used by Preview users.
+  ///
+  /// Currently no plugins are supported.
+  static const List<String> supportedPubPlugins = <String>[];
+
   @override
   void clearLogs() { }
 

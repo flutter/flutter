@@ -10,14 +10,21 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('RichText with recognizers without handlers does not throw', (WidgetTester tester) async {
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final LongPressGestureRecognizer recognizer2 = LongPressGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+    final DoubleTapGestureRecognizer recognizer3 = DoubleTapGestureRecognizer();
+    addTearDown(recognizer3.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: RichText(
           text: TextSpan(text: 'root', children: <InlineSpan>[
-            TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
-            TextSpan(text: 'two', recognizer: LongPressGestureRecognizer()),
-            TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+            TextSpan(text: 'one', recognizer: recognizer1),
+            TextSpan(text: 'two', recognizer: recognizer2),
+            TextSpan(text: 'three', recognizer: recognizer3),
           ]),
         ),
       ),
@@ -42,6 +49,11 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('TextSpan Locale works', (WidgetTester tester) async {
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final DoubleTapGestureRecognizer recognizer2 = DoubleTapGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -50,11 +62,11 @@ void main() {
             text: 'root',
             locale: const Locale('es', 'MX'),
             children: <InlineSpan>[
-              TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+              TextSpan(text: 'one', recognizer: recognizer1),
               const WidgetSpan(
                 child: SizedBox(),
               ),
-              TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+              TextSpan(text: 'three', recognizer: recognizer2),
             ]
           ),
         ),
@@ -91,6 +103,11 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('TextSpan spellOut works', (WidgetTester tester) async {
+    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    addTearDown(recognizer1.dispose);
+    final DoubleTapGestureRecognizer recognizer2 = DoubleTapGestureRecognizer();
+    addTearDown(recognizer2.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -99,11 +116,11 @@ void main() {
               text: 'root',
               spellOut: true,
               children: <InlineSpan>[
-                TextSpan(text: 'one', recognizer: TapGestureRecognizer()),
+                TextSpan(text: 'one', recognizer: recognizer1),
                 const WidgetSpan(
                   child: SizedBox(),
                 ),
-                TextSpan(text: 'three', recognizer: DoubleTapGestureRecognizer()),
+                TextSpan(text: 'three', recognizer: recognizer2),
               ]
           ),
         ),

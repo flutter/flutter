@@ -73,6 +73,37 @@ export 'package:flutter/services.dart' show Brightness;
 // Examples can assume:
 // late BuildContext context;
 
+/// Defines a customized theme for components with an `adaptive` factory constructor.
+///
+/// Currently, only [Switch.adaptive] supports this class.
+class Adaptation<T> {
+  /// Creates an [Adaptation].
+  const Adaptation();
+
+  /// The adaptation's type.
+  Type get type => T;
+
+  /// Typically, this is overridden to return an instance of a custom component
+  /// ThemeData class, like [SwitchThemeData], instead of the defaultValue.
+  ///
+  /// Factory constructors that support adaptations - currently only
+  /// [Switch.adaptive] - look for a [ThemeData.adaptations] member of the expected
+  /// type when computing their effective default component theme. If a matching
+  /// adaptation is not found, the component may choose to use a default adaptation.
+  /// For example, the [Switch.adaptive] component uses an empty [SwitchThemeData]
+  /// if a matching adaptation is not found, for the sake of backwards compatibility.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to create and use subclasses of [Adaptation] that
+  /// define adaptive [SwitchThemeData]s. The [adapt] method in this example is
+  /// overridden to only customize cupertino-style switches, but it can also be
+  /// used to customize any other platforms.
+  ///
+  /// ** See code in examples/api/lib/material/switch/switch.4.dart **
+  /// {@end-tool}
+  T adapt(ThemeData theme, T defaultValue) => defaultValue;
+}
+
 /// An interface that defines custom additions to a [ThemeData] object.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=8-szcYzFVao}
@@ -241,6 +272,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    Iterable<Adaptation<Object>>? adaptations,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
@@ -366,6 +398,7 @@ class ThemeData with Diagnosticable {
     // GENERAL CONFIGURATION
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     extensions ??= <ThemeExtension<dynamic>>[];
+    adaptations ??= <Adaptation<Object>>[];
     inputDecorationTheme ??= const InputDecorationTheme();
     platform ??= defaultTargetPlatform;
     switch (platform) {
@@ -388,7 +421,12 @@ class ThemeData with Diagnosticable {
       : InkSplash.splashFactory;
 
     // COLOR
-    assert(colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness);
+    assert(
+      colorScheme?.brightness == null || brightness == null || colorScheme!.brightness == brightness,
+      'ThemeData.brightness does not match ColorScheme.brightness. '
+      'Either override ColorScheme.brightness or ThemeData.brightness to '
+      'match the other.'
+    );
     assert(colorSchemeSeed == null || colorScheme == null);
     assert(colorSchemeSeed == null || primarySwatch == null);
     assert(colorSchemeSeed == null || primaryColor == null);
@@ -546,6 +584,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: _createAdaptationMap(adaptations),
       applyElevationOverlayColor: applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       extensions: _themeExtensionIterableToMap(extensions),
@@ -653,6 +692,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    required this.adaptationMap,
     required this.applyElevationOverlayColor,
     required this.cupertinoOverrideTheme,
     required this.extensions,
@@ -866,6 +906,19 @@ class ThemeData with Diagnosticable {
   /// text geometry.
   factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
 
+  /// Used to obtain a particular [Adaptation] from [adaptationMap].
+  ///
+  /// To get an adaptation, use `Theme.of(context).getAdaptation<MyAdaptation>()`.
+  Adaptation<T>? getAdaptation<T>() => adaptationMap[T] as Adaptation<T>?;
+
+  static Map<Type, Adaptation<Object>> _createAdaptationMap(Iterable<Adaptation<Object>> adaptations) {
+    final Map<Type, Adaptation<Object>> adaptationMap = <Type, Adaptation<Object>>{
+      for (final Adaptation<Object> adaptation in adaptations)
+        adaptation.type: adaptation
+    };
+    return adaptationMap;
+  }
+
   /// The overall theme brightness.
   ///
   /// The default [TextStyle] color for the [textTheme] is black if the
@@ -954,6 +1007,12 @@ class ThemeData with Diagnosticable {
   ///
   /// See [extensions] for an interactive example.
   T? extension<T>() => extensions[T] as T?;
+
+  /// A map which contains the adaptations for the theme. The entry's key is the
+  /// type of the adaptation; the value is the adaptation itself.
+  ///
+  /// To obtain an adaptation, use [getAdaptation].
+  final Map<Type, Adaptation<Object>> adaptationMap;
 
   /// The default [InputDecoration] values for [InputDecorator], [TextField],
   /// and [TextFormField] are based on this theme.
@@ -1475,6 +1534,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    Iterable<Adaptation<Object>>? adaptations,
     bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
     Iterable<ThemeExtension<dynamic>>? extensions,
@@ -1607,6 +1667,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: adaptations != null ? _createAdaptationMap(adaptations) : adaptationMap,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
@@ -1807,6 +1868,7 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: t < 0.5 ? a.adaptationMap : b.adaptationMap,
       applyElevationOverlayColor:t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       cupertinoOverrideTheme:t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       extensions: _lerpThemeExtensions(a, b, t),
@@ -1912,6 +1974,7 @@ class ThemeData with Diagnosticable {
         // alphabetical by symbol name.
 
         // GENERAL CONFIGURATION
+        mapEquals(other.adaptationMap, adaptationMap) &&
         other.applyElevationOverlayColor == applyElevationOverlayColor &&
         other.cupertinoOverrideTheme == cupertinoOverrideTheme &&
         mapEquals(other.extensions, extensions) &&
@@ -2013,6 +2076,8 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      ...adaptationMap.keys,
+      ...adaptationMap.values,
       applyElevationOverlayColor,
       cupertinoOverrideTheme,
       ...extensions.keys,
@@ -2118,6 +2183,7 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    properties.add(IterableProperty<Adaptation<dynamic>>('adaptations', adaptationMap.values, defaultValue: defaultData.adaptationMap.values, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NoDefaultCupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(IterableProperty<ThemeExtension<dynamic>>('extensions', extensions.values, defaultValue: defaultData.extensions.values, level: DiagnosticLevel.debug));
