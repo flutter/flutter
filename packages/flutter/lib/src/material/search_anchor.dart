@@ -1314,55 +1314,58 @@ class _SearchBarState extends State<SearchBar> {
         color: effectiveBackgroundColor,
         surfaceTintColor: effectiveSurfaceTintColor,
         shape: effectiveShape?.copyWith(side: effectiveSide),
-        child: InkWell(
-          onTap: () {
-            widget.onTap?.call();
-            if (!_focusNode.hasFocus) {
-              _focusNode.requestFocus();
-            }
-          },
-          overlayColor: effectiveOverlayColor,
-          customBorder: effectiveShape?.copyWith(side: effectiveSide),
-          statesController: _internalStatesController,
-          child: Padding(
-            padding: effectivePadding!,
-            child: Row(
-              textDirection: textDirection,
-              children: <Widget>[
-                if (leading != null) leading,
-                Expanded(
-                  child: Padding(
-                    padding: effectivePadding,
-                    child: TextField(
-                      autofocus: widget.autoFocus,
-                      onTap: widget.onTap,
-                      onTapAlwaysCalled: true,
-                      focusNode: _focusNode,
-                      onChanged: widget.onChanged,
-                      onSubmitted: widget.onSubmitted,
-                      controller: widget.controller,
-                      style: effectiveTextStyle,
-                      enabled: widget.enabled,
-                      decoration: InputDecoration(
-                        hintText: widget.hintText,
-                      ).applyDefaults(InputDecorationTheme(
-                        hintStyle: effectiveHintStyle,
-                        // The configuration below is to make sure that the text field
-                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                        enabledBorder: InputBorder.none,
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        // Setting `isDense` to true to allow the text field height to be
-                        // smaller than 48.0
-                        isDense: true,
-                      )),
-                      textCapitalization: effectiveTextCapitalization,
+        child: IgnorePointer(
+          ignoring: !widget.enabled,
+          child: InkWell(
+            onTap: () {
+              widget.onTap?.call();
+              if (!_focusNode.hasFocus) {
+                _focusNode.requestFocus();
+              }
+            },
+            overlayColor: effectiveOverlayColor,
+            customBorder: effectiveShape?.copyWith(side: effectiveSide),
+            statesController: _internalStatesController,
+            child: Padding(
+              padding: effectivePadding!,
+              child: Row(
+                textDirection: textDirection,
+                children: <Widget>[
+                  if (leading != null) leading,
+                  Expanded(
+                    child: Padding(
+                      padding: effectivePadding,
+                      child: TextField(
+                        autofocus: widget.autoFocus,
+                        onTap: widget.onTap,
+                        onTapAlwaysCalled: true,
+                        focusNode: _focusNode,
+                        onChanged: widget.onChanged,
+                        onSubmitted: widget.onSubmitted,
+                        controller: widget.controller,
+                        style: effectiveTextStyle,
+                        enabled: widget.enabled,
+                        decoration: InputDecoration(
+                          hintText: widget.hintText,
+                        ).applyDefaults(InputDecorationTheme(
+                          hintStyle: effectiveHintStyle,
+                          // The configuration below is to make sure that the text field
+                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                          enabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          // Setting `isDense` to true to allow the text field height to be
+                          // smaller than 48.0
+                          isDense: true,
+                        )),
+                        textCapitalization: effectiveTextCapitalization,
+                      ),
                     ),
                   ),
-                ),
-                if (trailing != null) ...trailing,
-              ],
+                  if (trailing != null) ...trailing,
+                ],
+              ),
             ),
           ),
         ),
