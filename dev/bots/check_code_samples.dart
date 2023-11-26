@@ -97,6 +97,19 @@ void main(List<String> args) {
   reportSuccessAndExit('All examples are linked and have tests.');
 }
 
+class LinkInfo {
+  const LinkInfo(this.link, this.file, this.line);
+
+  final String link;
+  final File file;
+  final int line;
+
+  @override
+  String toString() {
+    return '${file.path}:$line: $link';
+  }
+}
+
 class SampleChecker {
   SampleChecker({
     required this.examples,
@@ -119,10 +132,12 @@ class SampleChecker {
     final List<File> exampleFilenames = getExampleFilenames(examples);
 
     // Get a list of all the example link paths that appear in the source files.
-    final Set<String> exampleLinks = getExampleLinks(packages);
-
+    final (Set<String> exampleLinks, Set<LinkInfo> malformedLinks) = getExampleLinks(packages);
     // Also add in any that might be found in the dart:ui directory.
-    exampleLinks.addAll(getExampleLinks(dartUIPath));
+    final (Set<String> uiExampleLinks, Set<LinkInfo> uiMalformedLinks) = getExampleLinks(dartUIPath);
+
+    exampleLinks.addAll(uiExampleLinks);
+    malformedLinks.addAll(uiMalformedLinks);
 
     // Get a list of the filenames that were not found in the source files.
     final List<String> missingFilenames = checkForMissingLinks(exampleFilenames, exampleLinks);
@@ -136,7 +151,7 @@ class SampleChecker {
     // generate new examples.
     missingFilenames.removeWhere((String file) => _knownUnlinkedExamples.contains(file));
 
-    if (missingFilenames.isEmpty && missingTests.isEmpty && noLongerMissing.isEmpty) {
+    if (missingFilenames.isEmpty && missingTests.isEmpty && noLongerMissing.isEmpty && malformedLinks.isEmpty) {
       return true;
     }
 
@@ -165,6 +180,19 @@ class SampleChecker {
         buffer.writeln('  $name');
       }
       buffer.write('Either link them to a source file API doc comment, or remove them.');
+      foundError(buffer.toString().split('\n'));
+    }
+
+    if (malformedLinks.isNotEmpty) {
+      final StringBuffer buffer =
+          StringBuffer('The following malformed links were found in API doc comments:\n');
+      for (final LinkInfo link in malformedLinks) {
+        buffer.writeln('  $link');
+      }
+      buffer.write(
+        'Correct the formatting of these links so that they match the exact pattern:\n'
+        r"  r'\*\* See code in (?<path>.+) \*\*'"
+      );
       foundError(buffer.toString().split('\n'));
     }
     return false;
@@ -199,21 +227,34 @@ class SampleChecker {
     );
   }
 
-  Set<String> getExampleLinks(Directory searchDirectory) {
+  (Set<String>, Set<LinkInfo>) getExampleLinks(Directory searchDirectory) {
     final List<File> files = getFiles(searchDirectory, RegExp(r'\.dart$'));
     final Set<String> searchStrings = <String>{};
-    final RegExp exampleRe = RegExp(r'\*\* See code in (?<path>.*) \*\*');
+    final Set<LinkInfo> malformedStrings = <LinkInfo>{};
+    final RegExp validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
+    // Looks for some common broken versions of example links. This looks for
+    // something that is at minimum "///*seecode<something>*" to indicate that it
+    // looks like an example link. It should be narrowed if we start gettting false
+    // positives.
+    final RegExp malformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)');
     for (final File file in files) {
       final String contents = file.readAsStringSync();
-      searchStrings.addAll(
-        contents.split('\n').where((String s) => s.contains(exampleRe)).map<String>(
-          (String e) {
-            return exampleRe.firstMatch(e)!.namedGroup('path')!;
-          },
-        ),
-      );
+      final List<String> lines = contents.split('\n');
+      int count = 0;
+      for (final String line in lines) {
+        count += 1;
+        final RegExpMatch? validMatch = validExampleRe.firstMatch(line);
+        if (validMatch != null) {
+          searchStrings.add(validMatch.namedGroup('path')!);
+        }
+        final RegExpMatch? malformedMatch = malformedLinkRe.firstMatch(line);
+        // It's only malformed if it doesn't match the valid RegExp.
+        if (malformedMatch != null && validMatch == null) {
+          malformedStrings.add(LinkInfo(malformedMatch.namedGroup('malformed')!, file, count));
+        }
+      }
     }
-    return searchStrings;
+    return (searchStrings, malformedStrings);
   }
 
   List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {

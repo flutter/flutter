@@ -1184,6 +1184,21 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// To listen for platform shutdown messages (and other lifecycle changes),
 /// consider the [AppLifecycleListener] API.
 ///
+/// ## Dismissing Flutter UI via platform native methods
+///
+/// {@template flutter.widgets.runApp.dismissal}
+/// An application may have both Flutter and non-Flutter UI in it. If the
+/// application calls non-Flutter methods to remove Flutter based UI such as
+/// platform native API to manipulate the platform native navigation stack,
+/// the framework does not know if the developer intends to eagerly free
+/// resources or not. The widget tree remains mounted and ready to render
+/// as soon as it is displayed again.
+///
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
+/// the framework should dispose of the active widget tree.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
