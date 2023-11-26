@@ -599,13 +599,19 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
-                      valueColor: widget.armedColor ?? _valueColor,
+                      valueColor:
+                        (_mode == _RefreshIndicatorMode.armed
+                          ? widget.armedColor
+                          : null) ?? _valueColor,
                       backgroundColor: widget.backgroundColor,
                       strokeWidth: widget.strokeWidth,
                     );
 
                     final Widget cupertinoIndicator = CupertinoActivityIndicator(
-                      color: widget.armedColor ?? widget.color,
+                      color:
+                        (_mode == _RefreshIndicatorMode.armed
+                          ? widget.armedColor
+                          : null) ?? widget.color,
                     );
 
                     switch (widget._indicatorType) {
