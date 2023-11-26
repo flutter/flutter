@@ -3396,6 +3396,117 @@ void main() {
     expect(dragStarted, false);
   });
 
+  testWidgetsWithLeakTracking('Slider does not request focus when the value is changed', (WidgetTester tester) async {
+    double value = 0.5;
+    const Color overlayColor = Color(0xffff0000);
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not have focus when enabled and not tapped.
+    await tester.pumpAndSettle();
+    // ignore: avoid_dynamic_calls, invalid_assignment
+    final FocusNode focusNode = (tester.firstState(find.byType(Slider)) as dynamic).focusNode;
+    expect(value, equals(0.5));
+    expect(focusNode.hasFocus, false);
+
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
+
+    // Tap somewhere to change the value.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.addPointer();
+    await gesture.down(tapLocation);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(value, isNot(equals(0.5)));
+    expect(focusNode.hasFocus, false);
+  });
+
+  testWidgetsWithLeakTracking('Overlay remains when Slider is in active', (WidgetTester tester) async {
+    double value = 0.5;
+    const Color overlayColor = Color(0xffff0000);
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                onChanged: enabled
+                  ? (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                  : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not have overlay when enabled and not tapped.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    final Offset tapLocation = Offset(sliderCenter.dx, sliderCenter.dy);
+
+    // Tap and hold down on the slider to keep it active.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.addPointer();
+    await gesture.down(tapLocation);
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: overlayColor),
+    );
+
+    // Hover on the slider but outside the thumb.
+    await gesture.moveTo(tester.getTopLeft(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: overlayColor),
+    );
+
+    // Tap up on the slider.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+  });
+
   testWidgetsWithLeakTracking('Overlay appear only when hovered on the thumb on desktop', (WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
