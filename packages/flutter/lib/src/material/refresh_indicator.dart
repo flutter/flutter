@@ -134,6 +134,7 @@ class RefreshIndicator extends StatefulWidget {
     this.edgeOffset = 0.0,
     required this.onRefresh,
     this.color,
+    this.armedColor,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
@@ -214,6 +215,10 @@ class RefreshIndicator extends StatefulWidget {
   /// The progress indicator's foreground color. The current theme's
   /// [ColorScheme.primary] by default.
   final Color? color;
+
+  /// The progress indicator's foreground color, when armed for refresh.
+  /// Uses [color] or the current theme's [ColorScheme.primary] by default.
+  final Color? armedColor;
 
   /// The progress indicator's background color. The current theme's
   /// [ThemeData.canvasColor] by default.
@@ -594,13 +599,13 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
-                      valueColor: _valueColor,
+                      valueColor: widget.armedColor ?? _valueColor,
                       backgroundColor: widget.backgroundColor,
                       strokeWidth: widget.strokeWidth,
                     );
 
                     final Widget cupertinoIndicator = CupertinoActivityIndicator(
-                      color: widget.color,
+                      color: widget.armedColor ?? widget.color,
                     );
 
                     switch (widget._indicatorType) {
