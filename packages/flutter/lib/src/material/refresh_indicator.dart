@@ -166,6 +166,7 @@ class RefreshIndicator extends StatefulWidget {
     this.edgeOffset = 0.0,
     required this.onRefresh,
     this.color,
+    this.armedColor,
     this.backgroundColor,
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
