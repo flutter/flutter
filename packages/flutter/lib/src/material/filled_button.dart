@@ -397,13 +397,15 @@ class FilledButton extends ButtonStyleButton {
 }
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
-  final bool useMaterial3 = Theme.of(context).useMaterial3;
-  final double padding1x = useMaterial3 ? 24.0 : 16.0;
+  final ThemeData theme = Theme.of(context);
+  final double defaultFontSize = theme.textTheme.labelLarge?.fontSize ?? 14.0;
+  final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+  final double padding1x = theme.useMaterial3 ? 24.0 : 16.0;
   return ButtonStyleButton.scaledPadding(
      EdgeInsets.symmetric(horizontal: padding1x),
      EdgeInsets.symmetric(horizontal: padding1x / 2),
      EdgeInsets.symmetric(horizontal: padding1x / 2 / 2),
-    MediaQuery.textScalerOf(context).textScaleFactor,
+     effectiveTextScale,
   );
 }
 
@@ -502,17 +504,21 @@ class _FilledButtonWithIcon extends FilledButton {
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final EdgeInsetsGeometry scaledPadding = useMaterial3 ?  ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
-      const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
-      MediaQuery.textScalerOf(context).textScaleFactor,
-    ) : ButtonStyleButton.scaledPadding(
-      const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
-      MediaQuery.textScalerOf(context).textScaleFactor,
-    );
+    final MaterialStateProperty<TextStyle?>? textStyleProperty = style?.textStyle ?? themeStyleOf(context)?.textStyle;
+    final double defaultFontSize = textStyleProperty?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+    final EdgeInsetsGeometry scaledPadding = useMaterial3
+      ? ButtonStyleButton.scaledPadding(
+        const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
+        const EdgeInsetsDirectional.fromSTEB(8, 0, 12, 0),
+        const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
+        effectiveTextScale,
+      ) : ButtonStyleButton.scaledPadding(
+        const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+        const EdgeInsets.symmetric(horizontal: 8),
+        const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
+        effectiveTextScale,
+      );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );

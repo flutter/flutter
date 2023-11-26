@@ -376,12 +376,14 @@ class TextButton extends ButtonStyleButton {
 }
 
 EdgeInsetsGeometry _scaledPadding(BuildContext context) {
-  final bool useMaterial3 = Theme.of(context).useMaterial3;
+  final ThemeData theme = Theme.of(context);
+  final double defaultFontSize = theme.textTheme.labelLarge?.fontSize ?? 14.0;
+  final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
   return ButtonStyleButton.scaledPadding(
-    useMaterial3 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) :  const EdgeInsets.all(8),
+    theme.useMaterial3 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) :  const EdgeInsets.all(8),
     const EdgeInsets.symmetric(horizontal: 8),
     const EdgeInsets.symmetric(horizontal: 4),
-    MediaQuery.textScalerOf(context).textScaleFactor,
+    effectiveTextScale,
   );
 }
 
@@ -492,11 +494,14 @@ class _TextButtonWithIcon extends TextButton {
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final MaterialStateProperty<TextStyle?>? textStyleProperty = style?.textStyle ?? themeStyleOf(context)?.textStyle;
+    final double defaultFontSize = textStyleProperty?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
       useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.textScalerOf(context).textScaleFactor,
+      effectiveTextScale,
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),

@@ -170,24 +170,27 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
 
-  /// Returns an interpolated value based on the [textScaleFactor] parameter:
+  /// Returns an interpolated value based on the [effectiveTextScaleFactor]
+  /// parameter:
   ///
   ///  * 0 - 1 [geometry1x]
-  ///  * 1 - 2 lerp([geometry1x], [geometry2x], [textScaleFactor] - 1)
-  ///  * 2 - 3 lerp([geometry2x], [geometry3x], [textScaleFactor] - 2)
+  ///  * 1 - 2 lerp([geometry1x], [geometry2x], [effectiveTextScaleFactor] - 1)
+  ///  * 2 - 3 lerp([geometry2x], [geometry3x], [effectiveTextScaleFactor] - 2)
   ///  * otherwise [geometry3x]
   ///
-  /// A convenience method for subclasses.
+  /// A convenience method for subclasses. The [geometry1x], [geometry2x],
+  /// [geometry3x] parameters are typically set to empirical values for
+  ///
   static EdgeInsetsGeometry scaledPadding(
     EdgeInsetsGeometry geometry1x,
     EdgeInsetsGeometry geometry2x,
     EdgeInsetsGeometry geometry3x,
-    double textScaleFactor,
+    double effectiveTextScaleFactor,
   ) {
-    return switch (textScaleFactor) {
+    return switch (effectiveTextScaleFactor) {
       <= 1 => geometry1x,
-      < 2  => EdgeInsetsGeometry.lerp(geometry1x, geometry2x, textScaleFactor - 1)!,
-      < 3  => EdgeInsetsGeometry.lerp(geometry2x, geometry3x, textScaleFactor - 2)!,
+      < 2  => EdgeInsetsGeometry.lerp(geometry1x, geometry2x, effectiveTextScaleFactor - 1)!,
+      < 3  => EdgeInsetsGeometry.lerp(geometry2x, geometry3x, effectiveTextScaleFactor - 2)!,
       _    => geometry3x,
     };
   }
