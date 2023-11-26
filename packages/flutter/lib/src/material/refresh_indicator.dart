@@ -600,9 +600,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       semanticsValue: widget.semanticsValue,
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor:
-                        (_mode == _RefreshIndicatorMode.armed
-                          ? widget.armedColor
-                          : null) ?? _valueColor,
+                        _mode == _RefreshIndicatorMode.armed
+                            && widget.armedColor != null
+                          ? AlwaysStoppedAnimation<Color>(widget.armedColor!)
+                          : _valueColor,
                       backgroundColor: widget.backgroundColor,
                       strokeWidth: widget.strokeWidth,
                     );
