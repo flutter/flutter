@@ -390,7 +390,7 @@ class _FakeFlutterView extends Fake implements FlutterView {
   }
 
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
     lastRenderedScene = scene;
   }
 }
