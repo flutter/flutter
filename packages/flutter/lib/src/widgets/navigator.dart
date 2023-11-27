@@ -3032,22 +3032,20 @@ class _RouteEntry extends RouteTransitionRecord {
     }
   }
 
-  void handleDidPopNext(Route<dynamic> poppedRoute) {
+  Future<void> handleDidPopNext(Route<dynamic> poppedRoute) async {
     route.didPopNext(poppedRoute);
     lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(poppedRoute);
     if (lastFocusNode != null) {
       // Move focus back to the last focused node.
-      poppedRoute._disposeCompleter.future.then((dynamic result) {
+      await poppedRoute._disposeCompleter.future.then((dynamic result) async {
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
             // In the Android platform, we have to wait for the system refocus to complete before
             // sending the refocus message. Otherwise, the refocus message will be ignored.
             // TODO(hangyujin): update this logic if Android provide a better way to do so.
             final int? reFocusNode = lastFocusNode;
-            unawaited(Future<void>(() async {
-              await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
-              SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: reFocusNode));
-            }));
+            await Future<void>.delayed(_kAndroidRefocusingDelayDuration);
+            SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: reFocusNode));
           case TargetPlatform.iOS:
             SystemChannels.accessibility.send(const FocusSemanticEvent().toMap(nodeId: lastFocusNode));
           case _:
@@ -3055,6 +3053,7 @@ class _RouteEntry extends RouteTransitionRecord {
         }
       });
     }
+    return ;
   }
 
   /// Process the to-be-popped route.

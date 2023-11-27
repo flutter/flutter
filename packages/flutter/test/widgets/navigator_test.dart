@@ -4375,8 +4375,8 @@ void main() {
 
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   },
-    variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
-    skip: isBrowser, // [intended] only non-web Android and ios supports move a11y focus back to last item.
+    variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: isBrowser, // [intended] only non-web Android and iOS supports move a11y focus back to last item.
   );
 
   group('RouteSettings.toString', () {
