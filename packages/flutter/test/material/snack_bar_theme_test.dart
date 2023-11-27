@@ -74,6 +74,7 @@ void main() {
       showCloseIcon: false,
       closeIconColor: Color(0xFF0000AA),
       actionOverflowThreshold: 0.5,
+      dismissDirection: DismissDirection.down,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -618,7 +619,8 @@ SnackBarThemeData _createSnackBarTheme({
   ShapeBorder? shape,
   SnackBarBehavior? behavior,
   Color? actionBackgroundColor,
-  Color? disabledActionBackgroundColor
+  Color? disabledActionBackgroundColor,
+  DismissDirection? dismissDirection
 }) {
   return SnackBarThemeData(
     backgroundColor: backgroundColor,
@@ -629,7 +631,8 @@ SnackBarThemeData _createSnackBarTheme({
     shape: shape,
     behavior: behavior,
     actionBackgroundColor: actionBackgroundColor,
-    disabledActionBackgroundColor: disabledActionBackgroundColor
+    disabledActionBackgroundColor: disabledActionBackgroundColor,
+    dismissDirection: dismissDirection
   );
 }
 
