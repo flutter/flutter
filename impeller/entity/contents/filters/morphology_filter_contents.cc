@@ -127,8 +127,6 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
       sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
-    frag_info.supports_decal_sampler_address_mode =
-        renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode();
 
     FS::BindTextureSampler(
         cmd, input_snapshot->texture,
