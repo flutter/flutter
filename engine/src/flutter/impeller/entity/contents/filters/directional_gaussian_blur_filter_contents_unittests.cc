@@ -89,6 +89,7 @@ TEST_P(DirectionalGaussianBlurFilterContentsTest, RenderNoCoverage) {
 TEST_P(DirectionalGaussianBlurFilterContentsTest,
        RenderCoverageMatchesGetCoverage) {
   TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
       .format = PixelFormat::kB8G8R8A8UNormInt,
       .size = ISize(100, 100),
   };
