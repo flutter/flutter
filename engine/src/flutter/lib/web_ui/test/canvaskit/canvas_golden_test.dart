@@ -146,25 +146,24 @@ void testMain() {
       final LayerSceneBuilder builder = LayerSceneBuilder();
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, picture);
-      final LayerTree layerTree = builder.build().layerTree;
-      CanvasKitRenderer.instance.rasterizer.draw(layerTree);
+      final LayerScene scene = builder.build();
+      CanvasKitRenderer.instance.renderScene(scene, implicitView);
 
       // Now draw an empty layer tree and confirm that the red rectangle is
       // no longer drawn.
       final LayerSceneBuilder emptySceneBuilder = LayerSceneBuilder();
       emptySceneBuilder.pushOffset(0, 0);
-      final LayerTree emptyLayerTree = emptySceneBuilder.build().layerTree;
-      CanvasKitRenderer.instance.rasterizer.draw(emptyLayerTree);
+      final LayerScene emptyScene = emptySceneBuilder.build();
+      CanvasKitRenderer.instance.renderScene(emptyScene, implicitView);
 
       await matchGoldenFile('canvaskit_empty_scene.png',
           region: const ui.Rect.fromLTRB(0, 0, 100, 100));
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/121758
-    test('resources used in temporary surfaces for Image.toByteData can cross to rendering overlays', () async {
-      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      RenderCanvasFactory.instance.debugClear();
-
+    test(
+        'resources used in temporary surfaces for Image.toByteData can cross to rendering overlays',
+        () async {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
@@ -212,7 +211,7 @@ void testMain() {
       sb.pop();
 
       // The below line should not throw an error.
-      rasterizer.draw(sb.build().layerTree);
+      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
 
       await matchGoldenFile('cross_overlay_resources.png', region: const ui.Rect.fromLTRB(0, 0, 100, 100));
     });
