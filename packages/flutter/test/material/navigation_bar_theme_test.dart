@@ -7,9 +7,11 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -48,6 +50,7 @@ void main() {
       labelTextStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 7.0)),
       iconTheme: MaterialStatePropertyAll<IconThemeData>(IconThemeData(color: Color(0x00000097))),
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+      overlayColor: MaterialStatePropertyAll<Color>(Color(0x00000096)),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -61,12 +64,11 @@ void main() {
     expect(description[3], 'indicatorColor: Color(0x00000098)');
     expect(description[4], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
     expect(description[5], 'labelTextStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 7.0))');
-
     // Ignore instance address for IconThemeData.
     expect(description[6].contains('iconTheme: MaterialStatePropertyAll(IconThemeData'), isTrue);
     expect(description[6].contains('(color: Color(0x00000097))'), isTrue);
-
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
+    expect(description[8], 'overlayColor: MaterialStatePropertyAll(Color(0x00000096))');
   });
 
   testWidgetsWithLeakTracking('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
@@ -215,6 +217,86 @@ void main() {
     await tester.pumpAndSettle();
 
     await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_custom_label_style.png'));
+  });
+
+  testWidgetsWithLeakTracking('NavigationBar respects NavigationBarTheme.overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoverColor = Color(0xff0000ff);
+    const Color focusColor = Color(0xff00ffff);
+    const Color pressedColor = Color(0xffff00ff);
+    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>(
+      (Set<MaterialState> states) {
+        if (states.contains(MaterialState.hovered)) {
+          return hoverColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return focusColor;
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return pressedColor;
+        }
+        return Colors.transparent;
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(navigationBarTheme: NavigationBarThemeData(overlayColor: overlayColor)),
+      home: Scaffold(
+        bottomNavigationBar: RepaintBoundary(
+          child: NavigationBar(
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+
+    // Test hovered state.
+    expect(
+      inkFeatures,
+      kIsWeb
+        ? (paints..rrect()..rrect()..circle(color: hoverColor))
+        : (paints..circle(color: hoverColor)),
+    );
+
+    await gesture.down(tester.getCenter(find.byType(NavigationIndicator).last));
+    await tester.pumpAndSettle();
+
+    // Test pressed state.
+    expect(
+      inkFeatures,
+      kIsWeb
+        ? (paints..circle()..circle()..circle(color: pressedColor))
+        : (paints..circle()..circle(color: pressedColor)),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Press tab to focus the navigation bar.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    // Test focused state.
+    expect(
+      inkFeatures,
+      kIsWeb ? (paints..circle()..circle(color: focusColor)) : (paints..circle()..circle(color: focusColor)),
+    );
   });
 }
 

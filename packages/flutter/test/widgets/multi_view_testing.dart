@@ -17,7 +17,7 @@ class FakeView extends TestFlutterView {
   final int viewId;
 
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
     // Do not render the scene in the engine. The engine only observes one
     // instance of FlutterView (the _view), and it is generally expected that
     // the framework will render no more than one `Scene` per frame.
