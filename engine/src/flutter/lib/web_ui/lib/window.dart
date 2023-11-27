@@ -15,6 +15,7 @@ abstract class FlutterView {
   PlatformDispatcher get platformDispatcher;
   int get viewId;
   double get devicePixelRatio;
+  ViewConstraints get physicalConstraints;
   Size get physicalSize;
   ViewPadding get viewInsets;
   ViewPadding get viewPadding;
@@ -23,7 +24,7 @@ abstract class FlutterView {
   GestureSettings get gestureSettings;
   List<DisplayFeature> get displayFeatures;
   Display get display;
-  void render(Scene scene) => platformDispatcher.render(scene, this);
+  void render(Scene scene, {Size? size});
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 }
 
