@@ -392,7 +392,6 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutte
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_asan.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_debug.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_release.cfg
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_coverage.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug_exception.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_release.cfg
@@ -401,10 +400,10 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutte
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_asan.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_debug.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_release.cfg
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_coverage.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_debug.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_release.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_license_check.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_mingw_release.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_debug.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_release.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/macos/presubmit_clang_debug.cfg
@@ -412,11 +411,13 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutte
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/ndk-build/continuous_khronos.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/ndk-build/presubmit_khronos.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_debug_2017.cfg
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2015.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_debug_2019.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2017.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2019.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_debug_2017.cfg
-ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2015.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_debug_2019.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2017.cfg
+ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2019.cfg
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/env.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.h
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp
@@ -796,7 +797,6 @@ FILE: ../../../flutter/third_party/shaderc/kokoro/img/windows.png
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_asan.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_debug.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_clang_release.cfg
-FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_coverage.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_debug_exception.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_gcc_release.cfg
@@ -805,10 +805,10 @@ FILE: ../../../flutter/third_party/shaderc/kokoro/linux/continuous_mingw_release
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_asan.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_debug.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_clang_release.cfg
-FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_coverage.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_debug.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_gcc_release.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_license_check.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/linux/presubmit_mingw_release.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_debug.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/macos/continuous_clang_release.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/macos/presubmit_clang_debug.cfg
@@ -816,11 +816,13 @@ FILE: ../../../flutter/third_party/shaderc/kokoro/macos/presubmit_clang_release.
 FILE: ../../../flutter/third_party/shaderc/kokoro/ndk-build/continuous_khronos.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/ndk-build/presubmit_khronos.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_debug_2017.cfg
-FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2015.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_debug_2019.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2017.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/continuous_release_2019.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_debug_2017.cfg
-FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2015.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_debug_2019.cfg
 FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2017.cfg
+FILE: ../../../flutter/third_party/shaderc/kokoro/windows/presubmit_release_2019.cfg
 FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/env.h
 FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.h
 FILE: ../../../flutter/third_party/shaderc/libshaderc/include/shaderc/shaderc.hpp
