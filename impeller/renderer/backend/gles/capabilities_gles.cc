@@ -16,8 +16,6 @@ static const constexpr char* kTextureBorderClampExt =
     "GL_EXT_texture_border_clamp";
 static const constexpr char* kNvidiaTextureBorderClampExt =
     "GL_NV_texture_border_clamp";
-static const constexpr char* kOESTextureBorderClampExt =
-    "GL_OES_texture_border_clamp";
 
 // https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_multisampled_render_to_texture.txt
 static const constexpr char* kMultisampledRenderToTextureExt =
@@ -107,8 +105,7 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_framebuffer_fetch_ = desc->HasExtension(kFramebufferFetchExt);
 
   if (desc->HasExtension(kTextureBorderClampExt) ||
-      desc->HasExtension(kNvidiaTextureBorderClampExt) ||
-      desc->HasExtension(kOESTextureBorderClampExt)) {
+      desc->HasExtension(kNvidiaTextureBorderClampExt)) {
     supports_decal_sampler_address_mode_ = true;
   }
 
