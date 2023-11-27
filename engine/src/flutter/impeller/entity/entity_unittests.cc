@@ -2514,6 +2514,19 @@ TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
             expected_constants);
 }
 
+TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
+  auto content_context =
+      ContentContext(GetContext(), TypographerContextSkia::Make());
+
+  auto default_color_burn = content_context.GetMorphologyFilterPipeline({});
+
+  auto decal_supported = static_cast<int32_t>(
+      GetContext()->GetCapabilities()->SupportsDecalSamplerAddressMode());
+  std::vector<int32_t> expected_constants = {decal_supported};
+  ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
+            expected_constants);
+}
+
 }  // namespace testing
 }  // namespace impeller
 
