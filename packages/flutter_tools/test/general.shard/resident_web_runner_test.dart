@@ -693,6 +693,12 @@ void main() {
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
     ]);
+    expect(
+        analyticsTimingEventExists(
+            sentEvents: fakeAnalytics.sentEvents,
+            workflow: 'hot',
+            variableName: 'web-incremental-restart'),
+        true);
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
     Analytics: () => fakeAnalytics,
