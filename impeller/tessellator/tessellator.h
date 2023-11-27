@@ -45,10 +45,6 @@ class Tessellator {
 
   ~Tessellator();
 
-  /// @brief An arbitrary value to determine when a multi-contour non-zero fill
-  /// path should be split into multiple tessellations.
-  static constexpr size_t kMultiContourThreshold = 30u;
-
   /// @brief A callback that returns the results of the tessellation.
   ///
   ///        The index buffer may not be populated, in which case [indices] will
