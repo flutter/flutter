@@ -3674,6 +3674,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _handleContextMenuOnScroll(notification);
   }
 
+  Rect _calculateViewportRect() {
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final ui.FlutterView view = View.of(context);
+    final double obscuredVertical = (view.padding.top + view.padding.bottom + view.viewInsets.bottom) / view.devicePixelRatio;
+    final double obscuredHorizontal = (view.padding.left + view.padding.right) / view.devicePixelRatio;
+    final Size screenSize = Size(mediaQueryData.size.width - obscuredHorizontal, mediaQueryData.size.height - obscuredVertical);
+    return Rect.fromLTWH(view.padding.left / view.devicePixelRatio, view.padding.top / view.devicePixelRatio, screenSize.width, screenSize.height);
+  }
+
   void _handleContextMenuOnScroll(ScrollNotification notification) {
     if (!_platformSupportsFadeOnScroll || _webContextMenuEnabled) {
       return;
@@ -3706,8 +3715,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
 
       final Rect renderEditableBounds = MatrixUtils.transformRect(renderEditable.getTransformTo(null), renderEditable.paintBounds);
-      final Size screenSize = MediaQuery.of(context).size;
-      final Rect viewportRect = Rect.fromLTWH(0.0, 0.0, screenSize.width, screenSize.height);
+      final Rect viewportRect = _calculateViewportRect();
       final bool selectionIsVisible = renderEditable.selectionStartInViewport.value || renderEditable.selectionEndInViewport.value;
       final bool renderEditableInView = !renderEditableBounds.hasNaN && viewportRect.overlaps(renderEditableBounds);
 
