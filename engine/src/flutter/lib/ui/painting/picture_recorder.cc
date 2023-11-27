@@ -36,9 +36,11 @@ void PictureRecorder::endRecording(Dart_Handle dart_picture) {
     return;
   }
 
-  Picture::CreateAndAssociateWithDartWrapper(dart_picture,
-                                             display_list_builder_->Build());
+  auto display_list = display_list_builder_->Build();
   display_list_builder_ = nullptr;
+
+  FML_DCHECK(display_list->has_rtree());
+  Picture::CreateAndAssociateWithDartWrapper(dart_picture, display_list);
 
   canvas_->Invalidate();
   canvas_ = nullptr;

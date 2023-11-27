@@ -153,17 +153,12 @@ void DisplayList::Dispatch(DlOpReceiver& receiver,
   if (cull_rect.isEmpty()) {
     return;
   }
-  if (cull_rect.contains(bounds())) {
+  if (!has_rtree() || cull_rect.contains(bounds())) {
     Dispatch(receiver);
     return;
   }
   const DlRTree* rtree = this->rtree().get();
   FML_DCHECK(rtree != nullptr);
-  if (rtree == nullptr) {
-    FML_LOG(ERROR) << "dispatched with culling rect on DL with no rtree";
-    Dispatch(receiver);
-    return;
-  }
   uint8_t* ptr = storage_.get();
   std::vector<int> rect_indices;
   rtree->search(cull_rect, &rect_indices);
