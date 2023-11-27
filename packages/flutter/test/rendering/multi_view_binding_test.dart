@@ -188,7 +188,7 @@ class FakeFlutterView extends Fake implements FlutterView  {
   List<Scene> renderedScenes = <Scene>[];
 
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
     renderedScenes.add(scene);
   }
 }

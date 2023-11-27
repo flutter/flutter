@@ -874,7 +874,8 @@ class TestFlutterView implements FlutterView {
   }
 
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
+    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
     _view.render(scene);
   }
 
@@ -1635,7 +1636,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
+    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
     _view.render(scene);
   }
 
