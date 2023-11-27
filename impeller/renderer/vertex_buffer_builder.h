@@ -42,7 +42,7 @@ class VertexBufferBuilder {
     return impeller::IndexType::kUnknown;
   }
 
-  void SetLabel(std::string label) { label_ = std::move(label); }
+  void SetLabel(const std::string& label) { label_ = label; }
 
   void Reserve(size_t count) { return vertices_.reserve(count); }
 

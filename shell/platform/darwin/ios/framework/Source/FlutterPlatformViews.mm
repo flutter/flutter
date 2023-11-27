@@ -244,7 +244,7 @@ void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterRe
   FlutterTouchInterceptingView* touch_interceptor = [[[FlutterTouchInterceptingView alloc]
                   initWithEmbeddedView:platform_view
                platformViewsController:GetWeakPtr()
-      gestureRecognizersBlockingPolicy:gesture_recognizers_blocking_policies[viewType]]
+      gestureRecognizersBlockingPolicy:gesture_recognizers_blocking_policies_[viewType]]
       autorelease];
 
   touch_interceptors_[viewId] =
@@ -317,7 +317,7 @@ void FlutterPlatformViewsController::RegisterViewFactory(
   FML_CHECK(factories_.count(idString) == 0);
   factories_[idString] =
       fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>([factory retain]);
-  gesture_recognizers_blocking_policies[idString] = gestureRecognizerBlockingPolicy;
+  gesture_recognizers_blocking_policies_[idString] = gestureRecognizerBlockingPolicy;
 }
 
 void FlutterPlatformViewsController::BeginFrame(SkISize frame_size) {

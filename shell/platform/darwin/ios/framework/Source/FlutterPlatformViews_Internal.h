@@ -395,7 +395,7 @@ class FlutterPlatformViewsController {
 
   // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
   std::map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
-      gesture_recognizers_blocking_policies;
+      gesture_recognizers_blocking_policies_;
 
   bool catransaction_added_ = false;
 
