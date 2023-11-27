@@ -43,6 +43,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _initKeyboard();
     initLicenses();
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
+    SystemChannels.accessibility.setMessageHandler((dynamic message) => _handleAccessibilityMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
@@ -351,6 +352,21 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         }
     }
     return false;
+  }
+
+
+  /// Listenable that notifies when the accessibility focus on the system have changed.
+  final ValueNotifier<int?> accessibilityFocus = ValueNotifier<int?>(null);
+
+  Future<void> _handleAccessibilityMessage(Object accessibilityMessage) async {
+    final Map<String, dynamic> message =
+        (accessibilityMessage as Map<Object?, Object?>).cast<String, dynamic>();
+    final String type = message['type'] as String;
+    switch (type) {
+      case 'didGainFocus':
+       accessibilityFocus.value = message['nodeId'] as int;
+    }
+    return;
   }
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
