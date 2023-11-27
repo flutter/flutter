@@ -78,7 +78,7 @@ class CardTheme with Diagnosticable {
   /// Overrides the default value for [Card.shape].
   ///
   /// If null, [Card] then uses a [RoundedRectangleBorder] with a circular
-  /// corner radius of 4.0.
+  /// corner radius of 4.0 for Material 2 and 12.0 for Material 3.
   final ShapeBorder? shape;
 
   /// Creates a copy of this object with the given fields replaced with the
