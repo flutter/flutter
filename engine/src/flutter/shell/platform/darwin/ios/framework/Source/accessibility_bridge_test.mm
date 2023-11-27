@@ -1364,6 +1364,61 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                  UIAccessibilityLayoutChangedNotification);
 }
 
+- (void)testAccessibilityObjectDidBecomeFocused {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id engine = OCMClassMock([FlutterEngine class]);
+  id flutterViewController = OCMClassMock([FlutterViewController class]);
+
+  OCMStub([flutterViewController engine]).andReturn(engine);
+  OCMStub([engine binaryMessenger]).andReturn(messenger);
+  FlutterBinaryMessengerConnection connection = 123;
+  OCMStub([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                           binaryMessageHandler:[OCMArg any]])
+      .andReturn(connection);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    auto weakFactory =
+        std::make_unique<fml::WeakNSObjectFactory<FlutterViewController>>(flutterViewController);
+    platform_view->SetOwnerViewController(weakFactory->GetWeakNSObject());
+    auto bridge =
+        std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
+                                                       /*platform_view=*/platform_view.get(),
+                                                       /*platform_views_controller=*/nil);
+    XCTAssertTrue(bridge.get());
+    OCMVerify([messenger setMessageHandlerOnChannel:@"flutter/accessibility"
+                               binaryMessageHandler:[OCMArg isNotNil]]);
+
+    bridge->AccessibilityObjectDidBecomeFocused(123);
+
+    NSDictionary<NSString*, id>* annotatedEvent = @{@"type" : @"didGainFocus", @"nodeId" : @123};
+    NSData* encodedMessage = [[FlutterStandardMessageCodec sharedInstance] encode:annotatedEvent];
+
+    OCMVerify([messenger sendOnChannel:@"flutter/accessibility" message:encodedMessage]);
+    latch.Signal();
+  });
+  latch.Wait();
+
+  [engine stopMocking];
+}
+
 - (void)testAnnouncesRouteChangesWhenNoNamesRoute {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");

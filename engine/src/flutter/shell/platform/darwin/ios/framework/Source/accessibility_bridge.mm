@@ -75,6 +75,7 @@ UIView<UITextInput>* AccessibilityBridge::textInputView() {
 
 void AccessibilityBridge::AccessibilityObjectDidBecomeFocused(int32_t id) {
   last_focused_semantics_object_id_ = id;
+  [accessibility_channel_.get() sendMessage:@{@"type" : @"didGainFocus", @"nodeId" : @(id)}];
 }
 
 void AccessibilityBridge::AccessibilityObjectDidLoseFocus(int32_t id) {
