@@ -952,7 +952,6 @@
 ../../../flutter/third_party/skia/src/encode/BUILD.bazel
 ../../../flutter/third_party/skia/src/fonts/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/BUILD.bazel
-../../../flutter/third_party/skia/src/gpu/dawn/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/ganesh/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/ganesh/d3d/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/ganesh/effects/BUILD.bazel
