@@ -153,7 +153,7 @@ class BoxConstraints extends Constraints {
        minHeight = height ?? double.infinity,
        maxHeight = height ?? double.infinity;
 
-  /// Crates box constraints that match the given view constraints.
+  /// Creates box constraints that match the given view constraints.
   BoxConstraints.fromViewConstraints(ui.ViewConstraints constraints)
       : minWidth = constraints.minWidth,
         maxWidth = constraints.maxWidth,
