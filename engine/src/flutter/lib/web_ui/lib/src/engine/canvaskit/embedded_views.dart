@@ -17,18 +17,17 @@ import 'embedded_views_diff.dart';
 import 'path.dart';
 import 'picture.dart';
 import 'picture_recorder.dart';
+import 'rasterizer.dart';
 import 'render_canvas.dart';
 import 'render_canvas_factory.dart';
-import 'renderer.dart';
 
 /// This composites HTML views into the [ui.Scene].
 class HtmlViewEmbedder {
-  HtmlViewEmbedder._();
+  HtmlViewEmbedder(this.sceneHost, this.rasterizer, this.renderCanvasFactory);
 
-  /// The [HtmlViewEmbedder] singleton.
-  static HtmlViewEmbedder instance = HtmlViewEmbedder._();
-
-  DomElement get skiaSceneHost => CanvasKitRenderer.instance.sceneHost!;
+  final DomElement sceneHost;
+  final Rasterizer rasterizer;
+  final RenderCanvasFactory renderCanvasFactory;
 
   /// The context for the current frame.
   EmbedderFrameContext _context = EmbedderFrameContext();
@@ -219,7 +218,7 @@ class HtmlViewEmbedder {
 
     // If the chain was previously attached, attach it to the same position.
     if (headClipViewWasAttached) {
-      skiaSceneHost.insertBefore(head, headClipViewNextSibling);
+      sceneHost.insertBefore(head, headClipViewNextSibling);
     }
     return head;
   }
@@ -359,7 +358,7 @@ class HtmlViewEmbedder {
     }
     _svgPathDefs = kSvgResourceHeader.cloneNode(false) as SVGElement;
     _svgPathDefs!.append(createSVGDefsElement()..id = 'sk_path_defs');
-    skiaSceneHost.append(_svgPathDefs!);
+    sceneHost.append(_svgPathDefs!);
   }
 
   void submitFrame() {
@@ -386,8 +385,7 @@ class HtmlViewEmbedder {
             _context.pictureRecorders[pictureRecorderIndex].endRecording());
         pictureRecorderIndex++;
       }
-      CanvasKitRenderer.instance.rasterizer
-          .rasterizeToCanvas(overlay, pictures);
+      rasterizer.rasterizeToCanvas(overlay, pictures);
     }
     for (final CkPictureRecorder recorder
         in _context.pictureRecordersCreatedDuringPreroll) {
@@ -439,18 +437,18 @@ class HtmlViewEmbedder {
 
         if (diffResult.addToBeginning) {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
-          skiaSceneHost.insertBefore(platformViewRoot, elementToInsertBefore);
+          sceneHost.insertBefore(platformViewRoot, elementToInsertBefore);
           final RenderCanvas? overlay = _overlays[viewId];
           if (overlay != null) {
-            skiaSceneHost.insertBefore(
+            sceneHost.insertBefore(
                 overlay.htmlElement, elementToInsertBefore);
           }
         } else {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
-          skiaSceneHost.append(platformViewRoot);
+          sceneHost.append(platformViewRoot);
           final RenderCanvas? overlay = _overlays[viewId];
           if (overlay != null) {
-            skiaSceneHost.append(overlay.htmlElement);
+            sceneHost.append(overlay.htmlElement);
           }
         }
       }
@@ -463,17 +461,17 @@ class HtmlViewEmbedder {
           if (!overlayElement.isConnected!) {
             // This overlay wasn't added to the DOM.
             if (i == _compositionOrder.length - 1) {
-              skiaSceneHost.append(overlayElement);
+              sceneHost.append(overlayElement);
             } else {
               final int nextView = _compositionOrder[i + 1];
               final DomElement nextElement = _viewClipChains[nextView]!.root;
-              skiaSceneHost.insertBefore(overlayElement, nextElement);
+              sceneHost.insertBefore(overlayElement, nextElement);
             }
           }
         }
       }
     } else {
-      RenderCanvasFactory.instance.removeSurfacesFromDom();
+      renderCanvasFactory.removeSurfacesFromDom();
       for (int i = 0; i < _compositionOrder.length; i++) {
         final int viewId = _compositionOrder[i];
 
@@ -492,9 +490,9 @@ class HtmlViewEmbedder {
 
         final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
         final RenderCanvas? overlay = _overlays[viewId];
-        skiaSceneHost.append(platformViewRoot);
+        sceneHost.append(platformViewRoot);
         if (overlay != null) {
-          skiaSceneHost.append(overlay.htmlElement);
+          sceneHost.append(overlay.htmlElement);
         }
         _activeCompositionOrder.add(viewId);
         unusedViews.remove(viewId);
@@ -528,7 +526,7 @@ class HtmlViewEmbedder {
   void _releaseOverlay(int viewId) {
     if (_overlays[viewId] != null) {
       final RenderCanvas overlay = _overlays[viewId]!;
-      RenderCanvasFactory.instance.releaseCanvas(overlay);
+      renderCanvasFactory.releaseCanvas(overlay);
       _overlays.remove(viewId);
     }
   }
@@ -568,7 +566,7 @@ class HtmlViewEmbedder {
     if (diffResult == null) {
       // Everything is going to be explicitly recomposited anyway. Release all
       // the surfaces and assign an overlay to all the surfaces needing one.
-      RenderCanvasFactory.instance.releaseCanvases();
+      renderCanvasFactory.releaseCanvases();
       _overlays.clear();
       viewsNeedingOverlays.forEach(_initializeOverlay);
     } else {
@@ -638,7 +636,7 @@ class HtmlViewEmbedder {
     assert(!_overlays.containsKey(viewId));
 
     // Try reusing a cached overlay created for another platform view.
-    final RenderCanvas overlay = RenderCanvasFactory.instance.getCanvas();
+    final RenderCanvas overlay = renderCanvasFactory.getCanvas();
     _overlays[viewId] = overlay;
   }
 

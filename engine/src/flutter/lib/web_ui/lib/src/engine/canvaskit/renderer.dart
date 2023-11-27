@@ -44,9 +44,16 @@ class CanvasKitRenderer implements Renderer {
   DomElement? _sceneHost;
   DomElement? get sceneHost => _sceneHost;
 
-  late Rasterizer rasterizer = Rasterizer();
+  /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
+  /// used to render to many RenderCanvases to produce the rendered scene.
+  final Surface offscreenSurface = Surface();
 
-  set resourceCacheMaxBytes(int bytes) => rasterizer.setSkiaResourceCacheMaxBytes(bytes);
+  set resourceCacheMaxBytes(int bytes) =>
+      offscreenSurface.setSkiaResourceCacheMaxBytes(bytes);
+
+  /// A surface used specifically for `Picture.toImage` when software rendering
+  /// is supported.
+  final Surface pictureToImageSurface = Surface();
 
   @override
   Future<void> initialize() async {
@@ -64,13 +71,7 @@ class CanvasKitRenderer implements Renderer {
 
   @override
   void reset(FlutterViewEmbedder embedder) {
-    // CanvasKit uses a static scene element that never gets replaced, so it's
-    // added eagerly during initialization here and never touched, unless the
-    // system is reset due to hot restart or in a test.
-    _sceneHost = createDomElement('flt-scene');
-    // TODO(harryterkelsen): Do this operation on the appropriate Flutter View.
-    final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
-    implicitView.dom.setScene(_sceneHost!);
+    // No work required.
   }
 
   @override
@@ -373,7 +374,7 @@ class CanvasKitRenderer implements Renderer {
     CkParagraphBuilder(style);
 
   @override
-  void renderScene(ui.Scene scene) {
+  void renderScene(ui.Scene scene, ui.FlutterView view) {
     // "Build finish" and "raster start" happen back-to-back because we
     // render on the same thread, so there's no overhead from hopping to
     // another thread.
@@ -384,8 +385,37 @@ class CanvasKitRenderer implements Renderer {
     frameTimingsOnBuildFinish();
     frameTimingsOnRasterStart();
 
+    // TODO(harryterkelsen): Use `FlutterViewManager.onViewsChanged` to manage
+    // the lifecycle of Rasterizers,
+    // https://github.com/flutter/flutter/issues/137073.
+    final Rasterizer rasterizer =
+        _getRasterizerForView(view as EngineFlutterView);
+
     rasterizer.draw((scene as LayerScene).layerTree);
     frameTimingsOnRasterFinish();
+  }
+
+  final Map<EngineFlutterView, Rasterizer> _rasterizers =
+      <EngineFlutterView, Rasterizer>{};
+
+  Rasterizer _getRasterizerForView(EngineFlutterView view) {
+    return _rasterizers.putIfAbsent(view, () {
+      return Rasterizer(view.dom.sceneHost);
+    });
+  }
+
+  /// Returns the [Rasterizer] that has been created for the given [view].
+  /// Used in tests.
+  Rasterizer debugGetRasterizerForView(EngineFlutterView view) {
+    return _getRasterizerForView(view);
+  }
+
+  /// Resets the state of the renderer. Used in tests.
+  void debugClear() {
+    for (final Rasterizer rasterizer in _rasterizers.values) {
+      rasterizer.renderCanvasFactory.debugClear();
+      rasterizer.viewEmbedder.debugClear();
+    }
   }
 
   @override

@@ -222,5 +222,5 @@ abstract class Renderer {
 
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
 
-  FutureOr<void> renderScene(ui.Scene scene);
+  FutureOr<void> renderScene(ui.Scene scene, ui.FlutterView view);
 }

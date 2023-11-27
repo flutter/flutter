@@ -398,8 +398,11 @@ class SkwasmRenderer implements Renderer {
     return decoder;
   }
 
+  // TODO(harryterkelsen): Add multiview support,
+  // https://github.com/flutter/flutter/issues/137073.
   @override
-  Future<void> renderScene(ui.Scene scene) => sceneView.renderScene(scene as EngineScene);
+  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) =>
+      sceneView.renderScene(scene as EngineScene);
 
   @override
   String get rendererTag => 'skwasm';

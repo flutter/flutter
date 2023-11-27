@@ -49,7 +49,7 @@ void testMain() {
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, checkerboard);
       builder.pushBackdropFilter(ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10));
-      CanvasKitRenderer.instance.rasterizer.draw(builder.build().layerTree);
+      CanvasKitRenderer.instance.renderScene(builder.build(), implicitView);
       await matchGoldenFile('canvaskit_backdropfilter_blur_edges.png',
           region: region);
     });

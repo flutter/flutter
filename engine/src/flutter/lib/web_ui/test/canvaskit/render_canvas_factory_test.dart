@@ -67,11 +67,15 @@ void testMain() {
         expect(canvas.canvasElement.isConnected, isFalse);
       }
 
-      final RenderCanvasFactory originalFactory = RenderCanvasFactory.instance;
-      expect(RenderCanvasFactory.debugUninitializedInstance, isNotNull);
+      final EngineFlutterView implicitView =
+          EnginePlatformDispatcher.instance.implicitView!;
+
+      final RenderCanvasFactory originalFactory = CanvasKitRenderer.instance
+          .debugGetRasterizerForView(implicitView)
+          .renderCanvasFactory;
 
       // Cause the surface and its canvas to be attached to the page
-      CanvasKitRenderer.instance.sceneHost!
+      implicitView.dom.sceneHost
           .prepend(originalFactory.baseCanvas.htmlElement);
       expect(originalFactory.baseCanvas.canvasElement.isConnected, isTrue);
 
@@ -79,14 +83,13 @@ void testMain() {
       final List<RenderCanvas> overlays = <RenderCanvas>[];
       for (int i = 0; i < 3; i++) {
         final RenderCanvas canvas = originalFactory.getCanvas();
-        CanvasKitRenderer.instance.sceneHost!.prepend(canvas.htmlElement);
+        implicitView.dom.sceneHost.prepend(canvas.htmlElement);
         overlays.add(canvas);
       }
       expect(originalFactory.debugSurfaceCount, 4);
 
       // Trigger hot restart clean-up logic and check that we indeed clean up.
       debugEmulateHotRestart();
-      expect(RenderCanvasFactory.debugUninitializedInstance, isNull);
       expectDisposed(originalFactory.baseCanvas);
       overlays.forEach(expectDisposed);
       expect(originalFactory.debugSurfaceCount, 1);
