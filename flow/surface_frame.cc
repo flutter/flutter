@@ -31,8 +31,13 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
     canvas_ = &adapter_;
   } else if (display_list_fallback) {
     FML_DCHECK(!frame_size.isEmpty());
-    dl_builder_ =
-        sk_make_sp<DisplayListBuilder>(SkRect::Make(frame_size), true);
+    // The root frame of a surface will be filled by the layer_tree which
+    // performs branch culling so it will be unlikely to need an rtree for
+    // further culling during `DisplayList::Dispatch`. Further, this canvas
+    // will live underneath any platform views so we do not need to compute
+    // exact coverage to describe "pixel ownership" to the platform.
+    dl_builder_ = sk_make_sp<DisplayListBuilder>(SkRect::Make(frame_size),
+                                                 /*prepare_rtree=*/false);
     canvas_ = dl_builder_.get();
   }
 }

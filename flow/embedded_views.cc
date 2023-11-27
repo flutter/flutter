@@ -18,6 +18,7 @@ DlCanvas* DisplayListEmbedderViewSlice::canvas() {
 
 void DisplayListEmbedderViewSlice::end_recording() {
   display_list_ = builder_->Build();
+  FML_DCHECK(display_list_->has_rtree());
   builder_ = nullptr;
 }
 
