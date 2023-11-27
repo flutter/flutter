@@ -4374,7 +4374,10 @@ void main() {
     });
 
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
-  });
+  },
+    variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+    skip: isBrowser,
+  );
 
   group('RouteSettings.toString', () {
     test('when name is not null, should have double quote', () {
