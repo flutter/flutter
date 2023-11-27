@@ -110,6 +110,27 @@ enum class PixelFormat {
   kD32FloatS8UInt,
 };
 
+constexpr bool IsDepthWritable(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kD24UnormS8Uint:
+    case PixelFormat::kD32FloatS8UInt:
+      return true;
+    default:
+      return false;
+  }
+}
+
+constexpr bool IsStencilWritable(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kS8UInt:
+    case PixelFormat::kD24UnormS8Uint:
+    case PixelFormat::kD32FloatS8UInt:
+      return true;
+    default:
+      return false;
+  }
+}
+
 constexpr const char* PixelFormatToString(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
