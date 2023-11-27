@@ -1297,7 +1297,7 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
   fml::CountDownLatch latch(1);
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
-        ASSERT_EQ(layers_count, 3u);
+        ASSERT_EQ(layers_count, 2u);
 
         // Layer 0 (Root)
         {
@@ -1343,36 +1343,6 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
           layer.offset = FlutterPointMake(135.0, 60.0);
 
           ASSERT_EQ(*layers[1], layer);
-        }
-
-        // Layer 2
-        {
-          FlutterBackingStore backing_store = *layers[2]->backing_store;
-          backing_store.type = kFlutterBackingStoreTypeSoftware;
-          backing_store.did_update = true;
-
-          FlutterRect paint_region_rects[] = {
-              FlutterRectMakeLTRB(135, 0, 1024, 60),
-          };
-          FlutterRegion paint_region = {
-              .struct_size = sizeof(FlutterRegion),
-              .rects_count = 1,
-              .rects = paint_region_rects,
-          };
-          FlutterBackingStorePresentInfo present_info = {
-              .struct_size = sizeof(FlutterBackingStorePresentInfo),
-              .paint_region = &paint_region,
-          };
-
-          FlutterLayer layer = {};
-          layer.struct_size = sizeof(layer);
-          layer.type = kFlutterLayerContentTypeBackingStore;
-          layer.backing_store = &backing_store;
-          layer.size = FlutterSizeMake(1024.0, 600.0);
-          layer.offset = FlutterPointMake(0.0, 0.0);
-          layer.backing_store_present_info = &present_info;
-
-          ASSERT_EQ(*layers[2], layer);
         }
 
         latch.CountDown();

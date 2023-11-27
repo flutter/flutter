@@ -21,9 +21,8 @@ void DisplayListEmbedderViewSlice::end_recording() {
   builder_ = nullptr;
 }
 
-std::list<SkRect> DisplayListEmbedderViewSlice::searchNonOverlappingDrawnRects(
-    const SkRect& query) const {
-  return display_list_->rtree()->searchAndConsolidateRects(query);
+const DlRegion& DisplayListEmbedderViewSlice::getRegion() const {
+  return display_list_->rtree()->region();
 }
 
 void DisplayListEmbedderViewSlice::render_into(DlCanvas* canvas) {

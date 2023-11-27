@@ -43,7 +43,7 @@ EmbedderExternalView::~EmbedderExternalView() = default;
 
 EmbedderExternalView::RenderTargetDescriptor
 EmbedderExternalView::CreateRenderTargetDescriptor() const {
-  return {view_identifier_, render_surface_size_};
+  return RenderTargetDescriptor(render_surface_size_);
 }
 
 DlCanvas* EmbedderExternalView::GetCanvas() {
@@ -62,9 +62,8 @@ bool EmbedderExternalView::HasPlatformView() const {
   return view_identifier_.platform_view_id.has_value();
 }
 
-std::list<SkRect> EmbedderExternalView::GetEngineRenderedContentsRegion(
-    const SkRect& query) const {
-  return slice_->searchNonOverlappingDrawnRects(query);
+const DlRegion& EmbedderExternalView::GetDlRegion() const {
+  return slice_->getRegion();
 }
 
 bool EmbedderExternalView::HasEngineRenderedContents() {
@@ -87,7 +86,8 @@ const EmbeddedViewParams* EmbedderExternalView::GetEmbeddedViewParams() const {
   return embedded_view_params_.get();
 }
 
-bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target) {
+bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
+                                  bool clear_surface) {
   TRACE_EVENT0("flutter", "EmbedderExternalView::Render");
   TryEndRecording();
   FML_DCHECK(HasEngineRenderedContents())
@@ -124,7 +124,9 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target) {
   DlSkCanvasAdapter dl_canvas(canvas);
   int restore_count = dl_canvas.GetSaveCount();
   dl_canvas.SetTransform(surface_transformation_);
-  dl_canvas.Clear(DlColor::kTransparent());
+  if (clear_surface) {
+    dl_canvas.Clear(DlColor::kTransparent());
+  }
   slice_->render_into(&dl_canvas);
   dl_canvas.RestoreToCount(restore_count);
   dl_canvas.Flush();
