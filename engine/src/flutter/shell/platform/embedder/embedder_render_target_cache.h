@@ -25,30 +25,22 @@ class EmbedderRenderTargetCache {
 
   ~EmbedderRenderTargetCache();
 
-  using RenderTargets =
-      std::unordered_map<EmbedderExternalView::ViewIdentifier,
-                         std::unique_ptr<EmbedderRenderTarget>,
-                         EmbedderExternalView::ViewIdentifier::Hash,
-                         EmbedderExternalView::ViewIdentifier::Equal>;
-
-  std::pair<RenderTargets, EmbedderExternalView::ViewIdentifierSet>
-  GetExistingTargetsInCache(
-      const EmbedderExternalView::PendingViews& pending_views);
+  std::unique_ptr<EmbedderRenderTarget> GetRenderTarget(
+      const EmbedderExternalView::RenderTargetDescriptor& descriptor);
 
   std::set<std::unique_ptr<EmbedderRenderTarget>>
   ClearAllRenderTargetsInCache();
 
-  void CacheRenderTarget(EmbedderExternalView::ViewIdentifier view_identifier,
-                         std::unique_ptr<EmbedderRenderTarget> target);
+  void CacheRenderTarget(std::unique_ptr<EmbedderRenderTarget> target);
 
   size_t GetCachedTargetsCount() const;
 
  private:
-  using CachedRenderTargets =
-      std::unordered_map<EmbedderExternalView::RenderTargetDescriptor,
-                         std::stack<std::unique_ptr<EmbedderRenderTarget>>,
-                         EmbedderExternalView::RenderTargetDescriptor::Hash,
-                         EmbedderExternalView::RenderTargetDescriptor::Equal>;
+  using CachedRenderTargets = std::unordered_multimap<
+      EmbedderExternalView::RenderTargetDescriptor,
+      std::unique_ptr<EmbedderRenderTarget>,
+      EmbedderExternalView::RenderTargetDescriptor::Hash,
+      EmbedderExternalView::RenderTargetDescriptor::Equal>;
 
   CachedRenderTargets cached_render_targets_;
 
