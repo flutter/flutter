@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:ui/src/engine.dart';
-import 'package:ui/src/engine/skwasm/skwasm_stub.dart' if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
+import 'package:ui/src/engine/skwasm/skwasm_stub.dart'
+    if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart';
 
 Picture drawPicture(void Function(Canvas) drawCommands) {
@@ -20,8 +21,11 @@ Future<void> drawPictureUsingCurrentRenderer(Picture picture) async {
   final SceneBuilder sb = SceneBuilder();
   sb.pushOffset(0, 0);
   sb.addPicture(Offset.zero, picture);
-  await renderer.renderScene(sb.build());
+  await renderer.renderScene(sb.build(), implicitView);
 }
+
+/// Convenience getter for the implicit view.
+FlutterView get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 
 /// Returns [true] if this test is running in the CanvasKit renderer.
 bool get isCanvasKit => renderer is CanvasKitRenderer;
