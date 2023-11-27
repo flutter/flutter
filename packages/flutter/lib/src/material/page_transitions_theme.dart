@@ -416,7 +416,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
         fade: fadeTransition,
         scale: scaleTransition,
         animation: widget.animation,
-      backgroundColor: widget.backgroundColor,
+        backgroundColor: widget.backgroundColor,
       );
     }
     super.didUpdateWidget(oldWidget);
