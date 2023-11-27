@@ -322,7 +322,8 @@ ContentContext::ContentContext(
   gaussian_blur_noalpha_nodecal_pipelines_.CreateDefault(*context_,
                                                          options_trianglestrip);
   border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
-  morphology_filter_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  morphology_filter_pipelines_.CreateDefault(*context_, options_trianglestrip,
+                                             {supports_decal});
   color_matrix_color_filter_pipelines_.CreateDefault(*context_,
                                                      options_trianglestrip);
   linear_to_srgb_filter_pipelines_.CreateDefault(*context_,
