@@ -341,15 +341,16 @@ void RuntimeController::ScheduleFrame() {
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::Render(int64_t view_id, Scene* scene) {
+void RuntimeController::Render(int64_t view_id,
+                               Scene* scene,
+                               double width,
+                               double height) {
   const ViewportMetrics* view_metrics =
       UIDartState::Current()->platform_configuration()->GetMetrics(view_id);
   if (view_metrics == nullptr) {
     return;
   }
-  client_.Render(view_id,
-                 scene->takeLayerTree(view_metrics->physical_width,
-                                      view_metrics->physical_height),
+  client_.Render(view_id, scene->takeLayerTree(width, height),
                  view_metrics->device_pixel_ratio);
 }
 

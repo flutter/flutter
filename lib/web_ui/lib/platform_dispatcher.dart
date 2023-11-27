@@ -288,6 +288,25 @@ abstract class ViewPadding {
   }
 }
 
+abstract class ViewConstraints {
+  const factory ViewConstraints({
+    double minWidth,
+    double maxWidth,
+    double minHeight,
+    double maxHeight,
+  }) = engine.ViewConstraints;
+
+  factory ViewConstraints.tight(Size size) = engine.ViewConstraints.tight;
+
+  double get minWidth;
+  double get maxWidth;
+  double get minHeight;
+  double get maxHeight;
+  bool isSatisfiedBy(Size size);
+  bool get isTight;
+  ViewConstraints operator/(double factor);
+}
+
 @Deprecated(
   'Use ViewPadding instead. '
   'This feature was deprecated after v3.8.0-14.0.pre.',
