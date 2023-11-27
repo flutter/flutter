@@ -1217,7 +1217,13 @@ class _Asset {
   }
 
   @override
-  int get hashCode => Object.hash(baseDir, relativeUri, entryUri.hashCode);
+  int get hashCode => Object.hashAll(<Object>[
+    baseDir,
+    relativeUri,
+    entryUri,
+    assetKind,
+    ...flavors,
+  ]);
 }
 
 // Given an assets directory like this:
