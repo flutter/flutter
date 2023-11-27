@@ -511,7 +511,6 @@ class AppDomain extends Domain {
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
-    String? flavor,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(

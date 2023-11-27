@@ -714,7 +714,6 @@ class RunCommand extends RunCommandBase {
           multidexEnabled: boolArg('multidex'),
           userIdentifier: userIdentifier,
           enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
-          flavor: stringArg('flavor'),
         );
       } on Exception catch (error) {
         throwToolExit(error.toString());
