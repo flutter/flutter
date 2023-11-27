@@ -300,6 +300,15 @@ Java HotSpot(TM) 64-Bit Server VM (build 21+35-LTS-2513, mixed mode, sharing)
         final Version? version = java.version;
         expect(version, equals(Version(21, 0, 0)));
       });
+      testWithoutContext('parses openjdk 21 with no patch numbers', () {
+        addJavaVersionCommand('''
+openjdk version "21" 2023-09-19
+OpenJDK Runtime Environment (build 21+35)
+OpenJDK 64-Bit Server VM (build 21+35, mixed mode, sharing)
+''');
+        final Version? version = java.version;
+        expect(version, equals(Version(21, 0, 0)));
+      });
     });
   });
 }

@@ -148,8 +148,8 @@ class Java {
     // Should look something like 'openjdk 19.0.2 2023-01-17'.
     final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
 
-    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
-    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
+    // The contents that matter come in the format '11.0.18', '1.8.0_202 or 21'.
+    final RegExp jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
     final Iterable<RegExpMatch> matches =
         jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
@@ -167,7 +167,7 @@ class Java {
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;
     }
-    final String? version = matches.first.group(0);
+    final String? version = matches.first.namedGroup('version');
     if (version == null || version.split('_').isEmpty) {
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;
