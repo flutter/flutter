@@ -26,28 +26,38 @@ static fml::RefPtr<Shader> OpenRuntimeStageAsShader(
                       stage.GetCodeMapping(), stage.GetUniforms(), vertex_desc);
 }
 
-static void InstantiateTestShaderLibrary() {
+static fml::RefPtr<ShaderLibrary> InstantiateTestShaderLibrary() {
   ShaderLibrary::ShaderMap shaders;
-  auto vertex_desc = std::make_shared<impeller::VertexDescriptor>();
-  vertex_desc->SetStageInputs(
-      // TODO(bdero): The stage inputs need to be packed into the flatbuffer.
-      FlutterGPUUnlitVertexShader::kAllShaderStageInputs,
-      // TODO(bdero): Make the vertex attribute layout fully configurable.
-      //              When encoding commands, allow for specifying a stride,
-      //              type, and vertex buffer slot for each attribute.
-      //              Provide a way to lookup vertex attribute slot locations by
-      //              name from the shader.
-      FlutterGPUUnlitVertexShader::kInterleavedBufferLayout);
-  shaders["UnlitVertex"] = OpenRuntimeStageAsShader(
-      std::make_shared<fml::NonOwnedMapping>(kFlutterGPUUnlitVertIPLR,
-                                             kFlutterGPUUnlitVertIPLRLength),
-      vertex_desc);
-  shaders["UnlitFragment"] = OpenRuntimeStageAsShader(
-      std::make_shared<fml::NonOwnedMapping>(kFlutterGPUUnlitFragIPLR,
-                                             kFlutterGPUUnlitFragIPLRLength),
-      nullptr);
+  {
+    auto vertex_desc = std::make_shared<impeller::VertexDescriptor>();
+    vertex_desc->SetStageInputs(
+        FlutterGPUUnlitVertexShader::kAllShaderStageInputs,
+        FlutterGPUUnlitVertexShader::kInterleavedBufferLayout);
+    shaders["UnlitVertex"] = OpenRuntimeStageAsShader(
+        std::make_shared<fml::NonOwnedMapping>(kFlutterGPUUnlitVertIPLR,
+                                               kFlutterGPUUnlitVertIPLRLength),
+        vertex_desc);
+    shaders["UnlitFragment"] = OpenRuntimeStageAsShader(
+        std::make_shared<fml::NonOwnedMapping>(kFlutterGPUUnlitFragIPLR,
+                                               kFlutterGPUUnlitFragIPLRLength),
+        nullptr);
+  }
+  {
+    auto vertex_desc = std::make_shared<impeller::VertexDescriptor>();
+    vertex_desc->SetStageInputs(
+        FlutterGPUTextureVertexShader::kAllShaderStageInputs,
+        FlutterGPUTextureVertexShader::kInterleavedBufferLayout);
+    shaders["TextureVertex"] = OpenRuntimeStageAsShader(
+        std::make_shared<fml::NonOwnedMapping>(
+            kFlutterGPUTextureVertIPLR, kFlutterGPUTextureVertIPLRLength),
+        vertex_desc);
+    shaders["TextureFragment"] = OpenRuntimeStageAsShader(
+        std::make_shared<fml::NonOwnedMapping>(
+            kFlutterGPUTextureFragIPLR, kFlutterGPUTextureFragIPLRLength),
+        nullptr);
+  }
   auto library = ShaderLibrary::MakeFromShaders(std::move(shaders));
-  ShaderLibrary::SetOverride(library);
+  return library;
 }
 // ===[ END MEMES ]=============================================================
 
@@ -61,7 +71,9 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromAsset(
   // ===========================================================================
   // This is a temporary hack to get the shader library populated in the
   // framework before the shader bundle format is landed!
-  InstantiateTestShaderLibrary();
+  if (!override_shader_library_) {
+    return InstantiateTestShaderLibrary();
+  }
   // ===========================================================================
 
   if (override_shader_library_) {

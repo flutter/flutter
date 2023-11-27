@@ -28,6 +28,9 @@ mixin Buffer {
   void _bindAsVertexBuffer(RenderPass renderPass, int offsetInBytes,
       int lengthInBytes, int vertexCount);
 
+  void _bindAsIndexBuffer(RenderPass renderPass, int offsetInBytes,
+      int lengthInBytes, IndexType indexType, int indexCount);
+
   bool _bindAsUniform(RenderPass renderPass, UniformSlot slot,
       int offsetInBytes, int lengthInBytes);
 }
@@ -63,6 +66,13 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 with Buffer {
       int lengthInBytes, int vertexCount) {
     renderPass._bindVertexBufferDevice(
         this, offsetInBytes, lengthInBytes, vertexCount);
+  }
+
+  @override
+  void _bindAsIndexBuffer(RenderPass renderPass, int offsetInBytes,
+      int lengthInBytes, IndexType indexType, int indexCount) {
+    renderPass._bindIndexBufferDevice(
+        this, offsetInBytes, lengthInBytes, indexType.index, indexCount);
   }
 
   @override
@@ -134,6 +144,13 @@ base class HostBuffer extends NativeFieldWrapperClass1 with Buffer {
       int lengthInBytes, int vertexCount) {
     renderPass._bindVertexBufferHost(
         this, offsetInBytes, lengthInBytes, vertexCount);
+  }
+
+  @override
+  void _bindAsIndexBuffer(RenderPass renderPass, int offsetInBytes,
+      int lengthInBytes, IndexType indexType, int indexCount) {
+    renderPass._bindIndexBufferHost(
+        this, offsetInBytes, lengthInBytes, indexType.index, indexCount);
   }
 
   @override

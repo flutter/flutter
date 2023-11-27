@@ -189,11 +189,18 @@ void canCreateRenderPassAndSubmit() {
   assert(renderTexture != null);
 
   final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
-  final gpu.RenderPass encoder = commandBuffer.createRenderPass(
-      colorAttachment: gpu.ColorAttachment(texture: renderTexture!));
+
+  final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
+    gpu.ColorAttachment(texture: renderTexture!),
+  );
+  final gpu.RenderPass encoder = commandBuffer.createRenderPass(renderTarget);
 
   final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
   encoder.bindPipeline(pipeline);
+
+  // Configure blending with defaults (just to test the bindings).
+  encoder.setColorBlendEnable(true);
+  encoder.setColorBlendEquation(gpu.ColorBlendEquation());
 
   final gpu.HostBuffer transients = gpu.HostBuffer();
   final gpu.BufferView vertices = transients.emplace(float32(<double>[

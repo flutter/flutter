@@ -31,6 +31,10 @@ constexpr impeller::StorageMode ToImpellerStorageMode(
   }
 }
 
+constexpr impeller::StorageMode ToImpellerStorageMode(int value) {
+  return ToImpellerStorageMode(static_cast<FlutterGPUStorageMode>(value));
+}
+
 enum class FlutterGPUPixelFormat {
   kUnknown,
   kA8UNormInt,
@@ -88,6 +92,10 @@ constexpr impeller::PixelFormat ToImpellerPixelFormat(
   }
 }
 
+constexpr impeller::PixelFormat ToImpellerPixelFormat(int value) {
+  return ToImpellerPixelFormat(static_cast<FlutterGPUPixelFormat>(value));
+}
+
 constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     impeller::PixelFormat value) {
   switch (value) {
@@ -139,6 +147,12 @@ constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
     case FlutterGPUTextureCoordinateSystem::kRenderToTexture:
       return impeller::TextureCoordinateSystem::kRenderToTexture;
   }
+}
+
+constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
+    int value) {
+  return ToImpellerTextureCoordinateSystem(
+      static_cast<FlutterGPUTextureCoordinateSystem>(value));
 }
 
 enum class FlutterGPUBlendFactor {
@@ -195,6 +209,10 @@ constexpr impeller::BlendFactor ToImpellerBlendFactor(
   }
 }
 
+constexpr impeller::BlendFactor ToImpellerBlendFactor(int value) {
+  return ToImpellerBlendFactor(static_cast<FlutterGPUBlendFactor>(value));
+}
+
 enum class FlutterGPUBlendOperation {
   kAdd,
   kSubtract,
@@ -213,6 +231,10 @@ constexpr impeller::BlendOperation ToImpellerBlendOperation(
   }
 }
 
+constexpr impeller::BlendOperation ToImpellerBlendOperation(int value) {
+  return ToImpellerBlendOperation(static_cast<FlutterGPUBlendOperation>(value));
+}
+
 enum class FlutterGPULoadAction {
   kDontCare,
   kLoad,
@@ -229,6 +251,10 @@ constexpr impeller::LoadAction ToImpellerLoadAction(
     case FlutterGPULoadAction::kClear:
       return impeller::LoadAction::kClear;
   }
+}
+
+constexpr impeller::LoadAction ToImpellerLoadAction(int value) {
+  return ToImpellerLoadAction(static_cast<FlutterGPULoadAction>(value));
 }
 
 enum class FlutterGPUStoreAction {
@@ -252,6 +278,10 @@ constexpr impeller::StoreAction ToImpellerStoreAction(
   }
 }
 
+constexpr impeller::StoreAction ToImpellerStoreAction(int value) {
+  return ToImpellerStoreAction(static_cast<FlutterGPUStoreAction>(value));
+}
+
 enum class FlutterGPUShaderStage {
   kVertex,
   kFragment,
@@ -267,6 +297,10 @@ constexpr impeller::ShaderStage ToImpellerShaderStage(
   }
 }
 
+constexpr impeller::ShaderStage ToImpellerShaderStage(int value) {
+  return ToImpellerShaderStage(static_cast<FlutterGPUShaderStage>(value));
+}
+
 constexpr FlutterGPUShaderStage FromImpellerShaderStage(
     impeller::ShaderStage value) {
   switch (value) {
@@ -278,10 +312,192 @@ constexpr FlutterGPUShaderStage FromImpellerShaderStage(
     case impeller::ShaderStage::kTessellationControl:
     case impeller::ShaderStage::kTessellationEvaluation:
     case impeller::ShaderStage::kCompute:
-      FML_LOG(ERROR) << "Invalid Flutter GPU ShaderStage "
+      FML_LOG(FATAL) << "Invalid Flutter GPU ShaderStage "
                      << static_cast<size_t>(value);
       FML_UNREACHABLE();
   }
+}
+
+enum class FlutterGPUMinMagFilter {
+  kNearest,
+  kLinear,
+};
+
+constexpr impeller::MinMagFilter ToImpellerMinMagFilter(
+    FlutterGPUMinMagFilter value) {
+  switch (value) {
+    case FlutterGPUMinMagFilter::kNearest:
+      return impeller::MinMagFilter::kNearest;
+    case FlutterGPUMinMagFilter::kLinear:
+      return impeller::MinMagFilter::kLinear;
+  }
+}
+
+constexpr impeller::MinMagFilter ToImpellerMinMagFilter(int value) {
+  return ToImpellerMinMagFilter(static_cast<FlutterGPUMinMagFilter>(value));
+}
+
+enum class FlutterGPUMipFilter {
+  kNearest,
+  kLinear,
+};
+
+constexpr impeller::MipFilter ToImpellerMipFilter(FlutterGPUMipFilter value) {
+  switch (value) {
+    case FlutterGPUMipFilter::kNearest:
+      return impeller::MipFilter::kNearest;
+    case FlutterGPUMipFilter::kLinear:
+      return impeller::MipFilter::kLinear;
+  }
+}
+
+constexpr impeller::MipFilter ToImpellerMipFilter(int value) {
+  return ToImpellerMipFilter(static_cast<FlutterGPUMipFilter>(value));
+}
+
+enum class FlutterGPUSamplerAddressMode {
+  kClampToEdge,
+  kRepeat,
+  kMirror,
+};
+
+constexpr impeller::SamplerAddressMode ToImpellerSamplerAddressMode(
+    FlutterGPUSamplerAddressMode value) {
+  switch (value) {
+    case FlutterGPUSamplerAddressMode::kClampToEdge:
+      return impeller::SamplerAddressMode::kClampToEdge;
+    case FlutterGPUSamplerAddressMode::kRepeat:
+      return impeller::SamplerAddressMode::kRepeat;
+    case FlutterGPUSamplerAddressMode::kMirror:
+      return impeller::SamplerAddressMode::kMirror;
+  }
+}
+
+constexpr impeller::SamplerAddressMode ToImpellerSamplerAddressMode(int value) {
+  return ToImpellerSamplerAddressMode(
+      static_cast<FlutterGPUSamplerAddressMode>(value));
+}
+
+enum class FlutterGPUIndexType {
+  k16bit,
+  k32bit,
+};
+
+constexpr impeller::IndexType ToImpellerIndexType(FlutterGPUIndexType value) {
+  switch (value) {
+    case FlutterGPUIndexType::k16bit:
+      return impeller::IndexType::k16bit;
+    case FlutterGPUIndexType::k32bit:
+      return impeller::IndexType::k32bit;
+  }
+}
+
+constexpr impeller::IndexType ToImpellerIndexType(int value) {
+  return ToImpellerIndexType(static_cast<FlutterGPUIndexType>(value));
+}
+
+enum class FlutterGPUPrimitiveType {
+  kTriangle,
+  kTriangleStrip,
+  kLine,
+  kLineStrip,
+  kPoint,
+};
+
+constexpr impeller::PrimitiveType ToImpellerPrimitiveType(
+    FlutterGPUPrimitiveType value) {
+  switch (value) {
+    case FlutterGPUPrimitiveType::kTriangle:
+      return impeller::PrimitiveType::kTriangle;
+    case FlutterGPUPrimitiveType::kTriangleStrip:
+      return impeller::PrimitiveType::kTriangleStrip;
+    case FlutterGPUPrimitiveType::kLine:
+      return impeller::PrimitiveType::kLine;
+    case FlutterGPUPrimitiveType::kLineStrip:
+      return impeller::PrimitiveType::kLineStrip;
+    case FlutterGPUPrimitiveType::kPoint:
+      return impeller::PrimitiveType::kPoint;
+  }
+}
+
+constexpr impeller::PrimitiveType ToImpellerPrimitiveType(int value) {
+  return ToImpellerPrimitiveType(static_cast<FlutterGPUPrimitiveType>(value));
+}
+
+enum class FlutterGPUCompareFunction {
+  kNever,
+  kAlways,
+  kLess,
+  kEqual,
+  kLessEqual,
+  kGreater,
+  kNotEqual,
+  kGreaterEqual,
+};
+
+constexpr impeller::CompareFunction ToImpellerCompareFunction(
+    FlutterGPUCompareFunction value) {
+  switch (value) {
+    case FlutterGPUCompareFunction::kNever:
+      return impeller::CompareFunction::kNever;
+    case FlutterGPUCompareFunction::kAlways:
+      return impeller::CompareFunction::kAlways;
+    case FlutterGPUCompareFunction::kLess:
+      return impeller::CompareFunction::kLess;
+    case FlutterGPUCompareFunction::kEqual:
+      return impeller::CompareFunction::kEqual;
+    case FlutterGPUCompareFunction::kLessEqual:
+      return impeller::CompareFunction::kLessEqual;
+    case FlutterGPUCompareFunction::kGreater:
+      return impeller::CompareFunction::kGreater;
+    case FlutterGPUCompareFunction::kNotEqual:
+      return impeller::CompareFunction::kNotEqual;
+    case FlutterGPUCompareFunction::kGreaterEqual:
+      return impeller::CompareFunction::kGreaterEqual;
+  }
+}
+
+constexpr impeller::CompareFunction ToImpellerCompareFunction(int value) {
+  return ToImpellerCompareFunction(
+      static_cast<FlutterGPUCompareFunction>(value));
+}
+
+enum class FlutterGPUStencilOperation {
+  kKeep,
+  kZero,
+  kSetToReferenceValue,
+  kIncrementClamp,
+  kDecrementClamp,
+  kInvert,
+  kIncrementWrap,
+  kDecrementWrap,
+};
+
+constexpr impeller::StencilOperation ToImpellerStencilOperation(
+    FlutterGPUStencilOperation value) {
+  switch (value) {
+    case FlutterGPUStencilOperation::kKeep:
+      return impeller::StencilOperation::kKeep;
+    case FlutterGPUStencilOperation::kZero:
+      return impeller::StencilOperation::kZero;
+    case FlutterGPUStencilOperation::kSetToReferenceValue:
+      return impeller::StencilOperation::kSetToReferenceValue;
+    case FlutterGPUStencilOperation::kIncrementClamp:
+      return impeller::StencilOperation::kIncrementClamp;
+    case FlutterGPUStencilOperation::kDecrementClamp:
+      return impeller::StencilOperation::kDecrementClamp;
+    case FlutterGPUStencilOperation::kInvert:
+      return impeller::StencilOperation::kInvert;
+    case FlutterGPUStencilOperation::kIncrementWrap:
+      return impeller::StencilOperation::kIncrementWrap;
+    case FlutterGPUStencilOperation::kDecrementWrap:
+      return impeller::StencilOperation::kDecrementWrap;
+  }
+}
+
+constexpr impeller::StencilOperation ToImpellerStencilOperation(int value) {
+  return ToImpellerStencilOperation(
+      static_cast<FlutterGPUStencilOperation>(value));
 }
 
 }  // namespace gpu
