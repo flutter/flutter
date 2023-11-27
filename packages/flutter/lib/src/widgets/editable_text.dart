@@ -3675,12 +3675,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   Rect _calculateViewportRect() {
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final Size screenSize = MediaQuery.sizeOf(context);
     final ui.FlutterView view = View.of(context);
     final double obscuredVertical = (view.padding.top + view.padding.bottom + view.viewInsets.bottom) / view.devicePixelRatio;
     final double obscuredHorizontal = (view.padding.left + view.padding.right) / view.devicePixelRatio;
-    final Size screenSize = Size(mediaQueryData.size.width - obscuredHorizontal, mediaQueryData.size.height - obscuredVertical);
-    return Rect.fromLTWH(view.padding.left / view.devicePixelRatio, view.padding.top / view.devicePixelRatio, screenSize.width, screenSize.height);
+    final Size visibleScreenSize = Size(screenSize.width - obscuredHorizontal, screenSize.height - obscuredVertical);
+    return Rect.fromLTWH(view.padding.left / view.devicePixelRatio, view.padding.top / view.devicePixelRatio, visibleScreenSize.width, visibleScreenSize.height);
   }
 
   void _handleContextMenuOnScroll(ScrollNotification notification) {
