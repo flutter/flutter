@@ -611,8 +611,18 @@ class DragTarget<T extends Object> extends StatefulWidget {
   const DragTarget({
     super.key,
     required this.builder,
+    @Deprecated(
+      'Use onWillAcceptWithDetails instead. '
+      'This callback is similar to onWillAcceptWithDetails but does not provide drag details. '
+      'This feature was deprecated after v3.14.0-0.2.pre.'
+    )
     this.onWillAccept,
     this.onWillAcceptWithDetails,
+    @Deprecated(
+      'Use onAcceptWithDetails instead. '
+      'This callback is similar to onAcceptWithDetails but does not provide drag details. '
+      'This feature was deprecated after v3.14.0-0.2.pre.'
+    )
     this.onAccept,
     this.onAcceptWithDetails,
     this.onLeave,
@@ -636,6 +646,11 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// Equivalent to [onWillAcceptWithDetails], but only includes the data.
   ///
   /// Must not be provided if [onWillAcceptWithDetails] is provided.
+  @Deprecated(
+    'Use onWillAcceptWithDetails instead. '
+    'This callback is similar to onWillAcceptWithDetails but does not provide drag details. '
+    'This feature was deprecated after v3.14.0-0.2.pre.'
+  )
   final DragTargetWillAccept<T>? onWillAccept;
 
   /// Called to determine whether this widget is interested in receiving a given
@@ -655,6 +670,11 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// It will not be called if `data` is `null`.
   ///
   /// Equivalent to [onAcceptWithDetails], but only includes the data.
+  @Deprecated(
+    'Use onAcceptWithDetails instead. '
+    'This callback is similar to onAcceptWithDetails but does not provide drag details. '
+    'This feature was deprecated after v3.14.0-0.2.pre.'
+  )
   final DragTargetAccept<T>? onAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
