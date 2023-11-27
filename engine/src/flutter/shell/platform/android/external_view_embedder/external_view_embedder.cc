@@ -104,15 +104,15 @@ void AndroidExternalViewEmbedder::SubmitFrame(
       // The rect above the `current_view_rect`
       SkRect partial_joined_rect = SkRect::MakeEmpty();
       // Each rect corresponds to a native view that renders Flutter UI.
-      std::list<SkRect> intersection_rects =
-          slice->searchNonOverlappingDrawnRects(current_view_rect);
+      std::vector<SkIRect> intersection_rects =
+          slice->region(current_view_rect).getRects();
 
       // Limit the number of native views, so it doesn't grow forever.
       //
       // In this case, the rects are merged into a single one that is the union
       // of all the rects.
-      for (const SkRect& rect : intersection_rects) {
-        partial_joined_rect.join(rect);
+      for (const SkIRect& rect : intersection_rects) {
+        partial_joined_rect.join(SkRect::Make(rect));
       }
       // Get the intersection rect with the `current_view_rect`,
       partial_joined_rect.intersect(current_view_rect);

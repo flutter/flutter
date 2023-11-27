@@ -338,8 +338,11 @@ class EmbedderViewSlice {
   virtual ~EmbedderViewSlice() = default;
   virtual DlCanvas* canvas() = 0;
   virtual void end_recording() = 0;
-  virtual std::list<SkRect> searchNonOverlappingDrawnRects(
-      const SkRect& query) const = 0;
+  virtual const DlRegion& getRegion() const = 0;
+  DlRegion region(const SkRect& query) const {
+    return DlRegion::MakeIntersection(getRegion(), DlRegion(query.roundOut()));
+  }
+
   virtual void render_into(DlCanvas* canvas) = 0;
 };
 
@@ -350,8 +353,8 @@ class DisplayListEmbedderViewSlice : public EmbedderViewSlice {
 
   DlCanvas* canvas() override;
   void end_recording() override;
-  std::list<SkRect> searchNonOverlappingDrawnRects(
-      const SkRect& query) const override;
+  const DlRegion& getRegion() const override;
+
   void render_into(DlCanvas* canvas) override;
   void dispatch(DlOpReceiver& receiver);
   bool is_empty();
