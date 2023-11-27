@@ -50,7 +50,7 @@ class SolidColorView: UIView {
 
 
 class FLNativeView: NSObject, FlutterPlatformView {
-    private var _view: UIView
+    private var childView: UIView
 
     init(
         frame: CGRect,
@@ -58,11 +58,11 @@ class FLNativeView: NSObject, FlutterPlatformView {
         arguments args: Any?,
         binaryMessenger messenger: FlutterBinaryMessenger?
     ) {
-        _view = SolidColorView()
+        childView = SolidColorView()
         super.init()
     }
 
     func view() -> UIView {
-        return _view
+        return childView
     }
 }
