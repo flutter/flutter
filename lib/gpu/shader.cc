@@ -6,10 +6,11 @@
 
 #include <utility>
 
+#include "flutter/lib/gpu/formats.h"
 #include "fml/make_copyable.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_library.h"
-#include "lib/gpu/shader_library.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -27,6 +28,23 @@ fml::RefPtr<Shader> Shader::Make(
     std::shared_ptr<fml::Mapping> code_mapping,
     std::vector<impeller::RuntimeUniformDescription> uniforms,
     std::shared_ptr<impeller::VertexDescriptor> vertex_desc) {
+  // Sampler/texture slots start at 0. See runtime_effect_contents.cc
+  // TODO(bdero): I'm skeptical about the correctness of this. Verify what
+  //              happens with multiple texture samplers spaced apart with other
+  //              uniforms in-between.
+  size_t minimum_sampler_index = 100000000;
+  for (const auto& uniform : uniforms) {
+    if (uniform.type == impeller::kSampledImage &&
+        uniform.location < minimum_sampler_index) {
+      minimum_sampler_index = uniform.location;
+    }
+  }
+  for (auto& uniform : uniforms) {
+    if (uniform.type == impeller::kSampledImage) {
+      uniform.location -= minimum_sampler_index;
+    }
+  }
+
   auto shader = fml::MakeRefCounted<Shader>();
   shader->entrypoint_ = std::move(entrypoint);
   shader->stage_ = stage;
@@ -92,7 +110,8 @@ int Shader::GetUniformSlot(const std::string& name) const {
 ///
 
 int InternalFlutterGpu_Shader_GetShaderStage(flutter::gpu::Shader* wrapper) {
-  return static_cast<int>(wrapper->GetShaderStage());
+  return static_cast<int>(
+      flutter::gpu::FromImpellerShaderStage(wrapper->GetShaderStage()));
 }
 
 int InternalFlutterGpu_Shader_GetUniformSlot(flutter::gpu::Shader* wrapper,

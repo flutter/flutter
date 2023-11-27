@@ -71,18 +71,24 @@ static CompilerBackend CreateMSLCompiler(
   // metal backend of spirv-cross will order uniforms according to usage. To fix
   // this, we use the sorted order and the add_msl_resource_binding API to force
   // the ordering to match the declared order. Note that while this code runs
-  // for all compiled shaders, it will only affect fragment shaders due to the
-  // specified stage.
+  // for all compiled shaders, it will only affect vertex and fragment shaders
+  // due to the specified stage.
   auto floats =
       SortUniforms(&ir, sl_compiler.get(), spirv_cross::SPIRType::Float);
   auto images =
       SortUniforms(&ir, sl_compiler.get(), spirv_cross::SPIRType::SampledImage);
 
+  spv::ExecutionModel execution_model =
+      spv::ExecutionModel::ExecutionModelFragment;
+  if (source_options.type == SourceType::kVertexShader) {
+    execution_model = spv::ExecutionModel::ExecutionModelVertex;
+  }
+
   uint32_t buffer_offset = 0;
   uint32_t sampler_offset = 0;
   for (auto& float_id : floats) {
     sl_compiler->add_msl_resource_binding(
-        {.stage = spv::ExecutionModel::ExecutionModelFragment,
+        {.stage = execution_model,
          .basetype = spirv_cross::SPIRType::BaseType::Float,
          .desc_set = sl_compiler->get_decoration(float_id,
                                                  spv::DecorationDescriptorSet),
@@ -94,7 +100,7 @@ static CompilerBackend CreateMSLCompiler(
   }
   for (auto& image_id : images) {
     sl_compiler->add_msl_resource_binding({
-        .stage = spv::ExecutionModel::ExecutionModelFragment,
+        .stage = execution_model,
         .basetype = spirv_cross::SPIRType::BaseType::SampledImage,
         .desc_set =
             sl_compiler->get_decoration(image_id, spv::DecorationDescriptorSet),

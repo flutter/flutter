@@ -4,11 +4,13 @@
 
 #pragma once
 
+#include <map>
 #include <memory>
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
@@ -38,6 +40,11 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   impeller::RenderTarget& GetRenderTarget();
   const impeller::RenderTarget& GetRenderTarget() const;
 
+  impeller::ColorAttachmentDescriptor& GetColorAttachmentDescriptor(
+      size_t color_attachment_index);
+
+  impeller::DepthAttachmentDescriptor& GetDepthAttachmentDescriptor();
+
   impeller::VertexBuffer& GetVertexBuffer();
 
   bool Begin(flutter::gpu::CommandBuffer& command_buffer);
@@ -64,7 +71,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   // Pipeline descriptor layout state. We always keep track of this state, but
   // we'll only apply it as necessary to match the RenderTarget.
-  impeller::ColorAttachmentDescriptor color_desc_;
+  std::map<size_t, impeller::ColorAttachmentDescriptor> color_descriptors_;
   impeller::StencilAttachmentDescriptor stencil_front_desc_;
   impeller::StencilAttachmentDescriptor stencil_back_desc_;
   impeller::DepthAttachmentDescriptor depth_desc_;
@@ -90,6 +97,7 @@ extern void InternalFlutterGpu_RenderPass_Initialize(Dart_Handle wrapper);
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     flutter::gpu::RenderPass* wrapper,
+    int color_attachment_index,
     int load_action,
     int store_action,
     int clear_color,
@@ -97,11 +105,14 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     Dart_Handle resolve_texture_wrapper);
 
 FLUTTER_GPU_EXPORT
-extern Dart_Handle InternalFlutterGpu_RenderPass_SetStencilAttachment(
+extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     flutter::gpu::RenderPass* wrapper,
-    int load_action,
-    int store_action,
-    int clear_stencil,
+    int depth_load_action,
+    int depth_store_action,
+    float depth_clear_value,
+    int stencil_load_action,
+    int stencil_store_action,
+    int stencil_clear_value,
     flutter::gpu::Texture* texture);
 
 FLUTTER_GPU_EXPORT
@@ -131,6 +142,24 @@ extern void InternalFlutterGpu_RenderPass_BindVertexBufferHost(
     int vertex_count);
 
 FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes,
+    int index_type,
+    int index_count);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_BindIndexBufferHost(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::HostBuffer* host_buffer,
+    int offset_in_bytes,
+    int length_in_bytes,
+    int index_type,
+    int index_count);
+
+FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     flutter::gpu::RenderPass* wrapper,
     int stage,
@@ -147,6 +176,49 @@ extern bool InternalFlutterGpu_RenderPass_BindUniformHost(
     flutter::gpu::HostBuffer* host_buffer,
     int offset_in_bytes,
     int length_in_bytes);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_BindTexture(
+    flutter::gpu::RenderPass* wrapper,
+    int stage,
+    int slot_id,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_ClearBindings(
+    flutter::gpu::RenderPass* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetColorBlendEnable(
+    flutter::gpu::RenderPass* wrapper,
+    int color_attachment_index,
+    bool enable);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetColorBlendEquation(
+    flutter::gpu::RenderPass* wrapper,
+    int color_attachment_index,
+    int color_blend_operation,
+    int source_color_blend_factor,
+    int destination_color_blend_factor,
+    int alpha_blend_operation,
+    int source_alpha_blend_factor,
+    int destination_alpha_blend_factor);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetDepthWriteEnable(
+    flutter::gpu::RenderPass* wrapper,
+    bool enable);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(
+    flutter::gpu::RenderPass* wrapper,
+    int compare_operation);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_Draw(

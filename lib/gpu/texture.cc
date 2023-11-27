@@ -83,11 +83,9 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            bool enable_shader_read_usage,
                                            bool enable_shader_write_usage) {
   impeller::TextureDescriptor desc;
-  desc.storage_mode = flutter::gpu::ToImpellerStorageMode(
-      static_cast<flutter::gpu::FlutterGPUStorageMode>(storage_mode));
+  desc.storage_mode = flutter::gpu::ToImpellerStorageMode(storage_mode);
   desc.size = {width, height};
-  desc.format = flutter::gpu::ToImpellerPixelFormat(
-      static_cast<flutter::gpu::FlutterGPUPixelFormat>(format));
+  desc.format = flutter::gpu::ToImpellerPixelFormat(format);
   desc.usage = 0;
   if (enable_render_target_usage) {
     desc.usage |= static_cast<impeller::TextureUsageMask>(
@@ -120,9 +118,8 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
     return false;
   }
 
-  texture->SetCoordinateSystem(flutter::gpu::ToImpellerTextureCoordinateSystem(
-      static_cast<flutter::gpu::FlutterGPUTextureCoordinateSystem>(
-          coordinate_system)));
+  texture->SetCoordinateSystem(
+      flutter::gpu::ToImpellerTextureCoordinateSystem(coordinate_system));
 
   auto res = fml::MakeRefCounted<flutter::gpu::Texture>(std::move(texture));
   res->AssociateWithDartWrapper(wrapper);
@@ -134,9 +131,7 @@ void InternalFlutterGpu_Texture_SetCoordinateSystem(
     flutter::gpu::Texture* wrapper,
     int coordinate_system) {
   return wrapper->SetCoordinateSystem(
-      flutter::gpu::ToImpellerTextureCoordinateSystem(
-          static_cast<flutter::gpu::FlutterGPUTextureCoordinateSystem>(
-              coordinate_system)));
+      flutter::gpu::ToImpellerTextureCoordinateSystem(coordinate_system));
 }
 
 bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,
