@@ -325,6 +325,102 @@ flutter:
     });
   });
 
+  group('AssetBundle.build (web builds)', () {
+    late FileSystem testFileSystem;
+
+    setUp(() async {
+      testFileSystem = MemoryFileSystem(
+        style: globals.platform.isWindows
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix,
+      );
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+    });
+
+    testUsingContext('empty pubspec', () async {
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('');
+
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
+
+      expect(bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.json',
+          'AssetManifest.bin',
+          'AssetManifest.bin.json',
+        ])
+      );
+      expect(
+        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
+        '{}',
+      );
+      expect(
+        utf8.decode(await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()),
+        '""',
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('pubspec contains an asset', () async {
+      globals.fs.file('.packages').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync(r'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/bar/lizard.png
+''');
+      globals.fs.file(
+        globals.fs.path.joinAll(<String>['assets', 'bar', 'lizard.png'])
+      ).createSync(recursive: true);
+
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
+
+      expect(bundle.entries.keys,
+        unorderedEquals(<String>[
+          'AssetManifest.json',
+          'AssetManifest.bin',
+          'AssetManifest.bin.json',
+          'FontManifest.json',
+          'NOTICES', // not .Z
+          'assets/bar/lizard.png',
+        ])
+      );
+      final Map<Object?, Object?> manifestJson = json.decode(
+        utf8.decode(
+          await bundle.entries['AssetManifest.json']!.contentsAsBytes()
+        )
+      ) as Map<Object?, Object?>;
+      expect(manifestJson, isNotEmpty);
+      expect(manifestJson['assets/bar/lizard.png'], isNotNull);
+
+      final Uint8List manifestBinJsonBytes = base64.decode(
+        json.decode(
+          utf8.decode(
+            await bundle.entries['AssetManifest.bin.json']!.contentsAsBytes()
+          )
+        ) as String
+      );
+
+      final Uint8List manifestBinBytes = Uint8List.fromList(
+        await bundle.entries['AssetManifest.bin']!.contentsAsBytes()
+      );
+
+      expect(manifestBinJsonBytes, equals(manifestBinBytes),
+        reason: 'JSON-encoded binary content should be identical to BIN file.');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
   testUsingContext('Failed directory delete shows message', () async {
     final FileExceptionHandler handler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);

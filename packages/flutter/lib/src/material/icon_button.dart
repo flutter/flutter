@@ -173,8 +173,6 @@ class IconButton extends StatelessWidget {
   /// Requires one of its ancestors to be a [Material] widget. This requirement
   /// no longer exists if [ThemeData.useMaterial3] is set to true.
   ///
-  /// [autofocus] argument must not be null (though it has default value).
-  ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
   const IconButton({
@@ -361,8 +359,6 @@ class IconButton extends StatelessWidget {
   /// based on the [iconSize] and [color] properties of _this_ widget using an
   /// [IconTheme] and therefore should not be explicitly given in the icon
   /// widget.
-  ///
-  /// This property must not be null.
   ///
   /// See [Icon], [ImageIcon].
   final Widget icon;
@@ -880,6 +876,12 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    statesController.dispose();
+    super.dispose();
+  }
 }
 
 class _IconButtonM3 extends ButtonStyleButton {
@@ -963,9 +965,9 @@ class _IconButtonM3 extends ButtonStyleButton {
 
     bool isIconThemeDefault(Color? color) {
       if (isDark) {
-        return color == kDefaultIconLightColor;
+        return identical(color, kDefaultIconLightColor);
       }
-      return color == kDefaultIconDarkColor;
+      return identical(color, kDefaultIconDarkColor);
     }
     final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
     final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;

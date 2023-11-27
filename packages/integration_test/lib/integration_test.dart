@@ -100,10 +100,6 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   // under debug mode.
   static bool _firstRun = false;
 
-  /// Artificially changes the surface size to `size` on the Widget binding,
-  /// then flushes microtasks.
-  ///
-  /// Set to null to use the default surface size.
   @override
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
@@ -117,12 +113,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
-    final FlutterView view = platformDispatcher.implicitView!;
-    final double devicePixelRatio = view.devicePixelRatio;
-    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
+  ViewConfiguration createViewConfigurationFor(RenderView renderView) {
+    final FlutterView view = renderView.flutterView;
+    final Size? surfaceSize = view == platformDispatcher.implicitView ? _surfaceSize : null;
     return TestViewConfiguration.fromView(
-      size: size,
+      size: surfaceSize ?? view.physicalSize / view.devicePixelRatio,
       view: view,
     );
   }
@@ -331,9 +326,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// Future<void> main() {
   ///   return integrationDriver(
-  ///     responseDataCallback: (data) async {
+  ///     responseDataCallback: (Map<String, dynamic>? data) async {
   ///       if (data != null) {
-  ///         for (var entry in data.entries) {
+  ///         for (final MapEntry<String, dynamic> entry in data.entries) {
   ///           print('Writing ${entry.key} to the disk.');
   ///           await writeResponseData(
   ///             entry.value as Map<String, dynamic>,
@@ -442,11 +437,11 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   Timeout defaultTestTimeout = Timeout.none;
 
   @override
-  void attachRootWidget(Widget rootWidget) {
+  Widget wrapWithDefaultView(Widget rootWidget) {
     // This is a workaround where screenshots of root widgets have incorrect
     // bounds.
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    super.attachRootWidget(RepaintBoundary(child: rootWidget));
+    return super.wrapWithDefaultView(RepaintBoundary(child: rootWidget));
   }
 
   @override

@@ -126,7 +126,7 @@ class Testbed {
           body: () async {
             Cache.flutterRoot = '';
             if (_setup != null) {
-              await _setup?.call();
+              await _setup.call();
             }
             await test();
             Cache.flutterRoot = originalFlutterRoot;

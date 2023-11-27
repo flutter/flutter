@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
+import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -543,6 +543,39 @@ void main() {
         artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
         fileSystem.path.join('/flutter', 'prebuilts', 'macos-x64', 'dart-sdk', 'bin', 'dart'),
       );
+    });
+  });
+
+  group('LocalEngineInfo', () {
+    late FileSystem fileSystem;
+    late LocalEngineInfo localEngineInfo;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testUsingContext('determines the target device name from the path', () {
+      localEngineInfo = LocalEngineInfo(
+        targetOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        hostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+      );
+
+      expect(localEngineInfo.localTargetName, 'android_debug_unopt');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('determines the target device name from the path when using a custom engine path', () {
+      localEngineInfo = LocalEngineInfo(
+        targetOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        hostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+      );
+
+      expect(localEngineInfo.localHostName, 'host_debug_unopt');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

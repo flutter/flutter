@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "$tabIndex. vaheleht $tabCount-st",
   "modalBarrierDismissLabel": "Loobu",
   "searchTextFieldPlaceholderLabel": "Otsige",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Asendusi ei leitud",
+  "menuDismissLabel": "Sulge menüü",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

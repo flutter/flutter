@@ -19,7 +19,7 @@ abstract class DapTestServer {
   Future<void> stop();
   StreamSink<List<int>> get sink;
   Stream<List<int>> get stream;
-  Function(String message)? onStderrOutput;
+  void Function(String message)? onStderrOutput;
 }
 
 /// An instance of a DAP server running in-process (to aid debugging).
@@ -83,7 +83,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
         .listen((String error) {
       logger?.call(error);
       if (!_isShuttingDown) {
-        final Function(String message)? stderrHandler = onStderrOutput;
+        final void Function(String message)? stderrHandler = onStderrOutput;
         if (stderrHandler != null) {
           stderrHandler(error);
         } else {

@@ -44,6 +44,12 @@ enum _CheckboxType { material, adaptive }
 /// ** See code in examples/api/lib/material/checkbox/checkbox.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows what the checkbox error state looks like.
+///
+/// ** See code in examples/api/lib/material/checkbox/checkbox.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CheckboxListTile], which combines this widget with a [ListTile] so that
@@ -68,8 +74,6 @@ class Checkbox extends StatefulWidget {
   ///   can only be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
-  ///
-  /// The values of [tristate] and [autofocus] must not be null.
   const Checkbox({
     super.key,
     required this.value,
@@ -385,7 +389,7 @@ class Checkbox extends StatefulWidget {
   /// this is true. This is only used when [ThemeData.useMaterial3] is set to true.
   /// {@endtemplate}
   ///
-  /// Must not be null. Defaults to false.
+  /// Defaults to false.
   final bool isError;
 
   /// {@template flutter.material.checkbox.semanticLabel}

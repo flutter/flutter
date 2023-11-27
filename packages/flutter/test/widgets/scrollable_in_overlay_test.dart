@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('Can dispose ScrollPosition when hasPixels is false', () {
@@ -18,9 +19,10 @@ void main() {
     position.dispose(); // Should not throw/assert.
   });
 
-  testWidgets('scrollable in hidden overlay does not crash when unhidden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('scrollable in hidden overlay does not crash when unhidden', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44269.
     final TabController controller = TabController(vsync: const TestVSync(), length: 1);
+    addTearDown(controller.dispose);
 
     final OverlayEntry entry1 = OverlayEntry(
       maintainState: true,

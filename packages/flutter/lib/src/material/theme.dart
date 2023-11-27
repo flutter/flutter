@@ -36,8 +36,6 @@ const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 ///    the [MaterialApp.theme] argument.
 class Theme extends StatelessWidget {
   /// Applies the given theme [data] to [child].
-  ///
-  /// The [data] and [child] arguments must not be null.
   const Theme({
     super.key,
     required this.data,
@@ -201,8 +199,7 @@ class ThemeDataTween extends Tween<ThemeData> {
 class AnimatedTheme extends ImplicitlyAnimatedWidget {
   /// Creates an animated theme.
   ///
-  /// By default, the theme transition uses a linear curve. The [data] and
-  /// [child] arguments must not be null.
+  /// By default, the theme transition uses a linear curve.
   const AnimatedTheme({
     super.key,
     required this.data,

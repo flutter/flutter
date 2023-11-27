@@ -198,7 +198,8 @@ class Parser {
     this.messageString,
     {
       this.useEscaping = false,
-      this.logger
+      this.logger,
+      this.placeholders,
     }
   );
 
@@ -207,6 +208,7 @@ class Parser {
   final String filename;
   final bool useEscaping;
   final Logger? logger;
+  final List<String>? placeholders;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
@@ -216,12 +218,16 @@ class Parser {
   // every instance of "{" and "}" toggles the isString boolean and every
   // instance of "'" toggles the isEscaped boolean (and treats a double
   // single quote "''" as a single quote "'"). When !isString and !isEscaped
-  // delimit tokens by whitespace and special characters.
+  // delimit tokens by whitespace and special characters. When placeholders
+  // is passed, relax the syntax so that "{" and "}" can be used as strings in
+  // certain cases.
   List<Node> lexIntoTokens() {
+    final bool useRelaxedLexer = placeholders != null;
     final List<Node> tokens = <Node>[];
     bool isString = true;
     // Index specifying where to match from
     int startIndex = 0;
+    int depth = 0;
 
     // At every iteration, we should be able to match a new token until we
     // reach the end of the string. If for some reason we don't match a
@@ -267,9 +273,28 @@ class Parser {
         }
         match = brace.matchAsPrefix(messageString, startIndex);
         if (match != null) {
+          final String matchedBrace = match.group(0)!;
+          if (useRelaxedLexer) {
+            final Match? whitespaceMatch = whitespace.matchAsPrefix(messageString, match.end);
+            final int endOfWhitespace = whitespaceMatch?.group(0) == null ? match.end : whitespaceMatch!.end;
+            final Match? identifierMatch = alphanumeric.matchAsPrefix(messageString, endOfWhitespace);
+            // If we match a "}" and the depth is 0, treat it as a string.
+            // If we match a "{" and the next token is not a valid placeholder, treat it as a string.
+            if (matchedBrace == '}' && depth == 0) {
+              tokens.add(Node.string(startIndex, matchedBrace));
+              startIndex = match.end;
+              continue;
+            }
+            if (matchedBrace == '{' && (identifierMatch == null || !placeholders!.contains(identifierMatch.group(0)))) {
+              tokens.add(Node.string(startIndex, matchedBrace));
+              startIndex = match.end;
+              continue;
+            }
+          }
           tokens.add(Node.brace(startIndex, match.group(0)!));
           isString = false;
           startIndex = match.end;
+          depth += 1;
           continue;
         }
         // Theoretically, we only reach this point because of unmatched single quotes because
@@ -299,9 +324,15 @@ class Parser {
         if (match == null) {
           match = brace.matchAsPrefix(messageString, startIndex);
           if (match != null) {
-            tokens.add(Node.brace(startIndex, match.group(0)!));
+            final String matchedBrace = match.group(0)!;
+            tokens.add(Node.brace(startIndex, matchedBrace));
             isString = true;
             startIndex = match.end;
+            if (matchedBrace == '{') {
+              depth += 1;
+            } else {
+              depth -= 1;
+            }
             continue;
           }
           // This should only happen when there are special characters we are unable to match.

@@ -1686,4 +1686,15 @@ transforms:
         kind: 'fragment'
         value: 'arguments[colorScheme]'
 
+  # Changes made in https://github.com/flutter/flutter/pull/131455
+  - title: "Remove 'useMaterial3'"
+    date: 2023-07-27
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'useMaterial3'
+
 # Before adding a new fix: read instructions at the top of this file.

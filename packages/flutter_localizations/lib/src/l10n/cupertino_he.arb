@@ -32,5 +32,9 @@
   "tabSemanticsLabel": "כרטיסייה $tabIndex מתוך $tabCount",
   "modalBarrierDismissLabel": "סגירה",
   "searchTextFieldPlaceholderLabel": "חיפוש",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "לא נמצאו חלופות",
+  "menuDismissLabel": "סגירת התפריט",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

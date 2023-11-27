@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "တဘ် $tabCount ခုအနက် $tabIndex ခု",
   "modalBarrierDismissLabel": "ပယ်ရန်",
   "searchTextFieldPlaceholderLabel": "ရှာရန်",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "အစားထိုးမှုများ မတွေ့ပါ",
+  "menuDismissLabel": "မီနူးကိုပယ်ပါ",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

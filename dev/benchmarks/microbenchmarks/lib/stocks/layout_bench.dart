@@ -39,7 +39,7 @@ Future<void> main() async {
       size: const Size(355.0, 635.0),
       view: tester.view,
     );
-    final RenderView renderView = WidgetsBinding.instance.renderView;
+    final RenderView renderView = WidgetsBinding.instance.renderViews.single;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
     watch.start();

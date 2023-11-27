@@ -103,8 +103,6 @@ class MenuButtonThemeData with Diagnosticable {
 ///   [Theme].
 class MenuButtonTheme extends InheritedTheme {
   /// Create a [MenuButtonTheme].
-  ///
-  /// The [data] parameter must not be null.
   const MenuButtonTheme({
     super.key,
     required this.data,

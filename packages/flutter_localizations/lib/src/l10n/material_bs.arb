@@ -139,10 +139,14 @@
   "bottomSheetLabel": "Donja tabela",
   "scrimOnTapHint": "Zatvori: $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "sužavanje dvostrukim dodirom",
+  "expansionTileCollapsedHint": "proširivanje dvostrukim dodirom",
+  "expansionTileExpandedTapHint": "Sužavanje",
+  "expansionTileCollapsedTapHint": "Proširivanje za više detalja",
+  "expandedHint": "Suženo",
+  "collapsedHint": "Prošireno",
+  "menuDismissLabel": "Odbacivanje menija",
+  "lookUpButtonLabel": "Pogled prema gore",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

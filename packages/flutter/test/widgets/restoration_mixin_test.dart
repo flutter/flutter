@@ -4,13 +4,15 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'restoration.dart';
 
 void main() {
-  testWidgets('claims bucket', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('claims bucket', (WidgetTester tester) async {
     const String id = 'hello world 1234';
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
     expect(rawData, isEmpty);
@@ -35,8 +37,9 @@ void main() {
     expect(state.restoreStateLog.single, isNull);
   });
 
-  testWidgets('claimed bucket with data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('claimed bucket with data', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
     await tester.pumpWidget(
@@ -57,8 +60,9 @@ void main() {
     expect(state.restoreStateLog.single, isNull);
   });
 
-  testWidgets('renames existing bucket when new ID is provided via widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('renames existing bucket when new ID is provided via widget', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
     await tester.pumpWidget(
@@ -99,8 +103,9 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('renames existing bucket when didUpdateRestorationId is called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('renames existing bucket when didUpdateRestorationId is called', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
     await tester.pumpWidget(
@@ -134,8 +139,9 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('Disposing widget removes its data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disposing widget removes its data', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -162,8 +168,9 @@ void main() {
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isFalse);
   });
 
-  testWidgets('toggling id between null and non-null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('toggling id between null and non-null', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -222,9 +229,10 @@ void main() {
     expect(state.toggleBucketLog.single, same(bucket));
   });
 
-  testWidgets('move in and out of scope', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('move in and out of scope', (WidgetTester tester) async {
     final Key key = GlobalKey();
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
 
@@ -284,8 +292,9 @@ void main() {
     expect(state.toggleBucketLog.single, same(bucket));
   });
 
-  testWidgets('moving scope moves its data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('moving scope moves its data', (WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
+    addTearDown(manager.dispose);
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
     final Key key = GlobalKey();
@@ -349,7 +358,7 @@ void main() {
     expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('moving-child'), isTrue);
   });
 
-  testWidgets('restartAndRestore', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('restartAndRestore', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -388,7 +397,7 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('restore while running', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('restore while running', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -427,7 +436,7 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('can register additional property outside of restoreState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can register additional property outside of restoreState', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -464,7 +473,7 @@ void main() {
     expect(state.property.log, <String>['fromPrimitives', 'initWithValue']);
   });
 
-  testWidgets('cannot register same property twice', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cannot register same property twice', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -494,7 +503,7 @@ void main() {
     expect(() => state.registerPropertyUnderSameId(), throwsAssertionError);
   });
 
-  testWidgets('data of disabled property is not stored', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('data of disabled property is not stored', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -534,7 +543,7 @@ void main() {
     expect(state.property.value, 10); // Initialized to default value.
   });
 
-  testWidgets('Enabling property stores its data again', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Enabling property stores its data again', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -572,7 +581,7 @@ void main() {
     expect(state.property.value, 40);
   });
 
-  testWidgets('Unregistering a property removes its data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Unregistering a property removes its data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -598,7 +607,7 @@ void main() {
     expect(state.bucket!.read<int>('additional'), 11);
   });
 
-  testWidgets('Disposing a property unregisters it, but keeps data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disposing a property unregisters it, but keeps data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',

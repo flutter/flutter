@@ -7,13 +7,14 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
 void main() {
   final MockHttpClient client = MockHttpClient();
 
-  testWidgets('Headers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Headers', (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
       await tester.pumpWidget(Image.network(
         'https://www.example.com/images/frame.png',

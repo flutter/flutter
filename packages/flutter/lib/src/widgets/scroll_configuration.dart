@@ -27,10 +27,6 @@ const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
   PointerDeviceKind.unknown,
 };
 
-/// The default overscroll indicator applied on [TargetPlatform.android].
-// TODO(Piinks): Complete migration to stretch by default.
-const AndroidOverscrollIndicator _kDefaultAndroidOverscrollIndicator = AndroidOverscrollIndicator.glow;
-
 /// Types of overscroll indicators supported by [TargetPlatform.android].
 enum AndroidOverscrollIndicator {
   /// Utilizes a [StretchingOverscrollIndicator], which transforms the contents
@@ -67,28 +63,7 @@ enum AndroidOverscrollIndicator {
 @immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
-  const ScrollBehavior({
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }): _androidOverscrollIndicator = androidOverscrollIndicator;
-
-  /// Specifies which overscroll indicator to use on [TargetPlatform.android].
-  ///
-  /// Cannot be null. Defaults to [AndroidOverscrollIndicator.glow].
-  ///
-  /// See also:
-  ///
-  ///   * [MaterialScrollBehavior], which supports setting this property
-  ///     using [ThemeData].
-  @Deprecated(
-    'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-    'This feature was deprecated after v2.13.0-0.0.pre.'
-  )
-  AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? _kDefaultAndroidOverscrollIndicator;
-  final AndroidOverscrollIndicator? _androidOverscrollIndicator;
+  const ScrollBehavior();
 
   /// Creates a copy of this ScrollBehavior, making it possible to
   /// easily toggle `scrollbar` and `overscrollIndicator` effects.
@@ -105,11 +80,6 @@ class ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
@@ -119,7 +89,6 @@ class ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers,
       physics: physics,
       platform: platform,
-      androidOverscrollIndicator: androidOverscrollIndicator
     );
   }
 
@@ -187,23 +156,13 @@ class ScrollBehavior {
       case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
-        switch (androidOverscrollIndicator) {
-          case AndroidOverscrollIndicator.stretch:
-            return StretchingOverscrollIndicator(
-              axisDirection: details.direction,
-              child: child,
-            );
-          case AndroidOverscrollIndicator.glow:
-            break;
-        }
       case TargetPlatform.fuchsia:
-        break;
+        return GlowingOverscrollIndicator(
+          axisDirection: details.direction,
+          color: _kDefaultGlowColor,
+          child: child,
+        );
     }
-    return GlowingOverscrollIndicator(
-      axisDirection: details.direction,
-      color: _kDefaultGlowColor,
-      child: child,
-    );
   }
 
   /// Specifies the type of velocity tracker to use in the descendant
@@ -289,9 +248,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-  }) : _androidOverscrollIndicator = androidOverscrollIndicator,
-       _dragDevices = dragDevices,
+  }) : _dragDevices = dragDevices,
        _pointerAxisModifiers = pointerAxisModifiers;
 
   final ScrollBehavior delegate;
@@ -301,17 +258,12 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
-  @override
-  final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
   Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
-
-  @override
-  AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
@@ -337,7 +289,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    AndroidOverscrollIndicator? androidOverscrollIndicator
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
@@ -346,7 +297,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
-      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
 
@@ -387,8 +337,6 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 /// decorations used by descendants of [child].
 class ScrollConfiguration extends InheritedWidget {
   /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
-  ///
-  /// The [behavior] and [child] arguments must not be null.
   const ScrollConfiguration({
     super.key,
     required this.behavior,

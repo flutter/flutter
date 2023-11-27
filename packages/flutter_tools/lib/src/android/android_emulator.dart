@@ -141,7 +141,7 @@ class AndroidEmulator extends Emulator {
   @override
   PlatformType get platformType => PlatformType.android;
 
-  String? _prop(String name) => _properties != null ? _properties![name] : null;
+  String? _prop(String name) => _properties != null ? _properties[name] : null;
 
   @override
   Future<void> launch({@visibleForTesting Duration? startupDuration, bool coldBoot = false}) async {

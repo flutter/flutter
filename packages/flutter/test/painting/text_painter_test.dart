@@ -400,27 +400,27 @@ void main() {
     painter.dispose();
   });
 
-  test('TextPainter textScaleFactor test', () {
+  test('TextPainter textScaler test', () {
     final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
         style: TextStyle(inherit: false, fontSize: 10.0),
       ),
       textDirection: TextDirection.ltr,
-      textScaleFactor: 2.0,
+      textScaler: const TextScaler.linear(2.0),
     );
     painter.layout();
     expect(painter.size, const Size(20.0, 20.0));
     painter.dispose();
   });
 
-  test('TextPainter textScaleFactor null style test', () {
+  test('TextPainter textScaler null style test', () {
     final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
       ),
       textDirection: TextDirection.ltr,
-      textScaleFactor: 2.0,
+      textScaler: const TextScaler.linear(2.0),
     );
     painter.layout();
     expect(painter.size, const Size(28.0, 28.0));
@@ -1509,9 +1509,6 @@ void main() {
   });
 
   test('TextPainter line breaking does not round to integers', () {
-    if (! const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')) {
-      return;
-    }
     const double fontSize = 1.25;
     const String text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);

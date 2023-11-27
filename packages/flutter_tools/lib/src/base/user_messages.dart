@@ -183,10 +183,10 @@ class UserMessages {
       '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
       'Xcode not installed; this is necessary for iOS and macOS development.\n'
-      'Download at https://developer.apple.com/xcode/download/.';
+      'Download at https://developer.apple.com/xcode/.';
   String get xcodeIncomplete =>
       'Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.\n'
-      'Download at: https://developer.apple.com/xcode/download/\n'
+      'Download at: https://developer.apple.com/xcode/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
       '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\n'
@@ -239,7 +239,8 @@ class UserMessages {
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>
       'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
-  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
+  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete.\n'
+      'Please use Visual Studio Installer to complete the installation or reinstall Visual Studio.';
   String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
 
   // Messages used in LinuxDoctorValidator
@@ -308,6 +309,10 @@ class UserMessages {
       "you have compiled the engine in that directory, which should produce an 'out' directory";
   String get runnerLocalEngineOrWebSdkRequired =>
       'You must specify --local-engine or --local-web-sdk if you are using a locally built engine or web sdk.';
+  String get runnerLocalEngineRequiresHostEngine =>
+      'You are using a locally built engine (--local-engine) but have not specified --local-engine-host.\n'
+      'You may be building with a different engine than the one you are running with. '
+      'See https://github.com/flutter/flutter/issues/132245 for details.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
   String runnerNoWebSdk(String webSdkPath) =>

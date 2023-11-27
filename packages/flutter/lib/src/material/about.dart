@@ -170,9 +170,9 @@ class AboutListTile extends StatelessWidget {
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
 ///
-/// The [context], [useRootNavigator], [routeSettings] and [anchorPoint]
-/// arguments are passed to [showDialog], the documentation for which discusses
-/// how it is used.
+/// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
+/// [useRootNavigator], [routeSettings] and [anchorPoint] arguments are
+/// passed to [showDialog], the documentation for which discusses how it is used.
 void showAboutDialog({
   required BuildContext context,
   String? applicationName,
@@ -180,12 +180,18 @@ void showAboutDialog({
   Widget? applicationIcon,
   String? applicationLegalese,
   List<Widget>? children,
+  bool barrierDismissible = true,
+  Color? barrierColor,
+  String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
 }) {
   showDialog<void>(
     context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    barrierLabel: barrierLabel,
     useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
       return AboutDialog(
@@ -1173,9 +1179,10 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.nested;
     final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
 
-    return WillPopScope(
-      // Push pop check into nested navigator.
-      onWillPop: () async => !(await _navigatorKey.currentState!.maybePop()),
+    return NavigatorPopHandler(
+      onPop: () {
+        _navigatorKey.currentState!.maybePop();
+      },
       child: Navigator(
         key: _navigatorKey,
         initialRoute: 'initial',
@@ -1228,12 +1235,10 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
   MaterialPageRoute<void> _detailPageRoute(Object? arguments) {
     return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-      return WillPopScope(
-        onWillPop: () async {
+      return PopScope(
+        onPopInvoked: (bool didPop) {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
-          Navigator.of(context).pop();
-          return false;
         },
         child: BlockSemantics(child: widget.detailPageBuilder(context, arguments, null)),
       );

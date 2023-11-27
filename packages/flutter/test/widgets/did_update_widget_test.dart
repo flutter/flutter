@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Can call setState from didUpdateWidget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can call setState from didUpdateWidget', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: WidgetUnderTest(text: 'hello'),

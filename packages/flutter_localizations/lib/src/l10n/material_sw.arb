@@ -137,10 +137,14 @@
   "bottomSheetLabel": "Safu ya Chini",
   "scrimOnTapHint": "Funga $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "gusa mara mbili ili ukunje",
+  "expansionTileCollapsedHint": "gusa mara mbili ili upanue",
+  "expansionTileExpandedTapHint": "Kunja",
+  "expansionTileCollapsedTapHint": "Panua ili upate maelezo zaidi",
+  "expandedHint": "Imekunjwa",
+  "collapsedHint": "Imepanuliwa",
+  "menuDismissLabel": "Ondoa menyu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

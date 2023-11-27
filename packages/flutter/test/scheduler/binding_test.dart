@@ -28,4 +28,21 @@ void main() {
     );
     timeDilation = 1.0;
   });
+
+  test('Adding a persistent frame callback during a persistent frame callback', () {
+    bool calledBack = false;
+    SchedulerBinding.instance.addPersistentFrameCallback((Duration timeStamp) {
+      if (!calledBack) {
+        SchedulerBinding.instance.addPersistentFrameCallback((Duration timeStamp) {
+          calledBack = true;
+        });
+      }
+    });
+    SchedulerBinding.instance.handleBeginFrame(null);
+    SchedulerBinding.instance.handleDrawFrame();
+    expect(calledBack, false);
+    SchedulerBinding.instance.handleBeginFrame(null);
+    SchedulerBinding.instance.handleDrawFrame();
+    expect(calledBack, true);
+  });
 }

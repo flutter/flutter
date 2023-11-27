@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -33,7 +32,7 @@ const double _kIndicatorWidth = 64;
 ///
 /// This widget does not adjust its size with the [ThemeData.visualDensity].
 ///
-/// The [MediaQueryData.textScaleFactor] does not adjust the size of this widget but
+/// The [MediaQueryData.textScaler] does not adjust the size of this widget but
 /// rather the size of the [Tooltip]s displayed on long presses of the
 /// destinations.
 ///
@@ -183,7 +182,7 @@ class NavigationBar extends StatelessWidget {
   /// automatically.
   ///
   /// The height does not adjust with [ThemeData.visualDensity] or
-  /// [MediaQueryData.textScaleFactor] as this component loses usability at
+  /// [MediaQueryData.textScaler] as this component loses usability at
   /// larger and smaller sizes due to the truncating of labels or smaller tap
   /// targets.
   ///
@@ -296,6 +295,7 @@ class NavigationDestination extends StatelessWidget {
     this.selectedIcon,
     required this.label,
     this.tooltip,
+    this.enabled = true,
   });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -334,11 +334,17 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
+  /// Indicates that this destination is selectable.
+  ///
+  /// Defaults to true.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
     const Set<MaterialState> unselectedState = <MaterialState>{};
+    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
@@ -347,15 +353,24 @@ class NavigationDestination extends StatelessWidget {
     return _NavigationDestinationBuilder(
       label: label,
       tooltip: tooltip,
+      enabled: enabled,
       buildIcon: (BuildContext context) {
+        final IconThemeData selectedIconTheme =
+          navigationBarTheme.iconTheme?.resolve(selectedState)
+          ?? defaults.iconTheme!.resolve(selectedState)!;
+        final IconThemeData unselectedIconTheme =
+          navigationBarTheme.iconTheme?.resolve(unselectedState)
+          ?? defaults.iconTheme!.resolve(unselectedState)!;
+        final IconThemeData disabledIconTheme =
+          navigationBarTheme.iconTheme?.resolve(disabledState)
+          ?? defaults.iconTheme!.resolve(disabledState)!;
+
         final Widget selectedIconWidget = IconTheme.merge(
-          data: navigationBarTheme.iconTheme?.resolve(selectedState)
-            ?? defaults.iconTheme!.resolve(selectedState)!,
+          data: enabled ? selectedIconTheme : disabledIconTheme,
           child: selectedIcon ?? icon,
         );
         final Widget unselectedIconWidget = IconTheme.merge(
-          data: navigationBarTheme.iconTheme?.resolve(unselectedState)
-            ?? defaults.iconTheme!.resolve(unselectedState)!,
+          data: enabled ? unselectedIconTheme : disabledIconTheme,
           child: icon,
         );
 
@@ -383,18 +398,22 @@ class NavigationDestination extends StatelessWidget {
           ?? defaults.labelTextStyle!.resolve(selectedState);
         final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
+        final TextStyle? effectiveDisabledLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(disabledState)
+          ?? defaults.labelTextStyle!.resolve(disabledState);
+
+        final TextStyle? textStyle = enabled
+          ? _isForwardOrCompleted(animation)
+            ? effectiveSelectedLabelTextStyle
+            : effectiveUnselectedLabelTextStyle
+          : effectiveDisabledLabelTextStyle;
+
         return Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: _ClampTextScaleFactor(
+          child: MediaQuery.withClampedTextScaling(
             // Don't scale labels of destinations, instead, tooltip text will
             // upscale.
-            upperLimit: 1,
-            child: Text(
-              label,
-              style: _isForwardOrCompleted(animation)
-                  ? effectiveSelectedLabelTextStyle
-                  : effectiveUnselectedLabelTextStyle,
-            ),
+            maxScaleFactor: 1.0,
+            child: Text(label, style: textStyle),
           ),
         );
       },
@@ -421,6 +440,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
     required this.buildLabel,
     required this.label,
     this.tooltip,
+    this.enabled = true,
   });
 
   /// Builds the icon for a destination in a [NavigationBar].
@@ -459,6 +479,11 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
+  /// Indicates that this destination is selectable.
+  ///
+  /// Defaults to true.
+  final bool enabled;
+
   @override
   State<_NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
 }
@@ -479,7 +504,7 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
           iconKey: iconKey,
           labelBehavior: info.labelBehavior,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
-          onTap: info.onTap,
+          onTap: widget.enabled ? info.onTap : null,
           child: Row(
             children: <Widget>[
               Expanded(
@@ -1018,53 +1043,6 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   }
 }
 
-/// Utility Widgets
-
-// Clamps [MediaQueryData.textScaleFactor] so that if it is greater than
-// [upperLimit] or less than [lowerLimit], [upperLimit] or [lowerLimit] will be
-// used instead for the [child] widget.
-//
-// Example:
-//
-// ```dart
-// _ClampTextScaleFactor(
-//   upperLimit: 2.0,
-//   child: const Text('Foo'), // If textScaleFactor is 3.0, this will only scale 2x.
-// )
-// ```
-class _ClampTextScaleFactor extends StatelessWidget {
-  /// Clamps the text scale factor of descendants by modifying the [MediaQuery]
-  /// surrounding [child].
-  const _ClampTextScaleFactor({
-    this.upperLimit = double.infinity,
-    required this.child,
-  });
-
-  /// The maximum amount that the text scale factor should be for the [child]
-  /// widget.
-  ///
-  /// If this is `1.5`, the textScaleFactor for child widgets will never be
-  /// greater than `1.5`.
-  final double upperLimit;
-
-  /// The [Widget] that should have its (and its descendants) text scale factor
-  /// clamped.
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaleFactor: clampDouble(MediaQuery.textScaleFactorOf(context),
-          0.0,
-          upperLimit,
-        ),
-      ),
-      child: child,
-    );
-  }
-}
-
 /// Widget that listens to an animation, and rebuilds when the animation changes
 /// [AnimationStatus].
 ///
@@ -1371,9 +1349,11 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.selected)
-          ? _colors.onSecondaryContainer
-          : _colors.onSurfaceVariant,
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
+            ? _colors.onSecondaryContainer
+            : _colors.onSurfaceVariant,
       );
     });
   }
@@ -1384,9 +1364,11 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(color: states.contains(MaterialState.selected)
-        ? _colors.onSurface
-        : _colors.onSurfaceVariant
+      return style.apply(color: states.contains(MaterialState.disabled)
+        ? _colors.onSurfaceVariant.withOpacity(0.38)
+        : states.contains(MaterialState.selected)
+            ? _colors.onSurface
+            : _colors.onSurfaceVariant
       );
     });
   }
