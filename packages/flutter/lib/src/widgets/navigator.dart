@@ -3032,12 +3032,12 @@ class _RouteEntry extends RouteTransitionRecord {
     }
   }
 
-  Future<void> handleDidPopNext(Route<dynamic> poppedRoute) async {
+  void handleDidPopNext(Route<dynamic> poppedRoute) {
     route.didPopNext(poppedRoute);
     lastAnnouncedPoppedNextRoute = WeakReference<Route<dynamic>>(poppedRoute);
     if (lastFocusNode != null) {
       // Move focus back to the last focused node.
-      await poppedRoute._disposeCompleter.future.then((dynamic result) async {
+      poppedRoute._disposeCompleter.future.then((dynamic result) async {
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
             // In the Android platform, we have to wait for the system refocus to complete before
@@ -3053,7 +3053,6 @@ class _RouteEntry extends RouteTransitionRecord {
         }
       });
     }
-    return ;
   }
 
   /// Process the to-be-popped route.
