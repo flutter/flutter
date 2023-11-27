@@ -145,6 +145,7 @@ enum Setup {
   canvasSaveLayer,
   blur,
   drawnImage,
+  drawnImageAndPlatformView
 }
 
 void run(Setup setup) {
@@ -244,6 +245,19 @@ Future<ui.Image> _loadImage() async {
   return (await codec.getNextFrame()).image;
 }
 
+class DummyPlatformView extends StatelessWidget {
+  const DummyPlatformView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 400,
+      height: 400,
+      child: UiKitView(viewType: '<dummy-view>'),
+    );
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage(this.setup, {super.key, required this.title});
 
@@ -285,6 +299,14 @@ class _MyHomePageState extends State<MyHomePage> {
         imageWidget = Image.memory(base64Decode(_displayP3Logo));
       case Setup.drawnImage:
         imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
+      case Setup.drawnImageAndPlatformView:
+        imageWidget = Stack(
+          children: <Widget>[
+            const DummyPlatformView(),
+            Image.memory(base64Decode(_displayP3Logo)),
+            BackdropFilter(filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6), child: const SizedBox(width: 400, height: 400)),
+          ],
+        );
       case Setup.canvasSaveLayer:
         imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
       case Setup.blur:
