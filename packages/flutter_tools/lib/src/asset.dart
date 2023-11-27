@@ -1192,8 +1192,9 @@ class _Asset {
   bool hasEquivalentFlavorsWith(_Asset other) {
     final Set<String> assetFlavors = flavors.toSet();
     final Set<String> otherFlavors = other.flavors.toSet();
-    final Set<String> union = assetFlavors.union(otherFlavors);
-    return union.every((String e) => assetFlavors.contains(e) && otherFlavors.contains(e));
+    return assetFlavors.length == otherFlavors.length && assetFlavors.every(
+      (String e) => otherFlavors.contains(e),
+    );
   }
 
   @override
