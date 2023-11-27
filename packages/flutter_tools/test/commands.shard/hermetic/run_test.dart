@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -424,6 +425,41 @@ void main() {
             ),
           ),
         );
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('fails when --flavor is used with an unsupported target platform', () async {
+        final RunCommand command = RunCommand();
+        final List<PlatformType> unsupportedPlatforms = PlatformType.values
+          .whereNot((PlatformType element) => element == PlatformType.android
+            || element == PlatformType.ios
+            || element == PlatformType.macos
+          ).toList();
+
+        const List<String> runCommand = <String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          '--flavor=vanilla'
+        ];
+
+        for (final PlatformType platform in unsupportedPlatforms) {
+          final FakeDevice device = FakeDevice(platformType: platform);
+          testDeviceManager.devices = <Device>[device];
+
+          await expectLater(
+            () => createTestCommandRunner(command).run(runCommand),
+            throwsToolExit(
+              message: '--flavor is only supported for Android, iOS, and macOS '
+                'devices.'),
+              reason: 'should throw a ToolExit when --flavor is used with a '
+                'target platform of ${platform.name}',
+          );
+        }
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,

@@ -610,6 +610,20 @@ class RunCommand extends RunCommandBase {
     webMode = featureFlags.isWebEnabled &&
       devices!.length == 1  &&
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
+
+    final String? flavor = stringArg('flavor');
+    if (flavor != null) {
+      const List<PlatformType> platformsWithFlavorsSupport = <PlatformType>[
+        PlatformType.android,
+        PlatformType.ios,
+        PlatformType.macos,
+      ];
+      final bool flavorsNotSupportedForSomeDevice = devices!
+        .every((Device element) => platformsWithFlavorsSupport.contains(element.platformType));
+      if (!flavorsNotSupportedForSomeDevice) {
+        throwToolExit('--flavor is only supported for Android, iOS, and macOS devices.');
+      }
+    }
   }
 
   @visibleForTesting
