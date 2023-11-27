@@ -3652,11 +3652,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   final bool _platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
-    TargetPlatform.android => true,
+    TargetPlatform.android ||
     TargetPlatform.iOS => true,
-    TargetPlatform.fuchsia => false,
-    TargetPlatform.linux => false,
-    TargetPlatform.macOS => false,
+    TargetPlatform.fuchsia ||
+    TargetPlatform.linux ||
+    TargetPlatform.macOS ||
     TargetPlatform.windows => false,
   };
 
