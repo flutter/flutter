@@ -697,6 +697,7 @@
 ../../../flutter/third_party/rapidjson/test
 ../../../flutter/third_party/shaderc/.clang-format
 ../../../flutter/third_party/shaderc/.git
+../../../flutter/third_party/shaderc/.github
 ../../../flutter/third_party/shaderc/.gitignore
 ../../../flutter/third_party/shaderc/AUTHORS
 ../../../flutter/third_party/shaderc/Android.mk
