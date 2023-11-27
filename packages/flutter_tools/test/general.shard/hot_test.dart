@@ -335,6 +335,13 @@ void main() {
             scannedSourcesCount: 8
           )
         ));
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeAnalytics.sentEvents,
+            workflow: 'hot',
+            variableName: 'restart'), 
+            true
+        );
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -461,6 +468,13 @@ void main() {
             reloadVMTimeInMs: 512000
           ),
         ));
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeAnalytics.sentEvents,
+            workflow: 'hot',
+            variableName: 'reload'), 
+            true
+        );
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
