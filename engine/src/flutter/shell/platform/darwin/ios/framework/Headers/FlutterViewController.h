@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
  * with the update.
  */
 FLUTTER_DARWIN_EXPORT
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern NSNotificationName const FlutterSemanticsUpdateNotification;
 
 /**

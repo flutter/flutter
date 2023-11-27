@@ -20,18 +20,23 @@ class FlutterPlatformViewsController;
 }
 
 FLUTTER_DARWIN_EXPORT
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 FLUTTER_DARWIN_EXPORT
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern NSNotificationName const FlutterViewControllerHideHomeIndicator;
 
 FLUTTER_DARWIN_EXPORT
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
 typedef NS_ENUM(NSInteger, FlutterKeyboardMode) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterKeyboardModeHidden = 0,
   FlutterKeyboardModeDocked = 1,
   FlutterKeyboardModeFloating = 2,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);

@@ -45,10 +45,19 @@ CheckOptions:
   - key: readability-identifier-naming.PrivateMemberSuffix
     value: "_"
 
-# Lint headers within paths that contain "/flutter/" but not:
-# - gen         (generated code, the fact it compiles is good enough™)
-# - third_party (we didn't author most of the code, and can't fix the lints)
+# Intended to include (lint) all headers except:
+# ... those in ../../gen (generated files don't need to follow clang tidy)
+# ... those in flutter/third_party (we didn't author this code, it's a dep)
 #
-# Note this is because of our buildroot setup, so the full path of a lint is:
-# "../../flutter/impeller/core/runtime_types.h:1:1" as reported.
-HeaderFilterRegex: "(!third_party/)(!gen/).*/flutter/.*"
+# Unfortunately Clang Tidy uses an ancient version of regular expressions
+# without lookaheads, so the next best thing is to write out every directory
+# except third_party.
+#
+# If we ever add a new root directory, we'll have to update this expression.
+#
+# See the test in ./tools/clang_tidy/test/header_filter_regex_test.dart which
+# should theoretically catch if new directories are added but this regex is not
+# updated.
+#
+# tl;dr: I'm sorry.
+HeaderFilterRegex: "[..\/]+\/flutter\/(assets|benchmarking|build|ci|common|display_list|docs|examples|flow|flutter_frontend_server|flutter_vma|fml|impeller|lib|runtime|shell|skia|sky|testing|tools|vulkan|wasm|web_sdk)\/.*"

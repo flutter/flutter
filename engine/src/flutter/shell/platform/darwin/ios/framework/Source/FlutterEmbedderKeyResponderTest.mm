@@ -27,10 +27,10 @@ FLUTTER_ASSERT_ARC;
 @interface TestKeyEvent : NSObject
 @property(nonatomic) FlutterKeyEvent* data;
 @property(nonatomic) FlutterKeyEventCallback callback;
-@property(nonatomic) _VoidPtr userData;
+@property(nonatomic) void* _Nullable userData;
 - (nonnull instancetype)initWithEvent:(const FlutterKeyEvent*)event
                              callback:(nullable FlutterKeyEventCallback)callback
-                             userData:(nullable _VoidPtr)userData;
+                             userData:(void* _Nullable)userData;
 - (BOOL)hasCallback;
 - (void)respond:(BOOL)handled;
 @end
@@ -38,7 +38,7 @@ FLUTTER_ASSERT_ARC;
 @implementation TestKeyEvent
 - (instancetype)initWithEvent:(const FlutterKeyEvent*)event
                      callback:(nullable FlutterKeyEventCallback)callback
-                     userData:(nullable _VoidPtr)userData {
+                     userData:(void* _Nullable)userData {
   self = [super init];
   _data = new FlutterKeyEvent(*event);
   if (event->character != nullptr) {
@@ -132,7 +132,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -192,7 +192,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -251,7 +251,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -350,7 +350,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -420,7 +420,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -453,7 +453,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -541,7 +541,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -734,7 +734,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -816,7 +816,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -940,7 +940,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event
                                                      callback:callback
                                                      userData:user_data]];
@@ -995,7 +995,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   FlutterEmbedderKeyResponder* responder = [[FlutterEmbedderKeyResponder alloc]
       initWithSendEvent:^(const FlutterKeyEvent& event, _Nullable FlutterKeyEventCallback callback,
-                          _Nullable _VoidPtr user_data) {
+                          void* _Nullable user_data) {
         [events addObject:[[TestKeyEvent alloc] initWithEvent:&event callback:nil userData:nil]];
         callback(true, user_data);
       }];

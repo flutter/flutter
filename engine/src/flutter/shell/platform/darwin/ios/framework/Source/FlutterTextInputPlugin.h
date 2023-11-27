@@ -15,15 +15,19 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 
 typedef NS_ENUM(NSInteger, FlutterScribbleFocusStatus) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterScribbleFocusStatusUnfocused,
   FlutterScribbleFocusStatusFocusing,
   FlutterScribbleFocusStatusFocused,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterScribbleInteractionStatusNone,
   FlutterScribbleInteractionStatusStarted,
   FlutterScribbleInteractionStatusEnding,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 @interface FlutterTextInputPlugin
