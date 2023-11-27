@@ -99,7 +99,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   int32_t last_focused_semantics_object_id_;
   fml::scoped_nsobject<NSMutableDictionary<NSNumber*, SemanticsObject*>> objects_;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> accessibility_channel_;
-  int32_t previous_route_id_;
+  int32_t previous_route_id_ = 0;
   std::unordered_map<int32_t, flutter::CustomAccessibilityAction> actions_;
   std::vector<int32_t> previous_routes_;
   std::unique_ptr<IosDelegate> ios_delegate_;

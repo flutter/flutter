@@ -7,19 +7,16 @@
 
 #import <Foundation/NSObject.h>
 #import <UIKit/UIKit.h>
+
 #include "fml/memory/weak_ptr.h"
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
-namespace {
-typedef void* _VoidPtr;
-}
-
 typedef void (^FlutterSendKeyEvent)(const FlutterKeyEvent& /* event */,
                                     _Nullable FlutterKeyEventCallback /* callback */,
-                                    _Nullable _VoidPtr /* user_data */);
+                                    void* _Nullable /* user_data */);
 
 /**
  * A primary responder of |FlutterKeyboardManager| that handles events by

@@ -10,7 +10,7 @@
 const CGRect kScreenSize = CGRectMake(0, 0, 600, 800);
 
 namespace flutter {
-namespace {
+namespace testing {
 
 class SemanticsActionObservation {
  public:
@@ -83,7 +83,7 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
  private:
   UIView* view_;
 };
-}  // namespace
+}  // namespace testing
 }  // namespace flutter
 
 @interface SemanticsObject (Tests)

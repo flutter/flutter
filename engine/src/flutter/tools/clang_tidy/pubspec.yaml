@@ -31,6 +31,7 @@ dev_dependencies:
   litetest: any
   process_fakes: any
   smith: any
+  yaml: any
 
 dependency_overrides:
   args:
@@ -63,5 +64,13 @@ dependency_overrides:
     path: ../pkg/process_fakes
   process_runner:
     path: ../../third_party/pkg/process_runner
+  source_span:
+    path: ../../../third_party/dart/third_party/pkg/source_span
   smith:
     path: ../../../third_party/dart/pkg/smith
+  string_scanner:
+    path: ../../../third_party/dart/third_party/pkg/string_scanner
+  term_glyph:
+    path: ../../../third_party/dart/third_party/pkg/term_glyph
+  yaml:
+    path: ../../../third_party/dart/third_party/pkg/yaml

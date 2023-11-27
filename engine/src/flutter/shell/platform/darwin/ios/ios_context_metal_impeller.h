@@ -20,7 +20,8 @@ namespace flutter {
 
 class IOSContextMetalImpeller final : public IOSContext {
  public:
-  IOSContextMetalImpeller(std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
+  explicit IOSContextMetalImpeller(
+      const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   ~IOSContextMetalImpeller();
 

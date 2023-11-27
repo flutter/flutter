@@ -60,7 +60,7 @@ class IOSContext {
       IOSRenderingAPI api,
       IOSRenderingBackend backend,
       MsaaSampleCount msaa_samples,
-      std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
+      const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   //----------------------------------------------------------------------------
   /// @brief      Collects the context object. This must happen on the thread on

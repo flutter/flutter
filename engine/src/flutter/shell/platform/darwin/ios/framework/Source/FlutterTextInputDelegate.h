@@ -11,6 +11,7 @@
 @class FlutterTextInputView;
 
 typedef NS_ENUM(NSInteger, FlutterTextInputAction) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterTextInputActionUnspecified,
   FlutterTextInputActionDone,
   FlutterTextInputActionGo,
@@ -22,12 +23,15 @@ typedef NS_ENUM(NSInteger, FlutterTextInputAction) {
   FlutterTextInputActionRoute,
   FlutterTextInputActionEmergencyCall,
   FlutterTextInputActionNewline,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterFloatingCursorDragStateStart,
   FlutterFloatingCursorDragStateUpdate,
   FlutterFloatingCursorDragStateEnd,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 @protocol FlutterTextInputDelegate <NSObject>

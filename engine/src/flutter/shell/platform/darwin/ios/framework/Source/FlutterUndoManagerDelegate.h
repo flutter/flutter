@@ -10,8 +10,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, FlutterUndoRedoDirection) {
+  // NOLINTBEGIN(readability-identifier-naming)
   FlutterUndoRedoDirectionUndo,
   FlutterUndoRedoDirectionRedo,
+  // NOLINTEND(readability-identifier-naming)
 };
 
 @class FlutterUndoManagerPlugin;

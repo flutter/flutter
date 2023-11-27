@@ -20,7 +20,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testCreate {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   XCTAssertNotNil(object);
@@ -28,7 +28,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testSetChildren {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
@@ -40,7 +40,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testAccessibilityHitTestFocusAtLeaf {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* object0 = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   SemanticsObject* object1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
@@ -84,7 +84,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testAccessibilityHitTestNoFocusableItem {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* object0 = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   SemanticsObject* object1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
@@ -122,9 +122,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testAccessibilityScrollToVisible {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   SemanticsObject* object3 = [[SemanticsObject alloc] initWithBridge:bridge uid:3];
 
   flutter::SemanticsNode node3;
@@ -140,9 +140,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testAccessibilityScrollToVisibleWithChild {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   SemanticsObject* object3 = [[SemanticsObject alloc] initWithBridge:bridge uid:3];
 
   flutter::SemanticsNode node3;
@@ -159,7 +159,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testAccessibilityHitTestOutOfRect {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* object0 = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   SemanticsObject* object1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
@@ -202,7 +202,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testReplaceChildAtIndex {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   SemanticsObject* child1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
@@ -216,7 +216,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testPlainSemanticsObjectWithLabelHasStaticTextTrait {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   flutter::SemanticsNode node;
   node.label = "foo";
@@ -227,7 +227,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testNodeWithImplicitScrollIsAnAccessibilityElementWhenItisHidden {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   flutter::SemanticsNode node;
   node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling) |
@@ -239,7 +239,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testNodeWithImplicitScrollIsNotAnAccessibilityElementWhenItisNotHidden {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   flutter::SemanticsNode node;
   node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
@@ -250,7 +250,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testIntresetingSemanticsObjectWithLabelHasStaticTextTrait {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   flutter::SemanticsNode node;
   node.label = "foo";
@@ -263,7 +263,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testIntresetingSemanticsObjectWithLabelHasStaticTextTrait1 {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   flutter::SemanticsNode node;
   node.label = "foo";
@@ -275,7 +275,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testIntresetingSemanticsObjectWithLabelHasStaticTextTrait2 {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   flutter::SemanticsNode node;
   node.label = "foo";
@@ -287,7 +287,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testVerticalFlutterScrollableSemanticsObject {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   float transformScale = 0.5f;
@@ -325,7 +325,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testVerticalFlutterScrollableSemanticsObjectNoWindowDoesNotCrash {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridgeNoWindow());
+      new flutter::testing::MockAccessibilityBridgeNoWindow());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   float transformScale = 0.5f;
@@ -353,7 +353,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testHorizontalFlutterScrollableSemanticsObject {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   float transformScale = 0.5f;
@@ -391,7 +391,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testCanHandleInfiniteScrollExtent {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   float transformScale = 0.5f;
@@ -430,7 +430,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testCanHandleNaNScrollExtentAndScrollPoisition {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   float transformScale = 0.5f;
@@ -467,7 +467,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testFlutterScrollableSemanticsObjectIsNotHittestable {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   flutter::SemanticsNode node;
@@ -486,7 +486,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterScrollableSemanticsObjectIsHiddenWhenVoiceOverIsRunning {
-  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = false;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
@@ -509,7 +509,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterScrollableSemanticsObjectWithLabelValueHintIsNotHiddenWhenVoiceOverIsRunning {
-  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
@@ -538,7 +538,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterSemanticsObjectMergeTooltipToLabel {
-  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
@@ -554,7 +554,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterSemanticsObjectAttributedStringsDoNotCrashWhenEmpty {
-  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
@@ -567,7 +567,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterScrollableSemanticsObjectReturnsParentContainerIfNoChildren {
-  flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
@@ -611,7 +611,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testFlutterScrollableSemanticsObjectHidesScrollBar {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
 
   flutter::SemanticsNode node;
@@ -633,7 +633,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testSemanticsObjectBuildsAttributedString {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   flutter::SemanticsNode node;
   node.label = "label";
@@ -689,7 +689,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testShouldTriggerAnnouncement {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
 
@@ -726,9 +726,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testShouldDispatchShowOnScreenActionForHeader {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
 
   // Handle initial setting of node with header.
@@ -747,9 +747,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testShouldDispatchShowOnScreenActionForHidden {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
 
   // Handle initial setting of node with hidden.
@@ -768,9 +768,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterSwitchSemanticsObjectMatchesUISwitch {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   FlutterSwitchSemanticsObject* object = [[FlutterSwitchSemanticsObject alloc] initWithBridge:bridge
                                                                                           uid:1];
 
@@ -802,9 +802,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterSemanticsObjectOfRadioButton {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
 
   // Handle initial setting of node with header.
@@ -820,9 +820,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterSwitchSemanticsObjectMatchesUISwitchDisabled {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   FlutterSwitchSemanticsObject* object = [[FlutterSwitchSemanticsObject alloc] initWithBridge:bridge
                                                                                           uid:1];
 
@@ -843,7 +843,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testSemanticsObjectDeallocated {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
@@ -890,7 +890,8 @@ FLUTTER_ASSERT_ARC
   parent.childrenInTraversalOrder.push_back(2);
 
   {
-    flutter::MockAccessibilityBridge* mock = new flutter::MockAccessibilityBridge();
+    flutter::testing::MockAccessibilityBridge* mock =
+        new flutter::testing::MockAccessibilityBridge();
     mock->isVoiceOverRunningValue = true;
     fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
     fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
@@ -926,7 +927,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testAccessibilityHitTestSearchCanReturnPlatformView {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-      new flutter::MockAccessibilityBridge());
+      new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
   SemanticsObject* object0 = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   SemanticsObject* object1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
@@ -974,9 +975,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testFlutterPlatformViewSemanticsContainer {
-  fml::WeakPtrFactory<flutter::MockAccessibilityBridge> factory(
-      new flutter::MockAccessibilityBridge());
-  fml::WeakPtr<flutter::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   __weak FlutterTouchInterceptingView* weakPlatformView;
   @autoreleasepool {
     FlutterTouchInterceptingView* platformView = [[FlutterTouchInterceptingView alloc] init];

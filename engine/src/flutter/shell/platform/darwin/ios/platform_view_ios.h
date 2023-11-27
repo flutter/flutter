@@ -51,7 +51,7 @@ class PlatformViewIOS final : public PlatformView {
       const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller,
       const flutter::TaskRunners& task_runners,
       const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
-      std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
+      const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   ~PlatformViewIOS() override;
 
@@ -112,7 +112,7 @@ class PlatformViewIOS final : public PlatformView {
     ScopedObserver& operator=(const ScopedObserver&) = delete;
 
    private:
-    id<NSObject> observer_;
+    id<NSObject> observer_ = nil;
   };
 
   /// Wrapper that guarantees we communicate clearing Accessibility
@@ -142,7 +142,6 @@ class PlatformViewIOS final : public PlatformView {
   const std::shared_ptr<FlutterPlatformViewsController>& platform_views_controller_;
   AccessibilityBridgeManager accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
-  fml::closure firstFrameCallback_;
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;

@@ -15,6 +15,7 @@
  * MacOS doesn't provide a scan code, but a virtual keycode to represent a
  * physical key.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::map<uint32_t, uint64_t> keyCodeToPhysicalKey;
 
 /**
@@ -23,6 +24,7 @@ extern const std::map<uint32_t, uint64_t> keyCodeToPhysicalKey;
  * This is used to derive logical keys that can't or shouldn't be derived from
  * |charactersIgnoringModifiers|.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::map<uint32_t, uint64_t> keyCodeToLogicalKey;
 
 /**
@@ -96,29 +98,34 @@ constexpr uint32_t kModifierFlagSidedMask = kModifierFlagControlLeft | kModifier
 /**
  * Map |UIKey.keyCode| to the matching sided modifier in UIEventModifierFlags.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::map<uint32_t, ModifierFlag> keyCodeToModifierFlag;
 
 /**
  * Map a bit of bitmask of sided modifiers in UIEventModifierFlags to their
  * corresponding |UIKey.keyCode|.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::map<ModifierFlag, uint32_t> modifierFlagToKeyCode;
 
 /**
  * Maps a sided modifier key to the corresponding flag matching either side of
  * that type of modifier.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::map<ModifierFlag, ModifierFlag> sidedModifierToAny;
 
 /**
  * Maps a non-sided modifier key to the corresponding flag matching the left key
  * of that type of modifier.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::map<ModifierFlag, ModifierFlag> anyModifierToLeft;
 
 /**
  * A set of keycodes corresponding to function keys.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::set<uint32_t> functionKeyCodes;
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_KEY_CODE_MAP_INTERNAL_H_

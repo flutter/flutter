@@ -22,11 +22,13 @@ NS_ASSUME_NONNULL_BEGIN
  * The dart entrypoint that is associated with `main()`.  This is to be used as an argument to the
  * `runWithEntrypoint*` methods.
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern NSString* const FlutterDefaultDartEntrypoint;
 
 /**
  * The default Flutter initial route ("/").
  */
+// NOLINTNEXTLINE(readability-identifier-naming)
 extern NSString* const FlutterDefaultInitialRoute;
 
 /**

@@ -54,6 +54,8 @@ typedef enum {
   // NOLINTEND(readability-identifier-naming)
 } FlutterStandardCodecObjcType;
 
+// NOLINTBEGIN(google-objc-function-naming)
+
 ///////////////////////////////////////////////////////////////////////////////
 ///\name Reader Helpers
 ///@{
@@ -111,6 +113,7 @@ bool FlutterStandardCodecHelperWriteNumber(CFMutableDataRef data,
 
 ///@}
 
+// NOLINTEND(google-objc-function-naming)
 // NOLINTEND(google-runtime-int)
 
 #if defined(__cplusplus)
