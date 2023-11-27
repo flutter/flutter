@@ -70,6 +70,7 @@ TEST(GaussianBlurFilterContentsTest, CoverageWithSigma) {
 
 TEST_P(GaussianBlurFilterContentsTest, CoverageWithTexture) {
   TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
       .format = PixelFormat::kB8G8R8A8UNormInt,
       .size = ISize(100, 100),
   };
@@ -88,6 +89,7 @@ TEST_P(GaussianBlurFilterContentsTest, CoverageWithTexture) {
 
 TEST_P(GaussianBlurFilterContentsTest, CoverageWithEffectTransform) {
   TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
       .format = PixelFormat::kB8G8R8A8UNormInt,
       .size = ISize(100, 100),
   };
@@ -115,6 +117,7 @@ TEST(GaussianBlurFilterContentsTest, FilterSourceCoverage) {
 
 TEST_P(GaussianBlurFilterContentsTest, RenderCoverageMatchesGetCoverage) {
   TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
       .format = PixelFormat::kB8G8R8A8UNormInt,
       .size = ISize(100, 100),
   };
@@ -146,6 +149,7 @@ TEST_P(GaussianBlurFilterContentsTest, RenderCoverageMatchesGetCoverage) {
 TEST_P(GaussianBlurFilterContentsTest,
        RenderCoverageMatchesGetCoverageTranslate) {
   TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
       .format = PixelFormat::kB8G8R8A8UNormInt,
       .size = ISize(100, 100),
   };
@@ -159,6 +163,7 @@ TEST_P(GaussianBlurFilterContentsTest,
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
   std::optional<Entity> result =
       contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
@@ -178,6 +183,7 @@ TEST_P(GaussianBlurFilterContentsTest,
 TEST_P(GaussianBlurFilterContentsTest,
        RenderCoverageMatchesGetCoverageRotated) {
   TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
       .format = PixelFormat::kB8G8R8A8UNormInt,
       .size = ISize(400, 300),
   };
@@ -210,6 +216,7 @@ TEST_P(GaussianBlurFilterContentsTest,
 
 TEST_P(GaussianBlurFilterContentsTest, CalculateUVsSimple) {
   TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
       .format = PixelFormat::kB8G8R8A8UNormInt,
       .size = ISize(100, 100),
   };
