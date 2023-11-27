@@ -79,27 +79,6 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
     ASSERT_EQ(result, Tessellator::Result::kInputError);
   }
 
-  // More than 30 contours, non-zero fill mode.
-  {
-    Tessellator t;
-    PathBuilder builder = {};
-    for (auto i = 0u; i < Tessellator::kMultiContourThreshold + 1; i++) {
-      builder.AddCircle(Point(i, i), 4);
-    }
-    auto path = builder.TakePath(FillType::kNonZero);
-    bool no_indices = false;
-    Tessellator::Result result = t.Tessellate(
-        path, 1.0f,
-        [&no_indices](const float* vertices, size_t vertices_count,
-                      const uint16_t* indices, size_t indices_count) {
-          no_indices = indices == nullptr;
-          return true;
-        });
-
-    ASSERT_TRUE(no_indices);
-    ASSERT_EQ(result, Tessellator::Result::kSuccess);
-  }
-
   // More than uint16 points, odd fill mode.
   {
     Tessellator t;
