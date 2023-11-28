@@ -419,10 +419,12 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.keyboardType}
   final TextInputType keyboardType;
 
+  /// {@template flutter.widgets.TextField.textInputAction}
   /// The type of action button to use for the keyboard.
   ///
   /// Defaults to [TextInputAction.newline] if [keyboardType] is
   /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
+  /// {@endtemplate}
   final TextInputAction? textInputAction;
 
   /// {@macro flutter.widgets.editableText.textCapitalization}
