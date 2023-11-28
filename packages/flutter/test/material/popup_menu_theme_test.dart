@@ -111,7 +111,7 @@ void main() {
         .toList();
 
     expect(description, equals(<String>[
-      'color: Color(0xffffffff)',
+      'color: Color(0xfffffff1)',
       'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.circular(2.0))',
       'elevation: 2.0',
       'shadowColor: Color(0xfffffff2)',
