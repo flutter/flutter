@@ -263,6 +263,7 @@ Future<void> main(List<String> args) async {
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
       'realm_checker': _runRealmCheckerTest,
+      'customer_testing': _runCustomerTesting,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -842,9 +843,12 @@ Future<void> _runFrameworkTests() async {
         workingDirectory: path.join(flutterRoot, 'examples', 'api'),
       );
     }
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
+    for (final FileSystemEntity entity in Directory(path.join(flutterRoot, 'examples')).listSync()) {
+      if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
+        continue;
+      }
+      await _runFlutterTest(entity.path);
+    }
   }
 
   Future<void> runTracingTests() async {
@@ -1542,6 +1546,46 @@ Future<void> _runFlutterPackagesTests() async {
   await selectSubshard(<String, ShardRunner>{
     'analyze': runAnalyze,
   });
+}
+
+// Runs customer_testing.
+Future<void> _runCustomerTesting() async {
+  printProgress('${green}Running customer testing$reset');
+  await runCommand(
+    'git',
+    <String>[
+      'fetch',
+      'origin',
+      'master',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  await runCommand(
+    'git',
+    <String>[
+      'checkout',
+      'master',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  final Map<String, String> env = Platform.environment;
+  final String? revision = env['REVISION'];
+  if (revision != null) {
+    await runCommand(
+      'git',
+      <String>[
+        'checkout',
+        revision,
+      ],
+      workingDirectory: flutterRoot,
+    );
+  }
+  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
+  await runCommand(
+    Platform.isWindows? winScript: './ci.sh',
+    <String>[],
+    workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
+  );
 }
 
 /// Runs the skp_generator from the flutter/tests repo.
