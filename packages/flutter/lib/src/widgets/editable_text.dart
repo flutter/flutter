@@ -3671,6 +3671,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_internalScrolling) {
       return;
     }
+    if (!_scrollableNotificationIsFromSameSubtree(notification.context)) {
+      return;
+    }
     _handleContextMenuOnScroll(notification);
   }
 
@@ -3681,6 +3684,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final double obscuredHorizontal = (view.padding.left + view.padding.right) / view.devicePixelRatio;
     final Size visibleScreenSize = Size(screenSize.width - obscuredHorizontal, screenSize.height - obscuredVertical);
     return Rect.fromLTWH(view.padding.left / view.devicePixelRatio, view.padding.top / view.devicePixelRatio, visibleScreenSize.width, visibleScreenSize.height);
+  }
+
+  bool _scrollableNotificationIsFromSameSubtree(BuildContext? notificationContext) {
+    BuildContext? currentContext = context;
+    while (currentContext != null) {
+      if (currentContext == notificationContext) {
+        return true;
+      }
+      currentContext = currentContext.findAncestorStateOfType<State<StatefulWidget>>()?.context;
+    }
+    return false;
   }
 
   void _handleContextMenuOnScroll(ScrollNotification notification) {
