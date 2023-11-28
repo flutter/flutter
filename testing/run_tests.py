@@ -580,6 +580,10 @@ def run_engine_benchmarks(build_dir, executable_filter):
       build_dir, 'geometry_benchmarks', executable_filter, icu_flags
   )
 
+  run_engine_executable(
+      build_dir, 'canvas_benchmarks', executable_filter, icu_flags
+  )
+
   if is_linux():
     run_engine_executable(
         build_dir, 'txt_benchmarks', executable_filter, icu_flags

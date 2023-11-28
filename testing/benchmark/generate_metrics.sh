@@ -15,3 +15,4 @@ $ENGINE_PATH/src/out/host_release/shell_benchmarks --benchmark_format=json > $EN
 $ENGINE_PATH/src/out/host_release/ui_benchmarks --benchmark_format=json > $ENGINE_PATH/src/out/host_release/ui_benchmarks.json
 $ENGINE_PATH/src/out/host_release/display_list_builder_benchmarks --benchmark_format=json > $ENGINE_PATH/src/out/host_release/display_list_builder_benchmarks.json
 $ENGINE_PATH/src/out/host_release/geometry_benchmarks --benchmark_format=json > $ENGINE_PATH/src/out/host_release/geometry_benchmarks.json
+$ENGINE_PATH/src/out/host_release/canvas_benchmarks --benchmark_format=json > $ENGINE_PATH/src/out/host_release/canvas_benchmarks.json
