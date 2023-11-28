@@ -1047,7 +1047,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
 ///
-/// /// ## Updating to [MenuAnchor]
+/// ## Updating to [MenuAnchor]
 ///
 /// There is a Material 3 component,
 /// [MenuAnchor] that is preferred for applications that are configured
