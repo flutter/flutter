@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
@@ -19,7 +20,6 @@ import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 /// The function signature of the [print] function.
 typedef PrintFn = void Function(Object?);
