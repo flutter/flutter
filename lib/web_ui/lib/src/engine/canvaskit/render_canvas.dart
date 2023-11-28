@@ -53,6 +53,9 @@ class RenderCanvas {
   late final DomCanvasRenderingContextBitmapRenderer renderContext =
       canvasElement.contextBitmapRenderer;
 
+  late final DomCanvasRenderingContext2D renderContext2d =
+      canvasElement.context2D;
+
   double _currentDevicePixelRatio = -1;
 
   /// Sets the CSS size of the canvas so that canvas pixels are 1:1 with device
@@ -80,6 +83,25 @@ class RenderCanvas {
   void render(DomImageBitmap bitmap) {
     _ensureSize(ui.Size(bitmap.width.toDartDouble, bitmap.height.toDartDouble));
     renderContext.transferFromImageBitmap(bitmap);
+  }
+
+  void renderWithNoBitmapSupport(
+    DomCanvasImageSource imageSource,
+    int sourceHeight,
+    ui.Size size,
+  ) {
+    _ensureSize(size);
+    renderContext2d.drawImage(
+      imageSource,
+      0,
+      sourceHeight - size.height,
+      size.width,
+      size.height,
+      0,
+      0,
+      size.width,
+      size.height,
+    );
   }
 
   /// Ensures that this canvas can draw a frame of the given [size].
