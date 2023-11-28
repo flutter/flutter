@@ -264,6 +264,7 @@ Future<void> main(List<String> args) async {
       'skp_generator': _runSkpGeneratorTests,
       'realm_checker': _runRealmCheckerTest,
       'customer_testing': _runCustomerTesting,
+      'analyze': _runAnalyze,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -1585,6 +1586,19 @@ Future<void> _runCustomerTesting() async {
     Platform.isWindows? winScript: './ci.sh',
     <String>[],
     workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
+  );
+}
+
+// Runs analysis tests.
+Future<void> _runAnalyze() async {
+  printProgress('${green}Running analysis testing$reset');
+  await runCommand(
+    'dart',
+    <String>[
+      '--enable-asserts',
+      path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
+    ],
+    workingDirectory: flutterRoot,
   );
 }
 

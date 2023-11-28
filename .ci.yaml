@@ -242,13 +242,12 @@ platform_properties:
 
 targets:
   - name: Linux analyze
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      shard: analyze
       tags: >
-        ["framework","hostonly","linux"]
-      validation: analyze
-      validation_name: Analyze
+        ["framework","hostonly","shard","linux"]
 
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
@@ -2948,14 +2947,13 @@ targets:
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      shard: analyze
       ignore_flakiness: "true"
       tags: >
-        ["framework","hostonly","linux"]
-      validation: analyze
-      validation_name: Analyze
+        ["framework","hostonly","shard","linux"]
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
