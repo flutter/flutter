@@ -3692,7 +3692,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (currentContext == notificationContext) {
         return true;
       }
-      currentContext = currentContext.findAncestorStateOfType<State<StatefulWidget>>()?.context;
+      currentContext = currentContext.findAncestorStateOfType<State>()?.context;
     }
     return false;
   }
