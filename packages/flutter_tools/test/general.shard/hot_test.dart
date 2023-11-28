@@ -339,7 +339,7 @@ void main() {
           analyticsTimingEventExists(
             sentEvents: fakeAnalytics.sentEvents,
             workflow: 'hot',
-            variableName: 'restart'), 
+            variableName: 'restart'),
             true
         );
         expect(testingConfig.updateDevFSCompleteCalled, true);
@@ -472,7 +472,7 @@ void main() {
           analyticsTimingEventExists(
             sentEvents: fakeAnalytics.sentEvents,
             workflow: 'hot',
-            variableName: 'reload'), 
+            variableName: 'reload'),
             true
         );
         expect(testingConfig.updateDevFSCompleteCalled, true);
