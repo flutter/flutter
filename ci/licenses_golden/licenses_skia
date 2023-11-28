@@ -1,4 +1,4 @@
-Signature: fae76f33b89fe2389ea7ce47df6c0709
+Signature: 49c61da3e5540664738187b5c1075a45
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8886,6 +8886,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/DitherUtils.h + ../../../flutt
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/GpuTypesPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/PipelineUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/PipelineUtils.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/SkBackingFit.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/GrBackendSemaphorePriv.h + ../../../flutter/third_party/skia/LICENSE
@@ -9165,6 +9166,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/DitherUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/GpuTypesPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/PipelineUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/PipelineUtils.h
+FILE: ../../../flutter/third_party/skia/src/gpu/SkBackingFit.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/GrBackendSemaphorePriv.h
