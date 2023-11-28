@@ -586,6 +586,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     addBundleSkSLPathOption(hide: !verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
+    usesValidateBuildNameFlag();
     argParser.addFlag('codesign',
       defaultsTo: true,
       help: 'Codesign the application bundle (only available on device builds).',

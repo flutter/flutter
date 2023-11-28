@@ -47,6 +47,7 @@ class BuildInfo {
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
+    this.validateBuildName = true,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -179,6 +180,10 @@ class BuildInfo {
 
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
+
+  /// Whether to run validation on the build name.
+  /// On iOS, this will remove all non-digit characters to ensure a format of x.y.z
+  final bool validateBuildName;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

@@ -156,6 +156,7 @@ abstract final class FlutterOptions {
   static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
+  static const String kValidateBuildName = 'validate-build-name';
 }
 
 /// flutter command categories for usage.
@@ -1155,6 +1156,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesValidateBuildNameFlag() {
+    argParser.addFlag(
+      FlutterOptions.kValidateBuildName,
+      defaultsTo: true,
+      help: 'Validate the build name. On iOS, this will remove all non-digit '
+          'characters to ensure a valid format of x.y.z',
+    );
+  }
+
   /// Compute the [BuildInfo] for the current flutter command.
   /// Commands that build multiple build modes can pass in a [forcedBuildMode]
   /// to be used instead of parsing flags.
@@ -1268,6 +1278,9 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
+    final bool validateBuildName = argParser.options.containsKey(FlutterOptions.kValidateBuildName)
+        && boolArg(FlutterOptions.kValidateBuildName);
+
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
@@ -1336,6 +1349,7 @@ abstract class FlutterCommand extends Command<void> {
           : null,
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
+      validateBuildName: validateBuildName,
     );
   }
 

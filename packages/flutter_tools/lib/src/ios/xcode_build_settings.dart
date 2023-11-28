@@ -111,6 +111,10 @@ String? parsedBuildName({
   BuildInfo? buildInfo,
 }) {
   final String? buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
+  final bool shouldValidate = buildInfo?.validateBuildName ?? true;
+  if (!shouldValidate) {
+    return buildNameToParse;
+  }
   return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
 }
 
