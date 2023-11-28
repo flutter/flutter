@@ -144,20 +144,20 @@ std::shared_ptr<Texture> MakeBlurSubpass(
   return out_texture;
 }
 
-/// Calculate how much to scale down the texture depending on the blur radius.
-/// This curve was taken from |DirectionalGaussianBlurFilterContents|.
-Scalar CalculateScale(Scalar radius) {
-  constexpr Scalar decay = 4.0;   // Larger is more gradual.
-  constexpr Scalar limit = 0.95;  // The maximum percentage of the scaledown.
-  const Scalar curve =
-      std::min(1.0, decay / (std::max(1.0f, radius) + decay - 1.0));
-  return (curve - 1) * limit + 1;
-};
-
 }  // namespace
 
 GaussianBlurFilterContents::GaussianBlurFilterContents(Scalar sigma)
     : sigma_(sigma) {}
+
+// This value was extracted from Skia, see:
+//  * https://github.com/google/skia/blob/d29cc3fe182f6e8a8539004a6a4ee8251677a6fd/src/gpu/ganesh/GrBlurUtils.cpp#L2561-L2576
+//  * https://github.com/google/skia/blob/d29cc3fe182f6e8a8539004a6a4ee8251677a6fd/src/gpu/BlurUtils.h#L57
+Scalar GaussianBlurFilterContents::CalculateScale(Scalar sigma) {
+  if (sigma <= 4) {
+    return 1.0;
+  }
+  return 4.0 / sigma;
+};
 
 std::optional<Rect> GaussianBlurFilterContents::GetFilterSourceCoverage(
     const Matrix& effect_transform,
@@ -213,7 +213,10 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   }
 
   Scalar blur_radius = CalculateBlurRadius(sigma_);
-  Scalar desired_scalar = CalculateScale(blur_radius);
+  Scalar desired_scalar = CalculateScale(sigma_);
+  // TODO(jonahwilliams): if scaling value is 1.0, then skip the downsample
+  // pass.
+
   Vector2 downsample_scalar(desired_scalar, desired_scalar);
   Vector2 padding(ceil(blur_radius), ceil(blur_radius));
 
