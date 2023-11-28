@@ -381,13 +381,23 @@ class CupertinoCheckedMenuItem<T> extends CupertinoBaseMenuItem<T> {
     this.checked = true,
   });
 
+  /// Whether to display a checkmark next to the menu item.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, the [CupertinoIcons.check_mark] checkmark icon is displayed at
+  /// the leading edge of the menu item.
+  final bool? checked;
+
   @override
   bool get hasLeading => true;
 
   @override
   Widget? get leading {
     return ExcludeSemantics(child:
-       checked ?? false ? const _MenuLeadingIcon(CupertinoIcons.check_mark, fontSize: 15) : null,
+       (checked ?? false)
+            ? const _MenuLeadingIcon(CupertinoIcons.check_mark, fontSize: 15)
+            : null,
       );
   }
 
@@ -396,14 +406,6 @@ class CupertinoCheckedMenuItem<T> extends CupertinoBaseMenuItem<T> {
     HapticFeedback.selectionClick();
     super.onTap?.call();
   };
-
-  /// Whether to display a checkmark next to the menu item.
-  ///
-  /// Defaults to false.
-  ///
-  /// When true, the [CupertinoIcons.check_mark] checkmark icon is displayed at
-  /// the leading edge of the menu item.
-  final bool? checked;
 
   @override
   Widget buildChild(BuildContext context) {
@@ -600,7 +602,6 @@ class CupertinoBaseMenuItem<T> extends CupertinoInteractiveMenuItem<T> {
 
 // A default layout wrapper for [CupertinoBaseMenuItem]s.
 class _CupertinoMenuItemStructure extends StatelessWidget {
-
   // Creates a [_CupertinoMenuItemStructure]
   const _CupertinoMenuItemStructure({
     required this.title,
@@ -619,12 +620,12 @@ class _CupertinoMenuItemStructure extends StatelessWidget {
         _padding = padding ?? defaultPadding;
 
   static const EdgeInsetsDirectional defaultPadding =
-      EdgeInsetsDirectional.symmetric(vertical: 12);
+      EdgeInsetsDirectional.symmetric(vertical: 11.5);
   static const double defaultHorizontalWidth = 16;
   static const double leadingWidgetWidth = 32.0;
   static const double trailingWidgetWidth = 44.0;
   static const AlignmentDirectional defaultLeadingAlignment = AlignmentDirectional(1/6, 0);
-  static const AlignmentDirectional defaultTrailingAlignment = AlignmentDirectional(3/11, 0);
+  static const AlignmentDirectional defaultTrailingAlignment = AlignmentDirectional(-3/11, 0);
 
   // The padding for the contents of the menu item.
   final EdgeInsetsDirectional _padding;
@@ -669,23 +670,24 @@ class _CupertinoMenuItemStructure extends StatelessWidget {
     final bool showTrailingWidget = textScale < 1.25 && trailing != null;
     // Padding scales with textScale, but at a slower rate than text. Square
     // root is used to estimate the padding scaling factor.
-    final double scaledPadding = scalePadding ? math.sqrt(textScale) : 1.0;
+    final double paddingScaleFactor = scalePadding ? math.sqrt(textScale) : 1.0;
     final double trailingWidth = (_trailingWidth
                                    ?? (showTrailingWidget
                                         ? trailingWidgetWidth
-                                        : defaultHorizontalWidth)) * scaledPadding;
+                                        : defaultHorizontalWidth)) * paddingScaleFactor;
     final double leadingWidth = (_leadingWidth
                                   ?? (showLeadingWidget
                                        ? leadingWidgetWidth
-                                       : defaultHorizontalWidth)) * scaledPadding;
-    // AnimatedSize is used to limit jump when the contents of a menu item change
+                                       : defaultHorizontalWidth)) * paddingScaleFactor;
+    // AnimatedSize is used to limit jump when the contents of a menu item
+    // change
     return AnimatedSize(
       curve: Curves.easeOutExpo,
       duration: const Duration(milliseconds: 600),
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: height * scaledPadding),
+        constraints: BoxConstraints(minHeight: height * paddingScaleFactor),
         child: Padding(
-          padding: _padding * scaledPadding,
+          padding: _padding * paddingScaleFactor,
           child: Row(
             children: <Widget>[
               // The leading and trailing widgets are wrapped in SizedBoxes and
