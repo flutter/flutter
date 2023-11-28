@@ -579,22 +579,22 @@ class FloatingActionButton extends StatelessWidget {
           child: resolvedChild)
       : resolvedChild;
 
-    final MaterialStateProperty<Color?> resolvedOverlayColor = MaterialStateProperty.resolveWith(
+    final MaterialStateProperty<Color?> resolvedOverlayColor = MaterialStateProperty.resolveWith<Color?>(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
           return splashColor;
         }
-        if (states.contains(MaterialState.hovered)) {
-          return hoverColor;
-        }
         if (states.contains(MaterialState.focused)) {
           return focusColor;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return hoverColor;
         }
         return null;
       },
     );
 
-    final MaterialStateProperty<double> resolvedElevation = MaterialStateProperty.resolveWith(
+    final MaterialStateProperty<double> resolvedElevation = MaterialStateProperty.resolveWith<double>(
       (Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return disabledElevation;
@@ -602,11 +602,11 @@ class FloatingActionButton extends StatelessWidget {
           if (states.contains(MaterialState.pressed)) {
             return highlightElevation;
           }
-          if (states.contains(MaterialState.hovered)) {
-            return hoverElevation;
-          }
           if (states.contains(MaterialState.focused)) {
             return focusElevation;
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return hoverElevation;
           }
           return elevation;
       },
