@@ -191,7 +191,7 @@ abstract class SearchDelegate<T> {
   /// {@macro flutter.material.appbar.automaticallyImplyLeading}
   bool? automaticallyImplyLeading;
 
-  /// {@macro flutter.material.appbar.leadingWidth} .
+  /// {@macro flutter.material.appbar.leadingWidth}
   double? leadingWidth;
 
   /// Widgets to display after the search query in the [AppBar].
