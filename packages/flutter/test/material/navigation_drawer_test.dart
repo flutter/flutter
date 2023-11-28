@@ -83,7 +83,6 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-
   testWidgetsWithLeakTracking('NavigationDrawer can update destination background color',
       (WidgetTester tester) async {
     const Color color = Colors.yellow;
