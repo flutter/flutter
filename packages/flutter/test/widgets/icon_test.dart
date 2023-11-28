@@ -128,6 +128,22 @@ void main() {
     expect(richText.text.style!.fontFamily, equals('Roboto'));
   });
 
+  testWidgetsWithLeakTracking("Icon's TextStyle makes sure the font body is vertically center-aligned", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138592.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Icon(IconData(0x41)),
+        ),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style?.height, 1.0);
+    expect(richText.text.style?.leadingDistribution, TextLeadingDistribution.even);
+  });
+
   testWidgetsWithLeakTracking('Icon with custom fontFamilyFallback', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
