@@ -1172,7 +1172,7 @@ class TextureAndroidViewController extends AndroidViewController {
   Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
-    _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
+    final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
       viewType: _viewType,
       hybrid: false,
@@ -1180,7 +1180,12 @@ class TextureAndroidViewController extends AndroidViewController {
       creationParams: _creationParams,
       size: size,
       position: position,
-    ) as int;
+    );
+    if (response is int) {
+      _internals.textureId = response;
+    } else {
+      assert(response == null, 'response will be null when running under test');
+    }
   }
 
   @override
