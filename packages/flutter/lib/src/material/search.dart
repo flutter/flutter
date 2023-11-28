@@ -188,10 +188,10 @@ abstract class SearchDelegate<T> {
   ///  * [AppBar.leading], the intended use for the return value of this method.
   Widget? buildLeading(BuildContext context);
 
-  /// [AppBar.automaticallyImplyLeading]
+  /// {@macro flutter.material.appbar.automaticallyImplyLeading}
   bool? automaticallyImplyLeading;
 
-  /// [AppBar.leadingWidth]
+  /// {@macro flutter.material.appbar.leadingWidth} .
   double? leadingWidth;
 
   /// Widgets to display after the search query in the [AppBar].
