@@ -422,6 +422,7 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     required this.secondId,
   }) {
     _nextFrame = _firstFrame;
+    channelBuffers.setListener('flutter/lifecycle', _onPlatformMessage);
   }
 
   /// The platform view identifier to use for the first platform view.
@@ -437,13 +438,7 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     _nextFrame();
   }
 
-  bool _firstFrameBegan = false;
-
   void _firstFrame() {
-    if (!_firstFrameBegan) {
-      channelBuffers.setListener('flutter/lifecycle', _onPlatformMessage);
-    }
-    _firstFrameBegan = true;
     final SceneBuilder builder = SceneBuilder();
 
     builder.pushOffset(50, 600);
@@ -515,6 +510,13 @@ class MultiPlatformViewBackgroundForegroundScenario extends Scenario
     PlatformMessageResponseCallback? callback,
   ) {
     final String message = utf8.decode(data!.buffer.asUint8List());
+
+    // The expected first event should be 'AppLifecycleState.resumed', but
+    // occasionally it will receive 'AppLifecycleState.inactive' first. Skip
+    // any messages until 'AppLifecycleState.resumed' is received.
+    if (_lastLifecycleState.isEmpty && message != 'AppLifecycleState.resumed') {
+      return;
+    }
     if (_lastLifecycleState == 'AppLifecycleState.inactive' &&
         message == 'AppLifecycleState.resumed') {
       _nextFrame = _secondFrame;
