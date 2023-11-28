@@ -67,7 +67,7 @@ enum MultitouchDragStrategy {
   /// is the sum of the offsets of all active pointers.
   ///
   /// When a [Scrollable] drives scrolling by this drag strategy, the scrolling
-  /// speed will be doubled or triple, depending on how many fingers are dragging
+  /// speed will double or triple, depending on how many fingers are dragging
   /// at the same time.
   sumAllPointers,
 }

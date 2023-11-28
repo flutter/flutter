@@ -116,7 +116,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Configure the multi-finger drag strategy on multi-touch devices.
   ///
   /// If set to [MultitouchDragStrategy.latestPointer], the drag gesture recognizer
-  /// will only track the latest active(accepted by this recognizer) pointer, which
+  /// will only track the latest active (accepted by this recognizer) pointer, which
   /// appears to be only one finger dragging.
   ///
   /// If set to [MultitouchDragStrategy.sumAllPointers],
