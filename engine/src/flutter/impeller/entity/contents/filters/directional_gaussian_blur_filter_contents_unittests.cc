@@ -6,7 +6,9 @@
 #include "gmock/gmock.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/directional_gaussian_blur_filter_contents.h"
+#include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity_playground.h"
+#include "impeller/geometry/geometry_asserts.h"
 #include "impeller/renderer/testing/mocks.h"
 
 namespace impeller {
@@ -114,14 +116,108 @@ TEST_P(DirectionalGaussianBlurFilterContentsTest,
     EXPECT_TRUE(result_coverage.has_value());
     EXPECT_TRUE(contents_coverage.has_value());
     if (result_coverage.has_value() && contents_coverage.has_value()) {
-      EXPECT_NEAR(result_coverage.value().GetLeft(),
-                  contents_coverage.value().GetLeft(), kEhCloseEnough);
-      EXPECT_NEAR(result_coverage.value().GetTop(),
-                  contents_coverage.value().GetTop(), kEhCloseEnough);
-      EXPECT_NEAR(result_coverage.value().GetRight(),
-                  contents_coverage.value().GetRight(), kEhCloseEnough);
-      EXPECT_NEAR(result_coverage.value().GetBottom(),
-                  contents_coverage.value().GetBottom(), kEhCloseEnough);
+      EXPECT_TRUE(RectNear(result_coverage.value(), contents_coverage.value()));
+      // The precision on this blur is kind of off, thus the tolerance.
+      EXPECT_NEAR(result_coverage.value().GetLeft(), -1.f, 0.1f);
+      EXPECT_NEAR(result_coverage.value().GetTop(), 0.f, 0.001f);
+      EXPECT_NEAR(result_coverage.value().GetRight(), 101.f, 0.1f);
+      EXPECT_NEAR(result_coverage.value().GetBottom(), 100.f, 0.001f);
+    }
+  }
+}
+
+TEST_P(DirectionalGaussianBlurFilterContentsTest,
+       TextureContentsWithDestinationRect) {
+  TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
+      .format = PixelFormat::kB8G8R8A8UNormInt,
+      .size = ISize(100, 100),
+  };
+
+  std::shared_ptr<Texture> texture =
+      GetContentContext()->GetContext()->GetResourceAllocator()->CreateTexture(
+          desc);
+  auto texture_contents = std::make_shared<TextureContents>();
+  texture_contents->SetSourceRect(Rect::MakeSize(texture->GetSize()));
+  texture_contents->SetTexture(texture);
+  texture_contents->SetDestinationRect(Rect::MakeXYWH(
+      50, 40, texture->GetSize().width, texture->GetSize().height));
+
+  Scalar sigma_radius_1 = CalculateSigmaForBlurRadius(1.0);
+  auto contents = std::make_unique<DirectionalGaussianBlurFilterContents>();
+  contents->SetSigma(Sigma{sigma_radius_1});
+  contents->SetDirection({1.0, 0.0});
+  contents->SetInputs({FilterInput::Make(texture_contents)});
+  std::shared_ptr<ContentContext> renderer = GetContentContext();
+
+  Entity entity;
+  std::optional<Entity> result =
+      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+  EXPECT_TRUE(result.has_value());
+  if (result.has_value()) {
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    std::optional<Rect> result_coverage = result.value().GetCoverage();
+    std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
+    EXPECT_TRUE(result_coverage.has_value());
+    EXPECT_TRUE(contents_coverage.has_value());
+    if (result_coverage.has_value() && contents_coverage.has_value()) {
+      EXPECT_TRUE(RectNear(result_coverage.value(), contents_coverage.value()));
+      // The precision on this blur is kind of off, thus the tolerance.
+      EXPECT_NEAR(result_coverage.value().GetLeft(), 49.f, 0.1f);
+      EXPECT_NEAR(result_coverage.value().GetTop(), 40.f, 0.001f);
+      EXPECT_NEAR(result_coverage.value().GetRight(), 151.f, 0.1f);
+      EXPECT_NEAR(result_coverage.value().GetBottom(), 140.f, 0.001f);
+    }
+  }
+}
+
+TEST_P(DirectionalGaussianBlurFilterContentsTest,
+       TextureContentsWithDestinationRectScaled) {
+  TextureDescriptor desc = {
+      .storage_mode = StorageMode::kDevicePrivate,
+      .format = PixelFormat::kB8G8R8A8UNormInt,
+      .size = ISize(100, 100),
+  };
+
+  std::shared_ptr<Texture> texture =
+      GetContentContext()->GetContext()->GetResourceAllocator()->CreateTexture(
+          desc);
+  auto texture_contents = std::make_shared<TextureContents>();
+  texture_contents->SetSourceRect(Rect::MakeSize(texture->GetSize()));
+  texture_contents->SetTexture(texture);
+  texture_contents->SetDestinationRect(Rect::MakeXYWH(
+      50, 40, texture->GetSize().width, texture->GetSize().height));
+
+  Scalar sigma_radius_1 = CalculateSigmaForBlurRadius(1.0);
+  auto contents = std::make_unique<DirectionalGaussianBlurFilterContents>();
+  contents->SetSigma(Sigma{sigma_radius_1});
+  contents->SetDirection({1.0, 0.0});
+  contents->SetInputs({FilterInput::Make(texture_contents)});
+  std::shared_ptr<ContentContext> renderer = GetContentContext();
+
+  Entity entity;
+  entity.SetTransform(Matrix::MakeScale({2.0, 2.0, 1.0}));
+  std::optional<Entity> result =
+      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+  EXPECT_TRUE(result.has_value());
+  if (result.has_value()) {
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    std::optional<Rect> result_coverage = result.value().GetCoverage();
+    std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
+    EXPECT_TRUE(result_coverage.has_value());
+    EXPECT_TRUE(contents_coverage.has_value());
+    if (result_coverage.has_value() && contents_coverage.has_value()) {
+      // The precision on this blur is kind of off, thus the tolerance.
+
+      EXPECT_NEAR(result_coverage.value().GetLeft(), 98.f, 0.1f);
+      EXPECT_NEAR(result_coverage.value().GetTop(), 80.f, 0.001f);
+      EXPECT_NEAR(result_coverage.value().GetRight(), 302.f, 0.1f);
+      EXPECT_NEAR(result_coverage.value().GetBottom(), 280.f, 0.001f);
+
+      EXPECT_NEAR(contents_coverage.value().GetLeft(), 98.f, 0.1f);
+      EXPECT_NEAR(contents_coverage.value().GetTop(), 80.f, 0.001f);
+      EXPECT_NEAR(contents_coverage.value().GetRight(), 302.f, 0.1f);
+      EXPECT_NEAR(contents_coverage.value().GetBottom(), 280.f, 0.001f);
     }
   }
 }
