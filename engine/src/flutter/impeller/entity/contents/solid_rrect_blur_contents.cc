@@ -8,6 +8,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
@@ -63,7 +64,8 @@ std::optional<Rect> SolidRRectBlurContents::GetCoverage(
 bool SolidRRectBlurContents::Render(const ContentContext& renderer,
                                     const Entity& entity,
                                     RenderPass& pass) const {
-  if (!rect_.has_value()) {
+  // Early return if sigma is close to zero to avoid rendering NaNs.
+  if (!rect_.has_value() || std::fabs(sigma_.sigma) <= kEhCloseEnough) {
     return true;
   }
 

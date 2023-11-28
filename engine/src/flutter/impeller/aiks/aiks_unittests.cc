@@ -4096,5 +4096,23 @@ TEST_P(AiksTest, ArcWithZeroSweepAndBlur) {
   canvas.EndRecordingAsPicture();
 }
 
+TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
+  Canvas canvas;
+
+  Paint paint = {
+      .color = Color::White(),
+      .mask_blur_descriptor =
+          Paint::MaskBlurDescriptor{
+              .style = FilterContents::BlurStyle::kNormal,
+              .sigma = Sigma(0),
+          },
+  };
+
+  canvas.DrawCircle({300, 300}, 200, paint);
+  canvas.DrawRect(Rect::MakeLTRB(100, 300, 500, 600), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

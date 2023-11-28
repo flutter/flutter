@@ -18,6 +18,7 @@
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/path_builder.h"
 
 namespace impeller {
@@ -201,6 +202,10 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
   if (!paint.mask_blur_descriptor.has_value() ||
       paint.mask_blur_descriptor->style != FilterContents::BlurStyle::kNormal) {
     return false;
+  }
+  // A blur sigma that is close to zero should not result in any shadow.
+  if (std::fabs(paint.mask_blur_descriptor->sigma.sigma) <= kEhCloseEnough) {
+    return true;
   }
 
   Paint new_paint = paint;
