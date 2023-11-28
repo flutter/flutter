@@ -158,6 +158,7 @@ if (enable_unittests) {
       "//flutter/display_list/testing:display_list_testing",
       "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
       "//flutter/testing",
+      "//flutter/third_party/txt",
     ]
 
     if (!defined(defines)) {

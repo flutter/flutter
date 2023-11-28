@@ -8,9 +8,11 @@
 
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/core/SkTypeface.h"
+#include "txt/platform.h"
 
 namespace flutter {
 
@@ -116,8 +118,9 @@ auto AssetManagerFontStyleSet::createTypeface(int i) -> CreateTypefaceRet {
         MappingReleaseProc, asset_mapping_ptr);
     std::unique_ptr<SkMemoryStream> stream = SkMemoryStream::Make(asset_data);
 
+    sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
     // Ownership of the stream is transferred.
-    asset.typeface = SkTypeface::MakeFromStream(std::move(stream));
+    asset.typeface = font_mgr->makeFromStream(std::move(stream));
     if (!asset.typeface) {
       FML_DLOG(ERROR) << "Unable to load font asset for family: "
                       << family_name_;

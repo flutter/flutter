@@ -12,6 +12,7 @@
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/platform.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -94,7 +95,8 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
   auto mapping = flutter::testing::OpenFixtureAsSkData("NotoColorEmoji.ttf");
 #endif
   ASSERT_TRUE(mapping);
-  SkFont emoji_font(SkTypeface::MakeFromData(mapping), 50.0);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont emoji_font(font_mgr->makeFromData(mapping), 50.0);
   SkFont sk_font;
 
   auto blob = SkTextBlob::MakeFromString("hello", sk_font);

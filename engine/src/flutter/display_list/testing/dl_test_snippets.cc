@@ -5,6 +5,9 @@
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_receiver.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/include/core/SkTypeface.h"
+#include "txt/platform.h"
 
 namespace flutter {
 namespace testing {
@@ -978,7 +981,7 @@ SkFont CreateTestFontOfSize(SkScalar scalar) {
   static constexpr const char* kTestFontFixture = "Roboto-Regular.ttf";
   auto mapping = flutter::testing::OpenFixtureAsSkData(kTestFontFixture);
   FML_CHECK(mapping);
-  return SkFont{SkTypeface::MakeFromData(mapping), scalar};
+  return SkFont{txt::GetDefaultFontManager()->makeFromData(mapping), scalar};
 }
 
 sk_sp<SkTextBlob> GetTestTextBlob(int index) {
