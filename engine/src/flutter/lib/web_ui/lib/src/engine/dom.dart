@@ -1226,10 +1226,53 @@ extension DomCanvasRenderingContext2DExtension on DomCanvasRenderingContext2D {
           x0.toJS, y0.toJS, r0.toJS, x1.toJS, y1.toJS, r1.toJS);
 
   @JS('drawImage')
-  external JSVoid _drawImage(
-      DomCanvasImageSource source, JSNumber destX, JSNumber destY);
-  void drawImage(DomCanvasImageSource source, num destX, num destY) =>
-      _drawImage(source, destX.toJS, destY.toJS);
+  external JSVoid _drawImage1(
+      DomCanvasImageSource source, JSNumber dx, JSNumber dy);
+  @JS('drawImage')
+  external JSVoid _drawImage2(
+    DomCanvasImageSource source,
+    JSNumber sx,
+    JSNumber sy,
+    JSNumber sWidth,
+    JSNumber sHeight,
+    JSNumber dx,
+    JSNumber dy,
+    JSNumber dWidth,
+    JSNumber dHeight,
+  );
+  void drawImage(
+    DomCanvasImageSource source,
+    num srcxOrDstX,
+    num srcyOrDstY, [
+    num? srcWidth,
+    num? srcHeight,
+    num? dstX,
+    num? dstY,
+    num? dstWidth,
+    num? dstHeight,
+  ]) {
+    if (srcWidth == null) {
+      // In this case the numbers provided are the destination x and y offset.
+      return _drawImage1(source, srcxOrDstX.toJS, srcyOrDstY.toJS);
+    } else {
+      assert(srcHeight != null &&
+          dstX != null &&
+          dstY != null &&
+          dstWidth != null &&
+          dstHeight != null);
+      return _drawImage2(
+        source,
+        srcxOrDstX.toJS,
+        srcyOrDstY.toJS,
+        srcWidth.toJS,
+        srcHeight!.toJS,
+        dstX!.toJS,
+        dstY!.toJS,
+        dstWidth!.toJS,
+        dstHeight!.toJS,
+      );
+    }
+  }
 
   @JS('fill')
   external JSVoid _fill1();
@@ -3622,6 +3665,15 @@ bool browserSupportsFinalizationRegistry =
 external JSAny? get _offscreenCanvasConstructor;
 
 bool browserSupportsOffscreenCanvas = _offscreenCanvasConstructor != null;
+
+@JS('window.createImageBitmap')
+external JSAny? get _createImageBitmapFunction;
+
+/// Set to `true` to disable `createImageBitmap` support. Used in tests.
+bool debugDisableCreateImageBitmapSupport = false;
+
+bool browserSupportsCreateImageBitmap =
+    !debugDisableCreateImageBitmapSupport || _createImageBitmapFunction != null;
 
 @JS()
 @staticInterop
