@@ -558,9 +558,9 @@ class FloatingActionButton extends StatelessWidget {
             child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  if (child != null)
-                    child!,
-                  if (child != null && isExtended)
+                  if (resolvedChild != null)
+                    resolvedChild,
+                  if (resolvedChild != null && isExtended)
                     SizedBox(width: iconLabelSpacing),
                   if (isExtended)
                     _extendedLabel!,
@@ -758,19 +758,19 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
           highlightElevation: 12,
           enableFeedback: true,
           sizeConstraints: const BoxConstraints.tightFor(
-            width: 64.0,
-            height: 64.0,
+            width: 56.0,
+            height: 56.0,
           ),
           smallSizeConstraints: const BoxConstraints.tightFor(
-            width: 48.0,
-            height: 48.0,
+            width: 40.0,
+            height: 40.0,
           ),
           largeSizeConstraints: const BoxConstraints.tightFor(
-            width: 104.0,
-            height: 104.0,
+            width: 96.0,
+            height: 96.0,
           ),
           extendedSizeConstraints: const BoxConstraints.tightFor(
-            height: 64.0,
+            height: 48.0,
           ),
           extendedIconLabelSpacing: 8.0,
         );
@@ -811,19 +811,19 @@ class _FABDefaultsM3 extends FloatingActionButtonThemeData {
         highlightElevation: 6.0,
         enableFeedback: true,
         sizeConstraints: const BoxConstraints.tightFor(
-          width: 64.0,
-          height: 64.0,
+          width: 56.0,
+          height: 56.0,
         ),
         smallSizeConstraints: const BoxConstraints.tightFor(
-          width: 48.0,
-          height: 48.0,
+          width: 40.0,
+          height: 40.0,
         ),
         largeSizeConstraints: const BoxConstraints.tightFor(
-          width: 104.0,
-          height: 104.0,
+          width: 96.0,
+          height: 96.0,
         ),
         extendedSizeConstraints: const BoxConstraints.tightFor(
-          height: 64.0,
+          height: 56.0,
         ),
         extendedIconLabelSpacing: 8.0,
       );
