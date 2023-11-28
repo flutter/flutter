@@ -50,10 +50,10 @@ VulkanApplication::VulkanApplication(
   }
 #endif
 
-  const char* extensions[enabled_extensions.size()];
+  std::vector<const char*> extensions;
 
   for (size_t i = 0; i < enabled_extensions.size(); i++) {
-    extensions[i] = enabled_extensions[i].c_str();
+    extensions.push_back(enabled_extensions[i].c_str());
   }
 
   // Configure layers.
@@ -61,10 +61,10 @@ VulkanApplication::VulkanApplication(
   const std::vector<std::string> enabled_layers =
       InstanceLayersToEnable(vk_, enable_validation_layers_);
 
-  const char* layers[enabled_layers.size()];
+  std::vector<const char*> layers;
 
   for (size_t i = 0; i < enabled_layers.size(); i++) {
-    layers[i] = enabled_layers[i].c_str();
+    layers.push_back(enabled_layers[i].c_str());
   }
 
   // Configure init structs.
@@ -84,10 +84,10 @@ VulkanApplication::VulkanApplication(
       .pNext = nullptr,
       .flags = 0,
       .pApplicationInfo = &info,
-      .enabledLayerCount = static_cast<uint32_t>(enabled_layers.size()),
-      .ppEnabledLayerNames = layers,
-      .enabledExtensionCount = static_cast<uint32_t>(enabled_extensions.size()),
-      .ppEnabledExtensionNames = extensions,
+      .enabledLayerCount = static_cast<uint32_t>(layers.size()),
+      .ppEnabledLayerNames = layers.data(),
+      .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+      .ppEnabledExtensionNames = extensions.data(),
   };
 
   // Perform initialization.

@@ -75,10 +75,10 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
   auto enabled_layers =
       DeviceLayersToEnable(vk_, physical_device_, enable_validation_layers);
 
-  const char* layers[enabled_layers.size()];
+  std::vector<const char*> layers;
 
   for (size_t i = 0; i < enabled_layers.size(); i++) {
-    layers[i] = enabled_layers[i].c_str();
+    layers.push_back(enabled_layers[i].c_str());
   }
 
   const VkDeviceCreateInfo create_info = {
@@ -87,8 +87,8 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
       .flags = 0,
       .queueCreateInfoCount = 1,
       .pQueueCreateInfos = &queue_create,
-      .enabledLayerCount = static_cast<uint32_t>(enabled_layers.size()),
-      .ppEnabledLayerNames = layers,
+      .enabledLayerCount = static_cast<uint32_t>(layers.size()),
+      .ppEnabledLayerNames = layers.data(),
       .enabledExtensionCount = sizeof(extensions) / sizeof(const char*),
       .ppEnabledExtensionNames = extensions,
       .pEnabledFeatures = nullptr,
