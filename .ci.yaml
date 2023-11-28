@@ -376,13 +376,12 @@ targets:
   - name: Linux customer_testing
     enabled_branches:
       - master
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      shard: customer_testing
       tags: >
-        ["framework", "hostonly", "linux"]
-      validation: customer_testing
-      validation_name: Customer testing
+        ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux docs_publish
     recipe: flutter/flutter
@@ -2584,6 +2583,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: platform_channels_benchmarks
 
+  - name: Linux_pixel_7pro platform_channels_benchmarks
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: platform_channels_benchmarks
+
   - name: Linux_android platform_channel_sample_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3099,13 +3108,12 @@ targets:
   - name: Mac customer_testing
     enabled_branches:
       - master
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      validation: customer_testing
-      validation_name: Customer testing
+      shard: customer_testing
       tags: >
-        ["framework", "hostonly", "mac"]
+        ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -4691,13 +4699,12 @@ targets:
   - name: Windows customer_testing
     enabled_branches:
       - master
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      validation: customer_testing
-      validation_name: Customer testing
+      shard: customer_testing
       tags: >
-        ["framework", "hostonly", "windows"]
+        ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
