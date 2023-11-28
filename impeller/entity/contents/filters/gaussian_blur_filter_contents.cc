@@ -183,7 +183,9 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterCoverage(
 
   Scalar blur_radius = CalculateBlurRadius(sigma_);
   Vector3 blur_radii =
-      effect_transform.Basis() * Vector3{blur_radius, blur_radius, 0.0};
+      (inputs[0]->GetTransform(entity).Basis() * effect_transform.Basis() *
+       Vector3{blur_radius, blur_radius, 0.0})
+          .Abs();
   return input_coverage.value().Expand(Point(blur_radii.x, blur_radii.y));
 }
 
@@ -257,7 +259,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   return Entity::FromSnapshot(
       Snapshot{
           .texture = pass3_out_texture,
-          .transform = entity.GetTransform() *
+          .transform = input_snapshot->transform *
                        Matrix::MakeTranslation({-padding.x, -padding.y, 0}) *
                        Matrix::MakeScale(padded_size /
                                          Vector2(pass1_out_texture->GetSize())),
