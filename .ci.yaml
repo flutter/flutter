@@ -244,8 +244,8 @@ targets:
   - name: Linux analyze
     recipe: flutter/flutter_drone
     timeout: 60
-    shard: analyze
     properties:
+      shard: analyze
       tags: >
         ["framework","hostonly","shard","linux"]
 
