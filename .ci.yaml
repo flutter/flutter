@@ -2583,6 +2583,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: platform_channels_benchmarks
 
+  - name: Linux_pixel_7pro platform_channels_benchmarks
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: platform_channels_benchmarks
+
   - name: Linux_android platform_channel_sample_test
     recipe: devicelab/devicelab_drone
     presubmit: false
