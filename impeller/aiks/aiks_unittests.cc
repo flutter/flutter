@@ -46,6 +46,9 @@
 #include "impeller/typographer/backends/stb/typographer_context_stb.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/include/core/SkTypeface.h"
+#include "txt/platform.h"
 
 namespace impeller {
 namespace testing {
@@ -1398,7 +1401,8 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   if (!mapping) {
     return false;
   }
-  SkFont sk_font(SkTypeface::MakeFromData(mapping), options.font_size);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), options.font_size);
   auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
   if (!blob) {
     return false;
@@ -1576,7 +1580,8 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
   ASSERT_NE(mapping, nullptr);
 
   Scalar font_size = 80;
-  SkFont sk_font(SkTypeface::MakeFromData(mapping), font_size);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
 
   Paint text_paint;
   text_paint.color = Color::Blue().WithAlpha(0.8);
@@ -3449,7 +3454,8 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
   ASSERT_NE(mapping, nullptr);
 
   Scalar font_size = 100;
-  SkFont sk_font(SkTypeface::MakeFromData(mapping), font_size);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
 
   Paint text_paint;
   text_paint.color = Color::Blue();

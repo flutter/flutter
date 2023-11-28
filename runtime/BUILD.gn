@@ -10,7 +10,10 @@ source_set("test_font") {
     "test_font_data.cc",
     "test_font_data.h",
   ]
-  deps = [ "//flutter/skia" ]
+  deps = [
+    "//flutter/skia",
+    "//flutter/third_party/txt",
+  ]
   public_configs = [ "//flutter:config" ]
   defines = []
   if (flutter_runtime_mode == "debug" || current_toolchain == host_toolchain) {

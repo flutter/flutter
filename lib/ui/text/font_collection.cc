@@ -21,7 +21,9 @@
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 #include "txt/asset_font_manager.h"
+#include "txt/platform.h"
 #include "txt/test_font_manager.h"
+
 #if FML_OS_MACOSX || FML_OS_IOS
 #include "txt/platform_mac.h"
 #endif
@@ -158,8 +160,8 @@ void FontCollection::LoadFontFromList(Dart_Handle font_data_handle,
 
   std::unique_ptr<SkStreamAsset> font_stream = std::make_unique<SkMemoryStream>(
       font_data.data(), font_data.num_elements(), true);
-  sk_sp<SkTypeface> typeface =
-      SkTypeface::MakeFromStream(std::move(font_stream));
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  sk_sp<SkTypeface> typeface = font_mgr->makeFromStream(std::move(font_stream));
   txt::TypefaceFontAssetProvider& font_provider =
       font_collection.dynamic_font_manager_->font_provider();
   if (family_name.empty()) {
