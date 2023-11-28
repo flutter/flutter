@@ -68,24 +68,24 @@ String git(String workingDirectory, List<String> arguments, {bool allowFailure =
 }
 
 void main(List<String> arguments) {
-  if (arguments.isEmpty || arguments.length > 2 || arguments.contains('--help') || arguments.contains('-h')) {
+  if (arguments.isEmpty || arguments.length != 4 || arguments.contains('--help') || arguments.contains('-h')) {
     print(
-      'Usage: dart find_commit.dart [<path-to-primary-repo>] <path-to-secondary-repo>\n'
+      'Usage: dart find_commit.dart <path-to-primary-repo> <primary-trunk> <path-to-secondary-repo> <secondary-branch>\n'
       'This script will find the commit in the secondary repo that was contemporary\n'
       'when the commit in the primary repo was created. If that commit is on a\n'
-      "branch, then the date of the branch's last merge is used instead.\n"
-      'If <path-to-primary-repo> is omitted, the current directory is used for the\n'
-      'primary repo.'
+      "branch, then the date of the branch's last merge is used instead."
     );
   } else {
-    final String primaryRepo = arguments.length == 1 ? '.' : arguments.first;
-    final String secondaryRepo = arguments.last;
+    final String primaryRepo = arguments.first;
+    final String primaryTrunk = arguments[1];
+    final String secondaryRepo = arguments[2];
+    final String secondaryBranch = arguments.last;
     print(findCommit(
       primaryRepoDirectory: primaryRepo,
       primaryBranch: git(primaryRepo, <String>['rev-parse', '--abbrev-ref', 'HEAD']).trim(),
-      primaryTrunk: 'master',
+      primaryTrunk: primaryTrunk,
       secondaryRepoDirectory: secondaryRepo,
-      secondaryBranch: 'master',
+      secondaryBranch: secondaryBranch,
     ).trim());
   }
 }
