@@ -12,6 +12,7 @@ impeller_component("vulkan_unittests") {
     "command_encoder_vk_unittests.cc",
     "command_pool_vk_unittests.cc",
     "context_vk_unittests.cc",
+    "descriptor_pool_vk_unittests.cc",
     "fence_waiter_vk_unittests.cc",
     "pass_bindings_cache_unittests.cc",
     "resource_manager_vk_unittests.cc",

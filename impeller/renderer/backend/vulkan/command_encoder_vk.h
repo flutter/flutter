@@ -8,7 +8,6 @@
 #include <functional>
 #include <optional>
 
-#include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"

@@ -8,7 +8,6 @@
 #include <optional>
 #include <utility>
 
-#include "fml/macros.h"
 #include "fml/thread_local.h"
 #include "fml/trace_event.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
