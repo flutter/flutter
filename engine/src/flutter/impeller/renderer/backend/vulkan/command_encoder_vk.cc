@@ -16,11 +16,10 @@ namespace impeller {
 
 class TrackedObjectsVK {
  public:
-  explicit TrackedObjectsVK(
-      const std::weak_ptr<const DeviceHolder>& device_holder,
-      const std::shared_ptr<CommandPoolVK>& pool,
-      std::unique_ptr<GPUProbe> probe)
-      : desc_pool_(device_holder), probe_(std::move(probe)) {
+  explicit TrackedObjectsVK(const std::weak_ptr<const ContextVK>& context,
+                            const std::shared_ptr<CommandPoolVK>& pool,
+                            std::unique_ptr<GPUProbe> probe)
+      : desc_pool_(context), probe_(std::move(probe)) {
     if (!pool) {
       return;
     }
@@ -112,8 +111,7 @@ std::shared_ptr<CommandEncoderVK> CommandEncoderFactoryVK::Create() {
   if (!context) {
     return nullptr;
   }
-  auto& context_vk = ContextVK::Cast(*context);
-  auto recycler = context_vk.GetCommandPoolRecycler();
+  auto recycler = context->GetCommandPoolRecycler();
   if (!recycler) {
     return nullptr;
   }
@@ -123,9 +121,8 @@ std::shared_ptr<CommandEncoderVK> CommandEncoderFactoryVK::Create() {
   }
 
   auto tracked_objects = std::make_shared<TrackedObjectsVK>(
-      context_vk.GetDeviceHolder(), tls_pool,
-      context->GetGPUTracer()->CreateGPUProbe());
-  auto queue = context_vk.GetGraphicsQueue();
+      context, tls_pool, context->GetGPUTracer()->CreateGPUProbe());
+  auto queue = context->GetGraphicsQueue();
 
   if (!tracked_objects || !tracked_objects->IsValid() || !queue) {
     return nullptr;
@@ -140,15 +137,14 @@ std::shared_ptr<CommandEncoderVK> CommandEncoderFactoryVK::Create() {
   }
 
   if (label_.has_value()) {
-    context_vk.SetDebugName(tracked_objects->GetCommandBuffer(),
-                            label_.value());
+    context->SetDebugName(tracked_objects->GetCommandBuffer(), label_.value());
   }
   tracked_objects->GetGPUProbe().RecordCmdBufferStart(
       tracked_objects->GetCommandBuffer());
 
-  return std::make_shared<CommandEncoderVK>(context_vk.GetDeviceHolder(),
+  return std::make_shared<CommandEncoderVK>(context->GetDeviceHolder(),
                                             tracked_objects, queue,
-                                            context_vk.GetFenceWaiter());
+                                            context->GetFenceWaiter());
 }
 
 CommandEncoderVK::CommandEncoderVK(

@@ -405,6 +405,13 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
+  auto descriptor_pool_recycler =
+      std::make_shared<DescriptorPoolRecyclerVK>(weak_from_this());
+  if (!descriptor_pool_recycler) {
+    VALIDATION_LOG << "Could not create descriptor pool recycler.";
+    return;
+  }
+
   //----------------------------------------------------------------------------
   /// Fetch the queues.
   ///
@@ -436,6 +443,7 @@ void ContextVK::Setup(Settings settings) {
   fence_waiter_ = std::move(fence_waiter);
   resource_manager_ = std::move(resource_manager);
   command_pool_recycler_ = std::move(command_pool_recycler);
+  descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
   device_name_ = std::string(physical_device_properties.deviceName);
   is_valid_ = true;
 
