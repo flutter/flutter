@@ -4857,6 +4857,7 @@ ORIGIN: ../../../flutter/impeller/aiks/aiks_playground_inspector.cc + ../../../f
 ORIGIN: ../../../flutter/impeller/aiks/aiks_playground_inspector.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/canvas.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/canvas.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/aiks/canvas_benchmarks.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/canvas_recorder.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/canvas_type.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/color_filter.cc + ../../../flutter/LICENSE
@@ -7648,6 +7649,7 @@ FILE: ../../../flutter/impeller/aiks/aiks_playground_inspector.cc
 FILE: ../../../flutter/impeller/aiks/aiks_playground_inspector.h
 FILE: ../../../flutter/impeller/aiks/canvas.cc
 FILE: ../../../flutter/impeller/aiks/canvas.h
+FILE: ../../../flutter/impeller/aiks/canvas_benchmarks.cc
 FILE: ../../../flutter/impeller/aiks/canvas_recorder.h
 FILE: ../../../flutter/impeller/aiks/canvas_type.h
 FILE: ../../../flutter/impeller/aiks/color_filter.cc

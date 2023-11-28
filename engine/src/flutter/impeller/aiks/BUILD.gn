@@ -121,3 +121,12 @@ impeller_component("aiks_unittests_golden") {
     "//flutter/testing:testing_lib",
   ]
 }
+
+executable("canvas_benchmarks") {
+  testonly = true
+  sources = [ "canvas_benchmarks.cc" ]
+  deps = [
+    ":aiks",
+    "//flutter/benchmarking",
+  ]
+}
