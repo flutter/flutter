@@ -650,7 +650,7 @@ abstract class Page<T> extends RouteSettings {
     this.onPopInvoked = _defaultPopInvokedHandler,
   });
 
-  static void _defaultPopInvokedHandler(bool didPop) { }
+  static void _defaultPopInvokedHandler(bool didPop, Object? result) { }
 
   /// The key associated with this page.
   ///
@@ -1573,14 +1573,12 @@ class Navigator extends StatefulWidget {
   )
   final PopPageCallback? onPopPage;
 
-  /// Called when [pop] is invoked but the current [Route] corresponds to a
-  /// [Page] found in the [pages] list.
+  /// Called when a [Page]'s associated route is no longer in the Navigator.
   ///
-  /// The `result` argument is the value with which the route is to complete
-  /// (e.g. the value returned from a dialog).
+  /// This can happen when the route is removed or completed through
+  /// [Navigator.pop], [Navigator.pushReplacement], or its friends.
   ///
-  /// This callback is responsible for calling [Route.didPop] and returning
-  /// whether this pop is successful.
+  /// This callback is responsible removing the given page from the [pages].
   ///
   /// The [Navigator] widget should be rebuilt with a [pages] list that does not
   /// contain the [Page] for the given [Route]. The next time the [pages] list
