@@ -62,18 +62,24 @@ void main() {
         ),
       );
 
-      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.enabled, true);
-      expect(raw.textStyle!.color, theme.colorScheme.onPrimaryContainer);
-      expect(raw.fillColor, theme.colorScheme.primaryContainer);
-      expect(raw.elevation, 6.0);
-      expect(raw.highlightElevation, 6.0);
-      expect(raw.disabledElevation, 6.0);
-      expect(raw.constraints, defaultFABConstraints);
-      expect(raw.padding, defaultFABPadding);
-      expect(raw.shape, defaultFABShapeM3);
-      expect(raw.animationDuration, defaultButtonDuration);
-      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+      final ElevatedButton elevatedButton = tester.widget(find.byType(ElevatedButton));
+      final BoxConstraints buttonConstraints = BoxConstraints(
+        minWidth: elevatedButton.style!.minimumSize!.resolve(enabled)!.width,
+        minHeight: elevatedButton.style!.minimumSize!.resolve(enabled)!.height,
+        maxWidth: elevatedButton.style!.maximumSize!.resolve(enabled)!.width,
+        maxHeight: elevatedButton.style!.maximumSize!.resolve(enabled)!.height,
+      );
+      expect(elevatedButton.enabled, true);
+      expect(elevatedButton.style!.textStyle!.resolve(enabled)!.color, theme.colorScheme.onPrimaryContainer);
+      expect(elevatedButton.style!.backgroundColor!.resolve(enabled), theme.colorScheme.primaryContainer);
+      expect(elevatedButton.style!.elevation!.resolve(enabled), 6.0);
+      expect(elevatedButton.style!.elevation!.resolve(pressed), 6.0);
+      expect(elevatedButton.style!.elevation!.resolve(disabled), 6.0);
+      expect(buttonConstraints, defaultFABConstraints);
+      expect(elevatedButton.style!.padding!.resolve(enabled), defaultFABPadding);
+      expect(elevatedButton.style!.shape!.resolve(enabled), defaultFABShapeM3);
+      expect(elevatedButton.style!.animationDuration, defaultButtonDuration);
+      expect(elevatedButton.style!.tapTargetSize, MaterialTapTargetSize.padded);
     });
 
     testWidgets('Material2 - theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
@@ -126,20 +132,22 @@ void main() {
         ),
       );
 
-      final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.enabled, false);
-      expect(raw.textStyle!.color, theme.colorScheme.onPrimaryContainer);
-      expect(raw.fillColor, theme.colorScheme.primaryContainer);
-      // highlightColor, disabled button can't be pressed
-      // splashColor, disabled button doesn't splash
-      expect(raw.elevation, 6.0);
-      expect(raw.highlightElevation, 6.0);
-      expect(raw.disabledElevation, 6.0);
-      expect(raw.constraints, defaultFABConstraints);
-      expect(raw.padding, defaultFABPadding);
-      expect(raw.shape, defaultFABShapeM3);
-      expect(raw.animationDuration, defaultButtonDuration);
-      expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
+      final ElevatedButton elevatedButton = tester.widget(find.byType(ElevatedButton));
+      final BoxConstraints buttonConstraints = BoxConstraints(
+        minWidth: elevatedButton.style!.minimumSize!.resolve(disabled)!.width,
+        minHeight: elevatedButton.style!.minimumSize!.resolve(disabled)!.height,
+        maxWidth: elevatedButton.style!.maximumSize!.resolve(disabled)!.width,
+        maxHeight: elevatedButton.style!.maximumSize!.resolve(disabled)!.height,
+      );
+      expect(elevatedButton.enabled, false);
+      expect(elevatedButton.style!.textStyle!.resolve(disabled)!.color, const Color(0xff21005d));
+      expect(elevatedButton.style!.backgroundColor!.resolve(disabled), isNull);
+      expect(elevatedButton.style!.elevation!.resolve(disabled), 6.0);
+      expect(buttonConstraints, defaultFABConstraints);
+      expect(elevatedButton.style!.padding!.resolve(disabled), defaultFABPadding);
+      expect(elevatedButton.style!.shape!.resolve(disabled), defaultFABShapeM3);
+      expect(elevatedButton.style!.animationDuration, defaultButtonDuration);
+      expect(elevatedButton.style!.tapTargetSize, MaterialTapTargetSize.padded);
     });
   });
 }
