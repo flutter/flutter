@@ -298,6 +298,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
+          analytics: globals.analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
@@ -318,6 +319,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
+          analytics: globals.analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );

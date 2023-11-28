@@ -1292,7 +1292,7 @@ void main() {
         terminal: AnsiTerminal(
           stdio: fakeStdio,
           platform: _kNoAnsiPlatform,
-          isCliAnimationEnabled: false,
+          defaultCliAnimationEnabled: false,
         ),
         stdio: fakeStdio,
         stopwatchFactory: FakeStopwatchFactory(stopwatch: FakeStopwatch()),

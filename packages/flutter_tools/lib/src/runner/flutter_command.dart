@@ -261,6 +261,16 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: !verboseHelp,
     );
+    argParser.addOption(
+      'web-tls-cert-path',
+      help: 'The certificate that host will use to serve using TLS connection. '
+          'If not provided, the tool will use default http scheme.',
+    );
+    argParser.addOption(
+      'web-tls-cert-key-path',
+      help: 'The certificate key that host will use to authenticate cert. '
+          'If not provided, the tool will use default http scheme.',
+    );
     argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
       defaultsTo: 'ws',
@@ -1611,6 +1621,7 @@ abstract class FlutterCommand extends Command<void> {
       commandPath: commandPath,
       result: commandResult.toString(),
       maxRss: maxRss,
+      commandHasTerminal: globals.stdio.hasTerminal,
     ));
 
     // Send timing.
@@ -1696,6 +1707,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
         processManager: globals.processManager,
         platform: globals.platform,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         projectDir: project.directory,
         generateDartPluginRegistry: true,
       );

@@ -3604,6 +3604,55 @@ void main() {
     expect(getIconData(tester).color, const Color(0xff112233));
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/138287.
+  testWidgetsWithLeakTracking("Enabling and disabling Chip with Tooltip doesn't throw an exception", (WidgetTester tester) async {
+    bool isEnabled = true;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawChip(
+                    tooltip: 'tooltip',
+                    isEnabled: isEnabled,
+                    onPressed: isEnabled ? () {} : null,
+                    label: const Text('RawChip'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isEnabled = !isEnabled;
+                      });
+                    },
+                    child: Text('${isEnabled ? 'Disable' : 'Enable'} Chip'),
+                  )
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Tap the elevated button to disable the chip with a tooltip.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Disable Chip'));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+
+    // Tap the elevated button to enable the chip with a tooltip.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Enable Chip'));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

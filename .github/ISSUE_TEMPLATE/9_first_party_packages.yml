@@ -59,12 +59,15 @@ body:
         - palette_generator
         - path_provider
         - pigeon
+        - platform
         - plugin_platform_interface
         - pointer_interceptor
+        - process
         - quick_actions
         - rfw
         - shared_preferences
         - standard_message_codec
+        - two_dimensional_scrollables
         - url_launcher
         - video_player
         - web_benchmarks
