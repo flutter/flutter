@@ -49,7 +49,7 @@ import 'routes.dart';
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopEntry] and [ModalRoute.unregisterPopEntry],
 ///    which this widget uses to integrate with Flutter's navigation system.
-class PopScope extends StatefulWidget {
+class PopScope<T> extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
   const PopScope({
@@ -81,7 +81,7 @@ class PopScope extends StatefulWidget {
   /// See also:
   ///
   ///  * [Route.onPopInvoked], which is similar.
-  final PopInvokedCallback? onPopInvoked;
+  final PopInvokedCallback<T>? onPopInvoked;
 
   /// {@template flutter.widgets.PopScope.canPop}
   /// When false, blocks the current route from being popped.
@@ -99,14 +99,14 @@ class PopScope extends StatefulWidget {
   final bool canPop;
 
   @override
-  State<PopScope> createState() => _PopScopeState();
+  State<PopScope<T>> createState() => _PopScopeState<T>();
 }
 
-class _PopScopeState extends State<PopScope> implements PopEntry {
+class _PopScopeState<T> extends State<PopScope<T>> implements PopEntry<T> {
   ModalRoute<dynamic>? _route;
 
   @override
-  PopInvokedCallback? get onPopInvoked => widget.onPopInvoked;
+  PopInvokedCallback<T>? get onPopInvoked => widget.onPopInvoked;
 
   @override
   late final ValueNotifier<bool> canPopNotifier;
@@ -129,7 +129,7 @@ class _PopScopeState extends State<PopScope> implements PopEntry {
   }
 
   @override
-  void didUpdateWidget(PopScope oldWidget) {
+  void didUpdateWidget(PopScope<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     canPopNotifier.value = widget.canPop;
   }

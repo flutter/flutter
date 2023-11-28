@@ -79,6 +79,40 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets('pop scope can receive result', (WidgetTester tester) async {
+    Object? receivedResult;
+    final Object poppedResult = Object();
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        navigatorKey: nav,
+        home: Scaffold(
+          body: PopScope<Object?>(
+            canPop: false,
+            onPopInvoked: (bool didPop, Object? result) {
+              receivedResult = result;
+            },
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Home/PopScope Page'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    nav.currentState!.maybePop(poppedResult);
+    await tester.pumpAndSettle();
+    expect(receivedResult, poppedResult);
+  },
+    variant: TargetPlatformVariant.all(),
+  );
+
   testWidgets('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     bool canPop = true;
@@ -115,9 +149,9 @@ void main() {
               builder: (BuildContext context, StateSetter stateSetter) {
                 oneContext = context;
                 setState = stateSetter;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop,
-                  onPopInvoked: (bool didPop) {
+                  onPopInvoked: (bool didPop, _) {
                     lastPopSuccess = didPop;
                   },
                   child: const Center(

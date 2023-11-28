@@ -143,7 +143,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return null;
   }
 
-  Future<void> _handlePopInvoked(bool didPop) async {
+  Future<void> _handlePopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
