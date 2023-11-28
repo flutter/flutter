@@ -1329,7 +1329,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
 
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
-  /// ancestor or null if no such ancestor exists.
+  /// ancestor or [TextScaler.noScaling] if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
@@ -1339,7 +1339,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static TextScaler textScalerOf(BuildContext context) => maybeTextScalerOf(context) ?? TextScaler.noScaling;
 
   /// Returns the [MediaQueryData.textScaler] for the nearest [MediaQuery]
-  /// ancestor or [TextScaler.noScaling] if no such ancestor exists.
+  /// ancestor or null if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
