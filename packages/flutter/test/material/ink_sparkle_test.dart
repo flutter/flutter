@@ -179,7 +179,7 @@ Future<void> _runM3Test(WidgetTester tester, String positionName, double distanc
           key: repaintKey,
           child: ElevatedButton(
             key: buttonKey,
-            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+            style: ElevatedButton.styleFrom(),
             child: const Text('Sparkle!'),
             onPressed: () { },
           ),
