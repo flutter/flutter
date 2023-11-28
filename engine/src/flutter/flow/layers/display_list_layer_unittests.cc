@@ -578,7 +578,7 @@ TEST_F(DisplayListLayerTest, OverflowCachedDisplayListOpacityInheritance) {
   int layer_count = per_frame + 1;
   SkPoint opacity_offset = {10, 10};
   auto opacity_layer = std::make_shared<OpacityLayer>(0.5f, opacity_offset);
-  std::shared_ptr<DisplayListLayer> layers[layer_count];
+  std::vector<std::shared_ptr<DisplayListLayer>> layers;
   for (int i = 0; i < layer_count; i++) {
     DisplayListBuilder builder(false);
     builder.DrawRect({0, 0, 100, 100}, DlPaint());
@@ -587,9 +587,9 @@ TEST_F(DisplayListLayerTest, OverflowCachedDisplayListOpacityInheritance) {
     ASSERT_FALSE(display_list->can_apply_group_opacity());
     SkPoint offset = {i * 200.0f, 0};
 
-    layers[i] =
-        std::make_shared<DisplayListLayer>(offset, display_list, true, false);
-    opacity_layer->Add(layers[i]);
+    layers.push_back(
+        std::make_shared<DisplayListLayer>(offset, display_list, true, false));
+    opacity_layer->Add(layers.back());
   }
   for (size_t j = 0; j < context->raster_cache->access_threshold(); j++) {
     context->raster_cache->BeginFrame();

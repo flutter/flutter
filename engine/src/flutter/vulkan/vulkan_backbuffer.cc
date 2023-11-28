@@ -97,7 +97,7 @@ bool VulkanBackbuffer::CreateFences() {
 }
 
 bool VulkanBackbuffer::WaitFences() {
-  VkFence fences[use_fences_.size()];
+  VkFence fences[std::tuple_size_v<decltype(use_fences_)>];
 
   for (size_t i = 0; i < use_fences_.size(); i++) {
     fences[i] = use_fences_[i];
@@ -109,7 +109,7 @@ bool VulkanBackbuffer::WaitFences() {
 }
 
 bool VulkanBackbuffer::ResetFences() {
-  VkFence fences[use_fences_.size()];
+  VkFence fences[std::tuple_size_v<decltype(use_fences_)>];
 
   for (size_t i = 0; i < use_fences_.size(); i++) {
     fences[i] = use_fences_[i];

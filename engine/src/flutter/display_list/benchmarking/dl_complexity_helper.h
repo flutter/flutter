@@ -221,8 +221,8 @@ class ComplexityCalculatorHelper
                                        unsigned int conic_verb_cost,
                                        unsigned int cubic_verb_cost) {
     int verb_count = path.countVerbs();
-    uint8_t verbs[verb_count];
-    path.getVerbs(verbs, verb_count);
+    std::vector<uint8_t> verbs(verb_count);
+    path.getVerbs(verbs.data(), verbs.size());
 
     unsigned int complexity = 0;
     for (int i = 0; i < verb_count; i++) {
