@@ -1046,6 +1046,7 @@
 ../../../flutter/third_party/tonic/AUTHORS
 ../../../flutter/third_party/tonic/PATENTS
 ../../../flutter/third_party/tonic/README.md
+../../../flutter/third_party/tonic/file_loader/file_loader_unittests.cc
 ../../../flutter/third_party/tonic/filesystem/README.md
 ../../../flutter/third_party/tonic/filesystem/tests
 ../../../flutter/third_party/tonic/tests
