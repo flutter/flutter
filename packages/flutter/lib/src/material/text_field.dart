@@ -992,13 +992,15 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   int get _currentLength => _effectiveController.value.text.characters.length;
 
-  bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength! > 0 && _effectiveController.value.text.characters.length > widget.maxLength!;
+  bool get _hasIntrinsicError => widget.maxLength != null && 
+                                 widget.maxLength! > 0 && 
+                                 (widget.controller == null ?
+                                 (_controller?.isRegistered ?? false) && _effectiveController.value.text.characters.length > widget.maxLength! :
+                                 _effectiveController.value.text.characters.length > widget.maxLength!);
 
   bool get _hasError => widget.decoration?.errorText != null || widget.decoration?.error != null || _hasIntrinsicError;
 
   Color get _errorColor => widget.cursorErrorColor ?? widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
-
-  bool? _hadError;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -1092,18 +1094,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
-  void _updateMaterialErrorState() {
-    if (_hasError != _hadError) {
-      _statesController.update(MaterialState.error, _hasError);
-      _hadError = _hasError;
-    }
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _effectiveFocusNode.canRequestFocus = _canRequestFocus;
-    _updateMaterialErrorState();
   }
 
   @override
@@ -1131,13 +1125,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
 
     if (widget.statesController == oldWidget.statesController) {
-      final bool isOldWidgetEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
-
-      if (_isEnabled != isOldWidgetEnabled) {
-        _statesController.update(MaterialState.disabled, !_isEnabled);
-      }
-
-      _updateMaterialErrorState();
+      _statesController.update(MaterialState.disabled, !_isEnabled);
+      _statesController.update(MaterialState.hovered, _isHovering);
+      _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
+      _statesController.update(MaterialState.error, _hasError);
     } else {
       oldWidget.statesController?.removeListener(_handleStatesControllerChange);
       if (widget.statesController != null) {
@@ -1145,7 +1136,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         _internalStatesController = null;
       }
       _initStatesController();
-      _updateMaterialErrorState();
     }
   }
 
@@ -1295,6 +1285,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _statesController.update(MaterialState.disabled, !_isEnabled);
     _statesController.update(MaterialState.hovered, _isHovering);
     _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(MaterialState.error, _hasError);
     _statesController.addListener(_handleStatesControllerChange);
   }
 
