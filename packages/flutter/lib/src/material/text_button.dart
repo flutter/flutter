@@ -243,13 +243,11 @@ class TextButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
   ///
-  /// {@template flutter.material.text_button.default_font_size}
   /// The "default font size" below refers to the font size specified in the
   /// [defaultStyleOf] method (or 14.0 if unspecified), scaled by the
   /// `MediaQuery.textScalerOf(context).scale` method. And the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been abbreviated
   /// for readability.
-  /// {@endtemplate}
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.

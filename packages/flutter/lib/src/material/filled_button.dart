@@ -276,7 +276,7 @@ class FilledButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state, and "others" means all other states.
   ///
-  /// {@macro flutter.material.text_button.default_font_size}
+  /// {@macro flutter.material.elevated_button.default_font_size}
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
