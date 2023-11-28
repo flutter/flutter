@@ -130,7 +130,7 @@ class ScaleStartDetails {
   /// recognizer.
   final int pointerCount;
 
-  /// Recorded timestamp of the source pointer event that triggered the drag
+  /// Recorded timestamp of the source pointer event that triggered the scale
   /// event.
   ///
   /// Could be null if triggered from proxied events such as accessibility.
@@ -233,7 +233,7 @@ class ScaleUpdateDetails {
   /// recognizer.
   final int pointerCount;
 
-  /// Recorded timestamp of the source pointer event that triggered the drag
+  /// Recorded timestamp of the source pointer event that triggered the scale
   /// event.
   ///
   /// Could be null if triggered from proxied events such as accessibility.
