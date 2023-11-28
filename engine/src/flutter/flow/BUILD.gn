@@ -94,6 +94,7 @@ source_set("flow") {
     "//flutter/common/graphics",
     "//flutter/display_list",
     "//flutter/fml",
+    "//flutter/third_party/txt",
   ]
 
   deps = [ "//flutter/skia" ]

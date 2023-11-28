@@ -46,6 +46,10 @@
 
 #if EMBED_TEST_FONT_DATA
 
+#include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/include/core/SkTypeface.h"
+#include "txt/platform.h"
+
 static const unsigned char kAhemFont[] = {
     0x00, 0x01, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x80, 0x00, 0x03, 0x00, 0x30,
     0x4f, 0x53, 0x2f, 0x32, 0x77, 0x60, 0xf9, 0x6f, 0x00, 0x00, 0x01, 0x38,
@@ -1621,11 +1625,12 @@ namespace flutter {
 std::vector<sk_sp<SkTypeface>> GetTestFontData() {
   std::vector<sk_sp<SkTypeface>> typefaces;
 #if EMBED_TEST_FONT_DATA
-  typefaces.push_back(SkTypeface::MakeFromStream(
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  typefaces.push_back(font_mgr->makeFromStream(
       SkMemoryStream::MakeDirect(kFlutterTestFont, kFlutterTestFontLength)));
-  typefaces.push_back(SkTypeface::MakeFromStream(
+  typefaces.push_back(font_mgr->makeFromStream(
       SkMemoryStream::MakeDirect(kAhemFont, kAhemFontLength)));
-  typefaces.push_back(SkTypeface::MakeFromStream(
+  typefaces.push_back(font_mgr->makeFromStream(
       SkMemoryStream::MakeDirect(kCoughFont, kCoughFontLength)));
 #endif  // EMBED_TEST_FONT_DATA
   return typefaces;

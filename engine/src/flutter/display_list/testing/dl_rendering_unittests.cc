@@ -23,15 +23,18 @@
 
 #include "third_party/skia/include/core/SkBBHFactory.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/GrRecordingContext.h"
 #include "third_party/skia/include/gpu/GrTypes.h"
+#include "txt/platform.h"
 
 namespace flutter {
 namespace testing {
@@ -2747,7 +2750,8 @@ class CanvasCompareTester {
 
   static sk_sp<SkTextBlob> MakeTextBlob(const std::string& string,
                                         SkScalar font_height) {
-    SkFont font(SkTypeface::MakeFromName("ahem", SkFontStyle::Normal()),
+    SkFont font(txt::GetDefaultFontManager()->matchFamilyStyle(
+                    "ahem", SkFontStyle::Normal()),
                 font_height);
     return SkTextBlob::MakeFromText(string.c_str(), string.size(), font,
                                     SkTextEncoding::kUTF8);

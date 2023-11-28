@@ -10,6 +10,9 @@
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/include/core/SkTypeface.h"
+#include "txt/platform.h"
 
 namespace impeller {
 
@@ -56,7 +59,8 @@ SkFont DlPlayground::CreateTestFontOfSize(SkScalar scalar) {
   static constexpr const char* kTestFontFixture = "Roboto-Regular.ttf";
   auto mapping = flutter::testing::OpenFixtureAsSkData(kTestFontFixture);
   FML_CHECK(mapping);
-  return SkFont{SkTypeface::MakeFromData(mapping), scalar};
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  return SkFont{font_mgr->makeFromData(mapping), scalar};
 }
 
 SkFont DlPlayground::CreateTestFont() {

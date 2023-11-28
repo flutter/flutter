@@ -63,6 +63,7 @@ impeller_component("display_list_unittests") {
     "../playground:playground_test",
     "//flutter/impeller/scene",
     "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
+    "//flutter/third_party/txt",
   ]
 
   if (!defined(defines)) {
