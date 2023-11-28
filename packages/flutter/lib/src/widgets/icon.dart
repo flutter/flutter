@@ -250,14 +250,11 @@ class Icon extends StatelessWidget {
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
-    final bool? applyTextScaling = this.applyTextScaling ?? iconTheme.applyTextScaling;
+    final bool applyTextScaling = this.applyTextScaling ?? iconTheme.applyTextScaling ?? false;
 
-    final double? tentativeIconSize = size ?? iconTheme.size;
+    final double tentativeIconSize = size ?? iconTheme.size ?? kDefaultFontSize;
 
-    final double? iconSize = switch ((tentativeIconSize, applyTextScaling)) {
-      (final double tentativeIconSize, true) => MediaQuery.textScalerOf(context).scale(tentativeIconSize),
-      _ => tentativeIconSize,
-    };
+    final double iconSize = applyTextScaling ? MediaQuery.textScalerOf(context).scale(tentativeIconSize) : tentativeIconSize;
 
     final double? iconFill = fill ?? iconTheme.fill;
 
