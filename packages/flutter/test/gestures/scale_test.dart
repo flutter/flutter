@@ -1410,7 +1410,7 @@ void main() {
     expect(didTap, isFalse);
     expect(initialSourceTimestamp, isNull);
 
-    // One-finger panning
+    // One-finger panning.
     tester.route(down);
     expect(didStartScale, isFalse);
     expect(updatedScale, isNull);
@@ -1437,7 +1437,7 @@ void main() {
     expect(didTap, isFalse);
     expect(scale.pointerCount, 1);
 
-    // Two-finger scaling
+    // Two-finger scaling.
     final TestPointer pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0, ), timeStamp: const Duration(milliseconds: 30));
     scale.addPointer(down2);
@@ -1455,7 +1455,7 @@ void main() {
     expect(didStartScale, isFalse);
     expect(initialSourceTimestamp, isNull);
 
-    // Zoom in
+    // Zoom in.
     tester.route(pointer2.move(const Offset(0.0, 10.0), timeStamp: const Duration(milliseconds: 40)));
     expect(didStartScale, isTrue);
     didStartScale = false;
@@ -1476,7 +1476,7 @@ void main() {
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
-    // Zoom out
+    // Zoom out.
     tester.route(pointer2.move(const Offset(15.0, 25.0), timeStamp: const Duration(milliseconds: 50)));
     expect(updatedFocalPoint, const Offset(17.5, 27.5));
     expect(updatedScale, 0.5);
@@ -1488,14 +1488,14 @@ void main() {
     expect(initialSourceTimestamp, isNull);
 
 
-    // Horizontal scaling
+    // Horizontal scaling.
     tester.route(pointer2.move(const Offset(0.0, 20.0), timeStamp: const Duration(milliseconds: 60)));
     expect(updatedHorizontalScale, 2.0);
     expect(updatedVerticalScale, 1.0);
     expect(updatedSourceTimestamp, const Duration(milliseconds: 60));
     expect(initialSourceTimestamp, isNull);
 
-    // Vertical scaling
+    // Vertical scaling.
     tester.route(pointer2.move(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 70)));
     expect(updatedHorizontalScale, 1.0);
     expect(updatedVerticalScale, 2.0);
@@ -1508,7 +1508,7 @@ void main() {
     updatedDelta = null;
     updatedSourceTimestamp = null;
 
-    // Three-finger scaling
+    // Three-finger scaling.
     final TestPointer pointer3 = TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(25.0, 35.0), timeStamp: const Duration(milliseconds: 80));
     scale.addPointer(down3);
@@ -1525,7 +1525,7 @@ void main() {
     expect(initialSourceTimestamp, isNull);
 
 
-    // Zoom in
+    // Zoom in.
     tester.route(pointer3.move(const Offset(55.0, 65.0), timeStamp: const Duration(milliseconds: 90)));
     expect(didStartScale, isTrue);
     didStartScale = false;
@@ -1542,7 +1542,7 @@ void main() {
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
-    // Return to original positions but with different fingers
+    // Return to original positions but with different fingers.
     tester.route(pointer1.move(const Offset(25.0, 35.0), timeStamp: const Duration(milliseconds: 100)));
     tester.route(pointer2.move(const Offset(20.0, 30.0), timeStamp: const Duration(milliseconds: 110)));
     tester.route(pointer3.move(const Offset(15.0, 25.0), timeStamp: const Duration(milliseconds: 120)));
@@ -1570,7 +1570,7 @@ void main() {
     didEndScale = false;
     expect(didTap, isFalse);
 
-    // Continue scaling with two fingers
+    // Continue scaling with two fingers.
     tester.route(pointer3.move(const Offset(10.0, 20.0), timeStamp: const Duration(milliseconds: 130)));
     expect(didStartScale, isTrue);
     didStartScale = false;
@@ -1585,7 +1585,7 @@ void main() {
     expect(initialSourceTimestamp, const Duration(milliseconds: 130));
     initialSourceTimestamp = null;
 
-    // Continue rotating with two fingers
+    // Continue rotating with two fingers.
     tester.route(pointer3.move(const Offset(30.0, 40.0), timeStamp: const Duration(milliseconds: 140)));
     expect(updatedFocalPoint, const Offset(25.0, 35.0));
     updatedFocalPoint = null;
@@ -1618,7 +1618,7 @@ void main() {
     didEndScale = false;
     expect(didTap, isFalse);
 
-    // Continue panning with one finger
+    // Continue panning with one finger.
     tester.route(pointer3.move(Offset.zero, timeStamp: const Duration(milliseconds: 150)));
     expect(didStartScale, isTrue);
     didStartScale = false;
@@ -1633,7 +1633,7 @@ void main() {
     expect(initialSourceTimestamp, const Duration(milliseconds: 150));
     initialSourceTimestamp = null;
 
-    // We are done
+    // We are done.
     tester.route(pointer3.up());
     expect(didStartScale, isFalse);
     expect(updatedFocalPoint, isNull);
