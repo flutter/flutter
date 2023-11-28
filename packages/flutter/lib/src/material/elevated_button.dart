@@ -248,7 +248,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// {@template flutter.material.elevated_button.default_font_size}
   /// The "default font size" below refers to the font size specified in the
   /// [defaultStyleOf] method (or 14.0 if unspecified), scaled by the
-  /// `MediaQuery.textScalerOf(context).scale` method. And the names of the
+  /// `MediaQuery.textScalerOf(context).scale` method. The names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been abbreviated
   /// for readability.
   /// {@endtemplate}
