@@ -177,7 +177,7 @@ class Form extends StatefulWidget {
   ///  * [canPop], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
   ///  * [PopScope.onPopInvoked], which is what [Form] delegates to internally.
-  final PopInvokedCallback? onPopInvoked;
+  final PopInvokedCallback<Object?>? onPopInvoked;
 
   /// Called when one of the form fields changes.
   ///
@@ -244,7 +244,7 @@ class FormState extends State<Form> {
     }
 
     if (widget.canPop != null || widget.onPopInvoked != null) {
-      return PopScope(
+      return PopScope<Object?>(
         canPop: widget.canPop ?? true,
         onPopInvoked: widget.onPopInvoked,
         child: _FormScope(

@@ -355,7 +355,7 @@ abstract class Route<T> {
   /// will still be called. The `didPop` parameter indicates whether or not the
   /// back navigation actually happened successfully.
   /// {@endtemplate}
-  void onPopInvoked(bool didPop) {}
+  void onPopInvoked(bool didPop, T? result) {}
 
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
@@ -3113,7 +3113,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(isPresent);
     pendingResult = result;
     currentState = _RouteLifecycle.pop;
-    route.onPopInvoked(true);
+    route.onPopInvoked(true, result);
   }
 
   bool _reportRemovalToObserver = true;
@@ -5243,7 +5243,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         pop(result);
         return true;
       case RoutePopDisposition.doNotPop:
-        lastEntry.route.onPopInvoked(false);
+        lastEntry.route.onPopInvoked(false, result);
         return true;
     }
   }
