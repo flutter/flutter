@@ -1474,7 +1474,9 @@ class OverlayPortalController {
 /// widget can depend on.
 ///
 /// This widget requires an [Overlay] ancestor in the widget tree when its
-/// overlay child is showing.
+/// overlay child is showing. The overlay child is rendered by the [Overlay]
+/// ancestor, not by the widget itself. This allows the overlay child to float
+/// above other widgets, independent of its position in the widget tree.
 ///
 /// When [OverlayPortalController.hide] is called, the widget built using
 /// [overlayChildBuilder] will be removed from the widget tree the next time the
