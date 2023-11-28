@@ -33,7 +33,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// settings. It is used to implement features such as [MediaQuery].
 ///
 /// This class can be extended directly, or mixed in, to get default behaviors
-/// for all of the handlers. Alternatively it can can be used with the
+/// for all of the handlers. Alternatively it can be used with the
 /// `implements` keyword, in which case all the handlers must be implemented
 /// (and the analyzer will list those that have been omitted).
 ///
