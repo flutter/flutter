@@ -123,7 +123,8 @@ class IconThemeData with Diagnosticable {
     && grade != null
     && opticalSize != null
     && color != null
-    && opacity != null;
+    && opacity != null
+    && applyTextScaling != null;
 
   /// The default for [Icon.size].
   ///
