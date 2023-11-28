@@ -243,10 +243,13 @@ class TextButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
   ///
-  /// The "default font size" is the value of the font size specified by the
-  /// [ButtonStyle], scaled by `MediaQuery.textScalerOf(context).scale`, and the
-  /// names of the EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have
-  /// been abbreviated for readability.
+  /// {@template flutter.material.text_button.default_font_size}
+  /// The "default font size" below refers to the font size specified in the
+  /// [defaultStyleOf] method (or 14.0 if unspecified), scaled by the
+  /// `MediaQuery.textScalerOf(context).scale` method. And the names of the
+  /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been abbreviated
+  /// for readability.
+  /// {@endtemplate}
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
@@ -494,8 +497,8 @@ class _TextButtonWithIcon extends TextButton {
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final MaterialStateProperty<TextStyle?>? textStyleProperty = style?.textStyle ?? themeStyleOf(context)?.textStyle;
-    final double defaultFontSize = textStyleProperty?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final ButtonStyle buttonStyle = super.defaultStyleOf(context);
+    final double defaultFontSize = buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
       useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
@@ -503,7 +506,7 @@ class _TextButtonWithIcon extends TextButton {
       const EdgeInsets.symmetric(horizontal: 4),
       effectiveTextScale,
     );
-    return super.defaultStyleOf(context).copyWith(
+    return buttonStyle.copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
   }

@@ -433,8 +433,8 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
     if (!useMaterial3) {
       return super.defaultStyleOf(context);
     }
-    final MaterialStateProperty<TextStyle?>? textStyleProperty = style?.textStyle ?? themeStyleOf(context)?.textStyle;
-    final double defaultFontSize = textStyleProperty?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final ButtonStyle buttonStyle = super.defaultStyleOf(context);
+    final double defaultFontSize = buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
       const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
@@ -442,7 +442,7 @@ class _OutlinedButtonWithIcon extends OutlinedButton {
       const EdgeInsetsDirectional.fromSTEB(4, 0, 6, 0),
       effectiveTextScale,
     );
-    return super.defaultStyleOf(context).copyWith(
+    return buttonStyle.copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
   }

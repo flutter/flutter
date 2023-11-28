@@ -245,10 +245,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state, and "others" means all other states.
   ///
-  /// The "default font size" is the value of the font size specified by the
-  /// [ButtonStyle], scaled by `MediaQuery.textScalerOf(context).scale`, and the
-  /// names of the EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have
-  /// been abbreviated for readability.
+  /// {@macro flutter.material.text_button.default_font_size}
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
@@ -501,9 +498,10 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
   @override
   ButtonStyle defaultStyleOf(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final MaterialStateProperty<TextStyle?>? textStyleProperty = style?.textStyle ?? themeStyleOf(context)?.textStyle;
-    final double defaultFontSize = textStyleProperty?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
+    final ButtonStyle buttonStyle = super.defaultStyleOf(context);
+    final double defaultFontSize = buttonStyle.textStyle?.resolve(const <MaterialState>{})?.fontSize ?? 14.0;
     final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+
     final EdgeInsetsGeometry scaledPadding = useMaterial3
     ?  ButtonStyleButton.scaledPadding(
       const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
@@ -516,7 +514,7 @@ class _ElevatedButtonWithIcon extends ElevatedButton {
       const EdgeInsetsDirectional.fromSTEB(8, 0, 4, 0),
       effectiveTextScale,
     );
-    return super.defaultStyleOf(context).copyWith(
+    return buttonStyle.copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
     );
   }
