@@ -243,10 +243,10 @@ class TextButton extends ButtonStyleButton {
   /// value for all states, otherwise the values are as specified for
   /// each state and "others" means all other states.
   ///
-  /// The `textScaleFactor` is the value of
-  /// `MediaQuery.textScalerOf(context).textScaleFactor` and the names of the
-  /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
-  /// abbreviated for readability.
+  /// The "default font size" is the value of the font size specified by the
+  /// [ButtonStyle], scaled by `MediaQuery.textScalerOf(context).scale`, and the
+  /// names of the EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have
+  /// been abbreviated for readability.
   ///
   /// The color of the [ButtonStyle.textStyle] is not used, the
   /// [ButtonStyle.foregroundColor] color is used instead.
@@ -265,10 +265,10 @@ class TextButton extends ButtonStyleButton {
   /// * `shadowColor` - Theme.shadowColor
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - (horizontal(12), vertical(8))
-  ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
-  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
-  ///   * `3 < textScaleFactor` - horizontal(4)
+  ///   * `default font size <= 14` - (horizontal(12), vertical(8))
+  ///   * `14 < default font size <= 28` - lerp(all(8), horizontal(8))
+  ///   * `28 < default font size <= 36` - lerp(horizontal(8), horizontal(4))
+  ///   * `36 < default font size` - horizontal(4)
   /// * `minimumSize` - Size(64, 36)
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite
@@ -287,9 +287,9 @@ class TextButton extends ButtonStyleButton {
   /// The default padding values for the [TextButton.icon] factory are slightly different:
   ///
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - all(8)
-  ///   * `1 < textScaleFactor <= 2 `- lerp(all(8), horizontal(4))
-  ///   * `2 < textScaleFactor` - horizontal(4)
+  ///   * `default font size <= 14` - all(8)
+  ///   * `14 < default font size <= 28 `- lerp(all(8), horizontal(4))
+  ///   * `28 < default font size` - horizontal(4)
   ///
   /// The default value for `side`, which defines the appearance of the button's
   /// outline, is null. That means that the outline is defined by the button
@@ -315,10 +315,10 @@ class TextButton extends ButtonStyleButton {
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
-  ///   * `textScaleFactor <= 1` - lerp(horizontal(12), horizontal(4))
-  ///   * `1 < textScaleFactor <= 2` - lerp(all(8), horizontal(8))
-  ///   * `2 < textScaleFactor <= 3` - lerp(horizontal(8), horizontal(4))
-  ///   * `3 < textScaleFactor` - horizontal(4)
+  ///   * `default font size <= 14` - lerp(horizontal(12), horizontal(4))
+  ///   * `14 < default font size <= 28` - lerp(all(8), horizontal(8))
+  ///   * `28 < default font size <= 36` - lerp(horizontal(8), horizontal(4))
+  ///   * `36 < default font size` - horizontal(4)
   /// * `minimumSize` - Size(64, 40)
   /// * `fixedSize` - null
   /// * `maximumSize` - Size.infinite

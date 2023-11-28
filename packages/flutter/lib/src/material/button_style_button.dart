@@ -170,17 +170,22 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// A convenience method for subclasses.
   static MaterialStateProperty<T>? allOrNull<T>(T? value) => value == null ? null : MaterialStatePropertyAll<T>(value);
 
-  /// Returns an interpolated value based on the [effectiveTextScaleFactor]
-  /// parameter:
+  /// A convenience method used by subclasses in the framework, that returns an
+  /// interpolated value based on the [effectiveTextScaleFactor] parameter:
   ///
   ///  * 0 - 1 [geometry1x]
   ///  * 1 - 2 lerp([geometry1x], [geometry2x], [effectiveTextScaleFactor] - 1)
   ///  * 2 - 3 lerp([geometry2x], [geometry3x], [effectiveTextScaleFactor] - 2)
   ///  * otherwise [geometry3x]
   ///
-  /// A convenience method for subclasses. The [geometry1x], [geometry2x],
-  /// [geometry3x] parameters are typically set to empirical values for
+  /// This method is used by the framework for estimating the default paddings to
+  /// use on a button with a text label, when the system text scaling setting
+  /// changes. It's usually supplied with empirical [geometry1x], [geometry2x],
+  /// [geometry3x] values adjusted for different system text scaling values, when
+  /// the unscaled font size is set to 14.0 (the default [TextTheme.labelLarge]
+  /// value).
   ///
+  /// This method typically shouldn't be used outside of the Flutter framework.
   static EdgeInsetsGeometry scaledPadding(
     EdgeInsetsGeometry geometry1x,
     EdgeInsetsGeometry geometry2x,
