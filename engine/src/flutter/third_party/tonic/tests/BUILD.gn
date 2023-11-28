@@ -15,6 +15,7 @@ executable("tonic_unittests") {
   public_configs = [ "//flutter:export_dynamic_symbols" ]
 
   sources = [
+    "../file_loader/file_loader_unittests.cc",
     "dart_persistent_handle_unittest.cc",
     "dart_state_unittest.cc",
     "dart_weak_persistent_handle_unittest.cc",

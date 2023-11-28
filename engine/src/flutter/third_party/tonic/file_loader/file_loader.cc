@@ -136,8 +136,10 @@ Dart_Handle FileLoader::CanonicalizeURL(Dart_Handle library, Dart_Handle url) {
     return url;
   if (string.find(kPackageScheme) == 0u)
     return StdStringToDart(SanitizePath(string));
-  if (string.find(kFileScheme) == 0u)
-    return StdStringToDart(SanitizePath(CanonicalizeFileURL(string)));
+
+  if (string.find(kFileScheme) == 0u) {
+    return StdStringToDart(SanitizeURIEscapedCharacters(string));
+  }
 
   std::string library_url = StdStringFromDart(Dart_LibraryUrl(library));
   std::string prefix = ExtractSchemePrefix(library_url);

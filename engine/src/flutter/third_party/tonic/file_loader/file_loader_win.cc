@@ -39,10 +39,6 @@ std::string FileLoader::SanitizePath(const std::string& url) {
   return SanitizeURIEscapedCharacters(sanitized);
 }
 
-std::string FileLoader::CanonicalizeFileURL(const std::string& url) {
-  return SanitizePath(url.substr(FileLoader::kFileURLPrefixLength));
-}
-
 bool FileLoader::ReadFileToString(const std::string& path,
                                   std::string* result) {
   TONIC_DCHECK(dirfd_ == -1);
