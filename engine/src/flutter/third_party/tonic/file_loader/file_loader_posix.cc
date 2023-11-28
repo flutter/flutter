@@ -21,18 +21,8 @@ const char FileLoader::kFileURLPrefix[] = "file://";
 const size_t FileLoader::kFileURLPrefixLength =
     sizeof(FileLoader::kFileURLPrefix) - 1;
 
-namespace {
-
-const size_t kFileSchemeLength = FileLoader::kFileURLPrefixLength - 2;
-
-}  // namespace
-
 std::string FileLoader::SanitizePath(const std::string& url) {
   return SanitizeURIEscapedCharacters(url);
-}
-
-std::string FileLoader::CanonicalizeFileURL(const std::string& url) {
-  return url.substr(kFileSchemeLength);
 }
 
 bool FileLoader::ReadFileToString(const std::string& path,

@@ -46,7 +46,6 @@ class FileLoader {
  private:
   static std::string SanitizeURIEscapedCharacters(const std::string& str);
   static std::string SanitizePath(const std::string& path);
-  static std::string CanonicalizeFileURL(const std::string& url);
 
   std::string GetFilePathForURL(std::string url);
   std::string GetFilePathForPackageURL(std::string url);
