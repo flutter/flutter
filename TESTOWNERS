@@ -297,8 +297,6 @@
 ## Host only framework tests
 # Linux analyze
 /dev/bots/analyze.dart @HansMuller @flutter/framework
-# Linux/Mac/Windows customer_testing
-/dev/customer_testing/run_tests.dart @HansMuller @flutter/framework
 # Linux docs
 # Linux docs_test
 # Linux docs_publish
@@ -326,10 +324,12 @@
 # build_tests @eliasyishak @flutter/tool
 # ci_yaml flutter roller @caseyhillers @flutter/infra
 # coverage @godofredoc @flutter/infra
+# customer_testing @HansMuller @flutter/framework
 # flutter_packaging @godofredoc @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @HansMuller @flutter/framework
 # fuchsia_precache @christopherfujino @flutter/tool
+# realm_checker @jacksongardner @flutter/tool
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # tool_host_cross_arch_tests @andrewkolos @flutter/tool
@@ -341,4 +341,3 @@
 # web_long_running_tests @yjbanov @flutter/web
 # web_tests @yjbanov @flutter/web
 # web_tool_tests @eliasyishak @flutter/tool
-# realm_checker @jacksongardner @flutter/tool
