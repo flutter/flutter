@@ -1618,18 +1618,8 @@ Future<void> _runFuchsiaPrecache() async {
     'flutter',
     <String>[
       'precache',
-      '--fuchsia',
-      '--no-android',
-      '--no-ios',
-      '--force',
-    ],
-    workingDirectory: flutterRoot,
-  );
-  await runCommand(
-    'flutter',
-    <String>[
-      'precache',
       '--flutter_runner',
+      '--fuchsia',
       '--no-android',
       '--no-ios',
       '--force',
