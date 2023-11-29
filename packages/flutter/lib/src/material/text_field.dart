@@ -992,8 +992,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   int get _currentLength => _effectiveController.value.text.characters.length;
 
-  bool get _hasIntrinsicError => widget.maxLength != null && 
-                                 widget.maxLength! > 0 && 
+  bool get _hasIntrinsicError => widget.maxLength != null &&
+                                 widget.maxLength! > 0 &&
                                  (widget.controller == null ?
                                  !restorePending && _effectiveController.value.text.characters.length > widget.maxLength! :
                                  _effectiveController.value.text.characters.length > widget.maxLength!);
