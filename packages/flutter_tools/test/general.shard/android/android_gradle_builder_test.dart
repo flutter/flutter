@@ -914,7 +914,9 @@ Gradle Crashed
       AndroidStudio: () => FakeAndroidStudio(),
     });
 
-    testUsingContext('can call custom gradle task getApplicationIdForVariant and parse the result', () async {
+    testUsingContext('can call custom gradle task outputFreeDebugAppLinkSettings and parse the result', () async {
+      final String expectedOutputPath;
+      expectedOutputPath = fileSystem.path.join('/build/deeplink_data', 'app-link-settings-freeDebug.json');
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         java: FakeJava(),
         logger: logger,
@@ -927,10 +929,11 @@ Gradle Crashed
         platform: FakePlatform(),
         androidStudio: FakeAndroidStudio(),
       );
-      processManager.addCommand(const FakeCommand(
+      processManager.addCommand(FakeCommand(
         command: <String>[
           'gradlew',
           '-q',
+          '-PoutputPath=$expectedOutputPath',
           'outputFreeDebugAppLinkSettings',
         ],
       ));
@@ -940,6 +943,8 @@ Gradle Crashed
       );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {

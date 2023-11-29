@@ -28,6 +28,7 @@ Widget buildInputDecorator({
   bool isFocused = false,
   bool isHovering = false,
   bool useMaterial3 = false,
+  bool useIntrinsicWidth = false,
   TextStyle? baseStyle,
   TextAlignVertical? textAlignVertical,
   VisualDensity? visualDensity,
@@ -36,6 +37,21 @@ Widget buildInputDecorator({
     style: TextStyle(fontSize: 16.0),
   ),
 }) {
+  Widget widget = InputDecorator(
+    expands: expands,
+    decoration: decoration,
+    isEmpty: isEmpty,
+    isFocused: isFocused,
+    isHovering: isHovering,
+    baseStyle: baseStyle,
+    textAlignVertical: textAlignVertical,
+    child: child,
+  );
+
+  if (useIntrinsicWidth) {
+    widget = IntrinsicWidth(child: widget);
+  }
+
   return MaterialApp(
     theme: ThemeData(useMaterial3: false),
     home: Material(
@@ -52,16 +68,7 @@ Widget buildInputDecorator({
               alignment: Alignment.topLeft,
               child: Directionality(
                 textDirection: textDirection,
-                child: InputDecorator(
-                  expands: expands,
-                  decoration: decoration,
-                  isEmpty: isEmpty,
-                  isFocused: isFocused,
-                  isHovering: isHovering,
-                  baseStyle: baseStyle,
-                  textAlignVertical: textAlignVertical,
-                  child: child,
-                ),
+                child: widget,
               ),
             ),
           );
@@ -5021,14 +5028,15 @@ void runAllTests({ required bool useMaterial3 }) {
     final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
     // Fill is the border's outer path, a rounded rectangle
-    expect(box, paints..path(
+    expect(box, paints
+    ..drrect(
       style: PaintingStyle.fill,
-      color: const Color(0xFF00FF00),
-      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
-      excludes: <Offset>[
-        const Offset(1.0, 56.0 - 6.0), // bottom left
-        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
-      ],
+      inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
+          bottomRight: const Radius.elliptical(12.0, 11.5),
+          bottomLeft: const Radius.elliptical(12.0, 11.5)),
+      outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
+          bottomRight: const Radius.elliptical(12.0, 12.5),
+          bottomLeft: const Radius.elliptical(12.0, 12.5)),
     ));
   });
 
@@ -6972,6 +6980,48 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
     expect(decoratorRight, lessThanOrEqualTo(prefixRight));
   });
 
+  testWidgetsWithLeakTracking('instrinic width with prefixIcon/suffixIcon', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/137937
+    for (final TextDirection direction in TextDirection.values) {
+      Future<Size> measureText(InputDecoration decoration) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            useMaterial3: useMaterial3,
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            decoration: decoration,
+            useIntrinsicWidth: true,
+            textDirection: direction,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('text'), findsOneWidget);
+
+        return tester.renderObject<RenderBox>(find.text('text')).size;
+      }
+
+      const EdgeInsetsGeometry padding = EdgeInsetsDirectional.only(end: 24, start: 12);
+
+      final Size textSizeWithoutIcons = await measureText(const InputDecoration(
+        contentPadding: padding,
+      ));
+
+      final Size textSizeWithPrefixIcon = await measureText(const InputDecoration(
+        contentPadding: padding,
+        prefixIcon: Focus(child: Icon(Icons.search)),
+      ));
+
+      final Size textSizeWithSuffixIcon = await measureText(const InputDecoration(
+        contentPadding: padding,
+        suffixIcon: Focus(child: Icon(Icons.search)),
+      ));
+
+      expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
+      expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
+    }
+  });
+
   testWidgetsWithLeakTracking('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/129611
     const InputDecoration decoration = InputDecoration(
@@ -7016,5 +7066,41 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
       expect(decoration.isCollapsed, true);
     });
+  });
+
+  testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (WidgetTester tester) async {
+    const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+    const UnderlineInputBorder border = UnderlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    );
+    expect(
+      (Canvas canvas) => border.paint(canvas, canvasRect),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
+                bottomRight: const Radius.elliptical(12.0, 12.5),
+                bottomLeft: const Radius.elliptical(12.0, 12.5)),
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
+                bottomRight: const Radius.elliptical(12.0, 11.5),
+                bottomLeft: const Radius.elliptical(12.0, 11.5)),
+        ),
+    );
+
+    const UnderlineInputBorder border2 = UnderlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(60.0)),
+    );
+    expect(
+      (Canvas canvas) => border2.paint(canvas, canvasRect),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
+                bottomRight: const Radius.elliptical(50.0, 50.5),
+                bottomLeft: const Radius.elliptical(50.0, 50.5)),
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
+                bottomRight: const Radius.elliptical(50.0, 49.5),
+                bottomLeft: const Radius.elliptical(50.0, 49.5)),
+        ),
+      reason: 'clamp is expected',
+    );
   });
 }
