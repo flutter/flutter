@@ -3672,8 +3672,10 @@ external JSAny? get _createImageBitmapFunction;
 /// Set to `true` to disable `createImageBitmap` support. Used in tests.
 bool debugDisableCreateImageBitmapSupport = false;
 
-bool browserSupportsCreateImageBitmap =
-    !debugDisableCreateImageBitmapSupport || _createImageBitmapFunction != null;
+bool get browserSupportsCreateImageBitmap =>
+    _createImageBitmapFunction != null &&
+    !isChrome110OrOlderOnWindows &&
+    !debugDisableCreateImageBitmapSupport;
 
 @JS()
 @staticInterop
