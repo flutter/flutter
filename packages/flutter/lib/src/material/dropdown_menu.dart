@@ -518,14 +518,17 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         leadingIcon: entry.leadingIcon,
         trailingIcon: entry.trailingIcon,
         onPressed: entry.enabled
-          ? () {
-              textEditingController.text = entry.label;
-              textEditingController.selection =
-                TextSelection.collapsed(offset: textEditingController.text.length);
-              currentHighlight = widget.enableSearch ? i : null;
-              widget.onSelected?.call(entry.value);
-            }
-          : null,
+            ? () {
+                // The textEditingController may have been disposed if the DropdownMenu closes in response to a selection.
+                if (textEditingController.hasListeners) {
+                  textEditingController.text = entry.label;
+                  textEditingController.selection =
+                      TextSelection.collapsed(offset: textEditingController.text.length);
+                }
+                currentHighlight = widget.enableSearch ? i : null;
+                widget.onSelected?.call(entry.value);
+              }
+            : null,
         requestFocusOnHover: false,
         child: label,
       );

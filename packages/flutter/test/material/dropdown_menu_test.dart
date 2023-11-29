@@ -1180,6 +1180,57 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
+  testWidgetsWithLeakTracking('The onSelected gets called only when a selection is made in a nested menu',
+      (WidgetTester tester) async {
+    int selectionCount = 0;
+
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
+    ];
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return Scaffold(
+          body: MenuAnchor(
+            menuChildren: <Widget>[
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuWithDisabledItems,
+                onSelected: (_) {
+                  setState(() {
+                    selectionCount++;
+                  });
+                },
+              ),
+            ],
+            builder: (BuildContext context, MenuController controller, Widget? widget) {
+              return IconButton(
+                icon: const Icon(Icons.smartphone_rounded),
+                onPressed: () {
+                  controller.open();
+                },
+              );
+            },
+          ),
+        );
+      }),
+    ));
+
+    // Open the first menu
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    // Open the dropdown menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Disabled item doesn't trigger onSelected callback.
+    final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 0').last;
+    await tester.tap(item1);
+    await tester.pumpAndSettle();
+
+    expect(selectionCount, 1);
+  });
 
   testWidgetsWithLeakTracking('The selectedValue gives an initial text and highlights the according item', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
