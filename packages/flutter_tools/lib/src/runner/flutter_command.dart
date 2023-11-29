@@ -1161,7 +1161,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kValidateBuildName,
       defaultsTo: true,
       help: 'Validate the build name. On iOS, this will remove all non-digit '
-          'characters to ensure a valid format of x.y.z',
+          'characters to ensure a valid format of "x.y.z".',
     );
   }
 
