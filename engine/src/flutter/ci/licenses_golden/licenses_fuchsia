@@ -1,4 +1,4 @@
-Signature: 317fddaa55dac379b29f3f388a6912da
+Signature: 2876b2be8e782c4ab5c25a18a3c4eac5
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -3779,6 +3779,11 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/context.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/fields.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/handler.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/instrumentation.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/context.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/fields.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4033,6 +4038,11 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/str
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/context.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/fields.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/handler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/instrumentation.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/types.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/context.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/fields.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h
@@ -4356,6 +4366,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/mutex.h + ../../../
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/global.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/logger.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/wire_format.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/buffer_internal.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/fdio_connect.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event_args.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_args.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4654,6 +4665,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/mutex.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/global.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/logger.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/wire_format.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/buffer_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/fdio_connect.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event_args.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_args.h
@@ -9729,6 +9741,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_forma
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/iommu-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -9814,6 +9827,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/iommu-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl

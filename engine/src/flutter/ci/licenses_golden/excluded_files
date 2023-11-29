@@ -1360,6 +1360,7 @@
 ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/meta.json
 ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
+../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/meta.json
 ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
 ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
 ../../../fuchsia/sdk/linux/pkg/trace/meta.json
