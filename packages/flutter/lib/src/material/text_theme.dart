@@ -87,34 +87,22 @@ class TextTheme with Diagnosticable {
   /// other is allowed in this constructor. The 2018 styles are deprecated and
   /// will eventually be removed.
   const TextTheme({
-    TextStyle? displayLarge,
-    TextStyle? displayMedium,
-    TextStyle? displaySmall,
+    this.displayLarge,
+    this.displayMedium,
+    this.displaySmall,
     this.headlineLarge,
-    TextStyle? headlineMedium,
-    TextStyle? headlineSmall,
-    TextStyle? titleLarge,
-    TextStyle? titleMedium,
-    TextStyle? titleSmall,
-    TextStyle? bodyLarge,
-    TextStyle? bodyMedium,
-    TextStyle? bodySmall,
-    TextStyle? labelLarge,
+    this.headlineMedium,
+    this.headlineSmall,
+    this.titleLarge,
+    this.titleMedium,
+    this.titleSmall,
+    this.bodyLarge,
+    this.bodyMedium,
+    this.bodySmall,
+    this.labelLarge,
     this.labelMedium,
-    TextStyle? labelSmall,
-  }) : displayLarge = displayLarge,
-       displayMedium = displayMedium,
-       displaySmall = displaySmall,
-       headlineMedium = headlineMedium,
-       headlineSmall = headlineSmall,
-       titleLarge = titleLarge,
-       titleMedium = titleMedium,
-       titleSmall = titleSmall,
-       bodyLarge = bodyLarge,
-       bodyMedium = bodyMedium,
-       bodySmall = bodySmall,
-       labelLarge = labelLarge,
-       labelSmall = labelSmall;
+    this.labelSmall,
+  });
 
   /// Largest of the display styles.
   ///
