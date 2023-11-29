@@ -11,6 +11,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -20,9 +24,11 @@ import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.Build;
 import android.view.View;
@@ -84,18 +90,39 @@ public class PlatformPluginTest {
     PlatformChannel fakePlatformChannel = mock(PlatformChannel.class);
     PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, fakePlatformChannel);
 
+    // Successfully get the contents of the primary clip when they contain text.
     ClipboardContentFormat clipboardFormat = ClipboardContentFormat.PLAIN_TEXT;
     assertNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
     ClipData clip = ClipData.newPlainText("label", "Text");
     clipboardManager.setPrimaryClip(clip);
     assertNotNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
 
-    ContentResolver contentResolver = ctx.getContentResolver();
+    // Return null when the primary clip contains non-text media.
+    ContentResolver contentResolver = spy(ctx.getContentResolver());
     when(fakeActivity.getContentResolver()).thenReturn(contentResolver);
     Uri uri = Uri.parse("content://media/external_primary/images/media/");
     clip = ClipData.newUri(contentResolver, "URI", uri);
     clipboardManager.setPrimaryClip(clip);
     assertNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
+
+    // Still return text when the AssetFileDescriptor throws an IOException.
+    when(fakeActivity.getContentResolver()).thenReturn(contentResolver);
+    ClipDescription clipDescription =
+        new ClipDescription(
+            "label",
+            new String[] {
+              ClipDescription.MIMETYPE_TEXT_PLAIN, ClipDescription.MIMETYPE_TEXT_URILIST
+            });
+    ClipData.Item clipDataItem = new ClipData.Item("Text", null, uri);
+    ClipData clipData = new ClipData(clipDescription, clipDataItem);
+    clipboardManager.setPrimaryClip(clipData);
+    AssetFileDescriptor fakeAssetFileDescriptor = mock(AssetFileDescriptor.class);
+    doReturn(fakeAssetFileDescriptor)
+        .when(contentResolver)
+        .openTypedAssetFileDescriptor(eq(uri), anyString(), eq(null));
+    doThrow(new IOException()).when(fakeAssetFileDescriptor).close();
+    assertNotNull(platformPlugin.mPlatformMessageHandler.getClipboardData(clipboardFormat));
+    verify(fakeAssetFileDescriptor).close();
   }
 
   @SuppressWarnings("deprecation")
