@@ -942,32 +942,31 @@ class _RenderLargeTitle extends RenderShiftedBox {
 
   double _scale = 1.0;
 
+  static double _computeTitleScale(Size childSize, BoxConstraints constraints) {
+    final double maxScale = childSize.width != 0.0
+      ? clampDouble(constraints.maxWidth / childSize.width, 1.0, 1.1)
+      : 1.1;
+    return clampDouble(
+      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
+      1.0,
+      maxScale,
+    );
+  }
+
   @override
   void performLayout() {
     final RenderBox? child = this.child;
-    Size childSize = Size.zero;
-
     size = constraints.biggest;
-
     if (child == null) {
       return;
     }
 
     final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
     child.layout(childConstraints, parentUsesSize: true);
+    _scale = _computeTitleScale(child.size, constraints);
 
-    final double maxScale = child.size.width != 0.0
-      ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
-      : 1.1;
-    _scale = clampDouble(
-      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
-      1.0,
-      maxScale,
-    );
-
-    childSize = child.size * _scale;
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = alignment.alongOffset(size - childSize as Offset);
+    childParentData.offset = alignment.alongOffset(size - (child.size * _scale) as Offset);
   }
 
   @override
@@ -982,14 +981,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    final double maxScale = childSize.width != 0.0
-      ? clampDouble(constraints.maxWidth / childSize.width, 1.0, 1.1)
-      : 1.1;
-    final double scale = clampDouble(
-      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
-      1.0,
-      maxScale,
-    );
+    final double scale = _computeTitleScale(childSize, constraints);
     final Size scaledChildSize = childSize * scale;
     return result * scale + alignment.alongOffset(constraints.biggest - scaledChildSize as Offset).dy;
   }
