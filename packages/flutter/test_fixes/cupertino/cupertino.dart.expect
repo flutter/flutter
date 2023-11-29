@@ -255,5 +255,5 @@ void main() {
   }
   final Test test = Test();
   test.addPubRootDirectories([]);
-  WidgetInspectorServiceExtensions.addPubRootDirectories
+  WidgetInspectorServiceExtensions.addPubRootDirectories;
 }

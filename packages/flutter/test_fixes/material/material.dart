@@ -333,5 +333,5 @@ void main() {
   }
   final Test test = Test();
   test.setPubRootDirectories([]);
-  WidgetInspectorServiceExtensions.setPubRootDirectories
+  WidgetInspectorServiceExtensions.setPubRootDirectories;
 }

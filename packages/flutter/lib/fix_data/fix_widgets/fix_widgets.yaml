@@ -35,7 +35,7 @@ transforms:
         newName: 'addPubRootDirectories'
 
   # Changes made in TBD
-  - title: "Use WidgetServicesExtensions.addPubRootDirectories"
+  - title: "Use WidgetServiceExtensions.addPubRootDirectories"
     date: 2023-11-29
     element:
       uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
