@@ -466,7 +466,7 @@ std::string CompilerSkSL::to_function_args(const TextureFunctionArguments& args,
     return "()";
   }
 
-  return name + "_size * " + no_shader;
+  return name + "_size * (" + no_shader + ")";
 }
 
 }  // namespace compiler

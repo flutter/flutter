@@ -65,6 +65,14 @@ std::unique_ptr<fml::FileMapping> CompilerTest::GetReflectionJson(
   return fml::FileMapping::CreateReadOnly(fd);
 }
 
+std::unique_ptr<fml::FileMapping> CompilerTest::GetShaderFile(
+    const char* fixture_name,
+    TargetPlatform platform) const {
+  auto filename = SLFileName(fixture_name, platform);
+  auto fd = fml::OpenFileReadOnly(intermediates_directory_, filename.c_str());
+  return fml::FileMapping::CreateReadOnly(fd);
+}
+
 bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
                                         SourceType source_type,
                                         SourceLanguage source_language,
