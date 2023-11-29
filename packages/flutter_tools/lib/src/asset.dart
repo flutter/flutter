@@ -1186,7 +1186,11 @@ class _Asset {
       return true;
     }
 
-    return flavors.any((String e) => e == flavor);
+    if (flavor == null) {
+      return false;
+    }
+
+    return flavors.contains(flavor);
   }
 
   bool hasEquivalentFlavorsWith(_Asset other) {
