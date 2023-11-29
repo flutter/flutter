@@ -26,7 +26,6 @@ import 'safe_browser_api.dart';
 import 'shadow.dart';
 import 'util.dart';
 import 'vector_math.dart';
-import 'window.dart';
 
 /// Renders picture to a CanvasElement by allocating and caching 0 or more
 /// canvas(s) for [BitmapCanvas].
@@ -1039,7 +1038,7 @@ class ContextStateHandle {
         //
         // transformedShadowDelta = M*shadowDelta - M*origin.
         final Float32List tempVector = Float32List(2);
-        tempVector[0] = kOutsideTheBoundsOffset * window.devicePixelRatio;
+        tempVector[0] = kOutsideTheBoundsOffset * EngineFlutterDisplay.instance.devicePixelRatio;
         _canvasPool.currentTransform.transform2(tempVector);
         final double shadowOffsetX = tempVector[0];
         final double shadowOffsetY = tempVector[1];

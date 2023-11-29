@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../color_filter.dart';
+import '../display.dart';
 import 'canvaskit_api.dart';
 import 'color_filter.dart';
 import 'image.dart';
@@ -248,7 +249,7 @@ class CkCanvas {
   void drawShadow(
       CkPath path, ui.Color color, double elevation, bool transparentOccluder) {
     drawSkShadow(skCanvas, path, color, elevation, transparentOccluder,
-        ui.window.devicePixelRatio);
+        EngineFlutterDisplay.instance.devicePixelRatio);
   }
 
   void drawVertices(

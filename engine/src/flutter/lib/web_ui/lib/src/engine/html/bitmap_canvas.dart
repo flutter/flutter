@@ -17,7 +17,6 @@ import '../html_image_codec.dart';
 import '../text/canvas_paragraph.dart';
 import '../util.dart';
 import '../vector_math.dart';
-import '../window.dart';
 import 'clip.dart';
 import 'color_filter.dart';
 import 'dom_canvas.dart';
@@ -1036,7 +1035,7 @@ class BitmapCanvas extends EngineCanvas {
     _drawPointsPaint.color = paint.color;
     _drawPointsPaint.maskFilter = paint.maskFilter;
 
-    final double dpr = ui.window.devicePixelRatio;
+    final double dpr = EngineFlutterDisplay.instance.devicePixelRatio;
     // Use hairline (device pixel when strokeWidth is not specified).
     final double strokeWidth =
         paint.strokeWidth == null ? 1.0 / dpr : paint.strokeWidth!;
@@ -1077,7 +1076,7 @@ class BitmapCanvas extends EngineCanvas {
   /// viewport.
   ui.Rect _computeScreenBounds(Matrix4 targetTransform) {
     final Matrix4 inverted = targetTransform.clone()..invert();
-    final double dpr = ui.window.devicePixelRatio;
+    final double dpr = EngineFlutterDisplay.instance.devicePixelRatio;
     final double width = ui.window.physicalSize.width * dpr;
     final double height = ui.window.physicalSize.height * dpr;
     final Vector3 topLeft = inverted.perspectiveTransform(x: 0, y: 0, z: 0);
@@ -1457,7 +1456,7 @@ String maskFilterToCanvasFilter(ui.MaskFilter? maskFilter) {
   if (maskFilter != null) {
     // Multiply by device-pixel ratio because the canvas' pixel width and height
     // are larger than its CSS width and height by device-pixel ratio.
-    return 'blur(${maskFilter.webOnlySigma * window.devicePixelRatio}px)';
+    return 'blur(${maskFilter.webOnlySigma * EngineFlutterDisplay.instance.devicePixelRatio}px)';
   } else {
     return 'none';
   }

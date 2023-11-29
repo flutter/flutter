@@ -21,9 +21,6 @@ class LayerTree {
   /// The root of the layer tree.
   final RootLayer rootLayer;
 
-  /// The size (in physical pixels) of the frame to paint this layer tree into.
-  final ui.Size frameSize = ui.window.physicalSize;
-
   /// The devicePixelRatio of the frame to paint this layer tree into.
   double? devicePixelRatio;
 

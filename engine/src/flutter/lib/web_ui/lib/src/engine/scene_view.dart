@@ -194,10 +194,11 @@ final class PictureSliceContainer extends SliceContainer {
         bounds.bottom.ceilToDouble()
       );
       final DomCSSStyleDeclaration style = canvas.style;
-      final double logicalWidth = roundedOutBounds.width / window.devicePixelRatio;
-      final double logicalHeight = roundedOutBounds.height / window.devicePixelRatio;
-      final double logicalLeft = roundedOutBounds.left / window.devicePixelRatio;
-      final double logicalTop = roundedOutBounds.top / window.devicePixelRatio;
+      final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+      final double logicalWidth = roundedOutBounds.width / devicePixelRatio;
+      final double logicalHeight = roundedOutBounds.height / devicePixelRatio;
+      final double logicalLeft = roundedOutBounds.left / devicePixelRatio;
+      final double logicalTop = roundedOutBounds.top / devicePixelRatio;
       style.width = '${logicalWidth}px';
       style.height = '${logicalHeight}px';
       style.position = 'absolute';
@@ -243,21 +244,23 @@ final class PlatformViewContainer extends SliceContainer {
     }
   }
 
+
   @override
   void updateContents() {
     assert(_styling != null);
     assert(_size != null);
     if (_dirty) {
       final DomCSSStyleDeclaration style = container.style;
-      final double logicalWidth = _size!.width / window.devicePixelRatio;
-      final double logicalHeight = _size!.height / window.devicePixelRatio;
+      final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+      final double logicalWidth = _size!.width / devicePixelRatio;
+      final double logicalHeight = _size!.height / devicePixelRatio;
       style.width = '${logicalWidth}px';
       style.height = '${logicalHeight}px';
       style.position = 'absolute';
 
       final ui.Offset? offset = _styling!.position.offset;
-      final double logicalLeft = (offset?.dx ?? 0) / window.devicePixelRatio;
-      final double logicalTop = (offset?.dy ?? 0) / window.devicePixelRatio;
+      final double logicalLeft = (offset?.dx ?? 0) / devicePixelRatio;
+      final double logicalTop = (offset?.dy ?? 0) / devicePixelRatio;
       style.left = '${logicalLeft}px';
       style.top = '${logicalTop}px';
 
