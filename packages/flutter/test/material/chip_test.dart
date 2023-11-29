@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -3651,6 +3656,21 @@ void main() {
 
     // No exception should be thrown.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgetsWithLeakTracking('Delete button is visible RawChip is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: RawChip(
+          isEnabled: false,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      ),
+    );
+
+    // Delete button should be visible.
+    expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
   });
 
   group('Material 2', () {

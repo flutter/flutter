@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -410,5 +415,20 @@ void main() {
     await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
 
     expect(getIconData(tester).color, const Color(0xff00ff00));
+  });
+
+  testWidgetsWithLeakTracking('Delete button is visible InputChip is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: InputChip(
+          isEnabled: false,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      ),
+    );
+
+    // Delete button should be visible.
+    expectLater(find.byType(RawChip), matchesGoldenFile('input_chip.disabled.delete_button.png'));
   });
 }
