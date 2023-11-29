@@ -68,17 +68,6 @@
     </issue>
 
     <issue
-        id="Recycle"
-        message="This `AssetFileDescriptor` should be freed up after use with `#close()`"
-        errorLine1="          activity.getContentResolver().openTypedAssetFileDescriptor(item.getUri(), &quot;text/*&quot;, null);"
-        errorLine2="                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java"
-            line="522"
-            column="41"/>
-    </issue>
-
-    <issue
         id="ClickableViewAccessibility"
         message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
         errorLine1="  public boolean onTouchEvent(MotionEvent event) {"
