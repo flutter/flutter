@@ -1068,16 +1068,19 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory codeSizeDirectoryValue
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
-                doLast {
-                    project.exec {
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
-                        } else {
-                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
-                        }
-                    }
-                }
             }
+            // Task normalizeFilePermissions = project.tasks.create(
+            //     name: "normalizeFlutterAssets${variant.name.capitalize()}",
+            //     type: Exec,
+            // ) {
+            //     dependsOn compileTask
+            //     println "execOperations After $project"
+            //     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            //         commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
+            //     } else {
+            //         commandLine('chmod', '-R', 'u+w', assetsDirectory)
+            //     }
+            // }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDirectory = libJar.parentFile
@@ -1110,6 +1113,21 @@ class FlutterPlugin implements Plugin<Project> {
             ) {
                 dependsOn compileTask
                 with compileTask.assets
+                def gradleVersion = Double.parseDouble(project.getGradle().getGradleVersion())
+                // See https://docs.gradle.org/current/javadoc/org/gradle/api/file/ConfigurableFilePermissions.html
+                // See https://github.com/flutter/flutter/pull/50047
+                if (gradleVersion >= 8.3) {
+                    filePermissions {
+                        user {
+                            read = true
+                            write = true
+                        }
+                    }
+                } else {
+                    // See https://docs.gradle.org/8.2/dsl/org.gradle.api.tasks.Copy.html#org.gradle.api.tasks.Copy:fileMode
+                    // See https://github.com/flutter/flutter/pull/50047
+                    fileMode 0644
+                }
                 if (isUsedAsSubproject) {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
@@ -1135,6 +1153,7 @@ class FlutterPlugin implements Plugin<Project> {
             // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
             def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
             if (compressAssetsTask) {
+                compressAssetsTask.dependsOn "normalizeFlutterAssets${variant.name.capitalize()}"
                 compressAssetsTask.dependsOn copyFlutterAssetsTask
             }
 
