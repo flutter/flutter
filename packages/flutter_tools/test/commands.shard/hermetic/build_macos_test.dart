@@ -202,12 +202,13 @@ STDERR STUFF
     );
 
     expect(
-        analyticsTimingEventExists(
-          sentEvents: fakeAnalytics.sentEvents,
-          workflow: 'build',
-          variableName: 'xcode-macos',
-        ),
-        true);
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'xcode-macos',
+      ),
+      true,
+    );
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,

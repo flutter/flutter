@@ -217,17 +217,21 @@ void main() {
     expect(fileSystem.file('linux/flutter/ephemeral/generated_config.cmake'), exists);
 
     expect(
-        analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'cmake-linux'),
-        true);
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'cmake-linux',
+      ),
+      true,
+    );
     expect(
-        analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'linux-ninja'),
-        true);
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'linux-ninja',
+      ),
+      true,
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

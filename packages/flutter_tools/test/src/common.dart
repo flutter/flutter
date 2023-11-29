@@ -349,6 +349,8 @@ FakeAnalytics getInitializedFakeAnalyticsInstance({
   );
 }
 
+/// Returns "true" if the timing event searched for exists in [sentEvents].
+///
 /// This utility function allows us to check for an instance of
 /// [Event.timing] within a [FakeAnalytics] instance. Normally, we can
 /// use the equality operator for [Event] to check if the event exists, but

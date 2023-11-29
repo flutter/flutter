@@ -695,10 +695,10 @@ void main() {
     ]);
     expect(fakeAnalytics.sentEvents, contains(
       Event.timing(
-          workflow: 'hot',
-          variableName: 'web-incremental-restart',
-          elapsedMilliseconds: 0,
-        )
+        workflow: 'hot',
+        variableName: 'web-incremental-restart',
+        elapsedMilliseconds: 0,
+      ),
     ));
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
@@ -788,10 +788,10 @@ void main() {
     ]);
     expect(fakeAnalytics.sentEvents, contains(
       Event.timing(
-          workflow: 'hot',
-          variableName: 'web-incremental-restart',
-          elapsedMilliseconds: 0,
-        )
+        workflow: 'hot',
+        variableName: 'web-incremental-restart',
+        elapsedMilliseconds: 0,
+      ),
     ));
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,

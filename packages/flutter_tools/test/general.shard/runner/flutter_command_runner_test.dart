@@ -160,10 +160,10 @@ void main() {
         ));
         expect(fakeAnalytics.sentEvents, contains(
           Event.flutterCommandResult(
-              commandPath: 'version',
-              result: 'success',
-              commandHasTerminal: false,
-            )
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: false,
+          ),
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,

@@ -125,11 +125,13 @@ void main() {
     expect(timingEvent.category, 'build');
     expect(timingEvent.variableName, 'dart2wasm');
     expect(
-        analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'dart2wasm'),
-        true);
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'dart2wasm',
+      ),
+      true,
+    );
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {

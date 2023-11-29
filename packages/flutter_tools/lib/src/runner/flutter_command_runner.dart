@@ -330,6 +330,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults[FlutterGlobalOptions.kVersionFlag] as bool?) ?? false) {
           globals.flutterUsage.sendCommand(FlutterGlobalOptions.kVersionFlag);
+          globals.analytics.send(Event.flutterCommandResult(
+            commandPath: 'version',
+            result: 'success',
+            commandHasTerminal: globals.stdio.hasTerminal,
+          ));
           final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
             clock: globals.systemClock,
           );
@@ -342,11 +347,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
             status = version.toString();
           }
           globals.printStatus(status);
-          globals.analytics.send(Event.flutterCommandResult(
-            commandPath: 'version',
-            result: 'success',
-            commandHasTerminal: globals.stdio.hasTerminal,
-          ));
           return;
         }
         if (machineFlag && topLevelResults.command?.name != 'analyze') {

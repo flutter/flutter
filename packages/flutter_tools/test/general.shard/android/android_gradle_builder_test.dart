@@ -152,11 +152,13 @@ void main() {
       );
 
       expect(
-          analyticsTimingEventExists(
-              sentEvents: fakeAnalytics.sentEvents,
-              workflow: 'build',
-              variableName: 'gradle'),
-          true);
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'gradle',
+        ),
+        true,
+      );
 
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
@@ -888,11 +890,13 @@ BuildVariant: paidProfile
       expect(actual, <String>['freeDebug', 'paidDebug', 'freeRelease', 'paidRelease', 'freeProfile', 'paidProfile']);
 
       expect(
-          analyticsTimingEventExists(
-              sentEvents: fakeAnalytics.sentEvents,
-              workflow: 'print',
-              variableName: 'android build variants'),
-          true);
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'print',
+          variableName: 'android build variants',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
       Analytics: () => fakeAnalytics,
@@ -959,11 +963,13 @@ Gradle Crashed
       );
 
       expect(
-          analyticsTimingEventExists(
-              sentEvents: fakeAnalytics.sentEvents,
-              workflow: 'outputs',
-              variableName: 'app link settings'),
-          true);
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'outputs',
+          variableName: 'app link settings',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
       FileSystem: () => fileSystem,
@@ -1036,11 +1042,13 @@ Gradle Crashed
       expect(processManager, hasNoRemainingExpectations);
 
       expect(
-          analyticsTimingEventExists(
-              sentEvents: fakeAnalytics.sentEvents,
-              workflow: 'build',
-              variableName: 'gradle-aar'),
-          true);
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'gradle-aar',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
       Analytics: () => fakeAnalytics,

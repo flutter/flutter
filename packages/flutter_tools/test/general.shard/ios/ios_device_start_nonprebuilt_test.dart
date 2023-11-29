@@ -142,11 +142,13 @@ void main() {
       expect(logger.errorText, contains('Xcode build is missing expected TARGET_BUILD_DIR build setting'));
       expect(processManager, hasNoRemainingExpectations);
       expect(
-          analyticsTimingEventExists(
-              sentEvents: fakeAnalytics.sentEvents,
-              workflow: 'build',
-              variableName: 'xcode-ios'),
-          true);
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'xcode-ios',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,

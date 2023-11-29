@@ -512,9 +512,12 @@ void main() {
           timingEventCounts += 1;
         }
       }
-      expect(timingEventCounts, 0,
-          reason: 'There should not be any timing events sent, '
-              'there may be other events');
+      expect(
+        timingEventCounts,
+        0,
+        reason: 'There should not be any timing events sent, there may '
+            'be other non-timing events',
+      );
     });
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
@@ -542,11 +545,11 @@ void main() {
         )));
       expect(fakeAnalytics.sentEvents, contains(
         Event.timing(
-            workflow: 'flutter',
-            variableName: 'dummy',
-            elapsedMilliseconds: 500,
-            label: 'success-blah1-blah2-blah3',
-          )
+          workflow: 'flutter',
+          variableName: 'dummy',
+          elapsedMilliseconds: 500,
+          label: 'success-blah1-blah2-blah3',
+        ),
       ));
     });
 
@@ -574,11 +577,11 @@ void main() {
       ));
       expect(fakeAnalytics.sentEvents, contains(
         Event.timing(
-            workflow: 'flutter',
-            variableName: 'dummy',
-            elapsedMilliseconds: 1000,
-            label: 'fail',
-          )
+          workflow: 'flutter',
+          variableName: 'dummy',
+          elapsedMilliseconds: 1000,
+          label: 'fail',
+        ),
       ));
     });
 

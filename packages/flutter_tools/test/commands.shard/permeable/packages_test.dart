@@ -227,12 +227,14 @@ void main() {
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
       expect(
-          analyticsTimingEventExists(
-              sentEvents: fakeAnalytics.sentEvents,
-              workflow: 'pub',
-              variableName: 'get',
-              label: 'success'),
-          true);
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
