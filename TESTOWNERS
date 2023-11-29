@@ -295,8 +295,6 @@
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
 ## Host only framework tests
-# Linux analyze
-/dev/bots/analyze.dart @HansMuller @flutter/framework
 # Linux docs
 # Linux docs_test
 # Linux docs_publish
@@ -321,6 +319,7 @@
 # TODO(keyonghan): add files/paths for below framework host only testss.
 # https://github.com/flutter/flutter/issues/82068
 #
+# analyze @HansMuller @flutter/framework
 # build_tests @eliasyishak @flutter/tool
 # ci_yaml flutter roller @caseyhillers @flutter/infra
 # coverage @godofredoc @flutter/infra
