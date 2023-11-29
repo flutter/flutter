@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
@@ -298,7 +299,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
-          analytics: globals.analytics,
+          analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
@@ -319,7 +320,7 @@ class PackagesGetCommand extends FlutterCommand {
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
-          analytics: globals.analytics,
+          analytics: analytics,
           projectDir: rootProject.directory,
           generateDartPluginRegistry: true,
         );
@@ -354,10 +355,24 @@ class PackagesGetCommand extends FlutterCommand {
         command: name,
         touchesPackageConfig: !(isHelp || dryRun),
       );
-      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'success');
+      final Duration elapsedDuration = timer.elapsed;
+      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'success');
+      analytics.send(Event.timing(
+        workflow: 'pub',
+        variableName: 'get',
+        elapsedMilliseconds: elapsedDuration.inMilliseconds,
+        label: 'success'
+      ));
     // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) { // ignore: avoid_catches_without_on_clauses
-      globals.flutterUsage.sendTiming('pub', 'get', timer.elapsed, label: 'failure');
+      final Duration elapsedDuration = timer.elapsed;
+      globals.flutterUsage.sendTiming('pub', 'get', elapsedDuration, label: 'failure');
+      analytics.send(Event.timing(
+        workflow: 'pub',
+        variableName: 'get',
+        elapsedMilliseconds: elapsedDuration.inMilliseconds,
+        label: 'failure'
+      ));
       rethrow;
     }
 

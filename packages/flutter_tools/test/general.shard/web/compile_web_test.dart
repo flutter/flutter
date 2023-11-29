@@ -111,7 +111,7 @@ void main() {
 
     expect(
       fakeAnalytics.sentEvents,
-      unorderedEquals(<Event>[
+      containsAll(<Event>[
         Event.flutterBuildInfo(
           label: 'web-compile',
           buildType: 'web',
@@ -124,6 +124,14 @@ void main() {
     final TestTimingEvent timingEvent = testUsage.timings.single;
     expect(timingEvent.category, 'build');
     expect(timingEvent.variableName, 'dart2wasm');
+    expect(
+      analyticsTimingEventExists(
+        sentEvents: fakeAnalytics.sentEvents,
+        workflow: 'build',
+        variableName: 'dart2wasm',
+      ),
+      true,
+    );
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -159,5 +167,6 @@ void main() {
 
     expect(logger.errorText, contains('Target hello failed: FormatException: illegal character in input string'));
     expect(testUsage.timings, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
   });
 }

@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
@@ -78,6 +79,7 @@ void main() {
   late FakePlistUtils plistUtils;
   late BufferLogger logger;
   late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -94,6 +96,10 @@ void main() {
       processManager: fakeProcessManager,
     );
     plistUtils = FakePlistUtils();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -794,6 +800,9 @@ void main() {
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
@@ -801,6 +810,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
