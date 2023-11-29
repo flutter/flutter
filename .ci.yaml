@@ -681,8 +681,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
-      validation: fuchsia_precache
-      validation_name: Fuchsia precache
+      shard: fuchsia_precache
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
