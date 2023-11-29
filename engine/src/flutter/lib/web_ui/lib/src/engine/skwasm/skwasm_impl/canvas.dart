@@ -375,7 +375,7 @@ class SkwasmCanvas implements SceneCanvas {
       _handle,
       path.handle,
       elevation,
-      ui.window.devicePixelRatio,
+      EngineFlutterDisplay.instance.devicePixelRatio,
       color.value,
       transparentOccluder);
   }

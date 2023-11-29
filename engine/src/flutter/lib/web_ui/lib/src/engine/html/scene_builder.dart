@@ -8,12 +8,12 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../engine.dart' show kProfileApplyFrame, kProfilePrerollFrame;
+import '../display.dart';
 import '../dom.dart';
 import '../picture.dart';
 import '../profiler.dart';
 import '../util.dart';
 import '../vector_math.dart';
-import '../window.dart';
 import 'backdrop_filter.dart';
 import 'clip.dart';
 import 'color_filter.dart';
@@ -113,8 +113,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
       // scene to devicepixelratio. Use identity instead since CSS uses
       // logical device pixels.
       if (!ui_web.debugEmulateFlutterTesterEnvironment) {
-        assert(matrix4[0] == window.devicePixelRatio &&
-            matrix4[5] == window.devicePixelRatio);
+        assert(matrix4[0] == EngineFlutterDisplay.instance.devicePixelRatio &&
+            matrix4[5] == EngineFlutterDisplay.instance.devicePixelRatio);
       }
       matrix = Matrix4.identity().storage;
     } else {

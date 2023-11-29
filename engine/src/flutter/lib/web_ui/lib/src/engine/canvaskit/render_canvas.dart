@@ -6,8 +6,8 @@ import 'dart:js_interop';
 
 import 'package:ui/ui.dart' as ui;
 
+import '../display.dart';
 import '../dom.dart';
-import '../window.dart';
 
 /// A visible (on-screen) canvas that can display bitmaps produced by CanvasKit
 /// in the (off-screen) SkSurface which is backed by an OffscreenCanvas.
@@ -68,12 +68,13 @@ class RenderCanvas {
   /// match the size of the window precisely we use the most precise floating
   /// point value we can get.
   void _updateLogicalHtmlCanvasSize() {
-    final double logicalWidth = _pixelWidth / window.devicePixelRatio;
-    final double logicalHeight = _pixelHeight / window.devicePixelRatio;
+    final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+    final double logicalWidth = _pixelWidth / devicePixelRatio;
+    final double logicalHeight = _pixelHeight / devicePixelRatio;
     final DomCSSStyleDeclaration style = canvasElement.style;
     style.width = '${logicalWidth}px';
     style.height = '${logicalHeight}px';
-    _currentDevicePixelRatio = window.devicePixelRatio;
+    _currentDevicePixelRatio = devicePixelRatio;
   }
 
   /// Render the given [bitmap] with this [RenderCanvas].
@@ -112,7 +113,7 @@ class RenderCanvas {
         size.height.ceil() == _pixelHeight) {
       // The existing canvas doesn't need to be resized (unless the device pixel
       // ratio changed).
-      if (window.devicePixelRatio != _currentDevicePixelRatio) {
+      if (EngineFlutterDisplay.instance.devicePixelRatio != _currentDevicePixelRatio) {
         _updateLogicalHtmlCanvasSize();
       }
       return;

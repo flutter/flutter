@@ -5,13 +5,13 @@
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart' show PlatformViewManager;
+import '../display.dart';
 import '../dom.dart';
 import '../html/path_to_svg_clip.dart';
 import '../platform_views/slots.dart';
 import '../svg.dart';
 import '../util.dart';
 import '../vector_math.dart';
-import '../window.dart';
 import 'canvas.dart';
 import 'embedded_views_diff.dart';
 import 'path.dart';
@@ -68,7 +68,7 @@ class HtmlViewEmbedder {
   List<OverlayGroup> _activeOverlayGroups = <OverlayGroup>[];
 
   /// The size of the frame, in physical pixels.
-  ui.Size _frameSize = ui.window.physicalSize;
+  late ui.Size _frameSize;
 
   set frameSize(ui.Size size) {
     _frameSize = size;
@@ -326,7 +326,7 @@ class HtmlViewEmbedder {
     //
     // HTML elements use logical (CSS) pixels, but we have been using physical
     // pixels, so scale down the head element to match the logical resolution.
-    final double scale = window.devicePixelRatio;
+    final double scale = EngineFlutterDisplay.instance.devicePixelRatio;
     final double inverseScale = 1 / scale;
     final Matrix4 scaleMatrix =
         Matrix4.diagonal3Values(inverseScale, inverseScale, 1);
