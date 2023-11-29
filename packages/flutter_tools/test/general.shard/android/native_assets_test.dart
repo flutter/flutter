@@ -211,13 +211,12 @@ void main() {
     );
   });
 
-  testUsingContext('build with assets', overrides: <Type, Generator>{
+  testUsingContext('build with assets',
+      skip: const LocalPlatform().isWindows, // [intended] Backslashes in commands, but we will never run these commands on Windows.
+      overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    if (const LocalPlatform().isWindows) {
-      return; // Backslashes in commands, but we will never run these commands on Windows.
-    }
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();

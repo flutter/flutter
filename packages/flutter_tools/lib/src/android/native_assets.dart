@@ -31,9 +31,15 @@ Future<Uri?> dryRunNativeAssetsAndroid({
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, OS.android);
   final Iterable<Asset> nativeAssetPaths =
       await dryRunNativeAssetsAndroidInternal(
-          fileSystem, projectUri, buildRunner);
-  final Uri nativeAssetsUri =
-      await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
+    fileSystem,
+    projectUri,
+    buildRunner,
+  );
+  final Uri nativeAssetsUri = await writeNativeAssetsYaml(
+    nativeAssetPaths,
+    buildUri_,
+    fileSystem,
+  );
   return nativeAssetsUri;
 }
 
