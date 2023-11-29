@@ -500,10 +500,22 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             // TODO(a-wallen): As multi-window support expands, the pop call
             // will need to include the view ID. Right now only one view is
             // supported.
-            implicitView!.browserHistory.exit().then((_) {
+            //
+            // TODO(mdebbar): What should we do in multi-view mode?
+            //                https://github.com/flutter/flutter/issues/139174
+            if (implicitView != null) {
+              implicitView!.browserHistory.exit().then((_) {
+                replyToPlatformMessage(
+                  callback,
+                  jsonCodec.encodeSuccessEnvelope(true),
+                );
+              });
+            } else {
               replyToPlatformMessage(
-                  callback, jsonCodec.encodeSuccessEnvelope(true));
-            });
+                callback,
+                jsonCodec.encodeSuccessEnvelope(true),
+              );
+            }
             return;
           case 'HapticFeedback.vibrate':
             final String? type = decoded.arguments as String?;
@@ -588,7 +600,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
-            implicitView!.mouseCursor
+            // TODO(mdebbar): This needs a view ID from the framework.
+            //                https://github.com/flutter/flutter/issues/137289
+            implicitView?.mouseCursor
                 .activateSystemCursor(arguments.tryString('kind'));
         }
         return;
@@ -628,14 +642,23 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         // TODO(a-wallen): As multi-window support expands, the navigation call
         // will need to include the view ID. Right now only one view is
         // supported.
-        implicitView!.handleNavigationMessage(data).then((bool handled) {
-          if (handled) {
-            replyToPlatformMessage(
-                callback, jsonCodec.encodeSuccessEnvelope(true));
-          } else {
-            callback?.call(null);
-          }
-        });
+        //
+        // TODO(mdebbar): What should we do in multi-view mode?
+        //                https://github.com/flutter/flutter/issues/139174
+        if (implicitView != null) {
+          implicitView!.handleNavigationMessage(data).then((bool handled) {
+            if (handled) {
+              replyToPlatformMessage(
+                callback,
+                jsonCodec.encodeSuccessEnvelope(true),
+              );
+            } else {
+              callback?.call(null);
+            }
+          });
+        } else {
+          callback?.call(null);
+        }
 
         // As soon as Flutter starts taking control of the app navigation, we
         // should reset _defaultRouteName to "/" so it doesn't have any
@@ -1249,7 +1272,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///    requests from the embedder.
   @override
   String get defaultRouteName {
-    return _defaultRouteName ??= implicitView!.browserHistory.currentPath;
+    // TODO(mdebbar): What should we do in multi-view mode?
+    //                https://github.com/flutter/flutter/issues/139174
+    return _defaultRouteName ??= implicitView?.browserHistory.currentPath ?? '/';
   }
 
   /// Lazily initialized when the `defaultRouteName` getter is invoked.
