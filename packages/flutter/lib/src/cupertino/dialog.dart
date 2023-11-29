@@ -23,7 +23,7 @@ import 'theme.dart';
 // Apple Design Resources(https://developer.apple.com/design/resources/).
 // However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
-  fontFamily: '.SF UI Display',
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -33,7 +33,7 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -43,7 +43,7 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 16.8,
   fontWeight: FontWeight.w400,
@@ -52,7 +52,7 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 20.0,
   fontWeight: FontWeight.w400,
@@ -60,7 +60,7 @@ const TextStyle _kActionSheetActionStyle = TextStyle(
 );
 
 const TextStyle _kActionSheetContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,

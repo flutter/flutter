@@ -433,7 +433,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// By default, fonts differ depending on the platform.
 ///
 ///  * The default font-family for `Android`,`Fuchsia` and `Linux` is `Roboto`.
-///  * The default font-family for `iOS` is `.SF UI Display`/`.SF UI Text`.
+///  * The default font-family for `iOS` is `SF Pro Display`/`SF Pro Text`.
 ///  * The default font-family for `MacOS` is `.AppleSystemUIFont`.
 ///  * The default font-family for `Windows` is `Segoe UI`.
 //
@@ -470,6 +470,14 @@ class TextStyle with Diagnosticable {
   /// The `package` argument must be non-null if the font family is defined in a
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
+  ///
+  /// On Apple devices the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used in [fontFamily] as proxies for the
+  /// Apple system fonts. They currently redirect to the equivilant of SF Pro
+  /// Text and SF Pro Display respectively. 'CupertinoSystemText' is designed
+  /// for fonts below 20 point size, and 'CupertinoSystemDisplay' is recommended
+  /// for sizes 20 and above. When used on non-Apple platforms, these strings
+  /// will return the regular fallback font family instead.
   const TextStyle({
     this.inherit = true,
     this.color,
@@ -561,6 +569,14 @@ class TextStyle with Diagnosticable {
   /// first value in [fontFamilyFallback] acts as the preferred/first font
   /// family. When neither is provided, then the default platform font will
   /// be used.
+  ///
+  /// When running on Apple devices, the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used as proxies for the Apple system fonts.
+  /// They currently redirect to the equivilant of SF Pro Text and SF Pro Display
+  /// respectively. 'CupertinoSystemText' is designed for fonts below 20 point
+  /// size, and 'CupertinoSystemDisplay' is recommended for sizes 20 and above.
+  /// When used on non-Apple platforms, these strings will return the regular
+  /// fallback font family instead.
   final String? fontFamily;
 
   /// The ordered list of font families to fall back on when a glyph cannot be
