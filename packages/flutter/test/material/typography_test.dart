@@ -37,11 +37,11 @@ void main() {
 
   // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
   final Matcher isSanFranciscoDisplayFont = predicate((TextStyle s) {
-    return s.fontFamily == '.SF UI Display';
+    return s.fontFamily == 'CupertinoSystemDisplay';
   }, 'Uses SF Display font');
 
   final Matcher isSanFranciscoTextFont = predicate((TextStyle s) {
-    return s.fontFamily == '.SF UI Text';
+    return s.fontFamily == 'CupertinoSystemText';
   }, 'Uses SF Text font');
 
   final Matcher isMacOSSanFranciscoMetaFont = predicate((TextStyle s) {

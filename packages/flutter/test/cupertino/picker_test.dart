@@ -48,7 +48,7 @@ void main() {
     expect(paragraph.text.style!.color, isSameColorAs(CupertinoColors.black));
     expect(paragraph.text.style!.copyWith(color: CupertinoColors.black), const TextStyle(
       inherit: false,
-      fontFamily: '.SF Pro Display',
+      fontFamily: 'CupertinoSystemDisplay',
       fontSize: 21.0,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.6,
