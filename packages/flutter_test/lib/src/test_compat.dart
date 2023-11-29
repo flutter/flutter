@@ -297,7 +297,8 @@ class _Reporter {
   final bool _printPath;
 
   /// A stopwatch that tracks the duration of the full run.
-  final Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = Stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+  // Ignore context: Used for logging of actual test runs, outside of FakeAsync.
 
   /// The size of `_engine.passed` last time a progress notification was
   /// printed.

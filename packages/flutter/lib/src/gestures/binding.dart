@@ -36,7 +36,13 @@ class SamplingClock {
   DateTime now() => DateTime.now();
 
   /// Returns a new stopwatch that uses the current time as reported by `this`.
-  Stopwatch stopwatch() => Stopwatch();
+  ///
+  /// See also:
+  ///
+  ///   * [GestureBinding.debugSamplingClock], which is used in tests and
+  ///     debug builds to observe [FakeAsync].
+  Stopwatch stopwatch() => Stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+  // Ignore context: This is replaced by debugSampling clock in the test binding.
 }
 
 // Class that handles resampling of touch events for multiple pointer
@@ -59,7 +65,8 @@ class _Resampler {
   Duration _frameTime = Duration.zero;
 
   // Time since `_frameTime` was updated.
-  Stopwatch _frameTimeAge = Stopwatch();
+  Stopwatch _frameTimeAge = Stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+  // Ignore context: This is tested safely outside of FakeAsync.
 
   // Last sample time and time stamp of last event.
   //
