@@ -607,6 +607,10 @@ List<String> _validateAssets(Object? yaml) {
   return errors;
 }
 
+// TODO(andrewkolos): We end up parsing the assets section twice, once during
+// validation and once when the assets getter is called. We should consider
+// refactoring this class to parse and store everything in the constructor.
+// https://github.com/flutter/flutter/issues/139183
 (List<AssetsEntry>, List<String> errors) _computeAssetsSafe(Object? yaml) {
   if (yaml == null) {
     return (const <AssetsEntry>[], const <String>[]);
