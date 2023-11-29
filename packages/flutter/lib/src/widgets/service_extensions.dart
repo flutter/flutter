@@ -202,24 +202,6 @@ enum WidgetInspectorServiceExtensions {
   ///   extension is registered.
   disposeId,
 
-  /// Name of service extension that, when called, will set the list of
-  /// directories that should be considered part of the local project for the
-  /// Widget inspector summary tree.
-  ///
-  /// See also:
-  ///
-  /// * [WidgetInspectorService.addPubRootDirectories], which should be used in
-  ///   place of this method to add directories.
-  /// * [WidgetInspectorService.removePubRootDirectories], which should be used
-  ///   in place of this method to remove directories.
-  /// * [WidgetInspectorService.initServiceExtensions], where the service
-  ///   extension is registered.
-  @Deprecated(
-    'Use addPubRootDirectories instead. '
-    'This feature was deprecated after v3.1.0-9.0.pre.',
-  )
-  setPubRootDirectories,
-
   /// Name of service extension that, when called, will add a list of
   /// directories that should be considered part of the local project for the
   /// Widget inspector summary tree.

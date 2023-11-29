@@ -1786,7 +1786,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               );
 
               service
-                  .setPubRootDirectories(<String>[pubRootFramework, pubRootTest]);
+                  .addPubRootDirectories(<String>[pubRootFramework, pubRootTest]);
               service.setSelection(elementA, 'my-group');
               expect(
                 json.decode(service.getSelectedWidget(null, 'my-group')),
@@ -2947,7 +2947,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 .evaluate()
                 .first;
             service.setSelection(richText, 'my-group');
-            service.setPubRootDirectories(<String>[pubRootTest]);
+            service.addPubRootDirectories(<String>[pubRootTest]);
             final Map<String, Object?> jsonObject =
                 json.decode(service.getSelectedWidget(null, 'my-group'))
                     as Map<String, Object?>;

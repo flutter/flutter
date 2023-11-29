@@ -322,4 +322,12 @@ void main() {
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], child: const SizedBox());
   final Widget bodyValue = platformMenuBar.child;
+
+  // Changes made in TBD
+  class Test with WidgetInspectorService {
+    Test();
+  }
+  final Test test = Test();
+  test.addPubRootDirectories([]);
+  WidgetInspectorServiceExtensions.addPubRootDirectories
 }

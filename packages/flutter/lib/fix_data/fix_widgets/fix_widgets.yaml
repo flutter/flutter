@@ -23,6 +23,28 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in TBD
+  - title: "Migrate to addPubRootDirectories"
+    date: 2023-11-29
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      method: 'setPubRootDirectories'
+      inMixin: 'WidgetInspectorService'
+    changes:
+      - kind: 'rename'
+        newName: 'addPubRootDirectories'
+
+  # Changes made in TBD
+  - title: "Use WidgetServicesExtensions.addPubRootDirectories"
+    date: 2023-11-29
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      enum: 'setPubRootDirectories'
+      inEnum: 'WidgetInspectorServiceExtensions'
+    changes:
+    - kind: 'rename'
+      newName: 'addPubRootDirectories'
+
   # Changes made in https://github.com/flutter/flutter/pull/138509
   - title: "Migrate to 'PlatformMenuBar.child'"
     date: 2023-11-15
@@ -33,6 +55,7 @@ transforms:
     changes:
       - kind: 'rename'
         newName: 'child'
+
   - title: "Migrate PlatformMenuBar(body:) to PlatformMenuBar(child:)"
     date: 2023-11-15
     element:

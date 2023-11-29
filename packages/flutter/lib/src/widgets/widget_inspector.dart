@@ -1170,9 +1170,9 @@ mixin WidgetInspectorService {
       registerExtension: registerExtension,
     );
     _registerServiceExtensionVarArgs(
-      name: WidgetInspectorServiceExtensions.setPubRootDirectories.name,
+      name: WidgetInspectorServiceExtensions.addPubRootDirectories.name,
       callback: (List<String> args) async {
-        setPubRootDirectories(args);
+        addPubRootDirectories(args);
         return null;
       },
       registerExtension: registerExtension,
@@ -1475,21 +1475,6 @@ mixin WidgetInspectorService {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id is not in group')]);
     }
     _decrementReferenceCount(referenceData);
-  }
-
-  /// Set the list of directories that should be considered part of the local
-  /// project.
-  ///
-  /// The local project directories are used to distinguish widgets created by
-  /// the local project from widgets created from inside the framework
-  /// or other packages.
-  @protected
-  @Deprecated(
-    'Use addPubRootDirectories instead. '
-    'This feature was deprecated after v3.1.0-9.0.pre.',
-  )
-  void setPubRootDirectories(List<String> pubRootDirectories) {
-    addPubRootDirectories(pubRootDirectories);
   }
 
   /// Resets the list of directories, that should be considered part of the
