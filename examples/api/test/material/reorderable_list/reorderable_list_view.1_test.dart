@@ -13,7 +13,7 @@ void main() {
       const example.ReorderableApp(),
     );
 
-    final ThemeData theme = Theme.of(tester.element(find.byType(MaterialApp)));
+    final ThemeData theme = Theme.of(tester.element(find.byType(Scaffold)));
 
     // Dragged item is wrapped in a Material widget with correct color.
     final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
