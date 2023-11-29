@@ -186,9 +186,20 @@ static void quit_application() {
   if (app == nullptr) {
     // Unable to gracefully quit, so just exit the process.
     exit(0);
-  } else {
-    g_application_quit(app);
   }
+
+  // GtkApplication windows contain a reference back to the application.
+  // Break them so the application object can cleanup.
+  // See https://gitlab.gnome.org/GNOME/gtk/-/issues/6190
+  if (GTK_IS_APPLICATION(app)) {
+    GList* windows = gtk_application_get_windows(GTK_APPLICATION(app));
+    for (GList* link = windows; link != NULL; link = link->next) {
+      GtkWidget* window = GTK_WIDGET(link->data);
+      gtk_window_set_application(GTK_WINDOW(window), NULL);
+    }
+  }
+
+  g_application_quit(app);
 }
 
 // Handle response of System.requestAppExit.
