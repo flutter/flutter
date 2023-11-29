@@ -27,10 +27,11 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-// The default font size if none is specified. This should be kept in
-// sync with the default values in text_style.dart, as well as the
-// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
-const double _kDefaultFontSize = 14.0;
+/// The default font size if none is specified.
+///
+/// This should be kept in sync with the defaults set in the engine (e.g.,
+/// LibTxt's text_style.h, paragraph_style.h).
+const double kDefaultFontSize = 14.0;
 
 /// How overflowing text should be handled.
 ///
@@ -971,7 +972,7 @@ class TextPainter {
       // Use the default font size to multiply by as RichText does not
       // perform inheriting [TextStyle]s and would otherwise
       // fail to apply textScaler.
-      fontSize: textScaler.scale(_kDefaultFontSize),
+      fontSize: textScaler.scale(kDefaultFontSize),
       maxLines: maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
