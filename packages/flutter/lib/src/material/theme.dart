@@ -50,7 +50,7 @@ class Theme extends StatelessWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  static final ThemeData _kFallbackTheme = ThemeData.fallback();
+  static final ThemeData _kFallbackTheme = ThemeData.fallback(useMaterial3: false);
 
   /// The data from the closest [Theme] instance that encloses the given
   /// context.
