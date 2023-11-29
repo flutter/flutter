@@ -4,35 +4,17 @@
 
 import 'dart:ui' as ui;
 
-import 'package:clock/clock.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class TestResampleEventFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
-  @override
-  SamplingClock? get debugSamplingClock => TestSamplingClock(this.clock);
-}
-
-class TestSamplingClock implements SamplingClock {
-  TestSamplingClock(this._clock);
-
-  @override
-  DateTime now() => _clock.now();
-
-  @override
-  Stopwatch stopwatch() => _clock.stopwatch();
-
-  final Clock _clock;
-}
-
 void main() {
-  final TestWidgetsFlutterBinding binding = TestResampleEventFlutterBinding();
   testWidgetsWithLeakTracking('PointerEvent resampling on a widget', (WidgetTester tester) async {
-    assert(WidgetsBinding.instance == binding);
-    Duration currentTestFrameTime() => Duration(milliseconds: binding.clock.now().millisecondsSinceEpoch);
+    Duration currentTestFrameTime() => Duration(
+      milliseconds: TestWidgetsFlutterBinding.instance.clock.now().millisecondsSinceEpoch,
+    );
     void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((_) {});
     final Duration epoch = currentTestFrameTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
