@@ -1305,13 +1305,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
+    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
+    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
+    final ThemeData theme = Theme.of(context);
 
     Color getHighlightColorForType(_HighlightType type) {
-      const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
-      const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
-      const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
-
-      final ThemeData theme = Theme.of(context);
       switch (type) {
         // The pressed state triggers a ripple (ink splash), per the current
         // Material Design spec. A separate highlight is no longer used.
@@ -1328,7 +1327,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _highlights[type]?.color = getHighlightColorForType(type);
     }
 
-    _currentSplash?.color = widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? Theme.of(context).splashColor;
+    final Map<_HighlightType, Color> colors = _highlights.map<_HighlightType, Color>((_HighlightType key, InkHighlight? value) {
+      return MapEntry<_HighlightType, Color>(key, value?.color ?? const Color(0x12345678));
+    });
+
+    _currentSplash?.color = widget.overlayColor?.resolve(statesController.value) ?? widget.splashColor ?? theme.splashColor;
+    debugPrint('Splash: ${_currentSplash?.color} overlay: ${widget.overlayColor?.resolve(statesController.value)} ${widget.splashColor} ${theme.splashColor} Highlight colors: $colors overlay: ${widget.overlayColor?.resolve(pressed)} highlight: ${widget.highlightColor} theme: ${theme.highlightColor}');
 
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.clickable,

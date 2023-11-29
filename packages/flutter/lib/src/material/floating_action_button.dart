@@ -504,6 +504,7 @@ class FloatingActionButton extends StatelessWidget {
     final Color splashColor = this.splashColor
       ?? floatingActionButtonTheme.splashColor
       ?? defaults.splashColor!;
+    debugPrint('FAB splash: $splashColor this: ${this.splashColor} theme: ${floatingActionButtonTheme.splashColor} defaults: ${defaults.splashColor}');
     final double elevation = this.elevation
       ?? floatingActionButtonTheme.elevation
       ?? defaults.elevation!;
@@ -612,35 +613,38 @@ class FloatingActionButton extends StatelessWidget {
       },
     );
 
-    Widget result = ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        foregroundColor: foregroundColor,
-        backgroundColor: backgroundColor,
-        // Have to specify a transparent surface tint to match what
-        // RawMaterialButton was doing.
-        surfaceTintColor: Colors.transparent,
-        textStyle: extendedTextStyle,
-        padding: EdgeInsets.zero,
-        minimumSize: Size(sizeConstraints.minWidth, sizeConstraints.minHeight),
-        maximumSize: Size(sizeConstraints.maxWidth, sizeConstraints.maxHeight),
-        shape: shape is! OutlinedBorder ? const RoundedRectangleBorder() : shape,
-        tapTargetSize: materialTapTargetSize,
-        animationDuration: kThemeChangeDuration,
-        enableFeedback: enableFeedback,
-      ).copyWith(
-        overlayColor: resolvedOverlayColor,
-        elevation: resolvedElevation,
-        mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            return MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
-                ?? floatingActionButtonTheme.mouseCursor?.resolve(states)
-                ?? MaterialStateMouseCursor.clickable.resolve(states);
-          }),
-        ),
-      onPressed: onPressed,
-      clipBehavior: clipBehavior,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      child: decoratedChild,
+    Widget result = Theme(
+      data: theme.copyWith(highlightColor: Colors.transparent),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: foregroundColor,
+          backgroundColor: backgroundColor,
+          // Have to specify a transparent surface tint to match what
+          // RawMaterialButton was doing.
+          surfaceTintColor: Colors.transparent,
+          textStyle: extendedTextStyle,
+          padding: EdgeInsets.zero,
+          minimumSize: Size(sizeConstraints.minWidth, sizeConstraints.minHeight),
+          maximumSize: Size(sizeConstraints.maxWidth, sizeConstraints.maxHeight),
+          shape: shape is! OutlinedBorder ? const RoundedRectangleBorder() : shape,
+          tapTargetSize: materialTapTargetSize,
+          animationDuration: kThemeChangeDuration,
+          enableFeedback: enableFeedback,
+        ).copyWith(
+          overlayColor: resolvedOverlayColor,
+          elevation: resolvedElevation,
+          mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              return MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states)
+                  ?? floatingActionButtonTheme.mouseCursor?.resolve(states)
+                  ?? MaterialStateMouseCursor.clickable.resolve(states);
+            }),
+          ),
+        onPressed: onPressed,
+        clipBehavior: clipBehavior,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        child: decoratedChild,
+      ),
     );
 
     if (tooltip != null) {

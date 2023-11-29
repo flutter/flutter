@@ -945,27 +945,44 @@ void main() {
     expect(iconRichText.text.style!.color, foregroundColor);
   });
 
-  testWidgets('FloatingActionButton uses custom splash color', (WidgetTester tester) async {
-    const Color splashColor = Color(0xcafefeed);
+  group('Compare FAB', () {
 
-    await tester.pumpWidget(MaterialApp(
-      theme: material2Theme,
-      home: FloatingActionButton(
-        onPressed: () {},
-        splashColor: splashColor,
-        child: const Icon(Icons.access_alarm),
-      ),
-    ));
+    testWidgets('FloatingActionButton draws correct color', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: material2Theme,
+        home: FloatingActionButton(
+          onPressed: () {},
+          child: const Icon(Icons.access_alarm),
+        ),
+      ));
 
-    await tester.press(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
+      await tester.press(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.byType(FloatingActionButton),
-      paints..circle(color: splashColor),
-    );
+      expect(
+        find.byType(FloatingActionButton),
+        paints..circle(color: const Color(0x66c8c8c8))..rect(color: const Color(0x66c8c8c8)),
+      );
+    });
+
+    testWidgets('FloatingActionButtonOld draws correct color', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: material2Theme,
+        home: FloatingActionButtonOld(
+          onPressed: () {},
+          child: const Icon(Icons.access_alarm),
+        ),
+      ));
+
+      await tester.press(find.byType(FloatingActionButtonOld));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byType(FloatingActionButtonOld),
+        paints..circle(color: const Color(0x66c8c8c8))..rect(color: const Color(0x66bcbcbc)),
+      );
+    });
   });
-
   testWidgets('extended FAB does not show label when isExtended is false', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
