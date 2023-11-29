@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -918,5 +923,20 @@ void main() {
     expect(feedback.clickSoundCount, 2);
 
     feedback.dispose();
+  });
+
+  testWidgetsWithLeakTracking('Delete button is visible FilterChip is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: FilterChip(
+          label: const Text('Label'),
+          onSelected: null,
+          onDeleted: () { },
+        )
+      ),
+    );
+
+    // Delete button should be visible.
+    expectLater(find.byType(RawChip), matchesGoldenFile('filter_chip.disabled.delete_button.png'));
   });
 }
