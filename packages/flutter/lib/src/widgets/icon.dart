@@ -13,6 +13,7 @@ import 'framework.dart';
 import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'media_query.dart';
 
 /// A graphical icon widget drawn with a glyph from a font described in
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
@@ -80,6 +81,7 @@ class Icon extends StatelessWidget {
     this.shadows,
     this.semanticLabel,
     this.textDirection,
+    this.applyTextScaling,
   }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
@@ -231,6 +233,16 @@ class Icon extends StatelessWidget {
   /// specified, either directly using this property or using [Directionality].
   final TextDirection? textDirection;
 
+  /// Whether to scale the size of this widget using the ambient [MediaQuery]'s [TextScaler].
+  ///
+  /// This is specially useful when you have an icon associated with a text, as
+  /// scaling the text without scaling the icon would result in a confusing
+  /// interface.
+  ///
+  /// Defaults to the nearest [IconTheme]'s
+  /// [IconThemeData.applyTextScaling].
+  final bool? applyTextScaling;
+
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
@@ -238,7 +250,11 @@ class Icon extends StatelessWidget {
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
-    final double? iconSize = size ?? iconTheme.size;
+    final bool applyTextScaling = this.applyTextScaling ?? iconTheme.applyTextScaling ?? false;
+
+    final double tentativeIconSize = size ?? iconTheme.size ?? kDefaultFontSize;
+
+    final double iconSize = applyTextScaling ? MediaQuery.textScalerOf(context).scale(tentativeIconSize) : tentativeIconSize;
 
     final double? iconFill = fill ?? iconTheme.fill;
 
@@ -332,5 +348,6 @@ class Icon extends StatelessWidget {
     properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null));
   }
 }
