@@ -48,7 +48,7 @@ void main() {
     expect(paragraph.text.style!.color, isSameColorAs(CupertinoColors.black));
     expect(paragraph.text.style!.copyWith(color: CupertinoColors.black), const TextStyle(
       inherit: false,
-      fontFamily: '.SF Pro Display',
+      fontFamily: 'CupertinoSystemDisplay',
       fontSize: 21.0,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.6,
@@ -178,7 +178,7 @@ void main() {
 
     expect(find.byType(CupertinoPicker), paints..rrect(color: const Color.fromARGB(61,118, 118, 128)));
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
-  },leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed());
+  });
 
   testWidgetsWithLeakTracking('picker selectionOverlay', (WidgetTester tester) async {
     await tester.pumpWidget(

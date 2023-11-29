@@ -57,7 +57,17 @@ abstract class ScrollActivityDelegate {
 ///    [ScrollPosition] of a [Scrollable].
 abstract class ScrollActivity {
   /// Initializes [delegate] for subclasses.
-  ScrollActivity(this._delegate);
+  ScrollActivity(this._delegate) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$ScrollActivity',
+        object: this,
+      );
+    }
+  }
 
   /// The delegate that this activity will use to actuate the scroll view.
   ScrollActivityDelegate get delegate => _delegate;
@@ -137,6 +147,12 @@ abstract class ScrollActivity {
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
     _isDisposed = true;
   }
 

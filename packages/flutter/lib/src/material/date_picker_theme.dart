@@ -301,7 +301,7 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default style of the cancel button of a [DatePickerDialog].
   final ButtonStyle? cancelButtonStyle;
 
-  /// Overrrides the default style of the confirm (OK) button of a [DatePickerDialog].
+  /// Overrides the default style of the confirm (OK) button of a [DatePickerDialog].
   final ButtonStyle? confirmButtonStyle;
 
   /// Creates a copy of this object with the given fields replaced with the

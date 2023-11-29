@@ -189,8 +189,14 @@ class BuildEvent extends UsageEvent {
 
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
-  CommandResultEvent(super.commandPath, super.result)
-      : super(flutterUsage: globals.flutterUsage);
+  CommandResultEvent(
+    super.commandPath,
+    super.result,
+    int? maxRss,
+  )   : _maxRss = maxRss,
+        super(flutterUsage: globals.flutterUsage);
+
+  final int? _maxRss;
 
   @override
   void send() {
@@ -204,17 +210,13 @@ class CommandResultEvent extends UsageEvent {
     // A separate event for the memory highwater mark. This is a separate event
     // so that we can get the command result even if trying to grab maxRss
     // throws an exception.
-    try {
-      final int maxRss = globals.processInfo.maxRss;
+    if (_maxRss != null) {
       flutterUsage.sendEvent(
         'tool-command-max-rss',
         category,
         label: parameter,
-        value: maxRss,
+        value: _maxRss,
       );
-    } on Exception catch (error) {
-      // If grabbing the maxRss fails for some reason, just don't send an event.
-      globals.printTrace('Querying maxRss failed with error: $error');
     }
   }
 }

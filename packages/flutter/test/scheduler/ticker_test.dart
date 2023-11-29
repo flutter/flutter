@@ -23,6 +23,7 @@ void main() {
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isFalse);
@@ -100,6 +101,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Ticker control test', (WidgetTester tester) async {
     late Ticker ticker;
+    addTearDown(() => ticker.dispose());
 
     void testFunction() {
       ticker = Ticker((Duration _) { });
@@ -154,6 +156,7 @@ void main() {
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
     ticker.start();
 
     expect(ticker.isTicking, isTrue);
@@ -179,6 +182,7 @@ void main() {
     }
 
     final Ticker ticker = Ticker(handleTick);
+    addTearDown(ticker.dispose);
     ticker.start();
 
     expect(tickCount, equals(0));
@@ -197,5 +201,12 @@ void main() {
     expect(ticker.isTicking, isTrue);
 
     ticker.stop();
+  });
+
+  test('Ticker dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => Ticker((_) {}).dispose(), Ticker,),
+      areCreateAndDispose,
+    );
   });
 }

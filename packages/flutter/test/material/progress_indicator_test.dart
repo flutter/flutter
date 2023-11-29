@@ -499,7 +499,7 @@ void main() {
     await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.butt));
     expect(find.byType(CircularProgressIndicator),
         paints..arc(strokeCap: StrokeCap.butt),
-        reason: 'strokeCap can be set to StrokeCap.butt, and will not be overidden.');
+        reason: 'strokeCap can be set to StrokeCap.butt, and will not be overridden.');
 
     await tester.pumpWidget(const CircularProgressIndicator(strokeCap: StrokeCap.round));
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));

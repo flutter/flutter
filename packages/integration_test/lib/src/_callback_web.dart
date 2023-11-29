@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'common.dart';
+import '../common.dart';
 
 /// The dart:html implementation of [CallbackManager].
 ///
@@ -14,8 +14,8 @@ import 'common.dart';
 CallbackManager get callbackManager => _singletonWebDriverCommandManager;
 
 /// WebDriverCommandManager singleton.
-final WebCallbackManager _singletonWebDriverCommandManager =
-    WebCallbackManager();
+final _WebCallbackManager _singletonWebDriverCommandManager =
+    _WebCallbackManager();
 
 /// Manages communication between `integration_tests` and the `driver_tests`.
 ///
@@ -26,7 +26,7 @@ final WebCallbackManager _singletonWebDriverCommandManager =
 /// WebDriver APIs.
 ///
 /// See: https://www.w3.org/TR/webdriver/
-class WebCallbackManager implements CallbackManager {
+class _WebCallbackManager implements CallbackManager {
   /// App side tests will put the command requests from WebDriver to this pipe.
   Completer<WebDriverCommand> _webDriverCommandPipe =
       Completer<WebDriverCommand>();

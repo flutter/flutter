@@ -6501,7 +6501,7 @@ void main() {
       fontStyle: FontStyle.italic,
     );
 
-    // Test tab bar with labeStyle & unselectedLabelStyle.
+    // Test tab bar with labelStyle & unselectedLabelStyle.
     await tester.pumpWidget(boilerplate(
       child: const DefaultTabController(
         length: 2,
@@ -6564,7 +6564,7 @@ void main() {
       );
     }
 
-    // Test tab bar with labeStyle & unselectedLabelStyle.
+    // Test tab bar with labelStyle & unselectedLabelStyle.
     await tester.pumpWidget(buildTabBar());
 
     IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(tab1)));

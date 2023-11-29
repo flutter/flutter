@@ -106,7 +106,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return const SizedBox(
         height: 200.0,
         child:  Text('BottomSheet'),
@@ -141,7 +141,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return const SizedBox(
         height: 200.0,
         child: Text('BottomSheet'),
@@ -178,7 +178,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return const SizedBox(
         height: 200.0,
         child: Text('BottomSheet'),
@@ -216,7 +216,7 @@ void main() {
     expect(buildCount, 0);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       buildCount++;
       return const SizedBox(
         height: 200.0,
@@ -618,7 +618,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet'),
@@ -672,7 +672,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet'),
@@ -1345,6 +1345,13 @@ void main() {
 
   testWidgetsWithLeakTracking('Verify showModalBottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 2),
+      reverseDuration: const Duration(seconds: 2),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -1355,11 +1362,7 @@ void main() {
                 showModalBottomSheet<void>(
                   context: context,
                   // The default duration and reverseDuration is 1 second
-                  transitionAnimationController: AnimationController(
-                    vsync: const TestVSync(),
-                    duration: const Duration(seconds: 2),
-                    reverseDuration: const Duration(seconds: 2),
-                  ),
+                  transitionAnimationController: controller,
                   builder: (BuildContext context) {
                     return const Text('BottomSheet');
                   },
@@ -1465,6 +1468,13 @@ void main() {
   testWidgetsWithLeakTracking('Verify persistence BottomSheet use AnimationController if provided.', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     const Key tapTargetToClose = Key('tap-target-to-close');
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 2),
+      reverseDuration: const Duration(seconds: 2),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -1472,14 +1482,10 @@ void main() {
             return GestureDetector(
               key: tapTarget,
               onTap: () {
-                showBottomSheet<void>(
+                showBottomSheet(
                   context: context,
                   // The default duration and reverseDuration is 1 second
-                  transitionAnimationController: AnimationController(
-                    vsync: const TestVSync(),
-                    duration: const Duration(seconds: 2),
-                    reverseDuration: const Duration(seconds: 2),
-                  ),
+                  transitionAnimationController: controller,
                   builder: (BuildContext context) {
                     return ElevatedButton(
                       key: tapTargetToClose,
@@ -1533,7 +1539,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);
@@ -1547,7 +1553,7 @@ void main() {
     // The first sheet's animation is still running.
 
     // Trigger the second sheet will remove the first sheet from tree.
-    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);
@@ -1569,7 +1575,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/99627
   testWidgetsWithLeakTracking('The old route entry should be removed when a new sheet popup', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
-    PersistentBottomSheetController<void>? sheetController;
+    PersistentBottomSheetController? sheetController;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -1581,7 +1587,7 @@ void main() {
     final ModalRoute<dynamic> route = ModalRoute.of(scaffoldKey.currentContext!)!;
     expect(route.canPop, false);
 
-    scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);
@@ -1594,7 +1600,7 @@ void main() {
     expect(route.canPop, true);
 
     // Trigger the second sheet will remove the first sheet from tree.
-    sheetController = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    sheetController = scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);
@@ -1626,7 +1632,7 @@ void main() {
             return GestureDetector(
               key: tapTarget,
               onTap: () {
-                showBottomSheet<void>(
+                showBottomSheet(
                   context: context,
                   transitionAnimationController: controller,
                   builder: (BuildContext context) {
@@ -1669,7 +1675,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Calling PersistentBottomSheetController.close does not crash when it is not the current bottom sheet', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/93717
-    PersistentBottomSheetController<void>? sheetController1;
+    PersistentBottomSheetController? sheetController1;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(builder: (BuildContext context) {
@@ -1679,7 +1685,7 @@ void main() {
                 ElevatedButton(
                   child: const Text('show 1'),
                   onPressed: () {
-                    sheetController1 = Scaffold.of(context).showBottomSheet<void>(
+                    sheetController1 = Scaffold.of(context).showBottomSheet(
                       (BuildContext context) => const Text('BottomSheet 1'),
                     );
                   },
@@ -1687,7 +1693,7 @@ void main() {
                 ElevatedButton(
                   child: const Text('show 2'),
                   onPressed: () {
-                    Scaffold.of(context).showBottomSheet<void>(
+                    Scaffold.of(context).showBottomSheet(
                       (BuildContext context) => const Text('BottomSheet 2'),
                     );
                   },
@@ -1908,7 +1914,7 @@ void main() {
               child: ElevatedButton(
                 child: const Text('Press me'),
                 onPressed: () {
-                  Scaffold.of(context).showBottomSheet<void>(
+                  Scaffold.of(context).showBottomSheet(
                     (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
@@ -2027,7 +2033,7 @@ void main() {
               child: ElevatedButton(
                 child: const Text('Press me'),
                 onPressed: () {
-                  Scaffold.of(context).showBottomSheet<void>(
+                  Scaffold.of(context).showBottomSheet(
                     (BuildContext context) => const Text('BottomSheet'),
                   );
                 },
@@ -2096,7 +2102,7 @@ void main() {
               child: ElevatedButton(
                 child: const Text('Press me'),
                 onPressed: () {
-                  Scaffold.of(context).showBottomSheet<void>(
+                  Scaffold.of(context).showBottomSheet(
                     (BuildContext context) => const Text('BottomSheet'),
                     constraints: const BoxConstraints(maxWidth: sheetMaxWidth),
                   );

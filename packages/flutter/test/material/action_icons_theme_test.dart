@@ -37,7 +37,7 @@ void main() {
     expect(copy.drawerButtonIconBuilder, originalButtonBuilder);
     expect(copy.endDrawerButtonIconBuilder, originalButtonBuilder);
 
-    // Check if the properties are overriden.
+    // Check if the properties are overridden.
     final ActionIconThemeData overridden = original.copyWith(
       backButtonIconBuilder: newButtonBuilder,
       closeButtonIconBuilder: newButtonBuilder,

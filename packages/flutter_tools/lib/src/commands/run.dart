@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -250,6 +248,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        tlsCertPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-path') : null,
+        tlsCertKeyPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-key-path') : null,
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
         webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArg('web-server-debug-injected-client-protocol') == 'sse',
@@ -295,6 +295,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         verboseSystemLogs: boolArg('verbose-system-logs'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        tlsCertPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-path') : null,
+        tlsCertKeyPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-key-path') : null,
         webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webUseSseForDebugBackend: featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
         webUseSseForInjectedClient: featureFlags.isWebEnabled && stringArg('web-server-debug-injected-client-protocol') == 'sse',
@@ -597,6 +599,7 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         ipv6: ipv6 ?? false,
         multidexEnabled: boolArg('multidex'),
+        analytics: globals.analytics,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -608,6 +611,7 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         fileSystem: globals.fs,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         logger: globals.logger,
         systemClock: globals.systemClock,
       );

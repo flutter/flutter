@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
@@ -78,6 +79,7 @@ void main() {
   late FakePlistUtils plistUtils;
   late BufferLogger logger;
   late Artifacts artifacts;
+  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -94,6 +96,10 @@ void main() {
       processManager: fakeProcessManager,
     );
     plistUtils = FakePlistUtils();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fileSystem,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -180,6 +186,7 @@ void main() {
   FakeCommand exportArchiveCommand({
     String exportOptionsPlist =  '/ExportOptions.plist',
     File? cachePlist,
+    bool deleteExportOptionsPlist = false,
   }) {
     return FakeCommand(
       command: <String>[
@@ -200,6 +207,9 @@ void main() {
         // Save it somewhere else so test expectations can be run on it.
         if (cachePlist != null) {
           cachePlist.writeAsStringSync(fileSystem.file(_exportOptionsPlist).readAsStringSync());
+        }
+        if (deleteExportOptionsPlist) {
+          fileSystem.file(_exportOptionsPlist).deleteSync();
         }
       }
     );
@@ -410,6 +420,40 @@ void main() {
     expect(logger.statusText, contains('Building App Store IPA'));
     expect(logger.errorText, contains('Encountered error while creating the IPA:'));
     expect(logger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    Logger: () => logger,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build ignores deletion failure if generatedExportPlist does not exist', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: logger,
+      fileSystem: fileSystem,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(
+        exportOptionsPlist: _exportOptionsPlist,
+        cachePlist: cachedExportOptionsPlist,
+        deleteExportOptionsPlist: true,
+      ),
+    ]);
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
+    );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -756,6 +800,9 @@ void main() {
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
     expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(fakeAnalytics.sentEvents, contains(
+      Event.codeSizeAnalysis(platform: 'ios')
+    ));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     Logger: () => logger,
@@ -763,6 +810,7 @@ void main() {
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
     Usage: () => usage,
+    Analytics: () => fakeAnalytics,
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
