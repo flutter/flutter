@@ -452,6 +452,11 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
       _usage.sendTiming('hot', 'web-incremental-restart', elapsed);
+      _analytics.send(Event.timing(
+        workflow: 'hot',
+        variableName: 'web-incremental-restart',
+        elapsedMilliseconds: elapsed.inMilliseconds,
+      ));
       final String sdkName = await device!.device!.sdkNameAndVersion;
       HotEvent(
         'restart',

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:collection/collection.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -346,4 +347,39 @@ FakeAnalytics getInitializedFakeAnalyticsInstance({
     flutterVersion: fakeFlutterVersion.getVersionString(),
     clientIde: clientIde,
   );
+}
+
+/// Returns "true" if the timing event searched for exists in [sentEvents].
+///
+/// This utility function allows us to check for an instance of
+/// [Event.timing] within a [FakeAnalytics] instance. Normally, we can
+/// use the equality operator for [Event] to check if the event exists, but
+/// we are unable to do so for the timing event because the elapsed time
+/// is variable so we cannot predict what that value will be in tests.
+///
+/// This function allows us to check for the other keys that have
+/// string values by removing the `elapsedMilliseconds` from the
+/// [Event.eventData] map and checking for a match.
+bool analyticsTimingEventExists({
+  required List<Event> sentEvents,
+  required String workflow,
+  required String variableName,
+  String? label,
+}) {
+  final Map<String, String> lookup = <String, String>{
+    'workflow': workflow,
+    'variableName': variableName,
+    if (label != null) 'label': label,
+  };
+
+  for (final Event e in sentEvents) {
+    final Map<String, Object?> eventData = e.eventData;
+    eventData.remove('elapsedMilliseconds');
+
+    if (const DeepCollectionEquality().equals(lookup, eventData)) {
+      return true;
+    }
+  }
+
+  return false;
 }
