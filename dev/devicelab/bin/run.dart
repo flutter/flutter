@@ -10,7 +10,6 @@ import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
 
 /// Runs tasks.
 ///
@@ -235,29 +234,12 @@ ArgParser createArgParser(List<String> taskNames) {
     ..addMultiOption(
       'task',
       abbr: 't',
-      help: 'Either:\n'
-          ' - the name of a task defined in manifest.yaml.\n'
-          '   Example: complex_layout__start_up.\n'
-          ' - the path to a Dart file corresponding to a task,\n'
-          '   which resides in bin/tasks.\n'
-          '   Example: bin/tasks/complex_layout__start_up.dart.\n'
+      help: 'Name of a Dart file in bin/tasks.\n'
+          '   Example: complex_layout__start_up\n'
           '\n'
           'This option may be repeated to specify multiple tasks.',
-      callback: (List<String> value) {
-        for (final String nameOrPath in value) {
-          final List<String> fragments = path.split(nameOrPath);
-          final bool isDartFile = fragments.last.endsWith('.dart');
-
-          if (fragments.length == 1 && !isDartFile) {
-            // Not a path
-            taskNames.add(nameOrPath);
-          } else if (!isDartFile || !path.equals(path.dirname(nameOrPath), path.join('bin', 'tasks'))) {
-            // Unsupported executable location
-            throw FormatException('Invalid value for option -t (--task): $nameOrPath');
-          } else {
-            taskNames.add(path.withoutExtension(fragments.last));
-          }
-        }
+      callback: (List<String> tasks) {
+        taskNames.addAll(tasks);
       },
     )
     ..addOption(
@@ -339,14 +321,6 @@ ArgParser createArgParser(List<String> taskNames) {
             'the location based on the value of the --flutter-root option.',
     )
     ..addOption('luci-builder', help: '[Flutter infrastructure] Name of the LUCI builder being run on.')
-    ..addFlag(
-      'match-host-platform',
-      defaultsTo: true,
-      help: 'Only run tests that match the host platform (e.g. do not run a\n'
-            'test with a `required_agent_capabilities` value of "mac/android"\n'
-            'on a windows host). Each test publishes its '
-            '`required_agent_capabilities`\nin the `manifest.yaml` file.',
-    )
     ..addOption(
       'results-file',
       help: '[Flutter infrastructure] File path for test results. If passed with\n'

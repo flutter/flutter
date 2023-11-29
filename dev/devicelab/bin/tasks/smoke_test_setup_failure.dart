@@ -7,5 +7,8 @@
 /// By not calling `task()` the VM service extension is not registered and
 /// therefore will not accept requests to run tasks. When the runner attempts to
 /// connect and run the test it will receive a "method not found" error from the
-/// VM service, will likely retry and finally time out.
+/// VM service, will likely retry forever.
+///
+/// The test in ../../test/run_test.dart runs this task until it detects
+/// the retry message and then aborts the task.
 Future<void> main() async {}
