@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstring>
 #include "flutter/testing/testing.h"
+#include "gtest/gtest.h"
 #include "impeller/base/validation.h"
 #include "impeller/compiler/compiler.h"
 #include "impeller/compiler/compiler_test.h"
@@ -26,6 +28,9 @@ TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
 }
 
 TEST_P(CompilerTest, CanCompile) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ASSERT_TRUE(CanCompileAndReflect("sample.vert"));
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader));
   ASSERT_TRUE(CanCompileAndReflect("sample.vert", SourceType::kVertexShader,
@@ -33,11 +38,17 @@ TEST_P(CompilerTest, CanCompile) {
 }
 
 TEST_P(CompilerTest, CanCompileHLSL) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ASSERT_TRUE(CanCompileAndReflect(
       "simple.vert.hlsl", SourceType::kVertexShader, SourceLanguage::kHLSL));
 }
 
 TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
                                    SourceType::kVertexShader,
                                    SourceLanguage::kHLSL, "VertexShader"));
@@ -47,12 +58,18 @@ TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
 }
 
 TEST_P(CompilerTest, CanCompileTessellationControlShader) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ASSERT_TRUE(CanCompileAndReflect("sample.tesc"));
   ASSERT_TRUE(CanCompileAndReflect("sample.tesc",
                                    SourceType::kTessellationControlShader));
 }
 
 TEST_P(CompilerTest, CanCompileTessellationEvaluationShader) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ASSERT_TRUE(CanCompileAndReflect("sample.tese"));
   ASSERT_TRUE(CanCompileAndReflect("sample.tese",
                                    SourceType::kTessellationEvaluationShader));
@@ -67,12 +84,18 @@ TEST_P(CompilerTest, CanCompileComputeShader) {
 }
 
 TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ScopedValidationDisable disable_validation;
   ASSERT_FALSE(
       CanCompileAndReflect("resources_limit.vert", SourceType::kVertexShader));
 }
 
 TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ScopedValidationDisable disable_validation;
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
@@ -98,6 +121,9 @@ TEST_P(CompilerTest, BindingBaseForFragShader) {
 }
 
 TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
+  if (GetParam() == TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Not supported with SkSL";
+  }
   ASSERT_TRUE(CanCompileAndReflect("sample_with_binding.vert",
                                    SourceType::kVertexShader));
   ASSERT_TRUE(CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
@@ -123,14 +149,30 @@ TEST_P(CompilerTest, UniformsHaveBindingAndSet) {
   ASSERT_EQ(vert_uniform_binding.binding, 17u);
 }
 
-#define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)              \
-  INSTANTIATE_TEST_SUITE_P(                                               \
-      suite_name, CompilerTest,                                           \
-      ::testing::Values(                                                  \
-          TargetPlatform::kOpenGLES, TargetPlatform::kOpenGLDesktop,      \
-          TargetPlatform::kMetalDesktop, TargetPlatform::kMetalIOS),      \
-      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
-        return TargetPlatformToString(info.param);                        \
+TEST_P(CompilerTest, SkSLTextureLookUpOrderOfOperations) {
+  if (GetParam() != TargetPlatform::kSkSL) {
+    GTEST_SKIP() << "Only supported on SkSL";
+  }
+  ASSERT_TRUE(
+      CanCompileAndReflect("texture_lookup.frag", SourceType::kFragmentShader));
+
+  auto shader = GetShaderFile("texture_lookup.frag", GetParam());
+  auto string_mapping = reinterpret_cast<const char*>(shader->GetMapping());
+
+  EXPECT_TRUE(strcmp(string_mapping,
+                     "textureA.eval(textureA_size * ( vec2(1.0) + "
+                     "flutter_FragCoord.xy));") != -1);
+}
+
+#define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)               \
+  INSTANTIATE_TEST_SUITE_P(                                                \
+      suite_name, CompilerTest,                                            \
+      ::testing::Values(TargetPlatform::kOpenGLES,                         \
+                        TargetPlatform::kOpenGLDesktop,                    \
+                        TargetPlatform::kMetalDesktop,                     \
+                        TargetPlatform::kMetalIOS, TargetPlatform::kSkSL), \
+      [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) {  \
+        return TargetPlatformToString(info.param);                         \
       });
 
 INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);

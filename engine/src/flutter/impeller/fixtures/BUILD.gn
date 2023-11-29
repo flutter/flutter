@@ -101,6 +101,7 @@ test_fixtures("file_fixtures") {
     "two_triangles.glb",
     "types.h",
     "wtf.otf",
+    "texture_lookup.frag",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]
