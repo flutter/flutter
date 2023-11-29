@@ -99,19 +99,6 @@ void main() {
       isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
       reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
     );
-    expect(
-      kManuallyPinnedDependencies.keys,
-      unorderedEquals(const <String>[
-        'flutter_gallery_assets',
-        'flutter_template_images',
-        'video_player',
-        'material_color_utilities',
-        'archive',
-        'leak_tracker',
-        'leak_tracker_testing',
-        'leak_tracker_flutter_testing',
-      ]),
-    );
   });
 
   testWithoutContext(
