@@ -155,6 +155,70 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
+  testWidgetsWithLeakTracking('ScrollBehavior multitouchDragStrategy test', (WidgetTester tester) async {
+    const ScrollBehavior behavior1 = ScrollBehavior();
+    final ScrollBehavior behavior2 = const ScrollBehavior().copyWith(
+      multitouchDragStrategy: MultitouchDragStrategy.sumAllPointers
+    );
+    final ScrollController controller = ScrollController();
+    addTearDown(() => controller.dispose());
+
+    Widget buildFrame(ScrollBehavior behavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: behavior,
+          child: ListView(
+            controller: controller,
+            children: const <Widget>[
+              SizedBox(
+                height: 1000.0,
+                width: 1000.0,
+                child: Text('I Love Flutter!'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(behavior1));
+
+    expect(controller.position.pixels, 0.0);
+
+    final Offset listLocation = tester.getCenter(find.byType(ListView));
+
+    final TestGesture gesture1 = await tester.createGesture(pointer: 1);
+    await gesture1.down(listLocation);
+    await tester.pump();
+
+    final TestGesture gesture2 = await tester.createGesture(pointer: 2);
+    await gesture2.down(listLocation);
+    await tester.pump();
+
+    await gesture1.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    // The default multitouchDragStrategy should be MultitouchDragStrategy.latestPointer.
+    // Only the latest active pointer be tracked.
+    expect(controller.position.pixels, 50.0);
+
+    // Change to MultitouchDragStrategy.sumAllPointers.
+    await tester.pumpWidget(buildFrame(behavior2));
+
+    await gesture1.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    await gesture2.moveBy(const Offset(0, -50));
+    await tester.pump();
+
+    // All active pointers be tracked.
+    expect(controller.position.pixels, 50.0 + 50.0 + 50.0);
+  }, variant: TargetPlatformVariant.all());
+
   group('ScrollBehavior configuration is maintained over multiple copies', () {
     testWidgetsWithLeakTracking('dragDevices', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
