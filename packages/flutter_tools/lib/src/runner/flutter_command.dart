@@ -1361,7 +1361,11 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Additional usage values to be sent with the usage ping for
   /// package:unified_analytics.
-  Future<Event?> get unifiedAnalyticsUsageValues async => null;
+  /// 
+  /// Implementations of [FlutterCommand] can override this getter in order
+  /// to add additional parameters in the [Event.commandUsageValues] constructor.
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => 
+    Event.commandUsageValues(workflow: commandPath);
 
   /// Runs this command.
   ///
@@ -1745,6 +1749,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
       Usage.command(commandPath, parameters: CustomDimensions(
         commandHasTerminal: globals.stdio.hasTerminal,
       ).merge(await usageValues));
+      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }
 
     return runCommand();
