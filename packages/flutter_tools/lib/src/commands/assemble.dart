@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -147,6 +148,21 @@ class AssembleCommand extends FlutterCommand {
       // We've failed to send usage.
     }
     return const CustomDimensions();
+  }
+
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    try {
+      return Event.commandUsageValues(
+        workflow: commandPath,
+        buildBundleTargetPlatform: _environment.defines[kTargetPlatform],
+        buildBundleIsModule: flutterProject.isModule,
+      );
+    } on Exception {
+      // We've failed to send usage.
+    }
+    return Event.commandUsageValues(workflow: commandPath);
   }
 
   @override
