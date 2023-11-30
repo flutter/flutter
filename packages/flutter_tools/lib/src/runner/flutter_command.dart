@@ -1359,6 +1359,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Additional usage values to be sent with the usage ping.
   Future<CustomDimensions> get usageValues async => const CustomDimensions();
 
+  /// Additional usage values to be sent with the usage ping for
+  /// package:unified_analytics.
+  Future<Event?> get unifiedAnalyticsUsageValues async => null;
+
   /// Runs this command.
   ///
   /// Rather than overriding this method, subclasses should override
