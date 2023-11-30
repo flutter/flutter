@@ -11,6 +11,8 @@ import 'package:platform/platform.dart' show FakePlatform, Platform;
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import '../prepare_package.dart';
+import '../prepare_package/common.dart';
+import '../prepare_package/process_runner.dart';
 import 'common.dart';
 
 void main() {
