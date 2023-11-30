@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart' hide FakeXcodeProjectInterpreter;
@@ -89,13 +88,12 @@ void main() {
   });
 
   group('IOSDevice.startApp succeeds in release mode', () {
-    late MemoryFileSystem fileSystem;
+    late FileSystem fileSystem;
     late FakeProcessManager processManager;
     late BufferLogger logger;
     late Xcode xcode;
     late FakeXcodeProjectInterpreter fakeXcodeProjectInterpreter;
     late XcodeProjectInfo projectInfo;
-    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       logger = BufferLogger.test();
@@ -112,10 +110,6 @@ void main() {
       fileSystem.file('foo/.packages')
         ..createSync(recursive: true)
         ..writeAsStringSync('\n');
-      fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: fileSystem,
-        fakeFlutterVersion: FakeFlutterVersion(),
-      );
     });
 
     testUsingContext('missing TARGET_BUILD_DIR', () async {
@@ -141,14 +135,6 @@ void main() {
       expect(launchResult.started, false);
       expect(logger.errorText, contains('Xcode build is missing expected TARGET_BUILD_DIR build setting'));
       expect(processManager, hasNoRemainingExpectations);
-      expect(
-        analyticsTimingEventExists(
-          sentEvents: fakeAnalytics.sentEvents,
-          workflow: 'build',
-          variableName: 'xcode-ios',
-        ),
-        true,
-      );
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       FileSystem: () => fileSystem,
@@ -159,7 +145,6 @@ void main() {
         'DEVELOPMENT_TEAM': '3333CCCC33',
       }, projectInfo: projectInfo),
       Xcode: () => xcode,
-      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('missing project info', () async {

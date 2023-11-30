@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -46,7 +45,6 @@ void main() {
   late FileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage usage;
-  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -57,10 +55,6 @@ void main() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
     usage = TestUsage();
-    fakeAnalytics = getInitializedFakeAnalyticsInstance(
-      fs: fileSystem,
-      fakeFlutterVersion: FakeFlutterVersion(),
-    );
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -214,46 +208,6 @@ void main() {
     Platform: () => windowsPlatform,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
-
-  testUsingContext('Windows build sends timing events', () async {
-    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
-    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
-      ..visualStudioOverride = fakeVisualStudio;
-    setUpMockProjectFilesForBuild();
-
-    processManager = FakeProcessManager.list(<FakeCommand>[
-      cmakeGenerationCommand(),
-      buildCommand('Release'),
-    ]);
-
-    await createTestCommandRunner(command).run(
-      const <String>['windows', '--no-pub']
-    );
-
-    expect(
-      analyticsTimingEventExists(
-        sentEvents: fakeAnalytics.sentEvents,
-        workflow: 'build',
-        variableName: 'windows-cmake-generation',
-      ),
-      true,
-    );
-    expect(
-      analyticsTimingEventExists(
-        sentEvents: fakeAnalytics.sentEvents,
-        workflow: 'build',
-        variableName: 'windows-cmake-build',
-      ),
-      true,
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-    Platform: () => windowsPlatform,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-    Analytics: () => fakeAnalytics,
-  });
-
 
   testUsingContext('Windows build extracts errors from stdout', () async {
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
@@ -975,9 +929,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     expect(usage.events, contains(
         const TestUsageEvent('code-size-analysis', 'windows'),
     ));
-    expect(fakeAnalytics.sentEvents, contains(
-      Event.codeSizeAnalysis(platform: 'windows')
-    ));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     FileSystem: () => fileSystem,
@@ -985,7 +936,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     Platform: () => windowsPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
     Usage: () => usage,
-    Analytics: () => fakeAnalytics,
   });
 
   // Confirms that running for Windows in a directory with a
