@@ -933,41 +933,60 @@ class BoxParentData extends ParentData {
 /// the relevant type arguments.
 abstract class ContainerBoxParentData<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
-sealed class _IntrinsicsCacheType<Input extends Object, Output> {
+/// A class that encodes the type information of a piece of layout cache produced
+/// by a [RenderBox], and defines how to access the cache given the `cacheStorage`.
+///
+/// Each subclass of this sealed class is inhabited by one unique object. Each
+/// object represents the signature of a memoized layout computation ran by a
+/// [RenderBox]. For instance, the [dryLayout] object of the [_DryLayoutCache]
+/// subclass represents the signature of the [RenderBox.computeDryLayout] method:
+/// it takes a [BoxConstraints] (the subclass's `Input` type parameter) and returns a
+/// [Size] (the subclass's `Output` type parameter).
+///
+/// Subclasses do not have their own cache storage. Rather, their [getOrCompute]
+/// implementation takes a `cacheStorage`, and checks if the computation has
+/// already been memoized, and returns the memoized value if the cache hits.
+/// Otherwise the method runs the `computer` to compute the value and caches the
+/// result to `cacheStorage`.
+///
+/// The layout cache storage is typically cleared in `markNeedsLayout`, but is
+/// usually kept after [RenderObject.layout] because the [BoxConstraints] is
+/// part of `Input`.
+sealed class _CachedRenderBoxLayout<Input extends Object, Output> {
   static const _DryLayoutCache dryLayout = _DryLayoutCache();
   static const _DryBaselineCache baseline = _DryBaselineCache();
 
-  Output getOrCompute(_BoxIntrinsicsCache cache, Input input, Output Function(Input) computer);
+  Output getOrCompute(_BoxIntrinsicsCache cacheStorage, Input input, Output Function(Input) computer);
 }
 
-final class _DryLayoutCache implements _IntrinsicsCacheType<BoxConstraints, Size> {
+final class _DryLayoutCache implements _CachedRenderBoxLayout<BoxConstraints, Size> {
   const _DryLayoutCache();
 
   @override
-  Size getOrCompute(_BoxIntrinsicsCache cache, BoxConstraints input, Size Function(BoxConstraints) computer) {
-    return (cache._cachedDryLayoutSizes ??= <BoxConstraints, Size>{})
+  Size getOrCompute(_BoxIntrinsicsCache cacheStorage, BoxConstraints input, Size Function(BoxConstraints) computer) {
+    return (cacheStorage._cachedDryLayoutSizes ??= <BoxConstraints, Size>{})
       .putIfAbsent(input, () => computer(input));
   }
 }
 
-final class _DryBaselineCache implements _IntrinsicsCacheType<(BoxConstraints, TextBaseline), double?> {
+final class _DryBaselineCache implements _CachedRenderBoxLayout<(BoxConstraints, TextBaseline), double?> {
   const _DryBaselineCache();
 
   @override
-  double? getOrCompute(_BoxIntrinsicsCache cache, (BoxConstraints, TextBaseline) input, double? Function((BoxConstraints, TextBaseline)) computer) {
+  double? getOrCompute(_BoxIntrinsicsCache cacheStorage, (BoxConstraints, TextBaseline) input, double? Function((BoxConstraints, TextBaseline)) computer) {
     return switch (input.$2) {
-      TextBaseline.alphabetic => cache._cachedDryAlphabeticBaseline ??= <BoxConstraints, double?>{},
-      TextBaseline.ideographic => cache._cachedDryIdeoBaseline ??= <BoxConstraints, double?>{},
+      TextBaseline.alphabetic => cacheStorage._cachedDryAlphabeticBaseline ??= <BoxConstraints, double?>{},
+      TextBaseline.ideographic => cacheStorage._cachedDryIdeoBaseline ??= <BoxConstraints, double?>{},
     }.putIfAbsent(input.$1, () => computer(input));
   }
 }
 
-enum _IntrinsicDimension implements _IntrinsicsCacheType<double, double> {
+enum _IntrinsicDimension implements _CachedRenderBoxLayout<double, double> {
   minWidth, maxWidth, minHeight, maxHeight;
 
   @override
-  double getOrCompute(_BoxIntrinsicsCache cache, double input, double Function(double) computer) {
-    return (cache._cachedIntrinsicDimensions ??= <(_IntrinsicDimension, double), double>{})
+  double getOrCompute(_BoxIntrinsicsCache cacheStorage, double input, double Function(double) computer) {
+    return (cacheStorage._cachedIntrinsicDimensions ??= <(_IntrinsicDimension, double), double>{})
       .putIfAbsent((this, input), () => computer(input));
   }
 }
@@ -1000,7 +1019,7 @@ final class _BoxIntrinsicsCache {
   }
 
   Output getOrCompute<Input extends Object, Output>(
-    _IntrinsicsCacheType<Input, Output> type,
+    _CachedRenderBoxLayout<Input, Output> type,
     Input input,
     Output Function(Input argument) computer,
   ) {
@@ -1870,7 +1889,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Do not override this method. Instead, implement [computeDryLayout].
   @mustCallSuper
-  Size getDryLayout(covariant BoxConstraints constraints) => _intrinsicsCache.getOrCompute(_IntrinsicsCacheType.dryLayout, constraints, _computeDryLayout);
+  Size getDryLayout(covariant BoxConstraints constraints) => _intrinsicsCache.getOrCompute(_CachedRenderBoxLayout.dryLayout, constraints, _computeDryLayout);
 
   /// Returns the distance from the top of the box to the first baseline of the
   /// box's contents, given the input [constraints] to this [RenderBox], or null
@@ -1888,7 +1907,7 @@ abstract class RenderBox extends RenderObject {
   /// also guaranteed that calling this method does not alter the current layout
   /// of this [RenderBox] in any way.
   double? getDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return _intrinsicsCache.getOrCompute(_IntrinsicsCacheType.baseline, (constraints, baseline), _computeDryBaseline);
+    return _intrinsicsCache.getOrCompute(_CachedRenderBoxLayout.baseline, (constraints, baseline), _computeDryBaseline);
   }
 
   Size _computeDryLayout(BoxConstraints constraints) {
@@ -2238,7 +2257,7 @@ abstract class RenderBox extends RenderObject {
   double? getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     return _intrinsicsCache.getOrCompute(
-      _IntrinsicsCacheType.baseline,
+      _CachedRenderBoxLayout.baseline,
       (constraints, baseline),
       ((BoxConstraints, TextBaseline) pair) => computeDistanceToActualBaseline(pair.$2),
     );
@@ -2255,7 +2274,7 @@ abstract class RenderBox extends RenderObject {
     double? result;
     assert(() {
       result = _intrinsicsCache.getOrCompute(
-        _IntrinsicsCacheType.baseline,
+        _CachedRenderBoxLayout.baseline,
         (constraints, baseline),
         ((BoxConstraints, TextBaseline) pair) => computeDistanceToActualBaseline(pair.$2),
       );

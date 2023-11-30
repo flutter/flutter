@@ -286,12 +286,14 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
     ).enforce(constraints.loosen());
     final double? result = child.getDryBaseline(enforcedConstraint, baseline);
-    if (result == null) {
-      return null;
-    }
-    final Size childSize = child.getDryLayout(enforcedConstraint);
+    return result == null
+      ? null
+      : result + _computeChildOffset(child.getDryLayout(enforcedConstraint)).dy;
+  }
+
+  Offset _computeChildOffset(Size childSize) {
     final bool isAbove = anchorAbove.dy >= childSize.height - _kToolbarArrowSize.height * 2;
-    return result + (isAbove ? -_kToolbarArrowSize.height : 0.0);
+    return Offset(0.0, isAbove ? -_kToolbarArrowSize.height : 0.0);
   }
 
   bool get isAbove => anchorAbove.dy >= (child?.size.height ?? 0.0) - _kToolbarArrowSize.height * 2;
@@ -315,10 +317,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     // The height of one arrow will be clipped off of the child, so adjust the
     // size and position to remove that piece from the layout.
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = Offset(
-      0.0,
-      isAbove ? -_kToolbarArrowSize.height : 0.0,
-    );
+    childParentData.offset = _computeChildOffset(child.size);
     size = Size(
       child.size.width,
       child.size.height - _kToolbarArrowSize.height,

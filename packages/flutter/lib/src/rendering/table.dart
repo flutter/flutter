@@ -1046,10 +1046,11 @@ class RenderTable extends RenderBox {
           if (childBaseline != null && (baselineOffset == null || baselineOffset < childBaseline)) {
             baselineOffset = childBaseline;
           }
-          case TableCellVerticalAlignment.top:
-          case TableCellVerticalAlignment.middle:
-          case TableCellVerticalAlignment.bottom:
-          case TableCellVerticalAlignment.fill:
+        case TableCellVerticalAlignment.top:
+        case TableCellVerticalAlignment.middle:
+        case TableCellVerticalAlignment.bottom:
+        case TableCellVerticalAlignment.fill:
+        case TableCellVerticalAlignment.intrinsicHeight:
       }
     }
     return null;
