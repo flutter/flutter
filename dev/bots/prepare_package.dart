@@ -3,13 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' hide Platform;
+import 'dart:io' show exit, stderr;
 
 import 'package:args/args.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 
 import 'prepare_package/archive_creator.dart';
 import 'prepare_package/archive_publisher.dart';
 import 'prepare_package/common.dart';
+
+const FileSystem fs = LocalFileSystem();
 
 /// Prepares a flutter git repo to be packaged up for distribution. It mainly
 /// serves to populate the .pub-preload-cache with any appropriate Dart
@@ -94,10 +98,10 @@ Future<void> main(List<String> rawArguments) async {
   final Directory tempDir;
   bool removeTempDir = false;
   if (tempDirArg == null || tempDirArg.isEmpty) {
-    tempDir = Directory.systemTemp.createTempSync('flutter_package.');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {
-    tempDir = Directory(tempDirArg);
+    tempDir = fs.directory(tempDirArg);
     if (!tempDir.existsSync()) {
       errorExit("Temporary directory $tempDirArg doesn't exist.");
     }
@@ -107,7 +111,7 @@ Future<void> main(List<String> rawArguments) async {
   if (parsedArguments['output'] == null) {
     outputDir = tempDir;
   } else {
-    outputDir = Directory(parsedArguments['output'] as String);
+    outputDir = fs.directory(parsedArguments['output'] as String);
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
     }
@@ -121,6 +125,7 @@ Future<void> main(List<String> rawArguments) async {
     outputDir,
     revision,
     branch,
+    fs: fs,
     strict: publish && !dryRun,
   );
   int exitCode = 0;
@@ -135,6 +140,7 @@ Future<void> main(List<String> rawArguments) async {
       version,
       outputFile,
       dryRun,
+      fs: fs,
     );
     await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {

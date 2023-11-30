@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' show Directory, File;
 
 import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
+import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
@@ -24,6 +24,7 @@ class ArchivePublisher {
     this.dryRun, {
     ProcessManager? processManager,
     bool subprocessOutput = true,
+    required this.fs,
     this.platform = const LocalPlatform(),
   })  : assert(revision.length == 40),
         platformName = platform.operatingSystem.toLowerCase(),
@@ -34,6 +35,7 @@ class ArchivePublisher {
         );
 
   final Platform platform;
+  final FileSystem fs;
   final String platformName;
   final String metadataGsPath;
   final Branch branch;
@@ -127,7 +129,7 @@ class ArchivePublisher {
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
     // back in.
-    final File metadataFile = File(
+    final File metadataFile = fs.file(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
     await _runGsUtil(<String>['cp', gsPath, metadataFile.absolute.path]);
@@ -154,7 +156,7 @@ class ArchivePublisher {
 
   /// Publishes the metadata file to GCS.
   Future<void> _publishMetadata(String gsPath) async {
-    final File metadataFile = File(
+    final File metadataFile = fs.file(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
     await _cloudCopy(

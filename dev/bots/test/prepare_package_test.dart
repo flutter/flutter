@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' hide Platform;
+import 'dart:io' show ProcessResult;
 import 'dart:typed_data';
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show FakePlatform, Platform;
 
@@ -76,12 +78,14 @@ void main() {
             throwsA(isA<PreparePackageException>()));
       });
     });
+
     group('ArchiveCreator for $platformName', () {
       late ArchiveCreator creator;
       late Directory tempDir;
       Directory flutterDir;
       Directory cacheDir;
       late FakeProcessManager processManager;
+      late FileSystem fs;
       final List<List<String>> args = <List<String>>[];
       final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
       late String flutter;
@@ -95,16 +99,18 @@ void main() {
         processManager = FakeProcessManager.list(<FakeCommand>[]);
         args.clear();
         namedArgs.clear();
-        tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
-        flutterDir = Directory(path.join(tempDir.path, 'flutter'));
+        fs = MemoryFileSystem.test();
+        tempDir = fs.systemTempDirectory;
+        flutterDir = fs.directory(path.join(tempDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
-        cacheDir = Directory(path.join(flutterDir.path, 'bin', 'cache'));
+        cacheDir = fs.directory(path.join(flutterDir.path, 'bin', 'cache'));
         cacheDir.createSync(recursive: true);
         creator = ArchiveCreator(
           tempDir,
           tempDir,
           testRef,
           Branch.beta,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -199,6 +205,7 @@ void main() {
           tempDir,
           testRef,
           Branch.beta,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -248,6 +255,7 @@ void main() {
           tempDir,
           testRef,
           Branch.beta,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -306,6 +314,7 @@ void main() {
           tempDir,
           testRef,
           Branch.beta,
+          fs: fs,
           strict: false,
           processManager: processManager,
           subprocessOutput: false,
@@ -358,6 +367,7 @@ void main() {
           tempDir,
           testRef,
           Branch.beta,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -379,6 +389,7 @@ void main() {
     group('ArchivePublisher for $platformName', () {
       late FakeProcessManager processManager;
       late Directory tempDir;
+      late FileSystem fs;
       final String gsutilCall = platform.isWindows
           ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
           : 'python3 ${path.join("/", "depot_tools", "gsutil.py")}';
@@ -388,8 +399,9 @@ void main() {
       final String gsArchivePath = 'gs://flutter_infra_release/releases/stable/$platformName/$archiveName';
 
       setUp(() async {
+        fs = MemoryFileSystem.test(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
         processManager = FakeProcessManager.list(<FakeCommand>[]);
-        tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_prepage_package_test.');
       });
 
       tearDown(() async {
@@ -438,8 +450,8 @@ void main() {
   ]
 }
 ''';
-        File(jsonPath).writeAsStringSync(releasesJson);
-        File(archivePath).writeAsStringSync('archive contents');
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -450,7 +462,7 @@ void main() {
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
-        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
         outputFile.createSync();
         assert(tempDir.existsSync());
         final ArchivePublisher publisher = ArchivePublisher(
@@ -464,6 +476,7 @@ void main() {
           },
           outputFile,
           false,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -472,7 +485,7 @@ void main() {
         await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
-        final File releaseFile = File(jsonPath);
+        final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         // Make sure new data is added.
@@ -539,8 +552,8 @@ void main() {
   ]
 }
 ''';
-        File(jsonPath).writeAsStringSync(releasesJson);
-        File(archivePath).writeAsStringSync('archive contents');
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -551,7 +564,7 @@ void main() {
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
-        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
         outputFile.createSync();
         assert(tempDir.existsSync());
         final ArchivePublisher publisher = ArchivePublisher(
@@ -565,6 +578,7 @@ void main() {
           },
           outputFile,
           false,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -573,7 +587,7 @@ void main() {
         await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
-        final File releaseFile = File(jsonPath);
+        final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         expect(contents, contains('"dart_sdk_version": "3.2.1"'));
@@ -604,8 +618,8 @@ void main() {
   ]
 }
 ''';
-        File(jsonPath).writeAsStringSync(releasesJson);
-        File(archivePath).writeAsStringSync('archive contents');
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -616,7 +630,7 @@ void main() {
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
-        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
         outputFile.createSync();
         assert(tempDir.existsSync());
         final ArchivePublisher publisher = ArchivePublisher(
@@ -630,6 +644,7 @@ void main() {
           },
           outputFile,
           false,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -638,7 +653,7 @@ void main() {
         await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
-        final File releaseFile = File(jsonPath);
+        final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         final Map<String, dynamic> releases = jsonDecode(contents) as Map<String, dynamic>;
@@ -685,8 +700,8 @@ void main() {
   ]
 }
 ''';
-        File(jsonPath).writeAsStringSync(releasesJson);
-        File(archivePath).writeAsStringSync('archive contents');
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           // This process fails because the file does NOT already exist
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
@@ -697,7 +712,7 @@ void main() {
           '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath': null,
         };
         processManager.addCommands(convertResults(calls));
-        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
         outputFile.createSync();
         assert(tempDir.existsSync());
         final ArchivePublisher publisher = ArchivePublisher(
@@ -711,6 +726,7 @@ void main() {
           },
           outputFile,
           false,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -719,7 +735,7 @@ void main() {
         await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
-        final File releaseFile = File(jsonPath);
+        final File releaseFile = fs.file(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         final Map<String, dynamic> jsonData = json.decode(contents) as Map<String, dynamic>;
@@ -728,7 +744,7 @@ void main() {
 
       test('publishArchive throws if forceUpload is false and artifact already exists on cloud storage', () async {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
         final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
           testRef,
@@ -740,6 +756,7 @@ void main() {
           },
           outputFile,
           false,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -754,7 +771,7 @@ void main() {
 
       test('publishArchive does not throw if forceUpload is true and artifact already exists on cloud storage', () async {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
-        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = fs.file(path.join(tempDir.absolute.path, archiveName));
         final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
           testRef,
@@ -766,6 +783,7 @@ void main() {
           },
           outputFile,
           false,
+          fs: fs,
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
@@ -808,8 +826,8 @@ void main() {
   ]
 }
 ''';
-        File(jsonPath).writeAsStringSync(releasesJson);
-        File(archivePath).writeAsStringSync('archive contents');
+        fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(archivePath).writeAsStringSync('archive contents');
         final Map<String, List<ProcessResult>?> calls = <String, List<ProcessResult>?>{
           '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- rm $gsArchivePath': null,

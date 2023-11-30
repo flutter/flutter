@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' show Directory, File, stderr;
+import 'dart:io' show stderr;
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
+import 'package:file/file.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
@@ -34,13 +35,14 @@ class ArchiveCreator {
     Directory outputDir,
     String revision,
     Branch branch, {
-    bool strict = true,
-    ProcessManager? processManager,
-    bool subprocessOutput = true,
-    Platform platform = const LocalPlatform(),
+    required FileSystem fs,
     HttpReader? httpReader,
+    Platform platform = const LocalPlatform(),
+    ProcessManager? processManager,
+    bool strict = true,
+    bool subprocessOutput = true,
   }) {
-    final Directory flutterRoot = Directory(path.join(tempDir.path, 'flutter'));
+    final Directory flutterRoot = fs.directory(path.join(tempDir.path, 'flutter'));
     final ProcessRunner processRunner = ProcessRunner(
       processManager: processManager,
       subprocessOutput: subprocessOutput,
@@ -66,6 +68,7 @@ class ArchiveCreator {
       tempDir: tempDir,
       platform: platform,
       flutterRoot: flutterRoot,
+      fs: fs,
       outputDir: outputDir,
       revision: revision,
       branch: branch,
@@ -78,17 +81,18 @@ class ArchiveCreator {
   }
 
   ArchiveCreator._({
-    required this.tempDir,
-    required this.platform,
-    required this.flutterRoot,
-    required this.outputDir,
-    required this.revision,
     required this.branch,
-    required this.strict,
-    required ProcessRunner processRunner,
-    required this.httpReader,
-    required String flutterExecutable,
     required String dartExecutable,
+    required this.fs,
+    required String flutterExecutable,
+    required this.flutterRoot,
+    required this.httpReader,
+    required this.outputDir,
+    required this.platform,
+    required ProcessRunner processRunner,
+    required this.revision,
+    required this.strict,
+    required this.tempDir,
   }) :
     assert(revision.length == 40),
     _processRunner = processRunner,
@@ -116,6 +120,8 @@ class ArchiveCreator {
 
   /// The directory to write the output file to.
   final Directory outputDir;
+
+  final FileSystem fs;
 
   /// True if the creator should be strict about checking requirements or not.
   ///
@@ -173,7 +179,7 @@ class ArchiveCreator {
   /// Performs all of the steps needed to create an archive.
   Future<File> createArchive() async {
     assert(_version.isNotEmpty, 'Must run initializeRepo before createArchive');
-    final File outputFile = File(path.join(
+    final File outputFile = fs.file(path.join(
       outputDir.absolute.path,
       await _archiveName,
     ));
@@ -275,10 +281,10 @@ class ArchiveCreator {
       return;
     }
     final Uint8List data = await httpReader(_minGitUri);
-    final File gitFile = File(path.join(tempDir.absolute.path, 'mingit.zip'));
+    final File gitFile = fs.file(path.join(tempDir.absolute.path, 'mingit.zip'));
     await gitFile.writeAsBytes(data, flush: true);
 
-    final Directory minGitPath = Directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
+    final Directory minGitPath = fs.directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
     await minGitPath.create(recursive: true);
     await _unzipArchive(gitFile, workingDirectory: minGitPath);
   }
@@ -295,7 +301,7 @@ class ArchiveCreator {
   Future<void> _downloadPubPackageArchives() async {
     final Pool pool = Pool(10); // Number of simultaneous downloads.
     final http.Client client = http.Client();
-    final Directory preloadCache = Directory(path.join(flutterRoot.path, '.pub-preload-cache'));
+    final Directory preloadCache = fs.directory(path.join(flutterRoot.path, '.pub-preload-cache'));
     preloadCache.createSync(recursive: true);
     /// Fetch a single package.
     Future<void> fetchPackageArchive(String name, String version) async {
@@ -341,7 +347,7 @@ class ArchiveCreator {
             if (response.statusCode != 200) {
               throw Exception('Downloading ${request.url} failed. Status code ${response.statusCode}.');
             }
-            final File archiveFile = File(
+            final File archiveFile = fs.file(
               path.join(preloadCache.path, '$name-$version.tar.gz'),
             );
             await response.stream.pipe(archiveFile.openWrite());
@@ -420,14 +426,14 @@ class ArchiveCreator {
     ]);
 
     // Ensure the above commands do not clean out the cache
-    final Directory flutterCache = Directory(path.join(flutterRoot.absolute.path, 'bin', 'cache'));
+    final Directory flutterCache = fs.directory(path.join(flutterRoot.absolute.path, 'bin', 'cache'));
     if (!flutterCache.existsSync()) {
       throw Exception('The flutter cache was not found at ${flutterCache.path}!');
     }
 
     /// Remove git subfolder from .pub-cache, this contains the flutter goldens
     /// and new flutter_gallery.
-    final Directory gitCache = Directory(path.join(flutterRoot.absolute.path, '.pub-cache', 'git'));
+    final Directory gitCache = fs.directory(path.join(flutterRoot.absolute.path, '.pub-cache', 'git'));
     if (gitCache.existsSync()) {
       gitCache.deleteSync(recursive: true);
     }
@@ -466,7 +472,7 @@ class ArchiveCreator {
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
   Future<String> _unzipArchive(File archive, {Directory? workingDirectory}) {
-    workingDirectory ??= Directory(path.dirname(archive.absolute.path));
+    workingDirectory ??= fs.directory(path.dirname(archive.absolute.path));
     List<String> commandLine;
     if (platform.isWindows) {
       commandLine = <String>[
@@ -490,7 +496,7 @@ class ArchiveCreator {
       // Unhide the .git folder, https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/attrib.
       await _processRunner.runProcess(
         <String>['attrib', '-h', '.git'],
-        workingDirectory: Directory(source.absolute.path),
+        workingDirectory: fs.directory(source.absolute.path),
       );
       commandLine = <String>[
         '7za',
@@ -512,7 +518,7 @@ class ArchiveCreator {
     }
     return _processRunner.runProcess(
       commandLine,
-      workingDirectory: Directory(path.dirname(source.absolute.path)),
+      workingDirectory: fs.directory(path.dirname(source.absolute.path)),
     );
   }
 
@@ -523,6 +529,6 @@ class ArchiveCreator {
       'cJf',
       output.absolute.path,
       path.basename(source.absolute.path),
-    ], workingDirectory: Directory(path.dirname(source.absolute.path)));
+    ], workingDirectory: fs.directory(path.dirname(source.absolute.path)));
   }
 }
