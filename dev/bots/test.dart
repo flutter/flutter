@@ -266,6 +266,7 @@ Future<void> main(List<String> args) async {
       'customer_testing': _runCustomerTesting,
       'analyze': _runAnalyze,
       'fuchsia_precache': _runFuchsiaPrecache,
+      'docs': _runDocs,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -1623,6 +1624,22 @@ Future<void> _runFuchsiaPrecache() async {
       '--no-android',
       '--no-ios',
       '--force',
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
+// Runs docs.
+Future<void> _runDocs() async {
+  printProgress('${green}Running flutter doc tests$reset');
+  await runCommand(
+    './dev/bots/docs.sh',
+    <String>[
+      '--output',
+      'dev/docs/api_docs.zip',
+      '--keep-staging',
+      '--staging-dir',
+      'dev/docs',
     ],
     workingDirectory: flutterRoot,
   );
