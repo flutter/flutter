@@ -268,6 +268,7 @@ Future<void> main(List<String> args) async {
       'analyze': _runAnalyze,
       'fuchsia_precache': _runFuchsiaPrecache,
       'docs': _runDocs,
+      'verify_binaries_codesigned': _runVerifyCodesigned,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -1655,6 +1656,27 @@ Future<void> _runDocs() async {
       '--keep-staging',
       '--staging-dir',
       'dev/docs',
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
+// Verifies binaries are codesigned.
+Future<void> _runVerifyCodesigned() async {
+  printProgress('${green}Running binaries codesign verification$reset');
+  final Map<String, String> env = Platform.environment;
+  final String revision = env['REVISION'] ?? '';
+  if (revision==''){
+    throw Exception('verify_codesigned shard requires REVISION to be set.');
+  }
+  await runCommand(
+    './dev/conductor/bin/conductor',
+    <String>[
+      'codesign',
+      '--verify',
+      '--revision',
+      revision,
+      '--upstream="https://github.com/flutter/flutter.git"',
     ],
     workingDirectory: flutterRoot,
   );
