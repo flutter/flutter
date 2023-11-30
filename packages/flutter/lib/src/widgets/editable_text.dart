@@ -4823,6 +4823,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
                 return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
               },
+              undoStackModifier: (TextEditingValue value) {
+                // On Android we should discard the composing region when pushing
+                // a new entry to the undo stack. This prevents the TextInputPlugin
+                // from restarting the input on every undo/redo when the composing
+                // region is changed by the framework.
+                return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
+              },
               focusNode: widget.focusNode,
               controller: widget.undoController,
               child: Focus(
