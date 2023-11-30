@@ -5101,6 +5101,8 @@ ORIGIN: ../../../flutter/impeller/entity/entity_playground.cc + ../../../flutter
 ORIGIN: ../../../flutter/impeller/entity/entity_playground.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/cover_geometry.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/cover_geometry.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/geometry/ellipse_geometry.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/geometry/ellipse_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/fill_path_geometry.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/fill_path_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/geometry.cc + ../../../flutter/LICENSE
@@ -5206,6 +5208,8 @@ ORIGIN: ../../../flutter/impeller/geometry/sigma.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/sigma.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/size.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/size.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/geometry/trig.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/geometry/trig.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/type_traits.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/type_traits.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/geometry/vector.cc + ../../../flutter/LICENSE
@@ -5523,6 +5527,8 @@ ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_writer.cc + ../.
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_writer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/tessellator/circle_tessellator.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/tessellator/circle_tessellator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/tessellator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/tessellator.h + ../../../flutter/LICENSE
@@ -7893,6 +7899,8 @@ FILE: ../../../flutter/impeller/entity/entity_playground.cc
 FILE: ../../../flutter/impeller/entity/entity_playground.h
 FILE: ../../../flutter/impeller/entity/geometry/cover_geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry/cover_geometry.h
+FILE: ../../../flutter/impeller/entity/geometry/ellipse_geometry.cc
+FILE: ../../../flutter/impeller/entity/geometry/ellipse_geometry.h
 FILE: ../../../flutter/impeller/entity/geometry/fill_path_geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry/fill_path_geometry.h
 FILE: ../../../flutter/impeller/entity/geometry/geometry.cc
@@ -7998,6 +8006,8 @@ FILE: ../../../flutter/impeller/geometry/sigma.cc
 FILE: ../../../flutter/impeller/geometry/sigma.h
 FILE: ../../../flutter/impeller/geometry/size.cc
 FILE: ../../../flutter/impeller/geometry/size.h
+FILE: ../../../flutter/impeller/geometry/trig.cc
+FILE: ../../../flutter/impeller/geometry/trig.h
 FILE: ../../../flutter/impeller/geometry/type_traits.cc
 FILE: ../../../flutter/impeller/geometry/type_traits.h
 FILE: ../../../flutter/impeller/geometry/vector.cc
@@ -8316,6 +8326,8 @@ FILE: ../../../flutter/impeller/shader_archive/shader_archive_writer.cc
 FILE: ../../../flutter/impeller/shader_archive/shader_archive_writer.h
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.h
+FILE: ../../../flutter/impeller/tessellator/circle_tessellator.cc
+FILE: ../../../flutter/impeller/tessellator/circle_tessellator.h
 FILE: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart
 FILE: ../../../flutter/impeller/tessellator/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/tessellator.h

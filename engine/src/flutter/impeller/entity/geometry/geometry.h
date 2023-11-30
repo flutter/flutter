@@ -68,6 +68,8 @@ class Geometry {
                                             Scalar width,
                                             Cap cap);
 
+  static std::shared_ptr<Geometry> MakeCircle(Point center, Scalar radius);
+
   static std::shared_ptr<Geometry> MakePointField(std::vector<Point> points,
                                                   Scalar radius,
                                                   bool round);

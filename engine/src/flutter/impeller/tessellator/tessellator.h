@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/trig.h"
 
 struct TESStesselator;
 
@@ -88,6 +89,11 @@ class Tessellator {
   /// Used for polyline generation.
   std::unique_ptr<std::vector<Point>> point_buffer_;
   CTessellator c_tessellator_;
+
+  // Cached data for CircleTessellator
+  static constexpr size_t kCachedTrigCount = 300;
+  std::vector<Trig> precomputed_trigs_[kCachedTrigCount];
+  friend class CircleTessellator;
 
   Tessellator(const Tessellator&) = delete;
 

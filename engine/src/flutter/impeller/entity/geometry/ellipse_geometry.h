@@ -4,16 +4,15 @@
 
 #pragma once
 
-#include <type_traits>
 #include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
 
-class LineGeometry final : public Geometry {
+class EllipseGeometry final : public Geometry {
  public:
-  explicit LineGeometry(Point p0, Point p1, Scalar width, Cap cap);
+  explicit EllipseGeometry(Point center, Scalar radius);
 
-  ~LineGeometry() = default;
+  ~EllipseGeometry() = default;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -40,11 +39,6 @@ class LineGeometry final : public Geometry {
                       const Matrix& transform,
                       bool extend_endpoints) const;
 
-  Vector2 ComputeAlongVector(const Matrix& transform,
-                             bool allow_zero_length) const;
-
-  Scalar ComputeHalfWidth(const Matrix& transform) const;
-
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
@@ -63,16 +57,12 @@ class LineGeometry final : public Geometry {
                                      const Entity& entity,
                                      RenderPass& pass) const override;
 
-  Point p0_;
-  Point p1_;
-  Scalar width_;
-  Cap cap_;
+  Point center_;
+  Scalar radius_;
 
-  LineGeometry(const LineGeometry&) = delete;
+  EllipseGeometry(const EllipseGeometry&) = delete;
 
-  LineGeometry& operator=(const LineGeometry&) = delete;
+  EllipseGeometry& operator=(const EllipseGeometry&) = delete;
 };
-
-static_assert(std::is_trivially_destructible<LineGeometry>::value);
 
 }  // namespace impeller

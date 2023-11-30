@@ -56,6 +56,11 @@ class VertexBufferBuilder {
     return indices_.size() > 0 ? indices_.size() : vertices_.size();
   }
 
+  const VertexType& Last() const {
+    FML_DCHECK(!vertices_.empty());
+    return vertices_.back();
+  }
+
   VertexBufferBuilder& AppendVertex(VertexType_ vertex) {
     vertices_.emplace_back(std::move(vertex));
     return *this;
