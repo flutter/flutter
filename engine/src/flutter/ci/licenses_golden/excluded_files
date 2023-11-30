@@ -1268,6 +1268,8 @@
 ../../../fuchsia/sdk/linux/obj/arm64-api-14/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-12/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-13/sysroot/dist/lib/asan/ld.so.1
@@ -1276,6 +1278,8 @@
 ../../../fuchsia/sdk/linux/obj/riscv64-api-14/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-15/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/riscv64-api-15/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-12/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-13/sysroot/dist/lib/asan/ld.so.1
@@ -1284,6 +1288,8 @@
 ../../../fuchsia/sdk/linux/obj/x64-api-14/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-15/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-15/sysroot/dist/lib/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/dist/lib/asan/ld.so.1
+../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/packages/blobs
 ../../../fuchsia/sdk/linux/packages/heapdump-collector/meta.json
 ../../../fuchsia/sdk/linux/packages/realm_builder_server/meta.json
@@ -1362,7 +1368,10 @@
 ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/meta.json
 ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
+../../../fuchsia/sdk/linux/pkg/trace-headersonly/meta.json
 ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
+../../../fuchsia/sdk/linux/pkg/trace-vthread-headersonly/meta.json
+../../../fuchsia/sdk/linux/pkg/trace-vthread/meta.json
 ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 ../../../fuchsia/sdk/linux/pkg/utf-utils/meta.json
 ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
