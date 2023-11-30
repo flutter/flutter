@@ -20,7 +20,6 @@
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
-#include "flutter/shell/platform/windows/text_input_plugin_delegate.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 #include "flutter/shell/platform/windows/window_state.h"
@@ -30,10 +29,9 @@ namespace flutter {
 // ID for the window frame buffer.
 inline constexpr uint32_t kWindowFrameBufferID = 0;
 
-// An OS-windowing neutral abstration for flutter
-// view that works with win32 hwnds and Windows::UI::Composition visuals.
-class FlutterWindowsView : public WindowBindingHandlerDelegate,
-                           public TextInputPluginDelegate {
+// An OS-windowing neutral abstration for a Flutter view that works
+// with win32 HWNDs.
+class FlutterWindowsView : public WindowBindingHandlerDelegate {
  public:
   // Creates a FlutterWindowsView with the given implementor of
   // WindowBindingHandler.
@@ -186,11 +184,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // |WindowBindingHandlerDelegate|
   virtual gfx::NativeViewAccessible GetNativeViewAccessible() override;
 
-  // |TextInputPluginDelegate|
-  void OnCursorRectUpdated(const Rect& rect) override;
+  // Notifies the delegate of the updated the cursor rect in Flutter root view
+  // coordinates.
+  virtual void OnCursorRectUpdated(const Rect& rect);
 
-  // |TextInputPluginDelegate|
-  void OnResetImeComposing() override;
+  // Notifies the delegate that the system IME composing state should be reset.
+  virtual void OnResetImeComposing();
 
   // Called when a WM_ONCOMPOSITIONCHANGED message is received.
   void OnDwmCompositionChanged();

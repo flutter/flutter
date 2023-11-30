@@ -142,13 +142,13 @@ class PlatformHandlerTest : public WindowsTest {
  protected:
   FlutterWindowsEngine* engine() { return engine_.get(); }
 
-  void use_headless_engine() {
+  void UseHeadlessEngine() {
     FlutterWindowsEngineBuilder builder{GetContext()};
 
     engine_ = builder.Build();
   }
 
-  void use_engine_with_view() {
+  void UseEngineWithView() {
     FlutterWindowsEngineBuilder builder{GetContext()};
 
     auto window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
@@ -166,7 +166,7 @@ class PlatformHandlerTest : public WindowsTest {
 };
 
 TEST_F(PlatformHandlerTest, GetClipboardData) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -190,7 +190,7 @@ TEST_F(PlatformHandlerTest, GetClipboardData) {
 }
 
 TEST_F(PlatformHandlerTest, GetClipboardDataRejectsUnknownContentType) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
@@ -203,7 +203,7 @@ TEST_F(PlatformHandlerTest, GetClipboardDataRejectsUnknownContentType) {
 }
 
 TEST_F(PlatformHandlerTest, GetClipboardDataRequiresView) {
-  use_headless_engine();
+  UseHeadlessEngine();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
@@ -217,7 +217,7 @@ TEST_F(PlatformHandlerTest, GetClipboardDataRequiresView) {
 }
 
 TEST_F(PlatformHandlerTest, GetClipboardDataReportsOpenFailure) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -237,7 +237,7 @@ TEST_F(PlatformHandlerTest, GetClipboardDataReportsOpenFailure) {
 }
 
 TEST_F(PlatformHandlerTest, GetClipboardDataReportsGetDataFailure) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -261,7 +261,7 @@ TEST_F(PlatformHandlerTest, GetClipboardDataReportsGetDataFailure) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardHasStrings) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -282,7 +282,7 @@ TEST_F(PlatformHandlerTest, ClipboardHasStrings) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardHasStringsReturnsFalse) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -303,7 +303,7 @@ TEST_F(PlatformHandlerTest, ClipboardHasStringsReturnsFalse) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardHasStringsRejectsUnknownContentType) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
@@ -315,7 +315,7 @@ TEST_F(PlatformHandlerTest, ClipboardHasStringsRejectsUnknownContentType) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardHasStringsRequiresView) {
-  use_headless_engine();
+  UseHeadlessEngine();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
@@ -330,7 +330,7 @@ TEST_F(PlatformHandlerTest, ClipboardHasStringsRequiresView) {
 
 // Regression test for https://github.com/flutter/flutter/issues/95817.
 TEST_F(PlatformHandlerTest, ClipboardHasStringsIgnoresPermissionErrors) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -350,7 +350,7 @@ TEST_F(PlatformHandlerTest, ClipboardHasStringsIgnoresPermissionErrors) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardHasStringsReportsErrors) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -370,7 +370,7 @@ TEST_F(PlatformHandlerTest, ClipboardHasStringsReportsErrors) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardSetData) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -397,7 +397,7 @@ TEST_F(PlatformHandlerTest, ClipboardSetData) {
 
 // Regression test for: https://github.com/flutter/flutter/issues/121976
 TEST_F(PlatformHandlerTest, ClipboardSetDataTextMustBeString) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
@@ -409,7 +409,7 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataTextMustBeString) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardSetDataUnknownType) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
@@ -421,7 +421,7 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataUnknownType) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardSetDataRequiresView) {
-  use_headless_engine();
+  UseHeadlessEngine();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine());
@@ -435,7 +435,7 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataRequiresView) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardSetDataReportsOpenFailure) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -455,7 +455,7 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataReportsOpenFailure) {
 }
 
 TEST_F(PlatformHandlerTest, ClipboardSetDataReportsSetDataFailure) {
-  use_engine_with_view();
+  UseEngineWithView();
 
   TestBinaryMessenger messenger;
   PlatformHandler platform_handler(&messenger, engine(), []() {
@@ -478,7 +478,7 @@ TEST_F(PlatformHandlerTest, ClipboardSetDataReportsSetDataFailure) {
 }
 
 TEST_F(PlatformHandlerTest, PlaySystemSound) {
-  use_headless_engine();
+  UseHeadlessEngine();
 
   TestBinaryMessenger messenger;
   MockPlatformHandler platform_handler(&messenger, engine());
@@ -496,7 +496,7 @@ TEST_F(PlatformHandlerTest, PlaySystemSound) {
 }
 
 TEST_F(PlatformHandlerTest, SystemExitApplicationRequired) {
-  use_headless_engine();
+  UseHeadlessEngine();
   UINT exit_code = 0;
 
   TestBinaryMessenger messenger([](const std::string& channel,
@@ -518,7 +518,7 @@ TEST_F(PlatformHandlerTest, SystemExitApplicationRequired) {
 }
 
 TEST_F(PlatformHandlerTest, SystemExitApplicationCancelableCancel) {
-  use_headless_engine();
+  UseHeadlessEngine();
   bool called_cancel = false;
 
   TestBinaryMessenger messenger(
@@ -539,7 +539,7 @@ TEST_F(PlatformHandlerTest, SystemExitApplicationCancelableCancel) {
 }
 
 TEST_F(PlatformHandlerTest, SystemExitApplicationCancelableExit) {
-  use_headless_engine();
+  UseHeadlessEngine();
   bool called_cancel = false;
   UINT exit_code = 0;
 
