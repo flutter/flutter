@@ -4,6 +4,7 @@
 
 #include "impeller/entity/geometry/point_field_geometry.h"
 
+#include "flutter/impeller/tessellator/circle_tessellator.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/compute_command.h"
 
@@ -28,7 +29,7 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
 
   auto& host_buffer = pass.GetTransientsBuffer();
   return {
-      .type = PrimitiveType::kTriangle,
+      .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer = vtx_builder->CreateVertexBuffer(host_buffer),
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransform(),
@@ -56,7 +57,7 @@ GeometryResult PointFieldGeometry::GetPositionUVBuffer(
 
   auto& host_buffer = pass.GetTransientsBuffer();
   return {
-      .type = PrimitiveType::kTriangle,
+      .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer = uv_vtx_builder.CreateVertexBuffer(host_buffer),
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransform(),
@@ -79,44 +80,54 @@ PointFieldGeometry::GetPositionBufferCPU(const ContentContext& renderer,
   Scalar min_size = 1.0f / sqrt(std::abs(determinant));
   Scalar radius = std::max(radius_, min_size);
 
-  auto vertices_per_geom = ComputeCircleDivisions(
-      entity.GetTransform().GetMaxBasisLength() * radius, round_);
-  auto points_per_circle = 3 + (vertices_per_geom - 3) * 3;
-  auto total = points_per_circle * points_.size();
-  auto radian_start = round_ ? 0.0f : 0.785398f;
-  auto radian_step = k2Pi / vertices_per_geom;
-
   VertexBufferBuilder<SolidFillVertexShader::PerVertexData> vtx_builder;
-  vtx_builder.Reserve(total);
 
-  /// Precompute all relative points and angles for a fixed geometry size.
-  auto elapsed_angle = radian_start;
-  std::vector<Point> angle_table(vertices_per_geom);
-  for (auto i = 0u; i < vertices_per_geom; i++) {
-    angle_table[i] = Point(cos(elapsed_angle), sin(elapsed_angle)) * radius;
-    elapsed_angle += radian_step;
-  }
+  if (round_) {
+    std::shared_ptr<Tessellator> tessellator = renderer.GetTessellator();
+    CircleTessellator circle_tessellator(tessellator, entity.GetTransform(),
+                                         radius_);
 
-  for (auto i = 0u; i < points_.size(); i++) {
-    auto center = points_[i];
+    // Get triangulation relative to {0, 0} so we can translate it to each
+    // point in turn.
+    std::vector<Point> circle_vertices;
+    circle_vertices.reserve(circle_tessellator.GetCircleVertexCount());
+    circle_tessellator.GenerateCircleTriangleStrip(
+        [&circle_vertices](const Point& p) {  //
+          circle_vertices.push_back(p);
+        },
+        {}, radius);
+    FML_DCHECK(circle_vertices.size() ==
+               circle_tessellator.GetCircleVertexCount());
 
-    auto origin = center + angle_table[0];
-    vtx_builder.AppendVertex({origin});
+    vtx_builder.Reserve((circle_vertices.size() + 2) * points_.size() - 2);
+    for (auto& center : points_) {
+      if (vtx_builder.HasVertices()) {
+        vtx_builder.AppendVertex(vtx_builder.Last());
+        vtx_builder.AppendVertex({center + circle_vertices[0]});
+      }
 
-    auto pt1 = center + angle_table[1];
-    vtx_builder.AppendVertex({pt1});
+      for (auto& vertex : circle_vertices) {
+        vtx_builder.AppendVertex({center + vertex});
+      }
+    }
+  } else {
+    vtx_builder.Reserve(6 * points_.size() - 2);
+    for (auto& point : points_) {
+      auto first = Point(point.x - radius, point.y - radius);
 
-    auto pt2 = center + angle_table[2];
-    vtx_builder.AppendVertex({pt2});
+      if (vtx_builder.HasVertices()) {
+        vtx_builder.AppendVertex(vtx_builder.Last());
+        vtx_builder.AppendVertex({first});
+      }
 
-    for (auto j = 0u; j < vertices_per_geom - 3; j++) {
-      vtx_builder.AppendVertex({origin});
-      vtx_builder.AppendVertex({pt2});
-
-      pt2 = center + angle_table[j + 3];
-      vtx_builder.AppendVertex({pt2});
+      // Z pattern from UL -> UR -> LL -> LR
+      vtx_builder.AppendVertex({first});
+      vtx_builder.AppendVertex({{point.x + radius, point.y - radius}});
+      vtx_builder.AppendVertex({{point.x - radius, point.y + radius}});
+      vtx_builder.AppendVertex({{point.x + radius, point.y + radius}});
     }
   }
+
   return vtx_builder;
 }
 

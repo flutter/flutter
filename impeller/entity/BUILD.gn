@@ -193,6 +193,8 @@ impeller_component("entity") {
     "entity_pass_target.h",
     "geometry/cover_geometry.cc",
     "geometry/cover_geometry.h",
+    "geometry/ellipse_geometry.cc",
+    "geometry/ellipse_geometry.h",
     "geometry/fill_path_geometry.cc",
     "geometry/fill_path_geometry.h",
     "geometry/geometry.cc",
