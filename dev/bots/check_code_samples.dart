@@ -309,7 +309,6 @@ class SampleChecker {
 // TODO(gspencergoog): implement the missing tests.
 // See https://github.com/flutter/flutter/issues/130459
 final Set<String> _knownMissingTests = <String>{
-  'examples/api/test/cupertino/text_field/cupertino_text_field.0_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.2_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.1_test.dart',
   'examples/api/test/material/theme/theme_extension.1_test.dart',
@@ -329,12 +328,10 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/menu_anchor/menu_anchor.2_test.dart',
   'examples/api/test/material/stepper/stepper.controls_builder.0_test.dart',
   'examples/api/test/material/flexible_space_bar/flexible_space_bar.0_test.dart',
-  'examples/api/test/material/data_table/data_table.0_test.dart',
   'examples/api/test/material/floating_action_button_location/standard_fab_location.0_test.dart',
   'examples/api/test/material/chip/deletable_chip_attributes.on_deleted.0_test.dart',
   'examples/api/test/material/snack_bar/snack_bar.2_test.dart',
   'examples/api/test/material/snack_bar/snack_bar.1_test.dart',
-  'examples/api/test/material/icon_button/icon_button.2_test.dart',
   'examples/api/test/material/icon_button/icon_button.3_test.dart',
   'examples/api/test/material/expansion_panel/expansion_panel_list.expansion_panel_list_radio.0_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.1_test.dart',
@@ -378,7 +375,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/app_bar/sliver_app_bar.4_test.dart',
   'examples/api/test/material/app_bar/app_bar.3_test.dart',
   'examples/api/test/material/app_bar/app_bar.0_test.dart',
-  'examples/api/test/material/ink_well/ink_well.0_test.dart',
   'examples/api/test/material/banner/material_banner.1_test.dart',
   'examples/api/test/material/banner/material_banner.0_test.dart',
   'examples/api/test/material/checkbox/checkbox.1_test.dart',
