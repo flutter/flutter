@@ -407,7 +407,7 @@ targets:
       - os=Linux
 
   - name: Linux docs_test
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 90 # https://github.com/flutter/flutter/issues/120901
     properties:
       cores: "32"
@@ -418,9 +418,8 @@ targets:
       firebase_project: ""
       release_ref: ""
       tags: >
-        ["framework", "hostonly", "linux"]
-      validation: docs
-      validation_name: Docs
+        ["framework", "hostonly", "shard", "linux"]
+      shard: docs
     runIf:
       - bin/**
       - dev/**
