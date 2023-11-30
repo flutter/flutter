@@ -71,6 +71,7 @@ Future<void> buildMacOS({
       flutterProject.macos,
       globals.logger,
       globals.flutterUsage,
+      globals.analytics,
     ),
     MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
     XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
