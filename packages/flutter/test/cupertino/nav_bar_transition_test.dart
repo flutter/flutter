@@ -219,7 +219,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomMiddle.text.style!.color, const Color(0xff000306));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.9404401779174805);
@@ -230,7 +230,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style!.color, const Color(0xff000306));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
@@ -239,14 +239,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, const Color(0xff005ec5));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, const Color(0xff005ec5));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
@@ -267,7 +267,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomMiddle.text.style!.color, const Color(0xfff8fbff));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w600);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.9404401779174805);
@@ -278,7 +278,7 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style!.color, const Color(0xfff8fbff));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w600);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
@@ -287,14 +287,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomMiddle.text.style!.color, const Color(0xff409fff));
     expect(bottomMiddle.text.style!.fontWeight, FontWeight.w400);
-    expect(bottomMiddle.text.style!.fontFamily, '.SF Pro Text');
+    expect(bottomMiddle.text.style!.fontFamily, 'CupertinoSystemText');
     expect(bottomMiddle.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
     expect(topBackLabel.text.style!.color, const Color(0xff409fff));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w400);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
     expect(topBackLabel.text.style!.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
@@ -1121,28 +1121,28 @@ void main() {
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomLargeTitle.text.style!.color, const Color(0xff000306));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w700);
-    expect(bottomLargeTitle.text.style!.fontFamily, '.SF Pro Display');
-    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.38890619069337845));
+    expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemDisplay');
+    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // The top back label is styled exactly the same way.
     final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style!.color, const Color(0xff000306));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w700);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Display');
-    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.38890619069337845));
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemDisplay');
+    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(0.35967791542410854));
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
     expect(bottomLargeTitle.text.style!.color, const Color(0xff005ec5));
     expect(bottomLargeTitle.text.style!.fontWeight, FontWeight.w500);
-    expect(bottomLargeTitle.text.style!.fontFamily, '.SF Pro Text');
-    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
+    expect(bottomLargeTitle.text.style!.fontFamily, 'CupertinoSystemText');
+    expect(bottomLargeTitle.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
 
     expect(topBackLabel.text.style!.color, const Color(0xff005ec5));
     expect(topBackLabel.text.style!.fontWeight, FontWeight.w500);
-    expect(topBackLabel.text.style!.fontFamily, '.SF Pro Text');
-    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
+    expect(topBackLabel.text.style!.fontFamily, 'CupertinoSystemText');
+    expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.23270857974886894));
   });
 
   testWidgetsWithLeakTracking('Top middle fades in and slides in from the right', (WidgetTester tester) async {
