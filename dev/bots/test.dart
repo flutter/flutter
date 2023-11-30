@@ -1638,7 +1638,8 @@ Future<void> _runDocs() async {
       '--output',
       'dev/docs/api_docs.zip',
       '--keep-staging',
-      '--staging-dir dev/docs',
+      '--staging-dir',
+      'dev/docs',
     ],
     workingDirectory: flutterRoot,
   );
