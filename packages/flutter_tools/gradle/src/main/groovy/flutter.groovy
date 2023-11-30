@@ -1159,7 +1159,15 @@ class FlutterPlugin implements Plugin<Project> {
 
             def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
             if (bundleAarTask) {
+                println "NOTE:bundle${variant.name.capitalize()}Aar depends on $copyFlutterAssetsTask"
                 bundleAarTask.dependsOn copyFlutterAssetsTask
+                bundleAarTask.mustRunAfter copyFlutterAssetsTask
+            }
+            def bundleAarTask2 = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
+            if (bundleAarTask2) {
+                println "NOTE2:bundle${variant.name.capitalize()}Aar depends on $copyFlutterAssetsTask"
+                bundleAarTask2.dependsOn copyFlutterAssetsTask
+                bundleAarTask2.mustRunAfter copyFlutterAssetsTask
             }
 
             return copyFlutterAssetsTask
