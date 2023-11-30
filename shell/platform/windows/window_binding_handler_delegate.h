@@ -98,15 +98,16 @@ class WindowBindingHandlerDelegate {
 
   // Notifies the delegate that IME composing region have been committed.
   //
-  // Triggered when the user commits the current composing text while using a
-  // multi-step input method such as in CJK text input. Composing continues with
-  // the next keypress.
+  // Triggered when the user triggers a commit of the current composing text
+  // while using a multi-step input method such as in CJK text input. Composing
+  // continues with the next keypress.
   virtual void OnComposeCommit() = 0;
 
   // Notifies the delegate that IME composing mode has ended.
   //
-  // Triggered when the user commits the composing text while using a multi-step
-  // input method such as in CJK text input.
+  // Triggered when the composing ends, for example when the user presses
+  // ESC or when the user triggers a commit of the composing text while using a
+  // multi-step input method such as in CJK text input.
   virtual void OnComposeEnd() = 0;
 
   // Notifies the delegate that IME composing region contents have changed.
