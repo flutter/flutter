@@ -4,6 +4,7 @@
 
 import 'dart:async' show Timer;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart' show Tolerance, nearEqual;
@@ -776,17 +777,26 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
               mainAxisSize = size.height;
           }
 
-          final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
-            _stretchController.stretchDirection,
-          );
+          // TODO(jonahwilliams): there does not yet exist a widget that produces
+          // a backdrop filter with a transform that has a resolved aignment.
+          // One should be added so that we can make the stretch overscroll
+          // effect look better.
 
           final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
-          final Widget transform = Transform(
-            alignment: alignment,
-            transform: Matrix4.diagonal3Values(x, y, 1.0),
-            filterQuality: stretch == 0 ? null : FilterQuality.low,
-            child: widget.child,
-          );
+
+          Widget? child = widget.child;
+          if (stretch > 0) {
+            final ui.ImageFilter filter = ui.ImageFilter.matrix(Matrix4.diagonal3Values(x, y, 1.0).storage);
+            child = Stack(
+              children: <Widget>[
+                child ?? const SizedBox(),
+                BackdropFilter(
+                  filter: filter,
+                  child: const SizedBox.expand(),
+                ),
+              ],
+            );
+          }
 
           // Only clip if the viewport dimension is smaller than that of the
           // screen size in the main axis. If the viewport takes up the whole
@@ -795,7 +805,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             clipBehavior: stretch != 0.0 && viewportDimension != mainAxisSize
               ? widget.clipBehavior
               : Clip.none,
-            child: transform,
+            child: child,
           );
         },
       ),
