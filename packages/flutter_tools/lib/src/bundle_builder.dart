@@ -72,6 +72,7 @@ class BundleBuilder {
       logger: globals.logger,
       processManager: globals.processManager,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       platform: globals.platform,
       generateDartPluginRegistry: true,
     );

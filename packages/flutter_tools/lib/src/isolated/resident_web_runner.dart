@@ -293,6 +293,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
           port: await getPort(),
+          tlsCertPath: debuggingOptions.tlsCertPath,
+          tlsCertKeyPath: debuggingOptions.tlsCertKeyPath,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -309,7 +311,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nullSafetyMode: debuggingOptions.buildInfo.nullSafetyMode,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
         );
-        final Uri url = await device!.devFS!.create();
+        Uri url = await device!.devFS!.create();
+        if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
+          url = url.replace(scheme: 'https');
+        }
         if (debuggingOptions.buildInfo.isDebug) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
@@ -343,7 +348,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           mainPath: target,
           debuggingOptions: debuggingOptions,
           platformArgs: <String, Object>{
-            'uri': url.toString(),
+             'uri': url.toString(),
           },
         );
         return attach(
