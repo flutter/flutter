@@ -120,12 +120,10 @@ class RenderPadding extends RenderShiftedBox {
 
   EdgeInsets? _resolvedPadding;
 
-  void _resolve() {
-    if (_resolvedPadding != null) {
-      return;
-    }
-    _resolvedPadding = padding.resolve(textDirection);
-    assert(_resolvedPadding!.isNonNegative);
+  EdgeInsets _resolve() {
+    final EdgeInsets returnValue = _resolvedPadding ??= padding.resolve(textDirection);
+    assert(returnValue.isNonNegative);
+    return returnValue;
   }
 
   void _markNeedResolution() {
@@ -235,7 +233,7 @@ class RenderPadding extends RenderShiftedBox {
     if (child == null) {
       return null;
     }
-    final BoxConstraints innerConstraints = constraints.deflate(_resolvedPadding!);
+    final BoxConstraints innerConstraints = constraints.deflate(_resolve());
     final double? result = child.getDryBaseline(innerConstraints, baseline);
     if (result == null) {
       return null;
@@ -375,7 +373,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(constraints);
-    return result + _resolve().alongOffset(size - childSize as Offset).dy;
+    return result + _resolve().alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override

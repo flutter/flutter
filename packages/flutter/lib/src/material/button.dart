@@ -526,7 +526,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(constraints);
-    return result + Alignment.center.alongOffset(size - childSize as Offset).dy;
+    return result + Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override
