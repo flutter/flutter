@@ -490,7 +490,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If null, then the [AppBarTheme.backgroundColor] is used. If that value is also
   /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
-  /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
+  /// overall theme's brightness is [Brightness.light] and [useMaterial3] is set to [false], and [ColorScheme.surface]
   /// if the overall theme's brightness is [Brightness.dark].
   ///
   /// If this color is a [MaterialStateColor] it will be resolved against
