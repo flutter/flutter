@@ -295,6 +295,8 @@
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
 ## Host only framework tests
+# Linux docs_deploy_beta
+# Linux docs_deploy_stable
 # Linux docs_publish
 /dev/bots/docs.sh @HansMuller @flutter/framework
 # Linux packages_autoroller
