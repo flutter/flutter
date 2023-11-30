@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:unified_analytics/unified_analytics.dart';
-
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -162,13 +160,7 @@ Future<void> buildMacOS({
     throwToolExit('Build process failed');
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
-  final Duration elapsedDuration = sw.elapsed;
-  globals.flutterUsage.sendTiming('build', 'xcode-macos', elapsedDuration);
-  globals.analytics.send(Event.timing(
-    workflow: 'build',
-    variableName: 'xcode-macos',
-    elapsedMilliseconds: elapsedDuration.inMilliseconds,
-  ));
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// Performs a size analysis of the AOT snapshot and writes to an analysis file, if configured.

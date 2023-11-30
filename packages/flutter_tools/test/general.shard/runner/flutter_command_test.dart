@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -230,14 +229,14 @@ void main() {
           value: 10,
         ),
       ]);
-      expect(fakeAnalytics.sentEvents, contains(
+      expect(fakeAnalytics.sentEvents, <Event>[
         Event.flutterCommandResult(
           commandPath: 'dummy',
           result: 'success',
           maxRss: 10,
           commandHasTerminal: false,
         ),
-      ));
+      ]);
     });
 
     testUsingCommandContext('reports command that results in warning', () async {
@@ -264,14 +263,14 @@ void main() {
           value: 10,
         ),
       ]);
-      expect(fakeAnalytics.sentEvents, contains(
+      expect(fakeAnalytics.sentEvents, <Event>[
         Event.flutterCommandResult(
           commandPath: 'dummy',
           result: 'warning',
           maxRss: 10,
           commandHasTerminal: false,
         ),
-      ));
+      ]);
     });
 
     testUsingCommandContext('reports command that results in error', () async {
@@ -300,14 +299,14 @@ void main() {
           value: 10,
         ),
       ]);
-      expect(fakeAnalytics.sentEvents, contains(
+      expect(fakeAnalytics.sentEvents, <Event>[
         Event.flutterCommandResult(
           commandPath: 'dummy',
           result: 'fail',
           maxRss: 10,
           commandHasTerminal: false,
         ),
-      ));
+      ]);
     });
 
     test('FlutterCommandResult.success()', () async {
@@ -414,14 +413,14 @@ void main() {
             value: 10,
           ),
         ]);
-      expect(fakeAnalytics.sentEvents, contains(
+      expect(fakeAnalytics.sentEvents, <Event>[
         Event.flutterCommandResult(
           commandPath: 'dummy',
           result: 'killed',
           maxRss: 10,
           commandHasTerminal: false,
         ),
-      ));
+      ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
@@ -486,14 +485,6 @@ void main() {
           Duration(milliseconds: 1000),
           label: 'fail',
         )));
-      expect(fakeAnalytics.sentEvents, contains(
-        Event.timing(
-            workflow: 'flutter',
-            variableName: 'dummy',
-            elapsedMilliseconds: 1000,
-            label: 'fail',
-          )
-      ));
     });
 
     testUsingCommandContext('no timing report without usagePath', () async {
@@ -505,19 +496,6 @@ void main() {
       await flutterCommand.run();
 
       expect(usage.timings, isEmpty);
-      // Iterate through and count all the [Event.timing] instances
-      int timingEventCounts = 0;
-      for (final Event e in fakeAnalytics.sentEvents) {
-        if (e.eventName == DashEvent.timing) {
-          timingEventCounts += 1;
-        }
-      }
-      expect(
-        timingEventCounts,
-        0,
-        reason: 'There should not be any timing events sent, there may '
-            'be other non-timing events',
-      );
     });
 
     testUsingCommandContext('report additional FlutterCommandResult data', () async {
@@ -543,14 +521,6 @@ void main() {
           Duration(milliseconds: 500),
           label: 'success-blah1-blah2-blah3',
         )));
-      expect(fakeAnalytics.sentEvents, contains(
-        Event.timing(
-          workflow: 'flutter',
-          variableName: 'dummy',
-          elapsedMilliseconds: 500,
-          label: 'success-blah1-blah2-blah3',
-        ),
-      ));
     });
 
     testUsingCommandContext('report failed execution timing too', () async {
@@ -572,14 +542,6 @@ void main() {
           'flutter',
           'dummy',
           Duration(milliseconds: 1000),
-          label: 'fail',
-        ),
-      ));
-      expect(fakeAnalytics.sentEvents, contains(
-        Event.timing(
-          workflow: 'flutter',
-          variableName: 'dummy',
-          elapsedMilliseconds: 1000,
           label: 'fail',
         ),
       ));
