@@ -1676,7 +1676,8 @@ Future<void> _runVerifyCodesigned() async {
       '--verify',
       '--revision',
       revision,
-      "--upstream='https://github.com/flutter/flutter.git'",
+      '--upstream',
+      'https://github.com/flutter/flutter.git',
     ],
     workingDirectory: flutterRoot,
   );
