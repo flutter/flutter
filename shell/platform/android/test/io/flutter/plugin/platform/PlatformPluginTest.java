@@ -6,16 +6,19 @@ package io.flutter.plugin.platform;
 
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -28,6 +31,7 @@ import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.Build;
@@ -47,6 +51,8 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
@@ -628,5 +634,36 @@ public class PlatformPluginTest {
     platformPlugin.mPlatformMessageHandler.popSystemNavigator();
 
     verify(mockActivity, times(1)).finish();
+  }
+
+  @Test
+  public void startChoosenActivityWhenSharingText() {
+    Activity mockActivity = mock(Activity.class);
+    PlatformChannel mockPlatformChannel = mock(PlatformChannel.class);
+    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+    PlatformPlugin platformPlugin =
+        new PlatformPlugin(mockActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+
+    // Mock Intent.createChooser (in real application it opens a chooser where the user can
+    // select which application will be used to share the selected text).
+    Intent choosenIntent = new Intent();
+    MockedStatic<Intent> intentClass = mockStatic(Intent.class);
+    ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+    intentClass
+        .when(() -> Intent.createChooser(intentCaptor.capture(), any()))
+        .thenReturn(choosenIntent);
+
+    final String expectedContent = "Flutter";
+    platformPlugin.mPlatformMessageHandler.share(expectedContent);
+
+    // Activity.startActivity should have been called.
+    verify(mockActivity, times(1)).startActivity(choosenIntent);
+
+    // The intent action created by the plugin and passed to Intent.createChooser should be
+    // 'Intent.ACTION_SEND'.
+    Intent sendToIntent = intentCaptor.getValue();
+    assertEquals(sendToIntent.getAction(), Intent.ACTION_SEND);
+    assertEquals(sendToIntent.getType(), "text/plain");
+    assertEquals(sendToIntent.getStringExtra(Intent.EXTRA_TEXT), expectedContent);
   }
 }
