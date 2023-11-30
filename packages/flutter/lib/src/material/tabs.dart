@@ -2110,6 +2110,7 @@ class TabPageSelector extends StatelessWidget {
     this.color,
     this.selectedColor,
     this.borderStyle,
+    this.clickableDots = false,
   }) : assert(indicatorSize > 0.0);
 
   /// This widget's selection and animation state.
@@ -2137,6 +2138,11 @@ class TabPageSelector extends StatelessWidget {
   ///
   /// Defaults to [BorderStyle.solid] if value is not specified.
   final BorderStyle? borderStyle;
+
+  /// Allows the user to click on the dots to change tabs.
+  ///
+  /// Defaults to false.
+  final bool clickableDots;
 
   Widget _buildTabIndicator(
     int tabIndex,
@@ -2169,11 +2175,19 @@ class TabPageSelector extends StatelessWidget {
         background = selectedColorTween.begin!;
       }
     }
-    return TabPageSelectorIndicator(
-      backgroundColor: background,
-      borderColor: selectedColorTween.end!,
-      size: indicatorSize,
-      borderStyle: borderStyle ?? BorderStyle.solid,
+
+    return GestureDetector(
+      onTap: clickableDots ? () => tabController.animateTo(tabIndex) : null,
+      child: MouseRegion(
+        cursor:
+            clickableDots ? SystemMouseCursors.click : SystemMouseCursors.basic,
+        child: TabPageSelectorIndicator(
+          backgroundColor: background,
+          borderColor: selectedColorTween.end!,
+          size: indicatorSize,
+          borderStyle: borderStyle ?? BorderStyle.solid,
+        ),
+      ),
     );
   }
 
