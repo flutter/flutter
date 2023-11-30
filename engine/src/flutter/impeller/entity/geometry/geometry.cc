@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "impeller/entity/geometry/cover_geometry.h"
+#include "impeller/entity/geometry/ellipse_geometry.h"
 #include "impeller/entity/geometry/fill_path_geometry.h"
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
@@ -116,6 +117,10 @@ std::shared_ptr<Geometry> Geometry::MakeLine(Point p0,
                                              Scalar width,
                                              Cap cap) {
   return std::make_shared<LineGeometry>(p0, p1, width, cap);
+}
+
+std::shared_ptr<Geometry> Geometry::MakeCircle(Point center, Scalar radius) {
+  return std::make_shared<EllipseGeometry>(center, radius);
 }
 
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {

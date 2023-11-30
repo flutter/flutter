@@ -2060,6 +2060,32 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, FillCirclesRenderCorrectly) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  Paint paint;
+  const int color_count = 3;
+  Color colors[color_count] = {
+      Color::Blue(),
+      Color::Green(),
+      Color::Crimson(),
+  };
+
+  int c_index = 0;
+  int radius = 600;
+  while (radius > 0) {
+    paint.color = colors[(c_index++) % color_count];
+    canvas.DrawCircle({10, 10}, radius, paint);
+    if (radius > 30) {
+      radius -= 10;
+    } else {
+      radius -= 2;
+    }
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
