@@ -666,7 +666,7 @@ FlutterWindowsEngine::CreateKeyboardKeyHandler(
 
 std::unique_ptr<TextInputPlugin> FlutterWindowsEngine::CreateTextInputPlugin(
     BinaryMessenger* messenger) {
-  return std::make_unique<TextInputPlugin>(messenger, view_);
+  return std::make_unique<TextInputPlugin>(messenger, this);
 }
 
 bool FlutterWindowsEngine::RegisterExternalTexture(int64_t texture_id) {
