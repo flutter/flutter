@@ -3674,7 +3674,7 @@ bool debugDisableCreateImageBitmapSupport = false;
 
 bool get browserSupportsCreateImageBitmap =>
     _createImageBitmapFunction != null &&
-    !isChrome110OrOlderOnWindows &&
+    !isChrome110OrOlder &&
     !debugDisableCreateImageBitmapSupport;
 
 @JS()

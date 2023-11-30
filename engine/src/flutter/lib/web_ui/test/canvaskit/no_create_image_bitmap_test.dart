@@ -24,7 +24,7 @@ void testMain() {
 
     tearDown(() {
       debugDisableCreateImageBitmapSupport = false;
-      debugIsChrome110OrOlderOnWindows = null;
+      debugIsChrome110OrOlder = null;
     });
 
     test('can render without createImageBitmap', () async {
@@ -69,7 +69,7 @@ void testMain() {
     test(
         'createImageBitmap support is disabled on '
         'Windows on Chrome version 110 or older', () async {
-      debugIsChrome110OrOlderOnWindows = true;
+      debugIsChrome110OrOlder = true;
       debugDisableCreateImageBitmapSupport = false;
 
       expect(browserSupportsCreateImageBitmap, isFalse);
