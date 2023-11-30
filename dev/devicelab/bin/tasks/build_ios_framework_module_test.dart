@@ -825,9 +825,6 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
   section('Build frameworks without plugins');
   await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'macos');
-
-  section('check --static cannot be used with the --no-plugins flag');
-  await _testStaticAndNoPlugins(projectDir);
 }
 
 Future<void> _testBuildFrameworksWithoutPlugins(Directory projectDir, { required String platform}) async {
