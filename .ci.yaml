@@ -678,7 +678,7 @@ targets:
       - .ci.yaml
 
   - name: Linux fuchsia_precache
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
       shard: fuchsia_precache
