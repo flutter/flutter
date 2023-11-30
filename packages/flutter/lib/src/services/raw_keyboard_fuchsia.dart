@@ -10,9 +10,11 @@ import 'raw_keyboard.dart';
 export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
-export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Platform-specific key event data for Fuchsia.
+///
+/// This class is DEPRECATED. Platform specific key event data will no longer
+/// available. See [KeyEvent] for what is available.
 ///
 /// This object contains information about key events obtained from Fuchsia's
 /// `KeyData` interface.
@@ -20,8 +22,16 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
+@Deprecated(
+  'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+  'This feature was deprecated after v3.17.0-18.0.pre.',
+)
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Fuchsia.
+  @Deprecated(
+    'Platform specific key event data is no longer available. See KeyEvent for what is available. '
+    'This feature was deprecated after v3.17.0-18.0.pre.',
+  )
   const RawKeyEventDataFuchsia({
     this.hidUsage = 0,
     this.codePoint = 0,

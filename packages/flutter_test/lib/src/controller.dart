@@ -1858,9 +1858,6 @@ abstract class WidgetController {
   /// simulated event. If not specified, it uses a default derived from the
   /// logical `key`.
   ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
-  ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
   /// This method sends both the key down and the key up events, to simulate a
@@ -1903,9 +1900,6 @@ abstract class WidgetController {
   /// simulated event. If not specified, it uses a default derived from the
   /// logical `key`.
   ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
-  ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
   /// Returns true if the key event was handled by the framework.
@@ -1938,9 +1932,6 @@ abstract class WidgetController {
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
   /// keyboard layout for the corresponding logical `key`.
-  ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride].
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -1975,10 +1966,6 @@ abstract class WidgetController {
   /// Specify the `character` for the event to override what is included in the
   /// simulated event. If not specified, it uses a default derived from the
   /// logical `key`.
-  ///
-  /// Whether the event is sent through [RawKeyEvent] or [KeyEvent] is
-  /// controlled by [debugKeyEventSimulatorTransitModeOverride]. If through [RawKeyEvent],
-  /// this method is equivalent to [sendKeyDownEvent].
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
