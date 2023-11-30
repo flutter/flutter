@@ -79,7 +79,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12
+      os: Mac-12|Mac-13
       device_type: none
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
@@ -94,7 +94,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12
+      os: Mac-12|Mac-13
       device_type: none
       cpu: arm64
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -112,7 +112,7 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-12
+      os: Mac-12|Mac-13
       tags: >
         ["devicelab", "hostonly", "mac"]
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -128,7 +128,7 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12
+      os: Mac-12|Mac-13
       device_type: none
       cpu: x86
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -145,7 +145,7 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2024"}
         ]
-      os: Mac-12
+      os: Mac-12|Mac-13
       device_type: none
       cpu: x86
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
@@ -242,13 +242,12 @@ platform_properties:
 
 targets:
   - name: Linux analyze
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      shard: analyze
       tags: >
-        ["framework","hostonly","linux"]
-      validation: analyze
-      validation_name: Analyze
+        ["framework","hostonly","shard","linux"]
 
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
@@ -376,13 +375,12 @@ targets:
   - name: Linux customer_testing
     enabled_branches:
       - master
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      shard: customer_testing
       tags: >
-        ["framework", "hostonly", "linux"]
-      validation: customer_testing
-      validation_name: Customer testing
+        ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux docs_publish
     recipe: flutter/flutter
@@ -683,8 +681,7 @@ targets:
     recipe: flutter/flutter
     timeout: 60
     properties:
-      validation: fuchsia_precache
-      validation_name: Fuchsia precache
+      shard: fuchsia_precache
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
@@ -2584,6 +2581,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: platform_channels_benchmarks
 
+  - name: Linux_pixel_7pro platform_channels_benchmarks
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: platform_channels_benchmarks
+
   - name: Linux_android platform_channel_sample_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2939,14 +2946,13 @@ targets:
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
+      shard: analyze
       ignore_flakiness: "true"
       tags: >
-        ["framework","hostonly","linux"]
-      validation: analyze
-      validation_name: Analyze
+        ["framework","hostonly","shard","linux"]
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
@@ -3099,13 +3105,12 @@ targets:
   - name: Mac customer_testing
     enabled_branches:
       - master
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      validation: customer_testing
-      validation_name: Customer testing
+      shard: customer_testing
       tags: >
-        ["framework", "hostonly", "mac"]
+        ["framework", "hostonly", "shard", "mac"]
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -4441,14 +4446,13 @@ targets:
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
     # TODO(vashworth): Take out of bringup once https://github.com/flutter/flutter/issues/138194 is resolved.
-    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-12", "cpu=x86"]
+        ["device_os=iOS-16","os=Mac-12|Mac-13", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -4692,13 +4696,12 @@ targets:
   - name: Windows customer_testing
     enabled_branches:
       - master
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     timeout: 60
     properties:
-      validation: customer_testing
-      validation_name: Customer testing
+      shard: customer_testing
       tags: >
-        ["framework", "hostonly", "windows"]
+        ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
