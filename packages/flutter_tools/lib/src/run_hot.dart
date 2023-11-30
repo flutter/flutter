@@ -713,13 +713,7 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
 
     // Send timing analytics.
-    final Duration elapsedDuration = restartTimer.elapsed;
-    globals.flutterUsage.sendTiming('hot', 'restart', elapsedDuration);
-    _analytics.send(Event.timing(
-      workflow: 'hot',
-      variableName: 'restart',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
+    globals.flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
 
     // Toggle the main dill name after successfully uploading.
     _swap =! _swap;
@@ -1118,11 +1112,6 @@ class HotRunner extends ResidentRunner {
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleResult.reassembleViews.length == 1) && !reassembleResult.failedReassemble && shouldReportReloadTime) {
       globals.flutterUsage.sendTiming('hot', 'reload', reloadDuration);
-      _analytics.send(Event.timing(
-        workflow: 'hot',
-        variableName: 'reload',
-        elapsedMilliseconds: reloadDuration.inMilliseconds,
-      ));
     }
     return OperationResult(
       reassembleResult.failedReassemble ? 1 : OperationResult.ok.code,
