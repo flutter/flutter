@@ -677,7 +677,7 @@ deps = {
 
    # Dart packages
   'src/flutter/third_party/pkg/archive':
-  Var('github_git') + '/brendan-duncan/archive.git' + '@' + '9de7a0544457c6aba755ccb65abb41b0dc1db70d', # 3.1.2
+  Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + '9de7a0544457c6aba755ccb65abb41b0dc1db70d', # 3.1.2
 
   'src/flutter/third_party/pkg/equatable':
   Var('github_git') + '/felangel/equatable.git' + '@' + '2117551ff3054f8edb1a58f63ffe1832a8d25623', # 2.0.5
