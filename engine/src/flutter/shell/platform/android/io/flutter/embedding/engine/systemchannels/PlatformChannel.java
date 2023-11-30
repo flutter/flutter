@@ -187,6 +187,11 @@ public class PlatformChannel {
                   result.success(response);
                   break;
                 }
+              case "Share.invoke":
+                String text = (String) arguments;
+                platformMessageHandler.share(text);
+                result.success(null);
+                break;
               default:
                 result.notImplemented();
                 break;
@@ -549,6 +554,13 @@ public class PlatformChannel {
      * can be pasted.
      */
     boolean clipboardHasStrings();
+
+    /**
+     * The Flutter application would like to share the given {@code text} using the Android standard
+     * intent action named {@code Intent.ACTION_SEND}. See:
+     * https://developer.android.com/reference/android/content/Intent.html#ACTION_SEND
+     */
+    void share(@NonNull String text);
   }
 
   /** Types of sounds the Android OS can play on behalf of an application. */
