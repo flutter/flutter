@@ -237,6 +237,10 @@ class VsCode {
   }
 
   // Linux:
+  //   Arch Linux:
+  //     /usr/lib/code
+  //     /opt/visual-studio-code
+  //     /opt/visual-studio-code-insiders
   //   Deb:
   //     /usr/share/code/bin/code
   //     /usr/share/code-insiders/bin/code-insiders
@@ -246,6 +250,9 @@ class VsCode {
   //     /var/lib/flatpak/app/com.visualstudio.code/x86_64/stable/active/files/extra/vscode
   //     /var/lib/flatpak/app/com.visualstudio.code.insiders/x86_64/beta/active/files/extra/vscode-insiders
   // Linux Extensions:
+  //   Arch Linux:
+  //     $HOME/.vscode/extensions
+  //     $HOME/.vscode-insiders/extensions
   //   Deb:
   //     $HOME/.vscode/extensions
   //   Snap:
@@ -273,6 +280,9 @@ class VsCode {
         '/var/lib/flatpak/app/com.visualstudio.code.insiders/x86_64/beta/active/files/extra/vscode-insiders',
         '.var/app/com.visualstudio.code.insiders/data/vscode-insiders',
       ),
+      const VsCodeInstallLocation('/usr/lib/code', '.vscode'),
+      const VsCodeInstallLocation('/opt/visual-studio-code', '.vscode'),
+      const VsCodeInstallLocation('/opt/visual-studio-code-insiders', '.vscode-insiders'),
     ], fileSystem, platform);
   }
 
