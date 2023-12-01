@@ -590,7 +590,7 @@ void main() {
       expect(themeM2.primaryColor, Colors.blue);
       expect(themeM2.scaffoldBackgroundColor, Colors.grey[50]);
       expect(themeM2.primaryContrastingColor, Colors.white);
-      expect(themeM2.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(themeM2.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM2.textTheme.textStyle.fontSize, 17.0);
     });
 
@@ -601,7 +601,7 @@ void main() {
       expect(themeM3.primaryColor, const Color(0xff6750a4));
       expect(themeM3.scaffoldBackgroundColor, const Color(0xfffffbfe)); // ColorScheme.background
       expect(themeM3.primaryContrastingColor, Colors.white);
-      expect(themeM3.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(themeM3.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
     });
 
@@ -612,7 +612,7 @@ void main() {
       expect(themeM2.primaryColor, Colors.blue);
       expect(themeM2.primaryContrastingColor, Colors.white);
       expect(themeM2.scaffoldBackgroundColor, Colors.grey[850]);
-      expect(themeM2.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(themeM2.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM2.textTheme.textStyle.fontSize, 17.0);
     });
 
@@ -623,7 +623,7 @@ void main() {
       expect(themeM3.primaryColor, const Color(0xffd0bcff));
       expect(themeM3.primaryContrastingColor, const Color(0xff381e72));
       expect(themeM3.scaffoldBackgroundColor, const Color(0xff1c1b1f));
-      expect(themeM3.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(themeM3.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
     });
 
@@ -662,7 +662,7 @@ void main() {
       expect(themeM2.primaryColor, Colors.blue);
       expect(themeM2.primaryContrastingColor, Colors.white);
       expect(themeM2.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
-      expect(themeM2.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(themeM2.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM2.textTheme.textStyle.fontSize, 17.0);
     });
 
@@ -680,7 +680,7 @@ void main() {
       expect(themeM3.primaryColor, const Color(0xff6750a4));
       expect(themeM3.primaryContrastingColor, Colors.white);
       expect(themeM3.scaffoldBackgroundColor, CupertinoColors.lightBackgroundGray);
-      expect(themeM3.textTheme.textStyle.fontFamily, '.SF Pro Text');
+      expect(themeM3.textTheme.textStyle.fontFamily, 'CupertinoSystemText');
       expect(themeM3.textTheme.textStyle.fontSize, 17.0);
     });
 

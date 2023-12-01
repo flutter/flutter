@@ -5875,16 +5875,48 @@ void main() {
     );
 
     testWidgetsWithLeakTracking(
-      'not sent with selection',
+      'set to selection start on forward selection',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(
           text: 'a' * 100,
-          selection: const TextSelection(baseOffset: 0, extentOffset: 10),
+          selection: const TextSelection(baseOffset: 10, extentOffset: 30),
         );
         await tester.pumpWidget(builder());
         await tester.showKeyboard(find.byType(EditableText));
 
-        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
+      },
+    );
+
+    testWidgetsWithLeakTracking(
+      'set to selection start on reversed selection',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(
+          text: 'a' * 100,
+          selection: const TextSelection(baseOffset: 30, extentOffset: 10),
+        );
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
       },
     );
   });
@@ -13095,6 +13127,13 @@ void main() {
     Future<void> sendUndo(WidgetTester tester) => sendUndoRedo(tester);
     Future<void> sendRedo(WidgetTester tester) => sendUndoRedo(tester, true);
 
+    TextEditingValue emptyComposingOnAndroid(TextEditingValue value) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        return value.copyWith(composing: TextRange.empty);
+      }
+      return value;
+    }
+
     Widget boilerplate() {
       return MaterialApp(
         home: EditableText(
@@ -13298,14 +13337,14 @@ void main() {
 
       // Undo first insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep2);
+      expect(controller.value, emptyComposingOnAndroid(composingStep2));
 
       // Waiting for the throttling between undos should have no effect.
       await tester.pump(const Duration(milliseconds: 500));
 
       // Undo second insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep1);
+      expect(controller.value, emptyComposingOnAndroid(composingStep1));
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
@@ -13867,7 +13906,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13877,7 +13915,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13895,7 +13932,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13904,7 +13940,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13930,7 +13965,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13939,7 +13973,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13979,7 +14012,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13988,7 +14020,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -14106,10 +14137,12 @@ void main() {
         case TargetPlatform.android:
           expect(
             controller.value,
-            const TextEditingValue(
-              text: '1 2 ni',
-              composing: TextRange(start: 4, end: 6),
-              selection: TextSelection.collapsed(offset: 6),
+            emptyComposingOnAndroid(
+              const TextEditingValue(
+                text: '1 2 ni',
+                composing: TextRange(start: 4, end: 6),
+                selection: TextSelection.collapsed(offset: 6),
+              ),
             ),
           );
         // Composing changes are ignored on all other platforms.
@@ -14163,10 +14196,12 @@ void main() {
         case TargetPlatform.android:
           expect(
             controller.value,
-            const TextEditingValue(
-              text: '1 2 ni',
-              composing: TextRange(start: 4, end: 6),
-              selection: TextSelection.collapsed(offset: 6),
+            emptyComposingOnAndroid(
+              const TextEditingValue(
+                text: '1 2 ni',
+                composing: TextRange(start: 4, end: 6),
+                selection: TextSelection.collapsed(offset: 6),
+              ),
             ),
           );
         // Composing changes are ignored on all other platforms.

@@ -238,17 +238,22 @@ class VsCode {
 
   // Linux:
   //   /usr/share/code/bin/code
-  //   /snap/code/current
+  //   /snap/code/current/usr/share/code
   //   /usr/share/code-insiders/bin/code-insiders
+  //   /snap/code-insiders/current/usr/share/code-insiders
   // Linux Extensions:
   //   $HOME/.vscode/extensions
   //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedLinux(FileSystem fileSystem, Platform platform) {
     return _findInstalled(<VsCodeInstallLocation>[
       const VsCodeInstallLocation('/usr/share/code', '.vscode'),
-      const VsCodeInstallLocation('/snap/code/current', '.vscode'),
+      const VsCodeInstallLocation('/snap/code/current/usr/share/code', '.vscode'),
       const VsCodeInstallLocation(
         '/usr/share/code-insiders',
+        '.vscode-insiders',
+      ),
+      const VsCodeInstallLocation(
+        '/snap/code-insiders/current/usr/share/code-insiders',
         '.vscode-insiders',
       ),
     ], fileSystem, platform);

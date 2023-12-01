@@ -469,6 +469,51 @@ allprojects {
       );
     });
 
+    testWithoutContext('returns the AGP version when in settings', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      // File must exist and can not have agp defined.
+      androidDirectory.childFile('build.gradle').writeAsStringSync(r'');
+      androidDirectory.childFile('settings.gradle').writeAsStringSync(r'''
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }
+    settings.ext.flutterSdkPath = flutterSdkPath()
+
+    includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    plugins {
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    }
+}
+
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    // Decoy value to ensure we ignore commented out lines.
+    // id "com.android.application" version "6.1.0" apply false
+    id "com.android.application" version "7.3.0" apply false
+}
+
+include ":app"
+''');
+
+      expect(
+        getAgpVersion(androidDirectory, BufferLogger.test()),
+        '7.3.0',
+      );
+    });
+
     group('validates gradle/agp versions', () {
       final List<GradleAgpTestData> testData = <GradleAgpTestData>[
         // Values too new *these need to be updated* when

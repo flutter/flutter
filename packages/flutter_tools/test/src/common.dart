@@ -320,6 +320,7 @@ class FileExceptionHandler {
 FakeAnalytics getInitializedFakeAnalyticsInstance({
   required FileSystem fs,
   required FakeFlutterVersion fakeFlutterVersion,
+  String? clientIde,
 }) {
   final Directory homeDirectory = fs.directory('/');
   final FakeAnalytics initialAnalytics = FakeAnalytics(
@@ -343,5 +344,6 @@ FakeAnalytics getInitializedFakeAnalyticsInstance({
     surveyHandler: SurveyHandler(homeDirectory: homeDirectory, fs: fs),
     flutterChannel: fakeFlutterVersion.channel,
     flutterVersion: fakeFlutterVersion.getVersionString(),
+    clientIde: clientIde,
   );
 }
