@@ -38,12 +38,15 @@ void testMain() {
   }
 
   List<CkImageFilter> createImageFilters() {
-    return <CkImageFilter>[
+    final List<CkImageFilter> filters = <CkImageFilter>[
       CkImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
       for (final CkColorFilter colorFilter in createColorFilters()) CkImageFilter.color(colorFilter: colorFilter),
     ];
+    filters.add(CkImageFilter.compose(outer: filters[0], inner: filters[1]));
+    filters.add(CkImageFilter.compose(outer: filters[1], inner: filters[3]));
+    return filters;
   }
 
   setUpCanvasKitTest();
@@ -156,7 +159,47 @@ void testMain() {
       builder.addPicture(ui.Offset.zero, redCircle1);
       // The drawn red circle should actually be green with the colorFilter.
 
-      await matchSceneGolden('canvaskit_imageFilter_using_colorFilter.png', builder.build(), region: region);
+      await matchSceneGolden(
+          'canvaskit_imageFilter_using_colorFilter.png', builder.build(),
+          region: region);
+    });
+
+    test('using a compose filter', () async {
+      final CkImageFilter blurFilter = CkImageFilter.blur(
+        sigmaX: 5,
+        sigmaY: 5,
+        tileMode: ui.TileMode.clamp,
+      );
+      final CkColorFilter colorFilter = createCkColorFilter(
+          const EngineColorFilter.mode(
+              ui.Color.fromARGB(255, 0, 255, 0), ui.BlendMode.srcIn))!;
+      final CkImageFilter colorImageFilter =
+          CkImageFilter.color(colorFilter: colorFilter);
+      final CkImageFilter composeFilter =
+          CkImageFilter.compose(outer: blurFilter, inner: colorImageFilter);
+
+      const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 250);
+
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+      builder.pushOffset(0, 0);
+
+      builder.pushImageFilter(composeFilter);
+
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(region);
+
+      canvas.drawCircle(
+        const ui.Offset(75, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle1 = recorder.endRecording();
+      builder.addPicture(ui.Offset.zero, redCircle1);
+      // The drawn red circle should actually be green and blurred.
+
+      await matchSceneGolden(
+          'canvaskit_composeImageFilter.png', builder.build(),
+          region: region);
     });
   });
 
