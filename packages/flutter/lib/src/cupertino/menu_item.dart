@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -78,10 +79,10 @@ class CupertinoInteractiveMenuItem<T> extends StatefulWidget
     this.enabled = true,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
-    this.swipePressActivationDelay = Duration.zero,
+    this.panPressActivationDelay = Duration.zero,
     this.onTap,
     this.value,
-    this.pressedColor = CupertinoMenuEntry.backgroundOnPress,
+    this.pressedColor,
     this.focusNode,
     this.mouseCursor,
   });
@@ -109,7 +110,7 @@ class CupertinoInteractiveMenuItem<T> extends StatefulWidget
   /// The color of the menu item when pressed.
   ///
   /// This color will blend with the menu item's base color.
-  final Color pressedColor;
+  final Color? pressedColor;
 
   /// Whether to dismiss the enclosing [_CupertinoMenu] after this item has been pressed
   final bool shouldPopMenuOnPressed;
@@ -123,7 +124,7 @@ class CupertinoInteractiveMenuItem<T> extends StatefulWidget
   /// [Duration.zero] indicates no press should occur.
   ///
   /// Defaults to [Duration.zero]
-  final Duration swipePressActivationDelay;
+  final Duration panPressActivationDelay;
 
   /// Whether pressing this item will perform a destructive action
   ///
@@ -239,10 +240,10 @@ class _CupertinoInteractiveMenuItemState<T>
         button: true,
         child: CupertinoMenuItemGestureHandler<T>(
           mouseCursor: widget.mouseCursor,
-          panPressActivationDelay: widget.swipePressActivationDelay,
+          panPressActivationDelay: widget.panPressActivationDelay,
           onTap: widget.enabled ? handleTap : null,
           pressedColor: CupertinoDynamicColor.resolve(
-            widget.pressedColor,
+            widget.pressedColor ?? CupertinoMenuEntry.backgroundOnPress,
             context,
           ),
           enabled: widget.enabled,
@@ -355,6 +356,8 @@ class CupertinoMenuItem<T> extends CupertinoBaseMenuItem<T> {
     super.isDefaultAction,
     super.isDestructiveAction,
     super.mouseCursor,
+    super.pressedColor,
+    super.focusNode,
   });
 }
 
@@ -378,16 +381,10 @@ class CupertinoCheckedMenuItem<T> extends CupertinoBaseMenuItem<T> {
     super.shouldPopMenuOnPressed = true,
     super.isDefaultAction,
     super.isDestructiveAction,
+    super.pressedColor,
+    super.focusNode,
     this.checked = true,
   });
-
-  /// Whether to display a checkmark next to the menu item.
-  ///
-  /// Defaults to false.
-  ///
-  /// When true, the [CupertinoIcons.check_mark] checkmark icon is displayed at
-  /// the leading edge of the menu item.
-  final bool? checked;
 
   @override
   bool get hasLeading => true;
@@ -395,9 +392,7 @@ class CupertinoCheckedMenuItem<T> extends CupertinoBaseMenuItem<T> {
   @override
   Widget? get leading {
     return ExcludeSemantics(child:
-       (checked ?? false)
-            ? const _MenuLeadingIcon(CupertinoIcons.check_mark, fontSize: 15)
-            : null,
+       checked ?? false ? const _MenuLeadingIcon(CupertinoIcons.check_mark, fontSize: 15) : null,
       );
   }
 
@@ -406,6 +401,14 @@ class CupertinoCheckedMenuItem<T> extends CupertinoBaseMenuItem<T> {
     HapticFeedback.selectionClick();
     super.onTap?.call();
   };
+
+  /// Whether to display a checkmark next to the menu item.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, the [CupertinoIcons.check_mark] checkmark icon is displayed at
+  /// the leading edge of the menu item.
+  final bool? checked;
 
   @override
   Widget buildChild(BuildContext context) {
@@ -562,13 +565,15 @@ class CupertinoBaseMenuItem<T> extends CupertinoInteractiveMenuItem<T> {
     super.onTap,
     super.hasLeading,
     super.value,
-    super.swipePressActivationDelay,
+    super.panPressActivationDelay,
     super.mouseCursor,
     super.height,
     super.shouldPopMenuOnPressed = true,
     super.enabled = true,
     super.isDestructiveAction,
     super.isDefaultAction,
+    super.pressedColor,
+    super.focusNode,
     this.padding,
     this.leading,
     this.trailing,
@@ -602,6 +607,7 @@ class CupertinoBaseMenuItem<T> extends CupertinoInteractiveMenuItem<T> {
 
 // A default layout wrapper for [CupertinoBaseMenuItem]s.
 class _CupertinoMenuItemStructure extends StatelessWidget {
+
   // Creates a [_CupertinoMenuItemStructure]
   const _CupertinoMenuItemStructure({
     required this.title,
@@ -785,6 +791,9 @@ class CupertinoMenuActionItem<T> extends CupertinoInteractiveMenuItem<T>
     super.onTap,
     super.value,
     super.mouseCursor,
+    super.pressedColor,
+    super.shouldPopMenuOnPressed = true,
+    super.focusNode,
   });
 
   /// An icon to display above the [child] in a group of 2 or 3, or centrally in a group of 4.
@@ -878,7 +887,6 @@ class CupertinoMenuActionRow extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final double rowHeight = height * MediaQuery.textScalerOf(context).scale(1);
-
     return _ActionRowState(
       size: size,
       child: ConstrainedBox(
@@ -1286,12 +1294,14 @@ class _CupertinoMenuItemGestureHandlerState<T>
   }
 
   @override
-  void didPanLeave(bool pointerUp) {
+  void didPanLeave() {
     _longPanPressTimer?.cancel();
     _longPanPressTimer = null;
-    if (_isSwiped && mounted) {
+    if ((_isSwiped || _isPressed || _isHovered) && mounted) {
       setState(() {
         _isSwiped = false;
+        _isPressed = false;
+        _isHovered = false;
       });
     }
   }
@@ -1305,14 +1315,12 @@ class _CupertinoMenuItemGestureHandlerState<T>
   void _simulateTap(Intent intent) {
     if (enabled) {
       widget.onTap?.call();
-      controller?.rebuild();
     }
   }
 
   void _handleTap() {
     if (enabled) {
       widget.onTap?.call();
-      controller?.rebuild();
       setState(() {
         _isPressed = false;
         _isSwiped = false;
@@ -1390,17 +1398,16 @@ class _CupertinoMenuItemGestureHandlerState<T>
         child: Actions(
           actions: _actionMap,
           child: Focus(
-            debugLabel: '${widget.child.runtimeType}',
             canRequestFocus: enabled,
             skipTraversal: !enabled,
-            onFocusChange: (enabled || _isFocused) ? _handleFocusChange : null,
+            onFocusChange: enabled || _isFocused ? _handleFocusChange : null,
             focusNode: widget.focusNode,
             child: GestureDetector(
               behavior: widget.behavior ?? HitTestBehavior.opaque,
               onTap: _handleTap,
-              onTapDown: (enabled && !_isPressed) ? _handleTapDown : null,
+              onTapDown: enabled && !_isPressed ? _handleTapDown : null,
               onTapUp: _isPressed ? _handleTapUp : null,
-              onTapCancel: (_isPressed || _isSwiped) ? _handleTapCancel : null,
+              onTapCancel: _isPressed || _isSwiped ? _handleTapCancel : null,
               child: ColoredBox(
                 color: backgroundColor,
                 child: widget.child,
@@ -1492,6 +1499,7 @@ class CupertinoNestedMenuItemAnchor<T> extends StatefulWidget
     required this.visible,
     required this.expanded,
     required this.height,
+    this.pressedColor,
     this.enabled = true,
     this.trailing,
   });
@@ -1522,11 +1530,16 @@ class CupertinoNestedMenuItemAnchor<T> extends StatefulWidget
   /// Whether the anchor can be opened.
   final bool enabled;
 
+  /// The color of the anchor while the anchor is pressed.
+  final Color? pressedColor;
+
   @override
   bool get hasLeading => true;
 
   @override
   final double height;
+
+  static Duration panPressActivationDelay = const Duration(milliseconds: 400);
 
   /// The default color for a CupertinoNestedMenuItemAnchor subtitle.
   static const CupertinoDynamicColor defaultSubtitleColor =
@@ -1663,11 +1676,12 @@ class _CupertinoNestedMenuItemAnchorState<T>
       child: Semantics(
         expanded: widget.expanded,
         child: CupertinoBaseMenuItem<T>(
-          swipePressActivationDelay: const Duration(milliseconds: 500),
+          panPressActivationDelay: CupertinoNestedMenuItemAnchor.panPressActivationDelay,
           shouldPopMenuOnPressed: false,
           onTap: widget.enabled ? widget.onTap : null,
           enabled: widget.enabled,
           trailing: widget.trailing,
+          pressedColor: widget.pressedColor,
           leading: ExcludeSemantics(
             child: RotationTransition(
               turns: _chevronRotationAnimation!,
@@ -1707,6 +1721,7 @@ class _CupertinoNestedMenuItemAnchorState<T>
   }
 }
 
+
 /// Called when a [PanTarget] is entered or exited.
 ///
 /// The [position] describes the global position of the pointer.
@@ -1730,7 +1745,7 @@ typedef CupertinoPanStartCallback = Drag? Function(Offset position);
 
 /// This widget is used by [CupertinoInteractiveMenuItem]s to determine whether
 /// the menu item should be highlighted. On items with a defined
-/// [CupertinoInteractiveMenuItem.swipePressActivationDelay], menu items will be
+/// [CupertinoInteractiveMenuItem.panPressActivationDelay], menu items will be
 /// selected after the user's finger has made contact with the menu item for the
 /// specified duration
 class CupertinoPanListener<T extends PanTarget<StatefulWidget>>
@@ -1861,7 +1876,7 @@ mixin PanTarget<T extends StatefulWidget> on State<T> {
 
   /// Called when the pointer leaves the [PanTarget]. If [pointerUp] is true,
   /// then the pointer left the screen while over this menu item.
-  void didPanLeave(bool pointerUp);
+  void didPanLeave();
 }
 
 // Handles panning events for a [CupertinoPanListener]
@@ -1877,7 +1892,7 @@ class _PanHandler<T extends PanTarget<StatefulWidget>> extends Drag {
     this.onPanEnd,
     this.onPanUpdate,
   }) : _position = initialPosition {
-    updateDrag(initialPosition);
+    _updateDrag(initialPosition);
   }
 
   final int viewId;
@@ -1888,13 +1903,17 @@ class _PanHandler<T extends PanTarget<StatefulWidget>> extends Drag {
 
   @override
   void update(DragUpdateDetails details) {
+    final Offset oldPosition = _position;
     _position += details.delta;
-    updateDrag(_position);
+    _updateDrag(_position);
+    if (_position != oldPosition) {
+      onPanUpdate?.call(_position, _enteredTargets.isNotEmpty);
+    }
   }
 
   @override
   void end(DragEndDetails details) {
-    _finishDrag(pointerUp: true);
+    _finishDrag();
   }
 
   @override
@@ -1902,27 +1921,33 @@ class _PanHandler<T extends PanTarget<StatefulWidget>> extends Drag {
     _finishDrag();
   }
 
-  void updateDrag(Offset globalPosition) {
+  void _updateDrag(Offset globalPosition) {
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, globalPosition, viewId);
-    final List<T> targets = _getDragTargets(result.path).toList();
+    // Look for the RenderBoxes that corresponds to the hit target (the hit target
+    // widgets build RenderMetaData boxes for us for this purpose).
+    final List<T> targets = <T>[];
+    for (final HitTestEntry entry in result.path) {
+      final HitTestTarget target = entry.target;
+      if (target is RenderMetaData && target.metaData is T) {
+        targets.add(target.metaData as T);
+      }
+    }
+
     bool listsMatch = false;
     if (
       targets.length >= _enteredTargets.length &&
       _enteredTargets.isNotEmpty
     ) {
       listsMatch = true;
-      final Iterator<T> iterator = targets.iterator;
       for (int i = 0; i < _enteredTargets.length; i++) {
-        iterator.moveNext();
-        if (iterator.current != _enteredTargets[i]) {
+        if (targets[i] != _enteredTargets[i]) {
           listsMatch = false;
           break;
         }
       }
     }
 
-    onPanUpdate?.call(globalPosition, targets.isNotEmpty);
     // If everything is the same, bail early.
     if (listsMatch) {
       return;
@@ -1933,40 +1958,25 @@ class _PanHandler<T extends PanTarget<StatefulWidget>> extends Drag {
 
     // Enter new targets.
     for (final T? target in targets) {
-      if (target == null) {
-        continue;
-      }
-
-      _enteredTargets.add(target);
-      if (target.didPanEnter()) {
-        HapticFeedback.selectionClick();
-        break;
+      if (target != null) {
+        _enteredTargets.add(target);
+        if (target.didPanEnter()) {
+          HapticFeedback.selectionClick();
+          return;
+        }
       }
     }
   }
 
-  Iterable<T> _getDragTargets(Iterable<HitTestEntry> path) {
-    // Look for the RenderBoxes that corresponds to the hit target (the hit target
-    // widgets build RenderMetaData boxes for us for this purpose).
-    final List<T> targets = <T>[];
-    for (final HitTestEntry entry in path) {
-      final HitTestTarget target = entry.target;
-      if (target is RenderMetaData && target.metaData is T) {
-        targets.add(target.metaData as T);
-      }
-    }
-    return targets;
-  }
-
-  void _leaveAllEntered({bool pointerUp = false}) {
+  void _leaveAllEntered() {
     for (int i = 0; i < _enteredTargets.length; i += 1) {
-      _enteredTargets[i].didPanLeave(pointerUp);
+      _enteredTargets[i].didPanLeave();
     }
     _enteredTargets.clear();
   }
 
-  void _finishDrag({bool pointerUp = false}) {
-    _leaveAllEntered(pointerUp: pointerUp);
+  void _finishDrag() {
+    _leaveAllEntered();
     onPanEnd?.call(_position);
   }
 }
