@@ -196,25 +196,15 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     const DartIsolate* spawning_isolate) {
   TRACE_EVENT0("flutter", "DartIsolate::CreateRootIsolate");
 
-  // The child isolate preparer is null but will be set when the isolate is
-  // being prepared to run.
-  auto isolate_group_data =
-      std::make_unique<std::shared_ptr<DartIsolateGroupData>>(
-          std::shared_ptr<DartIsolateGroupData>(new DartIsolateGroupData(
-              settings,                            // settings
-              std::move(isolate_snapshot),         // isolate snapshot
-              context.advisory_script_uri,         // advisory URI
-              context.advisory_script_entrypoint,  // advisory entrypoint
-              nullptr,                             // child isolate preparer
-              isolate_create_callback,             // isolate create callback
-              isolate_shutdown_callback            // isolate shutdown callback
-              )));
+  // Only needed if this is the main isolate for the group.
+  std::unique_ptr<std::shared_ptr<DartIsolateGroupData>> isolate_group_data;
 
   auto isolate_data = std::make_unique<std::shared_ptr<DartIsolate>>(
-      std::shared_ptr<DartIsolate>(new DartIsolate(settings,  // settings
-                                                   true,      // is_root_isolate
-                                                   context    // context
-                                                   )));
+      std::shared_ptr<DartIsolate>(new DartIsolate(
+          /*settings=*/settings,
+          /*is_root_isolate=*/true,
+          /*context=*/context,
+          /*is_spawning_in_group=*/!!spawning_isolate)));
 
   DartErrorString error;
   Dart_Isolate vm_isolate = nullptr;
@@ -222,24 +212,40 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
 
   IsolateMaker isolate_maker;
   if (spawning_isolate) {
-    isolate_maker = [spawning_isolate](
-                        std::shared_ptr<DartIsolateGroupData>*
-                            isolate_group_data,
-                        std::shared_ptr<DartIsolate>* isolate_data,
-                        Dart_IsolateFlags* flags, char** error) {
-      return Dart_CreateIsolateInGroup(
-          /*group_member=*/spawning_isolate->isolate(),
-          /*name=*/(*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
-          /*shutdown_callback=*/
-          reinterpret_cast<Dart_IsolateShutdownCallback>(
-              DartIsolate::SpawnIsolateShutdownCallback),
-          /*cleanup_callback=*/
-          reinterpret_cast<Dart_IsolateCleanupCallback>(
-              DartIsolateCleanupCallback),
-          /*child_isolate_data=*/isolate_data,
-          /*error=*/error);
-    };
+    isolate_maker =
+        [spawning_isolate](
+            std::shared_ptr<DartIsolateGroupData>* isolate_group_data,
+            std::shared_ptr<DartIsolate>* isolate_data,
+            Dart_IsolateFlags* flags, char** error) {
+          return Dart_CreateIsolateInGroup(
+              /*group_member=*/spawning_isolate->isolate(),
+              /*name=*/
+              spawning_isolate->GetIsolateGroupData()
+                  .GetAdvisoryScriptEntrypoint()
+                  .c_str(),
+              /*shutdown_callback=*/
+              reinterpret_cast<Dart_IsolateShutdownCallback>(
+                  DartIsolate::SpawnIsolateShutdownCallback),
+              /*cleanup_callback=*/
+              reinterpret_cast<Dart_IsolateCleanupCallback>(
+                  DartIsolateCleanupCallback),
+              /*child_isolate_data=*/isolate_data,
+              /*error=*/error);
+        };
   } else {
+    // The child isolate preparer is null but will be set when the isolate is
+    // being prepared to run.
+    isolate_group_data =
+        std::make_unique<std::shared_ptr<DartIsolateGroupData>>(
+            std::shared_ptr<DartIsolateGroupData>(new DartIsolateGroupData(
+                settings,                            // settings
+                std::move(isolate_snapshot),         // isolate snapshot
+                context.advisory_script_uri,         // advisory URI
+                context.advisory_script_entrypoint,  // advisory entrypoint
+                nullptr,                             // child isolate preparer
+                isolate_create_callback,             // isolate create callback
+                isolate_shutdown_callback  // isolate shutdown callback
+                )));
     isolate_maker = [](std::shared_ptr<DartIsolateGroupData>*
                            isolate_group_data,
                        std::shared_ptr<DartIsolate>* isolate_data,
@@ -276,7 +282,8 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
 
 DartIsolate::DartIsolate(const Settings& settings,
                          bool is_root_isolate,
-                         const UIDartState::Context& context)
+                         const UIDartState::Context& context,
+                         bool is_spawning_in_group)
     : UIDartState(settings.task_observer_add,
                   settings.task_observer_remove,
                   settings.log_tag,
@@ -287,7 +294,8 @@ DartIsolate::DartIsolate(const Settings& settings,
                   context),
       may_insecurely_connect_to_all_domains_(
           settings.may_insecurely_connect_to_all_domains),
-      domain_network_policy_(settings.domain_network_policy) {
+      domain_network_policy_(settings.domain_network_policy),
+      is_spawning_in_group_(is_spawning_in_group) {
   phase_ = Phase::Uninitialized;
 }
 
@@ -548,13 +556,13 @@ bool DartIsolate::LoadKernel(const std::shared_ptr<const fml::Mapping>& mapping,
     return false;
   }
 
-  if (!mapping || mapping->GetSize() == 0) {
-    return false;
-  }
-
   tonic::DartState::Scope scope(this);
 
-  if (!child_isolate) {
+  if (!child_isolate && !is_spawning_in_group_) {
+    if (!mapping || mapping->GetSize() == 0) {
+      return false;
+    }
+
     // Use root library provided by kernel in favor of one provided by snapshot.
     Dart_SetRootLibrary(Dart_Null());
 
@@ -923,7 +931,7 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
       });
 
   if (*error) {
-    FML_LOG(ERROR) << "CreateDartIsolateGroup failed: " << error;
+    FML_LOG(ERROR) << "CreateDartIsolateGroup failed: " << *error;
   }
 
   return vm_isolate;

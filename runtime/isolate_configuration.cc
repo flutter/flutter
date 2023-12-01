@@ -43,6 +43,7 @@ class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {
 
 class KernelIsolateConfiguration : public IsolateConfiguration {
  public:
+  // The kernel mapping may be nullptr if reusing the group's loaded kernel.
   explicit KernelIsolateConfiguration(
       std::unique_ptr<const fml::Mapping> kernel)
       : kernel_(std::move(kernel)) {}
@@ -202,10 +203,15 @@ PrepareKernelMappings(const std::vector<std::string>& kernel_pieces_paths,
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     const Settings& settings,
     const std::shared_ptr<AssetManager>& asset_manager,
-    const fml::RefPtr<fml::TaskRunner>& io_worker) {
+    const fml::RefPtr<fml::TaskRunner>& io_worker,
+    IsolateLaunchType launch_type) {
   // Running in AOT mode.
   if (DartVM::IsRunningPrecompiledCode()) {
     return CreateForAppSnapshot();
+  }
+
+  if (launch_type == IsolateLaunchType::kExistingGroup) {
+    return CreateForKernel(nullptr);
   }
 
   if (settings.application_kernels) {
