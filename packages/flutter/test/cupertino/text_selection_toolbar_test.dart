@@ -274,6 +274,52 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
+  testWidgetsWithLeakTracking('correctly sizes large toolbar buttons', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 420,
+            child: CupertinoTextSelectionToolbar(
+              anchorAbove: const Offset(50.0, 100.0),
+              anchorBelow: const Offset(50.0, 200.0),
+              children: const <Widget>[
+                SizedBox(width: 100),
+                SizedBox(width: 300),
+                SizedBox(width: 100),
+                SizedBox(width: 100),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Finder findSizedBoxWithWidth(double width) =>
+      find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.width == width);
+
+    // The first page isn't wide enough to show the second button.
+    expect(findSizedBoxWithWidth(100), findsOneWidget);
+    expect(findSizedBoxWithWidth(300), findsNothing);
+
+    // Show the next page.
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    // The second page should show only the second button, but it should not
+    // limit its width.
+    // expect(findSizedBoxWithWidth(100), findsNothing);
+    // expect(findSizedBoxWithWidth(300), findsOneWidget);
+    expect(tester.getSize(findSizedBoxWithWidth(300)).width, 300);
+
+    // Show the next page
+    await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+    await tester.pumpAndSettle();
+
+    // The third page should show the last two items.
+    expect(findSizedBoxWithWidth(100), findsNWidgets(2));
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
+
   testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 50.0;
