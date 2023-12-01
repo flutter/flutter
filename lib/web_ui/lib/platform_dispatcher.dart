@@ -545,4 +545,7 @@ class SemanticsActionEvent {
       arguments: arguments == _noArgumentPlaceholder ? this.arguments : arguments,
     );
   }
+
+  @override
+  String toString() => 'SemanticsActionEvent($type, view: $viewId, node: $nodeId)';
 }

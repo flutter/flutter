@@ -62,7 +62,7 @@ class Scrollable extends PrimaryRoleManager {
   /// Responds to browser-detected "scroll" gestures.
   void _recomputeScrollPosition() {
     if (_domScrollPosition != _effectiveNeutralScrollPosition) {
-      if (!semanticsObject.owner.shouldAcceptBrowserGesture('scroll')) {
+      if (!EngineSemantics.instance.shouldAcceptBrowserGesture('scroll')) {
         return;
       }
       final bool doScrollForward =
@@ -121,7 +121,7 @@ class Scrollable extends PrimaryRoleManager {
       _gestureModeListener = (_) {
         _gestureModeDidChange();
       };
-      semanticsObject.owner.addGestureModeListener(_gestureModeListener);
+      EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
 
       _scrollListener = createDomEventListener((_) {
         _recomputeScrollPosition();
@@ -196,7 +196,7 @@ class Scrollable extends PrimaryRoleManager {
   }
 
   void _gestureModeDidChange() {
-    switch (semanticsObject.owner.gestureMode) {
+    switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:
         // overflow:scroll will cause the browser report "scroll" events when
         // the accessibility focus shifts outside the visible bounds.
@@ -232,8 +232,11 @@ class Scrollable extends PrimaryRoleManager {
     style.removeProperty('touch-action');
     if (_scrollListener != null) {
       removeEventListener('scroll', _scrollListener);
+      _scrollListener = null;
     }
-    semanticsObject.owner.removeGestureModeListener(_gestureModeListener);
-    _gestureModeListener = null;
+    if (_gestureModeListener != null) {
+      EngineSemantics.instance.removeGestureModeListener(_gestureModeListener!);
+      _gestureModeListener = null;
+    }
   }
 }

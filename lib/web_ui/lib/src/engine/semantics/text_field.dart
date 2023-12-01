@@ -296,7 +296,7 @@ class TextField extends PrimaryRoleManager {
     _initializeEditableElement();
     activeEditableElement.addEventListener('focus',
         createDomEventListener((DomEvent event) {
-          if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
+          if (EngineSemantics.instance.gestureMode != GestureMode.browserGestures) {
             return;
           }
 
@@ -305,7 +305,7 @@ class TextField extends PrimaryRoleManager {
         }));
     activeEditableElement.addEventListener('blur',
         createDomEventListener((DomEvent event) {
-          if (semanticsObject.owner.gestureMode != GestureMode.browserGestures) {
+          if (EngineSemantics.instance.gestureMode != GestureMode.browserGestures) {
             return;
           }
 
