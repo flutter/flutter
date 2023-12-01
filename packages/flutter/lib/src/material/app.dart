@@ -1080,7 +1080,8 @@ class _MaterialAppState extends State<MaterialApp> {
     result = Focus(
       canRequestFocus: false,
       onKeyEvent: (FocusNode node, KeyEvent event) {
-        if (event is! KeyDownEvent || event is! KeyRepeatEvent || event.logicalKey != LogicalKeyboardKey.escape) {
+        if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
+             event.logicalKey != LogicalKeyboardKey.escape) {
           return KeyEventResult.ignored;
         }
         return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
