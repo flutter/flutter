@@ -181,7 +181,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
 
     PS::FrameInfo frame_info;
     frame_info.count = points_.size();
-    frame_info.radius = radius;
+    frame_info.radius = round_ ? radius : radius * kSqrt2;
     frame_info.radian_start = round_ ? 0.0f : kPiOver4;
     frame_info.radian_step = k2Pi / vertices_per_geom;
     frame_info.points_per_circle = points_per_circle;
