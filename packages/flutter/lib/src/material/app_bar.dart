@@ -488,7 +488,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.backgroundColor}
   /// The fill color to use for an app bar's [Material].
   ///
-	/// If null, then the [AppBarTheme.backgroundColor] is used.
+  /// If null, then the [AppBarTheme.backgroundColor] is used.
   /// If that value is also null, then [AppBar] uses the overall theme's
   /// [ColorScheme.surface] if the overall theme's brightness is [Brightness.light]
   /// and [useMaterial3] is set to [true]. If [useMaterial3] is [false] and
