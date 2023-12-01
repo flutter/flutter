@@ -28,7 +28,7 @@ Future<void> testMain() async {
 
 void runCanvasTests({required bool deviceClipRoundsOut}) {
   setUp(() {
-    EngineSemanticsOwner.debugResetSemantics();
+    EngineSemantics.debugResetSemantics();
   });
 
   group('ui.Canvas transform tests', () {

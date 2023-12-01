@@ -523,7 +523,7 @@ abstract class _BaseAdapter {
       // Report the event to semantics. This information is used to debounce
       // browser gestures. Semantics tells us whether it is safe to forward
       // the event to the framework.
-      if (EngineSemanticsOwner.instance.receiveGlobalEvent(event)) {
+      if (EngineSemantics.instance.receiveGlobalEvent(event)) {
         handler(event);
       }
     }

@@ -50,8 +50,15 @@ void registerHotRestartListener(ui.VoidCallback listener) {
 /// such as removing static DOM listeners, prior to allowing the Dart runtime
 /// to re-initialize the program.
 void debugEmulateHotRestart() {
-  for (final ui.VoidCallback listener in _hotRestartListeners) {
-    listener();
+  // While hot restart listeners are executing, more listeners may be added. To
+  // avoid concurrent modification, the listeners are copies and emptied. If new
+  // listeners are added in the process, the loop will pick them up.
+  while (_hotRestartListeners.isNotEmpty) {
+    final List<ui.VoidCallback> copyOfListeners = _hotRestartListeners.toList();
+    _hotRestartListeners.clear();
+    for (final ui.VoidCallback listener in copyOfListeners) {
+      listener();
+    }
   }
 }
 

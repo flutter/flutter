@@ -8,7 +8,7 @@ import 'package:ui/ui.dart' as ui show Offset;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
-import '../semantics.dart' show EngineSemanticsOwner;
+import '../semantics.dart' show EngineSemantics;
 import '../text_editing/text_editing.dart';
 import '../vector_math.dart';
 
@@ -25,7 +25,7 @@ import '../vector_math.dart';
 /// offsetX, offsetY == 0 (TalkBack events).
 ui.Offset computeEventOffsetToTarget(DomMouseEvent event, DomElement actualTarget) {
   // On a TalkBack event
-  if (EngineSemanticsOwner.instance.semanticsEnabled && event.offsetX == 0 && event.offsetY == 0) {
+  if (EngineSemantics.instance.semanticsEnabled && event.offsetX == 0 && event.offsetY == 0) {
     return _computeOffsetForTalkbackEvent(event, actualTarget);
   }
 
@@ -109,7 +109,7 @@ ui.Offset _computeOffsetForInputs(DomMouseEvent event, EditableTextGeometry inpu
 /// positions. Finally, we deduct that from clientX, clientY of the event.
 // TODO(dit): Make this understand 3D transforms, https://github.com/flutter/flutter/issues/117091
 ui.Offset _computeOffsetForTalkbackEvent(DomMouseEvent event, DomElement actualTarget) {
-  assert(EngineSemanticsOwner.instance.semanticsEnabled);
+  assert(EngineSemantics.instance.semanticsEnabled);
   // Use clientX/clientY as the position of the event (this is relative to
   // the top left of the page, including scroll)
   double offsetX = event.clientX;

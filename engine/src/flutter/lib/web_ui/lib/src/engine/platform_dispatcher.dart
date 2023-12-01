@@ -806,7 +806,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     call `updateSemantics`.
   ''')
   void updateSemantics(ui.SemanticsUpdate update) {
-    EngineSemanticsOwner.instance.updateSemantics(update);
+    implicitView?.semantics.updateSemantics(update);
   }
 
   /// This is equivalent to `locales.first`, except that it will provide an

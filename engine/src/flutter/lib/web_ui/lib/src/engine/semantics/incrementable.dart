@@ -55,7 +55,7 @@ class Incrementable extends PrimaryRoleManager {
     _gestureModeListener = (GestureMode mode) {
       update();
     };
-    semanticsObject.owner.addGestureModeListener(_gestureModeListener);
+    EngineSemantics.instance.addGestureModeListener(_gestureModeListener);
     _focusManager.manage(semanticsObject.id, _element);
   }
 
@@ -76,7 +76,7 @@ class Incrementable extends PrimaryRoleManager {
   /// Disables the input [_element] when the gesture mode switches to
   /// [GestureMode.pointerEvents], and enables it when the mode switches back to
   /// [GestureMode.browserGestures].
-  GestureModeCallback? _gestureModeListener;
+  late final GestureModeCallback _gestureModeListener;
 
   /// Whether we forwarded a semantics action to the framework and awaiting an
   /// update.
@@ -89,7 +89,7 @@ class Incrementable extends PrimaryRoleManager {
   void update() {
     super.update();
 
-    switch (semanticsObject.owner.gestureMode) {
+    switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:
         _enableBrowserGestureHandling();
         _updateInputValues();
@@ -100,7 +100,7 @@ class Incrementable extends PrimaryRoleManager {
   }
 
   void _enableBrowserGestureHandling() {
-    assert(semanticsObject.owner.gestureMode == GestureMode.browserGestures);
+    assert(EngineSemantics.instance.gestureMode == GestureMode.browserGestures);
     if (!_element.disabled!) {
       return;
     }
@@ -108,7 +108,7 @@ class Incrementable extends PrimaryRoleManager {
   }
 
   void _updateInputValues() {
-    assert(semanticsObject.owner.gestureMode == GestureMode.browserGestures);
+    assert(EngineSemantics.instance.gestureMode == GestureMode.browserGestures);
 
     final bool updateNeeded = _pendingResync ||
         semanticsObject.isValueDirty ||
@@ -148,11 +148,9 @@ class Incrementable extends PrimaryRoleManager {
 
   @override
   void dispose() {
-    assert(_gestureModeListener != null);
     super.dispose();
     _focusManager.stopManaging();
-    semanticsObject.owner.removeGestureModeListener(_gestureModeListener);
-    _gestureModeListener = null;
+    EngineSemantics.instance.removeGestureModeListener(_gestureModeListener);
     _disableBrowserGestureHandling();
     _element.remove();
   }

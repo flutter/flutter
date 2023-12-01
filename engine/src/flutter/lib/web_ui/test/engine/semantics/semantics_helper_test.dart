@@ -18,7 +18,7 @@ void testMain() {
     late DomElement? placeholder;
 
     setUp(() {
-      EngineSemanticsOwner.instance.semanticsEnabled = false;
+      EngineSemantics.instance.semanticsEnabled = false;
       desktopSemanticsEnabler = DesktopSemanticsEnabler();
       placeholder = desktopSemanticsEnabler.prepareAccessibilityPlaceholder();
       domDocument.body!.append(placeholder!);
@@ -28,7 +28,7 @@ void testMain() {
       expect(placeholder, isNotNull,
           reason: 'Expected the test to create a placeholder');
       placeholder!.remove();
-      EngineSemanticsOwner.instance.semanticsEnabled = false;
+      EngineSemantics.instance.semanticsEnabled = false;
     });
 
     test('prepare accessibility placeholder', () async {
@@ -95,7 +95,7 @@ void testMain() {
       DomElement? placeholder;
 
       setUp(() {
-        EngineSemanticsOwner.instance.semanticsEnabled = false;
+        EngineSemantics.instance.semanticsEnabled = false;
         mobileSemanticsEnabler = MobileSemanticsEnabler();
         placeholder = mobileSemanticsEnabler.prepareAccessibilityPlaceholder();
         domDocument.body!.append(placeholder!);
@@ -103,7 +103,7 @@ void testMain() {
 
       tearDown(() {
         placeholder!.remove();
-        EngineSemanticsOwner.instance.semanticsEnabled = false;
+        EngineSemantics.instance.semanticsEnabled = false;
       });
 
       test('prepare accessibility placeholder', () async {

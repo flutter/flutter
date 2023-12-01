@@ -2308,7 +2308,7 @@ class HybridTextEditing {
   /// Supplies the DOM element used for editing.
   late final DefaultTextEditingStrategy strategy =
     debugTextEditingStrategyOverride ??
-    (EngineSemanticsOwner.instance.semanticsEnabled
+    (EngineSemantics.instance.semanticsEnabled
       ? SemanticsTextEditingStrategy.ensureInitialized(this)
       : createDefaultTextEditingStrategy(this));
 

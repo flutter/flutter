@@ -138,7 +138,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       return true;
     }
 
-    if (EngineSemanticsOwner.instance.semanticsEnabled) {
+    if (EngineSemantics.instance.semanticsEnabled) {
       // Semantics already enabled, forward to framework as normal.
       return true;
     }
@@ -167,7 +167,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       return true;
     }
 
-    EngineSemanticsOwner.instance.semanticsEnabled = true;
+    EngineSemantics.instance.semanticsEnabled = true;
     dispose();
     return false;
   }
@@ -267,7 +267,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       return true;
     }
 
-    if (EngineSemanticsOwner.instance.semanticsEnabled) {
+    if (EngineSemantics.instance.semanticsEnabled) {
       // Semantics already enabled, forward to framework as normal.
       return true;
     }
@@ -357,7 +357,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       _schedulePlaceholderRemoval = true;
       semanticsActivationTimer = Timer(_periodToConsumeEvents, () {
         dispose();
-        EngineSemanticsOwner.instance.semanticsEnabled = true;
+        EngineSemantics.instance.semanticsEnabled = true;
       });
       return false;
     }
