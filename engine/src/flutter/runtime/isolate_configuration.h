@@ -19,6 +19,17 @@
 
 namespace flutter {
 
+/// Describes whether the isolate is part of a group or not.
+///
+/// If the isolate is part of a group, it avoids reloading the kernel snapshot.
+enum class IsolateLaunchType {
+  /// The isolate is launched as a solo isolate or to start a new group.
+  kNewGroup,
+  /// The isolate is launched as part of a group, and avoids reloading the
+  /// kernel snapshot.
+  kExistingGroup,
+};
+
 //------------------------------------------------------------------------------
 /// @brief      An isolate configuration is a collection of snapshots and asset
 ///             managers that the engine will use to configure the isolate
@@ -57,6 +68,10 @@ class IsolateConfiguration {
   /// @param[in]  io_worker      An optional IO worker. Specify `nullptr` if a
   ///                            worker should not be used or one is not
   ///                            available.
+  /// @param[in]  launch_type    Whether the isolate is launching to form a new
+  ///                            group or as part of an existing group. If it is
+  ///                            part of an existing group, the isolate will
+  ///                            reuse resources if it can.
   ///
   /// @return     An isolate configuration if one can be inferred from the
   ///             settings. If not, returns `nullptr`.
@@ -64,7 +79,8 @@ class IsolateConfiguration {
   [[nodiscard]] static std::unique_ptr<IsolateConfiguration> InferFromSettings(
       const Settings& settings,
       const std::shared_ptr<AssetManager>& asset_manager = nullptr,
-      const fml::RefPtr<fml::TaskRunner>& io_worker = nullptr);
+      const fml::RefPtr<fml::TaskRunner>& io_worker = nullptr,
+      IsolateLaunchType launch_type = IsolateLaunchType::kNewGroup);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates an AOT isolate configuration using snapshot symbols
