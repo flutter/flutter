@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
@@ -523,6 +524,88 @@ class RunCommand extends RunCommandBase {
       commandRunEnableImpeller: enableImpeller.asBool,
       commandRunIOSInterfaceType: iOSInterfaceType,
       commandRunIsTest: targetFile.endsWith('_test.dart'),
+    );
+  }
+
+  @override
+  Future<analytics.Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    String deviceType, deviceOsVersion;
+    bool isEmulator;
+    bool anyAndroidDevices = false;
+    bool anyIOSDevices = false;
+    bool anyWirelessIOSDevices = false;
+
+    if (devices == null || devices!.isEmpty) {
+      deviceType = 'none';
+      deviceOsVersion = 'none';
+      isEmulator = false;
+    } else if (devices!.length == 1) {
+      final Device device = devices![0];
+      final TargetPlatform platform = await device.targetPlatform;
+      anyAndroidDevices = platform == TargetPlatform.android;
+      anyIOSDevices = platform == TargetPlatform.ios;
+      if (device is IOSDevice && device.isWirelesslyConnected) {
+        anyWirelessIOSDevices = true;
+      }
+      deviceType = getNameForTargetPlatform(platform);
+      deviceOsVersion = await device.sdkNameAndVersion;
+      isEmulator = await device.isLocalEmulator;
+    } else {
+      deviceType = 'multiple';
+      deviceOsVersion = 'multiple';
+      isEmulator = false;
+      for (final Device device in devices!) {
+        final TargetPlatform platform = await device.targetPlatform;
+        anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
+        anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        if (device is IOSDevice && device.isWirelesslyConnected) {
+          anyWirelessIOSDevices = true;
+        }
+        if (anyAndroidDevices && anyIOSDevices) {
+          break;
+        }
+      }
+    }
+
+    String? iOSInterfaceType;
+    if (anyIOSDevices) {
+      iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
+    }
+
+    String? androidEmbeddingVersion;
+    final List<String> hostLanguage = <String>[];
+    if (anyAndroidDevices) {
+      final AndroidProject androidProject = FlutterProject.current().android;
+      if (androidProject.existsSync()) {
+        hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
+        androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
+      }
+    }
+    if (anyIOSDevices) {
+      final IosProject iosProject = FlutterProject.current().ios;
+      if (iosProject.exists) {
+        final Iterable<File> swiftFiles = iosProject.hostAppRoot
+            .listSync(recursive: true, followLinks: false)
+            .whereType<File>()
+            .where((File file) => globals.fs.path.extension(file.path) == '.swift');
+        hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
+      }
+    }
+
+    final BuildInfo buildInfo = await getBuildInfo();
+    final String modeName = buildInfo.modeName;
+    return analytics.Event.commandUsageValues(
+      workflow: commandPath,
+      runIsEmulator: isEmulator,
+      runTargetName: deviceType,
+      runTargetOsVersion: deviceOsVersion,
+      runModeName: modeName,
+      runProjectModule: FlutterProject.current().isModule,
+      runProjectHostLanguage: hostLanguage.join(','),
+      runAndroidEmbeddingVersion: androidEmbeddingVersion,
+      runEnableImpeller: enableImpeller.asBool,
+      runIOSInterfaceType: iOSInterfaceType,
+      runIsTest: targetFile.endsWith('_test.dart'),
     );
   }
 
