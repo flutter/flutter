@@ -80,6 +80,7 @@ class ScrollBehavior {
     MultitouchDragStrategy? multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
+    bool? animatePointerScroll,
     TargetPlatform? platform,
   }) {
     return _WrappedScrollBehavior(
@@ -89,6 +90,7 @@ class ScrollBehavior {
       dragDevices: dragDevices,
       multitouchDragStrategy: multitouchDragStrategy,
       pointerAxisModifiers: pointerAxisModifiers,
+      animatePointerScroll: animatePointerScroll,
       physics: physics,
       platform: platform,
     );
@@ -112,6 +114,21 @@ class ScrollBehavior {
   /// By default, [MultitouchDragStrategy.latestPointer] is configured to
   /// create drag gestures for all platforms.
   MultitouchDragStrategy get multitouchDragStrategy => MultitouchDragStrategy.latestPointer;
+
+  /// Animates the the scroll input from discrete devices like stepped mouse
+  /// wheels.
+  ///
+  /// When true, [ScrollPosition.pointerScroll] will animate the position over a
+  /// simulated curve based on the amount of input received by the event.
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollPhysics.getPointerAnimationDurationFor], used to compute the
+  ///     duration of the animation, based on the amount of input that has been
+  ///     received from the input device.
+  ///   * [ScrollPhysics.pointerAnimationCurve], the curve applied to the
+  ///     animation. Defaults to [Curves.easeInOut].
+  bool get animatePointerScroll => false;
 
   /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in
   /// combination with a [PointerDeviceKind.mouse] pointer scroll event, will
@@ -255,11 +272,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     Set<PointerDeviceKind>? dragDevices,
     MultitouchDragStrategy? multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
+    bool? animatePointerScroll,
     this.physics,
     this.platform,
   }) : _dragDevices = dragDevices,
         _multitouchDragStrategy = multitouchDragStrategy,
-       _pointerAxisModifiers = pointerAxisModifiers;
+       _pointerAxisModifiers = pointerAxisModifiers,
+       _animatePointerScroll = animatePointerScroll;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -268,6 +287,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
   final MultitouchDragStrategy? _multitouchDragStrategy;
+  final bool? _animatePointerScroll;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
 
   @override
@@ -296,12 +316,16 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
+  bool get animatePointerScroll => _animatePointerScroll ?? delegate.animatePointerScroll;
+
+  @override
   ScrollBehavior copyWith({
     bool? scrollbars,
     bool? overscroll,
     Set<PointerDeviceKind>? dragDevices,
     MultitouchDragStrategy? multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
+    bool? animatePointerScroll,
     ScrollPhysics? physics,
     TargetPlatform? platform,
   }) {
@@ -311,6 +335,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       dragDevices: dragDevices ?? this.dragDevices,
       multitouchDragStrategy: multitouchDragStrategy ?? this.multitouchDragStrategy,
       pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
+      animatePointerScroll: animatePointerScroll ?? this.animatePointerScroll,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
     );
@@ -336,6 +361,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         || !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers)
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
+        || oldDelegate.animatePointerScroll != animatePointerScroll
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 

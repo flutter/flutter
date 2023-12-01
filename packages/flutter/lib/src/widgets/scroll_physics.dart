@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart' show AxisDirection;
 import 'package:flutter/physics.dart';
 
+import 'basic.dart';
 import 'binding.dart' show WidgetsBinding;
 import 'framework.dart';
 import 'overscroll_indicator.dart';
@@ -215,6 +216,73 @@ class ScrollPhysics {
       return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
     }
     return parent!.shouldAcceptUserOffset(position);
+  }
+
+  // Animated pointer scrolls
+  // Modeled after the Chromium ScrollOffsetAnimationCurve for physical mouse
+  // wheels, with a few extrapolations to translate to Flutter scrolling land.
+  // Durations are in milliseconds
+  static const double _kPointerAnimationMinDuration = 100.0;
+  static const double _kPointerAnimationMaxDuration = 200.0;
+  static const Curve _kPointerAnimationDefaultCurve = Curves.easeInOut;
+  double get _pointerAnimationSlope => -6.0 / 360.0;
+  double get _pointerAnimationOffset {
+    return pointerAnimationMaxDuration - 120.0 * _pointerAnimationSlope;
+  }
+
+  /// The minimum duration for animated pointer scrolling.
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollBehavior.animatePointerScroll], a flag to animate the the
+  ///     scroll input from discrete devices like stepped mouse wheels.
+  double get pointerAnimationMinDuration {
+    return parent?.pointerAnimationMinDuration ?? _kPointerAnimationMinDuration;
+  }
+  /// The maximum duration for animated pointer scrolling.
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollBehavior.animatePointerScroll], a flag to animate the the
+  ///     scroll input from discrete devices like stepped mouse wheels.
+  double get pointerAnimationMaxDuration {
+    return parent?.pointerAnimationMaxDuration ?? _kPointerAnimationMaxDuration;
+  }
+  /// Computes a duration based on the discrete input provided to
+  /// [ScrollPosition.pointerScroll] when opted in to
+  /// [ScrollBehavior.animatePointerScroll].
+  ///
+  /// A larger delta results in a shorter duration, so that large scrolling
+  /// deltas do not feel laggy when trying to traverse large distances. Shorter
+  /// deltas will result in more longer durations for a more gradual transition.
+  ///
+  /// Bounded by [pointerAnimationMinDuration] and [pointerAnimationMaxDuration].
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollBehavior.animatePointerScroll], a flag to animate the the
+  ///     scroll input from discrete devices like stepped mouse wheels.
+  double getPointerAnimationDurationFor(double delta) {
+    final double computedDuration = _pointerAnimationOffset + delta.abs() * _pointerAnimationSlope;
+    final double clampedDuration = clampDouble(
+      computedDuration / 60 * 1000,
+      pointerAnimationMinDuration,
+      pointerAnimationMaxDuration,
+    );
+    return clampedDuration;
+  }
+
+  /// The parametric animation applied to the [ScrollPosition.pointerScroll]
+  /// when opted in to [ScrollBehavior.animatePointerScroll].
+  ///
+  /// Defaults to [Curves.easeInOut].
+  ///
+  /// See also:
+  ///
+  ///   * [ScrollBehavior.animatePointerScroll], a flag to animate the the
+  ///     scroll input from discrete devices like stepped mouse wheels.
+  Curve get pointerAnimationCurve {
+    return parent?.pointerAnimationCurve ?? _kPointerAnimationDefaultCurve;
   }
 
   /// Provides a heuristic to determine if expensive frame-bound tasks should be

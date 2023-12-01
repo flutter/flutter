@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -209,7 +210,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void pointerScroll(double delta) {
+  void pointerScroll(double delta, { bool animatePointerScroll = false }) {
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
@@ -218,25 +219,77 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       return;
     }
 
-    final double targetPixels =
-        math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
+    final double targetPixels = math.min(
+      math.max(pixels + delta, minScrollExtent),
+      maxScrollExtent,
+    );
     if (targetPixels != pixels) {
-      goIdle();
-      updateUserScrollDirection(
+      // The position should change.
+      // Call on the ScrollConfiguration to see if we should use the smoothing
+      // opt-in
+      if (animatePointerScroll) {
+        // Simulate smooth scrolling based on discrete input.
+        _animatedPointerScroll(delta, targetPixels);
+      } else {
+        // Apply discrete input as received.
+        goIdle();
+        updateUserScrollDirection(
           -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
-      );
-      final double oldPixels = pixels;
-      // Set the notifier before calling force pixels.
-      // This is set to false again after going ballistic below.
-      isScrollingNotifier.value = true;
-      forcePixels(targetPixels);
-      didStartScroll();
-      didUpdateScrollPositionBy(pixels - oldPixels);
-      didEndScroll();
-      goBallistic(0.0);
+        );
+        final double oldPixels = pixels;
+        // Set the notifier before calling force pixels.
+        // This is set to false again after going ballistic below.
+        isScrollingNotifier.value = true;
+        forcePixels(targetPixels);
+        didStartScroll();
+        didUpdateScrollPositionBy(pixels - oldPixels);
+        didEndScroll();
+        goBallistic(0.0);
+      }
     }
   }
 
+  DrivenScrollActivity? _pointerScrollActivity;
+  bool get _animating => (_pointerScrollActivity?.velocity ?? 0.0) > 0.0;
+  int? _lastTarget;
+
+  void _animatedPointerScroll(double delta, double newTargetPixels) {
+    if (_lastTarget == newTargetPixels.round()) {
+      // No need to create another activity for the same destination.
+      return;
+    }
+    _lastTarget = newTargetPixels.round();
+    if (!_animating) {
+      // Initiate a new animation.
+      final double duration = physics.getPointerAnimationDurationFor(delta);
+      _pointerScrollActivity = DrivenScrollActivity(
+        this,
+        from: pixels,
+        to: newTargetPixels,
+        duration: Duration(milliseconds: duration.round()),
+        curve: Curves.easeInOut,
+        vsync: context.vsync,
+      );
+      beginActivity(_pointerScrollActivity);
+    } else {
+      assert(_pointerScrollActivity != null);
+      // We are already animating.
+      // Create a new animation to the new target, incorporating the one already
+      // underway.
+      // Compute the delta-based duration for the new input
+      final double newDuration = physics.getPointerAnimationDurationFor(delta);
+      final double carriedVelocity = 1.3 / (_pointerScrollActivity!.velocity.clamp(-1000, 1000) * 0.42);
+      _pointerScrollActivity = DrivenScrollActivity(
+        this,
+        from: pixels,
+        to: newTargetPixels,
+        duration: Duration(milliseconds: newDuration.round()),
+        curve: Cubic(0.42, carriedVelocity, 0.58, 1.0),
+        vsync: context.vsync,
+      );
+      beginActivity(_pointerScrollActivity);
+    }
+  }
 
   @Deprecated('This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @override

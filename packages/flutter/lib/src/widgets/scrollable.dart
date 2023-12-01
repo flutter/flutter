@@ -935,7 +935,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != position.pixels) {
-      position.pointerScroll(delta);
+      position.pointerScroll(
+        delta,
+        // Trackpad input is already manipulated by the platform into curved
+        // deltas for smooth scrolling.
+        animatePointerScroll: _configuration.animatePointerScroll
+          && event.kind != PointerDeviceKind.trackpad,
+      );
     }
   }
 
