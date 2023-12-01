@@ -78,6 +78,7 @@ void main() {
       contains(
         Event.commandUsageValues(
           workflow: 'bundle',
+          commandHasTerminal: false,
           buildBundleTargetPlatform: 'android-arm',
           buildBundleIsModule: true,
         ),
@@ -99,6 +100,7 @@ void main() {
       contains(
         Event.commandUsageValues(
           workflow: 'bundle',
+          commandHasTerminal: false,
           buildBundleTargetPlatform: 'android-arm',
           buildBundleIsModule: false,
         ),

@@ -124,6 +124,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     return Event.commandUsageValues(
       workflow: commandPath,
+      commandHasTerminal: hasTerminal,
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
     );

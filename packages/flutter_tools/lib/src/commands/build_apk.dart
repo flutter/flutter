@@ -117,6 +117,7 @@ class BuildApkCommand extends BuildSubCommand {
 
     return Event.commandUsageValues(
       workflow: commandPath,
+      commandHasTerminal: hasTerminal,
       buildApkTargetPlatform: stringsArg('target-platform').join(','),
       buildApkBuildMode: buildMode,
       buildApkSplitPerAbi: boolArg('split-per-abi'),

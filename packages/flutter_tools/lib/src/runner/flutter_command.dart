@@ -366,6 +366,9 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
+  /// Indicates if the currenet command running has a terminal attached.
+  bool get hasTerminal => globals.stdio.hasTerminal;
+
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
@@ -1365,7 +1368,7 @@ abstract class FlutterCommand extends Command<void> {
   /// Implementations of [FlutterCommand] can override this getter in order
   /// to add additional parameters in the [Event.commandUsageValues] constructor.
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => 
-    Event.commandUsageValues(workflow: commandPath);
+    Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
 
   /// Runs this command.
   ///
@@ -1629,7 +1632,7 @@ abstract class FlutterCommand extends Command<void> {
       commandPath: commandPath,
       result: commandResult.toString(),
       maxRss: maxRss,
-      commandHasTerminal: globals.stdio.hasTerminal,
+      commandHasTerminal: hasTerminal,
     ));
 
     // Send timing.
@@ -1747,7 +1750,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
 
     if (commandPath != null) {
       Usage.command(commandPath, parameters: CustomDimensions(
-        commandHasTerminal: globals.stdio.hasTerminal,
+        commandHasTerminal: hasTerminal,
       ).merge(await usageValues));
       analytics.send(await unifiedAnalyticsUsageValues(commandPath));
     }

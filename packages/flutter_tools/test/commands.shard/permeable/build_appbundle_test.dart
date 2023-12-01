@@ -54,6 +54,7 @@ void main() {
         fakeAnalytics.sentEvents,
         contains(Event.commandUsageValues(
           workflow: 'appbundle',
+          commandHasTerminal: false,
           buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
           buildAppBundleBuildMode: 'release',
         )),

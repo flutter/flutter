@@ -91,6 +91,7 @@ class BuildBundleCommand extends BuildSubCommand {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
     return Event.commandUsageValues(
       workflow: commandPath,
+      commandHasTerminal: hasTerminal,
       buildBundleTargetPlatform: stringArg('target-platform'),
       buildBundleIsModule: flutterProject.isModule,
     );

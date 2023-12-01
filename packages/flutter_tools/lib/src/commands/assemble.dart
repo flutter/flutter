@@ -156,13 +156,14 @@ class AssembleCommand extends FlutterCommand {
     try {
       return Event.commandUsageValues(
         workflow: commandPath,
+        commandHasTerminal: hasTerminal,
         buildBundleTargetPlatform: _environment.defines[kTargetPlatform],
         buildBundleIsModule: flutterProject.isModule,
       );
     } on Exception {
       // We've failed to send usage.
     }
-    return Event.commandUsageValues(workflow: commandPath);
+    return Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
   }
 
   @override

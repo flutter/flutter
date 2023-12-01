@@ -410,7 +410,7 @@ class PackagesGetCommand extends FlutterCommand {
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
     final FlutterProject? rootProject = _rootProject;
     if (rootProject == null) {
-      return Event.commandUsageValues(workflow: commandPath);
+      return Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
     }
 
     int numberPlugins;
@@ -428,6 +428,7 @@ class PackagesGetCommand extends FlutterCommand {
 
     return Event.commandUsageValues(
       workflow: commandPath,
+      commandHasTerminal: hasTerminal,
       packagesNumberPlugins: numberPlugins,
       packagesProjectModule: rootProject.isModule,
       packagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,

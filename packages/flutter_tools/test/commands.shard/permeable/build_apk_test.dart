@@ -59,6 +59,7 @@ void main() {
         contains(
           Event.commandUsageValues(
             workflow: 'apk',
+            commandHasTerminal: false,
             buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
             buildApkBuildMode: 'release',
             buildApkSplitPerAbi: false,

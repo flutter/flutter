@@ -136,6 +136,7 @@ flutter:
       fakeAnalytics.sentEvents,
       contains(Event.commandUsageValues(
         workflow: 'build/aar',
+        commandHasTerminal: false,
         buildAarProjectType: 'module',
         buildAarTargetPlatform: 'android-arm,android-arm64,android-x64',
       )),

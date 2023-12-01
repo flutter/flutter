@@ -188,6 +188,7 @@ void main() {
       contains(
         Event.commandUsageValues(
           workflow: 'create',
+          commandHasTerminal: false,
           createAndroidLanguage: 'java',
           createIosLanguage: 'objc',
         ),

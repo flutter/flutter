@@ -109,6 +109,7 @@ class BuildAarCommand extends BuildSubCommand {
 
     return Event.commandUsageValues(
       workflow: commandPath,
+      commandHasTerminal: hasTerminal,
       buildAarProjectType: projectType,
       buildAarTargetPlatform: stringsArg('target-platform').join(','),
     );

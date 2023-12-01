@@ -105,6 +105,7 @@ void main() {
       contains(
         Event.commandUsageValues(
           workflow: 'assemble',
+          commandHasTerminal: false,
           buildBundleTargetPlatform: 'darwin',
           buildBundleIsModule: false,
         ),

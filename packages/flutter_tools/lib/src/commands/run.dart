@@ -596,6 +596,7 @@ class RunCommand extends RunCommandBase {
     final String modeName = buildInfo.modeName;
     return analytics.Event.commandUsageValues(
       workflow: commandPath,
+      commandHasTerminal: hasTerminal,
       runIsEmulator: isEmulator,
       runTargetName: deviceType,
       runTargetOsVersion: deviceOsVersion,
