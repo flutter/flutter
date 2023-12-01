@@ -148,7 +148,7 @@ class KeyboardBinding {
       if (_debugLogKeyEvents) {
         print(event.type);
       }
-      if (EngineSemanticsOwner.instance.receiveGlobalEvent(event)) {
+      if (EngineSemantics.instance.receiveGlobalEvent(event)) {
         handler(event);
       }
     }

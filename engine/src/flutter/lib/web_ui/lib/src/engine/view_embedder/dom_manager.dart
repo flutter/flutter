@@ -43,7 +43,7 @@ import 'style_manager.dart';
 ///   +- <style>
 ///
 class DomManager {
-  factory DomManager({required double devicePixelRatio}) {
+  factory DomManager({required int viewId, required double devicePixelRatio}) {
     final DomElement rootElement = domDocument.createElement(DomManager.flutterViewTagName);
     final DomElement platformViewsHost = domDocument.createElement(DomManager.glassPaneTagName);
     final DomShadowRoot renderingHost = _attachShadowRoot(platformViewsHost);
@@ -52,10 +52,20 @@ class DomManager {
     final DomElement semanticsHost = domDocument.createElement(DomManager.semanticsHostTagName);
     final DomElement announcementsHost = createDomElement(DomManager.announcementsHostTagName);
 
-    // Root element children.
+    // This `flt-view-id` attribute does not serve a function in the engine's
+    // operation, but it's useful for debugging, test automation, and DOM
+    // interop use-cases. It allows one to use CSS selectors to find views by
+    // their identifiers.
+    //
+    // Example:
+    //
+    //     document.querySelector('flutter-view[flt-view-id="$viewId"]')
+    rootElement.setAttribute('flt-view-id', viewId);
 
+    // Root element children.
     rootElement.appendChild(platformViewsHost);
     rootElement.appendChild(textEditingHost);
+
     // The semantic host goes last because hit-test order-wise it must be
     // first. If semantics goes under the scene host, platform views will
     // obscure semantic elements.
@@ -70,10 +80,7 @@ class DomManager {
 
     // Rendering host (shadow root) children.
 
-    // TODO(yjbanov): In a multi-view world, we may want to have a separate
-    //                semantics owner for each view.
-    //                https://github.com/flutter/flutter/issues/137445
-    final DomElement accessibilityPlaceholder = EngineSemanticsOwner
+    final DomElement accessibilityPlaceholder = EngineSemantics
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
