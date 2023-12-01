@@ -348,18 +348,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
   final MenuController _controller = MenuController();
-  late final TextEditingController _textEditingController;
   late bool _enableFilter;
   late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
+  TextEditingController? _localTextEditingController;
+  TextEditingController get _textEditingController {
+    return widget.controller ?? (_localTextEditingController ??= TextEditingController());
+  }
 
   @override
   void initState() {
     super.initState();
-    _textEditingController = widget.controller ?? TextEditingController();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
@@ -375,8 +377,24 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   @override
+  void dispose() {
+    if (_localTextEditingController != null) {
+      debugPrint('Disposing of $_textEditingController');
+    }
+    _localTextEditingController?.dispose();
+    _localTextEditingController = null;
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      if (widget.controller != null) {
+        _localTextEditingController?.dispose();
+        _localTextEditingController = null;
+      }
+    }
     if (oldWidget.enableSearch != widget.enableSearch) {
       if (!widget.enableSearch) {
         currentHighlight = null;
@@ -463,7 +481,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   List<Widget> _buildButtons(
     List<DropdownMenuEntry<T>> filteredEntries,
-    TextEditingController textEditingController,
     TextDirection textDirection,
     { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
@@ -519,9 +536,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         trailingIcon: entry.trailingIcon,
         onPressed: entry.enabled
           ? () {
-              textEditingController.text = entry.label;
-              textEditingController.selection =
-                TextSelection.collapsed(offset: textEditingController.text.length);
+              _textEditingController.text = entry.label;
+              _textEditingController.selection =
+                TextSelection.collapsed(offset: _textEditingController.text.length);
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
             }
@@ -581,17 +598,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   @override
-  void dispose() {
-    if (widget.controller == null) {
-      _textEditingController.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, _textEditingController, textDirection, enableScrollToHighlight: false);
+    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, textDirection, enableScrollToHighlight: false);
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
@@ -610,7 +619,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       }
     }
 
-    final List<Widget> menu = _buildButtons(filteredEntries, _textEditingController, textDirection, focusedIndex: currentHighlight);
+    final List<Widget> menu = _buildButtons(filteredEntries, textDirection, focusedIndex: currentHighlight);
 
     final TextStyle? effectiveTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
 
