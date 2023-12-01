@@ -303,7 +303,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/benchmark' + '@' + '431abd149fd76a072f821913c0340137cc755f36',
 
   'src/third_party/googletest':
-   Var('chromium_git') + '/external/github.com/google/googletest' + '@' + '054a986a8513149e8374fc669a5fe40117ca6b41',
+   Var('chromium_git') + '/external/github.com/google/googletest' + '@' + '7f036c5563af7d0329f20e8bb42effb04629f0c0',
 
   'src/third_party/boringssl':
    Var('dart_git') + '/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
