@@ -1113,10 +1113,11 @@ class FlutterPlugin implements Plugin<Project> {
             ) {
                 dependsOn compileTask
                 with compileTask.assets
-                def gradleVersion = Double.parseDouble(project.getGradle().getGradleVersion())
+                def currentGradleVersion = project.getGradle().getGradleVersion()
+
                 // See https://docs.gradle.org/current/javadoc/org/gradle/api/file/ConfigurableFilePermissions.html
                 // See https://github.com/flutter/flutter/pull/50047
-                if (gradleVersion >= 8.3) {
+                if (compareVersionStrings(currentGradleVersion, '8.3') >= 0 ) {
                     filePermissions {
                         user {
                             read = true
@@ -1276,6 +1277,28 @@ class FlutterPlugin implements Plugin<Project> {
         }
         configurePlugins()
         detectLowCompileSdkVersionOrNdkVersion()
+    }
+
+    // compareTo implementation of version strings in the format of ints and periods
+    // Requires non null objects.
+    static int compareVersionStrings(String firstString, String secondString) {
+        List firstVersion = firstString.tokenize('.')
+        List secondVersion = secondString.tokenize('.')
+
+        def commonIndices = Math.min(firstVersion.size(), secondVersion.size())
+
+        for (int i = 0; i < commonIndices; i++) {
+            def firstAtIndex = firstVersion[i].toInteger()
+            def secondAtIndex = secondVersion[i].toInteger()
+
+            if (firstAtIndex != secondAtIndex) {
+                // <=> in groovy delegates to compareTo
+                return firstAtIndex <=> secondAtIndex
+            }
+        }
+
+        // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
+        return firstVersion.size() <=> secondVersion.size()
     }
 }
 
