@@ -1176,7 +1176,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@template flutter.semantics.SemanticsProperties.identifier}
   /// Provides an identifier for the semantics node in native accessibility hierarchy.
   ///
-  /// This value is not exposed to the user of the app.
+  /// This value is not exposed to the users of the app.
   ///
   /// It's usually used for UI testing with tools that work by querying the
   /// native accessibility, like UIAutomator, XCUITest, or Appium.
