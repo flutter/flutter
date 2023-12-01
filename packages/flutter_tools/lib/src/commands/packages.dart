@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
@@ -400,6 +401,36 @@ class PackagesGetCommand extends FlutterCommand {
       commandPackagesNumberPlugins: numberPlugins,
       commandPackagesProjectModule: rootProject.isModule,
       commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
+    );
+  }
+
+  /// The pub packages usage values are incorrect since these are calculated/sent
+  /// before pub get completes. This needs to be performed after dependency resolution.
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return Event.commandUsageValues(workflow: commandPath);
+    }
+
+    int numberPlugins;
+    // Do not send plugin analytics if pub has not run before.
+    final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
+      && rootProject.packageConfigFile.existsSync();
+    if (hasPlugins) {
+      // Do not fail pub get if package config files are invalid before pub has
+      // had a chance to run.
+      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
+      numberPlugins = plugins.length;
+    } else {
+      numberPlugins = 0;
+    }
+
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      packagesNumberPlugins: numberPlugins,
+      packagesProjectModule: rootProject.isModule,
+      packagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
     );
   }
 }
