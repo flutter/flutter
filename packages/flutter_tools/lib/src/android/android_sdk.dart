@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
@@ -41,8 +43,9 @@ final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 class AndroidSdk {
   AndroidSdk(this.directory, {
     Java? java,
+    FileSystem? fileSystem,
   }): _java = java {
-    reinitialize();
+    reinitialize(fileSystem: fileSystem);
   }
 
   /// The Android SDK root directory.
@@ -345,17 +348,23 @@ class AndroidSdk {
   /// 5. Look for the default install location inside the Android SDK:
   ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
   ///    newest.
-  String? getNdkBinaryPath(String binaryName) {
+  String? getNdkBinaryPath(
+    String binaryName, {
+    Platform? platform,
+    Config? config,
+  }) {
+    platform ??= globals.platform;
+    config ??= globals.config;
     Directory? findAndroidNdkHomeDir() {
       String? androidNdkHomeDir;
-      if (globals.config.containsKey('android-ndk')) {
-        androidNdkHomeDir = globals.config.getValue('android-ndk') as String?;
-      } else if (globals.platform.environment.containsKey(kAndroidNdkHome)) {
-        androidNdkHomeDir = globals.platform.environment[kAndroidNdkHome];
-      } else if (globals.platform.environment.containsKey(kAndroidNdkPath)) {
-        androidNdkHomeDir = globals.platform.environment[kAndroidNdkPath];
-      } else if (globals.platform.environment.containsKey(kAndroidNdkRoot)) {
-        androidNdkHomeDir = globals.platform.environment[kAndroidNdkRoot];
+      if (config!.containsKey('android-ndk')) {
+        androidNdkHomeDir = config.getValue('android-ndk') as String?;
+      } else if (platform!.environment.containsKey(kAndroidNdkHome)) {
+        androidNdkHomeDir = platform.environment[kAndroidNdkHome];
+      } else if (platform.environment.containsKey(kAndroidNdkPath)) {
+        androidNdkHomeDir = platform.environment[kAndroidNdkPath];
+      } else if (platform.environment.containsKey(kAndroidNdkRoot)) {
+        androidNdkHomeDir = platform.environment[kAndroidNdkRoot];
       }
       if (androidNdkHomeDir != null) {
         return directory.fileSystem.directory(androidNdkHomeDir);
@@ -394,8 +403,7 @@ class AndroidSdk {
         .childDirectory('toolchains')
         .childDirectory('llvm')
         .childDirectory('prebuilt')
-        .childDirectory(
-            _llvmHostDirectoryName[globals.platform.operatingSystem]!)
+        .childDirectory(_llvmHostDirectoryName[platform.operatingSystem]!)
         .childDirectory('bin')
         .childFile(binaryName);
     if (executable.existsSync()) {
@@ -405,20 +413,38 @@ class AndroidSdk {
     return null;
   }
 
-  String? getNdkClangPath() =>
-      getNdkBinaryPath(globals.platform.isWindows ? 'clang.exe' : 'clang');
+  String? getNdkClangPath({Platform? platform, Config? config}) {
+    platform ??= globals.platform;
+    return getNdkBinaryPath(
+      platform.isWindows ? 'clang.exe' : 'clang',
+      platform: platform,
+      config: config,
+    );
+  }
 
-  String? getNdkArPath() => getNdkBinaryPath(
-      globals.platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar');
+  String? getNdkArPath({Platform? platform, Config? config}) {
+    platform ??= globals.platform;
+    return getNdkBinaryPath(
+      platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar',
+      platform: platform,
+      config: config,
+    );
+  }
 
-  String? getNdkLdPath() =>
-      getNdkBinaryPath(globals.platform.isWindows ? 'ld.lld.exe' : 'ld.lld');
+  String? getNdkLdPath({Platform? platform, Config? config}) {
+    platform ??= globals.platform;
+    return getNdkBinaryPath(
+      platform.isWindows ? 'ld.lld.exe' : 'ld.lld',
+      platform: platform,
+      config: config,
+    );
+  }
 
   /// Sets up various paths used internally.
   ///
   /// This method should be called in a case where the tooling may have updated
   /// SDK artifacts, such as after running a gradle build.
-  void reinitialize() {
+  void reinitialize({FileSystem? fileSystem}) {
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = directory.childDirectory('build-tools');
@@ -481,7 +507,7 @@ class AndroidSdk {
         sdkLevel: platformVersion,
         platformName: platformName,
         buildToolsVersion: buildToolsVersion,
-        fileSystem: globals.fs,
+        fileSystem: fileSystem ?? globals.fs,
       );
     }).whereType<AndroidSdkVersion>().toList();
 
