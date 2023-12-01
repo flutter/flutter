@@ -369,9 +369,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
     if (index != -1) {
-      _textEditingController.text = filteredEntries[index].label;
-      _textEditingController.selection =
-          TextSelection.collapsed(offset: _textEditingController.text.length);
+      _textEditingController.value = TextEditingValue(
+        text: filteredEntries[index].label,
+        selection: TextSelection.collapsed(offset: _textEditingController.text.length),
+      );
     }
     refreshLeadingPadding();
   }
@@ -412,9 +413,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.initialSelection != widget.initialSelection) {
       final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
       if (index != -1) {
-        _textEditingController.text = filteredEntries[index].label;
-        _textEditingController.selection =
-            TextSelection.collapsed(offset: _textEditingController.text.length);
+        _textEditingController.value = TextEditingValue(
+          text: filteredEntries[index].label,
+          selection: TextSelection.collapsed(offset: _textEditingController.text.length),
+        );
       }
     }
   }
@@ -536,9 +538,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         trailingIcon: entry.trailingIcon,
         onPressed: entry.enabled
           ? () {
-              _textEditingController.text = entry.label;
-              _textEditingController.selection =
-                TextSelection.collapsed(offset: _textEditingController.text.length);
+              _textEditingController.value = TextEditingValue(
+                text: entry.label,
+                selection: TextSelection.collapsed(offset: _textEditingController.text.length),
+              );
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
             }
@@ -563,9 +566,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
     }
     final String currentLabel = filteredEntries[currentHighlight!].label;
-    _textEditingController.text = currentLabel;
-    _textEditingController.selection =
-      TextSelection.collapsed(offset: _textEditingController.text.length);
+    _textEditingController.value = TextEditingValue(
+      text: currentLabel,
+      selection: TextSelection.collapsed(offset: _textEditingController.text.length),
+    );
   });
 
   void handleDownKeyInvoke(_) => setState(() {
@@ -579,9 +583,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
     }
     final String currentLabel = filteredEntries[currentHighlight!].label;
-    _textEditingController.text = currentLabel;
-    _textEditingController.selection =
-      TextSelection.collapsed(offset: _textEditingController.text.length);
+    _textEditingController.value = TextEditingValue(
+      text: currentLabel,
+      selection: TextSelection.collapsed(offset: _textEditingController.text.length),
+    );
   });
 
   void handlePressed(MenuController controller) {
@@ -679,9 +684,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               if (currentHighlight != null) {
                 final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
                 if (entry.enabled) {
-                  _textEditingController.text = entry.label;
-                  _textEditingController.selection =
-                      TextSelection.collapsed(offset: _textEditingController.text.length);
+                  _textEditingController.value = TextEditingValue(
+                    text: entry.label,
+                    selection: TextSelection.collapsed(offset: _textEditingController.text.length),
+                  );
                   widget.onSelected?.call(entry.value);
                 }
               } else {
