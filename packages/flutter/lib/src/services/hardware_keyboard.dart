@@ -996,8 +996,7 @@ class KeyEventManager {
   /// useful to recognize the widget tree's structure. `FallbackDemo` is an
   /// example of using them in an app.
   ///
-  /// ** See code in
-  /// examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
+  /// ** See code in examples/api/lib/widgets/hardware_keyboard/key_event_manager.0.dart **
   /// {@end-tool}
   ///
   /// See also:
