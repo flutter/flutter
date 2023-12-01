@@ -1174,7 +1174,7 @@ class SemanticsProperties extends DiagnosticableTree {
   final int? currentValueLength;
 
   /// {@template flutter.semantics.SemanticsProperties.identifier}
-  /// Provides an identifier for the widget in native accessibility hierarchy.
+  /// Provides an identifier for the semantics node in native accessibility hierarchy.
   ///
   /// This value is not exposed to the user of the app.
   ///
