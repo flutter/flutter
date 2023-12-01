@@ -25,6 +25,9 @@
 
 #include "flutter/fml/macros.h"
 
+namespace fuchsia {
+namespace math {
+
 inline bool operator==(const fuchsia::math::SizeU& a,
                        const fuchsia::math::SizeU& b) {
   return a.width == b.width && a.height == b.height;
@@ -55,6 +58,20 @@ inline bool operator==(const fuchsia::math::RectF& a,
                        const fuchsia::math::RectF& b) {
   return a.x == b.x && a.y == b.y && a.width == b.width && a.height == b.height;
 }
+
+inline bool operator==(const std::optional<fuchsia::math::Rect>& a,
+                       const std::optional<fuchsia::math::Rect>& b) {
+  if (a.has_value() != b.has_value()) {
+    return false;
+  }
+  if (!a.has_value()) {
+  }
+  return a.value() == b.value();
+}
+
+}  // namespace math
+
+namespace ui::composition {
 
 inline bool operator==(const fuchsia::ui::composition::ContentId& a,
                        const fuchsia::ui::composition::ContentId& b) {
@@ -125,15 +142,8 @@ inline bool operator==(
   return true;
 }
 
-inline bool operator==(const std::optional<fuchsia::math::Rect>& a,
-                       const std::optional<fuchsia::math::Rect>& b) {
-  if (a.has_value() != b.has_value()) {
-    return false;
-  }
-  if (!a.has_value()) {
-  }
-  return a.value() == b.value();
-}
+}  // namespace ui::composition
+}  // namespace fuchsia
 
 namespace flutter_runner::testing {
 
