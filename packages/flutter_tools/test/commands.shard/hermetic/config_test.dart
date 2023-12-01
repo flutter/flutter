@@ -5,7 +5,6 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
@@ -18,11 +17,10 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart' as fakes;
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -31,29 +29,23 @@ void main() {
   late FakeAndroidSdk fakeAndroidSdk;
   late FakeFlutterVersion fakeFlutterVersion;
   late TestUsage testUsage;
-  late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
     Cache.disableLocking();
   });
 
   setUp(() {
-    fakeJava = fakes.FakeJava();
+    fakeJava = FakeJava();
     fakeAndroidStudio = FakeAndroidStudio();
     fakeAndroidSdk = FakeAndroidSdk();
     fakeFlutterVersion = FakeFlutterVersion();
     testUsage = TestUsage();
-    fakeAnalytics = getInitializedFakeAnalyticsInstance(
-      fs: MemoryFileSystem.test(),
-      fakeFlutterVersion: fakes.FakeFlutterVersion(),
-    );
   });
 
   void verifyNoAnalytics() {
     expect(testUsage.commands, isEmpty);
     expect(testUsage.events, isEmpty);
     expect(testUsage.timings, isEmpty);
-    expect(fakeAnalytics.sentEvents, isEmpty);
   }
 
   group('config', () {
@@ -271,7 +263,6 @@ void main() {
       ]));
       expect(testUsage.commands, isEmpty);
       expect(testUsage.timings, isEmpty);
-      expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });
@@ -294,7 +285,6 @@ void main() {
       ]));
       expect(testUsage.commands, isEmpty);
       expect(testUsage.timings, isEmpty);
-      expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{
       Usage: () => testUsage,
     });

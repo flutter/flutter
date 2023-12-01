@@ -41,7 +41,6 @@ import 'package:native_assets_cli/native_assets_cli.dart'
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -960,11 +959,8 @@ void main() {
     expect(event.parameters?.hotEventTargetPlatform, getNameForTargetPlatform(TargetPlatform.android_arm));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
 
-    // Parse out the event of interest since we may have timing events with
-    // the new analytics package
-    final List<Event> newEventList = fakeAnalytics.sentEvents.where((Event e) => e.eventName == DashEvent.hotRunnerInfo).toList();
-    expect(newEventList, hasLength(1));
-    final Event newEvent = newEventList.first;
+
+    final Event newEvent = fakeAnalytics.sentEvents.first;
     expect(newEvent.eventName.label, 'hot_runner_info');
     expect(newEvent.eventData['label'], 'restart');
     expect(newEvent.eventData['targetPlatform'], getNameForTargetPlatform(TargetPlatform.android_arm));

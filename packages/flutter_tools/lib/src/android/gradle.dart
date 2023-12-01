@@ -490,13 +490,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       status.stop();
     }
 
-    final Duration elapsedDuration = sw.elapsed;
-    _usage.sendTiming('build', 'gradle', elapsedDuration);
-    _analytics.send(Event.timing(
-      workflow: 'build',
-      variableName: 'gradle',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
+    _usage.sendTiming('build', 'gradle', sw.elapsed);
 
     if (exitCode != 0) {
       if (detectedGradleError == null) {
@@ -763,13 +757,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } finally {
       status.stop();
     }
-    final Duration elapsedDuration = sw.elapsed;
-    _usage.sendTiming('build', 'gradle-aar', elapsedDuration);
-    _analytics.send(Event.timing(
-      workflow: 'build',
-      variableName: 'gradle-aar',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
+    _usage.sendTiming('build', 'gradle-aar', sw.elapsed);
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
@@ -804,13 +792,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       project: project,
     );
 
-    final Duration elapsedDuration = sw.elapsed;
-    _usage.sendTiming('print', 'android build variants', elapsedDuration);
-    _analytics.send(Event.timing(
-      workflow: 'print',
-      variableName: 'android build variants',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
+    _usage.sendTiming('print', 'android build variants', sw.elapsed);
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
@@ -846,13 +828,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       options: <String>['-q', '-PoutputPath=$outputPath'],
       project: project,
     );
-    final Duration elapsedDuration = sw.elapsed;
-    _usage.sendTiming('outputs', 'app link settings', elapsedDuration);
-    _analytics.send(Event.timing(
-      workflow: 'outputs',
-      variableName: 'app link settings',
-      elapsedMilliseconds: elapsedDuration.inMilliseconds,
-    ));
+    _usage.sendTiming('outputs', 'app link settings', sw.elapsed);
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);

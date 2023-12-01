@@ -693,13 +693,6 @@ void main() {
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
     ]);
-    expect(fakeAnalytics.sentEvents, contains(
-      Event.timing(
-        workflow: 'hot',
-        variableName: 'web-incremental-restart',
-        elapsedMilliseconds: 0,
-      ),
-    ));
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
     Analytics: () => fakeAnalytics,
@@ -786,13 +779,6 @@ void main() {
     expect(testUsage.timings, const <TestTimingEvent>[
       TestTimingEvent('hot', 'web-incremental-restart', Duration.zero),
     ]);
-    expect(fakeAnalytics.sentEvents, contains(
-      Event.timing(
-        workflow: 'hot',
-        variableName: 'web-incremental-restart',
-        elapsedMilliseconds: 0,
-      ),
-    ));
   }, overrides: <Type, Generator>{
     Usage: () => testUsage,
     Analytics: () => fakeAnalytics,
