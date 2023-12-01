@@ -199,17 +199,17 @@
 
   "lookUpButtonLabel": "Look Up",
   "@lookUpButtonLabel": {
-    "description": "The label for the Look Up button and menu items on iOS."
+    "description": "The label for the Look Up button and menu items."
   },
 
   "searchWebButtonLabel": "Search Web",
   "@searchWebButtonLabel": {
-    "description": "The label for the Search Web button and menu items on iOS."
+    "description": "The label for the Search Web button and menu items."
   },
 
-  "shareButtonLabel": "Share...",
+  "shareButtonLabel": "Share",
   "@shareButtonLabel": {
-    "description": "The label for the Share button and menu items on iOS."
+    "description": "The label for the Share button and menu items."
   },
 
   "okButtonLabel": "OK",

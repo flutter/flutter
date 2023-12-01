@@ -7879,7 +7879,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'No items selected';
 
   @override
-  String get shareButtonLabel => 'Share...';
+  String get shareButtonLabel => 'Share';
 
   @override
   String get showAccountsLabel => 'Show accounts';
@@ -7941,6 +7941,9 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -8149,6 +8152,9 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   });
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get lookUpButtonLabel => 'Look up';
 
   @override
@@ -8247,6 +8253,9 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -8349,6 +8358,9 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   });
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get lookUpButtonLabel => 'Look up';
 
   @override
@@ -8444,6 +8456,9 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
@@ -8543,6 +8558,9 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   });
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get lookUpButtonLabel => 'Look up';
 
   @override
@@ -8638,6 +8656,9 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get lookUpButtonLabel => 'Look up';
