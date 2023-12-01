@@ -192,9 +192,18 @@ class CanvasKitRenderer implements Renderer {
   }) => CkImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
 
   @override
-  ui.ImageFilter composeImageFilters({required ui.ImageFilter outer, required ui.ImageFilter inner}) {
-  // TODO(ferhat): add implementation
-    throw UnimplementedError('ImageFilter.compose not implemented for CanvasKit.');
+  ui.ImageFilter composeImageFilters(
+      {required ui.ImageFilter outer, required ui.ImageFilter inner}) {
+    if (outer is EngineColorFilter) {
+      final CkColorFilter colorFilter = createCkColorFilter(outer)!;
+      outer = CkColorFilterImageFilter(colorFilter: colorFilter);
+    }
+    if (inner is EngineColorFilter) {
+      final CkColorFilter colorFilter = createCkColorFilter(inner)!;
+      inner = CkColorFilterImageFilter(colorFilter: colorFilter);
+    }
+    return CkImageFilter.compose(
+          outer: outer as CkImageFilter, inner: inner as CkImageFilter);
   }
 
   @override
