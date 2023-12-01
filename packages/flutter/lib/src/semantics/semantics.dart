@@ -1181,7 +1181,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// It's usually used for UI testing with tools that work by querying the
   /// native accessibility, like UIAutomator, XCUITest, or Appium.
   ///
-  /// On Android, this will call `AccessibilityNodeInfo.setViewIdResourceName`.
+  /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
   ///
   /// On iOS, this will set `UIAccessibilityElement.accessibilityIdentifier`.
