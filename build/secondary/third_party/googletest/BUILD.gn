@@ -21,41 +21,12 @@ static_library("gtest") {
     "googletest/include/gtest/gtest-spi.h",
     "googletest/include/gtest/gtest.h",
   ]
-  sources = [
-    "googletest/include/gtest/gtest-death-test.h",
-    "googletest/include/gtest/gtest-message.h",
-    "googletest/include/gtest/gtest-param-test.h",
-    "googletest/include/gtest/gtest-printers.h",
-    "googletest/include/gtest/gtest-test-part.h",
-    "googletest/include/gtest/gtest-typed-test.h",
-    "googletest/include/gtest/gtest_pred_impl.h",
-    "googletest/include/gtest/gtest_prod.h",
-    "googletest/include/gtest/internal/custom/gtest-port.h",
-    "googletest/include/gtest/internal/custom/gtest-printers.h",
-    "googletest/include/gtest/internal/custom/gtest.h",
-    "googletest/include/gtest/internal/gtest-death-test-internal.h",
-    "googletest/include/gtest/internal/gtest-filepath.h",
-    "googletest/include/gtest/internal/gtest-internal.h",
-    "googletest/include/gtest/internal/gtest-linked_ptr.h",
-    "googletest/include/gtest/internal/gtest-param-util-generated.h",
-    "googletest/include/gtest/internal/gtest-param-util.h",
-    "googletest/include/gtest/internal/gtest-port-arch.h",
-    "googletest/include/gtest/internal/gtest-port.h",
-    "googletest/include/gtest/internal/gtest-string.h",
-    "googletest/include/gtest/internal/gtest-tuple.h",
-    "googletest/include/gtest/internal/gtest-type-util.h",
-    "googletest/src/gtest-all.cc",
-    "googletest/src/gtest-death-test.cc",
-    "googletest/src/gtest-filepath.cc",
-    "googletest/src/gtest-internal-inl.h",
-    "googletest/src/gtest-matchers.cc",
-    "googletest/src/gtest-port.cc",
-    "googletest/src/gtest-printers.cc",
-    "googletest/src/gtest-test-part.cc",
-    "googletest/src/gtest-typed-test.cc",
-    "googletest/src/gtest.cc",
-  ]
-  sources -= [ "googletest/src/gtest-all.cc" ]
+
+  # Only add the "*-all.cc" files (and no headers) to improve maintainability
+  # from upstream refactoring. The "*-all.cc" files include the respective
+  # source files.
+  sources = [ "googletest/src/gtest-all.cc" ]
+
   public_configs = [ ":gtest_config" ]
   configs += [ ":gtest_private_config" ]
 
@@ -217,31 +188,7 @@ config("gmock_config") {
 static_library("gmock") {
   testonly = true
   public = [ "googlemock/include/gmock/gmock.h" ]
-  sources = [
-    "googlemock/include/gmock/gmock-actions.h",
-    "googlemock/include/gmock/gmock-cardinalities.h",
-    "googlemock/include/gmock/gmock-generated-actions.h",
-    "googlemock/include/gmock/gmock-generated-function-mockers.h",
-    "googlemock/include/gmock/gmock-generated-matchers.h",
-    "googlemock/include/gmock/gmock-generated-nice-strict.h",
-    "googlemock/include/gmock/gmock-matchers.h",
-    "googlemock/include/gmock/gmock-more-actions.h",
-    "googlemock/include/gmock/gmock-more-matchers.h",
-    "googlemock/include/gmock/gmock-spec-builders.h",
-    "googlemock/include/gmock/internal/custom/gmock-generated-actions.h",
-    "googlemock/include/gmock/internal/custom/gmock-matchers.h",
-    "googlemock/include/gmock/internal/custom/gmock-port.h",
-    "googlemock/include/gmock/internal/gmock-generated-internal-utils.h",
-    "googlemock/include/gmock/internal/gmock-internal-utils.h",
-    "googlemock/include/gmock/internal/gmock-port.h",
-    "googlemock/src/gmock-all.cc",
-    "googlemock/src/gmock-cardinalities.cc",
-    "googlemock/src/gmock-internal-utils.cc",
-    "googlemock/src/gmock-matchers.cc",
-    "googlemock/src/gmock-spec-builders.cc",
-    "googlemock/src/gmock.cc",
-  ]
-  sources -= [ "googlemock/src/gmock-all.cc" ]
+  sources = [ "googlemock/src/gmock-all.cc" ]
   public_configs = [ ":gmock_config" ]
   configs += [ ":gmock_private_config" ]
   deps = [ ":gtest" ]
