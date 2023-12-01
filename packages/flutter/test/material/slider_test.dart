@@ -3396,16 +3396,15 @@ void main() {
     expect(dragStarted, false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/139281
   testWidgetsWithLeakTracking('Slider does not request focus when the value is changed', (WidgetTester tester) async {
     double value = 0.5;
-    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
           child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             return Slider(
                 value: value,
-                focusNode: focusNode,
                 onChanged: (double newValue) {
                   setState(() {
                     value = newValue;
@@ -3416,14 +3415,18 @@ void main() {
         ),
       ),
     ));
-    // Initiallly, the slider does not have focus whe enabled and not tapped.
+    // Initially, the slider does not have focus whe enabled and not tapped.
+    await tester.pumpAndSettle();
     expect(value, equals(0.5));
+    // Get FocusNode from the state of the slider to include auto-generated FocusNode.
+    // ignore: avoid_dynamic_calls, invalid_assignment
+    final FocusNode focusNode = (tester.firstState(find.byType(Slider)) as dynamic).focusNode;
     // The slider does not have focus.
     expect(focusNode.hasFocus, false);
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
     final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
     // Tap on the slider to change the value.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture();
     await gesture.addPointer();
     await gesture.down(tapLocation);
     await gesture.up();
@@ -3433,6 +3436,7 @@ void main() {
     expect(focusNode.hasFocus, false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/139281
   testWidgetsWithLeakTracking('Overlay remains when Slider thumb is interacted', (WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
