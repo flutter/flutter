@@ -280,6 +280,11 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return super.computeDryBaseline(_additionalConstraints.enforce(constraints), baseline);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
@@ -293,11 +298,8 @@ class RenderConstrainedBox extends RenderProxyBox {
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    if (child != null) {
-      return child!.getDryLayout(_additionalConstraints.enforce(constraints));
-    } else {
-      return _additionalConstraints.enforce(constraints).constrain(Size.zero);
-    }
+    return child?.getDryLayout(_additionalConstraints.enforce(constraints))
+        ?? _additionalConstraints.enforce(constraints).constrain(Size.zero);
   }
 
   @override

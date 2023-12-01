@@ -894,6 +894,9 @@ mixin _RenderTheaterMixin on RenderBox {
   }
 
   @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+
+  @override
   bool get sizedByParent => true;
 
   @override
@@ -1161,11 +1164,11 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    RenderBox? child = _firstOnstageChild;
     double? baselineOffset;
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
     final Alignment alignment = theater._resolvedAlignment;
     final Size size = computeDryLayout(constraints);
+    RenderBox? child = _firstOnstageChild;
     while (child != null) {
       final StackParentData childParentData = child.parentData! as StackParentData;
       final double? childBaseline;
@@ -2206,11 +2209,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
       // to performLayout a second time.
       parent.invokeLayoutCallback((BoxConstraints constraints) { markNeedsLayout(); });
     }
-  }
-
-  @override
-  void performResize() {
-    size = constraints.biggest;
   }
 
   bool _debugMutationsLocked = false;

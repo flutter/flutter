@@ -2265,10 +2265,12 @@ abstract class RenderBox extends RenderObject {
   /// computation, override [computeDistanceToActualBaseline].
   double? getDistanceToBaseline(TextBaseline baseline, { bool onlyReal = false }) {
     assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
-    assert(!debugNeedsLayout);
-    assert(owner!.debugDoingLayout || owner!.debugDoingPaint);
-    assert(!owner!.debugDoingLayout || (RenderObject.debugActiveLayout == parent && parent!.debugDoingThisLayout));
-    assert(!owner!.debugDoingPaint || (RenderObject.debugActivePaint == parent && parent!.debugDoingThisPaint) || (RenderObject.debugActivePaint == this && debugDoingThisPaint));
+    assert(!debugNeedsLayout || RenderObject.debugCheckingIntrinsics);
+    assert(RenderObject.debugCheckingIntrinsics || switch (owner!) {
+      PipelineOwner(debugDoingLayout: true) => RenderObject.debugActiveLayout == parent && parent!.debugDoingThisLayout,
+      PipelineOwner(debugDoingPaint: true) => RenderObject.debugActivePaint == parent && parent!.debugDoingThisPaint || (RenderObject.debugActivePaint == this && debugDoingThisPaint),
+      PipelineOwner() => false,
+    });
     assert(_debugSetDoingBaseline(true));
     final double? result;
     try {
@@ -2463,16 +2465,6 @@ abstract class RenderBox extends RenderObject {
           ]);
         }
 
-        final List<DiagnosticsNode> messages = <DiagnosticsNode>[
-          ErrorDescription(
-            'The constraints used were $constraints.',
-          ),
-          ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
-          )
-        ];
-
         // Checking that getDryLayout computes the same size.
         _dryLayoutCalculationValid = true;
         RenderObject.debugCheckingIntrinsics = true;
@@ -2489,87 +2481,94 @@ abstract class RenderBox extends RenderObject {
               'The size computed in ${sizedByParent ? 'performResize' : 'performLayout'} '
               'is $size, which is different from $dryLayoutSize, which was computed by computeDryLayout.',
             ),
-            ...messages,
+            ErrorDescription(
+              'The constraints used were $constraints.',
+            ),
+            ErrorHint(
+              'If you are not writing your own RenderBox subclass, then this is not\n'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            )
           ]);
         }
-        final bool shouldCheckBaselines = !debugNeedsLayout
-          && (!owner!.debugDoingLayout || (RenderObject.debugActiveLayout == parent && parent!.debugDoingThisLayout));
-        if (shouldCheckBaselines) {
-          _dryLayoutCalculationValid = true;
-          RenderObject.debugCheckingIntrinsics = true;
-          final List<double?> baselineLocations;
-          try {
-            baselineLocations = TextBaseline.values.map((TextBaseline baseline) => getDryBaseline(constraints, baseline)).toList(growable: false);
-          } finally {
-            RenderObject.debugCheckingIntrinsics = false;
-          }
-          if (_dryLayoutCalculationValid) {
-            for (final TextBaseline baseline in TextBaseline.values) {
-              final double? dryBaseline = baselineLocations[baseline.index];
-              final double? realBaseline = getDistanceToBaseline(baseline, onlyReal: true);
-              if (dryBaseline == realBaseline) {
-                continue;
-              }
-              if ((dryBaseline == null) != (realBaseline == null)) {
-                final (String methodReturnedNull, String methodReturnedNonNull) = dryBaseline == null
-                  ? ('computeDryBaseline', 'computeDistanceToActualBaseline')
-                  : ('computeDistanceToActualBaseline', 'computeDryBaseline');
-                throw FlutterError.fromParts(<DiagnosticsNode>[
-                  ErrorSummary(
-                    'The $baseline location returned by ${objectRuntimeType(this, 'RenderBox')}.computeDistanceToActualBaseline '
-                    'differs from the baseline location computed by computeDryBaseline.'
-                  ),
-                  ErrorDescription(
-                    'The $methodReturnedNull method returned null while the $methodReturnedNonNull returned a non-null $baseline of ${dryBaseline ?? realBaseline}. '
-                    'Did you forget to implement $methodReturnedNull for ${objectRuntimeType(this, 'RenderBox')}?'
-                  ),
-                  ...messages,
-                ]);
-              } else {
-                throw FlutterError.fromParts(<DiagnosticsNode>[
-                  ErrorSummary(
-                    'The $baseline location returned by ${objectRuntimeType(this, 'RenderBox')}.computeDistanceToActualBaseline '
-                    'differs from the baseline location computed by computeDryBaseline.'
-                  ),
-                  DiagnosticsProperty<RenderObject>(
-                    'The RenderBox was',
-                    this,
-                    style: DiagnosticsTreeStyle.errorProperty,
-                  ),
-                  ErrorDescription(
-                    'The computeDryBaseline method returned $dryBaseline while the computeDistanceToActualBaseline method returned $realBaseline. '
-                    'Consider checking the implementations of:\n'
-                    ' * computeDistanceToActualBaseline\n'
-                    ' * computeDryBaseline\n'
-                    ' * performLayout\n'
-                    'methods of the ${objectRuntimeType(this, 'RenderBox')} class and make sure they are consistent.'
-                  ),
-                  ...messages,
-                ]);
-              }
-            }
-
-          }
-        }
-
       }
       return true;
     }());
   }
 
-  void _debugCheckComputeDryBaseline() {
+  // Some dry calculations of this [RenderBox] (including intrinsics, dry size and dry
+  // baseline) should only be checked
+  void _debugVerifyDryCalculations() {
     assert(() {
-      if (debugCheckIntrinsicSizes) {
-        final List<DiagnosticsNode> messages = <DiagnosticsNode>[
-          ErrorDescription(
-            'The constraints used were $constraints.',
-          ),
-          ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
-          )
-        ];
+      if (!debugCheckIntrinsicSizes) {
+        return true;
+      }
+      final List<DiagnosticsNode> messages = <DiagnosticsNode>[
+        ErrorDescription(
+          'The constraints used were $constraints.',
+        ),
+        ErrorHint(
+          'If you are not writing your own RenderBox subclass, then this is not\n'
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+        )
+      ];
 
+      // Only perform the baseline checks after performLayout. Currently this
+      // method is also run in the RenderBox.size setter and after
+      // performResize, and it's not safe to access the baseline location in
+      // those two places since it may depend on the child layout.
+      for (final TextBaseline baseline in TextBaseline.values) {
+        _dryLayoutCalculationValid = true;
+        RenderObject.debugCheckingIntrinsics = true;
+        final double? dryBaseline;
+        final double? realBaseline;
+        try {
+          dryBaseline = getDryBaseline(constraints, baseline);
+          realBaseline = getDistanceToBaseline(baseline, onlyReal: true);
+        } finally {
+          RenderObject.debugCheckingIntrinsics = false;
+        }
+        if (dryBaseline == realBaseline || !_dryLayoutCalculationValid) {
+          continue;
+        }
+        if ((dryBaseline == null) != (realBaseline == null)) {
+          final (String methodReturnedNull, String methodReturnedNonNull) = dryBaseline == null
+            ? ('computeDryBaseline', 'computeDistanceToActualBaseline')
+            : ('computeDistanceToActualBaseline', 'computeDryBaseline');
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'The $baseline location returned by ${objectRuntimeType(this, 'RenderBox')}.computeDistanceToActualBaseline '
+              'differs from the baseline location computed by computeDryBaseline.'
+            ),
+            ErrorDescription(
+              'The $methodReturnedNull method returned null while the $methodReturnedNonNull returned a non-null $baseline of ${dryBaseline ?? realBaseline}. '
+              'Did you forget to implement $methodReturnedNull for ${objectRuntimeType(this, 'RenderBox')}?'
+            ),
+            ...messages,
+          ]);
+        } else {
+          //print(toStringDeep());
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'The $baseline location returned by ${objectRuntimeType(this, 'RenderBox')}.computeDistanceToActualBaseline '
+              'differs from the baseline location computed by computeDryBaseline.'
+            ),
+            DiagnosticsProperty<RenderObject>(
+              'The RenderBox was',
+              this,
+              //style: DiagnosticsTreeStyle.errorProperty,
+            ),
+            ErrorDescription(
+              'The computeDryBaseline method returned $dryBaseline,\n'
+              'while the computeDistanceToActualBaseline method returned $realBaseline.\n'
+              'Consider checking the implementations of:\n'
+              ' * computeDistanceToActualBaseline\n'
+              ' * computeDryBaseline\n'
+              ' * performLayout\n'
+              'methods of the ${objectRuntimeType(this, 'RenderBox')} class and make sure they are consistent.'
+            ),
+            ...messages,
+          ]);
+        }
       }
       return true;
     }());
@@ -2587,6 +2586,15 @@ abstract class RenderBox extends RenderObject {
       return;
     }
     super.markNeedsLayout();
+  }
+
+  @override
+  void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    super.layout(constraints, parentUsesSize: parentUsesSize);
+    assert(() {
+      _debugVerifyDryCalculations();
+      return true;
+    }());
   }
 
   /// {@macro flutter.rendering.RenderObject.performResize}

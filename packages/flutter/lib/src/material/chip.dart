@@ -1664,7 +1664,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of the label.
-    return label!.getDistanceToActualBaseline(baseline);
+    final double? labelBaseline = label?.getDistanceToActualBaseline(baseline);
+    return labelBaseline == null ? null : labelBaseline + _boxParentData(label!).offset.dy;
   }
 
   (Size, BoxConstraints) _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {

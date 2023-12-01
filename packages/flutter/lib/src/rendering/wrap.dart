@@ -12,7 +12,7 @@ import 'layout_helper.dart';
 import 'object.dart';
 
 // The same as Size, but instead of describing a 2D size along the x-axis and the
-// y-axis, an _AxisSize's width is along the main axis and its height along the
+// y-axis, an _AxisSize's width is along the main axis and its height is along the
 // cross axis.
 typedef _AxisSize = Size;
 
@@ -59,6 +59,7 @@ enum WrapAlignment {
       _ => this,
   };
 
+  // Returns (leadingSpace, betweenSpace).
   (double, double) _distributeSpace(double freeSpace, double itemSpacing, int itemCount) {
     assert(itemCount > 0);
     return switch (this) {
