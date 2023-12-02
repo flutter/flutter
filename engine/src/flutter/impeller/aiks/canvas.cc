@@ -287,18 +287,6 @@ void Canvas::DrawRRect(Rect rect, Point corner_radii, const Paint& paint) {
 }
 
 void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
-  if (paint.style == Paint::Style::kStroke) {
-    auto circle_path =
-        PathBuilder{}
-            .AddCircle(center, radius)
-            .SetConvexity(Convexity::kConvex)
-            .SetBounds(Rect::MakeLTRB(center.x - radius, center.y - radius,
-                                      center.x + radius, center.y + radius))
-            .TakePath();
-    DrawPath(circle_path, paint);
-    return;
-  }
-
   Size half_size(radius, radius);
   if (AttemptDrawBlurredRRect(
           Rect::MakeOriginSize(center - half_size, half_size * 2), radius,
@@ -310,8 +298,12 @@ void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetClipDepth(GetClipDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(
-      paint.CreateContentsForGeometry(Geometry::MakeCircle(center, radius))));
+  auto geometry =
+      paint.style == Paint::Style::kStroke
+          ? Geometry::MakeStrokedCircle(center, radius, paint.stroke_width)
+          : Geometry::MakeCircle(center, radius);
+  entity.SetContents(
+      paint.WithFilters(paint.CreateContentsForGeometry(geometry)));
 
   GetCurrentPass().AddEntity(entity);
 }
