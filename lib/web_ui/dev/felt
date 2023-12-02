@@ -14,6 +14,25 @@ ENGINE_SRC_DIR="$(dirname $(dirname $(dirname $(dirname ${FELT_DIR}))))"
 FLUTTER_DIR="${ENGINE_SRC_DIR}/flutter"
 SDK_PREBUILTS_DIR="${FLUTTER_DIR}/prebuilts"
 
+# If set to 0 (the default) will run felt non-incrementally. For example, it will
+# run pub get.
+# If set to 1 (via the -i option) will run felt incrementally.
+INCREMENTAL=0
+
+# All arguments passed to felt, except -i, if any.
+ARGS=""
+for arg in "$@" ; do
+  case "$arg" in
+    -i)
+      INCREMENTAL=1
+      shift
+      ;;
+    *)
+      ARGS="${ARGS} ${arg}"
+      ;;
+  esac
+done
+
 if [ -z "${DART_SDK_DIR}" ]
 then
   if [[ $KERNEL_NAME == *"Darwin"* ]]
@@ -50,7 +69,7 @@ then
 
 else
   if [ ! -d "$DART_SDK_DIR" ]
-  then 
+  then
     echo "Explicitly specified dart SDK not found at ${DART_SDK_DIR}."
     exit 1
   fi
@@ -84,47 +103,10 @@ install_deps() {
   (cd "$WEB_UI_DIR"; silent_on_success $DART_PATH pub get)
 }
 
-if [[ $KERNEL_NAME == *"Darwin"* ]]
+cd $WEB_UI_DIR
+if [[ "$INCREMENTAL" == "0" ]]
 then
-  echo "Running on MacOS. Will check the file and user limits."
-  # Disable exit if the commands fails. We want to give more actionable
-  # error message.
-  set +e
-  ULIMIT_FILES=`ulimit -n`
-  # Increase the file limit if it is low. Note that these limits are changed
-  # only for this script (for this shell). After felt execution is completed
-  # no change is required to reset the original shell.
-  if [[ $ULIMIT_FILES -lt 50000 ]]
-  then
-    echo "File limits too low increasing the file limits"
-    # Get the max file limit.
-    MAX_ULIMIT_FILES=`launchctl limit maxfiles | sed -e 's/^[[:space:]]*//' | sed 's/ \{1,\}/ /g' | cut -d' ' -f2`
-    if [[ $MAX_ULIMIT_FILES -lt 50000 ]]
-    then
-      # Increase the maximum file limit.
-      sudo launchctl limit maxfiles 50000 200000
-    fi
-    ERROR=$(ulimit -n 50000 2>&1 >/dev/null)
-    if [[ ! -z $ERROR ]]
-    then
-      echo "Problem changing the file limit. Please try to reboot to use the higher limits. error: \n$ERROR" 1>&2
-    fi
-  fi
-  ULIMIT_USER=`ulimit -u`
-  # Increase the hard user limit if it is lower than 2048.
-  if [[ $ULIMIT_USER -lt 4096 ]]
-  then
-    echo "User limits too low increasing the user limits"
-    ERROR2=$(ulimit -u 4096 2>&1 >/dev/null)
-    if [[ ! -z $ERROR2 ]]
-    then
-      echo "Problem changing the user limit. Please try to reboot to use the higher limits. error: \n$ERROR2" 1>&2
-    fi
-  fi
-  # Set the value back to exit on non zero results.
-  set -e
+  install_deps
 fi
 
-cd $WEB_UI_DIR
-install_deps
-(cd $WEB_UI_DIR && $DART_SDK_DIR/bin/dart run $FELT_DEBUG_FLAGS dev/felt.dart $@)
+(cd $WEB_UI_DIR && $DART_SDK_DIR/bin/dart run $FELT_DEBUG_FLAGS dev/felt.dart ${ARGS})
