@@ -314,16 +314,6 @@ class SkiaGoldClient {
     _tryjobInitialized = true;
   }
 
-  static void _addIndented(StringBuffer buffer, String text) {
-    if (text.isEmpty) {
-      buffer.writeln('  <empty>');
-    } else {
-      for (final String line in text.split('\n')) {
-        buffer.writeln('  $line');
-      }
-    }
-  }
-
   /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
@@ -334,64 +324,41 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
   Future<void> tryjobAdd(String testName, File goldenFile) async {
-    Duration delay = const Duration(seconds: 5);
-    while (true) {
-      final io.ProcessResult result = await process.run(<String>[
-        _goldctl,
-        'imgtest', 'add',
-        '--work-dir', workDirectory.childDirectory('temp').path,
-        '--test-name', cleanTestName(testName),
-        '--png-file', goldenFile.path,
-        ..._getPixelMatchingArguments(),
-      ]);
+    final List<String> imgtestCommand = <String>[
+      _goldctl,
+      'imgtest', 'add',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--test-name', cleanTestName(testName),
+      '--png-file', goldenFile.path,
+      ..._getPixelMatchingArguments(),
+    ];
 
-      final String resultStdout = result.stdout as String;
-      final String resultStderr = result.stderr as String;
-      if (result.exitCode == 0 ||
-          resultStdout.contains('Untriaged') ||
-          resultStdout.contains('negative image')) {
-        return; // success
-      }
+    final io.ProcessResult result = await process.run(imgtestCommand);
 
-      if (resultStdout.contains('502')) {
-        // probably a transient error, try again
-        // Ideally we'd use something like package:test's printOnError, but best reliability
-        // in getting logs on CI for now we're just using print.
-        // See also: https://github.com/flutter/flutter/issues/91285
-        print('Transient failure from Skia Gold, retrying in ${delay.inSeconds} seconds.'); // ignore: avoid_print
-        print(''); // ignore: avoid_print
-        print('stdout from gold:'); // ignore: avoid_print
-        final StringBuffer buffer = StringBuffer();
-        _addIndented(buffer, resultStdout);
-        print(buffer); // ignore: avoid_print
-        await Future<void>.delayed(delay);
-        delay *= 2;
-        continue; // retry
-      }
-
-      final StringBuffer buffer = StringBuffer()
-        ..write('Golden test for "$testName" failed with exit code ${result.exitCode} ')
-        ..writeln('for a reason unrelated to pixel comparison.');
-      if (resultStdout.isNotEmpty) {
-        buffer
-          ..writeln()
-          ..writeln('stdout from gold:');
-        _addIndented(buffer, resultStdout);
-      }
-      if (resultStderr.isNotEmpty) {
-        buffer
-          ..writeln()
-          ..writeln('stderr from gold:');
-        _addIndented(buffer, resultStderr);
-      }
-      final File resultFile = workDirectory.childFile('result-state.json');
+    final String/*!*/ resultStdout = result.stdout.toString();
+    if (result.exitCode != 0 &&
+      !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
+      String? resultContents;
+      final File resultFile = workDirectory.childFile(fs.path.join(
+        'result-state.json',
+      ));
       if (await resultFile.exists()) {
-        buffer
-          ..writeln()
-          ..writeln('result-state.json contents:');
-        _addIndented(buffer, resultFile.readAsStringSync());
+        resultContents = await resultFile.readAsString();
       }
-      throw SkiaException(buffer.toString()); // failure
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Unexpected Gold tryjobAdd failure.')
+        ..writeln('Tryjob execution for golden file test $testName failed for')
+        ..writeln('a reason unrelated to pixel comparison.')
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}')
+        ..writeln()
+        ..writeln()
+        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+      throw SkiaException(buf.toString());
     }
   }
 
