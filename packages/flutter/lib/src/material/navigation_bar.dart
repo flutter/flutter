@@ -362,7 +362,7 @@ class NavigationDestination extends StatelessWidget {
     final NavigationBarThemeData defaults = _defaultsFor(context);
     final Animation<double> animation = info.selectedAnimation;
 
-    return NavigationDestinationBuilder(
+    return _NavigationDestinationBuilder(
       label: label,
       tooltip: tooltip,
       enabled: enabled,
@@ -445,9 +445,9 @@ class NavigationDestination extends StatelessWidget {
 /// animation value of 0 is unselected and 1 is selected.
 ///
 /// See [NavigationDestination] for an example.
-class NavigationDestinationBuilder extends StatefulWidget {
+class _NavigationDestinationBuilder extends StatefulWidget {
   /// Builds a destination (icon + label) to use in a Material 3 [NavigationBar].
-  const NavigationDestinationBuilder({
+  const _NavigationDestinationBuilder({
     required this.buildIcon,
     required this.buildLabel,
     required this.label,
@@ -497,10 +497,10 @@ class NavigationDestinationBuilder extends StatefulWidget {
   final bool enabled;
 
   @override
-  State<NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
+  State<_NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
 }
 
-class _NavigationDestinationBuilderState extends State<NavigationDestinationBuilder> {
+class _NavigationDestinationBuilderState extends State<_NavigationDestinationBuilder> {
   final GlobalKey iconKey = GlobalKey();
 
   @override
@@ -911,7 +911,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
 /// Provides localized semantic labels to the destination, for example, it will
 /// read "Home, Tab 1 of 3".
 ///
-/// Used by [NavigationDestinationBuilder].
+/// Used by [_NavigationDestinationBuilder].
 class _NavigationBarDestinationSemantics extends StatelessWidget {
   /// Adds the appropriate semantics for navigation bar destinations to the
   /// [child].
@@ -994,7 +994,7 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
 /// the icon, but the icon + label combination will be centered.
 ///
 /// Used in a [CustomMultiChildLayout] widget in the
-/// [NavigationDestinationBuilder].
+/// [_NavigationDestinationBuilder].
 class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   _NavigationDestinationLayoutDelegate({required this.animation}) : super(relayout: animation);
 
@@ -1009,7 +1009,7 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   /// This is used by the [LayoutId] when this delegate is used in a
   /// [CustomMultiChildLayout].
   ///
-  /// See [NavigationDestinationBuilder].
+  /// See [_NavigationDestinationBuilder].
   static const int iconId = 1;
 
   /// ID for the label widget child.
@@ -1017,7 +1017,7 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   /// This is used by the [LayoutId] when this delegate is used in a
   /// [CustomMultiChildLayout].
   ///
-  /// See [NavigationDestinationBuilder].
+  /// See [_NavigationDestinationBuilder].
   static const int labelId = 2;
 
   @override
