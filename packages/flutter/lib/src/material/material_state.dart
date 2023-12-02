@@ -407,6 +407,97 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
   /// widget or theme.
   @override
   OutlinedBorder? resolve(Set<MaterialState> states);
+
+  /// Creates a [MaterialStateOutlinedBorder] from a
+  /// [MaterialPropertyResolver<OutlinedBorder?>] callback function.
+  ///
+  /// If used as a regular [OutlinedBorder], the border resolved in the default state
+  /// (the empty set of states) will be used.
+  ///
+  /// Usage:
+  ///
+  /// ```dart
+  /// ChipTheme(
+  ///   data: Theme.of(context).chipTheme.copyWith(
+  ///     shape: MaterialStateOutlinedBorder.resolveWith((Set<MaterialState> states) {
+  ///       if (states.contains(MaterialState.selected)) {
+  ///         return const StadiumBorder(
+  ///           side: BorderSide(color: Colors.transparent),
+  ///         );
+  ///       }
+  ///       return null;  // Defer to default value on the theme or widget.
+  ///     }),
+  ///   ),
+  ///   child: const Chip(
+  ///     label: Text('Transceiver'),
+  ///   ),
+  /// ),
+  /// ```
+  ///
+  /// Alternatively:
+  ///
+  /// ```dart
+  /// Chip(
+  ///   label: const Text('Transceiver'),
+  ///   shape: MaterialStateOutlinedBorder.resolveWith((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.selected)) {
+  ///       return const StadiumBorder(
+  ///         side: BorderSide(color: Colors.transparent),
+  ///       );
+  ///     }
+  ///     return null;  // Defer to default value on the theme or widget.
+  ///   }),
+  /// ),
+  /// ```
+  static MaterialStateOutlinedBorder resolveWith(MaterialPropertyResolver<OutlinedBorder?> callback) =>
+      _MaterialStateOutlinedBorder(callback);
+}
+
+/// A [MaterialStateOutlinedBorder] created from a
+/// [MaterialPropertyResolver<OutlinedBorder>] callback alone.
+///
+/// If used as a regular [OutlinedBorder], the shape resolved in the default state will
+/// be used.
+///
+/// Used by [MaterialStateOutlinedBorder.resolveWith].
+class _MaterialStateOutlinedBorder extends MaterialStateOutlinedBorder {
+  const _MaterialStateOutlinedBorder(this._resolve);
+
+  final MaterialPropertyResolver<OutlinedBorder?> _resolve;
+
+  @override
+  OutlinedBorder? resolve(Set<MaterialState> states) {
+    return _resolve(states);
+  }
+
+  @override
+  OutlinedBorder copyWith({BorderSide? side}) {
+    _throwUnsupportedError();
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    _throwUnsupportedError();
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    _throwUnsupportedError();
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    _throwUnsupportedError();
+  }
+
+  @override
+  ShapeBorder scale(double t) {
+    _throwUnsupportedError();
+  }
+
+  Never _throwUnsupportedError() {
+    throw UnsupportedError('Not usable as a regular OutlinedBorder. Use resolve() instead.');
+  }
 }
 
 /// Defines a [TextStyle] that is also a [MaterialStateProperty].
