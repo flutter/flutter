@@ -3647,11 +3647,8 @@ void main() {
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
     final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
 
-    // Create a mouse gesture object to tap the slider and bring up the value indicator.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.down(tapLocation);
-    await gesture.up();
+    // Tap the slider by mouse to bring up the value indicator.
+    await tester.tapAt(tapLocation, kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
 
     // Value indicator is visible.
