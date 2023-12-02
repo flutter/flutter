@@ -246,7 +246,7 @@ class NavigationBar extends StatelessWidget {
                     duration: animationDuration ?? const Duration(milliseconds: 500),
                     isSelected: i == selectedIndex,
                     builder: (BuildContext context, Animation<double> animation) {
-                      return _NavigationDestinationInfo(
+                      return NavigationDestinationInfo(
                         index: i,
                         selectedIndex: selectedIndex,
                         totalNumberOfDestinations: destinations.length,
@@ -353,7 +353,7 @@ class NavigationDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
+    final NavigationDestinationInfo info = NavigationDestinationInfo.of(context);
     const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
     const Set<MaterialState> unselectedState = <MaterialState>{};
     const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
@@ -441,7 +441,7 @@ class NavigationDestination extends StatelessWidget {
 ///
 /// The icon and label of this destination are built with [buildIcon] and
 /// [buildLabel]. They should build the unselected and selected icon and label
-/// according to [_NavigationDestinationInfo.selectedAnimation], where an
+/// according to [NavigationDestinationInfo.selectedAnimation], where an
 /// animation value of 0 is unselected and 1 is selected.
 ///
 /// See [NavigationDestination] for an example.
@@ -458,7 +458,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   /// Builds the icon for a destination in a [NavigationBar].
   ///
   /// To animate between unselected and selected, build the icon based on
-  /// [_NavigationDestinationInfo.selectedAnimation]. When the animation is 0,
+  /// [NavigationDestinationInfo.selectedAnimation]. When the animation is 0,
   /// the destination is unselected, when the animation is 1, the destination is
   /// selected.
   ///
@@ -470,7 +470,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   /// Builds the label for a destination in a [NavigationBar].
   ///
   /// To animate between unselected and selected, build the icon based on
-  /// [_NavigationDestinationInfo.selectedAnimation]. When the animation is
+  /// [NavigationDestinationInfo.selectedAnimation]. When the animation is
   /// 0, the destination is unselected, when the animation is 1, the destination
   /// is selected.
   ///
@@ -505,7 +505,7 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
 
   @override
   Widget build(BuildContext context) {
-    final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
+    final NavigationDestinationInfo info = NavigationDestinationInfo.of(context);
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
 
@@ -564,12 +564,12 @@ class _IndicatorInkWell extends InkResponse {
 /// Inherited widget for passing data from the [NavigationBar] to the
 /// [NavigationBar.destinations] children widgets.
 ///
-/// Useful for building navigation destinations using:
-/// `_NavigationDestinationInfo.of(context)`.
-class _NavigationDestinationInfo extends InheritedWidget {
+/// Useful for building [NavigationBar.destinations] using:
+/// `NavigationDestinationInfo.of(context)`.
+class NavigationDestinationInfo extends InheritedWidget {
   /// Adds the information needed to build a navigation destination to the
   /// [child] and descendants.
-  const _NavigationDestinationInfo({
+  const NavigationDestinationInfo({
     required this.index,
     required this.selectedIndex,
     required this.totalNumberOfDestinations,
@@ -656,25 +656,25 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// with [index] passed in.
   final VoidCallback onTap;
 
-  /// Returns a non null [_NavigationDestinationInfo].
+  /// Returns a non null [NavigationDestinationInfo].
   ///
-  /// This will return an error if called with no [_NavigationDestinationInfo]
+  /// This will return an error if called with no [NavigationDestinationInfo]
   /// ancestor.
   ///
   /// Used by widgets that are implementing a navigation destination info to
   /// get information like the selected animation and destination number.
-  static _NavigationDestinationInfo of(BuildContext context) {
-    final _NavigationDestinationInfo? result = context.dependOnInheritedWidgetOfExactType<_NavigationDestinationInfo>();
+  static NavigationDestinationInfo of(BuildContext context) {
+    final NavigationDestinationInfo? result = context.dependOnInheritedWidgetOfExactType<NavigationDestinationInfo>();
     assert(
       result != null,
-      'Navigation destinations need a _NavigationDestinationInfo parent, '
+      'Navigation destinations need a NavigationDestinationInfo parent, '
       'which is usually provided by NavigationBar.',
     );
     return result!;
   }
 
   @override
-  bool updateShouldNotify(_NavigationDestinationInfo oldWidget) {
+  bool updateShouldNotify(NavigationDestinationInfo oldWidget) {
     return index != oldWidget.index
         || totalNumberOfDestinations != oldWidget.totalNumberOfDestinations
         || selectedAnimation != oldWidget.selectedAnimation
@@ -794,10 +794,10 @@ class NavigationIndicator extends StatelessWidget {
 }
 
 /// Widget that handles the layout of the icon + label in a navigation bar
-/// destination, based on [_NavigationDestinationInfo.labelBehavior] and
-/// [_NavigationDestinationInfo.selectedAnimation].
+/// destination, based on [NavigationDestinationInfo.labelBehavior] and
+/// [NavigationDestinationInfo.selectedAnimation].
 ///
-/// Depending on the [_NavigationDestinationInfo.labelBehavior], the labels
+/// Depending on the [NavigationDestinationInfo.labelBehavior], the labels
 /// will shift and fade accordingly.
 class _NavigationBarDestinationLayout extends StatelessWidget {
   /// Builds a widget to layout an icon + label for a destination in a Material
@@ -821,7 +821,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// The label widget that sits below the icon.
   ///
   /// This widget will sometimes be faded out, depending on
-  /// [_NavigationDestinationInfo.selectedAnimation].
+  /// [NavigationDestinationInfo.selectedAnimation].
   ///
   /// See [NavigationDestination.label].
   final Widget label;
@@ -864,7 +864,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
 
 /// Determines the appropriate [Curve] and [Animation] to use for laying out the
 /// [NavigationDestination], based on
-/// [_NavigationDestinationInfo.labelBehavior].
+/// [NavigationDestinationInfo.labelBehavior].
 ///
 /// The animation controlling the position and fade of the labels differs
 /// from the selection animation, depending on the
@@ -872,7 +872,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
 /// animation should be used for the position and fade of the labels.
 class _DestinationLayoutAnimationBuilder extends StatelessWidget {
   /// Builds a child with the appropriate animation [Curve] based on the
-  /// [_NavigationDestinationInfo.labelBehavior].
+  /// [NavigationDestinationInfo.labelBehavior].
   const _DestinationLayoutAnimationBuilder({required this.builder});
 
   /// Builds the child of this widget.
@@ -884,7 +884,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
+    final NavigationDestinationInfo info = NavigationDestinationInfo.of(context);
     switch (info.labelBehavior) {
       case NavigationDestinationLabelBehavior.alwaysShow:
         return builder(context, kAlwaysCompleteAnimation);
@@ -905,7 +905,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
 
 /// Semantics widget for a navigation bar destination.
 ///
-/// Requires a [_NavigationDestinationInfo] parent (normally provided by the
+/// Requires a [NavigationDestinationInfo] parent (normally provided by the
 /// [NavigationBar] by default).
 ///
 /// Provides localized semantic labels to the destination, for example, it will
@@ -925,7 +925,7 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final _NavigationDestinationInfo destinationInfo = _NavigationDestinationInfo.of(context);
+    final NavigationDestinationInfo destinationInfo = NavigationDestinationInfo.of(context);
     // The AnimationStatusBuilder will make sure that the semantics update to
     // "selected" when the animation status changes.
     return _StatusTransitionWidgetBuilder(
@@ -1001,7 +1001,7 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   /// The selection animation that indicates whether or not this destination is
   /// selected.
   ///
-  /// See [_NavigationDestinationInfo.selectedAnimation].
+  /// See [NavigationDestinationInfo.selectedAnimation].
   final Animation<double> animation;
 
   /// ID for the icon widget child.
