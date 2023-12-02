@@ -67,6 +67,15 @@ class CircleTessellator {
   ///          |GenerateRoundCapLineTriangleStrip| methods.
   size_t GetCircleVertexCount() const { return trigs_.size() * 4; }
 
+  /// @brief   Return the number of vertices that will be generated to
+  ///          tessellate a full stroked circle with a triangle strip.
+  ///
+  ///          This value can be used to pre-allocate space in a vector
+  ///          to hold the vertices that will be produced by the
+  ///          |GenerateCircleTriangleStrip| and
+  ///          |GenerateRoundCapLineTriangleStrip| methods.
+  size_t GetStrokedCircleVertexCount() const { return trigs_.size() * 8; }
+
   /// @brief   Generate the vertices for a triangle strip that covers the
   ///          circle at a given |radius| from a given |center|, delivering
   ///          the computed coordinates to the supplied |proc|.
@@ -77,6 +86,19 @@ class CircleTessellator {
   void GenerateCircleTriangleStrip(const TessellatedPointProc& proc,
                                    const Point& center,
                                    Scalar radius) const;
+
+  /// @brief   Generate the vertices for a triangle strip that draws the gap
+  ///          between 2 circles at |outer_radius| and |inner_radius|
+  ///          from a given |center|, delivering the computed coordinates to
+  ///          the supplied |proc|.
+  ///
+  ///          This procedure will generate no more than the number of
+  ///          vertices returned by |GetStrokedCircleVertexCount| in an order
+  ///          appropriate for rendering as a triangle strip.
+  void GenerateStrokedCircleTriangleStrip(const TessellatedPointProc& proc,
+                                          const Point& center,
+                                          Scalar outer_radius,
+                                          Scalar inner_radius) const;
 
   /// @brief   Generate the vertices for a triangle strip that covers the
   ///          line from |p0| to |p1| with round caps of the specified
