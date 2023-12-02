@@ -185,7 +185,7 @@ class BoxConstraints extends Constraints {
   }
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
-  BoxConstraints deflate(EdgeInsets edges) {
+  BoxConstraints deflate(EdgeInsetsGeometry edges) {
     assert(debugAssertIsValid());
     final double horizontal = edges.horizontal;
     final double vertical = edges.vertical;
@@ -223,12 +223,16 @@ class BoxConstraints extends Constraints {
   /// the given width and height as possible while still respecting the original
   /// box constraints.
   BoxConstraints tighten({ double? width, double? height }) {
-    return BoxConstraints(
-      minWidth: width == null ? minWidth : clampDouble(width, minWidth, maxWidth),
-      maxWidth: width == null ? maxWidth : clampDouble(width, minWidth, maxWidth),
-      minHeight: height == null ? minHeight : clampDouble(height, minHeight, maxHeight),
-      maxHeight: height == null ? maxHeight : clampDouble(height, minHeight, maxHeight),
-    );
+    final double? newWidth = width == null ? null : clampDouble(width, minWidth, maxWidth);
+    final double? newHeight = height == null ? null : clampDouble(height, minHeight, maxHeight);
+    return newWidth == null && newHeight == null
+      ? this
+      : BoxConstraints(
+          minWidth: newWidth ?? minWidth,
+          maxWidth: newWidth ?? maxWidth,
+          minHeight: newHeight ?? minHeight,
+          maxHeight: newHeight ?? maxHeight,
+        );
   }
 
   /// A box constraints with the width and height constraints flipped.
@@ -2502,6 +2506,12 @@ abstract class RenderBox extends RenderObject {
       if (!debugCheckIntrinsicSizes) {
         return true;
       }
+    final bool hasCache = (_layoutCacheStorage._cachedDryAlphabeticBaseline?.isNotEmpty ?? false)
+                       || (_layoutCacheStorage._cachedDryIdeoBaseline?.isNotEmpty ?? false);
+                       if (!hasCache) {
+                         return true;
+                       }
+
       final List<DiagnosticsNode> messages = <DiagnosticsNode>[
         ErrorDescription(
           'The constraints used were $constraints.',

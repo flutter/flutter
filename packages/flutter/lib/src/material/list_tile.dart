@@ -1258,10 +1258,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
-    final BoxParentData parentData = title!.parentData! as BoxParentData;
-    return parentData.offset.dy + title!.getDistanceToActualBaseline(baseline)!;
+    final double? baselineOffset = title!.getDistanceToActualBaseline(baseline);
+    return baselineOffset == null
+      ? null
+      : (title!.parentData! as BoxParentData).offset.dy + baselineOffset;
   }
 
   BoxConstraints get maxIconHeightConstraint => BoxConstraints(
@@ -1327,9 +1329,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     if (title == null) {
       return null;
     }
+    final double? titleBaseline = title.getDryBaseline(textConstraints, baseline);
+    if (titleBaseline == null) {
+      return null;
+    }
     final double defaultTileHeight = _defaultTileHeight;
     final double titleHeight = title.getDryLayout(textConstraints).height;
-    final double titleBaseline = title.getDryBaseline(textConstraints, baseline)!;
     if (subtitle == null) {
       final double tileHeight = math.max(defaultTileHeight, titleHeight + 2 * _minVerticalPadding);
       return (tileHeight - titleHeight) / 2.0 + titleBaseline;

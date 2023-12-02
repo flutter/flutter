@@ -32,12 +32,14 @@ class RenderTestBox extends RenderBox {
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!debugCheckIntrinsicSizes);
     calls += 1;
     return boxSize.height / 2.0;
   }
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    assert(!debugCheckIntrinsicSizes);
     calls += 1;
     return boxSize.height / 2.0;
   }
@@ -45,6 +47,10 @@ class RenderTestBox extends RenderBox {
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
+  if (debugCheckIntrinsicSizes) {
+    setUp(() { debugCheckIntrinsicSizes = false; });
+    tearDown(() { debugCheckIntrinsicSizes = true; });
+  }
 
   test('Intrinsics cache', () {
     final RenderBox test = RenderTestBox();

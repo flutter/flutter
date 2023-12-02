@@ -53,8 +53,9 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     double? result;
     final RenderBox? child = this.child;
+    assert(!debugNeedsLayout);
     if (child != null) {
-      assert(!debugNeedsLayout);
+      assert(!child.debugNeedsLayout);
       result = child.getDistanceToActualBaseline(baseline);
       final BoxParentData childParentData = child.parentData! as BoxParentData;
       if (result != null) {

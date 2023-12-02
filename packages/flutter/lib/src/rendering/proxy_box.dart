@@ -747,6 +747,19 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.tighten(
+      width: constraints.hasTightWidth ? null : _applyStep(child.getMaxIntrinsicWidth(constraints.maxHeight), _stepWidth),
+      height: stepHeight == null ? null : _applyStep(child.getMaxIntrinsicHeight(constraints.maxWidth), _stepHeight),
+    );
+    return child.getDryBaseline(childConstraints, baseline);
+  }
+
+  @override
   void performLayout() {
     size = _computeSize(
       layoutChild: ChildLayoutHelper.layoutChild,
@@ -845,6 +858,18 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
     );
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.hasTightHeight
+      ? constraints
+      : constraints.tighten(height: child.getMaxIntrinsicHeight(constraints.maxWidth));
+    return child.getDryBaseline(childConstraints, baseline);
   }
 
   @override

@@ -1194,15 +1194,36 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       : borderSide.width * 2.0 + _minWidth(child, height);
   }
 
+  EdgeInsetsDirectional get _childPadding {
+    assert(child != null);
+    return switch (direction) {
+      Axis.horizontal => EdgeInsetsDirectional.only(
+        start: leadingBorderSide.width,
+        end: trailingBorderSide.width,
+        top: borderSide.width,
+        bottom: borderSide.width,
+      ),
+      Axis.vertical => EdgeInsetsDirectional.only(
+        start: borderSide.width,
+        end: borderSide.width,
+        top: leadingBorderSide.width,
+        bottom: trailingBorderSide.width,
+      ),
+    };
+  }
+
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final double? childBaseline = child?.getDryBaseline(constraints, baseline);
+    final double? childBaseline = child?.getDryBaseline(constraints.deflate(_childPadding), baseline);
     return childBaseline == null
       ? null
       : childBaseline + switch (direction) {
           Axis.horizontal => borderSide.width,
-          Axis.vertical => leadingBorderSide.width,
-        };
+          Axis.vertical => switch (verticalDirection) {
+            VerticalDirection.down => leadingBorderSide.width,
+            VerticalDirection.up => trailingBorderSide.width,
+          },
+      };
   }
 
   @override
@@ -1255,39 +1276,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       }
     }
 
-    final double leftConstraint;
-    final double rightConstraint;
-    final double topConstraint;
-    final double bottomConstraint;
-
-    // It does not matter what [textDirection] or [verticalDirection] is,
-    // since deflating the size constraints horizontally/vertically
-    // and the returned size accounts for the width of both sides.
-    if (direction == Axis.horizontal) {
-      rightConstraint = trailingBorderSide.width;
-      leftConstraint = leadingBorderSide.width;
-      topConstraint = borderSide.width;
-      bottomConstraint = borderSide.width;
-    } else {
-      rightConstraint = borderSide.width;
-      leftConstraint = borderSide.width;
-      topConstraint = leadingBorderSide.width;
-      bottomConstraint = trailingBorderSide.width;
-    }
-    final BoxConstraints innerConstraints = constraints.deflate(
-      EdgeInsets.only(
-        left: leftConstraint,
-        top: topConstraint,
-        right: rightConstraint,
-        bottom: bottomConstraint,
-      ),
-    );
-    final Size childSize = layoutChild(child!, innerConstraints);
-
-    return constraints.constrain(Size(
-      leftConstraint + childSize.width + rightConstraint,
-      topConstraint + childSize.height + bottomConstraint,
-    ));
+    final EdgeInsetsDirectional childPadding = _childPadding;
+    final BoxConstraints innerConstraints = constraints.deflate(childPadding);
+    return constraints.constrain(childPadding.inflateSize(layoutChild(child!, innerConstraints)));
   }
 
   @override
@@ -1629,7 +1620,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(constraints);
-    return result + Alignment.center.alongOffset(size - childSize as Offset).dy;
+    return result + Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override

@@ -696,6 +696,7 @@ class _RenderDecorationLayout {
     required this.subtextBaseline,
     required this.containerHeight,
     required this.subtextHeight,
+    required this.inputConstraints,
   });
 
   final Map<RenderBox?, double> boxToBaseline;
@@ -704,6 +705,7 @@ class _RenderDecorationLayout {
   final double subtextBaseline; // helper/error counter
   final double containerHeight;
   final double subtextHeight;
+  final BoxConstraints inputConstraints;
 }
 
 // The workhorse: layout and paint a _Decorator widget's _Decoration.
@@ -944,7 +946,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     );
 
     // Margin on each side of subtext (counter and helperError)
-    final Map<RenderBox?, double> boxToBaseline = <RenderBox?, double>{ null: 0 };
+    final Map<RenderBox?, double> boxToBaseline = <RenderBox?, double>{ null: 0.0 };
     final BoxConstraints boxConstraints = layoutConstraints.loosen();
 
     Size? layoutLineBox(RenderBox? box, BoxConstraints constraints) {
@@ -954,11 +956,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final Size size = isDry
         ? box.getDryLayout(constraints)
         : (box..layout(constraints, parentUsesSize: true)).size;
-      final double? baseline = isDry
-        ? box.getDryBaseline(constraints, TextBaseline.alphabetic)
-        : box.getDistanceToBaseline(TextBaseline.alphabetic);
-      assert(baseline == null || _debugAssertBaselineNonNegative(box, baseline));
-      boxToBaseline[box] = baseline ?? 0;
+      final double baseline = isDry
+        ? box.getDryBaseline(constraints, TextBaseline.alphabetic) ?? box.getDryLayout(constraints).height
+        : box.getDistanceToBaseline(TextBaseline.alphabetic)!;
+      assert(_debugAssertBaselineNonNegative(box, baseline));
+      boxToBaseline[box] = baseline;
       return size;
     }
 
@@ -970,8 +972,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final BoxConstraints contentConstraints = containerConstraints.copyWith(
       maxWidth: math.max(0.0, containerConstraints.maxWidth - contentPadding.horizontal),
     );
-    final double prefixIconWidth = layoutLineBox(prefixIcon, containerConstraints)?.width ?? 0;
-    final double suffixIconWidth = layoutLineBox(suffixIcon, containerConstraints)?.width ?? 0;
+    final Size prefixIconSize = layoutLineBox(prefixIcon, containerConstraints) ?? Size.zero;
+    final Size suffixIconSize = layoutLineBox(suffixIcon, containerConstraints) ?? Size.zero;
     final Size prefixSize = layoutLineBox(prefix, contentConstraints) ?? Size.zero;
     final Size suffixSize = layoutLineBox(suffix, contentConstraints) ?? Size.zero;
 
@@ -980,25 +982,28 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       constraints.maxWidth - (
         iconWidth
         + (prefixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
-        + prefixIconWidth
+        + prefixIconSize.width
         + prefixSize.width
         + suffixSize.width
-        + suffixIconWidth
+        + suffixIconSize.width
         + (suffixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left))),
     );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
-    final double suffixIconSpace = decoration.border.isOutline
-      ? lerpDouble(suffixIconWidth, 0.0, decoration.floatingLabelProgress)!
-      : suffixIconWidth;
-    final double labelWidth = math.max(
-      0.0,
-      constraints.maxWidth - (iconWidth + contentPadding.horizontal + prefixIconWidth + suffixIconSpace),
-    );
-    final BoxConstraints labelConstraints = boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale);
-    boxToBaseline[label] = isDry
-      ? label?.getDryBaseline(labelConstraints, TextBaseline.alphabetic) ?? 0
-      : (label?..layout(labelConstraints, parentUsesSize: true))?.getDistanceToBaseline(TextBaseline.alphabetic) ?? 0;
+    final RenderBox? label = this.label;
+    if (label != null) {
+      final double suffixIconSpace = decoration.border.isOutline
+        ? lerpDouble(suffixIconSize.width, 0.0, decoration.floatingLabelProgress)!
+        : suffixIconSize.width;
+      final double labelWidth = math.max(
+        0.0,
+        constraints.maxWidth - (iconWidth + contentPadding.horizontal + prefixIconSize.width + suffixIconSpace),
+      );
+      final BoxConstraints labelConstraints = boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale);
+      boxToBaseline[label] = isDry
+        ? label.getDryBaseline(labelConstraints, TextBaseline.alphabetic) ?? label.getDryLayout(labelConstraints).height
+        : (label..layout(labelConstraints, parentUsesSize: true)).getDistanceToBaseline(TextBaseline.alphabetic)!;
+    }
     final Size? counterSize = layoutLineBox(counter, contentConstraints);
 
     // The helper or error text can occupy the full width less the space
@@ -1025,17 +1030,15 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       helperErrorHeight,
     );
     final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
-    final Size inputSize = layoutLineBox(
-      input,
-      boxConstraints.deflate(EdgeInsets.only(
-        top: contentPadding.vertical + topHeight + bottomHeight + densityOffset.dy,
-      )).tighten(width: inputWidth),
-    ) ?? Size.zero;
+    final BoxConstraints inputConstraints = boxConstraints
+      .deflate(EdgeInsets.only(top: contentPadding.vertical + topHeight + bottomHeight + densityOffset.dy))
+      .tighten(width: inputWidth);
+    final Size inputSize = layoutLineBox(input, inputConstraints) ?? Size.zero;
 
     // The field can be occupied by a hint or by the input itself
     final double hintHeight = layoutLineBox(
       hint,
-      boxConstraints.copyWith(minWidth: inputWidth, maxWidth: inputWidth),
+      boxConstraints.tighten(width: inputWidth),
     )?.height ?? 0;
     final double inputHeight = math.max(hintHeight, inputSize.height);
     final double inputInternalBaseline = math.max(
@@ -1063,9 +1066,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     );
 
     // Calculate the height of the input text container.
-    final double prefixIconHeight = prefixIcon?.size.height ?? 0;
-    final double suffixIconHeight = suffixIcon?.size.height ?? 0;
-    final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
+    final double fixIconHeight = math.max(prefixIconSize.height, suffixIconSize.height);
     final double contentHeight = math.max(
       fixIconHeight,
       topHeight
@@ -1167,6 +1168,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       outlineBaseline: outlineBaseline,
       subtextBaseline: subtextBaseline,
       subtextHeight: subtextHeight,
+      inputConstraints: inputConstraints,
     );
   }
 
@@ -1260,10 +1262,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double inputMaxHeight = <double>[inputHeight, prefixHeight, suffixHeight].reduce(math.max);
 
     final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
-    final double contentHeight = contentPadding.top
+    final double contentHeight = contentPadding.vertical
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + inputMaxHeight
-      + contentPadding.bottom
       + densityOffset.dy;
     final double containerHeight = <double>[iconHeight, contentHeight, prefixIconHeight, suffixIconHeight].reduce(math.max);
     final double minContainerHeight = decoration.isDense! || expands
@@ -1279,7 +1280,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
+    return _boxParentData(input!).offset.dy + (input?.getDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
@@ -1287,8 +1288,15 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? input = this.input;
+    if (input == null) {
+      return null;
+    }
     final _RenderDecorationLayout layout = _layout(constraints, isDry: true);
-    return _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
+    return switch (baseline) {
+      TextBaseline.alphabetic => 0.0,
+      TextBaseline.ideographic => (input.getDryBaseline(layout.inputConstraints, TextBaseline.ideographic) ?? input.getDryLayout(layout.inputConstraints).height) - (input.getDryBaseline(layout.inputConstraints, TextBaseline.alphabetic) ?? 0.0),
+    } + (_isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline);
   }
 
   @override

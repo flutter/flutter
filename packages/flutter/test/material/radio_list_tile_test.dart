@@ -1279,16 +1279,16 @@ void main() {
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       await tester.pumpWidget(buildApp(platform));
-      await tester.pumpAndSettle();
 
-      expect(find.byType(CupertinoRadio<int>), findsOneWidget);
-    }
-
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
-      await tester.pumpWidget(buildApp(platform));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(CupertinoRadio<int>), findsNothing);
+      final Matcher matcher = switch (platform) {
+        TargetPlatform.iOS ||
+        TargetPlatform.macOS => findsOneWidget,
+        TargetPlatform.android ||
+        TargetPlatform.fuchsia ||
+        TargetPlatform.linux ||
+        TargetPlatform.windows => findsNothing,
+      };
+      expect(find.byType(CupertinoRadio<int>), matcher);
     }
   });
 

@@ -191,12 +191,10 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
   bool focused = false;
 
   void _handleChanged(bool? selected) {
-    if (selected == null) {
-      widget.onChanged!(null);
-      return;
-    }
-    if (selected) {
-      widget.onChanged!(widget.value);
+    switch (selected) {
+      case null: widget.onChanged?.call(null);
+      case true: widget.onChanged?.call(widget.value);
+      case false: break;
     }
   }
 
