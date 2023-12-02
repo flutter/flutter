@@ -67,6 +67,9 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// If there is insufficient space to display the tooltip in the preferred
   /// direction, the tooltip will be displayed in the opposite direction.
+  ///
+  /// Applying `false` for the entire app is recommended
+  /// to avoid having a finger or cursor hide a tooltip.
   final bool? preferBelow;
 
   /// Whether the [Tooltip.message] should be excluded from the semantics

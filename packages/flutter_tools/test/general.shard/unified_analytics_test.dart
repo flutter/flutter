@@ -5,51 +5,28 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/reporting/unified_analytics.dart';
-import 'package:unified_analytics/src/enums.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fakes.dart';
 
 void main() {
   const String userBranch = 'abc123';
-  const String homeDirectoryName = 'home';
-  const DashTool tool = DashTool.flutterTool;
+  const String clientIde = 'VSCode';
 
   late FileSystem fs;
-  late Directory home;
   late FakeAnalytics analyticsOverride;
 
   setUp(() {
     fs = MemoryFileSystem.test();
-    home = fs.directory(homeDirectoryName);
 
-    // Prepare the tests by "onboarding" the tool into the package
-    // by invoking the [clientShowedMessage] method for the provided
-    // [tool]
-    final FakeAnalytics initialAnalytics = FakeAnalytics(
-      tool: tool,
-      homeDirectory: home,
-      dartVersion: '3.0.0',
-      platform: DevicePlatform.macos,
+    analyticsOverride = getInitializedFakeAnalyticsInstance(
       fs: fs,
-      surveyHandler: SurveyHandler(
-        homeDirectory: home,
-        fs: fs,
+      fakeFlutterVersion: FakeFlutterVersion(
+        branch: userBranch,
       ),
-    );
-    initialAnalytics.clientShowedMessage();
-
-    analyticsOverride = FakeAnalytics(
-      tool: tool,
-      homeDirectory: home,
-      dartVersion: '3.0.0',
-      platform: DevicePlatform.macos,
-      fs: fs,
-      surveyHandler: SurveyHandler(
-        homeDirectory: home,
-        fs: fs,
-      ),
+      clientIde: clientIde,
     );
   });
 
@@ -60,6 +37,7 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(analytics.clientId, isNot(NoOpAnalytics.staticClientId),
@@ -76,6 +54,7 @@ void main() {
         ),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
@@ -94,6 +73,7 @@ void main() {
         ),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
@@ -110,6 +90,7 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
@@ -122,10 +103,11 @@ void main() {
 
     testWithoutContext('NoOp instance when suppressing via env variable', () {
       final Analytics analytics = getAnalytics(
-        runningOnBot: true,
+        runningOnBot: false,
         flutterVersion: FakeFlutterVersion(),
         environment: const <String, String>{'FLUTTER_SUPPRESS_ANALYTICS': 'true'},
         analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
       );
 
       expect(
@@ -134,6 +116,31 @@ void main() {
         reason: 'The client ID should match the NoOp client id',
       );
       expect(analytics, isA<NoOpAnalytics>());
+    });
+
+    testWithoutContext('Suppression prevents events from being sent', () {
+      expect(analyticsOverride.okToSend, true);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+      expect(analyticsOverride.sentEvents, hasLength(1));
+
+      analyticsOverride.suppressTelemetry();
+      expect(analyticsOverride.okToSend, false);
+      analyticsOverride.send(Event.surveyShown(surveyId: 'surveyId'));
+
+      expect(analyticsOverride.sentEvents, hasLength(1));
+    });
+
+    testUsingContext('Client IDE is passed and found in events', () {
+      final Analytics analytics = getAnalytics(
+        runningOnBot: false,
+        flutterVersion: FakeFlutterVersion(),
+        environment: const <String, String>{},
+        analyticsOverride: analyticsOverride,
+        clientIde: clientIde,
+      );
+      analytics as FakeAnalytics;
+
+      expect(analytics.userProperty.clientIde, 'VSCode');
     });
   });
 }

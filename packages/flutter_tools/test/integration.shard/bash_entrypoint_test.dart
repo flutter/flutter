@@ -48,6 +48,64 @@ Future<void> main() async {
     expect(stdout, contains('Successfully received SIGTERM!'));
   },
   skip: platform.isWindows); // [intended] Windows does not use the bash entrypoint
+
+  test('shared.sh does not compile flutter tool if PROG_NAME=dart', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('bash_entrypoint_test');
+    try {
+      // bash script checks it is in a git repo
+      ProcessResult result = await processManager.run(<String>['git', 'init'], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+      result = await processManager.run(<String>['git', 'commit', '--allow-empty', '-m', 'init commit'], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      // copy dart and shared.sh to temp dir
+      final File trueSharedSh = flutterRoot.childDirectory('bin').childDirectory('internal').childFile('shared.sh');
+      final File fakeSharedSh = (tempDir.childDirectory('bin').childDirectory('internal')
+          ..createSync(recursive: true))
+          .childFile('shared.sh');
+      trueSharedSh.copySync(fakeSharedSh.path);
+      final File fakeDartBash = tempDir.childDirectory('bin').childFile('dart');
+      dartBash.copySync(fakeDartBash.path);
+      // mark dart executable
+      makeExecutable(fakeDartBash);
+
+      // create no-op fake update_dart_sdk.sh script
+      final File updateDartSdk = tempDir.childDirectory('bin').childDirectory('internal').childFile('update_dart_sdk.sh')..writeAsStringSync('''
+#!/usr/bin/env bash
+
+echo downloaded dart sdk
+''');
+      makeExecutable(updateDartSdk);
+
+      // create a fake dart runtime
+      final File dartBin = (tempDir.childDirectory('bin')
+          .childDirectory('cache')
+          .childDirectory('dart-sdk')
+          .childDirectory('bin')
+          ..createSync(recursive: true))
+          .childFile('dart');
+      dartBin.writeAsStringSync('''
+#!/usr/bin/env bash
+
+echo executed dart binary
+''');
+      makeExecutable(dartBin);
+
+      result = await processManager.run(<String>[fakeDartBash.path]);
+      expect(result, const ProcessResultMatcher());
+      expect(
+        (result.stdout as String).split('\n'),
+        // verify we ran updateDartSdk and dartBin
+        containsAll(<String>['downloaded dart sdk', 'executed dart binary']),
+      );
+
+      // Verify we did not try to compile the flutter_tool
+      expect(result.stderr, isNot(contains('Building flutter tool...')));
+    } finally {
+      tryToDelete(tempDir);
+    }
+  },
+  skip: platform.isWindows); // [intended] Windows does not use the bash entrypoint
 }
 
 // A test Dart app that will run until it receives SIGTERM
@@ -68,4 +126,9 @@ File get dartBash {
       .childDirectory('bin')
       .childFile('dart')
       .absolute;
+}
+
+void makeExecutable(File file) {
+  final ProcessResult result = processManager.runSync(<String>['chmod', '+x', file.path]);
+  expect(result, const ProcessResultMatcher());
 }

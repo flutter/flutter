@@ -30,6 +30,21 @@ void main() {
 
     expect(() => DisposableBuildContext(state), throwsAssertionError);
   });
+
+  testWidgetsWithLeakTracking('DisposableBuildContext dispatches memory events', (WidgetTester tester) async {
+    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    await tester.pumpWidget(TestWidget(key));
+
+    final TestWidgetState state = key.currentState!;
+
+    await expectLater(
+      await memoryEvents(
+        () => DisposableBuildContext<TestWidgetState>(state).dispose(),
+        DisposableBuildContext<TestWidgetState>,
+      ),
+      areCreateAndDispose,
+    );
+  });
 }
 
 class TestWidget extends StatefulWidget {

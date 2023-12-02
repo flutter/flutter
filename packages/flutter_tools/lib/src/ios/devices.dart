@@ -505,7 +505,7 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger);
+        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger, globals.analytics);
         _logger.printError('');
         return LaunchResult.failed();
       }
@@ -876,6 +876,8 @@ class IOSDevice extends Device {
         if (scheme == null) {
           projectInfo.reportFlavorNotFoundAndExit();
         }
+
+        _xcodeDebug.ensureXcodeDebuggerLaunchAction(project.xcodeProjectSchemeFile(scheme: scheme));
 
         debugProject = XcodeDebugProject(
           scheme: scheme,
