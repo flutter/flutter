@@ -123,6 +123,12 @@ std::shared_ptr<Geometry> Geometry::MakeCircle(Point center, Scalar radius) {
   return std::make_shared<EllipseGeometry>(center, radius);
 }
 
+std::shared_ptr<Geometry> Geometry::MakeStrokedCircle(Point center,
+                                                      Scalar radius,
+                                                      Scalar stroke_width) {
+  return std::make_shared<EllipseGeometry>(center, radius, stroke_width);
+}
+
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {
   return false;
 }

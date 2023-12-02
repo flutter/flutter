@@ -15,6 +15,8 @@ class LineGeometry final : public Geometry {
 
   ~LineGeometry() = default;
 
+  static Scalar ComputePixelHalfWidth(const Matrix& transform, Scalar width);
+
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
 
@@ -42,8 +44,6 @@ class LineGeometry final : public Geometry {
 
   Vector2 ComputeAlongVector(const Matrix& transform,
                              bool allow_zero_length) const;
-
-  Scalar ComputeHalfWidth(const Matrix& transform) const;
 
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,

@@ -162,19 +162,69 @@ void CircleTessellator::GenerateCircleTriangleStrip(
     const TessellatedPointProc& proc,
     const Point& center,
     Scalar radius) const {
+  // Quadrant 1 connecting with Quadrant 4:
   for (auto& trig : trigs_) {
     auto offset = trig * radius;
     proc({center.x - offset.x, center.y + offset.y});
     proc({center.x - offset.x, center.y - offset.y});
   }
+
   // The second half of the circle should be iterated in reverse, but
   // we can instead iterate forward and swap the x/y values of the
   // offset as the angles should be symmetric and thus should generate
-  // symmetrically reversed offset vectors.
+  // symmetrically reversed trig vectors.
+  // Quadrant 2 connecting with Quadrant 2:
   for (auto& trig : trigs_) {
     auto offset = trig * radius;
     proc({center.x + offset.y, center.y + offset.x});
     proc({center.x + offset.y, center.y - offset.x});
+  }
+}
+
+void CircleTessellator::GenerateStrokedCircleTriangleStrip(
+    const TessellatedPointProc& proc,
+    const Point& center,
+    Scalar outer_radius,
+    Scalar inner_radius) const {
+  // Zig-zag back and forth between points on the outer circle and the
+  // inner circle. Both circles are evaluated at the same number of
+  // quadrant divisions so the points for a given division should match
+  // 1 for 1 other than their applied radius.
+
+  // Quadrant 1:
+  for (auto& trig : trigs_) {
+    auto outer = trig * outer_radius;
+    auto inner = trig * inner_radius;
+    proc({center.x - outer.x, center.y - outer.y});
+    proc({center.x - inner.x, center.y - inner.y});
+  }
+
+  // The even quadrants of the circle should be iterated in reverse, but
+  // we can instead iterate forward and swap the x/y values of the
+  // offset as the angles should be symmetric and thus should generate
+  // symmetrically reversed trig vectors.
+  // Quadrant 2:
+  for (auto& trig : trigs_) {
+    auto outer = trig * outer_radius;
+    auto inner = trig * inner_radius;
+    proc({center.x + outer.y, center.y - outer.x});
+    proc({center.x + inner.y, center.y - inner.x});
+  }
+
+  // Quadrant 3:
+  for (auto& trig : trigs_) {
+    auto outer = trig * outer_radius;
+    auto inner = trig * inner_radius;
+    proc({center.x + outer.x, center.y + outer.y});
+    proc({center.x + inner.x, center.y + inner.y});
+  }
+
+  // Quadrant 4:
+  for (auto& trig : trigs_) {
+    auto outer = trig * outer_radius;
+    auto inner = trig * inner_radius;
+    proc({center.x - outer.y, center.y + outer.x});
+    proc({center.x - inner.y, center.y + inner.x});
   }
 }
 

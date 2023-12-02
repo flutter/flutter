@@ -11,6 +11,7 @@ namespace impeller {
 class EllipseGeometry final : public Geometry {
  public:
   explicit EllipseGeometry(Point center, Scalar radius);
+  explicit EllipseGeometry(Point center, Scalar radius, Scalar stroke_width);
 
   ~EllipseGeometry() = default;
 
@@ -59,6 +60,7 @@ class EllipseGeometry final : public Geometry {
 
   Point center_;
   Scalar radius_;
+  Scalar stroke_width_;
 
   EllipseGeometry(const EllipseGeometry&) = delete;
 

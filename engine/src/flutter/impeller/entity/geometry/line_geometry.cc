@@ -13,19 +13,20 @@ LineGeometry::LineGeometry(Point p0, Point p1, Scalar width, Cap cap)
   FML_DCHECK(width >= 0);
 }
 
-Scalar LineGeometry::ComputeHalfWidth(const Matrix& transform) const {
+Scalar LineGeometry::ComputePixelHalfWidth(const Matrix& transform,
+                                           Scalar width) {
   auto determinant = transform.GetDeterminant();
   if (determinant == 0) {
     return 0.0f;
   }
 
   Scalar min_size = 1.0f / sqrt(std::abs(determinant));
-  return std::max(width_, min_size) * 0.5f;
+  return std::max(width, min_size) * 0.5f;
 }
 
 Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
                                          bool allow_zero_length) const {
-  Scalar stroke_half_width = ComputeHalfWidth(transform);
+  Scalar stroke_half_width = ComputePixelHalfWidth(transform, width_);
   if (stroke_half_width < kEhCloseEnough) {
     return {};
   }
@@ -72,7 +73,7 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
   using VT = SolidFillVertexShader::PerVertexData;
 
   auto& transform = entity.GetTransform();
-  auto radius = ComputeHalfWidth(transform);
+  auto radius = ComputePixelHalfWidth(transform, width_);
 
   size_t count;
   BufferView vertex_buffer;
@@ -138,7 +139,7 @@ GeometryResult LineGeometry::GetPositionUVBuffer(Rect texture_coverage,
   using VT = TextureFillVertexShader::PerVertexData;
 
   auto& transform = entity.GetTransform();
-  auto radius = ComputeHalfWidth(transform);
+  auto radius = ComputePixelHalfWidth(transform, width_);
 
   auto uv_transform =
       texture_coverage.GetNormalizingTransform() * effect_transform;
