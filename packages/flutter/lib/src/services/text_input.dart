@@ -197,7 +197,7 @@ class TextInputType {
   static const TextInputType streetAddress = TextInputType._(9);
 
   /// Prevent the OS from showing the on-screen virtual keyboard.
-  static const TextInputType none = TextInputType.noneWithOptions(forceMultiline: false);
+  static const TextInputType none = TextInputType.noneWithOptions();
 
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
