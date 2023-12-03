@@ -102,7 +102,7 @@ class TextInputType {
   }) : index = 2, forceMultiline = null;
 
   /// Optimize for none information.
-  /// 
+  ///
   /// Requests a none keyboard with additional settings.
   /// The [forceMultiline] parameter is optional.
   const TextInputType.noneWithOptions({
@@ -125,7 +125,7 @@ class TextInputType {
   final bool? decimal;
 
   /// The none is force multiline, allowing a multiline text input.
-  /// 
+  ///
   /// This flag is only used for the [none] input type, otherwise `null`.
   /// Use `const TextInputType.noneWithOptions(forceMultiline: true)` to set this.
   final bool? forceMultiline;
