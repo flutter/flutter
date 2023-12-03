@@ -89,7 +89,8 @@ enum SmartQuotesType {
 class TextInputType {
   const TextInputType._(this.index)
     : signed = null,
-      decimal = null;
+      decimal = null,
+      forceMultiline = null;
 
   /// Optimize for numerical information.
   ///
@@ -98,7 +99,15 @@ class TextInputType {
   const TextInputType.numberWithOptions({
     this.signed = false,
     this.decimal = false,
-  }) : index = 2;
+  }) : index = 2, forceMultiline = null;
+
+  /// Optimize for none information.
+  /// 
+  /// Requests a none keyboard with additional settings.
+  /// The [forceMultiline] parameter is optional.
+  const TextInputType.noneWithOptions({
+    this.forceMultiline = false,
+  }) : index = 10, signed = null, decimal = null;
 
   /// Enum value index, corresponds to one of the [values].
   final int index;
@@ -114,6 +123,12 @@ class TextInputType {
   /// This flag is only used for the [number] input type, otherwise `null`.
   /// Use `const TextInputType.numberWithOptions(decimal: true)` to set this.
   final bool? decimal;
+
+  /// The none is force multiline, allowing a multiline text input.
+  /// 
+  /// This flag is only used for the [none] input type, otherwise `null`.
+  /// Use `const TextInputType.noneWithOptions(forceMultiline: true)` to set this.
+  final bool? forceMultiline;
 
   /// Optimize for textual information.
   ///
@@ -182,7 +197,7 @@ class TextInputType {
   static const TextInputType streetAddress = TextInputType._(9);
 
   /// Prevent the OS from showing the on-screen virtual keyboard.
-  static const TextInputType none = TextInputType._(10);
+  static const TextInputType none = TextInputType.noneWithOptions(forceMultiline: false);
 
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
@@ -203,6 +218,7 @@ class TextInputType {
       'name': _name,
       'signed': signed,
       'decimal': decimal,
+      'forceMultiline': forceMultiline,
     };
   }
 
@@ -211,7 +227,8 @@ class TextInputType {
     return '${objectRuntimeType(this, 'TextInputType')}('
         'name: $_name, '
         'signed: $signed, '
-        'decimal: $decimal)';
+        'decimal: $decimal, '
+        'forceMultiline: $forceMultiline)';
   }
 
   @override
@@ -219,11 +236,12 @@ class TextInputType {
     return other is TextInputType
         && other.index == index
         && other.signed == signed
-        && other.decimal == decimal;
+        && other.decimal == decimal
+        && other.forceMultiline == forceMultiline;
   }
 
   @override
-  int get hashCode => Object.hash(index, signed, decimal);
+  int get hashCode => Object.hash(index, signed, decimal, forceMultiline);
 }
 
 /// An action the user has requested the text input control to perform.
@@ -2226,7 +2244,9 @@ class _PlatformTextInputControl with TextInputControl {
   Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
-      json['inputType'] = TextInputType.none.toJson();
+      json['inputType'] = TextInputType.noneWithOptions(
+        forceMultiline: configuration.inputType == TextInputType.multiline,
+      );
     }
     return json;
   }
