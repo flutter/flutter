@@ -66,16 +66,11 @@ To run a test, use option `-t` (`--task`):
 
 ```sh
 # from the .../flutter/dev/devicelab directory
-../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST}
+../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t {NAME_OF_TEST}
 ```
 
-Where `NAME_OR_PATH_OF_TEST` can be either of:
-
-* the _name_ of a task, which is a file's basename in `bin/tasks`. Example:
-  `complex_layout__start_up`.
-* the path to a Dart _file_ corresponding to a task, which resides in
-  `bin/tasks`. Tip: most shells support path auto-completion using the Tab key.
-  Example: `bin/tasks/complex_layout__start_up.dart`.
+Where `NAME_OR_PATH_OF_TEST` is the name of a task, which is a file's
+basename in `bin/tasks`. Example: `complex_layout__start_up`.
 
 To run multiple tests, repeat option `-t` (`--task`) multiple times:
 
