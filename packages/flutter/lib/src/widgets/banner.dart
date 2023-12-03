@@ -350,34 +350,57 @@ class _BannerState extends State<Banner> {
   }
 }
 
-/// Displays a [Banner] saying "DEBUG" when running in debug mode.
+/// A widget that displays a [Banner] with a custom message when running in debug mode.
+/// In release mode, it can display a [Banner] with a custom message if `visibleInRelease` is set to true.
 /// [MaterialApp] builds one of these by default.
 ///
-/// Does nothing in release mode.
+/// Does nothing in release mode unless `visibleInRelease` is set to true and `customMessage` is not null.
 class CheckedModeBanner extends StatelessWidget {
   /// Creates a const debug mode banner.
+  ///
+  /// The [child] argument must not be null and is required.
+  ///
+  /// The [customMessage] argument is optional and defaults to null. If provided, this message will be displayed on the banner.
+  ///
+  /// The [visibleInRelease] argument is optional and defaults to false. If set to true, the banner will be visible in release mode.
   const CheckedModeBanner({
-    super.key,
+    Key? key,
     required this.child,
-  });
+    this.customMessage,
+    this.visibleInRelease = false,
+  }) : super(key: key);
 
   /// The widget to show behind the banner.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  /// The custom message to show on the banner. Defaults to `DEBUG` if not provided.
+  final String? customMessage;
+
+  /// A boolean to control the visibility of the banner in release mode. Defaults to false.
+  final bool visibleInRelease;
+
   @override
   Widget build(BuildContext context) {
     Widget result = child;
     assert(() {
       result = Banner(
-        message: 'DEBUG',
+        message: customMessage ?? 'DEBUG',
         textDirection: TextDirection.ltr,
         location: BannerLocation.topEnd,
         child: result,
       );
       return true;
     }());
+    if (visibleInRelease && customMessage != null) {
+      result = Banner(
+        message: customMessage!,
+        textDirection: TextDirection.ltr,
+        location: BannerLocation.topEnd,
+        child: result,
+      );
+    }
     return result;
   }
 
@@ -386,7 +409,7 @@ class CheckedModeBanner extends StatelessWidget {
     super.debugFillProperties(properties);
     String message = 'disabled';
     assert(() {
-      message = '"DEBUG"';
+      message = customMessage ?? '"DEBUG"';
       return true;
     }());
     properties.add(DiagnosticsNode.message(message));
