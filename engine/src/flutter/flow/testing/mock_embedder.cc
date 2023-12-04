@@ -25,10 +25,13 @@ void MockViewEmbedder::CancelFrame() {}
 
 // |ExternalViewEmbedder|
 void MockViewEmbedder::BeginFrame(
-    SkISize frame_size,
     GrDirectContext* context,
-    double device_pixel_ratio,
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+
+// |ExternalViewEmbedder|
+void MockViewEmbedder::PrepareFlutterView(int64_t flutter_view_id,
+                                          SkISize frame_size,
+                                          double device_pixel_ratio) {}
 
 // |ExternalViewEmbedder|
 void MockViewEmbedder::PrerollCompositeEmbeddedView(

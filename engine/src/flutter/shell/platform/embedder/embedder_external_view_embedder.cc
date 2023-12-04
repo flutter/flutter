@@ -7,6 +7,7 @@
 #include <cassert>
 #include <utility>
 
+#include "flutter/common/constants.h"
 #include "flutter/shell/platform/embedder/embedder_layers.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
@@ -53,10 +54,18 @@ void EmbedderExternalViewEmbedder::CancelFrame() {
 
 // |ExternalViewEmbedder|
 void EmbedderExternalViewEmbedder::BeginFrame(
-    SkISize frame_size,
     GrDirectContext* context,
-    double device_pixel_ratio,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+
+// |ExternalViewEmbedder|
+void EmbedderExternalViewEmbedder::PrepareFlutterView(
+    int64_t flutter_view_id,
+    SkISize frame_size,
+    double device_pixel_ratio) {
+  // TODO(dkwingsmt): This class only supports rendering into the implicit
+  // view. Properly support multi-view in the future.
+  // https://github.com/flutter/flutter/issues/135530 item 4
+  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   Reset();
 
   pending_frame_size_ = frame_size;
@@ -407,7 +416,7 @@ class LayerBuilder {
 
 };  // namespace
 
-void EmbedderExternalViewEmbedder::SubmitFrame(
+void EmbedderExternalViewEmbedder::SubmitFlutterView(
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
@@ -436,15 +445,15 @@ void EmbedderExternalViewEmbedder::SubmitFrame(
     return create_render_target_callback_(context, aiks_context, config);
   });
 
-  // This is where unused render targets will be collected. Control may flow to
-  // the embedder. Here, the embedder has the opportunity to trample on the
+  // This is where unused render targets will be collected. Control may flow
+  // to the embedder. Here, the embedder has the opportunity to trample on the
   // OpenGL context.
   //
   // For optimum performance, we should tell the render target cache to clear
-  // its unused entries before allocating new ones. This collection step before
-  // allocating new render targets ameliorates peak memory usage within the
-  // frame. But, this causes an issue in a known internal embedder. To work
-  // around this issue while that embedder migrates, collection of render
+  // its unused entries before allocating new ones. This collection step
+  // before allocating new render targets ameliorates peak memory usage within
+  // the frame. But, this causes an issue in a known internal embedder. To
+  // work around this issue while that embedder migrates, collection of render
   // targets is deferred after the presentation.
   //
   // @warning: Embedder may trample on our OpenGL context here.
@@ -460,9 +469,9 @@ void EmbedderExternalViewEmbedder::SubmitFrame(
 
   builder.Render();
 
-  // We are going to be transferring control back over to the embedder there the
-  // context may be trampled upon again. Flush all operations to the underlying
-  // rendering API.
+  // We are going to be transferring control back over to the embedder there
+  // the context may be trampled upon again. Flush all operations to the
+  // underlying rendering API.
   //
   // @warning: Embedder may trample on our OpenGL context here.
   if (context) {
@@ -482,7 +491,8 @@ void EmbedderExternalViewEmbedder::SubmitFrame(
     presented_layers.InvokePresentCallback(present_callback_);
   }
 
-  // See why this is necessary in the comment where this collection in realized.
+  // See why this is necessary in the comment where this collection in
+  // realized.
   //
   // @warning: Embedder may trample on our OpenGL context here.
   deferred_cleanup_render_targets.clear();

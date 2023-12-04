@@ -28,7 +28,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   // returns the new `post_preroll_result`.
   void UpdatePostPrerollResult(PostPrerollResult post_preroll_result);
 
-  // Gets the number of times the SubmitFrame method has been called in
+  // Gets the number of times the SubmitFlutterView method has been called in
   // the external view embedder.
   int GetSubmittedFrameCount();
 
@@ -46,11 +46,14 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(SkISize frame_size,
-                  GrDirectContext* context,
-                  double device_pixel_ratio,
+  void BeginFrame(GrDirectContext* context,
                   const fml::RefPtr<fml::RasterThreadMerger>&
                       raster_thread_merger) override;
+
+  // |ExternalViewEmbedder|
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          SkISize frame_size,
+                          double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -74,9 +77,10 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
       const SkRect& filter_rect) override;
 
   // |ExternalViewEmbedder|
-  void SubmitFrame(GrDirectContext* context,
-                   const std::shared_ptr<impeller::AiksContext>& aiks_context,
-                   std::unique_ptr<SurfaceFrame> frame) override;
+  void SubmitFlutterView(
+      GrDirectContext* context,
+      const std::shared_ptr<impeller::AiksContext>& aiks_context,
+      std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
   void EndFrame(bool should_resubmit_frame,

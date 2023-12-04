@@ -16,6 +16,10 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+// Ignoring the deprecated member use because we're specifically testing
+// deprecated API.
+// ignore: deprecated_member_use
+
 void testMain() {
   test('hashValues and hashList can hash lots of huge values effectively', () {
     final int hashValueFromArgs = hashValues(

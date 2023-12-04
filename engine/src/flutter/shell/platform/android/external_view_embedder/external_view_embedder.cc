@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+#include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 
@@ -62,11 +63,11 @@ SkRect AndroidExternalViewEmbedder::GetViewRect(int64_t view_id) const {
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedder::SubmitFrame(
+void AndroidExternalViewEmbedder::SubmitFlutterView(
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
-  TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder::SubmitFrame");
+  TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder::SubmitFlutterView");
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
@@ -257,10 +258,22 @@ void AndroidExternalViewEmbedder::Reset() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::BeginFrame(
-    SkISize frame_size,
     GrDirectContext* context,
-    double device_pixel_ratio,
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+  // JNI method must be called on the platform thread.
+  if (raster_thread_merger->IsOnPlatformThread()) {
+    jni_facade_->FlutterViewBeginFrame();
+  }
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder::PrepareFlutterView(
+    int64_t flutter_view_id,
+    SkISize frame_size,
+    double device_pixel_ratio) {
+  // TODO(dkwingsmt): This class only supports rendering into the implicit view.
+  // Properly support multi-view in the future.
+  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   Reset();
 
   // The surface size changed. Therefore, destroy existing surfaces as
@@ -269,10 +282,6 @@ void AndroidExternalViewEmbedder::BeginFrame(
     DestroySurfaces();
   }
   surface_pool_->SetFrameSize(frame_size);
-  // JNI method must be called on the platform thread.
-  if (raster_thread_merger->IsOnPlatformThread()) {
-    jni_facade_->FlutterViewBeginFrame();
-  }
 
   frame_size_ = frame_size;
   device_pixel_ratio_ = device_pixel_ratio;

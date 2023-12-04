@@ -25,11 +25,14 @@ class MockViewEmbedder : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(SkISize frame_size,
-                  GrDirectContext* context,
-                  double device_pixel_ratio,
+  void BeginFrame(GrDirectContext* context,
                   const fml::RefPtr<fml::RasterThreadMerger>&
                       raster_thread_merger) override;
+
+  // |ExternalViewEmbedder|
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          SkISize frame_size,
+                          double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
