@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include <unordered_map>
-
-#include "flutter/fml/macros.h"
+#include "impeller/core/sampler.h"
 #include "impeller/core/sampler_descriptor.h"
 
 namespace impeller {

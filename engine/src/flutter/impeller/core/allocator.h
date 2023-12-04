@@ -14,7 +14,6 @@ namespace impeller {
 
 class Context;
 class DeviceBuffer;
-class Texture;
 
 //------------------------------------------------------------------------------
 /// @brief      An object that allocates device memory.
