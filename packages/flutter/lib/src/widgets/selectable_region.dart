@@ -1817,6 +1817,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     _updateHandleLayersAndOwners();
   }
 
+  Rect _getBoundingBox(Selectable selectable) {
+    Rect result = selectable.boundingBoxes.first;
+    for (int index = 1; index < selectable.boundingBoxes.length; index += 1) {
+      result = result.expandToInclude(selectable.boundingBoxes[index]);
+    }
+    return result;
+  }
+
   /// The compare function this delegate used for determining the selection
   /// order of the selectables.
   ///
@@ -1827,11 +1835,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   int _compareScreenOrder(Selectable a, Selectable b) {
     final Rect rectA = MatrixUtils.transformRect(
       a.getTransformTo(null),
-      Rect.fromLTWH(0, 0, a.size.width, a.size.height),
+      _getBoundingBox(a),
     );
     final Rect rectB = MatrixUtils.transformRect(
       b.getTransformTo(null),
-      Rect.fromLTWH(0, 0, b.size.width, b.size.height),
+      _getBoundingBox(b),
     );
     final int result = _compareVertically(rectA, rectB);
     if (result != 0) {
@@ -2141,9 +2149,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     SelectionResult? lastSelectionResult;
     for (int index = 0; index < selectables.length; index += 1) {
       bool globalRectsContainsPosition = false;
-      if (selectables[index].granularRects.isNotEmpty) {
-        for (final Rect rect in selectables[index].granularRects) {
-          if (rect.contains(event.globalPosition)) {
+      if (selectables[index].boundingBoxes.isNotEmpty) {
+        for (final Rect rect in selectables[index].boundingBoxes) {
+          final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
+          if (globalRect.contains(event.globalPosition)) {
             globalRectsContainsPosition = true;
             break;
           }

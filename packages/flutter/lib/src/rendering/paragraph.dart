@@ -1977,7 +1977,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   @override
   Matrix4 getTransformTo(RenderObject? ancestor) {
-    return getTransformToParagraph()..multiply(paragraph.getTransformTo(ancestor));
+    return paragraph.getTransformTo(ancestor);
   }
 
   @override
@@ -1996,28 +1996,25 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
   }
 
-  List<Rect>? _cachedGranularRects;
+  List<Rect>? _cachedBoundingBoxes;
   @override
-  List<Rect> get granularRects {
-    if (_cachedGranularRects == null) {
+  List<Rect> get boundingBoxes {
+    if (_cachedBoundingBoxes == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
       );// Maybe we can re-use the getBoxesForSelections results in `_rect`.
       if (boxes.isNotEmpty) {
-        _cachedGranularRects = <Rect>[];
+        _cachedBoundingBoxes = <Rect>[];
         for (final TextBox textBox in boxes) {
-          final Rect rectBox = textBox.toRect();
-          final Rect rect = Rect.fromLTWH(0.0, 0.0, rectBox.width, rectBox.height);
-          final Matrix4 transform = Matrix4.translationValues(rectBox.left, rectBox.top, 0.0)..multiply(paragraph.getTransformTo(null));
-          _cachedGranularRects!.add(MatrixUtils.transformRect(transform, rect));
+          _cachedBoundingBoxes!.add(textBox.toRect());
         }
       } else {
         final Offset offset = paragraph._getOffsetForPosition(TextPosition(offset: range.start));
         final Rect rect = Rect.fromPoints(offset, offset.translate(0, - paragraph._textPainter.preferredLineHeight));
-        _cachedGranularRects = <Rect>[MatrixUtils.transformRect(getTransformTo(null), rect)];
+        _cachedBoundingBoxes = <Rect>[rect];
       }
     }
-    return _cachedGranularRects!;
+    return _cachedBoundingBoxes!;
   }
 
   Rect? _cachedRect;

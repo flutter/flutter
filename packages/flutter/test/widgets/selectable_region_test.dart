@@ -3785,15 +3785,13 @@ class RenderSelectionSpy extends RenderProxyBox
   Size _size = Size.zero;
 
   @override
-  List<Rect> get granularRects => _granularRects;
-  final List<Rect> _granularRects = <Rect>[];
+  List<Rect> get boundingBoxes => _boundingBoxes;
+  final List<Rect> _boundingBoxes = <Rect>[];
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     _size = Size(constraints.maxWidth, constraints.maxHeight);
-    WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      _granularRects.add(MatrixUtils.transformRect(getTransformTo(null), Rect.fromLTWH(0.0, 0.0, _size.width, _size.height)));
-    });
+    _boundingBoxes.add(Rect.fromLTWH(0.0, 0.0, constraints.maxWidth, constraints.maxHeight));
     return _size;
   }
 
@@ -3860,14 +3858,12 @@ class RenderSelectAll extends RenderProxyBox
   }
 
   @override
-  List<Rect> get granularRects => _granularRects;
-  final List<Rect> _granularRects = <Rect>[];
+  List<Rect> get boundingBoxes => _boundingBoxes;
+  final List<Rect> _boundingBoxes = <Rect>[];
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      _granularRects.add(MatrixUtils.transformRect(getTransformTo(null), Rect.fromLTWH(0.0, 0.0, size.width, size.height)));
-    });
+    _boundingBoxes.add(Rect.fromLTWH(0.0, 0.0, constraints.maxWidth, constraints.maxHeight));
     return super.computeDryLayout(constraints);
   }
 

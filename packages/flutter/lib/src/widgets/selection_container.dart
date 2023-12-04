@@ -201,7 +201,7 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   Size get size => (context.findRenderObject()! as RenderBox).size;
 
   @override
-  List<Rect> get granularRects => <Rect>[Rect.fromLTWH(0, 0, (context.findRenderObject()! as RenderBox).size.width, (context.findRenderObject()! as RenderBox).size.height)];
+  List<Rect> get boundingBoxes => <Rect>[Rect.fromLTWH(0, 0, (context.findRenderObject()! as RenderBox).size.width, (context.findRenderObject()! as RenderBox).size.height)];
 
   @override
   void dispose() {
