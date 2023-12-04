@@ -940,28 +940,17 @@ mixin _RenderTheaterMixin on RenderBox {
     }
   }
 
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performLayout() {
-    final Iterator<RenderBox> iterator = _childrenInPaintOrder().iterator;
-    // Same BoxConstraints as used by RenderStack for StackFit.expand.
-    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+  void layoutChild(RenderBox child, BoxConstraints nonPositionedChildConstraints) {
+    final StackParentData childParentData = child.parentData! as StackParentData;
     final Alignment alignment = theater._resolvedAlignment;
-
-    while (iterator.moveNext()) {
-      final RenderBox child = iterator.current;
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      if (!childParentData.isPositioned) {
-        child.layout(nonPositionedChildConstraints, parentUsesSize: true);
-        childParentData.offset = alignment.alongOffset(size - child.size as Offset);
-      } else {
-        assert(child is! _RenderDeferredLayoutBox, 'all _RenderDeferredLayoutBoxes must be non-positioned children.');
-        RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
-      }
-      assert(child.parentData == childParentData);
+    if (!childParentData.isPositioned) {
+      child.layout(nonPositionedChildConstraints, parentUsesSize: true);
+      childParentData.offset = Offset.zero;
+    } else {
+      assert(child is! _RenderDeferredLayoutBox, 'all _RenderDeferredLayoutBoxes must be non-positioned children.');
+      RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
     }
+    assert(child.parentData == childParentData);
   }
 
   @override
@@ -1246,6 +1235,41 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       yield child;
       childLeft -= 1;
       child = childLeft <= 0 ? null : childParentData.previousSibling;
+    }
+  }
+
+  @override
+  bool get sizedByParent => false;
+
+  @override
+  void performLayout() {
+    RenderBox? sizeDeterminingChild;
+    if (constraints.biggest.isFinite) {
+      size = constraints.biggest;
+    } else {
+      RenderBox? child = _lastOnstageChild;
+      while (child != null) {
+        final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+        // Only children that were not created by an OverlayPortal (overlayEntry != null)
+        // and that are non-positioned can determine overall size of Overlay.
+        if (childParentData.overlayEntry != null && !childParentData.isPositioned) {
+          sizeDeterminingChild = child;
+          layoutChild(sizeDeterminingChild, constraints);
+          size = child.size;
+          break;
+        }
+        child = childParentData.previousSibling;
+      }
+      // TODO(goderbauer): Provide better error message if we cannot find a size-determining child.
+      assert(sizeDeterminingChild != null);
+    }
+
+    // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      if (child != sizeDeterminingChild) {
+        layoutChild(child, nonPositionedChildConstraints);
+      }
     }
   }
 
@@ -2185,6 +2209,9 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     _callingMarkParentNeedsLayout = false;
   }
 
+  @override
+  bool get sizedByParent => true;
+
   bool _needsLayout = true;
   @override
   void markNeedsLayout() {
@@ -2254,7 +2281,8 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
       _needsLayout = false;
       return;
     }
-    super.performLayout();
+    assert(constraints.isTight);
+    layoutChild(child, constraints);
     assert(() {
       _debugMutationsLocked = false;
       return true;
