@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
+import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilderNew;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'debug.dart';
 
-export 'dart:ui' show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
+export 'dart:ui' show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilderNew;
 
 /// The glue between the semantics layer and the Flutter engine.
 mixin SemanticsBinding on BindingBase {
@@ -160,8 +160,8 @@ mixin SemanticsBinding on BindingBase {
   ///
   /// This method is used by the [SemanticsOwner] to create builder for all its
   /// semantics updates.
-  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
-    return ui.SemanticsUpdateBuilder();
+  ui.SemanticsUpdateBuilderNew createSemanticsUpdateBuilder() {
+    return ui.SemanticsUpdateBuilderNew();
   }
 
   /// The platform is requesting that animations be disabled or simplified.
