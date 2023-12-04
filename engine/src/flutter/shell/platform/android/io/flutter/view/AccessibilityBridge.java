@@ -671,6 +671,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Work around for https://github.com/flutter/flutter/issues/21030
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       result.setViewIdResourceName("");
+      if (semanticsNode.identifier != null) {
+        result.setViewIdResourceName(semanticsNode.identifier);
+      }
     }
     result.setPackageName(rootAccessibilityView.getContext().getPackageName());
     result.setClassName("android.view.View");
@@ -2355,6 +2358,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float scrollPosition;
     private float scrollExtentMax;
     private float scrollExtentMin;
+    private String identifier;
     private String label;
     private List<StringAttribute> labelAttributes;
     private String value;
@@ -2487,6 +2491,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             indent
                 + "SemanticsNode id="
                 + id
+                + " identifier="
+                + identifier
                 + " label="
                 + label
                 + " actions="
@@ -2550,6 +2556,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       scrollExtentMin = buffer.getFloat();
 
       int stringIndex = buffer.getInt();
+
+      identifier = stringIndex == -1 ? null : strings[stringIndex];
+      stringIndex = buffer.getInt();
+
       label = stringIndex == -1 ? null : strings[stringIndex];
 
       labelAttributes = getStringAttributesFromBuffer(buffer, stringAttributeArgs);

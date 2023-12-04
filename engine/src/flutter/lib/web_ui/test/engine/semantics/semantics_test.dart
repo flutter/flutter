@@ -3051,6 +3051,7 @@ void updateNode(
   double elevation = 0.0,
   double thickness = 0.0,
   ui.Rect rect = ui.Rect.zero,
+  String identifier = '',
   String label = '',
   List<ui.StringAttribute> labelAttributes = const <ui.StringAttribute>[],
   String hint = '',
@@ -3091,6 +3092,8 @@ void updateNode(
     elevation: elevation,
     thickness: thickness,
     rect: rect,
+    // TODO(bartekpacia): Pass real identifier parameter once migration is complete
+    // identifier: '',
     label: label,
     labelAttributes: labelAttributes,
     hint: hint,
