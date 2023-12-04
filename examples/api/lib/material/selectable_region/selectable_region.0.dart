@@ -114,7 +114,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   SelectionGeometry get value => _geometry.value;
 
   // Selectable APIs.
-  
+
   @override
   List<Rect> get boundingBoxes => _boundingBoxes;
   final List<Rect> _boundingBoxes = <Rect>[];
