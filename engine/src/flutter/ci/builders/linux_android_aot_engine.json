@@ -173,7 +173,8 @@
                     "parameters": [
                         "--variant",
                         "android_profile_arm64"
-                    ]
+                    ],
+		    "test_if": "main"
                 }
             ]
         },

@@ -325,6 +325,8 @@ directory.
 * **contexts** - a list of available contexts to add to the text execution step.
 The list of supported contexts can be found [here](https://flutter.googlesource.com/recipes/+/refs/heads/main/recipe_modules/flutter_deps/api.py#687). As of 06/20/23 two contexts are supported:
 "android_virtual_device" and "metric_center_token".
+* **test_if** - a regex of what branches this test should run on. Defaults
+to everywhere.
 
 The test scripts will run in a deferred context (failing the step only after
 logs have been uploaded). Tester and builder recipes provide an environment
