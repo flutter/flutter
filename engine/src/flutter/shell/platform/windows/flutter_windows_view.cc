@@ -535,18 +535,6 @@ void FlutterWindowsView::SendPointerEventWithData(
   }
 }
 
-bool FlutterWindowsView::MakeCurrent() {
-  return engine_->surface_manager()->MakeCurrent();
-}
-
-bool FlutterWindowsView::MakeResourceCurrent() {
-  return engine_->surface_manager()->MakeResourceCurrent();
-}
-
-bool FlutterWindowsView::ClearContext() {
-  return engine_->surface_manager()->ClearContext();
-}
-
 bool FlutterWindowsView::SwapBuffers() {
   // Called on an engine-controlled (non-platform) thread.
   std::unique_lock<std::mutex> lock(resize_mutex_);
