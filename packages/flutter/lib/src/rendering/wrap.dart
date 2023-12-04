@@ -15,6 +15,8 @@ import 'object.dart';
 // y-axis, an _AxisSize's width is along the main axis and its height is along the
 // cross axis.
 typedef _AxisSize = Size;
+typedef _PositionChild = void Function(Offset offset, RenderBox child);
+typedef _GetChildSize = Size Function(RenderBox child);
 
 /// How [Wrap] should align objects.
 ///
@@ -529,7 +531,7 @@ class RenderWrap extends RenderBox
 
   Size _convertAxisSize(Size size) => switch (direction) {
     Axis.horizontal => size,
-    Axis.vertical => Size(size.height, size.width),
+    Axis.vertical => size.flipped,
   };
 
   (bool, bool) get _areAxesFlipped {
@@ -547,6 +549,8 @@ class RenderWrap extends RenderBox
     };
   }
 
+  static Size _getChildSize(RenderBox child) => child.size;
+
   static void _setChildPosition(Offset offset, RenderBox child) {
     final WrapParentData childParentData = child.parentData! as WrapParentData;
     childParentData.offset = offset;
@@ -554,6 +558,7 @@ class RenderWrap extends RenderBox
 
   bool _hasVisualOverflow = false;
 
+  // Breaks the children into differet runs.
   (_AxisSize, Iterable<_RunMetrics>) _computeRuns(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
     final List<_RunMetrics> runMetrics = <_RunMetrics>[];
 
@@ -569,16 +574,13 @@ class RenderWrap extends RenderBox
 
     final (bool flipMainAxis, bool flipCrossAxis) = _areAxesFlipped;
 
-    RenderBox? child = firstChild;
     RenderBox? leadingChild;
     RenderBox? trailingChild;
 
-    while (child != null) {
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
       // The child closest to the top left edge.
       final RenderBox? topLeftChild = flipMainAxis ? trailingChild : leadingChild;
-      final Size childSize = layoutChild(child, childConstraints);
-      final double childMainAxisExtent = _getMainAxisExtent(childSize);
-      final double childCrossAxisExtent = _getCrossAxisExtent(childSize);
+      final _AxisSize(width: double childMainAxisExtent, height: double childCrossAxisExtent) = _convertAxisSize(layoutChild(child, childConstraints));
       if (topLeftChild != null && runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit) {
         assert(childCount > 0);
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
@@ -600,7 +602,6 @@ class RenderWrap extends RenderBox
       }
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       childCount += 1;
-      child = childAfter(child);
     }
     final RenderBox? topLeftChild = flipMainAxis ? trailingChild : leadingChild;
     if (topLeftChild != null) {
@@ -615,7 +616,7 @@ class RenderWrap extends RenderBox
     return (_AxisSize(mainAxisExtent, crossAxisExtent), flipCrossAxis ? runMetrics.reversed : runMetrics);
   }
 
-  void _positionChild(Iterable<_RunMetrics> runMetrics, _AxisSize childrenAxisSize, _AxisSize containerAxisSize, void Function(Offset, RenderBox) positionChild) {
+  void _positionChildren(Iterable<_RunMetrics> runMetrics, _AxisSize childrenAxisSize, _AxisSize containerAxisSize, _PositionChild positionChild, _GetChildSize getChildSize) {
     final _AxisSize freeAxisSize = _AxisSize(
       containerAxisSize.width - childrenAxisSize.width,
       containerAxisSize.height - childrenAxisSize.height,
@@ -645,8 +646,7 @@ class RenderWrap extends RenderBox
       double childMainAxisOffset = childLeadingSpace;
 
       run.visitChildren((RenderBox child) {
-        final double childMainAxisExtent = _getMainAxisExtent(child.size);
-        final double childCrossAxisExtent = _getCrossAxisExtent(child.size);
+        final _AxisSize(width: double childMainAxisExtent, height: double childCrossAxisExtent) = _convertAxisSize(getChildSize(child));
         final double childCrossAxisOffset = effectiveCrossAlignment._alignment * (runCrossAxisExtent - childCrossAxisExtent);
         positionChild(_getOffset(childMainAxisOffset, runCrossAxisOffset + childCrossAxisOffset), child);
         childMainAxisOffset += childMainAxisExtent + childBetweenSpace;
@@ -679,7 +679,8 @@ class RenderWrap extends RenderBox
           : math.min(localBaselineOffset, offset.dy + childBaseline);
       }
     }
-    _positionChild(runMetrics, childrenAxisSize, containerAxisSize, findHighestBaseline);
+    Size getChildSize(RenderBox child) => child.getDryLayout(childConstraints);
+    _positionChildren(runMetrics, childrenAxisSize, containerAxisSize, findHighestBaseline, getChildSize);
     return baselineOffset;
   }
 
@@ -706,8 +707,8 @@ class RenderWrap extends RenderBox
     double runMainAxisExtent = 0.0;
     double runCrossAxisExtent = 0.0;
     int childCount = 0;
-    RenderBox? child = firstChild;
-    while (child != null) {
+
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
       final Size childSize = layoutChild(child, childConstraints);
       final double childMainAxisExtent = _getMainAxisExtent(childSize);
       final double childCrossAxisExtent = _getCrossAxisExtent(childSize);
@@ -725,7 +726,6 @@ class RenderWrap extends RenderBox
         runMainAxisExtent += spacing;
       }
       childCount += 1;
-      child = childAfter(child);
     }
     crossAxisExtent += runCrossAxisExtent;
     mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
@@ -754,7 +754,7 @@ class RenderWrap extends RenderBox
     final _AxisSize containerAxisSize = _convertAxisSize(size);
     _hasVisualOverflow = containerAxisSize.width < childrenAxisSize.width
                       || containerAxisSize.height < childrenAxisSize.height;
-    _positionChild(runMetrics, childrenAxisSize, containerAxisSize, _setChildPosition);
+    _positionChildren(runMetrics, childrenAxisSize, containerAxisSize, _setChildPosition, _getChildSize);
   }
 
   @override

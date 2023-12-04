@@ -2510,15 +2510,6 @@ abstract class RenderBox extends RenderObject {
   // baseline) should only be checked
   void _debugVerifyDryCalculations() {
     assert(() {
-      if (!debugCheckIntrinsicSizes) {
-        return true;
-      }
-    final bool hasCache = (_layoutCacheStorage._cachedDryAlphabeticBaseline?.isNotEmpty ?? false)
-                       || (_layoutCacheStorage._cachedDryIdeoBaseline?.isNotEmpty ?? false);
-                       if (!hasCache) {
-                         return true;
-                       }
-
       final List<DiagnosticsNode> messages = <DiagnosticsNode>[
         ErrorDescription(
           'The constraints used were $constraints.',
@@ -2609,7 +2600,14 @@ abstract class RenderBox extends RenderObject {
   void layout(Constraints constraints, { bool parentUsesSize = false }) {
     super.layout(constraints, parentUsesSize: parentUsesSize);
     assert(() {
-      _debugVerifyDryCalculations();
+      if (!debugCheckIntrinsicSizes) {
+        return true;
+      }
+      final bool hasCache = (_layoutCacheStorage._cachedDryAlphabeticBaseline?.isNotEmpty ?? false)
+                        || (_layoutCacheStorage._cachedDryIdeoBaseline?.isNotEmpty ?? false);
+      if (hasCache) {
+        _debugVerifyDryCalculations();
+      }
       return true;
     }());
   }
