@@ -18,11 +18,12 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   flutter::SemanticsNodeUpdates update;
   flutter::SemanticsNode node0;
   node0.id = 0;
+  node0.identifier = "identifier";
   node0.label = "label";
   node0.tooltip = "tooltip";
   update.insert(std::make_pair(0, node0));
 
-  std::vector<uint8_t> expected_buffer(188);
+  std::vector<uint8_t> expected_buffer(192);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args(0);
   size_t position = 0;
   int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&expected_buffer[0]);
@@ -41,6 +42,8 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
+  buffer_int32[position++] = expected_strings.size();  // node0.identifier
+  expected_strings.push_back(node0.identifier);
   buffer_int32[position++] = expected_strings.size();  // node0.label
   expected_strings.push_back(node0.label);
   buffer_int32[position++] = -1;  // node0.labelAttributes
@@ -90,13 +93,14 @@ TEST(PlatformViewShell,
   locale_attribute->type = flutter::StringAttributeType::kLocale;
   locale_attribute->locale = "en-US";
   node0.id = 0;
+  node0.identifier = "identifier";
   node0.label = "label";
   node0.labelAttributes.push_back(spell_out_attribute);
   node0.hint = "hint";
   node0.hintAttributes.push_back(locale_attribute);
   update.insert(std::make_pair(0, node0));
 
-  std::vector<uint8_t> expected_buffer(220);
+  std::vector<uint8_t> expected_buffer(224);
   std::vector<std::vector<uint8_t>> expected_string_attribute_args;
   size_t position = 0;
   int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&expected_buffer[0]);
@@ -115,6 +119,8 @@ TEST(PlatformViewShell,
   buffer_float32[position++] = static_cast<float>(node0.scrollPosition);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMax);
   buffer_float32[position++] = static_cast<float>(node0.scrollExtentMin);
+  buffer_int32[position++] = expected_strings.size();  // node0.identifier
+  expected_strings.push_back(node0.identifier);
   buffer_int32[position++] = expected_strings.size();  // node0.label
   expected_strings.push_back(node0.label);
   buffer_int32[position++] = 1;   // node0.labelAttributes

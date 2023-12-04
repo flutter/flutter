@@ -730,6 +730,10 @@ abstract class SemanticsUpdateBuilder {
   /// [PlatformDispatcher.onSemanticsActionEvent] callback might be called with
   /// an action that is no longer possible.
   ///
+  /// The `identifier` is a string that describes the node for UI automation
+  /// tools that work by querying the accessibility hierarchy, such as Android
+  /// UI Automator, iOS XCUITest, or Appium. It's not exposed to users.
+  ///
   /// The `label` is a string that describes this node. The `value` property
   /// describes the current value of the node as a string. The `increasedValue`
   /// string will become the `value` string after a [SemanticsAction.increase]
@@ -803,6 +807,8 @@ abstract class SemanticsUpdateBuilder {
     required double elevation,
     required double thickness,
     required Rect rect,
+    // TODO(bartekpacia): Re-add once migration is complete
+    // String identifier,
     required String label,
     required List<StringAttribute> labelAttributes,
     required String value,
@@ -872,6 +878,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implem
     required double elevation,
     required double thickness,
     required Rect rect,
+    // TODO(bartekpacia): Re-add once migration is complete
+    // String identifier,
     required String label,
     required List<StringAttribute> labelAttributes,
     required String value,
@@ -910,6 +918,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implem
       rect.bottom,
       elevation,
       thickness,
+      // TODO(bartekpacia): Pass real identifier parameter once migration is complete
+      '',
       label,
       labelAttributes,
       value,
@@ -961,6 +971,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implem
           Handle,
           Handle,
           Handle,
+          Handle,
           Int32,
           Handle,
           Handle,
@@ -986,6 +997,343 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implem
       double bottom,
       double elevation,
       double thickness,
+      String? identifier,
+      String label,
+      List<StringAttribute> labelAttributes,
+      String value,
+      List<StringAttribute> valueAttributes,
+      String increasedValue,
+      List<StringAttribute> increasedValueAttributes,
+      String decreasedValue,
+      List<StringAttribute> decreasedValueAttributes,
+      String hint,
+      List<StringAttribute> hintAttributes,
+      String tooltip,
+      int textDirection,
+      Float64List transform,
+      Int32List childrenInTraversalOrder,
+      Int32List childrenInHitTestOrder,
+      Int32List additionalActions);
+
+  @override
+  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) {
+    _updateCustomAction(id, label ?? '', hint ?? '', overrideId);
+  }
+  @Native<Void Function(Pointer<Void>, Int32, Handle, Handle, Int32)>(symbol: 'SemanticsUpdateBuilder::updateCustomAction')
+  external void _updateCustomAction(int id, String label, String hint, int overrideId);
+
+  @override
+  SemanticsUpdate build() {
+    final _NativeSemanticsUpdate semanticsUpdate = _NativeSemanticsUpdate._();
+    _build(semanticsUpdate);
+    return semanticsUpdate;
+  }
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'SemanticsUpdateBuilder::build')
+  external void _build(_NativeSemanticsUpdate outSemanticsUpdate);
+}
+
+/// An object that creates [SemanticsUpdate] objects.
+///
+/// Once created, the [SemanticsUpdate] objects can be passed to
+/// [PlatformDispatcher.updateSemantics] to update the semantics conveyed to the
+/// user.
+@Deprecated('Temporary API. Will be removed once migration is complete.')
+abstract class SemanticsUpdateBuilderNew {
+  /// Creates an empty [SemanticsUpdateBuilderNew] object.
+  @Deprecated('Temporary API. Will be removed once migration is complete.')
+  factory SemanticsUpdateBuilderNew() = _NativeSemanticsUpdateBuilderNew;
+
+  /// Update the information associated with the node with the given `id`.
+  ///
+  /// The semantics nodes form a tree, with the root of the tree always having
+  /// an id of zero. The `childrenInTraversalOrder` and `childrenInHitTestOrder`
+  /// are the ids of the nodes that are immediate children of this node. The
+  /// former enumerates children in traversal order, and the latter enumerates
+  /// the same children in the hit test order. The two lists must have the same
+  /// length and contain the same ids. They may only differ in the order the
+  /// ids are listed in. For more information about different child orders, see
+  /// [DebugSemanticsDumpOrder].
+  ///
+  /// The system retains the nodes that are currently reachable from the root.
+  /// A given update need not contain information for nodes that do not change
+  /// in the update. If a node is not reachable from the root after an update,
+  /// the node will be discarded from the tree.
+  ///
+  /// The `flags` are a bit field of [SemanticsFlag]s that apply to this node.
+  ///
+  /// The `actions` are a bit field of [SemanticsAction]s that can be undertaken
+  /// by this node. If the user wishes to undertake one of these actions on this
+  /// node, the [PlatformDispatcher.onSemanticsActionEvent] will be called with
+  /// a [SemanticsActionEvent] specifying the action to be performed. Because
+  /// the semantics tree is maintained asynchronously, the
+  /// [PlatformDispatcher.onSemanticsActionEvent] callback might be called with
+  /// an action that is no longer possible.
+  ///
+  /// The `identifier` is a string that describes the node for UI automation
+  /// tools that work by querying the accessibility hierarchy, such as Android
+  /// UI Automator, iOS XCUITest, or Appium. It's not exposed to users.
+  ///
+  /// The `label` is a string that describes this node. The `value` property
+  /// describes the current value of the node as a string. The `increasedValue`
+  /// string will become the `value` string after a [SemanticsAction.increase]
+  /// action is performed. The `decreasedValue` string will become the `value`
+  /// string after a [SemanticsAction.decrease] action is performed. The `hint`
+  /// string describes what result an action performed on this node has. The
+  /// reading direction of all these strings is given by `textDirection`.
+  ///
+  /// The `labelAttributes`, `valueAttributes`, `hintAttributes`,
+  /// `increasedValueAttributes`, and `decreasedValueAttributes` are the lists of
+  /// [StringAttribute] carried by the `label`, `value`, `hint`, `increasedValue`,
+  /// and `decreasedValue` respectively. Their contents must not be changed during
+  /// the semantics update.
+  ///
+  /// The `tooltip` is a string that describe additional information when user
+  /// hover or long press on the backing widget of this semantics node.
+  ///
+  /// The fields `textSelectionBase` and `textSelectionExtent` describe the
+  /// currently selected text within `value`. A value of -1 indicates no
+  /// current text selection base or extent.
+  ///
+  /// The field `maxValueLength` is used to indicate that an editable text
+  /// field has a limit on the number of characters entered. If it is -1 there
+  /// is no limit on the number of characters entered. The field
+  /// `currentValueLength` indicates how much of that limit has already been
+  /// used up. When `maxValueLength` is >= 0, `currentValueLength` must also be
+  /// >= 0, otherwise it should be specified to be -1.
+  ///
+  /// The field `platformViewId` references the platform view, whose semantics
+  /// nodes will be added as children to this node. If a platform view is
+  /// specified, `childrenInHitTestOrder` and `childrenInTraversalOrder` must
+  /// be empty. A value of -1 indicates that this node is not associated with a
+  /// platform view.
+  ///
+  /// For scrollable nodes `scrollPosition` describes the current scroll
+  /// position in logical pixel. `scrollExtentMax` and `scrollExtentMin`
+  /// describe the maximum and minimum in-rage values that `scrollPosition` can
+  /// be. Both or either may be infinity to indicate unbound scrolling. The
+  /// value for `scrollPosition` can (temporarily) be outside this range, for
+  /// example during an overscroll. `scrollChildren` is the count of the
+  /// total number of child nodes that contribute semantics and `scrollIndex`
+  /// is the index of the first visible child node that contributes semantics.
+  ///
+  /// The `rect` is the region occupied by this node in its own coordinate
+  /// system.
+  ///
+  /// The `transform` is a matrix that maps this node's coordinate system into
+  /// its parent's coordinate system.
+  ///
+  /// The `elevation` describes the distance in z-direction between this node
+  /// and the `elevation` of the parent.
+  ///
+  /// The `thickness` describes how much space this node occupies in the
+  /// z-direction starting at `elevation`. Basically, in the z-direction the
+  /// node starts at `elevation` above the parent and ends at `elevation` +
+  /// `thickness` above the parent.
+  void updateNode({
+    required int id,
+    required int flags,
+    required int actions,
+    required int maxValueLength,
+    required int currentValueLength,
+    required int textSelectionBase,
+    required int textSelectionExtent,
+    required int platformViewId,
+    required int scrollChildren,
+    required int scrollIndex,
+    required double scrollPosition,
+    required double scrollExtentMax,
+    required double scrollExtentMin,
+    required double elevation,
+    required double thickness,
+    required Rect rect,
+    required String identifier,
+    required String label,
+    required List<StringAttribute> labelAttributes,
+    required String value,
+    required List<StringAttribute> valueAttributes,
+    required String increasedValue,
+    required List<StringAttribute> increasedValueAttributes,
+    required String decreasedValue,
+    required List<StringAttribute> decreasedValueAttributes,
+    required String hint,
+    required List<StringAttribute> hintAttributes,
+    String? tooltip,
+    TextDirection? textDirection,
+    required Float64List transform,
+    required Int32List childrenInTraversalOrder,
+    required Int32List childrenInHitTestOrder,
+    required Int32List additionalActions,
+  });
+
+  /// Update the custom semantics action associated with the given `id`.
+  ///
+  /// The name of the action exposed to the user is the `label`. For overridden
+  /// standard actions this value is ignored.
+  ///
+  /// The `hint` should describe what happens when an action occurs, not the
+  /// manner in which a tap is accomplished. For example, use "delete" instead
+  /// of "double tap to delete".
+  ///
+  /// The text direction of the `hint` and `label` is the same as the global
+  /// window.
+  ///
+  /// For overridden standard actions, `overrideId` corresponds with a
+  /// [SemanticsAction.index] value. For custom actions this argument should not be
+  /// provided.
+  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1});
+
+  /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
+  /// by this object.
+  ///
+  /// The returned object can be passed to [PlatformDispatcher.updateSemantics]
+  /// to actually update the semantics retained by the system.
+  ///
+  /// This object is unusable after calling build.
+  SemanticsUpdate build();
+}
+
+base class _NativeSemanticsUpdateBuilderNew extends NativeFieldWrapperClass1 implements SemanticsUpdateBuilderNew {
+  _NativeSemanticsUpdateBuilderNew() { _constructor(); }
+
+  @Native<Void Function(Handle)>(symbol: 'SemanticsUpdateBuilder::Create')
+  external void _constructor();
+
+  @override
+  void updateNode({
+    required int id,
+    required int flags,
+    required int actions,
+    required int maxValueLength,
+    required int currentValueLength,
+    required int textSelectionBase,
+    required int textSelectionExtent,
+    required int platformViewId,
+    required int scrollChildren,
+    required int scrollIndex,
+    required double scrollPosition,
+    required double scrollExtentMax,
+    required double scrollExtentMin,
+    required double elevation,
+    required double thickness,
+    required Rect rect,
+    required String identifier,
+    required String label,
+    required List<StringAttribute> labelAttributes,
+    required String value,
+    required List<StringAttribute> valueAttributes,
+    required String increasedValue,
+    required List<StringAttribute> increasedValueAttributes,
+    required String decreasedValue,
+    required List<StringAttribute> decreasedValueAttributes,
+    required String hint,
+    required List<StringAttribute> hintAttributes,
+    String? tooltip,
+    TextDirection? textDirection,
+    required Float64List transform,
+    required Int32List childrenInTraversalOrder,
+    required Int32List childrenInHitTestOrder,
+    required Int32List additionalActions,
+  }) {
+    assert(_matrix4IsValid(transform));
+    _updateNode(
+      id,
+      flags,
+      actions,
+      maxValueLength,
+      currentValueLength,
+      textSelectionBase,
+      textSelectionExtent,
+      platformViewId,
+      scrollChildren,
+      scrollIndex,
+      scrollPosition,
+      scrollExtentMax,
+      scrollExtentMin,
+      rect.left,
+      rect.top,
+      rect.right,
+      rect.bottom,
+      elevation,
+      thickness,
+      identifier,
+      label,
+      labelAttributes,
+      value,
+      valueAttributes,
+      increasedValue,
+      increasedValueAttributes,
+      decreasedValue,
+      decreasedValueAttributes,
+      hint,
+      hintAttributes,
+      tooltip ?? '',
+      textDirection != null ? textDirection.index + 1 : 0,
+      transform,
+      childrenInTraversalOrder,
+      childrenInHitTestOrder,
+      additionalActions,
+    );
+  }
+  @Native<
+      Void Function(
+          Pointer<Void>,
+          Int32,
+          Int32,
+          Int32,
+          Int32,
+          Int32,
+          Int32,
+          Int32,
+          Int32,
+          Int32,
+          Int32,
+          Double,
+          Double,
+          Double,
+          Double,
+          Double,
+          Double,
+          Double,
+          Double,
+          Double,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Handle,
+          Int32,
+          Handle,
+          Handle,
+          Handle,
+          Handle)>(symbol: 'SemanticsUpdateBuilder::updateNode')
+  external void _updateNode(
+      int id,
+      int flags,
+      int actions,
+      int maxValueLength,
+      int currentValueLength,
+      int textSelectionBase,
+      int textSelectionExtent,
+      int platformViewId,
+      int scrollChildren,
+      int scrollIndex,
+      double scrollPosition,
+      double scrollExtentMax,
+      double scrollExtentMin,
+      double left,
+      double top,
+      double right,
+      double bottom,
+      double elevation,
+      double thickness,
+      String identifier,
       String label,
       List<StringAttribute> labelAttributes,
       String value,

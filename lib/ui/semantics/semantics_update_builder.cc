@@ -50,6 +50,7 @@ void SemanticsUpdateBuilder::updateNode(
     double bottom,
     double elevation,
     double thickness,
+    std::string identifier,
     std::string label,
     const std::vector<NativeStringAttribute*>& labelAttributes,
     std::string value,
@@ -88,6 +89,7 @@ void SemanticsUpdateBuilder::updateNode(
                                SafeNarrow(right), SafeNarrow(bottom));
   node.elevation = elevation;
   node.thickness = thickness;
+  node.identifier = std::move(identifier);
   node.label = std::move(label);
   pushStringAttributes(node.labelAttributes, labelAttributes);
   node.value = std::move(value);
