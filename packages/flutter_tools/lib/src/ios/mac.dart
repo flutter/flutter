@@ -419,7 +419,13 @@ Future<XcodeBuildResult> buildXcodeProject({
       'Xcode ${xcodeBuildActionToString(buildAction)} done.'.padRight(kDefaultStatusPadding + 1)
           + getElapsedAsSeconds(sw.elapsed).padLeft(5),
     );
-    globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+    final Duration elapsedDuration = sw.elapsed;
+    globals.flutterUsage.sendTiming(xcodeBuildActionToString(buildAction), 'xcode-ios', elapsedDuration);
+    globals.analytics.send(Event.timing(
+      workflow: xcodeBuildActionToString(buildAction),
+      variableName: 'xcode-ios',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (tempDir.existsSync()) {
       // Display additional warning and error message from xcresult bundle.

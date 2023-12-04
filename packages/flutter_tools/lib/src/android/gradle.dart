@@ -490,7 +490,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
       status.stop();
     }
 
-    _usage.sendTiming('build', 'gradle', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('build', 'gradle', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'build',
+      variableName: 'gradle',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (exitCode != 0) {
       if (detectedGradleError == null) {
@@ -757,7 +763,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } finally {
       status.stop();
     }
-    _usage.sendTiming('build', 'gradle-aar', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('build', 'gradle-aar', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'build',
+      variableName: 'gradle-aar',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
@@ -792,7 +804,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
       project: project,
     );
 
-    _usage.sendTiming('print', 'android build variants', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('print', 'android build variants', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'print',
+      variableName: 'android build variants',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
@@ -828,7 +846,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
       options: <String>['-q', '-PoutputPath=$outputPath'],
       project: project,
     );
-    _usage.sendTiming('outputs', 'app link settings', sw.elapsed);
+    final Duration elapsedDuration = sw.elapsed;
+    _usage.sendTiming('outputs', 'app link settings', elapsedDuration);
+    _analytics.send(Event.timing(
+      workflow: 'outputs',
+      variableName: 'app link settings',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
 
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);

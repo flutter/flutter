@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -40,9 +41,14 @@ void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
     late Directory tempDir;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -220,6 +226,15 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'pub',
+          variableName: 'get',
+          label: 'success',
+        ),
+        true,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -231,6 +246,7 @@ void main() {
         platform: globals.platform,
         stdio: mockStdio,
       ),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('get --offline fetches packages', () async {
