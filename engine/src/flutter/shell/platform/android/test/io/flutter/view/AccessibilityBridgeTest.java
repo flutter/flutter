@@ -1103,6 +1103,44 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.toString(), root.tooltip);
   }
 
+  @TargetApi(28)
+  @Test
+  public void itSetsIdentifierCorrectly() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /*rootAccessibilityView=*/ mockRootView,
+            /*accessibilityChannel=*/ mockChannel,
+            /*accessibilityManager=*/ mockManager,
+            /*contentResolver=*/ null,
+            /*accessibilityViewEmbedder=*/ mockViewEmbedder,
+            /*platformViewsAccessibilityDelegate=*/ null);
+
+    ViewParent mockParent = mock(ViewParent.class);
+    when(mockRootView.getParent()).thenReturn(mockParent);
+    when(mockManager.isEnabled()).thenReturn(true);
+    // Create a node with identifier.
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.identifier = "identifier";
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    // Test the generated AccessibilityNodeInfo for the node we created and
+    // verify it has correct identifier (i.e. resource-id per Android
+    // terminology).
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    CharSequence actual = nodeInfo.getViewIdResourceName();
+    assertEquals(actual.toString(), root.identifier);
+  }
+
   @Config(sdk = 21)
   @TargetApi(21)
   @Test
@@ -2184,6 +2222,7 @@ public class AccessibilityBridgeTest {
     float scrollPosition = 0.0f;
     float scrollExtentMax = 0.0f;
     float scrollExtentMin = 0.0f;
+    String identifier = null;
     String label = null;
     List<TestStringAttribute> labelAttributes;
     String value = null;
@@ -2241,6 +2280,12 @@ public class AccessibilityBridgeTest {
       bytes.putFloat(scrollPosition);
       bytes.putFloat(scrollExtentMax);
       bytes.putFloat(scrollExtentMin);
+      if (identifier == null) {
+        bytes.putInt(-1);
+      } else {
+        strings.add(identifier);
+        bytes.putInt(strings.size() - 1);
+      }
       updateString(label, labelAttributes, bytes, strings, stringAttributeArgs);
       updateString(value, valueAttributes, bytes, strings, stringAttributeArgs);
       updateString(increasedValue, increasedValueAttributes, bytes, strings, stringAttributeArgs);

@@ -49,6 +49,7 @@ class SemanticsUpdateBuilder
       double bottom,
       double elevation,
       double thickness,
+      std::string identifier,
       std::string label,
       const std::vector<NativeStringAttribute*>& labelAttributes,
       std::string value,

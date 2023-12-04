@@ -44,7 +44,7 @@ PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
 void PlatformViewAndroidDelegate::UpdateSemantics(
     const flutter::SemanticsNodeUpdates& update,
     const flutter::CustomAccessibilityActionUpdates& actions) {
-  constexpr size_t kBytesPerNode = 47 * sizeof(int32_t);
+  constexpr size_t kBytesPerNode = 48 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
   constexpr size_t kBytesPerCustomAction = sizeof(int32_t);
   constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
@@ -103,6 +103,14 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       buffer_float32[position++] = static_cast<float>(node.scrollPosition);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
       buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
+
+      if (node.identifier.empty()) {
+        buffer_int32[position++] = -1;
+      } else {
+        buffer_int32[position++] = strings.size();
+        strings.push_back(node.identifier);
+      }
+
       if (node.label.empty()) {
         buffer_int32[position++] = -1;
       } else {

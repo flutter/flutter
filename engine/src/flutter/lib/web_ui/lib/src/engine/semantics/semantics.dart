@@ -212,6 +212,7 @@ class SemanticsNodeUpdate {
     required this.scrollExtentMax,
     required this.scrollExtentMin,
     required this.rect,
+    required this.identifier,
     required this.label,
     required this.labelAttributes,
     required this.hint,
@@ -273,6 +274,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.Rect rect;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final String identifier;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String label;
