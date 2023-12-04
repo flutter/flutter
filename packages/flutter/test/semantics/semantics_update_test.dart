@@ -172,12 +172,15 @@ void main() {
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
+  // ignore: deprecated_member_use
   ui.SemanticsUpdateBuilderNew createSemanticsUpdateBuilder() {
     return SemanticsUpdateBuilderSpy();
   }
 }
 
+// ignore: deprecated_member_use
 class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilderNew {
+  // ignore: deprecated_member_use
   final SemanticsUpdateBuilderNew _builder = ui.SemanticsUpdateBuilderNew();
 
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
