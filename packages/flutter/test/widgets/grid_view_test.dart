@@ -900,16 +900,20 @@ void main() {
     expect(controller.position.pixels, 472.0);
   });
 
-  testWidgets('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent corrected', (WidgetTester tester) async {
+  testWidgets(
+      'SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent corrected',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/138871
-    const SliverGridDelegateWithFixedCrossAxisCount delegate = SliverGridDelegateWithFixedCrossAxisCount(
+    const SliverGridDelegateWithFixedCrossAxisCount delegate =
+        SliverGridDelegateWithFixedCrossAxisCount(
       crossAxisCount: 3,
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
       mainAxisExtent: -100,
     );
 
-    final SliverGridRegularTileLayout sliverGridRegularTileLayout = delegate.getLayout(
+    final SliverGridRegularTileLayout sliverGridRegularTileLayout =
+        delegate.getLayout(
       const SliverConstraints(
         axisDirection: AxisDirection.down,
         growthDirection: GrowthDirection.forward,
@@ -927,18 +931,54 @@ void main() {
     ) as SliverGridRegularTileLayout;
 
     expect(sliverGridRegularTileLayout.childMainAxisExtent, 0);
+
+    double mainAxisExtent = 100;
+    late StateSetter stateSetter;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              mainAxisExtent: mainAxisExtent,
+            ),
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                alignment: Alignment.center,
+                child: Text('$index'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+    expect(tester.takeException(), isNull);
+
+    stateSetter(() => mainAxisExtent = -100);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent corrected', (WidgetTester tester) async {
+  testWidgets(
+      'SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent corrected',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/138871
-    const SliverGridDelegateWithMaxCrossAxisExtent delegate = SliverGridDelegateWithMaxCrossAxisExtent(
+    const SliverGridDelegateWithMaxCrossAxisExtent delegate =
+        SliverGridDelegateWithMaxCrossAxisExtent(
       maxCrossAxisExtent: 100,
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
       mainAxisExtent: -100,
     );
 
-    final SliverGridRegularTileLayout sliverGridRegularTileLayout = delegate.getLayout(
+    final SliverGridRegularTileLayout sliverGridRegularTileLayout =
+        delegate.getLayout(
       const SliverConstraints(
         axisDirection: AxisDirection.down,
         growthDirection: GrowthDirection.forward,
@@ -956,5 +996,37 @@ void main() {
     ) as SliverGridRegularTileLayout;
 
     expect(sliverGridRegularTileLayout.childMainAxisExtent, 0);
+
+    double mainAxisExtent = 100;
+    late StateSetter stateSetter;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          stateSetter = setState;
+          return GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 100,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              mainAxisExtent: mainAxisExtent,
+            ),
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                alignment: Alignment.center,
+                child: Text('$index'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+    expect(tester.takeException(), isNull);
+
+    stateSetter(() => mainAxisExtent = -100);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
   });
 }
