@@ -171,13 +171,13 @@ void main() {
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
-  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
+  ui.SemanticsUpdateBuilderNew createSemanticsUpdateBuilder() {
     return SemanticsUpdateBuilderSpy();
   }
 }
 
-class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
-  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
+class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilderNew {
+  final SemanticsUpdateBuilderNew _builder = ui.SemanticsUpdateBuilderNew();
 
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
 
@@ -199,6 +199,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required double elevation,
     required double thickness,
     required Rect rect,
+    required String identifier,
     required String label,
     List<StringAttribute>? labelAttributes,
     required String value,
