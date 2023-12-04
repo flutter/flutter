@@ -344,6 +344,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
+    if (!flutterProject.manifest.devDependencies.contains('flutter_test')) {
+      throwToolExit('flutter_test dev dependency not found!');
+    }
+
     String? testAssetDirectory;
     if (buildTestAssets) {
       await _buildTestAsset();
