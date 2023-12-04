@@ -1895,7 +1895,7 @@ void main() {
   testWidgetsWithLeakTracking('Changing positions of selectable text', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -1904,9 +1904,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -1947,9 +1947,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -1986,7 +1986,7 @@ void main() {
   testWidgetsWithLeakTracking('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -1995,9 +1995,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[

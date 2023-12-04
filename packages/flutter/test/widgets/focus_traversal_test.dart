@@ -2809,8 +2809,9 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(home: Container()));
 
-      RawKeyboard.instance.addListener((RawKeyEvent event) {
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
         events.add(event);
+        return true;
       });
 
       await tester.idle();
@@ -2829,7 +2830,7 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('Focus traversal does not break when no focusable is available on a WidgetsApp', (WidgetTester tester) async {
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      final List<KeyEvent> events = <KeyEvent>[];
 
       await tester.pumpWidget(
         WidgetsApp(
@@ -2843,8 +2844,9 @@ void main() {
         ),
       );
 
-      RawKeyboard.instance.addListener((RawKeyEvent event) {
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
         events.add(event);
+        return true;
       });
 
       await tester.idle();
