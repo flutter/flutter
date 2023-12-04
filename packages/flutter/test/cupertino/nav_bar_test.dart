@@ -1581,7 +1581,7 @@ class _ExpectStyles extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, isSameColorAs(color));
-    expect(style.fontFamily, '.SF Pro Text');
+    expect(style.fontFamily, 'CupertinoSystemText');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);
     count += index;
