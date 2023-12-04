@@ -28,6 +28,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool measureCpuGpu = true,
   bool badScroll = false,
   bool? enableImpeller,
+  bool forceOpenGLES = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -37,6 +38,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
     'complex_layout_scroll_perf',
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
   ).run;
 }
 
