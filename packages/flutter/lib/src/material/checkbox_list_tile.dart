@@ -517,12 +517,18 @@ class CheckboxListTile extends StatelessWidget {
     Widget? leading, trailing;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
-        leading = control;
+        leading = Focus(
+            descendantsAreFocusable: false,
+            canRequestFocus: false,
+            child: control);
         trailing = secondary;
       case ListTileControlAffinity.trailing:
       case ListTileControlAffinity.platform:
         leading = secondary;
-        trailing = control;
+        trailing = Focus(
+            descendantsAreFocusable: false,
+            canRequestFocus: false,
+            child: control);
     }
     final ThemeData theme = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
