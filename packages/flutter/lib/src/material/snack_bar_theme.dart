@@ -196,8 +196,6 @@ class SnackBarThemeData with Diagnosticable {
 
   /// Linearly interpolate between two SnackBar Themes.
   ///
-  /// The argument `t` must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static SnackBarThemeData lerp(SnackBarThemeData? a, SnackBarThemeData? b, double t) {
     if (identical(a, b) && a != null) {

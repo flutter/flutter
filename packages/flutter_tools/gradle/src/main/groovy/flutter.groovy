@@ -41,7 +41,7 @@ import org.gradle.internal.os.OperatingSystem
 */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 33
+    static int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 19
@@ -752,7 +752,7 @@ class FlutterPlugin implements Plugin<Project> {
     //
     // See https://developer.android.com/training/app-links/ for more information about app link.
     //
-    // The json will be stored in <project>/build/app/app-link-settings-<variant>.json
+    // The json will be saved in path stored in outputPath parameter.
     //
     // An example json:
     // {
@@ -830,7 +830,7 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                     def generator = new JsonGenerator.Options().build()
-                    new File(project.buildDir, "app-link-settings-${variant.name}.json").write(generator.toJson(appLinkSettings))
+                    new File(project.getProperty("outputPath")).write(generator.toJson(appLinkSettings))
                 }
             }
         }
@@ -964,6 +964,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
+        String frontendServerStarterPathValue = null
+        if (project.hasProperty('frontend-server-starter-path')) {
+            frontendServerStarterPathValue = project.property('frontend-server-starter-path')
+        }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -1052,6 +1056,7 @@ class FlutterPlugin implements Plugin<Project> {
                 targetPlatformValues = targetPlatforms
                 sourceDir getFlutterSourceDirectory()
                 intermediateDir project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/")
+                frontendServerStarterPath frontendServerStarterPathValue
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
@@ -1125,12 +1130,19 @@ class FlutterPlugin implements Plugin<Project> {
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
             }
-            // Task compressAssets uses the output of copyFlutterAssetsTask,
-            // so it's necessary to declare it as an dependency.
+            // The following tasks use the output of copyFlutterAssetsTask,
+            // so it's necessary to declare it as an dependency since Gradle 8.
+            // See https://docs.gradle.org/8.1/userguide/validation_problems.html#implicit_dependency.
             def compressAssetsTask = project.tasks.findByName("compress${variant.name.capitalize()}Assets")
             if (compressAssetsTask) {
                 compressAssetsTask.dependsOn copyFlutterAssetsTask
             }
+
+            def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
+            if (bundleAarTask) {
+                bundleAarTask.dependsOn copyFlutterAssetsTask
+            }
+
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
 
@@ -1290,6 +1302,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Internal
     File intermediateDir
     @Optional @Input
+    String frontendServerStarterPath
+    @Optional @Input
     String extraFrontEndOptions
     @Optional @Input
     String extraGenSnapshotOptions
@@ -1393,6 +1407,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
+            }
+            if (frontendServerStarterPath != null) {
+                args "-dFrontendServerStarterPath=${frontendServerStarterPath}"
             }
             if (extraFrontEndOptions != null) {
                 args "--ExtraFrontEndOptions=${extraFrontEndOptions}"

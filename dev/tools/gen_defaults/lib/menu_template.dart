@@ -65,6 +65,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor {
@@ -180,7 +181,9 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
-    return MaterialStatePropertyAll<TextStyle?>(${textStyle('md.comp.list.list-item.label-text')});
+    // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
+    // Update this when the token is available.
+    return MaterialStatePropertyAll<TextStyle?>(_textTheme.labelLarge);
   }
 
   @override

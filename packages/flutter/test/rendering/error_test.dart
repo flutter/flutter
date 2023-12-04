@@ -5,12 +5,13 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Unit tests error.dart's usage via ErrorWidget.
 void main() {
   const String errorMessage = 'Some error message';
 
-  testWidgets('test draw error paragraph', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test draw error paragraph', (WidgetTester tester) async {
     await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));
     expect(
       find.byType(ErrorWidget),

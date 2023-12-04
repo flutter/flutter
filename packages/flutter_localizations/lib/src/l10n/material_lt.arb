@@ -57,7 +57,6 @@
   "reorderItemRight": "Perkelti dešinėn",
   "expandedIconTapHint": "Sutraukti",
   "collapsedIconTapHint": "Išskleisti",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Liko 1 simbolis",
   "remainingTextFieldCharacterCountOther": "Liko $remainingCount simbolių",
   "refreshIndicatorSemanticLabel": "Atnaujinti",
@@ -149,7 +148,7 @@
   "expandedHint": "Sutraukta",
   "collapsedHint": "Išskleista",
   "menuDismissLabel": "Atsisakyti meniu",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Ieškoti",
+  "searchWebButtonLabel": "Ieškoti žiniatinklyje",
+  "shareButtonLabel": "Bendrinti..."
 }

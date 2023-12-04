@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
@@ -55,6 +56,7 @@ Widget overlay({ Widget? child }) {
       );
     },
   );
+  addTearDown(() => entry..remove()..dispose());
   return overlayWithEntry(entry);
 }
 
@@ -215,7 +217,7 @@ void main() {
     expect(tester.takeException(), isNotNull);  // side effect exception
   });
 
-  testWidgets('Do not crash when remove SelectableText during handle drag', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Do not crash when remove SelectableText during handle drag', (WidgetTester tester) async {
     // Regression test https://github.com/flutter/flutter/issues/108242
     bool isShow = true;
     late StateSetter setter;
@@ -283,7 +285,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('has expected defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
           child: const SelectableText('selectable text'),
@@ -299,7 +301,7 @@ void main() {
     expect(selectableText.enableInteractiveSelection, true);
   });
 
-  testWidgets('Rich selectable text has expected defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Rich selectable text has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -344,7 +346,7 @@ void main() {
     expect(selectableText.enableInteractiveSelection, true);
   });
 
-  testWidgets('Rich selectable text supports WidgetSpan', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Rich selectable text supports WidgetSpan', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -385,7 +387,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('no text keyboard when widget is focused', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('no text keyboard when widget is focused', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable text'),
@@ -396,7 +398,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
   });
 
-  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
     const Color selectionColor = Colors.orange;
     const Color cursorColor = Colors.red;
 
@@ -417,7 +419,7 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
-  testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable Text has adaptive size', (WidgetTester tester) async {
     await tester.pumpWidget(
         boilerplate(
           child: const SelectableText('s'),
@@ -439,7 +441,7 @@ void main() {
     expect(longtextBox.size, const Size(199.0, 14.0));
   });
 
-  testWidgets('can scale with textScaleFactor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can scale with textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         child: const SelectableText('selectable text'),
@@ -462,7 +464,7 @@ void main() {
     expect(scaledBox.size.height, 27.0);
   });
 
-  testWidgets('can switch between textWidthBasis', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can switch between textWidthBasis', (WidgetTester tester) async {
     RenderBox findTextBox() => tester.renderObject(find.byType(SelectableText));
     const String text = 'I can face roll keyboardkeyboardaszzaaaaszzaaaaszzaaaaszzaaaa';
     await tester.pumpWidget(
@@ -488,7 +490,7 @@ void main() {
     expect(textBox.size, const Size(633.0, 28.0));
   });
 
-  testWidgets('can switch between textHeightBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can switch between textHeightBehavior', (WidgetTester tester) async {
     const String text = 'selectable text';
     const TextHeightBehavior textHeightBehavior = TextHeightBehavior(
       applyHeightToFirstAscent: false,
@@ -512,7 +514,7 @@ void main() {
     expect(findRenderEditable(tester).textHeightBehavior, textHeightBehavior);
   });
 
-  testWidgets('Cursor blinks when showCursor is true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor blinks when showCursor is true', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SelectableText(
@@ -540,7 +542,7 @@ void main() {
     expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
   });
 
-  testWidgets('selectable text selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selectable text selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -571,7 +573,7 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
   });
 
-  testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Caret position is updated on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -591,7 +593,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, tapIndex);
   });
 
-  testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText(
@@ -614,7 +616,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, -1);
   });
 
-  testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText(
@@ -639,7 +641,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, -1);
   });
 
-  testWidgets('Can long press to select', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can long press to select', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -668,7 +670,7 @@ void main() {
     expect(editableText.controller.selection.baseOffset, 9);
   });
 
-  testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -695,7 +697,7 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
-  testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Mouse long press is just like a tap', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -717,7 +719,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, eIndex);
   });
 
-  testWidgets('selectable text basic', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selectable text basic', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable'),
@@ -749,7 +751,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgets('selectable text can disable toolbar options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selectable text can disable toolbar options', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SelectableText(
@@ -769,7 +771,7 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
   });
 
-  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can select text by dragging with a mouse', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -797,7 +799,7 @@ void main() {
     expect(controller.selection.extentOffset, 8);
   });
 
-  testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Continuous dragging does not cause flickering', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -849,7 +851,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
   });
 
-  testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dragging in opposite direction also works', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -877,7 +879,7 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
-  testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slow mouse dragging also selects text', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -904,7 +906,7 @@ void main() {
     expect(controller.selection.extentOffset,8);
   });
 
-  testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can drag handles to change selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -966,7 +968,7 @@ void main() {
     expect(controller.selection.extentOffset, 11);
   });
 
-  testWidgets('Dragging handles calls onSelectionChanged', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dragging handles calls onSelectionChanged', (WidgetTester tester) async {
     TextSelection? newSelection;
     await tester.pumpWidget(
       MaterialApp(
@@ -1018,7 +1020,7 @@ void main() {
     expect(newSelection!.extentOffset, 9);
   });
 
-  testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cannot drag one handle past the other', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -1076,7 +1078,7 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
-  testWidgets('Can use selection toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can use selection toolbar', (WidgetTester tester) async {
     const String testValue = 'abc def ghi';
     await tester.pumpWidget(
       const MaterialApp(
@@ -1118,7 +1120,7 @@ void main() {
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgets('Selectable height with maxLine', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable height with maxLine', (WidgetTester tester) async {
     await tester.pumpWidget(selectableTextBuilder());
 
     RenderBox findTextBox() => tester.renderObject(find.byType(SelectableText));
@@ -1170,7 +1172,7 @@ void main() {
     expect(textBox.size.height, greaterThan(fourLineInputSize.height));
   });
 
-  testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can drag handles to change selection in multiline', (WidgetTester tester) async {
     const String testValue = kThreeLines;
     await tester.pumpWidget(
       overlay(
@@ -1258,7 +1260,7 @@ void main() {
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgets('Can scroll multiline input', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can scroll multiline input', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SelectableText(
@@ -1352,7 +1354,7 @@ void main() {
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
 
-  testWidgets('minLines cannot be greater than maxLines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('minLines cannot be greater than maxLines', (WidgetTester tester) async {
     expect(
       () async {
         await tester.pumpWidget(
@@ -1376,7 +1378,7 @@ void main() {
     );
   });
 
-  testWidgets('Selectable height with minLine', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable height with minLine', (WidgetTester tester) async {
     await tester.pumpWidget(selectableTextBuilder());
 
     RenderBox findTextBox() => tester.renderObject(find.byType(SelectableText));
@@ -1390,7 +1392,7 @@ void main() {
     expect(textBox.size.height, emptyInputSize.height * 2);
   });
 
-  testWidgets('Can align to center', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can align to center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -1412,7 +1414,7 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgets('Can align to center within center', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can align to center within center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -1436,9 +1438,11 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgets('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
     final FocusNode firstFieldFocus = FocusNode();
+    addTearDown(firstFieldFocus.dispose);
     final FocusNode lastFieldFocus = FocusNode();
+    addTearDown(lastFieldFocus.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1474,7 +1478,7 @@ void main() {
     expect(lastFieldFocus.hasFocus, isTrue);
   });
 
-  testWidgets('Selectable text identifies as text field in semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable text identifies as text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1501,7 +1505,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Selectable text rich text with spell out in semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable text rich text with spell out in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1534,7 +1538,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Selectable text rich text with locale in semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable text rich text with locale in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1567,8 +1571,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
     await tester.pumpWidget(
       overlay(
         child: SelectableText.rich(
@@ -1577,8 +1584,7 @@ void main() {
               const TextSpan(text: 'text'),
               TextSpan(
                 text: 'link',
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () { },
+                recognizer: recognizer..onTap = () { },
               ),
             ],
           ),
@@ -1623,6 +1629,7 @@ void main() {
 
     Future<void> setupWidget(WidgetTester tester, String text) async {
       final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -1642,7 +1649,7 @@ void main() {
       controller = editableTextWidget.controller;
     }
 
-    testWidgets('Shift test 1', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
@@ -1650,7 +1657,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Shift test 2', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Shift test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'abcdefghi');
 
       controller.selection = const TextSelection.collapsed(offset: 3);
@@ -1662,7 +1669,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Control Shift test', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester, 'their big house');
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
@@ -1674,7 +1681,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Down and up test', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
@@ -1692,7 +1699,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Down and up test 2', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Down and up test 2', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house\njumped over a mouse\nOne more line yay');
 
       controller.selection = const TextSelection.collapsed(offset: 0);
@@ -1744,8 +1751,9 @@ void main() {
     }, variant: KeySimulatorTransitModeVariant.all());
   });
 
-  testWidgets('Copy test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Copy test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     String clipboardContent = '';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -1802,8 +1810,9 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Select all test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     const String testValue = 'a big house\njumped over a mouse';
     await tester.pumpWidget(
       MaterialApp(
@@ -1836,8 +1845,9 @@ void main() {
     expect(controller.selection.extentOffset, 31);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     TextSelection? newSelection;
     const String testValue = 'a big house\njumped over a mouse';
     await tester.pumpWidget(
@@ -1882,8 +1892,9 @@ void main() {
     }
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing positions of selectable text', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final Key key1 = UniqueKey();
@@ -1972,8 +1983,9 @@ void main() {
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Changing focus test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final Key key1 = UniqueKey();
@@ -2041,7 +2053,7 @@ void main() {
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Caret works when maxLines is null', (WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText(
@@ -2064,7 +2076,7 @@ void main() {
     expect(controller.selection.baseOffset, 0);
   });
 
-  testWidgets('SelectableText baseline alignment no-strut', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText baseline alignment no-strut', (WidgetTester tester) async {
     final Key keyA = UniqueKey();
     final Key keyB = UniqueKey();
 
@@ -2113,7 +2125,7 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
-  testWidgets('SelectableText baseline alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText baseline alignment', (WidgetTester tester) async {
     final Key keyA = UniqueKey();
     final Key keyB = UniqueKey();
 
@@ -2160,7 +2172,7 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
-  testWidgets('SelectableText semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2280,7 +2292,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText semantics, with semanticsLabel', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText semantics, with semanticsLabel', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2307,7 +2319,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2353,7 +2365,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText semantics for selections', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText semantics for selections', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2449,13 +2461,17 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontSize: 200);
     const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
@@ -2466,7 +2482,7 @@ void main() {
                 const TextSpan(text: onScreenText),
                 TextSpan(
                   text: offScreenText,
-                  recognizer: TapGestureRecognizer()..onTap = () { },
+                  recognizer: recognizer..onTap = () { },
                 ),
               ],
               style: textStyle,
@@ -2542,7 +2558,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText change selection with semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final Key key = UniqueKey();
@@ -2641,7 +2657,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can activate SelectableText with explicit controller via semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can activate SelectableText with explicit controller via semantics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17801
 
     const String testValue = 'Hello';
@@ -2715,7 +2731,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       overlay(
@@ -2739,7 +2755,7 @@ void main() {
     expect(tapCount, 3);
   });
 
-  testWidgets('SelectableText style is merged with default text style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText style is merged with default text style', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/23994
     final TextStyle defaultStyle = TextStyle(
       color: Colors.blue[500],
@@ -2786,7 +2802,7 @@ void main() {
     expect(editableText.style.color, isNull);
   });
 
-  testWidgets('style enforces required fields', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
         home: Material(
@@ -2818,7 +2834,7 @@ void main() {
     expect(tester.takeException(), isNotNull);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'tap moves cursor to the edge of the word it tapped',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2850,7 +2866,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'tap moves cursor to the position tapped (Android)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2882,7 +2898,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'two slow taps do not trigger a word selection',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2917,7 +2933,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'double tap selects word and first tap of double tap moves cursor',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2964,7 +2980,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar (Android)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3009,7 +3025,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'double tap on top of cursor also selects word (Android)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3058,7 +3074,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'double tap hold selects word',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3077,7 +3093,7 @@ void main() {
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
       final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+          await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -3106,7 +3122,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'double tap selects word with semantics label',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3139,7 +3155,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'tap after a double tap select is not affected (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3186,7 +3202,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press selects word and shows toolbar (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3223,7 +3239,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press selects word and shows toolbar (Android)',
     (WidgetTester tester) async {
 
@@ -3255,7 +3271,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press selects word and shows custom toolbar (Android)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3293,7 +3309,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press selects word and shows custom toolbar (iOS)',
     (WidgetTester tester) async {
 
@@ -3328,7 +3344,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'textSelectionControls is passed to EditableText',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3348,7 +3364,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3390,7 +3406,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press drag extends the selection to the word under the drag and shows toolbar on lift on non-Apple platforms',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3466,7 +3482,7 @@ void main() {
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press drag extends the selection to the word under the drag and shows toolbar on lift (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3559,7 +3575,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long press drag moves the cursor under the drag and shows toolbar on lift (macOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3575,7 +3591,7 @@ void main() {
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
       final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
+          await tester.startGesture(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 500));
 
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3637,7 +3653,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
   );
 
-  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long press drag can edge scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -3665,7 +3681,7 @@ void main() {
     final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
     final TestGesture gesture =
-    await tester.startGesture(selectableTextStart + const Offset(300, 5));
+        await tester.startGesture(selectableTextStart + const Offset(300, 5));
     await tester.pump(const Duration(milliseconds: 500));
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -3741,7 +3757,7 @@ void main() {
     skip: true, // https://github.com/flutter/flutter/issues/64059
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long tap still selects after a double tap select (iOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3787,7 +3803,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'long tap still selects after a double tap select (macOS)',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3831,7 +3847,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
   );
 //convert
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'double tap after a long tap is not affected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3880,7 +3896,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'double tap chains work',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -3955,7 +3971,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('force press does not select a word on (android)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -3991,7 +4007,7 @@ void main() {
     expect(find.byType(TextButton), findsNothing);
   });
 
-  testWidgets('force press selects word', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('force press selects word', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4032,7 +4048,7 @@ void main() {
     expect(find.byType(CupertinoButton), findsNWidgets(4));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('tap on non-force-press-supported devices work', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4080,7 +4096,7 @@ void main() {
     // https://github.com/flutter/flutter/issues/43445
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('default SelectableText debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('default SelectableText debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const SelectableText('something').debugFillProperties(builder);
@@ -4092,7 +4108,7 @@ void main() {
     expect(description, <String>['data: something']);
   });
 
-  testWidgets('SelectableText implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
@@ -4139,7 +4155,7 @@ void main() {
     ]);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'strut basic single line',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4162,7 +4178,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'strut TextStyle increases height',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4209,7 +4225,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'strut basic multi line',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4233,7 +4249,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'strut no force small strut',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4265,7 +4281,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'strut no force large strut',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4294,7 +4310,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'strut height override',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4323,7 +4339,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'strut forces field taller',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4354,7 +4370,7 @@ void main() {
     },
   );
 
-  testWidgets('Caret center position', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Caret center position', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -4390,7 +4406,7 @@ void main() {
     expect(topLeft.dx, equals(385));
   });
 
-  testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -4436,7 +4452,7 @@ void main() {
     expect(topLeft.dx, equals(385));
   });
 
-  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     await tester.pumpWidget(
       const MaterialApp(
@@ -4466,7 +4482,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   });
 
-  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
 
     await tester.pumpWidget(
@@ -4494,7 +4510,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Long press shows handles and toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4513,7 +4529,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
-  testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Double tap shows handles and toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4534,7 +4550,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Mouse tap does not show handles nor toolbar',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4562,7 +4578,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Mouse long press does not show handles nor toolbar',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4590,7 +4606,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Mouse double tap does not show handles nor toolbar',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -4622,12 +4638,14 @@ void main() {
     },
   );
 
-  testWidgets('text span with tap gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('text span with tap gesture recognizer works in selectable rich text', (WidgetTester tester) async {
     int spyTaps = 0;
     final TapGestureRecognizer spyRecognizer = TapGestureRecognizer()
       ..onTap = () {
         spyTaps += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4656,7 +4674,7 @@ void main() {
 
     // Starts a long press.
     final TestGesture gesture =
-      await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+        await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
     await tester.pump();
@@ -4672,12 +4690,14 @@ void main() {
     expect(spyTaps, 1);
   });
 
-  testWidgets('text span with long press gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('text span with long press gesture recognizer works in selectable rich text', (WidgetTester tester) async {
     int spyLongPress = 0;
     final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
       ..onLongPress = () {
         spyLongPress += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4706,7 +4726,7 @@ void main() {
 
     // Starts a long press.
     final TestGesture gesture =
-    await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
+        await tester.startGesture(selectableTextStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
     await tester.pump();
@@ -4723,7 +4743,7 @@ void main() {
     expect(spyLongPress, 1);
   });
 
-  testWidgets('SelectableText changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4742,7 +4762,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The handles show after pressing Select All', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4779,7 +4799,7 @@ void main() {
     }),
   );
 
-  testWidgets('The Select All calls on selection changed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The Select All calls on selection changed', (WidgetTester tester) async {
     TextSelection? newSelection;
     await tester.pumpWidget(
       MaterialApp(
@@ -4815,7 +4835,7 @@ void main() {
     }),
   );
 
-  testWidgets('The Select All calls on selection changed with a mouse on windows and linux', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The Select All calls on selection changed with a mouse on windows and linux', (WidgetTester tester) async {
     const String string = 'abc def ghi';
     TextSelection? newSelection;
     await tester.pumpWidget(
@@ -4857,7 +4877,7 @@ void main() {
     }),
   );
 
-  testWidgets('Does not show handles when updated from the web engine', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not show handles when updated from the web engine', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4897,7 +4917,7 @@ void main() {
     }
   });
 
-  testWidgets('onSelectionChanged is called when selection changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onSelectionChanged is called when selection changes', (WidgetTester tester) async {
     int onSelectionChangedCallCount = 0;
 
     await tester.pumpWidget(
@@ -4927,7 +4947,7 @@ void main() {
     expect(onSelectionChangedCallCount, equals(3));
   });
 
-  testWidgets('selecting a space selects the previous word on mobile', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selecting a space selects the previous word on mobile', (WidgetTester tester) async {
     TextSelection? selection;
 
     await tester.pumpWidget(
@@ -5028,7 +5048,7 @@ void main() {
     expect(selection!.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-  testWidgets('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
     TextSelection? selection;
 
     await tester.pumpWidget(
@@ -5093,7 +5113,7 @@ void main() {
     expect(selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
-  testWidgets('text selection style 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('text selection style 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -5146,7 +5166,7 @@ void main() {
     );
   });
 
-  testWidgets('text selection style 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -5198,7 +5218,7 @@ void main() {
     );
   });
 
-  testWidgets('keeps alive when has focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('keeps alive when has focus', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -5290,7 +5310,7 @@ void main() {
     late ValueNotifier<MagnifierInfo> magnifierInfo;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
         'Can drag handles to show, unshow, and update magnifier',
         (WidgetTester tester) async {
       const String testValue = 'abc def ghi';
@@ -5359,7 +5379,7 @@ void main() {
     });
   });
 
-  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/71389
 
     const TextStyle textStyle = TextStyle(color: Color(0xff00ff00), fontSize: 12.0);
@@ -5380,7 +5400,7 @@ void main() {
     expect(editableText.style.fontSize, textStyle.fontSize);
   });
 
-  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
     TextSelection? selection;
     int count = 0;
 
@@ -5420,7 +5440,7 @@ void main() {
     expect(count, 1); // The `onSelectionChanged` will not be triggered.
   });
 
-  testWidgets("Off-screen selected text doesn't throw exception", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Off-screen selected text doesn't throw exception", (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/123527
 
     TextSelection? selection;

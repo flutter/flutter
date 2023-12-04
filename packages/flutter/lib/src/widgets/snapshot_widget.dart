@@ -306,6 +306,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     // ignore: invalid_use_of_protected_member
     context.stopRecordingIfNeeded();
     if (mode != SnapshotMode.forced && !offsetLayer.supportsRasterization()) {
+      offsetLayer.dispose();
       if (mode == SnapshotMode.normal) {
         throw FlutterError('SnapshotWidget used with a child that contains a PlatformView.');
       }

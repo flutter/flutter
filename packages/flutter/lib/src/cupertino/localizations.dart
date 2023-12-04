@@ -57,7 +57,6 @@ enum DatePickerDateOrder {
 ///
 ///  * [DefaultCupertinoLocalizations], the default, English-only, implementation
 ///    of this interface.
-// TODO(xster): Supply non-english strings.
 abstract class CupertinoLocalizations {
   /// Year that is shown in [CupertinoDatePicker] spinner corresponding to the
   /// given year index.

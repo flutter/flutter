@@ -87,6 +87,9 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  printProgress('TargetPlatform tool/framework consistency');
+  await verifyTargetPlatform(flutterRoot);
+
   printProgress('No Double.clamp');
   await verifyNoDoubleClamp(flutterRoot);
 
@@ -120,6 +123,9 @@ Future<void> run(List<String> arguments) async {
 
   printProgress('Goldens...');
   await verifyGoldenTags(flutterPackages);
+
+  printProgress('Prevent flakes from Stopwatches...');
+  await verifyNoStopwatches(flutterPackages);
 
   printProgress('Skip test comments...');
   await verifySkipTestComments(flutterRoot);
@@ -263,6 +269,84 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
 
     node.visitChildren(this);
     return null;
+  }
+}
+
+Future<void> verifyTargetPlatform(String workingDirectory) async {
+  final File framework = File('$workingDirectory/packages/flutter/lib/src/foundation/platform.dart');
+  final Set<String> frameworkPlatforms = <String>{};
+  List<String> lines = framework.readAsLinesSync();
+  int index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Can no longer find TargetPlatform enum.']);
+      return;
+    }
+    if (lines[index].startsWith('enum TargetPlatform {')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Could not find end of TargetPlatform enum.']);
+      return;
+    }
+    String line = lines[index].trim();
+    final int comment = line.indexOf('//');
+    if (comment >= 0) {
+      line = line.substring(0, comment);
+    }
+    if (line == '}') {
+      break;
+    }
+    if (line.isNotEmpty) {
+      if (line.endsWith(',')) {
+        frameworkPlatforms.add(line.substring(0, line.length - 1));
+      } else {
+        foundError(<String>['${framework.path}:$index: unparseable line when looking for TargetPlatform values']);
+      }
+    }
+    index += 1;
+  }
+  final File tool = File('$workingDirectory/packages/flutter_tools/lib/src/resident_runner.dart');
+  final Set<String> toolPlatforms = <String>{};
+  lines = tool.readAsLinesSync();
+  index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Can no longer find nextPlatform logic.']);
+      return;
+    }
+    if (lines[index].trim().startsWith('const List<String> platforms = <String>[')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Could not find end of nextPlatform logic.']);
+      return;
+    }
+    final String line = lines[index].trim();
+    if (line.startsWith("'") && line.endsWith("',")) {
+      toolPlatforms.add(line.substring(1, line.length - 2));
+    } else if (line == '];') {
+      break;
+    } else {
+      foundError(<String>['${tool.path}:$index: unparseable line when looking for nextPlatform values']);
+    }
+    index += 1;
+  }
+  final Set<String> frameworkExtra = frameworkPlatforms.difference(toolPlatforms);
+  if (frameworkExtra.isNotEmpty) {
+    foundError(<String>['TargetPlatform has some extra values not found in the tool: ${frameworkExtra.join(", ")}']);
+  }
+  final Set<String> toolExtra = toolPlatforms.difference(frameworkPlatforms);
+  if (toolExtra.isNotEmpty) {
+    foundError(<String>['The nextPlatform logic in the tool has some extra values not found in TargetPlatform: ${toolExtra.join(", ")}']);
   }
 }
 
@@ -499,6 +583,48 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
     foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
+    ]);
+  }
+}
+
+/// Use of Stopwatches can introduce test flakes as the logical time of a
+/// stopwatch can fall out of sync with the mocked time of FakeAsync in testing.
+/// The Clock object provides a safe stopwatch instead, which is paired with
+/// FakeAsync as part of the test binding.
+final RegExp _findStopwatchPattern = RegExp(r'Stopwatch\(\)');
+const String _ignoreStopwatch = '// flutter_ignore: stopwatch (see analyze.dart)';
+const String _ignoreStopwatchForFile = '// flutter_ignore_for_file: stopwatch (see analyze.dart)';
+
+Future<void> verifyNoStopwatches(String workingDirectory, { int minimumMatches = 2000 }) async {
+  final List<String> errors = <String>[];
+  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+    if (file.path.contains('flutter_tool')) {
+      // Skip flutter_tool package.
+      continue;
+    }
+    int lineNumber = 1;
+    final List<String> lines = file.readAsLinesSync();
+    for (final String line in lines) {
+      // If the file is being ignored, skip parsing the rest of the lines.
+      if (line.contains(_ignoreStopwatchForFile)) {
+        break;
+      }
+
+      if (line.contains(_findStopwatchPattern)
+          && !line.contains(_leadingComment)
+          && !line.contains(_ignoreStopwatch)) {
+        // Stopwatch found
+        errors.add('\t${file.path}:$lineNumber');
+      }
+      lineNumber++;
+    }
+  }
+  if (errors.isNotEmpty) {
+    foundError(<String>[
+      'Stopwatch use was found in the following files:',
+      ...errors,
+      '${bold}Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.$reset',
+      'A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.'
     ]);
   }
 }

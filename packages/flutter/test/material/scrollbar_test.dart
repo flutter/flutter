@@ -203,6 +203,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     final AssertionError exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
@@ -229,6 +231,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
@@ -261,6 +265,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking(
@@ -314,6 +320,8 @@ void main() {
       await tester.pumpWidget(viewWithScroll());
       final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
+
+      controller.dispose();
     },
   );
 
@@ -341,6 +349,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
@@ -373,6 +383,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('On first render with thumbVisibility: false, the thumb is hidden', (WidgetTester tester) async {
@@ -399,6 +411,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking(
@@ -452,6 +466,8 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar is not showing after scroll finishes
       expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+      controller.dispose();
     },
   );
 
@@ -501,6 +517,8 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar is not showing after scroll finishes
       expect(find.byType(Scrollbar), paints..rect());
+
+      controller.dispose();
     },
   );
 
@@ -561,6 +579,8 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar thumb is showing after scroll finishes and timer ends.
       expect(find.byType(Scrollbar), paints..rect());
+
+      controller.dispose();
     },
   );
 
@@ -610,6 +630,8 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
       expect(materialScrollbar, isNot(paints..rect()));
+
+      controller.dispose();
     },
   );
 
@@ -673,6 +695,8 @@ void main() {
     ));
 
     await tester.pumpAndSettle();
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
@@ -763,9 +787,11 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 
-  testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scrollbar(
@@ -936,6 +962,8 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
@@ -1331,6 +1359,8 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
     final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
     expect(scrollbar.controller, isNotNull);
+
+    controller.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgetsWithLeakTracking("Scrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
@@ -1463,6 +1493,8 @@ void main() {
     await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
+
+    scrollController.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgetsWithLeakTracking('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
@@ -1557,6 +1589,8 @@ void main() {
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount * 2);
     expect(tapCount, 2);
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
@@ -1729,6 +1763,8 @@ void main() {
           color: const Color(0xffbcbcbc),
         ),
     );
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('Scrollbar.thumbVisibility triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
@@ -1796,6 +1832,8 @@ void main() {
       error.message,
       contains('The provided ScrollController is currently attached to more than one ScrollPosition.'),
     );
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
@@ -1844,5 +1882,7 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 }

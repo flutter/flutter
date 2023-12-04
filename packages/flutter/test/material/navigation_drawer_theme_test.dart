@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('NavigationDrawerThemeData copyWith, ==, hashCode, basics', () {
@@ -18,7 +19,7 @@ void main() {
     expect(identical(NavigationDrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationDrawerThemeData().debugFillProperties(builder);
 
@@ -30,7 +31,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('NavigationDrawerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationDrawerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationDrawerThemeData(
       tileHeight: 50,
@@ -66,7 +67,7 @@ void main() {
     ));
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'NavigationDrawerThemeData values are used when no NavigationDrawer properties are specified',
     (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -134,7 +135,7 @@ void main() {
       );
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'NavigationDrawer values take priority over NavigationDrawerThemeData values when both properties are specified',
     (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -196,7 +197,7 @@ void main() {
       expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
   });
 
-  testWidgets('Local NavigationDrawerTheme takes priority over ThemeData.navigationDrawerTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Local NavigationDrawerTheme takes priority over ThemeData.navigationDrawerTheme', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color backgroundColor = Color(0x00000009);
     const double elevation = 7.0;

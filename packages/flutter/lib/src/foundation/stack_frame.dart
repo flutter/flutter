@@ -22,8 +22,8 @@ import 'object.dart';
 class StackFrame {
   /// Creates a new StackFrame instance.
   ///
-  /// All parameters must not be null. The [className] may be the empty string
-  /// if there is no class (e.g. for a top level library method).
+  /// The [className] may be the empty string if there is no class (e.g. for a
+  /// top level library method).
   const StackFrame({
     required this.number,
     required this.column,

@@ -14,6 +14,7 @@ import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
@@ -248,6 +249,9 @@ class ExpansionTile extends StatefulWidget {
     this.clipBehavior,
     this.controlAffinity,
     this.controller,
+    this.dense,
+    this.visualDensity,
+    this.enableFeedback = true,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -491,6 +495,17 @@ class ExpansionTile extends StatefulWidget {
   /// than supplying a controller.
   final ExpansionTileController? controller;
 
+  /// {@macro flutter.material.ListTile.dense}
+  final bool? dense;
+
+  /// Defines how compact the expansion tile's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  final VisualDensity? visualDensity;
+
+  /// {@macro flutter.material.ListTile.enableFeedback}
+  final bool? enableFeedback;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -629,6 +644,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       case TargetPlatform.windows:
         break;
     }
+
     return Container(
       clipBehavior: clipBehavior,
       decoration: ShapeDecoration(
@@ -646,6 +662,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               textColor: _headerColor.value,
               child: ListTile(
                 onTap: _handleTap,
+                dense: widget.dense,
+                visualDensity: widget.visualDensity,
+                enableFeedback: widget.enableFeedback,
                 contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
                 leading: widget.leading ?? _buildLeadingIcon(context),
                 title: widget.title,
@@ -669,12 +688,46 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   @override
+  void didUpdateWidget(covariant ExpansionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final ThemeData theme = Theme.of(context);
+    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
+    final ExpansionTileThemeData defaults = theme.useMaterial3
+      ? _ExpansionTileDefaultsM3(context)
+      : _ExpansionTileDefaultsM2(context);
+    if (widget.collapsedShape != oldWidget.collapsedShape
+      || widget.shape != oldWidget.shape) {
+      _updateShapeBorder(expansionTileTheme, theme);
+    }
+    if (widget.collapsedTextColor != oldWidget.collapsedTextColor
+      || widget.textColor != oldWidget.textColor) {
+      _updateHeaderColor(expansionTileTheme, defaults);
+    }
+    if (widget.collapsedIconColor != oldWidget.collapsedIconColor
+      || widget.iconColor != oldWidget.iconColor) {
+      _updateIconColor(expansionTileTheme, defaults);
+    }
+    if (widget.backgroundColor != oldWidget.backgroundColor
+      || widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
+      _updateBackgroundColor(expansionTileTheme);
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ExpansionTileThemeData defaults = theme.useMaterial3
       ? _ExpansionTileDefaultsM3(context)
       : _ExpansionTileDefaultsM2(context);
+    _updateShapeBorder(expansionTileTheme, theme);
+    _updateHeaderColor(expansionTileTheme, defaults);
+    _updateIconColor(expansionTileTheme, defaults);
+    _updateBackgroundColor(expansionTileTheme);
+    super.didChangeDependencies();
+  }
+
+  void _updateShapeBorder(ExpansionTileThemeData expansionTileTheme, ThemeData theme) {
     _borderTween
       ..begin = widget.collapsedShape
         ?? expansionTileTheme.collapsedShape
@@ -688,20 +741,28 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           top: BorderSide(color: theme.dividerColor),
           bottom: BorderSide(color: theme.dividerColor),
         );
+  }
+
+  void _updateHeaderColor(ExpansionTileThemeData expansionTileTheme, ExpansionTileThemeData defaults) {
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor
         ?? defaults.collapsedTextColor
       ..end = widget.textColor ?? expansionTileTheme.textColor ?? defaults.textColor;
+  }
+
+  void _updateIconColor(ExpansionTileThemeData expansionTileTheme, ExpansionTileThemeData defaults) {
     _iconColorTween
       ..begin = widget.collapsedIconColor
         ?? expansionTileTheme.collapsedIconColor
         ?? defaults.collapsedIconColor
       ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? defaults.iconColor;
+  }
+
+  void _updateBackgroundColor(ExpansionTileThemeData expansionTileTheme) {
     _backgroundColorTween
       ..begin = widget.collapsedBackgroundColor ?? expansionTileTheme.collapsedBackgroundColor
       ..end = widget.backgroundColor ?? expansionTileTheme.backgroundColor;
-    super.didChangeDependencies();
   }
 
   @override

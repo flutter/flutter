@@ -29,11 +29,6 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor and a background\n'
     'The backgroundColor argument is just a shorthand for "background: Paint()..color = color".';
 
-// The default font size if none is specified. This should be kept in
-// sync with the default values in text_painter.dart, as well as the
-// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
-const double _kDefaultFontSize = 14.0;
-
 // Examples can assume:
 // late BuildContext context;
 
@@ -438,7 +433,7 @@ const double _kDefaultFontSize = 14.0;
 /// By default, fonts differ depending on the platform.
 ///
 ///  * The default font-family for `Android`,`Fuchsia` and `Linux` is `Roboto`.
-///  * The default font-family for `iOS` is `.SF UI Display`/`.SF UI Text`.
+///  * The default font-family for `iOS` is `SF Pro Display`/`SF Pro Text`.
 ///  * The default font-family for `MacOS` is `.AppleSystemUIFont`.
 ///  * The default font-family for `Windows` is `Segoe UI`.
 //
@@ -475,6 +470,14 @@ class TextStyle with Diagnosticable {
   /// The `package` argument must be non-null if the font family is defined in a
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
+  ///
+  /// On Apple devices the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used in [fontFamily] as proxies for the
+  /// Apple system fonts. They currently redirect to the equivilant of SF Pro
+  /// Text and SF Pro Display respectively. 'CupertinoSystemText' is designed
+  /// for fonts below 20 point size, and 'CupertinoSystemDisplay' is recommended
+  /// for sizes 20 and above. When used on non-Apple platforms, these strings
+  /// will return the regular fallback font family instead.
   const TextStyle({
     this.inherit = true,
     this.color,
@@ -518,10 +521,10 @@ class TextStyle with Diagnosticable {
   /// Otherwise, the combining is allowed, and the returned [TextStyle] inherits
   /// the [inherit] value from the method receiver.
   ///
-  /// This property has no effect on [TextSpan]'s text style cascading: in a
-  /// [TextSpan] tree, a [TextSpan]'s text style can be combined with that of an
-  /// ancestor [TextSpan] if it has unspecified fields, regardless of its
-  /// [inherit] value.
+  /// This property does not affect the text style inheritance in an [InlineSpan]
+  /// tree: an [InlineSpan]'s text style is merged with that of an ancestor
+  /// [InlineSpan] if it has unspecified fields, regardless of its [inherit]
+  /// value.
   ///
   /// Properties that don't have explicit values or other default values to fall
   /// back to will revert to the defaults: white in color, a font size of 14
@@ -566,6 +569,14 @@ class TextStyle with Diagnosticable {
   /// first value in [fontFamilyFallback] acts as the preferred/first font
   /// family. When neither is provided, then the default platform font will
   /// be used.
+  ///
+  /// When running on Apple devices, the strings 'CupertinoSystemText' and
+  /// 'CupertinoSystemDisplay' are used as proxies for the Apple system fonts.
+  /// They currently redirect to the equivilant of SF Pro Text and SF Pro Display
+  /// respectively. 'CupertinoSystemText' is designed for fonts below 20 point
+  /// size, and 'CupertinoSystemDisplay' is recommended for sizes 20 and above.
+  /// When used on non-Apple platforms, these strings will return the regular
+  /// fallback font family instead.
   final String? fontFamily;
 
   /// The ordered list of font families to fall back on when a glyph cannot be
@@ -928,8 +939,6 @@ class TextStyle with Diagnosticable {
   /// values, so that for instance `style.apply(fontWeightDelta: -2)` when
   /// applied to a `style` whose [fontWeight] is [FontWeight.w500] will return a
   /// [TextStyle] with a [FontWeight.w300].
-  ///
-  /// The numeric arguments must not be null.
   ///
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
@@ -1321,9 +1330,9 @@ class TextStyle with Diagnosticable {
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
   ///
-  /// The `textScaleFactor` argument must not be null. If omitted, it defaults
-  /// to 1.0. The other arguments may be null. The `maxLines` argument, if
-  /// specified and non-null, must be greater than zero.
+  /// If the `textScaleFactor` argument is omitted, it defaults to one. The
+  /// other arguments may be null. The `maxLines` argument, if specified and
+  /// non-null, must be greater than zero.
   ///
   /// If the font size on this style isn't set, it will default to 14 logical
   /// pixels.
@@ -1355,7 +1364,7 @@ class TextStyle with Diagnosticable {
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
       fontFamily: fontFamily ?? this.fontFamily,
-      fontSize: textScaler.scale(fontSize ?? this.fontSize ?? _kDefaultFontSize),
+      fontSize: textScaler.scale(fontSize ?? this.fontSize ?? kDefaultFontSize),
       height: height ?? this.height,
       textHeightBehavior: effectiveTextHeightBehavior,
       strutStyle: strutStyle == null ? null : ui.StrutStyle(

@@ -7,9 +7,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'multi_view_testing.dart';
 
 void main() {
-  testWidgets('Providing a RenderObjectWidget directly to the RootWidget fails', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Providing a RenderObjectWidget directly to the RootWidget fails', (WidgetTester tester) async {
     // No render tree exists to attach the RenderObjectWidget to.
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
@@ -23,7 +26,7 @@ void main() {
     ));
   });
 
-  testWidgets('Moving a RenderObjectWidget to the RootWidget via GlobalKey fails', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Moving a RenderObjectWidget to the RootWidget via GlobalKey fails', (WidgetTester tester) async {
     final Widget globalKeyedWidget = ColoredBox(
       key: GlobalKey(),
       color: Colors.red,
@@ -50,7 +53,7 @@ void main() {
     ));
   });
 
-  testWidgets('A View cannot be a child of a render object widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('A View cannot be a child of a render object widget', (WidgetTester tester) async {
     await tester.pumpWidget(Center(
       child: View(
         view: FakeView(tester.view),
@@ -65,7 +68,7 @@ void main() {
     ));
   });
 
-  testWidgets('The child of a ViewAnchor cannot be a View', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The child of a ViewAnchor cannot be a View', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
         child: View(
@@ -82,7 +85,7 @@ void main() {
     ));
   });
 
-  testWidgets('A View can not be moved via GlobalKey to be a child of a RenderObject', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('A View can not be moved via GlobalKey to be a child of a RenderObject', (WidgetTester tester) async {
     final Widget globalKeyedView = View(
       key: GlobalKey(),
       view: FakeView(tester.view),
@@ -110,7 +113,7 @@ void main() {
     ));
   });
 
-  testWidgets('The view property of a ViewAnchor cannot be a render object widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The view property of a ViewAnchor cannot be a render object widget', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
         view: const ColoredBox(color: Colors.red),
@@ -125,7 +128,7 @@ void main() {
     ));
   });
 
-  testWidgets('A RenderObject cannot be moved into the view property of a ViewAnchor via GlobalKey', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('A RenderObject cannot be moved into the view property of a ViewAnchor via GlobalKey', (WidgetTester tester) async {
     final Widget globalKeyedWidget = ColoredBox(
       key: GlobalKey(),
       color: Colors.red,
@@ -152,7 +155,7 @@ void main() {
     ));
   });
 
-  testWidgets('ViewAnchor cannot be used at the top of the widget tree (outside of View)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewAnchor cannot be used at the top of the widget tree (outside of View)', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: const ViewAnchor(
@@ -167,7 +170,7 @@ void main() {
     ));
   });
 
-  testWidgets('ViewAnchor cannot be moved to the top of the widget tree (outside of View) via GlobalKey', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewAnchor cannot be moved to the top of the widget tree (outside of View) via GlobalKey', (WidgetTester tester) async {
     final Widget globalKeyedViewAnchor = ViewAnchor(
       key: GlobalKey(),
       child: const SizedBox(),
@@ -194,7 +197,7 @@ void main() {
     ));
   });
 
-  testWidgets('View can be used at the top of the widget tree', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('View can be used at the top of the widget tree', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: View(
@@ -206,7 +209,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('View can be moved to the top of the widget tree view GlobalKey', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('View can be moved to the top of the widget tree view GlobalKey', (WidgetTester tester) async {
     final Widget globalKeyView = View(
       view: FakeView(tester.view),
       child: const ColoredBox(color: Colors.red),
@@ -235,7 +238,7 @@ void main() {
     expect(find.byType(ColoredBox), findsOneWidget);
   });
 
-  testWidgets('ViewCollection can be used at the top of the widget tree', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewCollection can be used at the top of the widget tree', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewCollection(
@@ -251,7 +254,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('ViewCollection cannot be used inside a View', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewCollection cannot be used inside a View', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewCollection(
         views: <Widget>[
@@ -270,7 +273,7 @@ void main() {
     ));
   });
 
-  testWidgets('ViewCollection can be used as ViewAnchor.view', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewCollection can be used as ViewAnchor.view', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
         view: ViewCollection(
@@ -288,7 +291,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('ViewCollection cannot have render object widgets as children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewCollection cannot have render object widgets as children', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: ViewCollection(
@@ -305,7 +308,7 @@ void main() {
     ));
   });
 
-  testWidgets('Views can be moved in and out of ViewCollections via GlobalKey', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Views can be moved in and out of ViewCollections via GlobalKey', (WidgetTester tester) async {
     final Widget greenView = View(
       key: GlobalKey(debugLabel: 'green'),
       view: tester.view,
@@ -350,7 +353,7 @@ void main() {
     expect(find.byType(ColoredBox), findsNWidgets(2));
   });
 
-  testWidgets('Can move stuff between views via global key: viewA -> viewB', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move stuff between views via global key: viewA -> viewB', (WidgetTester tester) async {
     final FlutterView greenView = tester.view;
     final FlutterView redView = FakeView(tester.view);
     final Widget globalKeyChild = SizedBox(
@@ -455,7 +458,7 @@ void main() {
     expect(leafRenderObject[redView.viewId], isA<RenderConstrainedBox>());
   });
 
-  testWidgets('Can move stuff between views via global key: viewB -> viewA', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move stuff between views via global key: viewB -> viewA', (WidgetTester tester) async {
     final FlutterView greenView = tester.view;
     final FlutterView redView = FakeView(tester.view);
     final Widget globalKeyChild = SizedBox(
@@ -560,7 +563,7 @@ void main() {
     expect(leafRenderObject[greenView.viewId], isA<RenderConstrainedBox>());
   });
 
-  testWidgets('Can move stuff out of a view that is going away, viewA -> ViewB', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move stuff out of a view that is going away, viewA -> ViewB', (WidgetTester tester) async {
     final FlutterView greenView = tester.view;
     final Key greenKey = UniqueKey();
     final FlutterView redView = FakeView(tester.view);
@@ -641,7 +644,7 @@ void main() {
     );
   });
 
-  testWidgets('Can move stuff out of a view that is going away, viewB -> ViewA', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move stuff out of a view that is going away, viewB -> ViewA', (WidgetTester tester) async {
     final FlutterView greenView = tester.view;
     final Key greenKey = UniqueKey();
     final FlutterView redView = FakeView(tester.view);
@@ -722,7 +725,7 @@ void main() {
     );
   });
 
-  testWidgets('Can move stuff out of a view that is moving itself, stuff ends up before view', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move stuff out of a view that is moving itself, stuff ends up before view', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
     final Key key3 = UniqueKey();
@@ -808,7 +811,7 @@ void main() {
     ));
   });
 
-  testWidgets('Can move stuff out of a view that is moving itself, stuff ends up after view', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move stuff out of a view that is moving itself, stuff ends up after view', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
     final Key key3 = UniqueKey();
@@ -896,7 +899,7 @@ void main() {
     ));
   });
 
-  testWidgets('Can globalkey move down the tree from a view that is going away', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can globalkey move down the tree from a view that is going away', (WidgetTester tester) async {
     final FlutterView anchorView = FakeView(tester.view);
     final Widget globalKeyChild = SizedBox(
       key: GlobalKey(),
@@ -973,7 +976,7 @@ void main() {
     );
   });
 
-  testWidgets('RenderObjects are disposed when a view goes away from a ViewAnchor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderObjects are disposed when a view goes away from a ViewAnchor', (WidgetTester tester) async {
     final FlutterView anchorView = FakeView(tester.view);
 
     await tester.pumpWidget(
@@ -1003,7 +1006,7 @@ void main() {
     expect(box.debugDisposed, isTrue);
   });
 
-  testWidgets('RenderObjects are disposed when a view goes away from a ViewCollection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderObjects are disposed when a view goes away from a ViewCollection', (WidgetTester tester) async {
     final FlutterView redView = tester.view;
     final FlutterView greenView = FakeView(tester.view);
 
@@ -1044,7 +1047,7 @@ void main() {
     expect(box.debugDisposed, isTrue);
   });
 
-  testWidgets('View can be wrapped and unwrapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('View can be wrapped and unwrapped', (WidgetTester tester) async {
     final Widget view = View(
       view: tester.view,
       child: const SizedBox(),
@@ -1077,7 +1080,7 @@ void main() {
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
   });
 
-  testWidgets('ViewAnchor with View can be wrapped and unwrapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ViewAnchor with View can be wrapped and unwrapped', (WidgetTester tester) async {
     final Widget viewAnchor = ViewAnchor(
       view: View(
         view: FakeView(tester.view),
@@ -1102,7 +1105,7 @@ void main() {
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));
   });
 
-  testWidgets('Moving a View keeps its semantics tree stable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Moving a View keeps its semantics tree stable', (WidgetTester tester) async {
     final Widget view = View(
       // No explicit key, we rely on the implicit key of the underlying RawView.
       view: tester.view,
@@ -1147,15 +1150,4 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
-}
-
-class FakeView extends TestFlutterView{
-  FakeView(FlutterView view, { this.viewId = 100 }) : super(
-    view: view,
-    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-    display: view.display as TestDisplay,
-  );
-
-  @override
-  final int viewId;
 }

@@ -5,11 +5,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // There's also some duplicate GlobalKey tests in the framework_test.dart file.
 
 void main() {
-  testWidgets('GlobalKey children of one node', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GlobalKey children of one node', (WidgetTester tester) async {
     // This is actually a test of the regular duplicate key logic, which
     // happens before the duplicate GlobalKey logic.
     await tester.pumpWidget(const Stack(children: <Widget>[
@@ -23,7 +24,7 @@ void main() {
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
   });
 
-  testWidgets('GlobalKey children of two nodes - A', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GlobalKey children of two nodes - A', (WidgetTester tester) async {
     await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -43,7 +44,7 @@ void main() {
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
   });
 
-  testWidgets('GlobalKey children of two different nodes - B', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GlobalKey children of two different nodes - B', (WidgetTester tester) async {
     await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -61,7 +62,7 @@ void main() {
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
   });
 
-  testWidgets('GlobalKey children of two nodes - C', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GlobalKey children of two nodes - C', (WidgetTester tester) async {
     late StateSetter nestedSetState;
     bool flag = false;
     await tester.pumpWidget(Stack(

@@ -45,12 +45,13 @@ void main() {
     const String home = '/home/me';
     final Platform platform = FakePlatform(environment: <String, String>{'HOME': home});
 
-    fileSystem.directory(fileSystem.path.join('/snap/code/current/', '.vscode')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('/snap/code/current/usr/share/code', '.vscode')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('/snap/code-insiders/current/usr/share/code-insiders', '.vscode-insiders')).createSync(recursive: true);
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
 
     final List<VsCode> installed = VsCode.allInstalled(fileSystem, platform, processManager);
-    expect(installed.length, 1);
+    expect(installed.length, 2);
   });
 
   testWithoutContext('can locate installations on macOS', () {

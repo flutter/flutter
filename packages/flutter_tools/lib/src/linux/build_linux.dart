@@ -17,6 +17,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import '../migrations/cmake_native_assets_migration.dart';
 
 // Matches the following error and warning patterns:
 // - <file path>:<line>:<column>: (fatal) error: <error...>
@@ -45,6 +46,7 @@ Future<void> buildLinux(
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(linuxProject, logger),
+    CmakeNativeAssetsMigration(linuxProject, 'linux', logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);

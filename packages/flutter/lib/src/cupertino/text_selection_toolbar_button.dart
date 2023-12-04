@@ -34,8 +34,6 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 18.0, h
 /// A button in the style of the iOS text selection toolbar buttons.
 class CupertinoTextSelectionToolbarButton extends StatefulWidget {
   /// Create an instance of [CupertinoTextSelectionToolbarButton].
-  ///
-  /// [child] cannot be null.
   const CupertinoTextSelectionToolbarButton({
     super.key,
     this.onPressed,
@@ -54,8 +52,6 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] from the given
   /// [ContextMenuButtonItem].
-  ///
-  /// [buttonItem] cannot be null.
   CupertinoTextSelectionToolbarButton.buttonItem({
     super.key,
     required ContextMenuButtonItem this.buttonItem,

@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -23,9 +24,8 @@ export 'package:flutter/painting.dart' show
 class RenderImage extends RenderBox {
   /// Creates a render box that displays an image.
   ///
-  /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments
-  /// must not be null. The [textDirection] argument must not be null if
-  /// [alignment] will need resolving or if [matchTextDirection] is true.
+  /// The [textDirection] argument must not be null if [alignment] will need
+  /// resolving or if [matchTextDirection] is true.
   RenderImage({
     ui.Image? image,
     this.debugImageLabel,
@@ -402,7 +402,8 @@ class RenderImage extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     return _sizeForConstraints(constraints);
   }
 

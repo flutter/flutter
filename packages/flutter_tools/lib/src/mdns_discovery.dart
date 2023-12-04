@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -26,10 +27,12 @@ class MDnsVmServiceDiscovery {
     MDnsClient? preliminaryMDnsClient,
     required Logger logger,
     required Usage flutterUsage,
+    required Analytics analytics,
   })  : _client = mdnsClient ?? MDnsClient(),
         _preliminaryClient = preliminaryMDnsClient,
         _logger = logger,
-        _flutterUsage = flutterUsage;
+        _flutterUsage = flutterUsage,
+        _analytics = analytics;
 
   final MDnsClient _client;
 
@@ -39,6 +42,7 @@ class MDnsVmServiceDiscovery {
 
   final Logger _logger;
   final Usage _flutterUsage;
+  final Analytics _analytics;
 
   @visibleForTesting
   static const String dartVmServiceName = '_dartVmService._tcp.local';
@@ -504,6 +508,7 @@ class MDnsVmServiceDiscovery {
     switch (targetPlatform) {
       case TargetPlatform.ios:
         UsageEvent('ios-mdns', 'no-ipv4-link-local', flutterUsage: _flutterUsage).send();
+        _analytics.send(Event.appleUsageEvent(workflow: 'ios-mdns', parameter: 'no-ipv4-link-local'));
         _logger.printError(
           'The mDNS query for an attached iOS device failed. It may '
           'be necessary to disable the "Personal Hotspot" on the device, and '

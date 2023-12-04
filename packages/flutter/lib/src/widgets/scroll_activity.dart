@@ -57,11 +57,23 @@ abstract class ScrollActivityDelegate {
 ///    [ScrollPosition] of a [Scrollable].
 abstract class ScrollActivity {
   /// Initializes [delegate] for subclasses.
-  ScrollActivity(this._delegate);
+  ScrollActivity(this._delegate) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$ScrollActivity',
+        object: this,
+      );
+    }
+  }
 
   /// The delegate that this activity will use to actuate the scroll view.
   ScrollActivityDelegate get delegate => _delegate;
   ScrollActivityDelegate _delegate;
+
+  bool _isDisposed = false;
 
   /// Updates the activity's link to the [ScrollActivityDelegate].
   ///
@@ -134,7 +146,15 @@ abstract class ScrollActivity {
 
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
+    _isDisposed = true;
+  }
 
   @override
   String toString() => describeIdentity(this);
@@ -226,8 +246,6 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 class ScrollDragController implements Drag {
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
-  ///
-  /// The [delegate] and `details` arguments must not be null.
   ScrollDragController({
     required ScrollActivityDelegate delegate,
     required DragStartDetails details,
@@ -521,8 +539,6 @@ class DragScrollActivity extends ScrollActivity {
 ///    animation parameters.
 class BallisticScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on a [simulation].
-  ///
-  /// The [delegate], [simulation], and [vsync] arguments must not be null.
   BallisticScrollActivity(
     super.delegate,
     Simulation simulation,
@@ -535,7 +551,7 @@ class BallisticScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateWith(simulation)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late AnimationController _controller;
@@ -569,7 +585,11 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(0.0);
+    // Check if the activity was disposed before going ballistic because _end might be called
+    // if _controller is disposed just after completion.
+    if (!_isDisposed) {
+      delegate.goBallistic(0.0);
+    }
   }
 
   @override
@@ -610,8 +630,6 @@ class BallisticScrollActivity extends ScrollActivity {
 class DrivenScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on animation
   /// parameters.
-  ///
-  /// All of the parameters must be non-null.
   DrivenScrollActivity(
     super.delegate, {
     required double from,
@@ -628,7 +646,7 @@ class DrivenScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateTo(to, duration: duration, curve: curve)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late final Completer<void> _completer;
@@ -648,7 +666,11 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(velocity);
+    // Check if the activity was disposed before going ballistic because _end might be called
+    // if _controller is disposed just after completion.
+    if (!_isDisposed) {
+      delegate.goBallistic(velocity);
+    }
   }
 
   @override

@@ -301,7 +301,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
   });
 
-  testWidgets('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -334,7 +334,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildCheckbox(active: false));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -348,7 +348,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildCheckbox(active: true));
-    await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
     expect(
@@ -360,6 +360,11 @@ void main() {
         ),
       reason: 'Active pressed Checkbox should have overlay color: $activePressedOverlayColor',
     );
+
+    // Finish gesture to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Local CheckboxTheme can override global CheckboxTheme', (WidgetTester tester) async {

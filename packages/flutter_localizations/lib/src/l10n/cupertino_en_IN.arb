@@ -1,4 +1,6 @@
 {
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share...",
   "lookUpButtonLabel": "Look up",
   "noSpellCheckReplacementsLabel": "No replacements found",
   "menuDismissLabel": "Dismiss menu",

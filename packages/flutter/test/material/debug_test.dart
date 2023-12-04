@@ -97,7 +97,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            showBottomSheet<void>(
+            showBottomSheet(
               context: context,
               builder: (BuildContext context) => Container(),
             );
@@ -137,7 +137,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
