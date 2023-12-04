@@ -562,13 +562,6 @@ Rasterizer::DoDrawResult Rasterizer::DrawToSurfaces(
 std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
     FrameTimingsRecorder& frame_timings_recorder,
     std::vector<std::unique_ptr<LayerTreeTask>> tasks) {
-  // TODO(dkwingsmt): The rasterizer only supports rendering a single view
-  // and that view must be the implicit view. Properly support multi-view
-  // in the future.
-  // See https://github.com/flutter/flutter/issues/135530, item 2 & 4.
-  FML_CHECK(tasks.size() == 1u) << "Unexpected size of " << tasks.size();
-  FML_DCHECK(tasks.front()->view_id == kFlutterImplicitViewId);
-
   compositor_context_->ui_time().SetLapTime(
       frame_timings_recorder.GetBuildDuration());
 
@@ -593,11 +586,8 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
   if (external_view_embedder_) {
     FML_DCHECK(!external_view_embedder_->GetUsedThisFrame());
     external_view_embedder_->SetUsedThisFrame(true);
-    external_view_embedder_->BeginFrame(
-        // TODO(dkwingsmt): Add all views here.
-        // See https://github.com/flutter/flutter/issues/135530, item 4.
-        tasks.front()->layer_tree->frame_size(), surface_->GetContext(),
-        tasks.front()->device_pixel_ratio, raster_thread_merger_);
+    external_view_embedder_->BeginFrame(surface_->GetContext(),
+                                        raster_thread_merger_);
   }
 
   std::optional<fml::TimePoint> presentation_time = std::nullopt;
@@ -664,6 +654,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
 
   DlCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {
+    external_view_embedder_->PrepareFlutterView(
+        view_id, layer_tree.frame_size(), device_pixel_ratio);
     // TODO(dkwingsmt): Add view ID here.
     embedder_root_canvas = external_view_embedder_->GetRootCanvas();
   }
@@ -704,7 +696,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     // for accurate performance metrics.
     if (frame->framebuffer_info().supports_partial_repaint &&
         !layer_tree.is_leaf_layer_tracing_enabled()) {
-      // Disable partial repaint if external_view_embedder_ SubmitFrame is
+      // Disable partial repaint if external_view_embedder_ SubmitFlutterView is
       // involved - ExternalViewEmbedder unconditionally clears the entire
       // surface and also partial repaint with platform view present is
       // something that still need to be figured out.
@@ -750,7 +742,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     if (external_view_embedder_ &&
         (!raster_thread_merger_ || raster_thread_merger_->IsMerged())) {
       FML_DCHECK(!frame->IsSubmitted());
-      external_view_embedder_->SubmitFrame(
+      external_view_embedder_->SubmitFlutterView(
           surface_->GetContext(), surface_->GetAiksContext(), std::move(frame));
     } else {
       frame->Submit();
