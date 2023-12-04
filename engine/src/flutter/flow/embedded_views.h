@@ -369,6 +369,29 @@ class DisplayListEmbedderViewSlice : public EmbedderViewSlice {
 //
 // Used on iOS, Android (hybrid composite mode), and on embedded platforms
 // that provide a system compositor as part of the project arguments.
+//
+// There are two kinds of "view IDs" in the context of ExternalViewEmbedder, and
+// specific names are used to avoid ambiguation:
+//
+// * ExternalViewEmbedder composites a stack of layers. Each layer's content
+//   might be from Flutter widgets, or a platform view, which displays platform
+//   native components. Each platform view is labeled by a view ID, which
+//   corresponds to the ID from `PlatformViewsRegistry.getNextPlatformViewId`
+//   from the framework. In the context of `ExternalViewEmbedder`, this ID is
+//   called platform_view_id.
+// * The layers are compositied into a single rectangular surface, displayed by
+//   taking up an entire native window or part of a window. Each such surface
+//   is labeled by a view ID, which corresponds to `FlutterView.viewID` from
+//   dart:ui. In the context of `ExternalViewEmbedder`, this ID is called
+//   flutter_view_id.
+//
+// The lifecycle of drawing a frame using ExternalViewEmbedder is:
+//
+//   1. At the start of a frame, call |BeginFrame|, then |SetUsedThisFrame| to
+//      true.
+//   2. For each view to be drawn, call |PrepareFlutterView|, then
+//   |SubmitFlutterView|.
+//   3. At the end of a frame, if |GetUsedThisFrame| is true, call |EndFrame|.
 class ExternalViewEmbedder {
   // TODO(cyanglaz): Make embedder own the `EmbeddedViewParams`.
 
@@ -383,7 +406,7 @@ class ExternalViewEmbedder {
   // from the on-screen render target.
   virtual DlCanvas* GetRootCanvas() = 0;
 
-  // Call this in-lieu of |SubmitFrame| to clear pre-roll state and
+  // Call this in-lieu of |SubmitFlutterView| to clear pre-roll state and
   // sets the stage for the next pre-roll.
   virtual void CancelFrame() = 0;
 
@@ -392,13 +415,11 @@ class ExternalViewEmbedder {
   // The `raster_thread_merger` will be null if |SupportsDynamicThreadMerging|
   // returns false.
   virtual void BeginFrame(
-      SkISize frame_size,
       GrDirectContext* context,
-      double device_pixel_ratio,
       const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) = 0;
 
   virtual void PrerollCompositeEmbeddedView(
-      int64_t view_id,
+      int64_t platform_view_id,
       std::unique_ptr<EmbeddedViewParams> params) = 0;
 
   // This needs to get called after |Preroll| finishes on the layer tree.
@@ -411,14 +432,19 @@ class ExternalViewEmbedder {
   }
 
   // Must be called on the UI thread.
-  virtual DlCanvas* CompositeEmbeddedView(int64_t view_id) = 0;
+  virtual DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) = 0;
+
+  // Prepare for a view to be drawn.
+  virtual void PrepareFlutterView(int64_t flutter_view_id,
+                                  SkISize frame_size,
+                                  double device_pixel_ratio) = 0;
 
   // Implementers must submit the frame by calling frame.Submit().
   //
   // This method can mutate the root Skia canvas before submitting the frame.
   //
   // It can also allocate frames for overlay surfaces to compose hybrid views.
-  virtual void SubmitFrame(
+  virtual void SubmitFlutterView(
       GrDirectContext* context,
       const std::shared_ptr<impeller::AiksContext>& aiks_context,
       std::unique_ptr<SurfaceFrame> frame);
@@ -462,7 +488,7 @@ class ExternalViewEmbedder {
 
   // Pushes the platform view id of a visited platform view to a list of
   // visited platform views.
-  virtual void PushVisitedPlatformView(int64_t view_id) {}
+  virtual void PushVisitedPlatformView(int64_t platform_view_id) {}
 
   // Pushes a DlImageFilter object to each platform view within a list of
   // visited platform views.

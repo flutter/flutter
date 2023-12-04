@@ -58,6 +58,7 @@ constexpr static fuchsia::ui::composition::BlendMode kFirstLayerBlendMode{
     fuchsia::ui::composition::BlendMode::SRC};
 constexpr static fuchsia::ui::composition::BlendMode kUpperLayerBlendMode{
     fuchsia::ui::composition::BlendMode::SRC_OVER};
+constexpr static int64_t kImplicitViewId = 0;
 
 class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
  public:
@@ -326,7 +327,9 @@ void DrawSimpleFrame(ExternalViewEmbedder& external_view_embedder,
                      SkISize frame_size,
                      float frame_dpr,
                      std::function<void(flutter::DlCanvas*)> draw_callback) {
-  external_view_embedder.BeginFrame(frame_size, nullptr, frame_dpr, nullptr);
+  external_view_embedder.BeginFrame(nullptr, nullptr);
+  external_view_embedder.PrepareFlutterView(kImplicitViewId, frame_size,
+                                            frame_dpr);
   {
     flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
     external_view_embedder.PostPrerollAction(nullptr);
@@ -335,7 +338,7 @@ void DrawSimpleFrame(ExternalViewEmbedder& external_view_embedder,
   external_view_embedder.EndFrame(false, nullptr);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
-  external_view_embedder.SubmitFrame(
+  external_view_embedder.SubmitFlutterView(
       nullptr, nullptr,
       std::make_unique<flutter::SurfaceFrame>(
           nullptr, std::move(framebuffer_info),
@@ -352,7 +355,9 @@ void DrawFrameWithView(
     flutter::EmbeddedViewParams& view_params,
     std::function<void(flutter::DlCanvas*)> background_draw_callback,
     std::function<void(flutter::DlCanvas*)> overlay_draw_callback) {
-  external_view_embedder.BeginFrame(frame_size, nullptr, frame_dpr, nullptr);
+  external_view_embedder.BeginFrame(nullptr, nullptr);
+  external_view_embedder.PrepareFlutterView(kImplicitViewId, frame_size,
+                                            frame_dpr);
   {
     flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
     external_view_embedder.PrerollCompositeEmbeddedView(
@@ -366,7 +371,7 @@ void DrawFrameWithView(
   external_view_embedder.EndFrame(false, nullptr);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
-  external_view_embedder.SubmitFrame(
+  external_view_embedder.SubmitFlutterView(
       nullptr, nullptr,
       std::make_unique<flutter::SurfaceFrame>(
           nullptr, std::move(framebuffer_info),
