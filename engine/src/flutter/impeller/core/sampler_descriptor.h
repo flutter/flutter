@@ -4,14 +4,11 @@
 
 #pragma once
 
-#include <unordered_map>
-
 #include "impeller/base/comparable.h"
 #include "impeller/core/formats.h"
 
 namespace impeller {
 
-class Sampler;
 class Context;
 
 struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
@@ -48,10 +45,5 @@ struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
            depth_address_mode == o.depth_address_mode;
   }
 };
-
-using SamplerMap = std::unordered_map<SamplerDescriptor,
-                                      std::shared_ptr<const Sampler>,
-                                      ComparableHash<SamplerDescriptor>,
-                                      ComparableEqual<SamplerDescriptor>>;
 
 }  // namespace impeller

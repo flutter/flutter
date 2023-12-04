@@ -8,6 +8,7 @@
 #include <string>
 
 #include "flutter/fml/macros.h"
+#include "impeller/core/allocator.h"
 #include "impeller/core/capture.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -20,7 +21,6 @@ class ShaderLibrary;
 class SamplerLibrary;
 class CommandBuffer;
 class PipelineLibrary;
-class Allocator;
 
 //------------------------------------------------------------------------------
 /// @brief      To do anything rendering related with Impeller, you need a

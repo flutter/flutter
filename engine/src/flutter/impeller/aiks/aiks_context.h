@@ -15,7 +15,6 @@
 namespace impeller {
 
 struct Picture;
-class RenderPass;
 
 class AiksContext {
  public:

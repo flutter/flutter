@@ -15,6 +15,7 @@
 #include "impeller/aiks/paint.h"
 #include "impeller/aiks/picture.h"
 #include "impeller/core/sampler_descriptor.h"
+#include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
@@ -25,8 +26,6 @@
 #include "impeller/typographer/text_frame.h"
 
 namespace impeller {
-
-class Entity;
 
 struct CanvasStackEntry {
   Matrix transform;

@@ -12,8 +12,6 @@
 
 namespace impeller {
 
-class EntityPass;
-
 class PaintPassDelegate final : public EntityPassDelegate {
  public:
   explicit PaintPassDelegate(Paint paint);
