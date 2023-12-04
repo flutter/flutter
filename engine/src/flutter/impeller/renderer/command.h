@@ -189,19 +189,19 @@ struct Command : public ResourceBinder {
   bool BindResource(ShaderStage stage,
                     const ShaderUniformSlot& slot,
                     const ShaderMetadata& metadata,
-                    const BufferView& view) override;
+                    BufferView view) override;
 
   bool BindResource(ShaderStage stage,
                     const ShaderUniformSlot& slot,
                     const std::shared_ptr<const ShaderMetadata>& metadata,
-                    const BufferView& view);
+                    BufferView view);
 
   // |ResourceBinder|
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
-                    const std::shared_ptr<const Texture>& texture,
-                    const std::shared_ptr<const Sampler>& sampler) override;
+                    std::shared_ptr<const Texture> texture,
+                    std::shared_ptr<const Sampler> sampler) override;
 
   BufferView GetVertexBuffer() const;
 
@@ -212,7 +212,7 @@ struct Command : public ResourceBinder {
   bool DoBindResource(ShaderStage stage,
                       const ShaderUniformSlot& slot,
                       T metadata,
-                      const BufferView& view);
+                      BufferView view);
 };
 
 }  // namespace impeller
