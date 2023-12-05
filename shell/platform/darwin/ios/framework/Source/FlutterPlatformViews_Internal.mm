@@ -8,8 +8,8 @@
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
-static int kMaxPointsInVerb = 4;
-static const NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
+static constexpr int kMaxPointsInVerb = 4;
+static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
 namespace flutter {
 
