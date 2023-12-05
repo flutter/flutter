@@ -2325,7 +2325,7 @@ class _TestPageUpdateState extends State<_TestPageUpdate> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             const Text('Main'),
             ElevatedButton(
               onPressed: () {
