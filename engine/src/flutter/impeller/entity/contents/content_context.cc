@@ -197,8 +197,8 @@ ContentContext::ContentContext(
       .primitive_type = PrimitiveType::kTriangleStrip,
       .color_attachment_pixel_format =
           context_->GetCapabilities()->GetDefaultColorFormat()};
-  const auto supports_decal =
-      context_->GetCapabilities()->SupportsDecalSamplerAddressMode();
+  const auto supports_decal = static_cast<Scalar>(
+      context_->GetCapabilities()->SupportsDecalSamplerAddressMode());
 
 #ifdef IMPELLER_DEBUG
   checkerboard_pipelines_.CreateDefault(*context_, options);
@@ -221,96 +221,96 @@ ContentContext::ContentContext(
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
     framebuffer_blend_color_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kColor), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
     framebuffer_blend_colorburn_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kColorBurn), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
     framebuffer_blend_colordodge_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kColorDodge), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
     framebuffer_blend_darken_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kDarken), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
     framebuffer_blend_difference_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kDifference), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
     framebuffer_blend_exclusion_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kExclusion), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
     framebuffer_blend_hardlight_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kHardLight), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
     framebuffer_blend_hue_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kHue), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
     framebuffer_blend_lighten_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kLighten), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
     framebuffer_blend_luminosity_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kLuminosity), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
     framebuffer_blend_multiply_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kMultiply), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
     framebuffer_blend_overlay_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kOverlay), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
     framebuffer_blend_saturation_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kSaturation), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
     framebuffer_blend_screen_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kScreen), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
     framebuffer_blend_softlight_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
-        {static_cast<int32_t>(BlendSelectValues::kSoftLight), supports_decal});
+        {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
   }
 
   blend_color_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kColor), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
   blend_colorburn_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kColorBurn), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
   blend_colordodge_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kColorDodge), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
   blend_darken_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kDarken), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
   blend_difference_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kDifference), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
   blend_exclusion_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kExclusion), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
   blend_hardlight_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kHardLight), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
   blend_hue_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kHue), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
   blend_lighten_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kLighten), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
   blend_luminosity_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kLuminosity), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
   blend_multiply_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kMultiply), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
   blend_overlay_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kOverlay), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
   blend_saturation_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kSaturation), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
   blend_screen_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kScreen), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
   blend_softlight_pipelines_.CreateDefault(
       *context_, options_trianglestrip,
-      {static_cast<int32_t>(BlendSelectValues::kSoftLight), supports_decal});
+      {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
 
   rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
   texture_blend_pipelines_.CreateDefault(*context_, options);

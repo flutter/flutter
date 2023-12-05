@@ -8,8 +8,8 @@
 #include <impeller/types.glsl>
 #include "blend_select.glsl"
 
-layout(constant_id = 0) const int blend_type = 0;
-layout(constant_id = 1) const int supports_decal = 1;
+layout(constant_id = 0) const float blend_type = 0.0;
+layout(constant_id = 1) const float supports_decal = 1.0;
 
 uniform BlendInfo {
   float16_t dst_input_alpha;
@@ -49,7 +49,7 @@ void main() {
                              ) *
                           blend_info.src_input_alpha;
 
-  f16vec3 blend_result = AdvancedBlend(dst.rgb, src.rgb, blend_type);
+  f16vec3 blend_result = AdvancedBlend(dst.rgb, src.rgb, int(blend_type));
   f16vec4 blended = mix(src, f16vec4(blend_result, dst.a), dst.a);
   frag_color = mix(dst_sample, blended, src.a);
 }

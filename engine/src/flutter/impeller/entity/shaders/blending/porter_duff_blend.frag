@@ -9,7 +9,7 @@ precision mediump float;
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
-layout(constant_id = 0) const int supports_decal = 1;
+layout(constant_id = 0) const float supports_decal = 1.0;
 
 uniform f16sampler2D texture_sampler_dst;
 

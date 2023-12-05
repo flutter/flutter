@@ -49,7 +49,7 @@ struct PipelineBuilder {
   ///
   static std::optional<PipelineDescriptor> MakeDefaultPipelineDescriptor(
       const Context& context,
-      const std::vector<int>& constants = {}) {
+      const std::vector<Scalar>& constants = {}) {
     PipelineDescriptor desc;
     desc.SetSpecializationConstants(constants);
     if (InitializePipelineDescriptorDefaults(context, desc)) {

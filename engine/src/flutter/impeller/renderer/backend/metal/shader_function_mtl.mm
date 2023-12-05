@@ -18,15 +18,15 @@ ShaderFunctionMTL::ShaderFunctionMTL(UniqueID parent_library_id,
 ShaderFunctionMTL::~ShaderFunctionMTL() = default;
 
 void ShaderFunctionMTL::GetMTLFunctionSpecialized(
-    const std::vector<int>& constants,
+    const std::vector<Scalar>& constants,
     const CompileCallback& callback) const {
   MTLFunctionConstantValues* constantValues =
       [[MTLFunctionConstantValues alloc] init];
   size_t index = 0;
   for (const auto value : constants) {
-    int copied_value = value;
+    Scalar copied_value = value;
     [constantValues setConstantValue:&copied_value
-                                type:MTLDataTypeInt
+                                type:MTLDataTypeFloat
                              atIndex:index];
     index++;
   }

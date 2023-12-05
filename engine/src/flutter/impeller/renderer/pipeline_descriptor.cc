@@ -282,11 +282,11 @@ PolygonMode PipelineDescriptor::GetPolygonMode() const {
 }
 
 void PipelineDescriptor::SetSpecializationConstants(
-    std::vector<int32_t> values) {
+    std::vector<Scalar> values) {
   specialization_constants_ = std::move(values);
 }
 
-const std::vector<int32_t>& PipelineDescriptor::GetSpecializationConstants()
+const std::vector<Scalar>& PipelineDescriptor::GetSpecializationConstants()
     const {
   return specialization_constants_;
 }

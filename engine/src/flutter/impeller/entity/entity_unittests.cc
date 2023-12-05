@@ -2507,9 +2507,9 @@ TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
   ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
             alt_color_burn->GetDescriptor().GetSpecializationConstants());
 
-  auto decal_supported = static_cast<int32_t>(
+  auto decal_supported = static_cast<Scalar>(
       GetContext()->GetCapabilities()->SupportsDecalSamplerAddressMode());
-  std::vector<int32_t> expected_constants = {5, decal_supported};
+  std::vector<Scalar> expected_constants = {5, decal_supported};
   ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
             expected_constants);
 }
@@ -2520,9 +2520,9 @@ TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
 
   auto default_color_burn = content_context.GetMorphologyFilterPipeline({});
 
-  auto decal_supported = static_cast<int32_t>(
+  auto decal_supported = static_cast<Scalar>(
       GetContext()->GetCapabilities()->SupportsDecalSamplerAddressMode());
-  std::vector<int32_t> expected_constants = {decal_supported};
+  std::vector<Scalar> expected_constants = {decal_supported};
   ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
             expected_constants);
 }
