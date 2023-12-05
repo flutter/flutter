@@ -42,13 +42,13 @@ dependencies:
   shelf_static: 1.1.2
   pub_semver: 2.1.4
   pool: 1.5.1
-  path: 1.8.3
+  path: 1.9.0
   mime: 1.0.4
   logging: 1.2.0
   http_multi_server: 3.2.1
   convert: 3.1.1
   async: 2.11.0
-  unified_analytics: 5.6.0
+  unified_analytics: 5.7.0
 
   cli_config: 0.1.2
   graphs: 2.3.1
@@ -115,4 +115,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: d1a2
+# PUBSPEC CHECKSUM: 77a1
