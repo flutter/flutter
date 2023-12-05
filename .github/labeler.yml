@@ -39,7 +39,7 @@
 
 'd: api docs':
   - any:
-   - examples/api/**/*
+    - examples/api/**/*
 
 'd: examples':
   - any:
