@@ -11,7 +11,7 @@ namespace impeller {
 /// @brief A geometry that is created from a stroked path object.
 class StrokePathGeometry final : public Geometry {
  public:
-  StrokePathGeometry(const Path& path,
+  StrokePathGeometry(Path path,
                      Scalar stroke_width,
                      Scalar miter_limit,
                      Cap stroke_cap,

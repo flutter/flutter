@@ -20,7 +20,7 @@ TEST(EntityGeometryTest, RectGeometryCoversArea) {
 TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
   auto path = PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath();
   auto geometry = Geometry::MakeFillPath(
-      path, /* inner rect */ Rect::MakeLTRB(0, 0, 100, 100));
+      std::move(path), /* inner rect */ Rect::MakeLTRB(0, 0, 100, 100));
   ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(0, 0, 100, 100)));
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
   ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(1, 1, 100, 100)));
@@ -29,7 +29,7 @@ TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
 
 TEST(EntityGeometryTest, FillPathGeometryCoversAreaNoInnerRect) {
   auto path = PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 100, 100)).TakePath();
-  auto geometry = Geometry::MakeFillPath(path);
+  auto geometry = Geometry::MakeFillPath(std::move(path));
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(0, 0, 100, 100)));
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(1, 1, 100, 100)));

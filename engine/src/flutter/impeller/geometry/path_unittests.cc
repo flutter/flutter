@@ -443,5 +443,36 @@ TEST(PathTest, SimplePath) {
       });
 }
 
+TEST(PathTest, CanBeCloned) {
+  PathBuilder builder;
+  builder.MoveTo({10, 10});
+  builder.LineTo({20, 20});
+  builder.SetBounds(Rect::MakeLTRB(0, 0, 100, 100));
+  builder.SetConvexity(Convexity::kConvex);
+
+  auto path_a = builder.TakePath(FillType::kAbsGeqTwo);
+  auto path_b = path_a.Clone();
+
+  EXPECT_EQ(path_a.GetBoundingBox(), path_b.GetBoundingBox());
+  EXPECT_EQ(path_a.GetFillType(), path_b.GetFillType());
+  EXPECT_EQ(path_a.IsConvex(), path_b.IsConvex());
+
+  auto poly_a = path_a.CreatePolyline(1.0);
+  auto poly_b = path_b.CreatePolyline(1.0);
+
+  ASSERT_EQ(poly_a.points->size(), poly_b.points->size());
+  ASSERT_EQ(poly_a.contours.size(), poly_b.contours.size());
+
+  for (auto i = 0u; i < poly_a.points->size(); i++) {
+    EXPECT_EQ((*poly_a.points)[i], (*poly_b.points)[i]);
+  }
+
+  for (auto i = 0u; i < poly_a.contours.size(); i++) {
+    EXPECT_EQ(poly_a.contours[i].start_index, poly_b.contours[i].start_index);
+    EXPECT_EQ(poly_a.contours[i].start_direction,
+              poly_b.contours[i].start_direction);
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller

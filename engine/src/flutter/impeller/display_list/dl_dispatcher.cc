@@ -778,7 +778,7 @@ void DlDispatcher::drawOval(const SkRect& bounds) {
                     .AddOval(skia_conversions::ToRect(bounds))
                     .SetConvexity(Convexity::kConvex)
                     .TakePath();
-    canvas_.DrawPath(path, paint_);
+    canvas_.DrawPath(std::move(path), paint_);
   }
 }
 

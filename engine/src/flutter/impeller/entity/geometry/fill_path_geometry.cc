@@ -7,9 +7,8 @@
 
 namespace impeller {
 
-FillPathGeometry::FillPathGeometry(const Path& path,
-                                   std::optional<Rect> inner_rect)
-    : path_(path), inner_rect_(inner_rect) {}
+FillPathGeometry::FillPathGeometry(Path path, std::optional<Rect> inner_rect)
+    : path_(std::move(path)), inner_rect_(inner_rect) {}
 
 GeometryResult FillPathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
