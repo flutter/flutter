@@ -1077,6 +1077,7 @@ targets:
       - .ci.yaml
 
   - name: Linux android_preview_tool_integration_tests_1_1
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3671,6 +3672,7 @@ targets:
       - .ci.yaml
 
   - name: Mac android_preview_tool_integration_tests_1_1
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5276,6 +5278,7 @@ targets:
       - .ci.yaml
 
   - name: Windows android_preview_tool_integration_tests_1_1
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
