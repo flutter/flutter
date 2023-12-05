@@ -348,18 +348,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
   final MenuController _controller = MenuController();
-  late final TextEditingController _textEditingController;
   late bool _enableFilter;
   late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
+  TextEditingController? _localTextEditingController;
+  TextEditingController get _textEditingController {
+    return widget.controller ?? (_localTextEditingController ??= TextEditingController());
+  }
 
   @override
   void initState() {
     super.initState();
-    _textEditingController = widget.controller ?? TextEditingController();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
@@ -367,16 +369,33 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
     if (index != -1) {
-      _textEditingController.text = filteredEntries[index].label;
-      _textEditingController.selection =
-          TextSelection.collapsed(offset: _textEditingController.text.length);
+      _textEditingController.value = TextEditingValue(
+        text: filteredEntries[index].label,
+        selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+      );
     }
     refreshLeadingPadding();
   }
 
   @override
+  void dispose() {
+    if (_localTextEditingController != null) {
+      debugPrint('Disposing of $_textEditingController');
+    }
+    _localTextEditingController?.dispose();
+    _localTextEditingController = null;
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      if (widget.controller != null) {
+        _localTextEditingController?.dispose();
+        _localTextEditingController = null;
+      }
+    }
     if (oldWidget.enableSearch != widget.enableSearch) {
       if (!widget.enableSearch) {
         currentHighlight = null;
@@ -394,9 +413,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.initialSelection != widget.initialSelection) {
       final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
       if (index != -1) {
-        _textEditingController.text = filteredEntries[index].label;
-        _textEditingController.selection =
-            TextSelection.collapsed(offset: _textEditingController.text.length);
+        _textEditingController.value = TextEditingValue(
+          text: filteredEntries[index].label,
+          selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+        );
       }
     }
   }
@@ -463,7 +483,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   List<Widget> _buildButtons(
     List<DropdownMenuEntry<T>> filteredEntries,
-    TextEditingController textEditingController,
     TextDirection textDirection,
     { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
@@ -519,9 +538,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         trailingIcon: entry.trailingIcon,
         onPressed: entry.enabled
           ? () {
-              textEditingController.text = entry.label;
-              textEditingController.selection =
-                TextSelection.collapsed(offset: textEditingController.text.length);
+              _textEditingController.value = TextEditingValue(
+                text: entry.label,
+                selection: TextSelection.collapsed(offset: entry.label.length),
+              );
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
             }
@@ -535,37 +555,43 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleUpKeyInvoke(_) => setState(() {
-    if (!_menuHasEnabledItem || !_controller.isOpen) {
-      return;
-    }
-    _enableFilter = false;
-    currentHighlight ??= 0;
-    currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
-    while (!filteredEntries[currentHighlight!].enabled) {
+  void handleUpKeyInvoke(_) {
+    setState(() {
+      if (!_menuHasEnabledItem || !_controller.isOpen) {
+        return;
+      }
+      _enableFilter = false;
+      currentHighlight ??= 0;
       currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
-    }
-    final String currentLabel = filteredEntries[currentHighlight!].label;
-    _textEditingController.text = currentLabel;
-    _textEditingController.selection =
-      TextSelection.collapsed(offset: _textEditingController.text.length);
-  });
+      while (!filteredEntries[currentHighlight!].enabled) {
+        currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
+      }
+      final String currentLabel = filteredEntries[currentHighlight!].label;
+      _textEditingController.value = TextEditingValue(
+        text: currentLabel,
+        selection: TextSelection.collapsed(offset: currentLabel.length),
+      );
+    });
+  }
 
-  void handleDownKeyInvoke(_) => setState(() {
-    if (!_menuHasEnabledItem || !_controller.isOpen) {
-      return;
-    }
-    _enableFilter = false;
-    currentHighlight ??= -1;
-    currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
-    while (!filteredEntries[currentHighlight!].enabled) {
+  void handleDownKeyInvoke(_) {
+    setState(() {
+      if (!_menuHasEnabledItem || !_controller.isOpen) {
+        return;
+      }
+      _enableFilter = false;
+      currentHighlight ??= -1;
       currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
-    }
-    final String currentLabel = filteredEntries[currentHighlight!].label;
-    _textEditingController.text = currentLabel;
-    _textEditingController.selection =
-      TextSelection.collapsed(offset: _textEditingController.text.length);
-  });
+      while (!filteredEntries[currentHighlight!].enabled) {
+        currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
+      }
+      final String currentLabel = filteredEntries[currentHighlight!].label;
+      _textEditingController.value = TextEditingValue(
+        text: currentLabel,
+        selection: TextSelection.collapsed(offset: currentLabel.length),
+      );
+    });
+  }
 
   void handlePressed(MenuController controller) {
     if (controller.isOpen) {
@@ -581,17 +607,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   @override
-  void dispose() {
-    if (widget.controller == null) {
-      _textEditingController.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, _textEditingController, textDirection, enableScrollToHighlight: false);
+    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, textDirection, enableScrollToHighlight: false);
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
@@ -610,7 +628,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       }
     }
 
-    final List<Widget> menu = _buildButtons(filteredEntries, _textEditingController, textDirection, focusedIndex: currentHighlight);
+    final List<Widget> menu = _buildButtons(filteredEntries, textDirection, focusedIndex: currentHighlight);
 
     final TextStyle? effectiveTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
 
@@ -670,9 +688,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               if (currentHighlight != null) {
                 final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
                 if (entry.enabled) {
-                  _textEditingController.text = entry.label;
-                  _textEditingController.selection =
-                      TextSelection.collapsed(offset: _textEditingController.text.length);
+                  _textEditingController.value = TextEditingValue(
+                    text: entry.label,
+                    selection: TextSelection.collapsed(offset: entry.label.length),
+                  );
                   widget.onSelected?.call(entry.value);
                 }
               } else {
