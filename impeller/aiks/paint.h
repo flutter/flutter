@@ -84,7 +84,7 @@ struct Paint {
       std::shared_ptr<Contents> input,
       const Matrix& effect_transform = Matrix()) const;
 
-  std::shared_ptr<Contents> CreateContentsForEntity(const Path& path = {},
+  std::shared_ptr<Contents> CreateContentsForEntity(Path path = {},
                                                     bool cover = false) const;
 
   std::shared_ptr<Contents> CreateContentsForGeometry(

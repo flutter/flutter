@@ -171,12 +171,13 @@ void Canvas::RestoreToCount(size_t count) {
   }
 }
 
-void Canvas::DrawPath(const Path& path, const Paint& paint) {
+void Canvas::DrawPath(Path path, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetClipDepth(GetClipDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(paint.CreateContentsForEntity(path)));
+  entity.SetContents(
+      paint.WithFilters(paint.CreateContentsForEntity(std::move(path))));
 
   GetCurrentPass().AddEntity(entity);
 }
@@ -277,13 +278,13 @@ void Canvas::DrawRRect(Rect rect, Point corner_radii, const Paint& paint) {
     entity.SetTransform(GetCurrentTransform());
     entity.SetClipDepth(GetClipDepth());
     entity.SetBlendMode(paint.blend_mode);
-    entity.SetContents(paint.WithFilters(
-        paint.CreateContentsForGeometry(Geometry::MakeFillPath(path))));
+    entity.SetContents(paint.WithFilters(paint.CreateContentsForGeometry(
+        Geometry::MakeFillPath(std::move(path)))));
 
     GetCurrentPass().AddEntity(entity);
     return;
   }
-  DrawPath(path, paint);
+  DrawPath(std::move(path), paint);
 }
 
 void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
@@ -308,10 +309,10 @@ void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
   GetCurrentPass().AddEntity(entity);
 }
 
-void Canvas::ClipPath(const Path& path, Entity::ClipOperation clip_op) {
-  ClipGeometry(Geometry::MakeFillPath(path), clip_op);
+void Canvas::ClipPath(Path path, Entity::ClipOperation clip_op) {
+  auto bounds = path.GetBoundingBox();
+  ClipGeometry(Geometry::MakeFillPath(std::move(path)), clip_op);
   if (clip_op == Entity::ClipOperation::kIntersect) {
-    auto bounds = path.GetBoundingBox();
     if (bounds.has_value()) {
       IntersectCulling(bounds.value());
     }
@@ -355,7 +356,7 @@ void Canvas::ClipRRect(const Rect& rect,
   std::optional<Rect> inner_rect = (flat_on_LR && flat_on_TB)
                                        ? rect.Expand(-corner_radii)
                                        : std::make_optional<Rect>();
-  auto geometry = Geometry::MakeFillPath(path, inner_rect);
+  auto geometry = Geometry::MakeFillPath(std::move(path), inner_rect);
   auto& cull_rect = transform_stack_.back().cull_rect;
   if (clip_op == Entity::ClipOperation::kIntersect &&                      //
       cull_rect.has_value() &&                                             //

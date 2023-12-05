@@ -73,6 +73,11 @@ void Path::Shift(Point shift) {
   }
 }
 
+Path Path::Clone() const {
+  Path new_path = *this;
+  return new_path;
+}
+
 Path& Path::AddLinearComponent(const Point& p1, const Point& p2) {
   auto index = points_.size();
   points_.emplace_back(p1);
