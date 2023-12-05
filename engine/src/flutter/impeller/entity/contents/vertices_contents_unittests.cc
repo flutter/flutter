@@ -21,7 +21,6 @@ namespace impeller {
 namespace testing {
 
 using EntityTest = EntityPlayground;
-INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 
 std::shared_ptr<VerticesGeometry> CreateColorVertices(
     const std::vector<Point>& vertices,
