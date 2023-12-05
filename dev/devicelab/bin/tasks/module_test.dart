@@ -224,14 +224,15 @@ class ModuleTest {
 
       // Modify gradle version to passed in version.
       // This is somehow the wrong file.
-      final File gradleWrapperProperties = File(path.join(hostApp.path, 'gradle',
-          'wrapper', 'gradle-wrapper.properties'));
+      final File gradleWrapperProperties = File(path.join(
+          hostApp.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'));
       String propertyContent = await gradleWrapperProperties.readAsString();
       propertyContent = propertyContent.replaceFirst(
         'REPLACEME',
         '$gradleVersion',
       );
-      await gradleWrapperProperties.writeAsString(content, flush: true);
+      section(propertyContent);
+      await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
 
       final File analyticsOutputFile =
           File(path.join(tempDir.path, 'analytics.log'));
