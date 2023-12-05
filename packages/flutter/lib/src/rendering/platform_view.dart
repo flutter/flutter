@@ -386,6 +386,59 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers);
 }
 
+/// Windows platform view prototype.
+class RenderWin32View extends RenderBox {
+  /// Creates the view.
+  RenderWin32View(Win32ViewController viewController): _viewController = viewController;
+
+  /// The unique identifier of the platform view controlled by this controller.
+  Win32ViewController get viewController => _viewController;
+  Win32ViewController _viewController;
+  set viewController(Win32ViewController value) {
+    if (_viewController == value) {
+      return;
+    }
+    final bool needsSemanticsUpdate = _viewController.id != value.id;
+    _viewController = value;
+    markNeedsPaint();
+    if (needsSemanticsUpdate) {
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.addLayer(PlatformViewLayer(
+      rect: offset & size,
+      viewId: viewController.id,
+    ));
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, { Offset? position }) {
+    if (!size.contains(position!)) {
+      return false;
+    }
+    result.add(BoxHitTestEntry(this, position));
+    return true;
+  }
+}
+
 /// A render object for an iOS UIKit UIView.
 ///
 /// [RenderUiKitView] is responsible for sizing and displaying an iOS

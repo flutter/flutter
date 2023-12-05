@@ -292,6 +292,19 @@ class PlatformViewsService {
     }
     return AppKitViewController._(id, layoutDirection);
   }
+
+  static Future<Win32ViewController> initWin32View({
+    required int id,
+    required String viewType
+  }) async {
+    // TODO(schectman): send message
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+    };
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    return Win32ViewController._(id);
+  }
 }
 
 /// Properties of an Android pointer.
@@ -1386,6 +1399,12 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
       'hybrid': true,
     });
   }
+}
+
+class Win32ViewController {
+  Win32ViewController._(this.id);
+
+  final int id;
 }
 
 /// Base class for iOS and macOS view controllers.

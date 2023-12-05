@@ -195,6 +195,17 @@ class AndroidView extends StatefulWidget {
   State<AndroidView> createState() => _AndroidViewState();
 }
 
+class Win32View extends StatefulWidget {
+  Win32View({
+    required this.viewType,
+  });
+
+  final String viewType;
+
+  @override
+  State<Win32View> createState() => _WindowsViewState();
+}
+
 /// Common superclass for iOS and macOS platform views.
 ///
 /// Platform views are used to embed native views in the widget hierarchy, with
@@ -605,6 +616,52 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
+class _WindowsViewState extends State<Win32View> {
+  bool _initialized = false;
+  Win32ViewController? _controller;
+
+  void _initializeOnce() {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _createNewWin32View();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeOnce();
+  }
+
+  @override
+  void didUpdateWidget(Win32View oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.viewType != widget.viewType) {
+      _controller = null;
+      _createNewWin32View();
+    }
+  }
+
+  Future<void> _createNewWin32View() async {
+    final int id = platformViewsRegistry.getNextPlatformViewId();
+    final Win32ViewController controller = await PlatformViewsService.initWin32View(id: id, viewType: widget.viewType);
+    setState(() {
+      _controller = controller;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Win32ViewController? controller = _controller;
+    if (controller == null) {
+      return const SizedBox.expand();
+    }
+    return _Win32View(controller: controller);
+  }
+}
+
 abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT extends DarwinPlatformViewController, RenderT extends RenderDarwinPlatformView<ControllerT>, ViewT extends _DarwinPlatformView<ControllerT, RenderT>> extends State<PlatformViewT> {
   ControllerT? _controller;
   TextDirection? _layoutDirection;
@@ -800,6 +857,25 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
     renderObject.clipBehavior = clipBehavior;
+  }
+}
+
+class _Win32View extends LeafRenderObjectWidget {
+  const _Win32View({
+    required this.controller,
+  });
+
+  final Win32ViewController controller;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderWin32View(controller);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderWin32View renderObject) {
+    renderObject
+      .viewController = controller;
   }
 }
 
