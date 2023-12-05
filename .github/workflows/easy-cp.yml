@@ -24,9 +24,8 @@ jobs:
           echo "CHANNEL=$(echo ${{ github.event.label.name }} | cut -d ':' -f 2 | xargs)" >> $GITHUB_ENV
       - name: Get Release Candidate Branch
         run: |
-          curl -o version.json https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version
-          echo "RELEASE_BRANCH=$(cat version.json | tr -d '\n')" >> $GITHUB_ENV
-          rm version.json
+          RELEASE_BRANCH=$(curl https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version)
+          echo "RELEASE_BRANCH=$(echo $RELEASE_BRANCH | tr -d '\n')" >> $GITHUB_ENV
       - name: Get Cherry Pick PR
         run: |
           echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
@@ -37,6 +36,7 @@ jobs:
           token: ${{ github.token }}
           path: flutter
           ref: master
+          # Use depth 0 to checkout history of master branch, so the cp commit is a known object
           fetch-depth: 0
       # use same name when checking out branch, since the marketplace action does a hard reset.
       - name: Attempt CP
@@ -47,35 +47,31 @@ jobs:
           git config user.email "<>"
           git fetch origin $RELEASE_BRANCH
           git fetch origin master
-          git checkout -b cp-$COMMIT_SHA --track origin/$RELEASE_BRANCH
+          git checkout -b $RELEASE_BRANCH --track origin/$RELEASE_BRANCH
           git cherry-pick $COMMIT_SHA
-          git status
       # TODO(xilaizhang): move cp template to flutter/flutter.
       # The Pull Request cherry pick template should be under flutter/.github/PULL_REQUEST_CP_TEMPLATE.md.
       - name: Get CP Template
         run: |
           curl -o flutter/.github/PULL_REQUEST_CP_TEMPLATE.md https://raw.githubusercontent.com/XilaiZhang/miscellaneous-side-project/master/.github/workflows/template/cherrypick.md
-      # PAT token is needed, otherwise 'Permission to flutter/flutter.git denied to github-actions[bot].'
       - name: Create PR on CP success
         if: ${{ steps.attempt-cp.conclusion == 'success' }}
         uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
         with:
           base: ${{ env.RELEASE_BRANCH }}
           path: flutter
-          token: ${{ secrets.PAT }}
+          token: ${{ github.token}}
           commit-message: automated cherry pick
           committer: GitHub <noreply@github.com>
           labels: |
             cp: review
           title: '[${{ env.CHANNEL }}-cherrypick] cherrypicks commit ${{ env.COMMIT_SHA }} from PR ${{ github.event.pull_request.title }}'
           body-path: flutter/.github/PULL_REQUEST_CP_TEMPLATE.md
-      # Need PAT Token to comment. Otherwise throws error "GraphQL: Resource not accessible by integration (addComment)"
       - name: Leave Comment on CP failure
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
         run: |
-          FAILURE_MSG="An automated cherry pick for this PR was attempted due to the cherry pick label added.<br>"
-          FAILURE_MSG+="However, the cherry pick failed (potentially due to a merge confclit).<br>"
-          FAILURE_MSG+="You will need to create the cherry pick PR pull request manually and add chillers as a reviewer.<br>"
+          FAILURE_MSG="Failed to create CP due to merge conflicts.<br>"
+          FAILURE_MSG+="You will need to create the PR manually. See https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process<br>"
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ github.token }}
