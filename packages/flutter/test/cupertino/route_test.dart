@@ -780,11 +780,12 @@ void main() {
     // Wait for pages to update.
     await tester.pump(const Duration(seconds: 3));
 
+    // Verify pages are updated.
     expect(
       find.text('New page'),
       findsOneWidget,
     );
-
+    // Verify `userGestureInProgress` is set to false.
     expect(
       tester.stateList<NavigatorState>(find.byType(Navigator)).last.userGestureInProgress,
       false,
