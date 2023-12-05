@@ -230,7 +230,7 @@ TEST_P(EntityTest, CanDrawRRect) {
                   .SetConvexity(Convexity::kConvex)
                   .AddRoundedRect(Rect::MakeXYWH(100, 100, 100, 100), 10.0)
                   .TakePath();
-  contents->SetGeometry(Geometry::MakeFillPath(path));
+  contents->SetGeometry(Geometry::MakeFillPath(std::move(path)));
   contents->SetColor(Color::Red());
 
   Entity entity;
@@ -261,7 +261,7 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakeStrokePath(path, 5.0));
+  contents->SetGeometry(Geometry::MakeStrokePath(std::move(path), 5.0));
   contents->SetColor(Color::Red());
   entity.SetContents(std::move(contents));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
@@ -281,7 +281,7 @@ TEST_P(EntityTest, StrokeWithTextureContents) {
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
   auto contents = std::make_unique<TiledTextureContents>();
-  contents->SetGeometry(Geometry::MakeStrokePath(path, 100.0));
+  contents->SetGeometry(Geometry::MakeStrokePath(std::move(path), 100.0));
   contents->SetTexture(bridge);
   contents->SetTileModes(Entity::TileMode::kClamp, Entity::TileMode::kClamp);
   entity.SetContents(std::move(contents));
@@ -321,7 +321,7 @@ TEST_P(EntityTest, TriangleInsideASquare) {
     Entity entity;
     entity.SetTransform(Matrix::MakeScale(GetContentScale()));
     auto contents = std::make_unique<SolidColorContents>();
-    contents->SetGeometry(Geometry::MakeStrokePath(path, 20.0));
+    contents->SetGeometry(Geometry::MakeStrokePath(std::move(path), 20.0));
     contents->SetColor(Color::Red());
     entity.SetContents(std::move(contents));
 
@@ -356,8 +356,8 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     auto render_path = [width = width, &context, &pass, &world_matrix](
                            const Path& path, Cap cap, Join join) {
       auto contents = std::make_unique<SolidColorContents>();
-      contents->SetGeometry(
-          Geometry::MakeStrokePath(path, width, miter_limit, cap, join));
+      contents->SetGeometry(Geometry::MakeStrokePath(path.Clone(), width,
+                                                     miter_limit, cap, join));
       contents->SetColor(Color::Red());
 
       Entity entity;
@@ -470,7 +470,7 @@ TEST_P(EntityTest, CubicCurveTest) {
           .TakePath();
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-  entity.SetContents(SolidColorContents::Make(path, Color::Red()));
+  entity.SetContents(SolidColorContents::Make(std::move(path), Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
@@ -514,7 +514,7 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
 
     Entity entity;
     entity.SetTransform(result_transform);
-    entity.SetContents(SolidColorContents::Make(path, Color::Red()));
+    entity.SetContents(SolidColorContents::Make(std::move(path), Color::Red()));
     return entity.Render(context, pass);
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -744,7 +744,7 @@ TEST_P(EntityTest, CubicCurveAndOverlapTest) {
           .TakePath();
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-  entity.SetContents(SolidColorContents::Make(path, Color::Red()));
+  entity.SetContents(SolidColorContents::Make(std::move(path), Color::Red()));
   ASSERT_TRUE(OpenPlaygroundHere(entity));
 }
 
@@ -946,7 +946,7 @@ TEST_P(EntityTest, BezierCircleScaled) {
                     .TakePath();
     entity.SetTransform(
         Matrix::MakeScale({scale, scale, 1.0}).Translate({-90, -20, 0}));
-    entity.SetContents(SolidColorContents::Make(path, Color::Red()));
+    entity.SetContents(SolidColorContents::Make(std::move(path), Color::Red()));
     return entity.Render(context, pass);
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -2289,8 +2289,8 @@ TEST_P(EntityTest, CoverageForStrokePathWithNegativeValuesInTransform) {
                         .LineTo({120, 190})
                         .LineTo({190, 120})
                         .TakePath();
-  auto geometry = Geometry::MakeStrokePath(arrow_head, 15.0, 4.0, Cap::kRound,
-                                           Join::kRound);
+  auto geometry = Geometry::MakeStrokePath(std::move(arrow_head), 15.0, 4.0,
+                                           Cap::kRound, Join::kRound);
 
   auto transform = Matrix::MakeTranslation({300, 300}) *
                    Matrix::MakeRotationZ(Radians(kPiOver2));

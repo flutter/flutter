@@ -96,7 +96,7 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(const Path& path, const Paint& paint);
+  void DrawPath(Path path, const Paint& paint);
 
   void DrawPaint(const Paint& paint);
 
@@ -125,7 +125,7 @@ class Canvas {
                      SamplerDescriptor sampler = {});
 
   void ClipPath(
-      const Path& path,
+      Path path,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
   void ClipRect(

@@ -27,8 +27,7 @@ class SolidColorContents final : public ColorSourceContents {
 
   ~SolidColorContents() override;
 
-  static std::unique_ptr<SolidColorContents> Make(const Path& path,
-                                                  Color color);
+  static std::unique_ptr<SolidColorContents> Make(Path path, Color color);
 
   void SetColor(Color color);
 

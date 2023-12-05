@@ -80,9 +80,9 @@ GeometryResult Geometry::GetPositionUVBuffer(Rect texture_coverage,
 }
 
 std::shared_ptr<Geometry> Geometry::MakeFillPath(
-    const Path& path,
+    Path path,
     std::optional<Rect> inner_rect) {
-  return std::make_shared<FillPathGeometry>(path, inner_rect);
+  return std::make_shared<FillPathGeometry>(std::move(path), inner_rect);
 }
 
 std::shared_ptr<Geometry> Geometry::MakePointField(std::vector<Point> points,
@@ -91,7 +91,7 @@ std::shared_ptr<Geometry> Geometry::MakePointField(std::vector<Point> points,
   return std::make_shared<PointFieldGeometry>(std::move(points), radius, round);
 }
 
-std::shared_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
+std::shared_ptr<Geometry> Geometry::MakeStrokePath(Path path,
                                                    Scalar stroke_width,
                                                    Scalar miter_limit,
                                                    Cap stroke_cap,
@@ -100,8 +100,8 @@ std::shared_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  return std::make_shared<StrokePathGeometry>(path, stroke_width, miter_limit,
-                                              stroke_cap, stroke_join);
+  return std::make_shared<StrokePathGeometry>(
+      std::move(path), stroke_width, miter_limit, stroke_cap, stroke_join);
 }
 
 std::shared_ptr<Geometry> Geometry::MakeCover() {

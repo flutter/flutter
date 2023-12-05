@@ -8,12 +8,12 @@
 
 namespace impeller {
 
-StrokePathGeometry::StrokePathGeometry(const Path& path,
+StrokePathGeometry::StrokePathGeometry(Path path,
                                        Scalar stroke_width,
                                        Scalar miter_limit,
                                        Cap stroke_cap,
                                        Join stroke_join)
-    : path_(path),
+    : path_(std::move(path)),
       stroke_width_(stroke_width),
       miter_limit_(miter_limit),
       stroke_cap_(stroke_cap),
