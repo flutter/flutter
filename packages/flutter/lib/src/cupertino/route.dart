@@ -628,7 +628,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     _recognizer.dispose();
 
     // If this is disposed during a drag. Call navigator.didStopUserGesture.
-    if(_backGestureController != null) {
+    if (_backGestureController != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _backGestureController?.navigator.didStopUserGesture();
         _backGestureController = null;
