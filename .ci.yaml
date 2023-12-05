@@ -4583,7 +4583,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Windows build_tests_1_6
+  - name: Windows build_tests_1_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4597,11 +4598,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "1_6"
+      subshard: "1_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_2_6
+  - name: Windows build_tests_2_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4615,11 +4617,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "2_6"
+      subshard: "2_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_3_6
+  - name: Windows build_tests_3_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4633,11 +4636,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "3_6"
+      subshard: "3_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_4_6
+  - name: Windows build_tests_4_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4651,11 +4655,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "4_6"
+      subshard: "4_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_5_6
+  - name: Windows build_tests_5_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4669,11 +4674,12 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "5_6"
+      subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
-  - name: Windows build_tests_6_6
+  - name: Windows build_tests_6_7
+    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4687,7 +4693,26 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       shard: build_tests
-      subshard: "6_6"
+      subshard: "6_7"
+      tags: >
+        ["framework", "hostonly", "shard", "windows"]
+
+  - name: Windows build_tests_7_7
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "chrome_and_driver", "version": "version:118.0.5993.70"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      shard: build_tests
+      subshard: "7_7"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
 
