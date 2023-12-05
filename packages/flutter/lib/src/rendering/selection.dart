@@ -142,7 +142,7 @@ mixin Selectable implements SelectionHandler {
   /// The size of this [Selectable].
   Size get size;
 
-  /// A list of [Rect]s that represent the precise region covered by this [Selectable]
+  /// A list of [Rect]s that represent the bounding box of this [Selectable]
   /// in local coordinates.
   List<Rect> get boundingBoxes;
 
