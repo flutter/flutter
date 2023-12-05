@@ -686,11 +686,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   double computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     assert(constraints.debugAssertIsValid());
     // Like other intrinsic methods, the implementation WILL destory the current
-    // TextPainter layout. Methods that relies on the current text layout
-    // (paint, getOffsetForCaret, to name a few) must not assume the TextPainter
-    // is laid out with the correct constraints. These methods should typically
-    // call _layoutTextWithConstraints before querying the TextPainter, to make
-    // sure the TextPainter is laid out using the right constraints.
+    // TextPainter layout. Methods that rely on the current text layout (paint,
+    // getOffsetForCaret, to name a few) must not assume the TextPainter is laid
+    // out with the correct constraints. These methods should typically call
+    // _layoutTextWithConstraints before querying the TextPainter, to make sure
+    // the TextPainter is laid out using the right constraints.
     _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, isDryLayout: true));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);

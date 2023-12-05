@@ -69,8 +69,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final double? result = child?.getDryBaseline(constraints, baseline);
-    return result;
+    return child?.getDryBaseline(constraints, baseline);
   }
 
   @override

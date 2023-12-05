@@ -2007,7 +2007,11 @@ abstract class RenderBox extends RenderObject {
   /// ### When the size cannot be known
   ///
   /// There are cases where render objects do not have an efficient way to
-  /// compute their size without affecting the current layout. For example,
+  /// compute their size. For example, the size may computed by a callback about
+  /// which the render object cannot reason, or the layout is so complex that it
+  /// is impractical to calculate the size in an efficient way.
+  ///
+  ///For example,
   /// a [LayoutBuilder] changes its live render subtree based on the incoming
   /// constraints, so currently there is no easy way to compute its size
   /// speculatively given arbitrary constraints, for that alters the [RenderBox]'s
@@ -2040,17 +2044,18 @@ abstract class RenderBox extends RenderObject {
   /// first baseline of the box's contents, or null if the box does not have any
   /// baselines.
   ///
-  /// Changing the current layout (for instance, modifying the size or the paint
-  /// offset of any RenderBox in the render tree) in the implementation is
-  /// prohibited. Failing to fulfill this contract could result in incorrect
-  /// layout (which could happen, for instance, if this method is called when the
-  /// layout of this render object is already finalized).
+  /// Changing the [RenderBox]'s internal layout states (for instance, modifying
+  /// the size or the paint offset of any [RenderBox] descendants) in the
+  /// implementation is prohibited. Failing to fulfill this contract could result
+  /// in incorrect layout (which could happen, for instance, if this method is
+  /// called when the layout of this render object is already finalized).
   ///
   /// Accessing the current layout of this [RenderBox] or child [RenderBox]es
   /// (including accessing [size] or `child.size`) usually indicates a bug in the
   /// implementaion, as the current layout is typically calculated using a set of
   /// [BoxConstraints] that's different from the `constraints` given as the first
-  /// parameter.
+  /// parameter. To get the size of this [RenderBox] or a child [RenderBox] in
+  /// this method, use the [getDryLayout] method.
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     return null;

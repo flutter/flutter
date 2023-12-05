@@ -55,7 +55,6 @@ _LayoutAxisDimensions _updateWithChildSize(_LayoutAxisDimensions old, _AxisSize 
 }
 
 _LayoutAxisDimensions _updateWithChildBaselineLocation(_LayoutAxisDimensions old, double mainSize, double ascent, double descent) {
-  //print('\tascent: $ascent, descent: $descent');
   final double newMainSize = mainSize + old.axisSize.width;
   final _AscentDescent? oldAscentDescent = old.ascentDescent;
   final _AscentDescent newAscentDescent = oldAscentDescent == null
@@ -963,8 +962,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return result;
   }
 
-  // Returns (width, ascent, descent) if this is a horizontal flex with baseline alignment,
-  // or (mainAxisExtent, null, crossSize) otherwise.
+  // Updates the `current` _LayoutAxisDimensions with the dimensions of the given
+  // child and returns the updated _LayoutAxisDimensions.
   _LayoutAxisDimensions _computeChildSize(_LayoutAxisDimensions current, RenderBox child, BoxConstraints childConstraints, ChildLayouter layoutChild, _ComputeBaseline computeBaseline) {
     final Size childSize = layoutChild(child, childConstraints);
     switch ((crossAxisAlignment, direction)) {
@@ -1083,10 +1082,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final double? ascent = sizes.ascentDescent?.ascent;
 
     // Position child, from top left to bottom right.
-    //print('------- $direction, $textDirection, $verticalDirection, $mainAxisAlignment, $crossAxisAlignment, $topLeftChild, $flipMainAxis, $_flipCrossAxis');
-    //print('$leadingSpace = $betweenSpace');
     for (RenderBox? child = topLeftChild; child != null; child = nextChild(child)) {
-      //if (ascent != null) print('> layout: ${sizes.ascentDescent}, ${sizes.size}');
       final double childCrossPosition = ascent != null
         ? switch (child.getDistanceToBaseline(textBaseline, onlyReal: true)) {
           null => 0,
@@ -1097,13 +1093,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             CrossAxisAlignment.end => crossSize - _getCrossSize(child.size),
             CrossAxisAlignment.center => (crossSize - _getCrossSize(child.size)) / 2,
         };
-      //print('cross: $effectiveCrossAxisAlignment, $crossSize, ${_getCrossSize(child.size)}  => $childCrossPosition');
       final FlexParentData childParentData = child.parentData! as FlexParentData;
       childParentData.offset = switch (_direction) {
         Axis.horizontal => Offset(childMainPosition, childCrossPosition),
         Axis.vertical => Offset(childCrossPosition, childMainPosition),
       };
-      //print('${child.toString()} size ${child.debugSize}: ${childParentData.offset}');
       childMainPosition += _getMainSize(child.size) + betweenSpace;
     }
   }
