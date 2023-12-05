@@ -19,14 +19,12 @@
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/aiks/testing/context_spy.h"
 #include "impeller/core/capture.h"
-#include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/sweep_gradient_contents.h"
-#include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
@@ -45,7 +43,6 @@
 #include "impeller/typographer/backends/stb/typeface_stb.h"
 #include "impeller/typographer/backends/stb/typographer_context_stb.h"
 #include "third_party/imgui/imgui.h"
-#include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/platform.h"
@@ -1378,14 +1375,15 @@ TEST_P(AiksTest, CanDrawAnOpenPathThatIsntARect) {
 
 struct TextRenderOptions {
   Scalar font_size = 50;
-  Scalar alpha = 1;
+  Color color = Color::Yellow();
   Point position = Vector2(100, 200);
+  std::optional<Paint::MaskBlurDescriptor> mask_blur_descriptor;
 };
 
 bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
                             Canvas& canvas,
                             const std::string& text,
-                            const std::string& font_fixture,
+                            const std::string_view& font_fixture,
                             TextRenderOptions options = {}) {
   // Draw the baseline.
   canvas.DrawRect(
@@ -1397,7 +1395,8 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
                     Paint{.color = Color::Red().WithAlpha(0.25)});
 
   // Construct the text blob.
-  auto mapping = flutter::testing::OpenFixtureAsSkData(font_fixture.c_str());
+  auto c_font_fixture = std::string(font_fixture);
+  auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
   if (!mapping) {
     return false;
   }
@@ -1412,7 +1411,8 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
 
   Paint text_paint;
-  text_paint.color = Color::Yellow().WithAlpha(options.alpha);
+  text_paint.color = options.color;
+  text_paint.mask_blur_descriptor = options.mask_blur_descriptor;
   canvas.DrawTextFrame(frame, options.position, text_paint);
   return true;
 }
@@ -1442,7 +1442,7 @@ bool RenderTextInCanvasSTB(const std::shared_ptr<Context>& context,
       typeface_stb, Font::Metrics{.point_size = options.font_size}, text);
 
   Paint text_paint;
-  text_paint.color = Color::Yellow().WithAlpha(options.alpha);
+  text_paint.color = options.color;
   canvas.DrawTextFrame(frame, options.position, text_paint);
   return true;
 }
@@ -1520,17 +1520,32 @@ TEST_P(AiksTest, CanRenderItalicizedText) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+static constexpr std::string_view kFontFixture =
+#if FML_OS_MACOSX
+    "Apple Color Emoji.ttc";
+#else
+    "NotoColorEmoji.ttf";
+#endif
+
 TEST_P(AiksTest, CanRenderEmojiTextFrame) {
   Canvas canvas;
   canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
 
-  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), canvas,
-                                     "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊",
-#if FML_OS_MACOSX
-                                     "Apple Color Emoji.ttc"));
-#else
-                                     "NotoColorEmoji.ttf"));
-#endif
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), canvas, "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊", kFontFixture));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderEmojiTextFrameWithBlur) {
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
+
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), canvas, "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊", kFontFixture,
+      TextRenderOptions{.color = Color::Blue(),
+                        .mask_blur_descriptor = Paint::MaskBlurDescriptor{
+                            .style = FilterContents::BlurStyle::kNormal,
+                            .sigma = Sigma(4)}}));
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
@@ -1538,14 +1553,9 @@ TEST_P(AiksTest, CanRenderEmojiTextFrameWithAlpha) {
   Canvas canvas;
   canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
 
-  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), canvas,
-                                     "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊",
-#if FML_OS_MACOSX
-                                     "Apple Color Emoji.ttc", { .alpha = 0.5 }
-#else
-                                     "NotoColorEmoji.ttf", {.alpha = 0.5}
-#endif
-                                     ));
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), canvas, "😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊", kFontFixture,
+      {.color = Color::Black().WithAlpha(0.5)}));
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
