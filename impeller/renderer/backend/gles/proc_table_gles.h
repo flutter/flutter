@@ -239,7 +239,7 @@ class ProcTableGLES {
   /// support static specialization. For example, setting "#define Foo 1".
   void ShaderSourceMapping(GLuint shader,
                            const fml::Mapping& mapping,
-                           const std::vector<int32_t>& defines = {}) const;
+                           const std::vector<Scalar>& defines = {}) const;
 
   const DescriptionGLES* GetDescription() const;
 
@@ -262,7 +262,7 @@ class ProcTableGLES {
   // Visible For testing.
   std::optional<std::string> ComputeShaderWithDefines(
       const fml::Mapping& mapping,
-      const std::vector<int32_t>& defines) const;
+      const std::vector<Scalar>& defines) const;
 
  private:
   bool is_valid_ = false;

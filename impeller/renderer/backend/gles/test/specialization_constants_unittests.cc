@@ -26,7 +26,7 @@ TEST(SpecConstant, CanCreateShaderWithSpecializationConstant) {
 
   auto expected_shader_source =
       "#version 100\n"
-      "#define SPIRV_CROSS_CONSTANT_ID_0 0\n"
+      "#define SPIRV_CROSS_CONSTANT_ID_0 0.000000\n"
       "#ifndef SPIRV_CROSS_CONSTANT_ID_0\n"
       "#define SPIRV_CROSS_CONSTANT_ID_0 1\n"
       "#endif\n"
@@ -54,12 +54,12 @@ TEST(SpecConstant, CanCreateShaderWithSpecializationConstantMultipleValues) {
 
   auto expected_shader_source =
       "#version 100\n"
-      "#define SPIRV_CROSS_CONSTANT_ID_0 0\n"
-      "#define SPIRV_CROSS_CONSTANT_ID_1 1\n"
-      "#define SPIRV_CROSS_CONSTANT_ID_2 2\n"
-      "#define SPIRV_CROSS_CONSTANT_ID_3 3\n"
-      "#define SPIRV_CROSS_CONSTANT_ID_4 4\n"
-      "#define SPIRV_CROSS_CONSTANT_ID_5 5\n"
+      "#define SPIRV_CROSS_CONSTANT_ID_0 0.000000\n"
+      "#define SPIRV_CROSS_CONSTANT_ID_1 1.000000\n"
+      "#define SPIRV_CROSS_CONSTANT_ID_2 2.000000\n"
+      "#define SPIRV_CROSS_CONSTANT_ID_3 3.000000\n"
+      "#define SPIRV_CROSS_CONSTANT_ID_4 4.000000\n"
+      "#define SPIRV_CROSS_CONSTANT_ID_5 5.000000\n"
       "#ifndef SPIRV_CROSS_CONSTANT_ID_0\n"
       "#define SPIRV_CROSS_CONSTANT_ID_0 1\n"
       "#endif\n"

@@ -58,7 +58,7 @@ Instead of using a runtime check, we can create a specialization constant that i
 shader. This constant will be `1` if decal is supported and `0` otherwise.
 
 ```glsl
-layout(constant_id = 0) const int supports_decal = 1;
+layout(constant_id = 0) const float supports_decal = 1.0;
 
 vec4 Sample(sampler2D sampler, vec2 coord) {
   if (supports_decal) {
@@ -77,7 +77,7 @@ Immediately we realize a number of benefits:
 
 ## Implementation
 
-Only 32bit ints are supported as const values and can be used to represent:
+Const values are floats and can be used to represent:
 
 * true/false via 0/1.
 * function selection, such as advanced blends. The specialization value maps to a specific blend function. For example, 0 maps to screen and 1 to overlay via a giant if/else macro.

@@ -124,9 +124,9 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   PolygonMode GetPolygonMode() const;
 
-  void SetSpecializationConstants(std::vector<int32_t> values);
+  void SetSpecializationConstants(std::vector<Scalar> values);
 
-  const std::vector<int32_t>& GetSpecializationConstants() const;
+  const std::vector<Scalar>& GetSpecializationConstants() const;
 
  private:
   std::string label_;
@@ -146,7 +146,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
       back_stencil_attachment_descriptor_;
   PrimitiveType primitive_type_ = PrimitiveType::kTriangle;
   PolygonMode polygon_mode_ = PolygonMode::kFill;
-  std::vector<int32_t> specialization_constants_;
+  std::vector<Scalar> specialization_constants_;
 };
 
 }  // namespace impeller
