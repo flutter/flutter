@@ -121,7 +121,7 @@ class Focus extends StatefulWidget {
     FocusOnKeyEventCallback? onKeyEvent,
     @Deprecated(
       'Use onKeyEvent instead. '
-      'This feature was deprecated after v3.17.0-18.0.pre.',
+      'This feature was deprecated after v3.18.0-2.0.pre.',
     )
     FocusOnKeyCallback? onKey,
     bool? canRequestFocus,
@@ -232,8 +232,7 @@ class Focus extends StatefulWidget {
   /// A handler for keys that are pressed when this object or one of its
   /// children has focus.
   ///
-  /// This API is deprecated and will be removed at a future date. Use
-  /// [onKeyEvent] instead.
+  /// This property is deprecated and will be removed. Use [onKeyEvent] instead.
   ///
   /// Key events are first given to the [FocusNode] that has primary focus, and
   /// if its [onKey] method return false, then they are given to each ancestor
@@ -247,7 +246,7 @@ class Focus extends StatefulWidget {
   /// things.
   @Deprecated(
     'Use onKeyEvent instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   FocusOnKeyCallback? get onKey => _onKey ?? focusNode?.onKey;
   final FocusOnKeyCallback? _onKey;

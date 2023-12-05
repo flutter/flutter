@@ -112,7 +112,7 @@ KeyEventResult combineKeyEventResults(Iterable<KeyEventResult> results) {
 /// was handled.
 @Deprecated(
   'Use FocusOnKeyEventCallback instead. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 typedef FocusOnKeyCallback = KeyEventResult Function(FocusNode node, RawKeyEvent event);
 
@@ -441,7 +441,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     String? debugLabel,
     @Deprecated(
       'Use onKeyEvent instead. '
-      'This feature was deprecated after v3.17.0-18.0.pre.',
+      'This feature was deprecated after v3.18.0-2.0.pre.',
     )
     this.onKey,
     this.onKeyEvent,
@@ -630,13 +630,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Called if this focus node receives a key event while focused (i.e. when
   /// [hasFocus] returns true).
   ///
+  /// This property is deprecated and will be removed at a future date. Use
+  /// [onKeyEvent] instead.
+  ///
   /// This is a legacy API based on [RawKeyEvent] and will be deprecated in the
   /// future. Prefer [onKeyEvent] instead.
   ///
   /// {@macro flutter.widgets.FocusNode.keyEvents}
   @Deprecated(
     'Use onKeyEvent instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   FocusOnKeyCallback? onKey;
 
@@ -1056,7 +1059,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     FocusOnKeyEventCallback? onKeyEvent,
     @Deprecated(
       'Use onKeyEvent instead. '
-      'This feature was deprecated after v3.17.0-18.0.pre.',
+      'This feature was deprecated after v3.18.0-2.0.pre.',
     )
     FocusOnKeyCallback? onKey,
   }) {
@@ -1259,7 +1262,7 @@ class FocusScopeNode extends FocusNode {
     super.onKeyEvent,
     @Deprecated(
       'Use onKeyEvent instead. '
-      'This feature was deprecated after v3.17.0-18.0.pre.',
+      'This feature was deprecated after v3.18.0-2.0.pre.',
     )
     super.onKey,
     super.skipTraversal,
@@ -1987,8 +1990,8 @@ class _HighlightModeManager {
     }
 
     // Walk the current focus from the leaf to the root, calling each node's
-    // onKeyEvent on the way up, and if one responds that they handled it or want to
-    // stop propagation, stop.
+    // onKeyEvent on the way up, and if one responds that they handled it or
+    // want to stop propagation, stop.
     for (final FocusNode node in <FocusNode>[
       FocusManager.instance.primaryFocus!,
       ...FocusManager.instance.primaryFocus!.ancestors,

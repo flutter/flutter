@@ -14,8 +14,8 @@ export 'package:flutter/services.dart' show RawKeyEvent;
 /// A widget that calls a callback whenever the user presses or releases a key
 /// on a keyboard.
 ///
-/// The [RawKeyboardListener] is deprecated and will be removed at a future
-/// date. Use [KeyboardListener] instead.
+/// The [RawKeyboardListener] is deprecated and will be removed. Use
+/// [KeyboardListener] instead.
 ///
 /// A [RawKeyboardListener] is useful for listening to raw key events and
 /// hardware buttons that are represented as keys. Typically used by games and
@@ -26,13 +26,13 @@ export 'package:flutter/services.dart' show RawKeyEvent;
 ///
 /// See also:
 ///
-///  * [EditableText], which should be used instead of this widget for text
-///    entry.
-///  * [KeyboardListener], a similar widget based on the newer
-///    [HardwareKeyboard] API.
+/// * [EditableText], which should be used instead of this widget for text
+///   entry.
+/// * [KeyboardListener], a similar widget based on the newer [HardwareKeyboard]
+///   API.
 @Deprecated(
   'Use KeyboardListener instead. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class RawKeyboardListener extends StatefulWidget {
   /// Creates a widget that receives raw keyboard events.
@@ -41,7 +41,7 @@ class RawKeyboardListener extends StatefulWidget {
   /// on-screen keyboards and input method editors (IMEs).
   @Deprecated(
     'Use KeyboardListener instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const RawKeyboardListener({
     super.key,

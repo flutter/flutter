@@ -13,8 +13,8 @@ export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 
 /// Platform-specific key event data for Linux.
 ///
-/// This class is DEPRECATED. Platform specific key event data will no longer
-/// available. See [KeyEvent] for what is available.
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer available. See [KeyEvent] for what is available.
 ///
 /// Different window toolkit implementations can map to different key codes. This class
 /// will use the correct mapping depending on the [keyHelper] provided.
@@ -24,13 +24,13 @@ export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 @Deprecated(
   'Platform specific key event data is no longer available. See KeyEvent for what is available. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for Linux.
   @Deprecated(
     'Platform specific key event data is no longer available. See KeyEvent for what is available. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const RawKeyEventDataLinux({
     required this.keyHelper,
@@ -180,15 +180,18 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 /// Given that there might be multiple window toolkit implementations (GLFW,
 /// GTK, QT, etc), this creates a common interface for each of the
 /// different toolkits.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer available. See [KeyEvent] for what is available.
 @Deprecated(
   'No longer supported. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 abstract class KeyHelper {
   /// Create a KeyHelper implementation depending on the given toolkit.
   @Deprecated(
     'No longer supported. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   factory KeyHelper(String toolkit) {
     if (toolkit == 'glfw') {
@@ -209,7 +212,7 @@ abstract class KeyHelper {
   /// the given keyboard modifier key were pressed at the time of this event.
   @Deprecated(
     'No longer supported. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeyboardSide getModifierSide(ModifierKey key);
 
@@ -217,7 +220,7 @@ abstract class KeyHelper {
   /// event.
   @Deprecated(
     'No longer supported. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown});
 
@@ -232,9 +235,12 @@ abstract class KeyHelper {
 }
 
 /// Helper class that uses GLFW-specific key mappings.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer available. See [KeyEvent] for what is available.
 @Deprecated(
   'No longer supported. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class GLFWKeyHelper implements KeyHelper {
   /// This mask is used to check the [RawKeyEventDataLinux.modifiers] field to
@@ -373,9 +379,12 @@ class GLFWKeyHelper implements KeyHelper {
 }
 
 /// Helper class that uses GTK-specific key mappings.
+///
+/// This class is deprecated and will be removed. Platform specific key event
+/// data will no longer available. See [KeyEvent] for what is available.
 @Deprecated(
   'No longer supported. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class GtkKeyHelper implements KeyHelper {
   /// This mask is used to check the [RawKeyEventDataLinux.modifiers] field to

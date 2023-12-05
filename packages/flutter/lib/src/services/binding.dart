@@ -67,9 +67,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// The global singleton instance of [KeyEventManager], which is used
   /// internally to dispatch key messages.
+  ///
+  /// This property is deprecated, and will be removed. See
+  /// [HardwareKeyboard.addHandler] instead.
   @Deprecated(
     'No longer supported. Add a handler to HardwareKeyboard instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeyEventManager get keyEventManager => _keyEventManager;
   late final KeyEventManager _keyEventManager;

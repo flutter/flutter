@@ -1030,13 +1030,13 @@ Future<bool> simulateKeyRepeatEvent(
 /// of [KeyDataTransitMode].
 @Deprecated(
   'No longer supported. Transit mode is always key data only. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   /// Creates a [KeySimulatorTransitModeVariant] that tests the given [values].
   @Deprecated(
     'No longer supported. Transit mode is always key data only. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const KeySimulatorTransitModeVariant(this.values);
 
@@ -1044,7 +1044,7 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   /// [KeyDataTransitMode].
   @Deprecated(
     'No longer supported. Transit mode is always key data only. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeySimulatorTransitModeVariant.all()
     : this(KeyDataTransitMode.values.toSet());
@@ -1053,7 +1053,7 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   /// [KeyDataTransitMode.keyDataThenRawKeyData].
   @Deprecated(
     'No longer supported. Transit mode is always key data only. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeySimulatorTransitModeVariant.keyDataThenRawKeyData()
     : this(<KeyDataTransitMode>{KeyDataTransitMode.keyDataThenRawKeyData});

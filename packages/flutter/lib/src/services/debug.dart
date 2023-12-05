@@ -13,9 +13,11 @@ export 'hardware_keyboard.dart' show KeyDataTransitMode;
 /// Setting [debugKeyEventSimulatorTransitModeOverride] is a good way to make
 /// certain tests simulate the behavior of different type of platforms in terms
 /// of their extent of support for keyboard API.
+///
+/// This value is deprecated and will be removed.
 @Deprecated(
   'No longer supported. Transit mode is always key data only. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
 

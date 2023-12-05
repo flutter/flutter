@@ -28,14 +28,14 @@ String? _unicodeChar(String key) {
 ///  * [RawKeyboard], which uses this interface to expose key data.
 @Deprecated(
   'Platform specific key event data is no longer available. See KeyEvent for what is available. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 @immutable
 class RawKeyEventDataWeb extends RawKeyEventData {
   /// Creates a key event data structure specific for Web.
   @Deprecated(
     'Platform specific key event data is no longer available. See KeyEvent for what is available. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const RawKeyEventDataWeb({
     required this.code,

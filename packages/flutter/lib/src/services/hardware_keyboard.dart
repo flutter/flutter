@@ -680,6 +680,10 @@ class HardwareKeyboard {
 
 /// The mode in which information of key messages is delivered.
 ///
+/// This enum is deprecated and will be removed. There is no direct substitute
+/// planned, since this enum will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
+///
 /// Different platforms use different methods, classes, and models to inform the
 /// framework of native key events, which is called "transit mode".
 ///
@@ -693,15 +697,15 @@ class HardwareKeyboard {
 ///
 /// See also:
 ///
-///  * [KeyEventManager], which infers the transit mode of the current platform
-///    and guides how key messages are dispatched.
-///  * [debugKeyEventSimulatorTransitModeOverride], overrides the transit mode
-///    used to simulate key events.
-///  * [KeySimulatorTransitModeVariant], an easier way to set
-///    [debugKeyEventSimulatorTransitModeOverride] in widget tests.
+/// * [KeyEventManager], which infers the transit mode of the current platform
+///   and guides how key messages are dispatched.
+/// * [debugKeyEventSimulatorTransitModeOverride], overrides the transit mode
+///   used to simulate key events.
+/// * [KeySimulatorTransitModeVariant], an easier way to set
+///   [debugKeyEventSimulatorTransitModeOverride] in widget tests.
 @Deprecated(
   'No longer supported. Transit mode is always key data only. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 enum KeyDataTransitMode {
   /// Key event information is delivered as raw key data.
@@ -714,7 +718,7 @@ enum KeyDataTransitMode {
   /// to both [KeyMessage.events] and [KeyMessage.rawEvent].
   @Deprecated(
     'No longer supported. Transit mode is always key data only. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   rawKeyData,
 
@@ -734,16 +738,16 @@ enum KeyDataTransitMode {
   /// the raw data for [KeyMessage.rawEvent].
   @Deprecated(
     'No longer supported. Transit mode is always key data only. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   keyDataThenRawKeyData,
 }
 
 /// The assembled information converted from a native key message.
 ///
-/// This class is deprecated, and will be removed at a future date. There is no
-/// direct substitute planned, since this class will no longer be necessary once
-/// the [RawKeyEvent] and associated APIs are removed.
+/// This class is deprecated, and will be removed. There is no direct substitute
+/// planned, since this class will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
 ///
 /// Native key messages, produced by physically pressing or releasing keyboard
 /// keys, are translated into two different event streams in Flutter:
@@ -792,7 +796,7 @@ enum KeyDataTransitMode {
 /// ```
 @Deprecated(
   'No longer supported. Once RawKeyEvent is removed, it will no longer be needed. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 @immutable
 class KeyMessage {
@@ -801,7 +805,7 @@ class KeyMessage {
   /// The [events] might be empty.
   @Deprecated(
     'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const KeyMessage(this.events, this.rawEvent);
 
@@ -844,17 +848,25 @@ class KeyMessage {
 
 /// The signature for [KeyEventManager.keyMessageHandler].
 ///
-/// A [KeyMessageHandler] processes a [KeyMessage] and returns whether
-/// the message is considered handled. Handled messages should not be
-/// propagated to other native components.
+/// A [KeyMessageHandler] processes a [KeyMessage] and returns whether the
+/// message is considered handled. Handled messages should not be propagated to
+/// other native components.
+///
+/// This message handler signature is deprecated, and will be removed. There is
+/// no direct substitute planned, since this handler type will no longer be
+/// necessary once [RawKeyEvent] and associated APIs are removed.
 @Deprecated(
   'No longer supported. Once KeyMessage is removed, will no longer be needed. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 typedef KeyMessageHandler = bool Function(KeyMessage message);
 
 /// A singleton class that processes key messages from the platform and
 /// dispatches converted messages accordingly.
+///
+/// This class is deprecated, and will be removed. There is no direct substitute
+/// planned, since this class will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
 ///
 /// [KeyEventManager] receives platform key messages by [handleKeyData] and
 /// [handleRawKeyMessage], sends converted events to [HardwareKeyboard] and
@@ -901,7 +913,7 @@ typedef KeyMessageHandler = bool Function(KeyMessage message);
 /// is ended with a "flutter/keyevent" message.
 @Deprecated(
   'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class KeyEventManager {
   /// Create an instance.
@@ -909,13 +921,13 @@ class KeyEventManager {
   /// This is typically only called by [ServicesBinding].
   @Deprecated(
     'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeyEventManager(this._hardwareKeyboard, this._rawKeyboard);
 
   /// The global entrance which handles all key events sent to Flutter.
   ///
-  /// This handler is deprecated and will be removed at a future date. Use
+  /// This handler is deprecated and will be removed. Use
   /// [HardwareKeyboard.addHandler]/[HardwareKeyboard.removeHandler] instead.
   ///
   /// Typical applications use [WidgetsBinding], where this field is set by the
@@ -1005,7 +1017,7 @@ class KeyEventManager {
   ///   process [KeyEvent]s
   @Deprecated(
     'No longer supported. Once RawKeyEvent is removed, will no longer be needed. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeyMessageHandler? keyMessageHandler;
 
@@ -1040,9 +1052,12 @@ class KeyEventManager {
   /// Dispatch a key data to global and leaf listeners.
   ///
   /// This method is the handler to the global `onKeyData` API.
+  ///
+  /// This handler is deprecated, and will be removed. Use
+  /// [HardwareKeyboard.addHandler] instead.
   @Deprecated(
     'No longer supported. Use HardwareKeyboard.instance.addHandler instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool handleKeyData(ui.KeyData data) {
     _transitMode ??= KeyDataTransitMode.keyDataThenRawKeyData;
@@ -1107,12 +1122,15 @@ class KeyEventManager {
 
   /// Handles a raw key message.
   ///
-  /// This method is the handler to [SystemChannels.keyEvent], processing
-  /// the JSON form of the native key message and returns the responds for the
+  /// This method is the handler to [SystemChannels.keyEvent], processing the
+  /// JSON form of the native key message and returns the responds for the
   /// channel.
+  ///
+  /// This handler is deprecated, and will be removed. Use
+  /// [HardwareKeyboard.addHandler] instead.
   @Deprecated(
     'No longer supported. Use HardwareKeyboard.instance.addHandler instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   Future<Map<String, dynamic>> handleRawKeyMessage(dynamic message) async {
     if (_transitMode == null) {

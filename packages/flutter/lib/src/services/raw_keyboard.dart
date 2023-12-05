@@ -25,13 +25,17 @@ export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 /// discrimination between which key is pressed (e.g. the left or right SHIFT
 /// key).
 ///
+/// This enum is deprecated and will be removed. There is no direct substitute
+/// planned, since this enum will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
+///
 /// See also:
 ///
 ///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
 ///    argument.
 @Deprecated(
   'No longer supported. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 enum KeyboardSide {
   /// Matches if either the left, right or both versions of the key are pressed.
@@ -49,13 +53,17 @@ enum KeyboardSide {
 
 /// An enum describing the type of modifier key that is being pressed.
 ///
+/// This enum is deprecated and will be removed. There is no direct substitute
+/// planned, since this enum will no longer be necessary once [RawKeyEvent] and
+/// associated APIs are removed.
+///
 /// See also:
 ///
 ///  * [RawKeyEventData.isModifierPressed], which accepts this enum as an
 ///    argument.
 @Deprecated(
   'No longer supported. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 enum ModifierKey {
   /// The CTRL modifier key.
@@ -114,6 +122,9 @@ enum ModifierKey {
 
 /// Base class for platform-specific key event data.
 ///
+/// This class is deprecated, and will be removed. Platform specific key event
+/// data will no be longer available. See [KeyEvent] for what is available.
+///
 /// This base class exists to have a common type to use for each of the
 /// target platform's key event data structures.
 ///
@@ -126,7 +137,7 @@ enum ModifierKey {
 ///  * [RawKeyboard], which uses these interfaces to expose key data.
 @Deprecated(
   'Platform specific key event data is no longer available. See KeyEvent for what is available. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 @immutable
 abstract class RawKeyEventData with Diagnosticable {
@@ -134,12 +145,15 @@ abstract class RawKeyEventData with Diagnosticable {
   /// const constructors so that they can be used in const expressions.
   @Deprecated(
     'Platform specific key event data is no longer available. See KeyEvent for what is available. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const RawKeyEventData();
 
   /// Returns true if the given [ModifierKey] was pressed at the time of this
   /// event.
+  ///
+  /// This method is deprecated and will be removed. For equivalent information,
+  /// inspect [HardwareKeyboard.logicalKeysPressed] instead.
   ///
   /// If [side] is specified, then this restricts its check to the specified
   /// side of the keyboard. Defaults to checking for the key being down on
@@ -147,12 +161,14 @@ abstract class RawKeyEventData with Diagnosticable {
   /// the keyboard, then [side] is ignored.
   @Deprecated(
     'No longer available. Inspect HardwareKeyboard.instance.logicalKeysPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any });
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
+  ///
+  /// This method is deprecated and will be removed.
   ///
   /// If the modifier key wasn't pressed at the time of this event, returns
   /// null. If the given key only appears in one place on the keyboard, returns
@@ -160,55 +176,70 @@ abstract class RawKeyEventData with Diagnosticable {
   /// the side, return [KeyboardSide.any].
   @Deprecated(
     'No longer available. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   KeyboardSide? getModifierSide(ModifierKey key);
 
   /// Returns true if a CTRL modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isControlPressed] instead.
+  ///
   /// Use [isModifierPressed] if you need to know which control key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isControlPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isControlPressed => isModifierPressed(ModifierKey.controlModifier);
 
   /// Returns true if a SHIFT modifier key was pressed at the time of this
   /// event, regardless of which side of the keyboard it is on.
   ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isShiftPressed] instead.
+  ///
   /// Use [isModifierPressed] if you need to know which shift key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isShiftPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isShiftPressed => isModifierPressed(ModifierKey.shiftModifier);
 
   /// Returns true if a ALT modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isAltPressed] instead.
+  ///
   /// Use [isModifierPressed] if you need to know which alt key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isAltPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isAltPressed => isModifierPressed(ModifierKey.altModifier);
 
   /// Returns true if a META modifier key was pressed at the time of this event,
   /// regardless of which side of the keyboard it is on.
   ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isMetaPressed] instead.
+  ///
   /// Use [isModifierPressed] if you need to know which meta key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isMetaPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isMetaPressed => isModifierPressed(ModifierKey.metaModifier);
 
   /// Returns a map of modifier keys that were pressed at the time of this
   /// event, and the keyboard side or sides that the key was on.
+  ///
+  /// This method is deprecated and will be removed. For equivalent information,
+  /// inspect [HardwareKeyboard.logicalKeysPressed] instead.
   @Deprecated(
     'No longer available. Inspect HardwareKeyboard.instance.logicalKeysPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   Map<ModifierKey, KeyboardSide> get modifiersPressed {
     final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
@@ -326,7 +357,7 @@ abstract class RawKeyEventData with Diagnosticable {
 /// * [RawKeyboardListener], a widget that listens for raw key events.
 @Deprecated(
   'Use KeyEvent instead. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 @immutable
 abstract class RawKeyEvent with Diagnosticable {
@@ -334,7 +365,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// const constructors so that they can be used in const expressions.
   @Deprecated(
     'Use KeyEvent instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const RawKeyEvent({
     required this.data,
@@ -349,7 +380,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// instead of using the message information.
   @Deprecated(
     'No longer supported. Use KeyEvent instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   factory RawKeyEvent.fromMessage(Map<String, Object?> message) {
     String? character;
@@ -468,19 +499,25 @@ abstract class RawKeyEvent with Diagnosticable {
   }
 
   /// Returns true if the given [LogicalKeyboardKey] is pressed.
+  ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isLogicalKeyPressed] instead.
   @Deprecated(
     'Use HardwareKeyboard.instance.isLogicalKeyPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool isKeyPressed(LogicalKeyboardKey key) => RawKeyboard.instance.keysPressed.contains(key);
 
   /// Returns true if a CTRL modifier key is pressed, regardless of which side
   /// of the keyboard it is on.
   ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isControlPressed] instead.
+  ///
   /// Use [isKeyPressed] if you need to know which control key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isControlPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isControlPressed {
     return isKeyPressed(LogicalKeyboardKey.controlLeft) || isKeyPressed(LogicalKeyboardKey.controlRight);
@@ -489,10 +526,13 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Returns true if a SHIFT modifier key is pressed, regardless of which side
   /// of the keyboard it is on.
   ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isShiftPressed] instead.
+  ///
   /// Use [isKeyPressed] if you need to know which shift key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isShiftPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isShiftPressed {
     return isKeyPressed(LogicalKeyboardKey.shiftLeft) || isKeyPressed(LogicalKeyboardKey.shiftRight);
@@ -500,6 +540,9 @@ abstract class RawKeyEvent with Diagnosticable {
 
   /// Returns true if a ALT modifier key is pressed, regardless of which side
   /// of the keyboard it is on.
+  ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isAltPressed] instead.
   ///
   /// The `AltGr` key that appears on some keyboards is considered to be
   /// the same as [LogicalKeyboardKey.altRight] on some platforms (notably
@@ -510,7 +553,7 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Use [isKeyPressed] if you need to know which alt key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isAltPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isAltPressed {
     return isKeyPressed(LogicalKeyboardKey.altLeft) || isKeyPressed(LogicalKeyboardKey.altRight);
@@ -519,10 +562,13 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Returns true if a META modifier key is pressed, regardless of which side
   /// of the keyboard it is on.
   ///
+  /// This method is deprecated and will be removed. Use
+  /// [HardwareKeyboard.isMetaPressed] instead.
+  ///
   /// Use [isKeyPressed] if you need to know which meta key was pressed.
   @Deprecated(
     'Use HardwareKeyboard.instance.isMetaPressed instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   bool get isMetaPressed {
     return isKeyPressed(LogicalKeyboardKey.metaLeft) || isKeyPressed(LogicalKeyboardKey.metaRight);
@@ -617,18 +663,21 @@ abstract class RawKeyEvent with Diagnosticable {
 
 /// The user has pressed a key on the keyboard.
 ///
+/// This class has been deprecated and will be removed. Use [KeyDownEvent]
+/// instead.
+///
 /// See also:
 ///
-///  * [RawKeyboard], which uses this interface to expose key data.
+/// * [RawKeyboard], which uses this interface to expose key data.
 @Deprecated(
   'Use KeyDownEvent instead. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class RawKeyDownEvent extends RawKeyEvent {
   /// Creates a key event that represents the user pressing a key.
   @Deprecated(
     'Use KeyDownEvent instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const RawKeyDownEvent({
     required super.data,
@@ -639,18 +688,21 @@ class RawKeyDownEvent extends RawKeyEvent {
 
 /// The user has released a key on the keyboard.
 ///
+/// This class has been deprecated and will be removed. Use [KeyUpEvent]
+/// instead.
+///
 /// See also:
 ///
 ///  * [RawKeyboard], which uses this interface to expose key data.
 @Deprecated(
   'Use KeyUpEvent instead. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class RawKeyUpEvent extends RawKeyEvent {
   /// Creates a key event that represents the user releasing a key.
   @Deprecated(
     'Use KeyUpEvent instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   const RawKeyUpEvent({
     required super.data,
@@ -661,11 +713,14 @@ class RawKeyUpEvent extends RawKeyEvent {
 /// A callback type used by [RawKeyboard.keyEventHandler] to send key events to
 /// a handler that can determine if the key has been handled or not.
 ///
+/// This typedef has been deprecated and will be removed. Use [KeyEventCallback]
+/// instead.
+///
 /// The handler should return true if the key has been handled, and false if the
 /// key was not handled. It must not return null.
 @Deprecated(
   'Use KeyEventCallback instead. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
 
@@ -709,19 +764,19 @@ typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
 /// * [HardwareKeyboard], the recommended replacement.
 @Deprecated(
   'Use HardwareKeyboard instead. '
-  'This feature was deprecated after v3.17.0-18.0.pre.',
+  'This feature was deprecated after v3.18.0-2.0.pre.',
 )
 class RawKeyboard {
   @Deprecated(
     'Use HardwareKeyboard instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   RawKeyboard._();
 
   /// The shared instance of [RawKeyboard].
   @Deprecated(
     'Use HardwareKeyboard.instance instead. '
-    'This feature was deprecated after v3.17.0-18.0.pre.',
+    'This feature was deprecated after v3.18.0-2.0.pre.',
   )
   static final RawKeyboard instance = RawKeyboard._();
 
