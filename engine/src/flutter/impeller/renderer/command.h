@@ -60,13 +60,12 @@ struct Resource {
 
 using BufferResource = Resource<BufferView>;
 using TextureResource = Resource<std::shared_ptr<const Texture>>;
-using SamplerResource = Resource<std::shared_ptr<const Sampler>>;
 
 /// @brief combines the texture, sampler and sampler slot information.
 struct TextureAndSampler {
   SampledImageSlot slot;
   TextureResource texture;
-  SamplerResource sampler;
+  std::shared_ptr<const Sampler> sampler;
 };
 
 /// @brief combines the buffer resource and its uniform slot information.
@@ -78,8 +77,6 @@ struct BufferAndUniformSlot {
 struct Bindings {
   std::map<size_t, TextureAndSampler> sampled_images;
   std::map<size_t, BufferAndUniformSlot> buffers;
-  // This is only valid for vertex bindings.
-  BufferAndUniformSlot vertex_buffer;
 };
 
 //------------------------------------------------------------------------------
@@ -111,29 +108,6 @@ struct Command : public ResourceBinder {
   /// stage.
   ///
   Bindings fragment_bindings;
-  //----------------------------------------------------------------------------
-  /// The index buffer binding used by the vertex shader stage. Instead of
-  /// setting this directly, it usually easier to specify the vertex and index
-  /// buffer bindings directly via a single call to `BindVertices`.
-  ///
-  /// @see         `BindVertices`
-  ///
-  BufferView index_buffer;
-  //----------------------------------------------------------------------------
-  /// The number of vertices to draw.
-  ///
-  /// If the index_type is `IndexType::kNone`, this is a count into the vertex
-  /// buffer. Otherwise, it is a count into the index buffer. Set the vertex and
-  /// index buffers as well as the index count using a call to `BindVertices`.
-  ///
-  /// @see         `BindVertices`
-  ///
-  size_t vertex_count = 0u;
-  //----------------------------------------------------------------------------
-  /// The type of indices in the index buffer. The indices must be tightly
-  /// packed in the index buffer.
-  ///
-  IndexType index_type = IndexType::kUnknown;
 
 #ifdef IMPELLER_DEBUG
   //----------------------------------------------------------------------------
@@ -177,13 +151,18 @@ struct Command : public ResourceBinder {
   size_t instance_count = 1u;
 
   //----------------------------------------------------------------------------
+  /// The bound per-vertex data and optional index buffer.
+  VertexBuffer vertex_buffer;
+
+  //----------------------------------------------------------------------------
   /// @brief      Specify the vertex and index buffer to use for this command.
   ///
-  /// @param[in]  buffer  The vertex and index buffer definition.
+  /// @param[in]  buffer  The vertex and index buffer definition. If possible,
+  ///             this value should be moved and not copied.
   ///
   /// @return     returns if the binding was updated.
   ///
-  bool BindVertices(const VertexBuffer& buffer);
+  bool BindVertices(VertexBuffer buffer);
 
   // |ResourceBinder|
   bool BindResource(ShaderStage stage,
@@ -202,8 +181,6 @@ struct Command : public ResourceBinder {
                     const ShaderMetadata& metadata,
                     std::shared_ptr<const Texture> texture,
                     std::shared_ptr<const Sampler> sampler) override;
-
-  BufferView GetVertexBuffer() const;
 
   bool IsValid() const { return pipeline && pipeline->IsValid(); }
 

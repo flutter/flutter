@@ -106,7 +106,7 @@ bool RadialGradientContents::RenderSSBO(const ContentContext& renderer,
   options.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetRadialGradientSSBOFillPipeline(options);
 
-  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
   FS::BindColorData(cmd, color_buffer);
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -165,7 +165,7 @@ bool RadialGradientContents::RenderTexture(const ContentContext& renderer,
   options.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetRadialGradientFillPipeline(options);
 
-  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;

@@ -395,10 +395,9 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
 void InternalFlutterGpu_RenderPass_ClearBindings(
     flutter::gpu::RenderPass* wrapper) {
   auto& command = wrapper->GetCommand();
-  command.vertex_count = 0;
+  command.vertex_buffer = {};
   command.vertex_bindings = {};
   command.fragment_bindings = {};
-  command.index_buffer = {};
 }
 
 void InternalFlutterGpu_RenderPass_SetColorBlendEnable(

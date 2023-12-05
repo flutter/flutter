@@ -66,7 +66,6 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
       {Point(0, size.height), Point(0, 1)},
       {Point(size.width, size.height), Point(1, 1)},
   });
-  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kSource;
@@ -74,7 +73,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
 
   Command cmd;
   DEBUG_COMMAND_INFO(cmd, "Framebuffer Advanced Blend Filter");
-  cmd.BindVertices(vtx_buffer);
+  cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
   cmd.stencil_reference = entity.GetClipDepth();
 
   switch (blend_mode_) {

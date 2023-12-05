@@ -12,22 +12,14 @@
 
 namespace impeller {
 
-bool Command::BindVertices(const VertexBuffer& buffer) {
+bool Command::BindVertices(VertexBuffer buffer) {
   if (buffer.index_type == IndexType::kUnknown) {
     VALIDATION_LOG << "Cannot bind vertex buffer with an unknown index type.";
     return false;
   }
 
-  vertex_bindings.vertex_buffer =
-      BufferAndUniformSlot{.slot = {}, .view = {nullptr, buffer.vertex_buffer}};
-  index_buffer = buffer.index_buffer;
-  vertex_count = buffer.vertex_count;
-  index_type = buffer.index_type;
+  vertex_buffer = std::move(buffer);
   return true;
-}
-
-BufferView Command::GetVertexBuffer() const {
-  return vertex_bindings.vertex_buffer.view.resource;
 }
 
 bool Command::BindResource(ShaderStage stage,
@@ -93,14 +85,14 @@ bool Command::BindResource(ShaderStage stage,
       vertex_bindings.sampled_images[slot.sampler_index] = TextureAndSampler{
           .slot = slot,
           .texture = {&metadata, std::move(texture)},
-          .sampler = {&metadata, std::move(sampler)},
+          .sampler = std::move(sampler),
       };
       return true;
     case ShaderStage::kFragment:
       fragment_bindings.sampled_images[slot.sampler_index] = TextureAndSampler{
           .slot = slot,
           .texture = {&metadata, std::move(texture)},
-          .sampler = {&metadata, std::move(sampler)},
+          .sampler = std::move(sampler),
       };
       return true;
     case ShaderStage::kCompute:

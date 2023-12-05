@@ -107,7 +107,7 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
   options.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetLinearGradientFillPipeline(options);
 
-  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
@@ -169,7 +169,7 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
   options.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetLinearGradientSSBOFillPipeline(options);
 
-  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
   FS::BindColorData(cmd, color_buffer);
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));

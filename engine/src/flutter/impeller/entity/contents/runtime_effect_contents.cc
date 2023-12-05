@@ -154,7 +154,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   DEBUG_COMMAND_INFO(cmd, "RuntimeEffectContents");
   cmd.pipeline = pipeline;
   cmd.stencil_reference = entity.GetClipDepth();
-  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
 
   //--------------------------------------------------------------------------
   /// Vertex stage uniforms.

@@ -231,7 +231,7 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     }
 
     for (const auto& data : command.bindings.sampled_images) {
-      if (!Bind(pass_bindings, data.first, *data.second.sampler.resource,
+      if (!Bind(pass_bindings, data.first, *data.second.sampler,
                 *data.second.texture.resource)) {
         return false;
       }

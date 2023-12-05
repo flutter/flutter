@@ -351,10 +351,6 @@ static bool EncodeCommand(const Context& context,
                           PassBindingsCache& command_buffer_cache,
                           const ISize& target_size,
                           const vk::DescriptorSet vk_desc_set) {
-  if (command.vertex_count == 0u || command.instance_count == 0u) {
-    return true;
-  }
-
 #ifdef IMPELLER_DEBUG
   fml::ScopedCleanupClosure pop_marker(
       [&encoder]() { encoder.PopDebugGroup(); });
@@ -388,14 +384,13 @@ static bool EncodeCommand(const Context& context,
       command.stencil_reference);
 
   // Configure vertex and index and buffers for binding.
-  auto vertex_buffer_view = command.GetVertexBuffer();
+  auto& vertex_buffer_view = command.vertex_buffer.vertex_buffer;
 
   if (!vertex_buffer_view) {
     return false;
   }
 
   auto& allocator = *context.GetResourceAllocator();
-
   auto vertex_buffer = vertex_buffer_view.buffer->GetDeviceBuffer(allocator);
 
   if (!vertex_buffer) {
@@ -414,9 +409,9 @@ static bool EncodeCommand(const Context& context,
   vk::DeviceSize vertex_buffer_offsets[] = {vertex_buffer_view.range.offset};
   cmd_buffer.bindVertexBuffers(0u, 1u, vertex_buffers, vertex_buffer_offsets);
 
-  if (command.index_type != IndexType::kNone) {
+  if (command.vertex_buffer.index_type != IndexType::kNone) {
     // Bind the index buffer.
-    auto index_buffer_view = command.index_buffer;
+    auto index_buffer_view = command.vertex_buffer.index_buffer;
     if (!index_buffer_view) {
       return false;
     }
@@ -435,20 +430,20 @@ static bool EncodeCommand(const Context& context,
     auto index_buffer_handle = DeviceBufferVK::Cast(*index_buffer).GetBuffer();
     cmd_buffer.bindIndexBuffer(index_buffer_handle,
                                index_buffer_view.range.offset,
-                               ToVKIndexType(command.index_type));
+                               ToVKIndexType(command.vertex_buffer.index_type));
 
     // Engage!
-    cmd_buffer.drawIndexed(command.vertex_count,    // index count
+    cmd_buffer.drawIndexed(command.vertex_buffer.vertex_count,  // index count
                            command.instance_count,  // instance count
                            0u,                      // first index
                            command.base_vertex,     // vertex offset
                            0u                       // first instance
     );
   } else {
-    cmd_buffer.draw(command.vertex_count,    // vertex count
-                    command.instance_count,  // instance count
-                    command.base_vertex,     // vertex offset
-                    0u                       // first instance
+    cmd_buffer.draw(command.vertex_buffer.vertex_count,  // vertex count
+                    command.instance_count,              // instance count
+                    command.base_vertex,                 // vertex offset
+                    0u                                   // first instance
     );
   }
   return true;

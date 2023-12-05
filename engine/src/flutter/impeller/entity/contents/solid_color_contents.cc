@@ -67,7 +67,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 
   options.primitive_type = geometry_result.type;
   cmd.pipeline = renderer.GetSolidFillPipeline(options);
-  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
   frame_info.mvp = capture.AddMatrix("Transform", geometry_result.transform);

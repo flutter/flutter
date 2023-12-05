@@ -153,11 +153,10 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
                      vertex_buffer_count->AsBufferView().contents)
                      ->count;
 
-    VertexBuffer render_vertex_buffer{
-        .vertex_buffer = vertex_buffer->AsBufferView(),
-        .vertex_count = count,
-        .index_type = IndexType::kNone};
-    cmd.BindVertices(render_vertex_buffer);
+    cmd.BindVertices(
+        VertexBuffer{.vertex_buffer = vertex_buffer->AsBufferView(),
+                     .vertex_count = count,
+                     .index_type = IndexType::kNone});
 
     VS::FrameInfo frame_info;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
@@ -357,11 +356,10 @@ TEST_P(ComputeSubgroupTest, LargePath) {
                      vertex_buffer_count->AsBufferView().contents)
                      ->count;
 
-    VertexBuffer render_vertex_buffer{
-        .vertex_buffer = vertex_buffer->AsBufferView(),
-        .vertex_count = count,
-        .index_type = IndexType::kNone};
-    cmd.BindVertices(render_vertex_buffer);
+    cmd.BindVertices(
+        VertexBuffer{.vertex_buffer = vertex_buffer->AsBufferView(),
+                     .vertex_count = count,
+                     .index_type = IndexType::kNone});
 
     VS::FrameInfo frame_info;
     auto world_matrix = Matrix::MakeScale(GetContentScale());
@@ -441,11 +439,10 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
                      vertex_buffer_count->AsBufferView().contents)
                      ->count;
 
-    VertexBuffer render_vertex_buffer{
-        .vertex_buffer = vertex_buffer->AsBufferView(),
-        .vertex_count = count,
-        .index_type = IndexType::kNone};
-    cmd.BindVertices(render_vertex_buffer);
+    cmd.BindVertices(
+        VertexBuffer{.vertex_buffer = vertex_buffer->AsBufferView(),
+                     .vertex_count = count,
+                     .index_type = IndexType::kNone});
 
     VS::FrameInfo frame_info;
     auto world_matrix = Matrix::MakeScale(GetContentScale());

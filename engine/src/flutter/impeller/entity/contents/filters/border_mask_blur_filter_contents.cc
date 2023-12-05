@@ -102,7 +102,6 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
           coverage.origin.y + coverage.size.height},
          input_uvs[3]},
     });
-    auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     Command cmd;
     DEBUG_COMMAND_INFO(cmd, "Border Mask Blur Filter");
@@ -110,7 +109,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
     cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);
-    cmd.BindVertices(vtx_buffer);
+    cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
     cmd.stencil_reference = entity.GetClipDepth();
 
     VS::FrameInfo frame_info;

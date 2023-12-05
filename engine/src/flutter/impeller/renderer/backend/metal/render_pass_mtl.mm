@@ -408,13 +408,6 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
   auto bind_stage_resources = [&allocator, &pass_bindings](
                                   const Bindings& bindings,
                                   ShaderStage stage) -> bool {
-    if (stage == ShaderStage::kVertex) {
-      if (!Bind(pass_bindings, *allocator, stage,
-                VertexDescriptor::kReservedVertexBufferIndex,
-                bindings.vertex_buffer.view.resource)) {
-        return false;
-      }
-    }
     for (const auto& buffer : bindings.buffers) {
       if (!Bind(pass_bindings, *allocator, stage, buffer.first,
                 buffer.second.view.resource)) {
@@ -422,7 +415,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
       }
     }
     for (const auto& data : bindings.sampled_images) {
-      if (!Bind(pass_bindings, stage, data.first, *data.second.sampler.resource,
+      if (!Bind(pass_bindings, stage, data.first, *data.second.sampler,
                 *data.second.texture.resource)) {
         return false;
       }
@@ -434,13 +427,6 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
 
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
   for (const auto& command : commands_) {
-    if (command.vertex_count == 0u) {
-      continue;
-    }
-    if (command.instance_count == 0u) {
-      continue;
-    }
-
 #ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
     if (!command.label.empty()) {
@@ -479,6 +465,12 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
                                      pipeline_desc.GetPolygonMode())];
     [encoder setStencilReferenceValue:command.stencil_reference];
 
+    if (!Bind(pass_bindings, *allocator, ShaderStage::kVertex,
+              VertexDescriptor::kReservedVertexBufferIndex,
+              command.vertex_buffer.vertex_buffer)) {
+      return false;
+    }
+
     if (!bind_stage_resources(command.vertex_bindings, ShaderStage::kVertex)) {
       return false;
     }
@@ -488,7 +480,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     }
 
     const PrimitiveType primitive_type = pipeline_desc.GetPrimitiveType();
-    if (command.index_type == IndexType::kNone) {
+    if (command.vertex_buffer.index_type == IndexType::kNone) {
       if (command.instance_count != 1u) {
 #if TARGET_OS_SIMULATOR
         VALIDATION_LOG << "iOS Simulator does not support instanced rendering.";
@@ -496,22 +488,22 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
 #else   // TARGET_OS_SIMULATOR
         [encoder drawPrimitives:ToMTLPrimitiveType(primitive_type)
                     vertexStart:command.base_vertex
-                    vertexCount:command.vertex_count
+                    vertexCount:command.vertex_buffer.vertex_count
                   instanceCount:command.instance_count
                    baseInstance:0u];
 #endif  // TARGET_OS_SIMULATOR
       } else {
         [encoder drawPrimitives:ToMTLPrimitiveType(primitive_type)
                     vertexStart:command.base_vertex
-                    vertexCount:command.vertex_count];
+                    vertexCount:command.vertex_buffer.vertex_count];
       }
       continue;
     }
 
-    if (command.index_type == IndexType::kUnknown) {
+    if (command.vertex_buffer.index_type == IndexType::kUnknown) {
       return false;
     }
-    auto index_buffer = command.index_buffer.buffer;
+    auto index_buffer = command.vertex_buffer.index_buffer.buffer;
     if (!index_buffer) {
       return false;
     }
@@ -525,30 +517,34 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
       return false;
     }
 
-    FML_DCHECK(command.vertex_count *
-                   (command.index_type == IndexType::k16bit ? 2 : 4) ==
-               command.index_buffer.range.length);
+    FML_DCHECK(
+        command.vertex_buffer.vertex_count *
+            (command.vertex_buffer.index_type == IndexType::k16bit ? 2 : 4) ==
+        command.vertex_buffer.index_buffer.range.length);
 
     if (command.instance_count != 1u) {
 #if TARGET_OS_SIMULATOR
       VALIDATION_LOG << "iOS Simulator does not support instanced rendering.";
       return false;
 #else   // TARGET_OS_SIMULATOR
-      [encoder drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type)
-                          indexCount:command.vertex_count
-                           indexType:ToMTLIndexType(command.index_type)
-                         indexBuffer:mtl_index_buffer
-                   indexBufferOffset:command.index_buffer.range.offset
-                       instanceCount:command.instance_count
-                          baseVertex:command.base_vertex
-                        baseInstance:0u];
+      [encoder
+          drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type)
+                     indexCount:command.vertex_buffer.vertex_count
+                      indexType:ToMTLIndexType(command.vertex_buffer.index_type)
+                    indexBuffer:mtl_index_buffer
+              indexBufferOffset:command.vertex_buffer.index_buffer.range.offset
+                  instanceCount:command.instance_count
+                     baseVertex:command.base_vertex
+                   baseInstance:0u];
 #endif  // TARGET_OS_SIMULATOR
     } else {
-      [encoder drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type)
-                          indexCount:command.vertex_count
-                           indexType:ToMTLIndexType(command.index_type)
-                         indexBuffer:mtl_index_buffer
-                   indexBufferOffset:command.index_buffer.range.offset];
+      [encoder
+          drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type)
+                     indexCount:command.vertex_buffer.vertex_count
+                      indexType:ToMTLIndexType(command.vertex_buffer.index_type)
+                    indexBuffer:mtl_index_buffer
+              indexBufferOffset:command.vertex_buffer.index_buffer.range
+                                    .offset];
     }
   }
   return true;

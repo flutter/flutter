@@ -174,7 +174,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
                      : renderer.GetTexturePipeline(options);
 #endif  // IMPELLER_ENABLE_OPENGLES
 
-  cmd.BindVertices(geometry_result.vertex_buffer);
+  cmd.BindVertices(std::move(geometry_result.vertex_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 
   if (is_external_texture) {
