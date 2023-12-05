@@ -3432,7 +3432,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(value, isNot(equals(0.5)));
-    // The slider does not have have focus after the value is changed.
+    // The slider does not have focus after the value is changed.
     expect(focusNode.hasFocus, false);
   });
 
