@@ -440,6 +440,11 @@ void main() {
 
       expect(dds.uri, Uri.parse('http://127.0.0.1:400/remote'));
 
+      expect(
+        bufferLogger.eventText.trim(),
+        '{"name":"device.proxied_dds_forwarded","args":{"deviceId":"test_id","remoteUri":"http://127.0.0.1:300/remote","localUri":"http://127.0.0.1:400/remote"}}',
+      );
+
       unawaited(dds.shutdown());
 
       final DaemonMessage shutdownMessage = await broadcastOutput.first;
