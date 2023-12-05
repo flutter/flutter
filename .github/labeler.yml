@@ -4,8 +4,9 @@
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
 'a: accessibility':
-    - changed-files:
-      - any-glob-to-any-file: ['**/accessibility/*', '**/*accessibility*', '**/semantics/*', '**/*semantics*']
+   - any:
+     - changed-files:
+       - any-glob-to-any-file: ['**/accessibility/*', '**/*accessibility*', '**/semantics/*', '**/*semantics*']
 
 'a: animation':
   - any-glob-to-any-file: '**/animation/*'
