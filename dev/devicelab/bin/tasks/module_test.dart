@@ -13,16 +13,42 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
+import 'package:path/path.dart' as path;
+
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+final String gradlewExecutable =
+    Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
+final String platformLineSep = Platform.isWindows ? '\r\n' : '\n';
+
+/// Combines several TaskFunctions with trivial success value into one.
+TaskFunction combine(List<TaskFunction> tasks) {
+  return () async {
+    for (final TaskFunction task in tasks) {
+      final TaskResult result = await task();
+      if (result.failed) {
+        return result;
+      }
+    }
+    return TaskResult.success(null);
+  };
+}
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
-Future<void> main() async {
-  await task(() async {
+class ModuleTest {
+  ModuleTest(
+    this.buildTarget,
+    this.options, {
+    this.gradleVersion = '7.6.3',
+  });
 
+  final String buildTarget;
+  final List<String> options;
+  final String gradleVersion;
+
+  Future<TaskResult> call() async {
+    section('Running: $buildTarget');
     section('Find Java');
 
     final String? javaHome = await findJavaHome();
@@ -191,11 +217,24 @@ Future<void> main() async {
         hostApp,
       );
       copy(
-        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper',
+            'gradle-wrapper.jar')),
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
-      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+      // Modify gradle version to passed in version.
+      // This is somehow the wrong file.
+      final File gradleWrapperProperties = File(path.join(hostApp.path, 'gradle',
+          'wrapper', 'gradle-wrapper.properties'));
+      String propertyContent = await gradleWrapperProperties.readAsString();
+      propertyContent = propertyContent.replaceFirst(
+        'REPLACEME',
+        '$gradleVersion',
+      );
+      await gradleWrapperProperties.writeAsString(content, flush: true);
+
+      final File analyticsOutputFile =
+          File(path.join(tempDir.path, 'analytics.log'));
 
       section('Build debug host APK');
 
@@ -378,7 +417,15 @@ Future<void> main() async {
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      rmTree(tempDir);
+      // rmTree(tempDir); DO NOT SUBMIT
     }
-  });
+  }
+}
+
+Future<void> main() async {
+  await task(combine(<TaskFunction>[
+    ModuleTest('module-gradle-7.6', <String>[''], gradleVersion: "7.6.3").call,
+    // Test that read only protection applies in gradle 8.3 and beyond
+    ModuleTest('module-gradle-8.3', <String>[''], gradleVersion: '8.3').call,
+  ]));
 }
