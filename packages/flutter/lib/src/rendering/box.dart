@@ -2111,19 +2111,33 @@ abstract class RenderBox extends RenderObject {
       final Size? size = _size;
       if (size is _DebugSize) {
         assert(size._owner == this);
-        if (RenderObject.debugActiveLayout != null &&
-            !RenderObject.debugActiveLayout!.debugDoingThisLayoutWithCallback) {
-          assert(
-            debugDoingThisResize || debugDoingThisLayout || _computingThisDryLayout ||
-              (RenderObject.debugActiveLayout == parent && size._canBeUsedByParent),
-            'RenderBox.size accessed beyond the scope of resize, layout, or '
-            'permitted parent access. RenderBox can always access its own size, '
-            'otherwise, the only object that is allowed to read RenderBox.size '
-            'is its parent, if they have said they will. It you hit this assert '
-            'trying to access a child\'s size, pass "parentUsesSize: true" to '
-            "that child's layout() in ${objectRuntimeType(this, 'RenderBox')}.performLayout.",
-          );
-        }
+        final RenderObject? parent = this.parent;
+        // Whether the size getter is accessed during layout (but not in a
+        // layout callback).
+        final bool doingRegularLayout = !(RenderObject.debugActiveLayout?.debugDoingThisLayoutWithCallback ?? true);
+        final bool sizeAccessAllowed = !doingRegularLayout
+          || debugDoingThisResize
+          || debugDoingThisLayout
+          || _computingThisDryLayout
+          || RenderObject.debugActiveLayout == parent && size._canBeUsedByParent;
+        assert(sizeAccessAllowed,
+          'RenderBox.size accessed beyond the scope of resize, layout, or '
+          'permitted parent access. RenderBox can always access its own size, '
+          'otherwise, the only object that is allowed to read RenderBox.size '
+          'is its parent, if they have said they will. It you hit this assert '
+          'trying to access a child\'s size, pass "parentUsesSize: true" to '
+          "that child's layout() in ${objectRuntimeType(this, 'RenderBox')}.performLayout.",
+        );
+        final RenderBox? renderBoxDoingDryBaseline = _computingThisDryBaseline
+          ? this
+          : (parent is RenderBox && parent._computingThisDryBaseline ? parent : null);
+        assert(renderBoxDoingDryBaseline == null,
+          'RenderBox.size accessed in '
+          '${objectRuntimeType(renderBoxDoingDryBaseline, 'RenderBox')}.computeDryBaseline.'
+          'The computeDryBaseline method should not access '
+          '${renderBoxDoingDryBaseline == this ? "the RenderBox's own size" : "the size of its child"},'
+          "because it's established in peformLayout or peformResize using different BoxConstraints."
+        );
         assert(size == _size);
       }
       return true;
