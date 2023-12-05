@@ -3778,10 +3778,8 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
   final ScrollController _controller = ScrollController();
   late List<double> _offsets;
   bool _isTopLayer = false;
-  double _height = 0.0;
   // The height occupied by a [CupertinoStickyMenuHeader], if one is provided.
   double _headerOffset = 0.0;
-
   bool get hasStickyHeader => _headerOffset > 0;
   int get _topLayer {
     return CupertinoMenu.interactiveLayersOf(context)
@@ -3839,35 +3837,19 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
       SchedulerBinding.instance.addPostFrameCallback(
         (Duration timeStamp) {
           if(mounted) {
-            _height = (childSize.height + _headerOffset).roundToDouble();
+            final double height = (childSize.height + _headerOffset).roundToDouble();
             // Report the height of the menu to the parent layer. See
             // _UnsafeSizeChangedLayoutNotifier for more information.
             context
-              ..findAncestorStateOfType<_CupertinoMenuLayerState>()!._setLayerHeight(_height)
+              ..findAncestorStateOfType<_CupertinoMenuLayerState>()!._setLayerHeight(height)
               ..findAncestorStateOfType<_MenuScopeState>()
                 !._setNestedLayerHeight(
-                  height: _height,
+                  height: height,
                   coordinates: coordinates,
                 );
           }
         },
       );
-    }
-  }
-
-  // Returns the [ScrollPhysics] that should be used for this menu layer. If the
-  // menu layer is the top layer and is the same size as the scroll area, then
-  // the menu layer should use the user-specified physics. Otherwise, the menu
-  // layer should not be scrollable.
-  ScrollPhysics? getScrollPhysics(double? layerHeight) {
-    if (
-      _isTopLayer &&
-      _controller.hasClients &&
-      _controller.position.extentTotal > (layerHeight ?? 0) + 2
-    ) {
-      return widget.physics;
-    } else {
-      return const NeverScrollableScrollPhysics();
     }
   }
 
@@ -3925,14 +3907,9 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    final CupertinoMenuLayerModel(
-      : CupertinoMenuCoordinates coordinates,
-      : BoxConstraintsTween constraintsTween
-    ) = CupertinoMenuLayer.of(context);
+    final CupertinoMenuCoordinates coordinates = CupertinoMenuLayer.of(context).coordinates;
     final int depth = coordinates.depth;
     _isTopLayer = depth == _topLayer;
 
@@ -3975,7 +3952,9 @@ class _MenuBodyState<T> extends State<_MenuBody<T>> {
             child: CustomScrollView(
               clipBehavior: Clip.none,
               controller: _controller,
-              physics: getScrollPhysics(constraintsTween.end?.maxHeight),
+              physics: _isTopLayer
+                        ? widget.physics
+                        : const NeverScrollableScrollPhysics(),
               slivers: <Widget>[
                 if (hasStickyHeader)
                   SliverPersistentHeader(
