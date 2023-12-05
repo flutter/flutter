@@ -3951,7 +3951,6 @@ targets:
 
   - name: Mac_arm64_ios flavors_test_ios_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -3960,10 +3959,11 @@ targets:
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18",
+          "sdk_version": "15a240d",
           "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
           "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
+      os: Mac-13
     bringup: true
 
   # TODO(vashworth): Stop running in presubmit after macOS 13 upgrade is complete (https://github.com/flutter/flutter/issues/134737)
@@ -3995,7 +3995,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4004,10 +4003,11 @@ targets:
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18",
+          "sdk_version": "15a240d",
           "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
           "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
+      os: Mac-13
     bringup: true
 
   - name: Mac_ios flutter_view_ios__start_up
@@ -4087,7 +4087,6 @@ targets:
 
   - name: Mac_ios integration_ui_ios_driver_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4096,10 +4095,11 @@ targets:
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18",
+          "sdk_version": "15a240d",
           "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
           "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
+      os: Mac-13
     bringup: true
 
   - name: Mac_ios integration_ui_ios_frame_number
@@ -4238,7 +4238,6 @@ targets:
   # TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
   - name: Mac_ios microbenchmarks_ios_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4247,10 +4246,11 @@ targets:
       # TODO(vashworth): Remove specific toolchain_ver once https://github.com/flutter/flutter/issues/138109 is resolved.
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "14c18",
+          "sdk_version": "15a240d",
           "toolchain_ver_arm": "JiMOaZvCH66lnGWMJdLScE-7lkUnKaw3COdWwqXmjWEC",
           "toolchain_ver_intel": "Zp2HmSx7_-pu-yHqYqzoEpo0JRwNZGGwSj5V1SnLFmoC"
         }
+      os: Mac-13
     bringup: true
 
   - name: Mac native_assets_ios_simulator
