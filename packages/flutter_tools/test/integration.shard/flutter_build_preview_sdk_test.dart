@@ -13,7 +13,7 @@ void main() {
   late String flutterBin;
   late Directory exampleAppDir;
   late Directory pluginDir;
-  final RegExp compileSdkVersionMatch = RegExp(r'compileSdkVersion [\w.]+');
+  final RegExp compileSdkVersionMatch = RegExp(r'compileSdk [\w.]+');
   final String builtApkPath = <String>['build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk']
       .join(platform.pathSeparator);
 
@@ -42,15 +42,15 @@ void main() {
   });
 
   test(
-    'build succeeds targeting string compileSdkVersion',
+    'build succeeds targeting string compileSdk Version',
     () async {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
-      // write a build.gradle with compileSdkVersion as `android-Tiramisu` which is a string preview version
+      // write a build.gradle with compileSdk Version as `android-UpsideDownCake` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkVersion "android-UpsideDownCake"'),
+        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdk "android-UpsideDownCake"'),
         flush: true
       );
-      expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion "android-UpsideDownCake"'));
+      expect(buildGradleFile.readAsStringSync(), contains('compileSdk "android-UpsideDownCake"'));
 
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
