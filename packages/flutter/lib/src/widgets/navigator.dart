@@ -3509,6 +3509,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final FocusNode focusNode = FocusNode(debugLabel: 'Navigator');
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
+  bool _disposed = false;
 
   HeroController? _heroControllerFromScope;
 
@@ -3890,6 +3891,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }
       return true;
     }());
+    _disposed = true;
     _updateHeroController(null);
     focusNode.dispose();
     _forcedDisposeAllRouteEntries();
@@ -5474,6 +5476,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// previously notified with [didStartUserGesture] has completed.
   void didStopUserGesture() {
     assert(_userGesturesInProgress > 0);
+    if (_disposed) {
+      return;
+    }
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
       for (final NavigatorObserver observer in _effectiveObservers) {
