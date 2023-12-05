@@ -18,10 +18,6 @@ namespace testing {
 TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
   ASSERT_EQ(SourceTypeFromFileName("hello.vert"), SourceType::kVertexShader);
   ASSERT_EQ(SourceTypeFromFileName("hello.frag"), SourceType::kFragmentShader);
-  ASSERT_EQ(SourceTypeFromFileName("hello.tesc"),
-            SourceType::kTessellationControlShader);
-  ASSERT_EQ(SourceTypeFromFileName("hello.tese"),
-            SourceType::kTessellationEvaluationShader);
   ASSERT_EQ(SourceTypeFromFileName("hello.comp"), SourceType::kComputeShader);
   ASSERT_EQ(SourceTypeFromFileName("hello.msl"), SourceType::kUnknown);
   ASSERT_EQ(SourceTypeFromFileName("hello.glsl"), SourceType::kUnknown);
@@ -55,24 +51,6 @@ TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
   ASSERT_TRUE(CanCompileAndReflect("multiple_stages.hlsl",
                                    SourceType::kFragmentShader,
                                    SourceLanguage::kHLSL, "FragmentShader"));
-}
-
-TEST_P(CompilerTest, CanCompileTessellationControlShader) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
-  ASSERT_TRUE(CanCompileAndReflect("sample.tesc"));
-  ASSERT_TRUE(CanCompileAndReflect("sample.tesc",
-                                   SourceType::kTessellationControlShader));
-}
-
-TEST_P(CompilerTest, CanCompileTessellationEvaluationShader) {
-  if (GetParam() == TargetPlatform::kSkSL) {
-    GTEST_SKIP() << "Not supported with SkSL";
-  }
-  ASSERT_TRUE(CanCompileAndReflect("sample.tese"));
-  ASSERT_TRUE(CanCompileAndReflect("sample.tese",
-                                   SourceType::kTessellationEvaluationShader));
 }
 
 TEST_P(CompilerTest, CanCompileComputeShader) {

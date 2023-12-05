@@ -63,12 +63,6 @@ static void LogShaderCompilationFailure(const ProcTableGLES& gl,
     case ShaderStage::kFragment:
       stream << "fragment";
       break;
-    case ShaderStage::kTessellationControl:
-      stream << "tessellation control";
-      break;
-    case ShaderStage::kTessellationEvaluation:
-      stream << "tessellation evaluation";
-      break;
     case ShaderStage::kCompute:
       stream << "compute";
       break;

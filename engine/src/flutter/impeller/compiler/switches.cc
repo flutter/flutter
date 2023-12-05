@@ -31,8 +31,6 @@ static const std::map<std::string, TargetPlatform> kKnownPlatforms = {
 static const std::map<std::string, SourceType> kKnownSourceTypes = {
     {"vert", SourceType::kVertexShader},
     {"frag", SourceType::kFragmentShader},
-    {"tesc", SourceType::kTessellationControlShader},
-    {"tese", SourceType::kTessellationEvaluationShader},
     {"comp", SourceType::kComputeShader},
 };
 

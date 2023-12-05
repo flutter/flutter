@@ -82,8 +82,6 @@ test_fixtures("file_fixtures") {
     "resources_limit.vert",
     "sample.comp",
     "sample.frag",
-    "sample.tesc",
-    "sample.tese",
     "sample.vert",
     "sample_with_binding.vert",
     "simple.vert.hlsl",
