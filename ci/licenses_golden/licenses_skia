@@ -1,4 +1,4 @@
-Signature: d495f5e3ffe4f301637eb9f5fae26750
+Signature: 64e78fbf18e3fee331507e07847bab7b
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1520,8 +1520,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkHRESULT.h + ../../../f
 ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkIStream.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkIStream.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkTScopedComPtr.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkWGL.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/utils/win/SkWGL_win.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/xps/SkXPSDevice.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/xps/SkXPSDevice.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
@@ -1703,8 +1701,6 @@ FILE: ../../../flutter/third_party/skia/src/utils/win/SkHRESULT.h
 FILE: ../../../flutter/third_party/skia/src/utils/win/SkIStream.cpp
 FILE: ../../../flutter/third_party/skia/src/utils/win/SkIStream.h
 FILE: ../../../flutter/third_party/skia/src/utils/win/SkTScopedComPtr.h
-FILE: ../../../flutter/third_party/skia/src/utils/win/SkWGL.h
-FILE: ../../../flutter/third_party/skia/src/utils/win/SkWGL_win.cpp
 FILE: ../../../flutter/third_party/skia/src/xps/SkXPSDevice.cpp
 FILE: ../../../flutter/third_party/skia/src/xps/SkXPSDevice.h
 ----------------------------------------------------------------------------------------------------
