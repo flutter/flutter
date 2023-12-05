@@ -666,7 +666,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final double lerpValue = _lerp(value);
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
-      _focusNode?.requestFocus();
     }
   }
 
@@ -1376,8 +1375,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (hovered && hoveringThumb) {
       _state.overlayController.forward();
     } else {
-      // Only remove overlay when Slider is unfocused.
-      if (!hasFocus) {
+      // Only remove overlay when Slider is inactive and unfocused.
+      if (!_active && !hasFocus) {
         _state.overlayController.reverse();
       }
     }
@@ -1457,6 +1456,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   @override
   void dispose() {
+    _drag.dispose();
+    _tap.dispose();
     _labelPainter.dispose();
     super.dispose();
   }
@@ -1494,14 +1495,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         case SliderInteraction.tapOnly:
           _active = true;
           _currentDragValue = _getValueFromGlobalPosition(globalPosition);
-          onChanged!(_discretize(_currentDragValue));
         case SliderInteraction.slideThumb:
           if (_isPointerOnOverlay(globalPosition)) {
             _active = true;
             _currentDragValue = value;
           }
         case SliderInteraction.slideOnly:
-          break;
+          onChangeStart?.call(_discretize(value));
       }
 
       if (_active) {
@@ -1509,6 +1509,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         // a tap, it consists of a call to onChangeStart with the previous value and
         // a call to onChangeEnd with the new value.
         onChangeStart?.call(_discretize(value));
+        onChanged!(_discretize(_currentDragValue));
         _state.overlayController.forward();
         if (showValueIndicator) {
           _state.valueIndicatorController.forward();

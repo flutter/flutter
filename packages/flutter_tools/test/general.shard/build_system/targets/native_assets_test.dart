@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
+import 'package:package_config/package_config.dart' show Package;
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -54,11 +55,19 @@ void main() {
     expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('NativeAssets throws error if missing ios archs', () async {
+  testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     await createPackageConfig(iosEnvironment);
 
     iosEnvironment.defines.remove(kIosArchs);
-    expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+
+    final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
+    await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
+
+    final File nativeAssetsYaml =
+        iosEnvironment.buildDir.childFile('native_assets.yaml');
+    final File depsFile = iosEnvironment.buildDir.childFile('native_assets.d');
+    expect(depsFile, exists);
+    expect(nativeAssetsYaml, exists);
   });
 
   testUsingContext('NativeAssets throws error if missing sdk root', () async {
@@ -104,6 +113,7 @@ void main() {
       await createPackageConfig(iosEnvironment);
 
       final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
         buildResult: FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
           native_assets_cli.Asset(
             id: 'package:foo/foo.dart',

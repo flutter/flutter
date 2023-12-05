@@ -1,4 +1,6 @@
 {
+  "searchWebButtonLabel": "Buscar en la Web",
+  "shareButtonLabel": "Compartir…",
   "scanTextButtonLabel": "Analizar texto",
   "lookUpButtonLabel": "Mirar hacia arriba",
   "menuDismissLabel": "Descartar menú",
@@ -139,7 +141,6 @@
   "reorderItemRight": "Mover hacia la derecha",
   "expandedIconTapHint": "Contraer",
   "collapsedIconTapHint": "Expandir",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
   "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
   "refreshIndicatorSemanticLabel": "Actualizar"

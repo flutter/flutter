@@ -71,15 +71,11 @@ class PaginatedDataTable extends StatefulWidget {
   /// order is ascending, this should be true (the default), otherwise it should
   /// be false.
   ///
-  /// The [source] must not be null. The [source] should be a long-lived
-  /// [DataTableSource]. The same source should be provided each time a
-  /// particular [PaginatedDataTable] widget is created; avoid creating a new
-  /// [DataTableSource] with each new instance of the [PaginatedDataTable]
-  /// widget unless the data table really is to now show entirely different
-  /// data from a new source.
-  ///
-  /// The [rowsPerPage] and [availableRowsPerPage] must not be null (they
-  /// both have defaults, though, so don't have to be specified).
+  /// The [source] should be a long-lived [DataTableSource]. The same source
+  /// should be provided each time a particular [PaginatedDataTable] widget is
+  /// created; avoid creating a new [DataTableSource] with each new instance of
+  /// the [PaginatedDataTable] widget unless the data table really is to now
+  /// show entirely different data from a new source.
   ///
   /// Themed by [DataTableTheme]. [DataTableThemeData.decoration] is ignored.
   /// To modify the border or background color of the [PaginatedDataTable], use
@@ -116,6 +112,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.controller,
     this.primary,
     this.headingRowColor,
+    this.showEmptyRows = true,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -264,7 +261,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// and no affordance will be provided to change the value.
   final ValueChanged<int?>? onRowsPerPageChanged;
 
-  /// The data source which provides data to show in each row. Must be non-null.
+  /// The data source which provides data to show in each row.
   ///
   /// This object should generally have a lifetime longer than the
   /// [PaginatedDataTable] widget itself; it should be reused each time the
@@ -292,6 +289,14 @@ class PaginatedDataTable extends StatefulWidget {
 
    /// {@macro flutter.material.dataTable.headingRowColor}
   final MaterialStateProperty<Color?>? headingRowColor;
+
+  /// Controls the visibility of empty rows on the last page of a
+  /// [PaginatedDataTable].
+  ///
+  /// Defaults to `true`, which means empty rows will be populated on the
+  /// last page of the table if there is not enough content.
+  /// When set to `false`, empty rows will not be created.
+  final bool showEmptyRows;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -411,8 +416,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           haveProgressIndicator = true;
         }
       }
-      row ??= _getBlankRowFor(index);
-      result.add(row);
+
+      if (widget.showEmptyRows) {
+        row ??= _getBlankRowFor(index);
+      }
+
+      if (row != null) {
+        result.add(row);
+      }
     }
     return result;
   }
@@ -604,6 +615,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   ),
                 ),
               ),
+              if (!widget.showEmptyRows)
+                SizedBox(
+                    height: (widget.dataRowMaxHeight ?? kMinInteractiveDimension) * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)), // ignore_clamp_double_lint
               DefaultTextStyle(
                 style: footerTextStyle!,
                 child: IconTheme.merge(

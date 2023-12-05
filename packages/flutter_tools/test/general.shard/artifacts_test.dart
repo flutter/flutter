@@ -143,7 +143,8 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-        fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'frontend_server.dart.snapshot')
+        fileSystem.path.join('root', 'bin', 'cache', 'dart-sdk', 'bin',
+          'snapshots', 'frontend_server_aot.dart.snapshot')
       );
     });
 
@@ -325,9 +326,17 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk', 'bin',
-          'snapshots', 'frontend_server.dart.snapshot')
+          'snapshots', 'frontend_server_aot.dart.snapshot')
       );
 
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.flutterPreviewDevice,
+          platform: TargetPlatform.windows_x64,
+        ),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts',
+          'flutter_preview', 'flutter_preview.exe'),
+      );
 
       fileSystem.file(fileSystem.path.join('/out', 'host_debug_unopt', 'impellerc'))
         .createSync(recursive: true);
@@ -397,7 +406,7 @@ void main() {
           Artifact.frontendServerSnapshotForEngineDartSdk,
           platform: TargetPlatform.web_javascript),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin',
-          'snapshots', 'frontend_server.dart.snapshot'),
+          'snapshots', 'frontend_server_aot.dart.snapshot'),
       );
       expect(
         artifacts.getArtifactPath(

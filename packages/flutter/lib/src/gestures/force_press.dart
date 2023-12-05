@@ -46,8 +46,6 @@ enum _ForceState {
 class ForcePressDetails {
   /// Creates details for a [GestureForcePressStartCallback],
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
-  ///
-  /// The [globalPosition] argument must not be null.
   ForcePressDetails({
     required this.globalPosition,
     Offset? localPosition,

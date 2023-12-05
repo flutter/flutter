@@ -301,8 +301,6 @@ class TimePickerThemeData with Diagnosticable {
 
   /// Linearly interpolate between two time picker themes.
   ///
-  /// The argument `t` must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static TimePickerThemeData lerp(TimePickerThemeData? a, TimePickerThemeData? b, double t) {
     if (identical(a, b) && a != null) {

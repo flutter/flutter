@@ -31,143 +31,6 @@ import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
-
-// On web, key events in text fields are handled by the browser.
-const bool areKeyEventsHandledByPlatform = isBrowser;
-
-class CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<CupertinoLocalizations> load(Locale locale) =>
-    DefaultCupertinoLocalizations.load(locale);
-
-  @override
-  bool shouldReload(CupertinoLocalizationsDelegate old) => false;
-}
-
-class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
-
-  @override
-  bool shouldReload(MaterialLocalizationsDelegate old) => false;
-}
-
-class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
-}
-
-Widget overlay({ required Widget child }) {
-  final OverlayEntry entry = OverlayEntry(
-    builder: (BuildContext context) {
-      return Center(
-        child: Material(
-          child: child,
-        ),
-      );
-    },
-  );
-  addTearDown(() => entry..remove()..dispose());
-  return overlayWithEntry(entry);
-}
-
-Widget overlayWithEntry(OverlayEntry entry) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
-      WidgetsLocalizationsDelegate(),
-      MaterialLocalizationsDelegate(),
-      CupertinoLocalizationsDelegate(),
-    ],
-    child: DefaultTextEditingShortcuts(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry,
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Widget boilerplate({ required Widget child, ThemeData? theme }) {
-  return MaterialApp(
-    theme: theme,
-    home: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
-        WidgetsLocalizationsDelegate(),
-        MaterialLocalizationsDelegate(),
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Center(
-            child: Material(
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 200));
-}
-
-double getOpacity(WidgetTester tester, Finder finder) {
-  return tester.widget<FadeTransition>(
-    find.ancestor(
-      of: finder,
-      matching: find.byType(FadeTransition),
-    ),
-  ).opacity.value;
-}
-
-class TestFormatter extends TextInputFormatter {
-  TestFormatter(this.onFormatEditUpdate);
-  FormatEditUpdateCallback onFormatEditUpdate;
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    onFormatEditUpdate(oldValue, newValue);
-    return newValue;
-  }
-}
-
-FocusNode _focusNode() {
-  final FocusNode result = FocusNode();
-  addTearDown(result.dispose);
-  return result;
-}
-
-TextEditingController _textEditingController({String text = ''}) {
-  final TextEditingController result = TextEditingController(text: text);
-  addTearDown(result.dispose);
-  return result;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -787,7 +650,7 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
-  testWidgets('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -2484,7 +2347,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
-  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2527,6 +2390,11 @@ void main() {
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -2576,7 +2444,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2620,11 +2488,16 @@ void main() {
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/122519
     final TextEditingController controller = _textEditingController();
@@ -2697,6 +2570,11 @@ void main() {
 
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, testValue.indexOf('i'));
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -6807,6 +6685,154 @@ void main() {
     expect(editableText.style.color, theme.textTheme.bodyLarge!.color!.withOpacity(0.38));
   });
 
+  testWidgets('Enabled TextField statesController', (WidgetTester tester) async {
+    final TextEditingController textEditingController = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController statesController = MaterialStatesController();
+    statesController.addListener(valueChanged);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final Offset center = tester.getCenter(find.byType(EditableText).first);
+    await gesture.moveTo(center);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.down(center);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(count, 4); // adds hovered and pressed - two changes.
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.focused});
+    expect(count, 5);
+
+    await gesture.down(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{});
+    expect(count, 6);
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(center);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(count, 8); // adds hovered and pressed - two changes.
+
+    // If the text field is rebuilt disabled, then the focused state is
+    // removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(count, 10); // removes focused and adds disabled - two changes.
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 11);
+
+    // If the text field is rebuilt enabled and in an error state, then the error
+    // state is added.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+              decoration: const InputDecoration(
+                errorText: 'error',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(statesController.value, <MaterialState>{MaterialState.error});
+    expect(count, 13); // removes disabled and adds error - two changes.
+
+    // If the text field is rebuilt without an error, then the error
+    // state is removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(statesController.value, <MaterialState>{});
+    expect(count, 14);
+  });
+
+  testWidgets('Disabled TextField statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 1);
+  });
+
   testWidgetsWithLeakTracking('Provided style correctly resolves for material states', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -6964,7 +6990,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
-            child: RawKeyboardListener(
+            child: KeyboardListener(
               focusNode: focusNode,
               child: TextField(
                 controller: controller,
@@ -7157,7 +7183,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7231,7 +7257,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7286,7 +7312,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7354,7 +7380,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7405,7 +7431,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7450,7 +7476,7 @@ void main() {
   testWidgetsWithLeakTracking('Changing positions of text fields', (WidgetTester tester) async {
 
     final FocusNode focusNode = _focusNode();
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final TextEditingController c1 = _textEditingController();
     final TextEditingController c2 = _textEditingController();
@@ -7461,9 +7487,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -7506,9 +7532,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -7544,7 +7570,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final TextEditingController c1 = _textEditingController();
     final TextEditingController c2 = _textEditingController();
@@ -7555,9 +7581,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -12361,7 +12387,7 @@ void main() {
      skip: isBrowser, // [intended] Browser handles arrow keys differently.
   );
 
-  testWidgets('long press drag can edge scroll vertically', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('long press drag can edge scroll vertically', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12438,6 +12464,11 @@ void main() {
       textOffsetToPosition(tester, 0).dy,
       moreOrLessEquals(firstCharY - lineHeight, epsilon: 1),
     );
+
+    // End gesture and skip the magnifier hide animation, so it can release
+    // resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgetsWithLeakTracking('keyboard selection change scrolls the field vertically', (WidgetTester tester) async {
@@ -14283,7 +14314,7 @@ void main() {
       });
     });
   });
-  testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Arrow keys don't move input focus", (WidgetTester tester) async {
     final TextEditingController controller1 = _textEditingController();
     final TextEditingController controller2 = _textEditingController();
     final TextEditingController controller3 = _textEditingController();
@@ -14446,7 +14477,7 @@ void main() {
     expect(textFieldSize1, equals(textFieldSize2));
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'The selection menu displays in an Overlay without error',
     (WidgetTester tester) async {
       // This is a regression test for
@@ -14454,6 +14485,9 @@ void main() {
       final TextEditingController controller = _textEditingController(
         text: 'This is a test that shows some odd behavior with Text Selection!',
       );
+
+      late final OverlayEntry overlayEntry;
+      addTearDown(() => overlayEntry..remove()..dispose());
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -14466,7 +14500,7 @@ void main() {
                 height: 600,
                 child: Overlay(
                   initialEntries: <OverlayEntry>[
-                    OverlayEntry(
+                    overlayEntry = OverlayEntry(
                       builder: (BuildContext context) => Center(
                         child: TextField(
                           controller: controller,
@@ -16271,7 +16305,7 @@ void main() {
   });
 
   group('magnifier builder', () {
-    testWidgets('should build custom magnifier if given',
+    testWidgetsWithLeakTracking('should build custom magnifier if given',
         (WidgetTester tester) async {
       final Widget customMagnifier = Container(
         key: UniqueKey(),
@@ -16286,14 +16320,15 @@ void main() {
         home: Placeholder(),
       ));
 
-      final BuildContext context =
-          tester.firstElement(find.byType(Placeholder));
+      final BuildContext context = tester.firstElement(find.byType(Placeholder));
+      final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierInfo.dispose);
 
       expect(
           textField.magnifierConfiguration!.magnifierBuilder(
               context,
               MagnifierController(),
-              ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+              magnifierInfo,
             ),
           isA<Widget>().having(
               (Widget widget) => widget.key,
@@ -16302,24 +16337,26 @@ void main() {
     });
 
     group('defaults', () {
-      testWidgets('should build Magnifier on Android', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should build Magnifier on Android', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
         );
 
         final BuildContext context = tester.firstElement(find.byType(TextField));
         final EditableText editableText = tester.widget(find.byType(EditableText));
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        addTearDown(magnifierInfo.dispose);
 
         expect(
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+                magnifierInfo,
               ),
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-      testWidgets('should build CupertinoMagnifier on iOS',
+      testWidgetsWithLeakTracking('should build CupertinoMagnifier on iOS',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
@@ -16327,17 +16364,19 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(TextField));
         final EditableText editableText = tester.widget(find.byType(EditableText));
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        addTearDown(magnifierInfo.dispose);
 
         expect(
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+                magnifierInfo,
               ),
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-      testWidgets('should build nothing on Android and iOS',
+      testWidgetsWithLeakTracking('should build nothing on Android and iOS',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
@@ -16345,12 +16384,14 @@ void main() {
 
         final BuildContext context = tester.firstElement(find.byType(TextField));
         final EditableText editableText = tester.widget(find.byType(EditableText));
+        final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+        addTearDown(magnifierInfo.dispose);
 
         expect(
             editableText.magnifierConfiguration.magnifierBuilder(
                 context,
                 MagnifierController(),
-                ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+                magnifierInfo,
               ),
             isNull);
       },
@@ -17059,4 +17100,142 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
       ),
     );
   }
+}
+
+
+typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
+
+// On web, key events in text fields are handled by the browser.
+const bool areKeyEventsHandledByPlatform = isBrowser;
+
+class CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+    DefaultCupertinoLocalizations.load(locale);
+
+  @override
+  bool shouldReload(CupertinoLocalizationsDelegate old) => false;
+}
+
+class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(MaterialLocalizationsDelegate old) => false;
+}
+
+class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+}
+
+Widget overlay({ required Widget child }) {
+  final OverlayEntry entry = OverlayEntry(
+    builder: (BuildContext context) {
+      return Center(
+        child: Material(
+          child: child,
+        ),
+      );
+    },
+  );
+  addTearDown(() => entry..remove()..dispose());
+  return overlayWithEntry(entry);
+}
+
+Widget overlayWithEntry(OverlayEntry entry) {
+  return Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      WidgetsLocalizationsDelegate(),
+      MaterialLocalizationsDelegate(),
+      CupertinoLocalizationsDelegate(),
+    ],
+    child: DefaultTextEditingShortcuts(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry,
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget boilerplate({ required Widget child, ThemeData? theme }) {
+  return MaterialApp(
+    theme: theme,
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
+}
+
+double getOpacity(WidgetTester tester, Finder finder) {
+  return tester.widget<FadeTransition>(
+    find.ancestor(
+      of: finder,
+      matching: find.byType(FadeTransition),
+    ),
+  ).opacity.value;
+}
+
+class TestFormatter extends TextInputFormatter {
+  TestFormatter(this.onFormatEditUpdate);
+  FormatEditUpdateCallback onFormatEditUpdate;
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    onFormatEditUpdate(oldValue, newValue);
+    return newValue;
+  }
+}
+
+FocusNode _focusNode() {
+  final FocusNode result = FocusNode();
+  addTearDown(result.dispose);
+  return result;
+}
+
+TextEditingController _textEditingController({String text = ''}) {
+  final TextEditingController result = TextEditingController(text: text);
+  addTearDown(result.dispose);
+  return result;
 }

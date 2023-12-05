@@ -33,7 +33,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   }
 
   @override
-  int addPostFrameCallback(FrameCallback callback) {
+  int addPostFrameCallback(FrameCallback callback, {String debugLabel = 'callback'}) {
     postFrameCallback = callback;
     return 0;
   }

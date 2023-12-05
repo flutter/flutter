@@ -51,7 +51,6 @@
   "reorderItemRight": "Mou cap a la dreta",
   "expandedIconTapHint": "Replega",
   "collapsedIconTapHint": "Desplega",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Queda 1 caràcter",
   "remainingTextFieldCharacterCountOther": "Queden $remainingCount caràcters",
   "refreshIndicatorSemanticLabel": "Actualitza",
@@ -143,7 +142,7 @@
   "expandedHint": "S'ha replegat",
   "collapsedHint": "S'ha desplegat",
   "menuDismissLabel": "Ignora el menú",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Mira amunt",
+  "searchWebButtonLabel": "Cerca al web",
+  "shareButtonLabel": "Comparteix..."
 }

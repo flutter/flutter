@@ -38,8 +38,6 @@ import 'sliver_multi_box_adaptor.dart';
 abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that contains multiple box children that have the same
   /// extent in the main axis.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverFixedExtentBoxAdaptor({
     required super.childManager,
   });
@@ -411,8 +409,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that have a given
   /// extent in the main axis.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverFixedExtentList({
     required super.childManager,
     required double itemExtent,

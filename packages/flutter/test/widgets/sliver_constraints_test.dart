@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('precedingScrollExtent is reported as infinity for Sliver of unknown size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('precedingScrollExtent is reported as infinity for Sliver of unknown size', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(

@@ -93,6 +93,7 @@ export 'dart:io'
         // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
+        SecurityContext,
         ServerSocket,
         SignalException,
         Socket,
@@ -191,13 +192,25 @@ class ProcessSignal {
   ///
   /// Returns true if the signal was delivered, false otherwise.
   ///
-  /// On Windows, this can only be used with [ProcessSignal.sigterm], which
-  /// terminates the process.
+  /// On Windows, this can only be used with [sigterm], which terminates the
+  /// process.
   ///
-  /// This is implemented by sending the signal using [Process.killPid].
+  /// This is implemented by sending the signal using [io.Process.killPid] and
+  /// therefore cannot be faked in tests. To fake sending signals in tests, use
+  /// [kill] instead.
   bool send(int pid) {
     assert(!_platform.isWindows || this == ProcessSignal.sigterm);
     return io.Process.killPid(pid, _delegate);
+  }
+
+  /// A more testable variant of [send].
+  ///
+  /// Sends this signal to the given `process` by invoking [io.Process.kill].
+  ///
+  /// In tests this method can be faked by passing a fake implementation of the
+  /// [io.Process] interface.
+  bool kill(io.Process process) {
+    return process.kill(_delegate);
   }
 
   @override

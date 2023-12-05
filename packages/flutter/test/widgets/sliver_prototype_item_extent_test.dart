@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestItem extends StatelessWidget {
   const TestItem({ super.key, required this.item, this.width, this.height });
@@ -40,7 +41,7 @@ Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirec
 }
 
 void main() {
-  testWidgets('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -69,7 +70,7 @@ void main() {
     }
   });
 
-  testWidgets('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -95,7 +96,7 @@ void main() {
     expect(find.text('Item 7'), findsNothing);
   });
 
-  testWidgets('SliverPrototypeExtentList vertical scrolling basics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList vertical scrolling basics', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(count: 20, height: 100.0));
 
     // The viewport is 600 pixels high, lazily created items are 100 pixels high.
@@ -121,7 +122,7 @@ void main() {
     }
   });
 
-  testWidgets('SliverPrototypeExtentList horizontal scrolling basics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList horizontal scrolling basics', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(count: 20, width: 100.0, scrollDirection: Axis.horizontal));
 
     // The viewport is 800 pixels wide, lazily created items are 100 pixels wide.
@@ -147,7 +148,7 @@ void main() {
     }
   });
 
-  testWidgets('SliverPrototypeExtentList change the prototype item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList change the prototype item', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(count: 10, height: 60.0));
 
     // The viewport is 600 pixels high, each of the 10 items is 60 pixels high
@@ -173,7 +174,7 @@ void main() {
     }
   });
 
-  testWidgets('SliverPrototypeExtentList first item is also the prototype', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList first item is also the prototype', (WidgetTester tester) async {
     final List<Widget> items = List<Widget>.generate(10, (int index) {
       return TestItem(key: ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
     }).toList();
@@ -203,7 +204,7 @@ void main() {
     }
   });
 
-  testWidgets('SliverPrototypeExtentList prototypeItem paint transform is zero.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPrototypeExtentList prototypeItem paint transform is zero.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67117
     // This test ensures that the SliverPrototypeExtentList does not cause an
     // assertion error when calculating the paint transform of its prototypeItem.

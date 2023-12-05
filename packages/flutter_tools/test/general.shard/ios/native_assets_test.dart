@@ -143,6 +143,13 @@ void main() {
       ),
     );
     expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Dry running native assets for ios.',
+        'Dry running native assets for ios done.',
+      ]),
+    );
+    expect(
       nativeAssetsYaml,
       projectUri.resolve('build/native_assets/ios/native_assets.yaml'),
     );
@@ -259,7 +266,7 @@ void main() {
             Asset(
               id: 'package:bar/bar.dart',
               linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSArm64,
+              target: native_assets_cli.Target.iOSArm64,
               path: AssetAbsolutePath(Uri.file('bar.dylib')),
             ),
           ],
@@ -267,8 +274,75 @@ void main() {
       ),
     );
     expect(
+      (globals.logger as BufferLogger).traceText,
+      stringContainsInOrder(<String>[
+        'Building native assets for [ios_arm64] debug.',
+        'Building native assets for [ios_arm64] done.',
+      ]),
+    );
+    expect(
       environment.buildDir.childFile('native_assets.yaml'),
       exists,
+    );
+  });
+
+  testUsingContext('Native assets dry run error', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => dryRunNativeAssetsIOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          dryRunResult: const FakeNativeAssetsBuilderResult(
+            success: false,
+          ),
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
+    );
+  });
+
+  testUsingContext('Native assets build error', overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    ProcessManager: () => FakeProcessManager.empty(),
+  }, () async {
+    final File packageConfig =
+        environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      () => buildNativeAssetsIOS(
+        darwinArchs: <DarwinArch>[DarwinArch.arm64],
+        environmentType: EnvironmentType.simulator,
+        projectUri: projectUri,
+        buildMode: BuildMode.debug,
+        fileSystem: fileSystem,
+        yamlParentDirectory: environment.buildDir.uri,
+        buildRunner: FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          buildResult: const FakeNativeAssetsBuilderResult(
+            success: false,
+          ),
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Building native assets failed. See the logs for more details.',
+      ),
     );
   });
 }

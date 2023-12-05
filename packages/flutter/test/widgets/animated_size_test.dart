@@ -435,7 +435,7 @@ void main() {
       );
     });
 
-    testWidgets('disposes animation and controller', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('disposes animation and controller', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(

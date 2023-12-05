@@ -4,95 +4,116 @@
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
 'a: accessibility':
-  - '**/accessibility/*'
-  - '**/*accessibility*'
-  - '**/semantics/*'
-  - '**/*semantics*'
+  - any:
+    - '**/accessibility/*'
+    - '**/*accessibility*'
+    - '**/semantics/*'
+    - '**/*semantics*'
 
 'a: animation':
-  - '**/animation/*'
-  - '**/*animation*'
+  - any:
+    - '**/animation/*'
+    - '**/*animation*'
 
 'a: desktop':
-  - '**/linux/**/*'
-  - '**/macos/**/*'
-  - '**/windows/**/*'
+  - any:
+    - '**/linux/**/*'
+    - '**/macos/**/*'
+    - '**/windows/**/*'
 
 'a: internationalization':
-  - packages/flutter_localizations/**/*
+  - any:
+    - packages/flutter_localizations/**/*
 
 'a: tests':
-  - packages/flutter_driver/**/*
-  - packages/flutter_goldens/**/*
-  - packages/flutter_goldens_client/**/*
-  - packages/flutter_test/**/*
+  - any:
+    - packages/flutter_driver/**/*
+    - packages/flutter_goldens/**/*
+    - packages/flutter_goldens_client/**/*
+    - packages/flutter_test/**/*
 
 'a: text input':
-  - '**/text/*'
-  - '**/*text*'
+  - any:
+    - '**/text/*'
+    - '**/*text*'
 
 'd: api docs':
-  - examples/api/**/*
+  - any:
+    - examples/api/**/*
 
 'd: examples':
-  - examples/**/*
+  - any:
+    - examples/**/*
 
 engine:
-  - bin/internal/engine.version
+  - any:
+    - bin/internal/engine.version
 
 'f: cupertino':
-  - '**/cupertino/*'
-  - '**/*cupertino*'
+  - any:
+    - '**/cupertino/*'
+    - '**/*cupertino*'
 
 'f: focus':
-  - '**/focus/*'
-  - '**/*focus*'
+  - any:
+    - '**/focus/*'
+    - '**/*focus*'
 
 'f: gestures':
-  - '**/gestures/*'
-  - '**/*gestures*'
+  - any:
+    - '**/gestures/*'
+    - '**/*gestures*'
 
 'f: material design':
-  - '**/material/*'
-  - '**/*material*'
+  - any:
+    - '**/material/*'
+    - '**/*material*'
 
 'f: routes':
-  - '**/navigator/*'
-  - '**/*navigator*'
-  - '**/route/*'
-  - '**/*route*'
+  - any:
+    - '**/navigator/*'
+    - '**/*navigator*'
+    - '**/route/*'
+    - '**/*route*'
 
 'f: scrolling':
-  - '**/*scroll*'
-  - '**/scroll/*'
-  - '**/*sliver*'
-  - '**/sliver/*'
-  - '**/*viewport*'
-  - '**/viewport/*'
+  - any:
+    - '**/*scroll*'
+    - '**/scroll/*'
+    - '**/*sliver*'
+    - '**/sliver/*'
+    - '**/*viewport*'
+    - '**/viewport/*'
 
 framework:
-  - packages/flutter/**/*
-  - packages/flutter_driver/**/*
-  - packages/flutter_goldens/**/*
-  - packages/flutter_goldens_client/**/*
-  - packages/flutter_test/**/*
-  - packages/integration_test/**/*
-  - examples/api/**/*
+  - any:
+    - packages/flutter/**/*
+    - packages/flutter_driver/**/*
+    - packages/flutter_goldens/**/*
+    - packages/flutter_goldens_client/**/*
+    - packages/flutter_test/**/*
+    - packages/integration_test/**/*
+    - examples/api/**/*
 
 'f: integration_test':
-  - packages/integration_test/**/*
+  - any:
+    - packages/integration_test/**/*
 
 platform-ios:
-  - packages/flutter_tools/lib/src/ios/**/*
+  - any:
+    - packages/flutter_tools/lib/src/ios/**/*
 
 'customer: gallery':
-  - examples/flutter_gallery/**/*
+  - any:
+    - examples/flutter_gallery/**/*
 
 'c: tech-debt':
-  - '**/fix_data.yaml'
-  - '**/*.expect'
-  - '**/*test_fixes*'
+  - any:
+    - '**/fix_data.yaml'
+    - '**/*.expect'
+    - '**/*test_fixes*'
 
 tool:
-  - packages/flutter_tools/**/*
-  - packages/fuchsia_remote_debug_protocol/**/*
+  - any:
+    - packages/flutter_tools/**/*
+    - packages/fuchsia_remote_debug_protocol/**/*

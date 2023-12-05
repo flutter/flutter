@@ -864,12 +864,15 @@ void main() {
     expect(tooltipContainer.padding, const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}));
 
-  testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
       color: Color(0x80800000),
     );
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -877,7 +880,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Tooltip(
                     key: tooltipKey,
@@ -1011,6 +1014,39 @@ void main() {
     await tester.pump(showDuration);
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('Tooltip is dismissed after tap to dismiss immediately', (WidgetTester tester) async {
+
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap);
+
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
+
+   // Tap to trigger the tooltip.
+    await _testGestureTap(tester, tooltip);
+    expect(find.text(tooltipText), findsOneWidget);
+
+   // Tap to dismiss the tooltip. Tooltip is dismissed immediately.
+    await _testGestureTap(tester, find.text(tooltipText));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+    testWidgetsWithLeakTracking('Tooltip is not dismissed after tap if enableTapToDismiss is false', (WidgetTester tester) async {
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, enableTapToDismiss: false);
+
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
+
+   // Tap to trigger the tooltip.
+    await _testGestureTap(tester, tooltip);
+    expect(find.text(tooltipText), findsOneWidget);
+
+   // Tap the tooltip. Tooltip is not dismissed .
+    await _testGestureTap(tester, find.text(tooltipText));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsOneWidget);
   });
 
   testWidgetsWithLeakTracking('Tooltip is dismissed after a tap and showDuration expired when competing with a GestureDetector', (WidgetTester tester) async {
@@ -1422,16 +1458,18 @@ void main() {
     await tester.pump(waitDuration);
   });
 
-  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Stack(
                   children: <Widget>[
@@ -1471,6 +1509,70 @@ void main() {
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgetsWithLeakTracking('Tooltip semantics does not merge into child', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return ListView(
+                  children: <Widget>[
+                    const Text('before'),
+                    Tooltip(
+                      key: tooltipKey,
+                      showDuration: const Duration(seconds: 50),
+                      message: 'B',
+                      child: const Text('child'),
+                    ),
+                    const Text('after'),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    tooltipKey.currentState?.ensureTooltipVisible();
+
+    // Starts the animation.
+    await tester.pump();
+    // Make sure the fade in animation has started and the tooltip isn't transparent.
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(semantics, hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'before'),
+                    TestSemantics(label: 'child', tooltip: 'B', children: <TestSemantics>[TestSemantics(label: 'B')]),
+                    TestSemantics(label: 'after'),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+    ));
 
     semantics.dispose();
   });
@@ -2087,13 +2189,15 @@ void main() {
 
   testWidgetsWithLeakTracking('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {
     bool isTapped = false;
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Tooltip(
           richMessage: TextSpan(
             text: tooltipText,
-            recognizer: TapGestureRecognizer()..onTap = () {
+            recognizer: recognizer..onTap = () {
               isTapped = true;
             }
           ),
@@ -2321,9 +2425,13 @@ void main() {
       ),
     );
 
-    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Tooltip does not crash when showing the tooltip but the OverlayPortal is unmounted, during dispose', (WidgetTester tester) async {
@@ -2343,13 +2451,17 @@ void main() {
     );
 
     final TooltipState tooltipState = tester.state(find.byType(Tooltip));
-    await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Tooltip)));
     tooltipState.ensureTooltipVisible();
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgets('Tooltip is not selectable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip is not selectable', (WidgetTester tester) async {
     const String tooltipText = 'AAAAAAAAAAAAAAAAAAAAAAA';
     String? selectedText;
     await tester.pumpWidget(
@@ -2403,6 +2515,7 @@ Future<void> setWidgetForTooltipMode(
   WidgetTester tester,
   TooltipTriggerMode triggerMode, {
   Duration? showDuration,
+  bool? enableTapToDismiss,
   TooltipTriggeredCallback? onTriggered,
 }) async {
   await tester.pumpWidget(
@@ -2412,6 +2525,7 @@ Future<void> setWidgetForTooltipMode(
         triggerMode: triggerMode,
         onTriggered: onTriggered,
         showDuration: showDuration,
+        enableTapToDismiss: enableTapToDismiss ?? true,
         child: const SizedBox(width: 100.0, height: 100.0),
       ),
     ),

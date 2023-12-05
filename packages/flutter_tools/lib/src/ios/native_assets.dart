@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_builder/native_assets_builder.dart' show BuildResult;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    show BuildResult, DryRunResult;
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
@@ -23,11 +24,11 @@ Future<Uri?> dryRunNativeAssetsIOS({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     return null;
   }
 
-  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, OS.iOS);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, OS.iOS);
   final Iterable<Asset> assetTargetLocations = await dryRunNativeAssetsIOSInternal(
     fileSystem,
     projectUri,
@@ -35,7 +36,7 @@ Future<Uri?> dryRunNativeAssetsIOS({
   );
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
     assetTargetLocations,
-    buildUri_,
+    buildUri,
     fileSystem,
   );
   return nativeAssetsUri;
@@ -46,17 +47,18 @@ Future<Iterable<Asset>> dryRunNativeAssetsIOSInternal(
   Uri projectUri,
   NativeAssetsBuildRunner buildRunner,
 ) async {
-  const OS targetOs = OS.iOS;
-  globals.logger.printTrace('Dry running native assets for $targetOs.');
-  final List<Asset> nativeAssets = (await buildRunner.dryRun(
+  const OS targetOS = OS.iOS;
+  globals.logger.printTrace('Dry running native assets for $targetOS.');
+  final DryRunResult dryRunResult = await buildRunner.dryRun(
     linkModePreference: LinkModePreference.dynamic,
-    targetOs: targetOs,
+    targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
-  ))
-      .assets;
+  );
+  ensureNativeAssetsBuildSucceed(dryRunResult);
+  final List<Asset> nativeAssets = dryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
-  globals.logger.printTrace('Dry running native assets for $targetOs done.');
+  globals.logger.printTrace('Dry running native assets for $targetOS done.');
   final Iterable<Asset> assetTargetLocations = _assetTargetLocations(nativeAssets).values;
   return assetTargetLocations;
 }
@@ -72,7 +74,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   required Uri yamlParentDirectory,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner) || await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (!await nativeBuildRequired(buildRunner)) {
     await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory, fileSystem);
     return <Uri>[];
   }
@@ -80,8 +82,8 @@ Future<List<Uri>> buildNativeAssetsIOS({
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
   final native_assets_cli.BuildMode buildModeCli = nativeAssetsBuildMode(buildMode);
 
-  const OS targetOs = OS.iOS;
-  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOs);
+  const OS targetOS = OS.iOS;
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
   final IOSSdk iosSdk = _getIOSSdk(environmentType);
 
   globals.logger.printTrace('Building native assets for $targets $buildModeCli.');
@@ -97,6 +99,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
     );
+    ensureNativeAssetsBuildSucceed(result);
     nativeAssets.addAll(result.assets);
     dependencies.addAll(result.dependencies);
   }
@@ -104,7 +107,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<AssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
   await copyNativeAssetsMacOSHost(
-    buildUri_,
+    buildUri,
     fatAssetTargetLocations,
     codesignIdentity,
     buildMode,

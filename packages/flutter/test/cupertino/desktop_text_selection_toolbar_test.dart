@@ -7,11 +7,12 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('has correct backdrop filters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has correct backdrop filters', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -53,7 +54,7 @@ void main() {
     );
   });
 
-  testWidgets('has shadow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has shadow', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -83,7 +84,7 @@ void main() {
     );
   });
 
-  testWidgets('is translucent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('is translucent', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -116,7 +117,7 @@ void main() {
     );
   });
 
-  testWidgets('positions itself at the anchor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('positions itself at the anchor', (WidgetTester tester) async {
     // An arbitrary point on the screen to position at.
     const Offset anchor = Offset(30.0, 40.0);
 

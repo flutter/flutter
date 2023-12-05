@@ -261,8 +261,6 @@ class SwitchListTile extends StatelessWidget {
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Whether this switch is checked.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the user toggles the switch on or off.
