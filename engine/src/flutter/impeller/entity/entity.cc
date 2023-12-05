@@ -174,6 +174,10 @@ Capture& Entity::GetCapture() const {
   return capture_;
 }
 
+Entity Entity::Clone() const {
+  return Entity(*this);
+}
+
 void Entity::SetCapture(Capture capture) const {
   capture_ = std::move(capture);
 }
