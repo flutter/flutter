@@ -125,10 +125,6 @@ constexpr std::optional<vk::ShaderStageFlagBits> ToVKShaderStageFlagBits(
       return vk::ShaderStageFlagBits::eVertex;
     case ShaderStage::kFragment:
       return vk::ShaderStageFlagBits::eFragment;
-    case ShaderStage::kTessellationControl:
-      return vk::ShaderStageFlagBits::eTessellationControl;
-    case ShaderStage::kTessellationEvaluation:
-      return vk::ShaderStageFlagBits::eTessellationEvaluation;
     case ShaderStage::kCompute:
       return vk::ShaderStageFlagBits::eCompute;
   }
@@ -259,10 +255,6 @@ constexpr vk::ShaderStageFlags ToVkShaderStage(ShaderStage stage) {
       return vk::ShaderStageFlagBits::eAll;
     case ShaderStage::kFragment:
       return vk::ShaderStageFlagBits::eFragment;
-    case ShaderStage::kTessellationControl:
-      return vk::ShaderStageFlagBits::eTessellationControl;
-    case ShaderStage::kTessellationEvaluation:
-      return vk::ShaderStageFlagBits::eTessellationEvaluation;
     case ShaderStage::kCompute:
       return vk::ShaderStageFlagBits::eCompute;
     case ShaderStage::kVertex:

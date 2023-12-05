@@ -22,8 +22,6 @@ enum class ShaderStage {
   kUnknown,
   kVertex,
   kFragment,
-  kTessellationControl,
-  kTessellationEvaluation,
   kCompute,
 };
 
@@ -35,10 +33,6 @@ constexpr ShaderStage ToShaderStage(RuntimeShaderStage stage) {
       return ShaderStage::kFragment;
     case RuntimeShaderStage::kCompute:
       return ShaderStage::kCompute;
-    case RuntimeShaderStage::kTessellationControl:
-      return ShaderStage::kTessellationControl;
-    case RuntimeShaderStage::kTessellationEvaluation:
-      return ShaderStage::kTessellationEvaluation;
   }
   FML_UNREACHABLE();
 }

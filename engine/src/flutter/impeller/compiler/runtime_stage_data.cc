@@ -45,28 +45,20 @@ static std::optional<fb::Stage> ToStage(spv::ExecutionModel stage) {
       return fb::Stage::kFragment;
     case spv::ExecutionModel::ExecutionModelGLCompute:
       return fb::Stage::kCompute;
-    case spv::ExecutionModel::ExecutionModelTessellationControl:
-      return fb::Stage::kTessellationControl;
-    case spv::ExecutionModel::ExecutionModelTessellationEvaluation:
-      return fb::Stage::kTessellationEvaluation;
     default:
       return std::nullopt;
   }
   FML_UNREACHABLE();
 }
 
-static std::optional<uint32_t> ToJsonStage(spv::ExecutionModel stage) {
+static std::optional<fb::Stage> ToJsonStage(spv::ExecutionModel stage) {
   switch (stage) {
     case spv::ExecutionModel::ExecutionModelVertex:
-      return 0;  // fb::Stage::kVertex;
+      return fb::Stage::kVertex;
     case spv::ExecutionModel::ExecutionModelFragment:
-      return 1;  // fb::Stage::kFragment;
+      return fb::Stage::kFragment;
     case spv::ExecutionModel::ExecutionModelGLCompute:
-      return 2;  // fb::Stage::kCompute;
-    case spv::ExecutionModel::ExecutionModelTessellationControl:
-      return 3;  // fb::Stage::kTessellationControl;
-    case spv::ExecutionModel::ExecutionModelTessellationEvaluation:
-      return 4;  // fb::Stage::kTessellationEvaluation;
+      return fb::Stage::kCompute;
     default:
       return std::nullopt;
   }
@@ -246,7 +238,7 @@ std::shared_ptr<fml::Mapping> RuntimeStageData::CreateJsonMapping() const {
     VALIDATION_LOG << "Invalid runtime stage.";
     return nullptr;
   }
-  root[kStageKey] = stage.value();
+  root[kStageKey] = static_cast<uint32_t>(stage.value());
 
   const auto target_platform = ToJsonTargetPlatform(target_platform_);
   if (!target_platform.has_value()) {

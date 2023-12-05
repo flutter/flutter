@@ -30,8 +30,6 @@ enum class RuntimeShaderStage {
   kVertex,
   kFragment,
   kCompute,
-  kTessellationControl,
-  kTessellationEvaluation,
 };
 
 struct RuntimeUniformDimensions {

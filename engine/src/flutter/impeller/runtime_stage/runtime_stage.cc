@@ -51,10 +51,6 @@ static RuntimeShaderStage ToShaderStage(fb::Stage stage) {
       return RuntimeShaderStage::kFragment;
     case fb::Stage::kCompute:
       return RuntimeShaderStage::kCompute;
-    case fb::Stage::kTessellationControl:
-      return RuntimeShaderStage::kTessellationControl;
-    case fb::Stage::kTessellationEvaluation:
-      return RuntimeShaderStage::kTessellationEvaluation;
   }
   FML_UNREACHABLE();
 }

@@ -8,8 +8,6 @@ enum Stage:byte {
   kVertex,
   kFragment,
   kCompute,
-  kTessellationControl,
-  kTessellationEvaluation,
 }
 
 enum TargetPlatform:byte {
