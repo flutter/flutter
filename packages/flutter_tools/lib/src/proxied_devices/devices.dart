@@ -775,6 +775,11 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
 
     _localUri = remoteUri.replace(port: localPort);
     _logger.printTrace('Local port forwarded DDS on $_localUri.');
+    _logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
+      'deviceId': deviceId,
+      'remoteUri': remoteUri.toString(),
+      'localUri': _localUri!.toString(),
+    });
   }
 
   @override
