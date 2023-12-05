@@ -340,6 +340,14 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
             : fuchsia::accessibility::semantics::CheckedState::UNCHECKED);
   }
 
+  // Set enabled state.
+  if (node.HasFlag(flutter::SemanticsFlags::kHasEnabledState)) {
+    states.set_enabled_state(
+        node.HasFlag(flutter::SemanticsFlags::kIsEnabled)
+            ? fuchsia::accessibility::semantics::EnabledState::ENABLED
+            : fuchsia::accessibility::semantics::EnabledState::DISABLED);
+  }
+
   // Set selected state.
   states.set_selected(node.HasFlag(flutter::SemanticsFlags::kIsSelected));
 
