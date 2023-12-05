@@ -22,7 +22,8 @@
     - '**/windows/**/*'
 
 'a: internationalization':
-  - packages/flutter_localizations/**/*
+  - any:
+    - packages/flutter_localizations/**/*
 
 'a: tests':
   - any:
@@ -37,13 +38,16 @@
     - '**/*text*'
 
 'd: api docs':
-  - examples/api/**/*
+  - any:
+   - examples/api/**/*
 
 'd: examples':
-  - examples/**/*
+  - any:
+    - examples/**/*
 
 engine:
-  - bin/internal/engine.version
+  - any:
+    - bin/internal/engine.version
 
 'f: cupertino':
   - any:
@@ -92,13 +96,16 @@ framework:
     - examples/api/**/*
 
 'f: integration_test':
-  - packages/integration_test/**/*
+  - any:
+    - packages/integration_test/**/*
 
 platform-ios:
-  - packages/flutter_tools/lib/src/ios/**/*
+  - any:
+    - packages/flutter_tools/lib/src/ios/**/*
 
 'customer: gallery':
-  - examples/flutter_gallery/**/*
+  - any:
+    - examples/flutter_gallery/**/*
 
 'c: tech-debt':
   - any:
