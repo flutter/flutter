@@ -932,50 +932,35 @@ void main() {
 
     expect(sliverGridRegularTileLayout.childMainAxisExtent, 0);
 
-    double mainAxisExtent = 100;
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          mainAxisExtent: mainAxisExtent,
+    Widget build(double mainAxisExtent) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            mainAxisExtent: mainAxisExtent,
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              height: 50,
+              alignment: Alignment.center,
+              child: Text('$index'),
+            );
+          },
+          itemCount: 50,
         ),
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            height: 50,
-            alignment: Alignment.center,
-            child: Text('$index'),
-          );
-        },
-        itemCount: 50,
-      ),
-    ));
+      );
+    }
+
+    double mainAxisExtent = 100;
+    await tester.pumpWidget(build(mainAxisExtent));
 
     expect(tester.takeException(), isNull);
 
     mainAxisExtent = -100;
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          mainAxisExtent: mainAxisExtent,
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            height: 50,
-            alignment: Alignment.center,
-            child: Text('$index'),
-          );
-        },
-        itemCount: 50,
-      ),
-    ));
-    await tester.pump();
+    await tester.pumpWidget(build(mainAxisExtent));
 
     expect(tester.takeException(), isNull);
   });
@@ -1012,50 +997,35 @@ void main() {
 
     expect(sliverGridRegularTileLayout.childMainAxisExtent, 0);
 
-    double mainAxisExtent = 100;
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 100,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          mainAxisExtent: mainAxisExtent,
+    Widget build(double mainAxisExtent) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 100,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            mainAxisExtent: mainAxisExtent,
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              height: 50,
+              alignment: Alignment.center,
+              child: Text('$index'),
+            );
+          },
+          itemCount: 50,
         ),
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            height: 50,
-            alignment: Alignment.center,
-            child: Text('$index'),
-          );
-        },
-        itemCount: 50,
-      ),
-    ));
+      );
+    }
+
+    double mainAxisExtent = 100;
+    await tester.pumpWidget(build(mainAxisExtent));
 
     expect(tester.takeException(), isNull);
 
     mainAxisExtent = -100;
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 100,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          mainAxisExtent: mainAxisExtent,
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            height: 50,
-            alignment: Alignment.center,
-            child: Text('$index'),
-          );
-        },
-        itemCount: 50,
-      ),
-    ));
-    await tester.pump();
+    await tester.pumpWidget(build(mainAxisExtent));
 
     expect(tester.takeException(), isNull);
   });
