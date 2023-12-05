@@ -379,9 +379,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   @override
   void dispose() {
-    if (_localTextEditingController != null) {
-      debugPrint('Disposing of $_textEditingController');
-    }
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     super.dispose();
