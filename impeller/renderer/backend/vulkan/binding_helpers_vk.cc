@@ -26,7 +26,7 @@ static bool BindImages(const Bindings& bindings,
   for (const auto& [index, data] : bindings.sampled_images) {
     auto texture = data.texture.resource;
     const auto& texture_vk = TextureVK::Cast(*texture);
-    const SamplerVK& sampler = SamplerVK::Cast(*data.sampler.resource);
+    const SamplerVK& sampler = SamplerVK::Cast(*data.sampler);
 
     if (!encoder->Track(texture) ||
         !encoder->Track(sampler.GetSharedSampler())) {

@@ -174,7 +174,6 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
         {Point(0, 1), input_uvs[2]},
         {Point(1, 1), input_uvs[3]},
     });
-    auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
@@ -195,7 +194,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     Command cmd;
     DEBUG_COMMAND_INFO(cmd, SPrintF("Gaussian Blur Filter (Radius=%.2f)",
                                     transformed_blur_radius_length));
-    cmd.BindVertices(vtx_buffer);
+    cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
 
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;

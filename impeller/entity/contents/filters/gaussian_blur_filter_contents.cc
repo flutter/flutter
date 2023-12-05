@@ -44,8 +44,7 @@ void BindVertices(Command& cmd,
                   std::initializer_list<typename T::PerVertexData>&& vertices) {
   VertexBufferBuilder<typename T::PerVertexData> vtx_builder;
   vtx_builder.AddVertices(vertices);
-  auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
-  cmd.BindVertices(vtx_buffer);
+  cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
 }
 
 Matrix MakeAnchorScale(const Point& anchor, Vector2 scale) {

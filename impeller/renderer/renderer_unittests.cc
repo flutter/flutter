@@ -72,10 +72,6 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
       {{800, 800, 0.0}, {1.0, 1.0}},  // 3
       {{100, 800, 0.0}, {0.0, 1.0}},  // 4
   });
-  auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator());
-  ASSERT_TRUE(vertex_buffer);
-
   auto bridge = CreateTextureForFixture("bay_bridge.jpg");
   auto boston = CreateTextureForFixture("boston.jpg");
   ASSERT_TRUE(bridge && boston);
@@ -96,7 +92,8 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
     DEBUG_COMMAND_INFO(cmd, "Box");
     cmd.pipeline = pipeline;
 
-    cmd.BindVertices(vertex_buffer);
+    cmd.BindVertices(
+        vertex_builder.CreateVertexBuffer(*context->GetResourceAllocator()));
 
     VS::UniformBuffer uniforms;
     uniforms.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
