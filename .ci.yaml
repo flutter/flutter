@@ -383,7 +383,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
 
   - name: Linux docs_publish
-    recipe: flutter/flutter
+    recipe: flutter/docs
     presubmit: false
     timeout: 90 # https://github.com/flutter/flutter/issues/120901
     dimensions:
@@ -5675,7 +5675,7 @@ targets:
 
 
   - name: Linux docs_deploy_beta
-    recipe: flutter/flutter
+    recipe: flutter/docs
     scheduler: release
     bringup: true
     enabled_branches:
@@ -5698,7 +5698,7 @@ targets:
       - os=Linux
 
   - name: Linux docs_deploy_stable
-    recipe: flutter/flutter
+    recipe: flutter/docs
     scheduler: release
     bringup: true
     enabled_branches:
