@@ -202,7 +202,7 @@ std::optional<Rect> FilterContents::GetLocalCoverage(
 }
 
 std::optional<Rect> FilterContents::GetCoverage(const Entity& entity) const {
-  Entity entity_with_local_transform = entity;
+  Entity entity_with_local_transform = entity.Clone();
   entity_with_local_transform.SetTransform(GetTransform(entity.GetTransform()));
 
   return GetLocalCoverage(entity_with_local_transform);
@@ -269,7 +269,7 @@ std::optional<Entity> FilterContents::GetEntity(
     const ContentContext& renderer,
     const Entity& entity,
     const std::optional<Rect>& coverage_hint) const {
-  Entity entity_with_local_transform = entity;
+  Entity entity_with_local_transform = entity.Clone();
   entity_with_local_transform.SetTransform(GetTransform(entity.GetTransform()));
 
   auto coverage = GetLocalCoverage(entity_with_local_transform);
