@@ -4,37 +4,47 @@
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
 'affects: desktop':
-  - shell/platform/darwin/common/**/*
-  - shell/platform/darwin/macos/**/*
-  - shell/platform/linux/**/*
-  - shell/platform/windows/**/*
+  - any:
+    - shell/platform/darwin/common/**/*
+    - shell/platform/darwin/macos/**/*
+    - shell/platform/linux/**/*
+    - shell/platform/windows/**/*
 
 embedder:
-  - shell/platform/embedder
+  - any:
+    - shell/platform/embedder
 
 'e: impeller':
-  - impeller/**/*
+  - any:
+    - impeller/**/*
 
 platform-android:
-  - shell/platform/android/**/*
+  - any:
+    - shell/platform/android/**/*
 
 platform-ios:
-  - shell/platform/darwin/common/**/*
-  - shell/platform/darwin/ios/**/*
+  - any:
+    - shell/platform/darwin/common/**/*
+    - shell/platform/darwin/ios/**/*
 
 platform-fuchsia:
-  - shell/platform/fuchsia/**/*
+  - any:
+    - shell/platform/fuchsia/**/*
 
 platform-linux:
-  - shell/platform/linux/**/*
+  - any:
+    - shell/platform/linux/**/*
 
 platform-macos:
-  - shell/platform/darwin/common/**/*
-  - shell/platform/darwin/macos/**/*
+  - any:
+    - shell/platform/darwin/common/**/*
+    - shell/platform/darwin/macos/**/*
 
 platform-web:
-  - lib/web_ui/**/*
-  - '**/web_sdk/**/*'
+  - any:
+    - lib/web_ui/**/*
+    - '**/web_sdk/**/*'
 
 platform-windows:
-  - shell/platform/windows/**/*
+  - any:
+    - shell/platform/windows/**/*
