@@ -95,6 +95,7 @@ void main() {
       'showCloseIcon: false',
       'closeIconColor: Color(0xff0000aa)',
       'actionOverflowThreshold: 0.5',
+      'dismissDirection: DismissDirection.down',
     ]);
   });
 
