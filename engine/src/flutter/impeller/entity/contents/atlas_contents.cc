@@ -244,12 +244,10 @@ bool AtlasContents::Render(const ContentContext& renderer,
       }
     }
 
-    auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
-
     Command cmd;
     DEBUG_COMMAND_INFO(
         cmd, SPrintF("DrawAtlas Blend (%s)", BlendModeToString(blend_mode_)));
-    cmd.BindVertices(vtx_buffer);
+    cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
     cmd.stencil_reference = entity.GetClipDepth();
     auto options = OptionsFromPass(pass);
     cmd.pipeline = renderer.GetPorterDuffBlendPipeline(options);

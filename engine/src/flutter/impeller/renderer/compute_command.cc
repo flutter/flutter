@@ -50,7 +50,7 @@ bool ComputeCommand::BindResource(ShaderStage stage,
   bindings.sampled_images[slot.sampler_index] = TextureAndSampler{
       .slot = slot,
       .texture = {&metadata, std::move(texture)},
-      .sampler = {&metadata, std::move(sampler)},
+      .sampler = std::move(sampler),
   };
 
   return false;

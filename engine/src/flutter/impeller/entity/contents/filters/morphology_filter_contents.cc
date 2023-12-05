@@ -85,8 +85,6 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
         {Point(1, 1), input_uvs[3]},
     });
 
-    auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
-
     VS::FrameInfo frame_info;
     frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
     frame_info.texture_sampler_y_coord_scale =
@@ -120,7 +118,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     options.primitive_type = PrimitiveType::kTriangleStrip;
     options.blend_mode = BlendMode::kSource;
     cmd.pipeline = renderer.GetMorphologyFilterPipeline(options);
-    cmd.BindVertices(vtx_buffer);
+    cmd.BindVertices(vtx_builder.CreateVertexBuffer(host_buffer));
 
     auto sampler_descriptor = input_snapshot->sampler_descriptor;
     if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {

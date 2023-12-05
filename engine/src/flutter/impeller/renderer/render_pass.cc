@@ -74,13 +74,8 @@ bool RenderPass::AddCommand(Command&& command) {
     }
   }
 
-  if (command.vertex_count == 0u) {
-    // Essentially a no-op. Don't record the command but this is not necessary
-    // an error either.
-    return true;
-  }
-
-  if (command.instance_count == 0u) {
+  if (command.vertex_buffer.vertex_count == 0u ||
+      command.instance_count == 0u) {
     // Essentially a no-op. Don't record the command but this is not necessary
     // an error either.
     return true;
