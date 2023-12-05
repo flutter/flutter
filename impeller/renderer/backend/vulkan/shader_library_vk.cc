@@ -41,12 +41,6 @@ static std::string VKShaderNameToShaderKeyName(const std::string& name,
     case ShaderStage::kFragment:
       stream << "_fragment_";
       break;
-    case ShaderStage::kTessellationControl:
-      stream << "_tessellation_control_";
-      break;
-    case ShaderStage::kTessellationEvaluation:
-      stream << "_tessellation_evaluation_";
-      break;
     case ShaderStage::kCompute:
       stream << "_compute_";
       break;

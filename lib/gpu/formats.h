@@ -309,8 +309,6 @@ constexpr FlutterGPUShaderStage FromImpellerShaderStage(
     case impeller::ShaderStage::kFragment:
       return FlutterGPUShaderStage::kFragment;
     case impeller::ShaderStage::kUnknown:
-    case impeller::ShaderStage::kTessellationControl:
-    case impeller::ShaderStage::kTessellationEvaluation:
     case impeller::ShaderStage::kCompute:
       FML_LOG(FATAL) << "Invalid Flutter GPU ShaderStage "
                      << static_cast<size_t>(value);

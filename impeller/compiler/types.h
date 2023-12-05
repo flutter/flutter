@@ -20,8 +20,6 @@ enum class SourceType {
   kUnknown,
   kVertexShader,
   kFragmentShader,
-  kTessellationControlShader,
-  kTessellationEvaluationShader,
   kComputeShader,
 };
 
