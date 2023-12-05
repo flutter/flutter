@@ -17,7 +17,6 @@ namespace impeller {
 namespace testing {
 
 using EntityTest = EntityPlayground;
-INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 
 #ifdef IMPELLER_DEBUG
 TEST(EntityTest, HasNulloptCoverage) {

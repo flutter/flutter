@@ -15,7 +15,6 @@ namespace impeller {
 namespace testing {
 
 using EntityTest = EntityPlayground;
-INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 
 TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
   TextureDescriptor texture_desc;
