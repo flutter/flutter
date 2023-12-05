@@ -12,6 +12,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/matrix.h"
 #include "impeller/geometry/sigma.h"
 
 namespace impeller {
@@ -230,7 +231,7 @@ class FilterContents : public Contents {
   std::optional<Rect> GetLocalCoverage(const Entity& local_entity) const;
 
   FilterInput::Vector inputs_;
-  Matrix effect_transform_;
+  Matrix effect_transform_ = Matrix();
 
   FilterContents(const FilterContents&) = delete;
 

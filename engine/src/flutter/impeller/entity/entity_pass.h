@@ -72,6 +72,7 @@ class EntityPass {
 
   std::unique_ptr<EntityPass> Clone() const;
 
+  /// @brief Add an entity to the current entity pass.
   void AddEntity(Entity entity);
 
   void SetElements(std::vector<Element> elements);
@@ -183,7 +184,7 @@ class EntityPass {
     ///         error while resolving the Entity.
     Status status = kFailure;
 
-    static EntityResult Success(const Entity& e) { return {e, kSuccess}; }
+    static EntityResult Success(Entity e) { return {std::move(e), kSuccess}; }
     static EntityResult Failure() { return {{}, kFailure}; }
     static EntityResult Skip() { return {{}, kSkip}; }
   };

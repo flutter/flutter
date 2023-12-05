@@ -2547,7 +2547,7 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
   Entity entity;
   entity.SetContents(SolidColorContents::Make(
       PathBuilder{}.AddRect(rect).TakePath(), Color::Red()));
-  entity_pass->AddEntity(entity);
+  entity_pass->AddEntity(std::move(entity));
   paint.color = Color::Red().WithAlpha(0.5);
 
   delegate = std::make_shared<OpacityPeepholePassDelegate>(paint);
@@ -3239,20 +3239,22 @@ TEST_P(AiksTest, OpaqueEntitiesGetCoercedToSource) {
   Picture picture = canvas.EndRecordingAsPicture();
 
   // Extract the SolidColorSource.
-  Entity entity;
+  // Entity entity;
+  std::vector<Entity> entity;
   std::shared_ptr<SolidColorContents> contents;
-  picture.pass->IterateAllEntities([&e = entity, &contents](Entity& entity) {
+  picture.pass->IterateAllEntities([e = &entity, &contents](Entity& entity) {
     if (ScalarNearlyEqual(entity.GetTransform().GetScale().x, 1.618f)) {
-      e = entity;
       contents =
           std::static_pointer_cast<SolidColorContents>(entity.GetContents());
+      e->emplace_back(entity.Clone());
       return false;
     }
     return true;
   });
 
+  ASSERT_TRUE(entity.size() >= 1);
   ASSERT_TRUE(contents->IsOpaque());
-  ASSERT_EQ(entity.GetBlendMode(), BlendMode::kSource);
+  ASSERT_EQ(entity[0].GetBlendMode(), BlendMode::kSource);
 }
 
 TEST_P(AiksTest, CanRenderDestructiveSaveLayer) {

@@ -70,6 +70,8 @@ class Entity {
 
   ~Entity();
 
+  Entity(Entity&&) = default;
+
   /// @brief  Get the global transform matrix for this Entity.
   const Matrix& GetTransform() const;
 
@@ -113,7 +115,11 @@ class Entity {
 
   void SetCapture(Capture capture) const;
 
+  Entity Clone() const;
+
  private:
+  Entity(const Entity&) = default;
+
   Matrix transform_;
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
