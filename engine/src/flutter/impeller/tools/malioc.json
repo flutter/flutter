@@ -3758,7 +3758,7 @@
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/glyph_atlas_color.frag.gles",
       "has_side_effects": false,
-      "has_uniform_computation": false,
+      "has_uniform_computation": true,
       "modifies_coverage": false,
       "reads_color_buffer": false,
       "type": "Fragment",
@@ -3773,9 +3773,9 @@
               "varying"
             ],
             "longest_path_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0625,
+              0.0625,
+              0.0625,
               0.0,
               0.0,
               0.5,
@@ -3794,9 +3794,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
+              0.0625,
+              0.0625,
               0.03125,
-              0.03125,
-              0.0,
               0.0,
               0.0,
               0.5,
@@ -3806,9 +3806,9 @@
               "varying"
             ],
             "total_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0625,
+              0.0625,
+              0.0625,
               0.0,
               0.0,
               0.5,
@@ -3857,17 +3857,16 @@
               1.0
             ],
             "total_bound_pipelines": [
-              "load_store",
-              "texture"
+              "arithmetic"
             ],
             "total_cycles": [
-              0.6666666865348816,
+              1.3333333730697632,
               1.0,
               1.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 0,
+          "uniform_registers_used": 1,
           "work_registers_used": 2
         }
       }
@@ -7544,7 +7543,7 @@
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/glyph_atlas_color.frag.vkspv",
       "has_side_effects": false,
-      "has_uniform_computation": false,
+      "has_uniform_computation": true,
       "modifies_coverage": false,
       "reads_color_buffer": false,
       "type": "Fragment",
@@ -7559,9 +7558,9 @@
               "varying"
             ],
             "longest_path_cycles": [
+              0.0625,
+              0.0625,
               0.03125,
-              0.03125,
-              0.0,
               0.0,
               0.0,
               0.5,
@@ -7580,9 +7579,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
+              0.0625,
+              0.0625,
               0.03125,
-              0.03125,
-              0.0,
               0.0,
               0.0,
               0.5,
@@ -7592,9 +7591,9 @@
               "varying"
             ],
             "total_cycles": [
+              0.0625,
+              0.0625,
               0.03125,
-              0.03125,
-              0.0,
               0.0,
               0.0,
               0.5,
@@ -7604,7 +7603,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 4,
-          "work_registers_used": 6
+          "work_registers_used": 8
         }
       }
     }
