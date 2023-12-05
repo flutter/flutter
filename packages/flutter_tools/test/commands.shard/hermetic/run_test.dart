@@ -489,7 +489,7 @@ void main() {
           contains(
             analytics.Event.commandUsageValues(
               workflow: 'run',
-              commandHasTerminal: false,
+              commandHasTerminal: globals.stdio.hasTerminal,
               runIsEmulator: false,
               runTargetName: 'ios',
               runTargetOsVersion: 'iOS 13',
@@ -542,7 +542,7 @@ void main() {
           contains(
             analytics.Event.commandUsageValues(
               workflow: 'run',
-              commandHasTerminal: false,
+              commandHasTerminal: globals.stdio.hasTerminal,
               runIsEmulator: false,
               runTargetName: 'ios',
               runTargetOsVersion: 'iOS 13',
