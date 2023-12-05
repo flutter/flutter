@@ -922,6 +922,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   final List<String> directories = Directory(srcPath).listSync()
     .whereType<Directory>()
     .map<String>((Directory entity) => path.basename(entity.path))
+    .where((String name) => !name.startsWith('_'))
     .toList()..sort();
   if (!_listEquals<String>(packages, directories)) {
     errors.add(<String>[

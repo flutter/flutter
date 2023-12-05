@@ -11,12 +11,12 @@ import 'dart:ui_web' as ui_web;
 import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/web.dart' as web;
 import 'package:flutter/src/widgets/_html_element_view_web.dart'
     show debugOverridePlatformViewRegistry;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
-import 'package:web/web.dart' as web;
 
 final Object _mockHtmlElement = Object();
 Object _mockViewFactory(int id, {Object? params}) {

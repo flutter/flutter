@@ -10,9 +10,9 @@ import 'dart:js_interop';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/web.dart' as web;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
-import 'package:web/web.dart' as web;
 
 extension on web.HTMLCollection {
   Iterable<web.Element> get iterable => _genIterable(this);

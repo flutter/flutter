@@ -4,7 +4,7 @@
 
 import 'dart:js_interop';
 
-import 'package:web/web.dart' as web;
+import 'package:flutter/src/web.dart' as web;
 
 /// Defines a new property on an Object.
 @JS('Object.defineProperty')
