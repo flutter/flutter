@@ -1805,6 +1805,109 @@ void main() {
     await tester.pump();
     checkExpectedHighlight(searchResult: 'Read', otherItems: <String>['All', 'Unread']);
   });
+
+   testWidgetsWithLeakTracking('onSelected gets called when a selection is made in a nested menu',
+      (WidgetTester tester) async {
+    int selectionCount = 0;
+
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
+    ];
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return Scaffold(
+          body: MenuAnchor(
+            menuChildren: <Widget>[
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuWithDisabledItems,
+                onSelected: (_) {
+                  setState(() {
+                    selectionCount++;
+                  });
+                },
+              ),
+            ],
+            builder: (BuildContext context, MenuController controller, Widget? widget) {
+              return IconButton(
+                icon: const Icon(Icons.smartphone_rounded),
+                onPressed: () {
+                  controller.open();
+                },
+              );
+            },
+          ),
+        );
+      }),
+    ));
+
+    // Open the first menu
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    // Open the dropdown menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 0').last;
+    await tester.tap(item1);
+    await tester.pumpAndSettle();
+
+    expect(selectionCount, 1);
+  });
+
+  testWidgetsWithLeakTracking('When onSelected is called and menu is closed, no textEditingController exception is thrown',
+      (WidgetTester tester) async {
+    int selectionCount = 0;
+
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
+      const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
+    ];
+
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return Scaffold(
+          body: MenuAnchor(
+            menuChildren: <Widget>[
+              DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuWithDisabledItems,
+                onSelected: (_) {
+                  setState(() {
+                    selectionCount++;
+                  });
+                },
+              ),
+            ],
+            builder: (BuildContext context, MenuController controller, Widget? widget) {
+              return IconButton(
+                icon: const Icon(Icons.smartphone_rounded),
+                onPressed: () {
+                  controller.open();
+                },
+              );
+            },
+          ),
+        );
+      }),
+    ));
+
+    // Open the first menu
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    // Open the dropdown menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 0').last;
+    await tester.tap(item1);
+    await tester.pumpAndSettle();
+
+    expect(selectionCount, 1);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 enum TestMenu {
