@@ -1,4 +1,4 @@
-Signature: f1255de8e70307c83c23452ea378e195
+Signature: d9af9028c6e99fbe6d5c01799d8c4ec7
 
 ====================================================================================================
 LIBRARY: angle
@@ -1094,7 +1094,6 @@ ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_
 ORIGIN: http://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/vulkan-deps/vulkan-validation-layers/src/layers/vk_layer_settings_ext.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/algorithm/algorithm.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/algorithm/container.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/algorithm/equal_benchmark.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/attributes.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/call_once.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/casts.h
@@ -1108,6 +1107,7 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/atomic_hook_test_helper.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/cycleclock.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/cycleclock.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/cycleclock_config.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/direct_mmap.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/endian.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/errno_saver.h
@@ -1123,8 +1123,8 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/low_level_alloc.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/low_level_alloc.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/low_level_scheduling.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/nullability_impl.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/per_thread_tls.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/prefetch.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/pretty_function.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/raw_logging.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/raw_logging.h
@@ -1154,13 +1154,18 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/unaligned_access.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/unscaledcycleclock.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/unscaledcycleclock.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/internal/unscaledcycleclock_config.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/log_severity.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/log_severity.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/macros.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/no_destructor.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/no_destructor_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/nullability.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/optimization.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/options.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/policy_checks.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/port.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/prefetch.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/spinlock_test_common.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/base/thread_annotations.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/cleanup/cleanup.h
@@ -1177,9 +1182,9 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/btree.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/btree_container.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/common.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/common_policy_traits.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/compressed_tuple.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/container_memory.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/counting_allocator.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/hash_function_defaults.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/hash_generator_testing.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/hash_generator_testing.h
@@ -1199,11 +1204,32 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/raw_hash_set.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/raw_hash_set_benchmark.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/raw_hash_set_probe_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/test_allocator.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/test_instance_tracker.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/test_instance_tracker.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/internal/tracked.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/node_hash_map.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/container/node_hash_set.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/crc32c.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/crc32c.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/crc32c_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/cpu_detect.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/cpu_detect.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc32_x86_arm_combined_simd.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc32c.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc32c_inline.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_cord_state.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_cord_state.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_internal.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_memcpy.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_memcpy_fallback.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_memcpy_x86_arm_combined.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_non_temporal_memcpy.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/crc_x86_arm_combined.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/non_temporal_arm_intrinsics.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/crc/internal/non_temporal_memcpy.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/debugging/failure_signal_handler.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/debugging/failure_signal_handler.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/debugging/internal/address_is_readable.cc
@@ -1279,6 +1305,7 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/functional/internal/any_invocable.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/functional/internal/front_binder.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/functional/internal/function_ref.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/functional/overload.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/hash/hash.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/hash/hash_benchmark.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/hash/hash_testing.h
@@ -1290,6 +1317,64 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/hash/internal/low_level_hash.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/hash/internal/print_hash_of.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/hash/internal/spy_hash_state.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/absl_check.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/absl_log.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/check.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/check_test_impl.inc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/die_if_null.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/die_if_null.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/flags.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/flags.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/globals.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/globals.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/initialize.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/initialize.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/append_truncated.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/check_impl.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/check_op.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/check_op.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/conditions.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/conditions.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/config.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/flags.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/fnmatch.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/fnmatch.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/fnmatch_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/globals.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/globals.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/log_format.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/log_format.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/log_impl.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/log_message.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/log_message.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/log_sink_set.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/log_sink_set.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/nullguard.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/nullguard.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/nullstream.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/proto.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/proto.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/strip.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/structured.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/test_actions.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/test_actions.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/test_helpers.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/test_helpers.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/test_matchers.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/test_matchers.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/internal/voidify.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_basic_test_impl.inc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_entry.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_entry.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_sink.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_sink.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_sink_registry.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/log_streamer.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/scoped_mock_log.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/scoped_mock_log.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/log/structured.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/memory/memory.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/meta/type_traits.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/numeric/bits.h
@@ -1367,6 +1452,7 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/random/uniform_int_distribution.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/random/uniform_real_distribution.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/random/zipf_distribution.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/status/internal/status_internal.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/status/internal/status_internal.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/status/internal/statusor_internal.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/status/status.cc
@@ -1381,6 +1467,8 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/charconv.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/charconv.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/charconv_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/charset.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/charset_benchmark.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/cord.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/cord.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/cord_analysis.cc
@@ -1392,8 +1480,8 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/escaping.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/escaping.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/escaping_benchmark.cc
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/char_map.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/char_map_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/has_absl_stringify.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/has_ostream_operator.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/charconv_bigint.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/charconv_bigint.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/charconv_parse.cc
@@ -1412,9 +1500,6 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_crc.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_crc.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_flat.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_ring.cc
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_ring.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_ring_reader.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_test_util.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cordz_functions.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cordz_functions.h
@@ -1427,6 +1512,8 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cordz_statistics.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cordz_update_scope.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/cordz_update_tracker.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/damerau_levenshtein_distance.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/damerau_levenshtein_distance.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/escaping.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/escaping.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/escaping_test_common.h
@@ -1446,6 +1533,7 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_format/bind.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_format/bind.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_format/checker.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_format/constexpr_parser.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_format/extension.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_format/extension.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_format/float_conversion.cc
@@ -1457,6 +1545,8 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_join_internal.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/str_split_internal.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/string_constant.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/stringify_sink.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/stringify_sink.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/utf8.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/internal/utf8.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/strings/match.cc
@@ -1490,15 +1580,27 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/create_thread_identity.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/create_thread_identity.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/futex.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/futex_waiter.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/futex_waiter.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/graphcycles.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/graphcycles.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/graphcycles_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/kernel_timeout.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/kernel_timeout.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/per_thread_sem.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/per_thread_sem.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/pthread_waiter.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/pthread_waiter.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/sem_waiter.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/sem_waiter.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/stdcpp_waiter.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/stdcpp_waiter.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/thread_pool.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter_base.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter_base.h
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/win32_waiter.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/internal/win32_waiter.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/mutex.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/mutex.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/synchronization/mutex_benchmark.cc
@@ -1549,26 +1651,19 @@ ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/bad_variant_access.cc
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/bad_variant_access.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/compare.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/conformance_aliases.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/conformance_archetype.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/conformance_profile.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/conformance_testing.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/conformance_testing_helpers.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/optional.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/parentheses.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/span.h
-ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/transform_args.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/internal/variant.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/optional.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/span.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/variant.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/types/variant_benchmark.cc
+ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/utility/internal/if_constexpr.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/absl/utility/utility.h
 ORIGIN: https://www.apache.org/licenses/LICENSE-2.0 referenced by ../../../third_party/abseil-cpp/ci/absl_alternate_options.h
 TYPE: LicenseType.apache
 FILE: ../../../third_party/abseil-cpp/absl/algorithm/algorithm.h
 FILE: ../../../third_party/abseil-cpp/absl/algorithm/container.h
-FILE: ../../../third_party/abseil-cpp/absl/algorithm/equal_benchmark.cc
 FILE: ../../../third_party/abseil-cpp/absl/base/attributes.h
 FILE: ../../../third_party/abseil-cpp/absl/base/call_once.h
 FILE: ../../../third_party/abseil-cpp/absl/base/casts.h
@@ -1582,6 +1677,7 @@ FILE: ../../../third_party/abseil-cpp/absl/base/internal/atomic_hook_test_helper
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/atomic_hook_test_helper.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/cycleclock.cc
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/cycleclock.h
+FILE: ../../../third_party/abseil-cpp/absl/base/internal/cycleclock_config.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/direct_mmap.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/endian.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/errno_saver.h
@@ -1597,8 +1693,8 @@ FILE: ../../../third_party/abseil-cpp/absl/base/internal/invoke.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/low_level_alloc.cc
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/low_level_alloc.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/low_level_scheduling.h
+FILE: ../../../third_party/abseil-cpp/absl/base/internal/nullability_impl.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/per_thread_tls.h
-FILE: ../../../third_party/abseil-cpp/absl/base/internal/prefetch.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/pretty_function.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/raw_logging.cc
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/raw_logging.h
@@ -1628,13 +1724,18 @@ FILE: ../../../third_party/abseil-cpp/absl/base/internal/tsan_mutex_interface.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/unaligned_access.h
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/unscaledcycleclock.cc
 FILE: ../../../third_party/abseil-cpp/absl/base/internal/unscaledcycleclock.h
+FILE: ../../../third_party/abseil-cpp/absl/base/internal/unscaledcycleclock_config.h
 FILE: ../../../third_party/abseil-cpp/absl/base/log_severity.cc
 FILE: ../../../third_party/abseil-cpp/absl/base/log_severity.h
 FILE: ../../../third_party/abseil-cpp/absl/base/macros.h
+FILE: ../../../third_party/abseil-cpp/absl/base/no_destructor.h
+FILE: ../../../third_party/abseil-cpp/absl/base/no_destructor_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/base/nullability.h
 FILE: ../../../third_party/abseil-cpp/absl/base/optimization.h
 FILE: ../../../third_party/abseil-cpp/absl/base/options.h
 FILE: ../../../third_party/abseil-cpp/absl/base/policy_checks.h
 FILE: ../../../third_party/abseil-cpp/absl/base/port.h
+FILE: ../../../third_party/abseil-cpp/absl/base/prefetch.h
 FILE: ../../../third_party/abseil-cpp/absl/base/spinlock_test_common.cc
 FILE: ../../../third_party/abseil-cpp/absl/base/thread_annotations.h
 FILE: ../../../third_party/abseil-cpp/absl/cleanup/cleanup.h
@@ -1651,9 +1752,9 @@ FILE: ../../../third_party/abseil-cpp/absl/container/inlined_vector_benchmark.cc
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/btree.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/btree_container.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/common.h
+FILE: ../../../third_party/abseil-cpp/absl/container/internal/common_policy_traits.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/compressed_tuple.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/container_memory.h
-FILE: ../../../third_party/abseil-cpp/absl/container/internal/counting_allocator.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/hash_function_defaults.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/hash_generator_testing.cc
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/hash_generator_testing.h
@@ -1673,11 +1774,32 @@ FILE: ../../../third_party/abseil-cpp/absl/container/internal/raw_hash_set.cc
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/raw_hash_set.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/raw_hash_set_benchmark.cc
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/raw_hash_set_probe_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/container/internal/test_allocator.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/test_instance_tracker.cc
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/test_instance_tracker.h
 FILE: ../../../third_party/abseil-cpp/absl/container/internal/tracked.h
 FILE: ../../../third_party/abseil-cpp/absl/container/node_hash_map.h
 FILE: ../../../third_party/abseil-cpp/absl/container/node_hash_set.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/crc32c.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/crc32c.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/crc32c_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/cpu_detect.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/cpu_detect.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc32_x86_arm_combined_simd.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc32c.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc32c_inline.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_cord_state.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_cord_state.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_internal.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_memcpy.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_memcpy_fallback.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_memcpy_x86_arm_combined.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_non_temporal_memcpy.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/crc_x86_arm_combined.cc
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/non_temporal_arm_intrinsics.h
+FILE: ../../../third_party/abseil-cpp/absl/crc/internal/non_temporal_memcpy.h
 FILE: ../../../third_party/abseil-cpp/absl/debugging/failure_signal_handler.cc
 FILE: ../../../third_party/abseil-cpp/absl/debugging/failure_signal_handler.h
 FILE: ../../../third_party/abseil-cpp/absl/debugging/internal/address_is_readable.cc
@@ -1753,6 +1875,7 @@ FILE: ../../../third_party/abseil-cpp/absl/functional/function_type_benchmark.cc
 FILE: ../../../third_party/abseil-cpp/absl/functional/internal/any_invocable.h
 FILE: ../../../third_party/abseil-cpp/absl/functional/internal/front_binder.h
 FILE: ../../../third_party/abseil-cpp/absl/functional/internal/function_ref.h
+FILE: ../../../third_party/abseil-cpp/absl/functional/overload.h
 FILE: ../../../third_party/abseil-cpp/absl/hash/hash.h
 FILE: ../../../third_party/abseil-cpp/absl/hash/hash_benchmark.cc
 FILE: ../../../third_party/abseil-cpp/absl/hash/hash_testing.h
@@ -1764,6 +1887,64 @@ FILE: ../../../third_party/abseil-cpp/absl/hash/internal/low_level_hash.cc
 FILE: ../../../third_party/abseil-cpp/absl/hash/internal/low_level_hash.h
 FILE: ../../../third_party/abseil-cpp/absl/hash/internal/print_hash_of.cc
 FILE: ../../../third_party/abseil-cpp/absl/hash/internal/spy_hash_state.h
+FILE: ../../../third_party/abseil-cpp/absl/log/absl_check.h
+FILE: ../../../third_party/abseil-cpp/absl/log/absl_log.h
+FILE: ../../../third_party/abseil-cpp/absl/log/check.h
+FILE: ../../../third_party/abseil-cpp/absl/log/check_test_impl.inc
+FILE: ../../../third_party/abseil-cpp/absl/log/die_if_null.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/die_if_null.h
+FILE: ../../../third_party/abseil-cpp/absl/log/flags.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/flags.h
+FILE: ../../../third_party/abseil-cpp/absl/log/globals.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/globals.h
+FILE: ../../../third_party/abseil-cpp/absl/log/initialize.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/initialize.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/append_truncated.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/check_impl.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/check_op.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/check_op.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/conditions.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/conditions.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/config.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/flags.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/fnmatch.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/fnmatch.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/fnmatch_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/globals.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/globals.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/log_format.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/log_format.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/log_impl.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/log_message.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/log_message.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/log_sink_set.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/log_sink_set.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/nullguard.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/nullguard.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/nullstream.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/proto.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/proto.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/strip.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/structured.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/test_actions.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/test_actions.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/test_helpers.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/test_helpers.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/test_matchers.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/test_matchers.h
+FILE: ../../../third_party/abseil-cpp/absl/log/internal/voidify.h
+FILE: ../../../third_party/abseil-cpp/absl/log/log.h
+FILE: ../../../third_party/abseil-cpp/absl/log/log_basic_test_impl.inc
+FILE: ../../../third_party/abseil-cpp/absl/log/log_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/log_entry.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/log_entry.h
+FILE: ../../../third_party/abseil-cpp/absl/log/log_sink.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/log_sink.h
+FILE: ../../../third_party/abseil-cpp/absl/log/log_sink_registry.h
+FILE: ../../../third_party/abseil-cpp/absl/log/log_streamer.h
+FILE: ../../../third_party/abseil-cpp/absl/log/scoped_mock_log.cc
+FILE: ../../../third_party/abseil-cpp/absl/log/scoped_mock_log.h
+FILE: ../../../third_party/abseil-cpp/absl/log/structured.h
 FILE: ../../../third_party/abseil-cpp/absl/memory/memory.h
 FILE: ../../../third_party/abseil-cpp/absl/meta/type_traits.h
 FILE: ../../../third_party/abseil-cpp/absl/numeric/bits.h
@@ -1841,6 +2022,7 @@ FILE: ../../../third_party/abseil-cpp/absl/random/seed_sequences.h
 FILE: ../../../third_party/abseil-cpp/absl/random/uniform_int_distribution.h
 FILE: ../../../third_party/abseil-cpp/absl/random/uniform_real_distribution.h
 FILE: ../../../third_party/abseil-cpp/absl/random/zipf_distribution.h
+FILE: ../../../third_party/abseil-cpp/absl/status/internal/status_internal.cc
 FILE: ../../../third_party/abseil-cpp/absl/status/internal/status_internal.h
 FILE: ../../../third_party/abseil-cpp/absl/status/internal/statusor_internal.h
 FILE: ../../../third_party/abseil-cpp/absl/status/status.cc
@@ -1855,6 +2037,8 @@ FILE: ../../../third_party/abseil-cpp/absl/strings/ascii_benchmark.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/charconv.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/charconv.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/charconv_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/strings/charset.h
+FILE: ../../../third_party/abseil-cpp/absl/strings/charset_benchmark.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/cord.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/cord.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/cord_analysis.cc
@@ -1866,8 +2050,8 @@ FILE: ../../../third_party/abseil-cpp/absl/strings/cordz_test_helpers.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/escaping.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/escaping.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/escaping_benchmark.cc
-FILE: ../../../third_party/abseil-cpp/absl/strings/internal/char_map.h
-FILE: ../../../third_party/abseil-cpp/absl/strings/internal/char_map_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/strings/has_absl_stringify.h
+FILE: ../../../third_party/abseil-cpp/absl/strings/has_ostream_operator.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/charconv_bigint.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/charconv_bigint.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/charconv_parse.cc
@@ -1886,9 +2070,6 @@ FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_consume.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_crc.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_crc.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_flat.h
-FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_ring.cc
-FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_ring.h
-FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_ring_reader.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cord_rep_test_util.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cordz_functions.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cordz_functions.h
@@ -1901,6 +2082,8 @@ FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cordz_sample_token.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cordz_statistics.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cordz_update_scope.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/cordz_update_tracker.h
+FILE: ../../../third_party/abseil-cpp/absl/strings/internal/damerau_levenshtein_distance.cc
+FILE: ../../../third_party/abseil-cpp/absl/strings/internal/damerau_levenshtein_distance.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/escaping.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/escaping.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/escaping_test_common.h
@@ -1920,6 +2103,7 @@ FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/arg.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/bind.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/bind.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/checker.h
+FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/constexpr_parser.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/extension.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/extension.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/float_conversion.cc
@@ -1931,6 +2115,8 @@ FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_format/parser.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_join_internal.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/str_split_internal.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/string_constant.h
+FILE: ../../../third_party/abseil-cpp/absl/strings/internal/stringify_sink.cc
+FILE: ../../../third_party/abseil-cpp/absl/strings/internal/stringify_sink.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/utf8.cc
 FILE: ../../../third_party/abseil-cpp/absl/strings/internal/utf8.h
 FILE: ../../../third_party/abseil-cpp/absl/strings/match.cc
@@ -1964,15 +2150,27 @@ FILE: ../../../third_party/abseil-cpp/absl/synchronization/blocking_counter_benc
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/create_thread_identity.cc
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/create_thread_identity.h
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/futex.h
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/futex_waiter.cc
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/futex_waiter.h
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/graphcycles.cc
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/graphcycles.h
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/graphcycles_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/kernel_timeout.cc
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/kernel_timeout.h
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/per_thread_sem.cc
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/per_thread_sem.h
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/pthread_waiter.cc
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/pthread_waiter.h
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/sem_waiter.cc
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/sem_waiter.h
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/stdcpp_waiter.cc
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/stdcpp_waiter.h
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/thread_pool.h
-FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter.cc
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter.h
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter_base.cc
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/waiter_base.h
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/win32_waiter.cc
+FILE: ../../../third_party/abseil-cpp/absl/synchronization/internal/win32_waiter.h
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/mutex.cc
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/mutex.h
 FILE: ../../../third_party/abseil-cpp/absl/synchronization/mutex_benchmark.cc
@@ -2023,20 +2221,14 @@ FILE: ../../../third_party/abseil-cpp/absl/types/bad_optional_access.h
 FILE: ../../../third_party/abseil-cpp/absl/types/bad_variant_access.cc
 FILE: ../../../third_party/abseil-cpp/absl/types/bad_variant_access.h
 FILE: ../../../third_party/abseil-cpp/absl/types/compare.h
-FILE: ../../../third_party/abseil-cpp/absl/types/internal/conformance_aliases.h
-FILE: ../../../third_party/abseil-cpp/absl/types/internal/conformance_archetype.h
-FILE: ../../../third_party/abseil-cpp/absl/types/internal/conformance_profile.h
-FILE: ../../../third_party/abseil-cpp/absl/types/internal/conformance_testing.h
-FILE: ../../../third_party/abseil-cpp/absl/types/internal/conformance_testing_helpers.h
 FILE: ../../../third_party/abseil-cpp/absl/types/internal/optional.h
-FILE: ../../../third_party/abseil-cpp/absl/types/internal/parentheses.h
 FILE: ../../../third_party/abseil-cpp/absl/types/internal/span.h
-FILE: ../../../third_party/abseil-cpp/absl/types/internal/transform_args.h
 FILE: ../../../third_party/abseil-cpp/absl/types/internal/variant.h
 FILE: ../../../third_party/abseil-cpp/absl/types/optional.h
 FILE: ../../../third_party/abseil-cpp/absl/types/span.h
 FILE: ../../../third_party/abseil-cpp/absl/types/variant.h
 FILE: ../../../third_party/abseil-cpp/absl/types/variant_benchmark.cc
+FILE: ../../../third_party/abseil-cpp/absl/utility/internal/if_constexpr.h
 FILE: ../../../third_party/abseil-cpp/absl/utility/utility.h
 FILE: ../../../third_party/abseil-cpp/ci/absl_alternate_options.h
 FILE: ../../../third_party/angle/include/CL/cl.h
@@ -8615,10 +8807,10 @@ FILE: ../../../third_party/abseil-cpp/absl/flags/flag_benchmark.lds
 FILE: ../../../third_party/abseil-cpp/absl/random/gaussian_distribution.cc
 FILE: ../../../third_party/abseil-cpp/absl/time/internal/cctz/src/tzfile.h
 FILE: ../../../third_party/abseil-cpp/absl/time/internal/get_current_time_posix.inc
-FILE: ../../../third_party/abseil-cpp/absl/time/internal/zoneinfo.inc
 FILE: ../../../third_party/abseil-cpp/patches/0001-Turn-on-hardened-mode.patch
 FILE: ../../../third_party/abseil-cpp/patches/0002-delete-unprefixed-annotations.patch
 FILE: ../../../third_party/abseil-cpp/patches/0003-delete-static-initializer-in-stacktrace.patch
+FILE: ../../../third_party/abseil-cpp/patches/0004-keep-transitive-include.patch
 FILE: ../../../third_party/abseil-cpp/symbols_arm64_dbg.def
 FILE: ../../../third_party/abseil-cpp/symbols_arm64_rel.def
 FILE: ../../../third_party/abseil-cpp/symbols_x64_dbg.def
