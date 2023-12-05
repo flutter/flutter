@@ -355,7 +355,7 @@ class CocoaPods {
 
     if (result.exitCode != 0) {
       invalidatePodInstallOutput(xcodeProject);
-      _diagnosePodInstallFailure(result);
+      _diagnosePodInstallFailure(result, xcodeProject);
       throwToolExit('Error running pod install');
     } else if (xcodeProject.podfileLock.existsSync()) {
       // Even if the Podfile.lock didn't change, update its modified date to now
@@ -367,7 +367,7 @@ class CocoaPods {
     }
   }
 
-  void _diagnosePodInstallFailure(ProcessResult result) {
+  void _diagnosePodInstallFailure(ProcessResult result, XcodeBasedProject xcodeProject) {
     final Object? stdout = result.stdout;
     final Object? stderr = result.stderr;
     if (stdout is! String || stderr is! String) {
@@ -397,7 +397,130 @@ class CocoaPods {
         '  sudo gem uninstall ffi && sudo gem install ffi -- --enable-libffi-alloc\n',
         emphasis: true,
       );
+    } else if (stdout.contains('required a higher minimum deployment target')) {
+      final ({String failingPod, String sourcePlugin, String podPluginSubdir})?
+          podInfo = _parseMinDeploymentFailureInfo(stdout);
+      if (podInfo != null) {
+        final String sourcePlugin = podInfo.sourcePlugin;
+        // If the plugin's podfile has set its own minimum version correctly
+        // based on the requirements of its dependencies the failing pod should
+        // be the plugin itself, but if not they may be different (e.g., if
+        // a plugin says its minimum iOS version is 11, but depends on a pod
+        // with a minimum version of 12, then building for 11 will report that
+        // pod as failing.)
+        if (podInfo.failingPod == podInfo.sourcePlugin) {
+          final Directory symlinksDir;
+          final String podPlatformString;
+          final String platformName;
+          final String docsLink;
+          if (xcodeProject is IosProject) {
+            symlinksDir = xcodeProject.symlinks;
+            podPlatformString = 'ios';
+            platformName = 'iOS';
+            docsLink = 'https://docs.flutter.dev/deployment/ios';
+          } else if (xcodeProject is MacOSProject) {
+            symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
+            podPlatformString = 'osx';
+            platformName = 'macOS';
+            docsLink = 'https://docs.flutter.dev/deployment/macos';
+          } else {
+            return;
+          }
+          final File podspec = symlinksDir
+              .childDirectory('plugins')
+              .childDirectory(sourcePlugin)
+              .childDirectory(podInfo.podPluginSubdir)
+              .childFile('$sourcePlugin.podspec');
+          final String? minDeploymentVersion = _findPodspecMinDeploymentVersion(
+            podspec,
+            podPlatformString
+          );
+          if (minDeploymentVersion != null) {
+            _logger.printError(
+              'Error: The plugin "$sourcePlugin" requires a higher minimum '
+              '$platformName deployment version than your application is targeting.\n'
+              "To build, increase your application's deployment target to at "
+              'least $minDeploymentVersion as described at $docsLink',
+              emphasis: true,
+            );
+          } else {
+            // If for some reason the min version can't be parsed out, provide
+            // a less specific error message that still describes the problem,
+            // but also requests filing a Flutter issue so the parsing in
+            // _findPodspecMinDeploymentVersion can be improved.
+            _logger.printError(
+              'Error: The plugin "$sourcePlugin" requires a higher minimum '
+              '$platformName deployment version than your application is targeting.\n'
+              "To build, increase your application's deployment target as "
+              'described at $docsLink\n\n'
+              'The minimum required version for "$sourcePlugin" could not be '
+              'determined. Please file an issue at '
+              'https://github.com/flutter/flutter/issues about this error message.',
+              emphasis: true,
+            );
+          }
+        } else {
+          // In theory this could find the failing pod's spec and parse out its
+          // minimum deployment version, but finding that spec would add a lot
+          // of complexity to handle a case that plugin authors should not
+          // create, so this just provides the actionable step of following up
+          // with the plugin developer.
+          _logger.printError(
+            'Error: The pod "${podInfo.failingPod}" required by the plugin '
+            '"$sourcePlugin" requires a higher minimum iOS deployment version '
+            "than the plugin's reported minimum version.\n"
+            'To build, remove the plugin "$sourcePlugin", or contact the plugin\'s '
+            'developers for assistance.',
+            emphasis: true,
+          );
+        }
+      }
     }
+  }
+
+  ({String failingPod, String sourcePlugin, String podPluginSubdir})?
+      _parseMinDeploymentFailureInfo(String podInstallOutput) {
+    final RegExp sourceLine = RegExp(r'\(from `.*\.symlinks/plugins/([^/]+)/([^/]+)`\)');
+    final RegExp dependencyLine = RegExp(r'Specs satisfying the `([^ ]+).*` dependency were found, '
+        'but they required a higher minimum deployment target');
+    final RegExpMatch? sourceMatch = sourceLine.firstMatch(podInstallOutput);
+    final RegExpMatch? dependencyMatch = dependencyLine.firstMatch(podInstallOutput);
+    if (sourceMatch == null || dependencyMatch == null) {
+      return null;
+    }
+    return (
+      failingPod: dependencyMatch.group(1)!,
+      sourcePlugin:  sourceMatch.group(1)!,
+      podPluginSubdir: sourceMatch.group(2)!
+    );
+  }
+
+  String? _findPodspecMinDeploymentVersion(File podspec, String platformString) {
+    if (!podspec.existsSync()) {
+      return null;
+    }
+    // There are two ways the deployment target can be specified; see
+    // https://guides.cocoapods.org/syntax/podspec.html#group_platform
+    final RegExp platformPattern = RegExp(
+      // Example: spec.platform = :osx, '10.8'
+      // where "spec" is an arbitrary variable name.
+      r'^\s*[a-zA-Z_]+\.platform\s*=\s*'
+      ':$platformString'
+      r'''\s*,\s*["']([^"']+)["']''',
+      multiLine: true
+    );
+    final RegExp deploymentTargetPlatform = RegExp(
+      // Example: spec.osx.deployment_target = '10.8'
+      // where "spec" is an arbitrary variable name.
+      r'^\s*[a-zA-Z_]+\.'
+      '$platformString\\.deployment_target'
+      r'''\s*=\s*["']([^"']+)["']''',
+      multiLine: true
+    );
+    final String podspecContents = podspec.readAsStringSync();
+    final RegExpMatch? match = platformPattern.firstMatch(podspecContents) ??
+        deploymentTargetPlatform.firstMatch(podspecContents);
+    return match?.group(1);
   }
 
   bool _isFfiX86Error(String error) {
