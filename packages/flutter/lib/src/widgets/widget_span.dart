@@ -381,7 +381,8 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    return child?.computeDryBaseline(BoxConstraints(maxWidth: constraints.maxWidth / scale), baseline);
+    final double? distance = child?.computeDryBaseline(BoxConstraints(maxWidth: constraints.maxWidth / scale), baseline);
+    return distance == null ? null : scale * distance;
   }
 
   @override

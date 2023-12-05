@@ -1340,7 +1340,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       return (tileHeight - titleHeight) / 2.0 + titleBaseline;
     }
     final double subtitleHeight = subtitle.getDryLayout(textConstraints).height;
-    final double subtitleBaseline = title.getDryBaseline(textConstraints, subtitleBaselineType!)!;
+    final double subtitleBaseline = subtitle.getDryBaseline(textConstraints, subtitleBaselineType!)!;
 
     final double targetTitleY = (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - titleBaseline;
     final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - subtitleBaseline;

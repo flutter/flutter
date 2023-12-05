@@ -2053,6 +2053,21 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(innerConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(innerConstraints);
+    return result + resolvedAlignment.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     child!.layout(innerConstraints, parentUsesSize: true);
@@ -2253,10 +2268,11 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     if (child == null) {
       return null;
     }
-    final double? result = child.getDryBaseline(constraints, baseline);
+    final BoxConstraints childConstraints = constraints.widthConstraints().deflate(padding);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
     return result == null
       ? null
-      : result + _computeChildOffset(child.getDryLayout(constraints), getDryLayout(constraints)).dy;
+      : result + _computeChildOffset(child.getDryLayout(childConstraints), getDryLayout(constraints)).dy;
   }
 
   @override

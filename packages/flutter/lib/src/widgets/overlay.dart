@@ -894,7 +894,58 @@ mixin _RenderTheaterMixin on RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(constraints.biggest.isFinite);
+    return constraints.biggest;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!debugNeedsLayout);
+    double? result;
+    final Iterator<RenderBox> childIterator = _childrenInPaintOrder().iterator;
+    while (childIterator.moveNext()) {
+      final RenderBox child = childIterator.current;
+      assert(!child.debugNeedsLayout);
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      double? candidate = child.getDistanceToActualBaseline(baseline);
+      if (candidate != null) {
+        candidate += childParentData.offset.dy;
+        if (result != null) {
+          result = math.min(result, candidate);
+        } else {
+          result = candidate;
+        }
+      }
+    }
+    return result;
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    double? baselineOffset;
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+    final Alignment alignment = theater._resolvedAlignment;
+    final Size size = computeDryLayout(constraints);
+    final Iterator<RenderBox> childIterator = _childrenInPaintOrder().iterator;
+    while (childIterator.moveNext()) {
+      final RenderBox child = childIterator.current;
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      final double? childBaseline;
+      if (!childParentData.isPositioned) {
+        childBaseline = switch (child.getDryBaseline(nonPositionedChildConstraints, baseline)) {
+          null => null,
+          final double baseline => baseline + alignment.alongOffset(size - child.getDryLayout(nonPositionedChildConstraints) as Offset).dy,
+        };
+      } else {
+        childBaseline = RenderStack.baselineForPositionedChild(child, childParentData, size, alignment, baseline);
+      }
+      if (childBaseline != null && (baselineOffset == null || baselineOffset > childBaseline)) {
+        baselineOffset = childBaseline;
+      }
+    }
+    return baselineOffset;
+  }
 
   @override
   bool get sizedByParent => true;

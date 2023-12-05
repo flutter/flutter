@@ -641,7 +641,8 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     if (result == null) {
       return null;
     }
-    return result + _getPositionForChild(_getSize(constraints), childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(constraints)).dy;
+    final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(childConstraints);
+    return result + _getPositionForChild(_getSize(constraints), childSize).dy;
   }
 
   @override
@@ -652,8 +653,8 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
       child!.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = _getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child!.size);
       final Size childSize = childConstraints.isTight ? childConstraints.smallest : child!.size;
+      childParentData.offset = _getPositionForChild(size, childSize);
 
       if (_lastSize != childSize) {
         _lastSize = childSize;

@@ -2636,14 +2636,8 @@ class RenderFittedBox extends RenderProxyBox {
        _clipBehavior = clipBehavior,
        super(child);
 
+  Alignment _resolve() => _resolvedAlignment ??= alignment.resolve(textDirection);
   Alignment? _resolvedAlignment;
-
-  void _resolve() {
-    if (_resolvedAlignment != null) {
-      return;
-    }
-    _resolvedAlignment = alignment.resolve(textDirection);
-  }
 
   void _markNeedResolution() {
     _resolvedAlignment = null;
@@ -2760,6 +2754,11 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(const BoxConstraints(), baseline);
+  }
+
+  @override
   void performLayout() {
     if (child != null) {
       child!.layout(const BoxConstraints(), parentUsesSize: true);
@@ -2812,13 +2811,13 @@ class RenderFittedBox extends RenderProxyBox {
       _hasVisualOverflow = false;
       _transform = Matrix4.identity();
     } else {
-      _resolve();
+      final Alignment resolvedAlignment = _resolve();
       final Size childSize = child!.size;
       final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
       final double scaleX = sizes.destination.width / sizes.source.width;
       final double scaleY = sizes.destination.height / sizes.source.height;
-      final Rect sourceRect = _resolvedAlignment!.inscribe(sizes.source, Offset.zero & childSize);
-      final Rect destinationRect = _resolvedAlignment!.inscribe(sizes.destination, Offset.zero & size);
+      final Rect sourceRect = resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
+      final Rect destinationRect = resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
       assert(scaleX.isFinite && scaleY.isFinite);
       _transform = Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)

@@ -954,19 +954,13 @@ class _RenderLargeTitle extends RenderShiftedBox {
   }
 
   @override
-  void performLayout() {
-    final RenderBox? child = this.child;
-    size = constraints.biggest;
-    if (child == null) {
-      return;
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final double? distance = child?.getDistanceToActualBaseline(baseline);
+    if (distance == null) {
+      return null;
     }
-
-    final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
-    child.layout(childConstraints, parentUsesSize: true);
-    _scale = _computeTitleScale(child.size, constraints);
-
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = alignment.alongOffset(size - (child.size * _scale) as Offset);
+    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    return childParentData.offset.dy + distance * _scale;
   }
 
   @override
@@ -984,6 +978,22 @@ class _RenderLargeTitle extends RenderShiftedBox {
     final double scale = _computeTitleScale(childSize, constraints);
     final Size scaledChildSize = childSize * scale;
     return result * scale + alignment.alongOffset(constraints.biggest - scaledChildSize as Offset).dy;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    size = constraints.biggest;
+    if (child == null) {
+      return;
+    }
+
+    final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
+    child.layout(childConstraints, parentUsesSize: true);
+    _scale = _computeTitleScale(child.size, constraints);
+
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    childParentData.offset = alignment.alongOffset(size - (child.size * _scale) as Offset);
   }
 
   @override

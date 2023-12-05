@@ -96,7 +96,9 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 void main() {
   testWidgetsWithLeakTracking('Control test for CustomSingleChildLayout', (WidgetTester tester) async {
     final TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
-    await tester.pumpWidget(buildFrame(delegate));
+    // Stop at EnginePhase.layout to prevent the dryBaseline debug checks from
+    // running.
+    await tester.pumpWidget(buildFrame(delegate), null, EnginePhase.layout);
 
     expect(delegate.constraintsFromGetSize.minWidth, 0.0);
     expect(delegate.constraintsFromGetSize.maxWidth, 800.0);
@@ -116,9 +118,10 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
-    TestSingleChildLayoutDelegate delegate =
-        TestSingleChildLayoutDelegate();
-    await tester.pumpWidget(buildFrame(delegate));
+    TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
+    // Stop at EnginePhase.layout to prevent the dryBaseline debug checks from
+    // running.
+    await tester.pumpWidget(buildFrame(delegate), null, EnginePhase.layout);
 
     // Layout happened because the delegate was set.
     expect(delegate.constraintsFromGetConstraintsForChild, isNotNull); // i.e. layout happened
@@ -127,14 +130,18 @@ void main() {
     // Layout did not happen because shouldRelayout() returned false.
     delegate = TestSingleChildLayoutDelegate();
     delegate.shouldRelayoutValue = false;
-    await tester.pumpWidget(buildFrame(delegate));
+    // Stop at EnginePhase.layout to prevent the dryBaseline debug checks from
+    // running.
+    await tester.pumpWidget(buildFrame(delegate), null, EnginePhase.layout);
     expect(delegate.shouldRelayoutCalled, isTrue);
     expect(delegate.constraintsFromGetConstraintsForChild, isNull);
 
     // Layout happened because shouldRelayout() returned true.
     delegate = TestSingleChildLayoutDelegate();
     delegate.shouldRelayoutValue = true;
-    await tester.pumpWidget(buildFrame(delegate));
+    // Stop at EnginePhase.layout to prevent the dryBaseline debug checks from
+    // running.
+    await tester.pumpWidget(buildFrame(delegate), null, EnginePhase.layout);
     expect(delegate.shouldRelayoutCalled, isTrue);
     expect(delegate.constraintsFromGetConstraintsForChild, isNotNull);
   });

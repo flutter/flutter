@@ -617,6 +617,7 @@ class RenderWrap extends RenderBox
   }
 
   void _positionChildren(Iterable<_RunMetrics> runMetrics, _AxisSize childrenAxisSize, _AxisSize containerAxisSize, _PositionChild positionChild, _GetChildSize getChildSize) {
+    assert(runMetrics.isNotEmpty);
     final _AxisSize freeAxisSize = _AxisSize(
       containerAxisSize.width - childrenAxisSize.width,
       containerAxisSize.height - childrenAxisSize.height,
@@ -659,6 +660,9 @@ class RenderWrap extends RenderBox
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (firstChild == null) {
+      return null;
+    }
     double? baselineOffset;
     final BoxConstraints childConstraints = switch (direction) {
       Axis.horizontal => BoxConstraints(maxWidth: constraints.maxWidth),

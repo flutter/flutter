@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -48,6 +49,8 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Chip caches baseline', (WidgetTester tester) async {
+    final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+    debugCheckIntrinsicSizes = false;
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -57,6 +60,7 @@ void main() {
             baselineType: TextBaseline.alphabetic,
             child: Chip(
               label: BaselineDetector(() {
+                assert(!debugCheckIntrinsicSizes);
                 calls += 1;
               }),
             ),
@@ -70,9 +74,12 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   });
 
   testWidgetsWithLeakTracking('ListTile caches baseline', (WidgetTester tester) async {
+    final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+    debugCheckIntrinsicSizes = false;
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -95,6 +102,7 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   });
 
   testWidgetsWithLeakTracking("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
@@ -155,6 +163,11 @@ class RenderBaselineDetector extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     callback();
+    return 20.0;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     return 20.0;
   }
 

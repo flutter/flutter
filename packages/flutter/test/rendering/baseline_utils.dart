@@ -54,10 +54,21 @@ double? verifyDryBaseline(RenderBox box) {
   );
 
   for (final TextBaseline baseline in TextBaseline.values) {
-    expect(
-      box.getDryBaseline(box.constraints, baseline),
-      box.debugGetDistanceToBaseline(baseline),
-      reason: 'getDryBaseline(${box.constraints}, $baseline) should be consistent with getDistanceToBaseline',
+    final double? actualBaseline;
+    if (RenderObject.debugCheckingIntrinsics) {
+      actualBaseline = box.getDistanceToBaseline(baseline);
+    } else {
+      try {
+        RenderObject.debugCheckingIntrinsics = true;
+        actualBaseline = box.getDistanceToBaseline(baseline, onlyReal: true);
+      } finally {
+        RenderObject.debugCheckingIntrinsics = false;
+      }
+    }
+    final double? dryBaseline = box.getDryBaseline(box.constraints, baseline);
+    expect(dryBaseline, actualBaseline,
+      reason: '$box getDryBaseline(${box.constraints}, $baseline) returned $dryBaseline which is not consistent with '
+      'getDistanceToBaseline: $actualBaseline',
     );
   }
   final List<(Symbol, List<Object?>)> afterPaintInstructions = <(Symbol, List<Object?>)>[];

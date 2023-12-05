@@ -297,9 +297,14 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
+  /// The [Alignment] to use for aligning the child.
+  ///
+  /// This is the [alignment] resolved against [textDirection]. Subclasses should
+  /// use [resolvedAlignment] instead of [alignment] directly, for computing the
+  /// child's offset.
+  @protected
+  Alignment get resolvedAlignment => _resolvedAlignment ??= alignment.resolve(textDirection);
   Alignment? _resolvedAlignment;
-
-  Alignment _resolve() => _resolvedAlignment ??= alignment.resolve(textDirection);
 
   void _markNeedResolution() {
     _resolvedAlignment = null;
@@ -353,14 +358,12 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// this object's own size has been set.
   @protected
   void alignChild() {
-    _resolve();
     assert(child != null);
     assert(!child!.debugNeedsLayout);
     assert(child!.hasSize);
     assert(hasSize);
-    assert(_resolvedAlignment != null);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset = _resolvedAlignment!.alongOffset(size - child!.size as Offset);
+    childParentData.offset = resolvedAlignment.alongOffset(size - child!.size as Offset);
   }
 
   @override
@@ -374,7 +377,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(constraints);
-    return result + _resolve().alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+    return result + resolvedAlignment.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override
@@ -468,7 +471,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
       return null;
     }
     final Size childSize = child.getDryLayout(childConstraints);
-    return result + _resolve().alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+    return result + resolvedAlignment.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override
@@ -733,6 +736,22 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       case OverflowBoxFit.deferToChild:
         return child?.getDryLayout(constraints) ?? constraints.smallest;
     }
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = _getInnerConstraints(constraints);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(childConstraints);
+    final Size size = constraints.constrain(childSize);
+    return result + resolvedAlignment.alongOffset(size - childSize as Offset).dy;
   }
 
   @override
@@ -1047,8 +1066,17 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    return child?.getDryBaseline(constraints, baseline) ?? super.getDryBaseline(constraints, baseline);
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(constraints);
+    return result + resolvedAlignment.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override

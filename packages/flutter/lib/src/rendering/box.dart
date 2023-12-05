@@ -2034,7 +2034,7 @@ abstract class RenderBox extends RenderObject {
   /// Computes the value returned by [getDryBaseline].
   ///
   /// This method is for overriding only and shouldn't be called directly.
-  /// Instead, call [getDryLayout] to get the speculative baseline location.
+  /// Instead, call [getDryBaseline] to get the speculative baseline location.
   ///
   /// The implementation must return the distance from the top of the box to the
   /// first baseline of the box's contents, or null if the box does not have any
@@ -2301,6 +2301,7 @@ abstract class RenderBox extends RenderObject {
   /// [computeDistanceToActualBaseline]. Do not call this function directly from
   /// outside those two methods.
   @protected
+  @mustCallSuper
   double? getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     return _layoutCacheStorage.getOrCompute(
@@ -2308,26 +2309,6 @@ abstract class RenderBox extends RenderObject {
       (constraints, baseline),
       ((BoxConstraints, TextBaseline) pair) => computeDistanceToActualBaseline(pair.$2),
     );
-  }
-
-  /// Calls [computeDistanceToActualBaseline] and caches the result.
-  ///
-  /// This method is for testing purposes only. It always returns null in
-  /// non-debug modes.
-  @nonVirtual
-  @visibleForTesting
-  double? debugGetDistanceToBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
-    double? result;
-    assert(() {
-      result = _layoutCacheStorage.getOrCompute(
-        _CachedLayoutCalculation.baseline,
-        (constraints, baseline),
-        ((BoxConstraints, TextBaseline) pair) => computeDistanceToActualBaseline(pair.$2),
-      );
-      return true;
-    }());
-    return result;
   }
 
   /// Returns the distance from the y-coordinate of the position of the box to
@@ -2594,22 +2575,6 @@ abstract class RenderBox extends RenderObject {
       return;
     }
     super.markNeedsLayout();
-  }
-
-  @override
-  void layout(Constraints constraints, { bool parentUsesSize = false }) {
-    super.layout(constraints, parentUsesSize: parentUsesSize);
-    assert(() {
-      if (!debugCheckIntrinsicSizes) {
-        return true;
-      }
-      final bool hasCache = (_layoutCacheStorage._cachedDryAlphabeticBaseline?.isNotEmpty ?? false)
-                        || (_layoutCacheStorage._cachedDryIdeoBaseline?.isNotEmpty ?? false);
-      if (hasCache) {
-        _debugVerifyDryCalculations();
-      }
-      return true;
-    }());
   }
 
   /// {@macro flutter.rendering.RenderObject.performResize}
@@ -2926,6 +2891,9 @@ abstract class RenderBox extends RenderObject {
   @override
   void debugPaint(PaintingContext context, Offset offset) {
     assert(() {
+      if (debugCheckIntrinsicSizes) {
+        _debugVerifyDryCalculations();
+      }
       if (debugPaintSizeEnabled) {
         debugPaintSize(context, offset);
       }

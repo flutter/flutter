@@ -1159,14 +1159,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    // The baseline of this widget is the baseline of its child
-    return direction == Axis.horizontal
-      ? child!.computeDistanceToActualBaseline(baseline)! + borderSide.width
-      : child!.computeDistanceToActualBaseline(baseline)! + leadingBorderSide.width;
-  }
-
-  @override
   double computeMaxIntrinsicHeight(double width) {
     return direction == Axis.horizontal
       ? borderSide.width * 2.0 + _maxHeight(child, width)
@@ -1213,17 +1205,33 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final double? childBaseline = child?.computeDistanceToActualBaseline(baseline);
+    if (childBaseline == null) {
+      return null;
+    }
+    return childBaseline + switch (direction) {
+      Axis.horizontal => borderSide.width,
+      Axis.vertical => switch (verticalDirection) {
+        VerticalDirection.down => leadingBorderSide.width,
+        VerticalDirection.up => trailingBorderSide.width,
+      },
+    };
+  }
+
+  @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
     final double? childBaseline = child?.getDryBaseline(constraints.deflate(_childPadding), baseline);
-    return childBaseline == null
-      ? null
-      : childBaseline + switch (direction) {
-          Axis.horizontal => borderSide.width,
-          Axis.vertical => switch (verticalDirection) {
-            VerticalDirection.down => leadingBorderSide.width,
-            VerticalDirection.up => trailingBorderSide.width,
-          },
-      };
+    if (childBaseline == null) {
+      return null;
+    }
+    return childBaseline + switch (direction) {
+      Axis.horizontal => borderSide.width,
+      Axis.vertical => switch (verticalDirection) {
+        VerticalDirection.down => leadingBorderSide.width,
+        VerticalDirection.up => trailingBorderSide.width,
+      },
+    };
   }
 
   @override

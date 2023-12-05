@@ -1279,8 +1279,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + (input?.getDistanceToActualBaseline(baseline) ?? 0.0);
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final RenderBox? input = this.input;
+    return input == null
+      ? null
+      : _boxParentData(input).offset.dy + (input.getDistanceToActualBaseline(baseline) ?? input.size.height);
   }
 
   // Records where the label was painted.
@@ -1295,7 +1298,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final _RenderDecorationLayout layout = _layout(constraints, isDry: true);
     return switch (baseline) {
       TextBaseline.alphabetic => 0.0,
-      TextBaseline.ideographic => (input.getDryBaseline(layout.inputConstraints, TextBaseline.ideographic) ?? input.getDryLayout(layout.inputConstraints).height) - (input.getDryBaseline(layout.inputConstraints, TextBaseline.alphabetic) ?? 0.0),
+      TextBaseline.ideographic => (input.getDryBaseline(layout.inputConstraints, TextBaseline.ideographic) ?? input.getDryLayout(layout.inputConstraints).height) - (input.getDryBaseline(layout.inputConstraints, TextBaseline.alphabetic) ?? input.getDryLayout(layout.inputConstraints).height),
     } + (_isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline);
   }
 

@@ -491,6 +491,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   bool get _debugHasNecessaryDirections {
+    if (RenderObject.debugCheckingIntrinsics) {
+      return true;
+    }
     if (firstChild != null && lastChild != firstChild) {
       // i.e. there's more than one child
       switch (direction) {
@@ -658,14 +661,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     );
   }
 
-  @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return switch (_direction) {
-      Axis.horizontal => defaultComputeDistanceToHighestActualBaseline(baseline),
-      Axis.vertical => defaultComputeDistanceToFirstActualBaseline(baseline),
-    };
-  }
-
   int _getFlex(RenderBox child) {
     final FlexParentData childParentData = child.parentData! as FlexParentData;
     return childParentData.flex ?? 0;
@@ -779,73 +774,19 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     };
   }
 
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    // `defaultComputeDistanceToFirstActualBaseline` does not work when
+    // Axis.vertical + VerticalDirection.up are specified.
+    return defaultComputeDistanceToHighestActualBaseline(baseline);
+  }
+
   static double? _min(double? a, double? b) {
     if (a == null) {
       return b;
     }
     return b == null ? a : math.min(a, b);
   }
-
-  //double? _computeDryBaselineHorizontal(BoxConstraints constraints, TextBaseline baseline) {
-  //  int totalFlex = 0;
-  //  final double maxMainSize = constraints.maxWidth;
-  //  assert(maxMainSize < double.infinity);
-
-  //  double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
-  //  double? baselineOffset;
-  //  RenderBox? child = firstChild;
-  //  RenderBox? lastFlexChild;
-  //  while (child != null) {
-  //    final FlexParentData childParentData = child.parentData! as FlexParentData;
-  //    final int flex = _getFlex(child);
-  //    if (flex > 0) {
-  //      totalFlex += flex;
-  //      lastFlexChild = child;
-  //    } else {
-  //      final BoxConstraints innerConstraints = _constraintsForNonFlexChild(constraints);
-  //      final Size childSize = child.getDryLayout(innerConstraints);
-  //      allocatedSize += _getMainSize(childSize);
-  //      baselineOffset = _min(baselineOffset, child.getDryBaseline(innerConstraints, baseline));
-  //    }
-  //    assert(child.parentData == childParentData);
-  //    child = childParentData.nextSibling;
-  //  }
-
-  //  // Distribute free space to flexible children.
-  //  final double freeSpace = math.max(0.0, maxMainSize - allocatedSize);
-  //  double allocatedFlexSpace = 0.0;
-  //  if (totalFlex > 0) {
-  //    final double spacePerFlex = freeSpace / totalFlex;
-  //    child = firstChild;
-  //    while (child != null) {
-  //      final int flex = _getFlex(child);
-  //      if (flex > 0) {
-  //        final double maxChildExtent = child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex;
-  //        final double minChildExtent = switch (_getFit(child)) {
-  //          FlexFit.tight => maxChildExtent,
-  //          FlexFit.loose => 0.0,
-  //        };
-  //        final BoxConstraints innerConstraints = BoxConstraints(
-  //          minWidth: minChildExtent,
-  //          maxWidth: maxChildExtent,
-  //          minHeight: constraints.maxHeight,
-  //          maxHeight: crossAxisAlignment == CrossAxisAlignment.stretch
-  //            ? constraints.maxHeight
-  //            : double.infinity,
-  //        );
-  //        final Size childSize = child.getDryLayout(innerConstraints);
-  //        final double childMainSize = _getMainSize(childSize);
-  //        assert(childMainSize <= maxChildExtent);
-  //        allocatedFlexSpace += maxChildExtent;
-  //        baselineOffset = _min(baselineOffset, child.getDryBaseline(innerConstraints, baseline));
-  //      }
-  //      final FlexParentData childParentData = child.parentData! as FlexParentData;
-  //      child = childParentData.nextSibling;
-  //    }
-  //  }
-  //  return baselineOffset;
-  //}
-
   static double? _getChildDryBaseline(RenderBox child, BoxConstraints childConstraints, TextBaseline baseline) => child.getDryBaseline(childConstraints, baseline);
   static double? _getChildActualBaseline(RenderBox child, BoxConstraints childConstraints, TextBaseline baseline) {
     assert(child.constraints == childConstraints);
