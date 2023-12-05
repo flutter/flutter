@@ -713,7 +713,7 @@ class ContentContext {
 
     void CreateDefault(const Context& context,
                        const ContentContextOptions& options,
-                       const std::initializer_list<int32_t>& constants = {}) {
+                       const std::initializer_list<Scalar>& constants = {}) {
       auto desc =
           PipelineT::Builder::MakeDefaultPipelineDescriptor(context, constants);
       if (!desc.has_value()) {
