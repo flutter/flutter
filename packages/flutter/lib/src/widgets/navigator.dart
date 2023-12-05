@@ -3505,13 +3505,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   final Queue<_NavigatorObservation> _observedRouteAdditions = Queue<_NavigatorObservation>();
   final Queue<_NavigatorObservation> _observedRouteDeletions = Queue<_NavigatorObservation>();
 
-  /// The [FocusScopeNode] for the [FocusScope] that encloses the topmost navigator.
-  @Deprecated(
-    'Use focusNode.enclosingScope! instead. '
-    'This feature was deprecated after v3.1.0-0.0.pre.'
-  )
-  FocusScopeNode get focusScopeNode => focusNode.enclosingScope!;
-
   /// The [FocusNode] for the [Focus] that encloses the routes.
   final FocusNode focusNode = FocusNode(debugLabel: 'Navigator');
 
