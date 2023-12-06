@@ -548,15 +548,15 @@ targets:
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
@@ -3152,27 +3152,27 @@ targets:
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
     presubmit: false
@@ -5536,15 +5536,15 @@ targets:
 
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
