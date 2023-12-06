@@ -14,7 +14,7 @@ export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 /// Platform-specific key event data for Linux.
 ///
 /// This class is deprecated and will be removed. Platform specific key event
-/// data will no longer available. See [KeyEvent] for what is available.
+/// data will no longer be available. See [KeyEvent] for what is available.
 ///
 /// Different window toolkit implementations can map to different key codes. This class
 /// will use the correct mapping depending on the [keyHelper] provided.
@@ -182,7 +182,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 /// different toolkits.
 ///
 /// This class is deprecated and will be removed. Platform specific key event
-/// data will no longer available. See [KeyEvent] for what is available.
+/// data will no longer be available. See [KeyEvent] for what is available.
 @Deprecated(
   'No longer supported. '
   'This feature was deprecated after v3.18.0-2.0.pre.',
@@ -237,7 +237,7 @@ abstract class KeyHelper {
 /// Helper class that uses GLFW-specific key mappings.
 ///
 /// This class is deprecated and will be removed. Platform specific key event
-/// data will no longer available. See [KeyEvent] for what is available.
+/// data will no longer be available. See [KeyEvent] for what is available.
 @Deprecated(
   'No longer supported. '
   'This feature was deprecated after v3.18.0-2.0.pre.',
@@ -381,7 +381,7 @@ class GLFWKeyHelper implements KeyHelper {
 /// Helper class that uses GTK-specific key mappings.
 ///
 /// This class is deprecated and will be removed. Platform specific key event
-/// data will no longer available. See [KeyEvent] for what is available.
+/// data will no longer be available. See [KeyEvent] for what is available.
 @Deprecated(
   'No longer supported. '
   'This feature was deprecated after v3.18.0-2.0.pre.',

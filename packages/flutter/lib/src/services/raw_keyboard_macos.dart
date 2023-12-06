@@ -25,7 +25,7 @@ int runeToLowerCase(int rune) {
 /// Platform-specific key event data for macOS.
 ///
 /// This class is deprecated and will be removed. Platform specific key event
-/// data will no longer available. See [KeyEvent] for what is available.
+/// data will no longer be available. See [KeyEvent] for what is available.
 ///
 /// This object contains information about key events obtained from macOS's
 /// `NSEvent` interface.
