@@ -66,7 +66,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
   {
     // Fetch a pool (which will be created).
     auto pool = DescriptorPoolVK(context);
-    pool.AllocateDescriptorSets(1024, 1024, {});
+    pool.AllocateDescriptorSets(1024, 1024, 1024, {});
   }
 
   // There is a chance that the first death rattle item below is destroyed in
@@ -106,7 +106,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
       auto pool = std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets(1024, 1024, {});
+      pool->AllocateDescriptorSets(1024, 1024, 1024, {});
       pools.push_back(std::move(pool));
     }
   }
@@ -135,7 +135,7 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
     std::vector<std::unique_ptr<DescriptorPoolVK>> pools;
     for (auto i = 0u; i < 33; i++) {
       auto pool = std::make_unique<DescriptorPoolVK>(context);
-      pool->AllocateDescriptorSets(1024, 1024, {});
+      pool->AllocateDescriptorSets(1024, 1024, 1024, {});
       pools.push_back(std::move(pool));
     }
   }

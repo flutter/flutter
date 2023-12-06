@@ -11,11 +11,16 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
-#include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/compute_command.h"
+#include "vulkan/vulkan_core.h"
 
 namespace impeller {
+
+// Warning: if any of the constant values or layouts are changed in the
+// framebuffer fetch shader, then this input binding may need to be
+// manually changed.
+static constexpr size_t kMagicSubpassInputBinding = 64;
 
 static bool BindImages(const Bindings& bindings,
                        Allocator& allocator,
@@ -117,7 +122,8 @@ static bool BindBuffers(const Bindings& bindings,
 fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
     const ContextVK& context,
     const std::shared_ptr<CommandEncoderVK>& encoder,
-    const std::vector<Command>& commands) {
+    const std::vector<Command>& commands,
+    const TextureVK& input_attachment) {
   if (commands.empty()) {
     return std::vector<vk::DescriptorSet>{};
   }
@@ -127,6 +133,7 @@ fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
   // to allocate a correctly sized descriptor pool.
   size_t buffer_count = 0;
   size_t samplers_count = 0;
+  size_t subpass_count = 0;
   std::vector<vk::DescriptorSetLayout> layouts;
   layouts.reserve(commands.size());
 
@@ -134,12 +141,14 @@ fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
     buffer_count += command.vertex_bindings.buffers.size();
     buffer_count += command.fragment_bindings.buffers.size();
     samplers_count += command.fragment_bindings.sampled_images.size();
+    subpass_count +=
+        command.pipeline->GetDescriptor().UsesSubpassInput() ? 1 : 0;
 
     layouts.emplace_back(
         PipelineVK::Cast(*command.pipeline).GetDescriptorSetLayout());
   }
-  auto descriptor_result =
-      encoder->AllocateDescriptorSets(buffer_count, samplers_count, layouts);
+  auto descriptor_result = encoder->AllocateDescriptorSets(
+      buffer_count, samplers_count, subpass_count, layouts);
   if (!descriptor_result.ok()) {
     return descriptor_result.status();
   }
@@ -153,9 +162,9 @@ fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
   std::vector<vk::DescriptorImageInfo> images;
   std::vector<vk::DescriptorBufferInfo> buffers;
   std::vector<vk::WriteDescriptorSet> writes;
-  images.reserve(samplers_count);
+  images.reserve(samplers_count + subpass_count);
   buffers.reserve(buffer_count);
-  writes.reserve(samplers_count + buffer_count);
+  writes.reserve(samplers_count + buffer_count + subpass_count);
 
   auto& allocator = *context.GetResourceAllocator();
   auto desc_index = 0u;
@@ -172,6 +181,23 @@ fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
                     descriptor_sets[desc_index], images, writes)) {
       return fml::Status(fml::StatusCode::kUnknown,
                          "Failed to bind texture or buffer.");
+    }
+
+    if (command.pipeline->GetDescriptor().UsesSubpassInput()) {
+      vk::DescriptorImageInfo image_info;
+      image_info.imageLayout = vk::ImageLayout::eGeneral;
+      image_info.sampler = VK_NULL_HANDLE;
+      image_info.imageView = input_attachment.GetImageView();
+      images.push_back(image_info);
+
+      vk::WriteDescriptorSet write_set;
+      write_set.dstSet = descriptor_sets[desc_index];
+      write_set.dstBinding = kMagicSubpassInputBinding;
+      write_set.descriptorCount = 1u;
+      write_set.descriptorType = vk::DescriptorType::eInputAttachment;
+      write_set.pImageInfo = &images.back();
+
+      writes.push_back(write_set);
     }
     desc_index += 1;
   }
@@ -203,7 +229,7 @@ fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateAndBindDescriptorSets(
         ComputePipelineVK::Cast(*command.pipeline).GetDescriptorSetLayout());
   }
   auto descriptor_result =
-      encoder->AllocateDescriptorSets(buffer_count, samplers_count, layouts);
+      encoder->AllocateDescriptorSets(buffer_count, samplers_count, 0, layouts);
   if (!descriptor_result.ok()) {
     return descriptor_result.status();
   }

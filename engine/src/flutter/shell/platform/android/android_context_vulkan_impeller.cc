@@ -6,6 +6,7 @@
 
 #include "flutter/fml/paths.h"
 #include "flutter/impeller/entity/vk/entity_shaders_vk.h"
+#include "flutter/impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "flutter/impeller/entity/vk/modern_shaders_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
 
@@ -19,14 +20,17 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     const fml::RefPtr<vulkan::VulkanProcTable>& proc_table,
     bool enable_vulkan_validation) {
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
-    std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
-                                           impeller_entity_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
+                                             impeller_entity_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_vk_data,
+          impeller_framebuffer_blend_shaders_vk_length),
 #if IMPELLER_ENABLE_3D
-    std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_vk_data,
-                                           impeller_scene_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_vk_data,
+                                             impeller_scene_shaders_vk_length),
 #endif
-    std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_vk_data,
-                                           impeller_modern_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_vk_data,
+                                             impeller_modern_shaders_vk_length),
   };
 
   PFN_vkGetInstanceProcAddr instance_proc_addr =

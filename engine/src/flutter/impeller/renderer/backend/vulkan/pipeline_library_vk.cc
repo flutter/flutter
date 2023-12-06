@@ -19,6 +19,8 @@
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shader_function_vk.h"
 #include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
+#include "vulkan/vulkan_core.h"
+#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 
@@ -28,6 +30,7 @@ PipelineLibraryVK::PipelineLibraryVK(
     fml::UniqueFD cache_directory,
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner)
     : device_holder_(device_holder),
+      supports_framebuffer_fetch_(caps->SupportsFramebufferFetch()),
       pso_cache_(std::make_shared<PipelineCacheVK>(std::move(caps),
                                                    device_holder,
                                                    std::move(cache_directory))),
@@ -60,11 +63,12 @@ static vk::AttachmentDescription CreatePlaceholderAttachmentDescription(
     SampleCount sample_count) {
   // Load store ops are immaterial for pass compatibility. The right ops will be
   // picked up when the pass associated with framebuffer.
-  return CreateAttachmentDescription(format,                      //
-                                     sample_count,                //
-                                     LoadAction::kDontCare,       //
-                                     StoreAction::kDontCare,      //
-                                     vk::ImageLayout::eUndefined  //
+  return CreateAttachmentDescription(format,                       //
+                                     sample_count,                 //
+                                     LoadAction::kDontCare,        //
+                                     StoreAction::kDontCare,       //
+                                     vk::ImageLayout::eUndefined,  //
+                                     false                         //
   );
 }
 
@@ -78,10 +82,12 @@ static vk::AttachmentDescription CreatePlaceholderAttachmentDescription(
 ///
 static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
     const vk::Device& device,
-    const PipelineDescriptor& desc) {
+    const PipelineDescriptor& desc,
+    bool supports_framebuffer_fetch) {
   std::vector<vk::AttachmentDescription> attachments;
 
   std::vector<vk::AttachmentReference> color_refs;
+  std::vector<vk::AttachmentReference> subpass_color_ref;
   vk::AttachmentReference depth_stencil_ref = kUnusedAttachmentReference;
 
   color_refs.resize(desc.GetMaxColorAttacmentBindIndex() + 1,
@@ -96,6 +102,8 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
     attachments.emplace_back(
         CreatePlaceholderAttachmentDescription(color.format, sample_count));
   }
+  subpass_color_ref.push_back(vk::AttachmentReference{
+      static_cast<uint32_t>(0), vk::ImageLayout::eColorAttachmentOptimal});
 
   if (auto depth = desc.GetDepthStencilAttachmentDescriptor();
       depth.has_value()) {
@@ -115,6 +123,17 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
 
   vk::SubpassDescription subpass_desc;
   subpass_desc.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+
+  // If the device supports framebuffer fetch, compatibility pipelines are
+  // always created with the self reference and rasterization order flag. This
+  // ensures that all compiled pipelines are compatible with a render pass that
+  // contains a framebuffer fetch shader (advanced blends).
+  std::vector<vk::SubpassDependency> subpass_dependencies;
+  if (supports_framebuffer_fetch) {
+    subpass_desc.setFlags(vk::SubpassDescriptionFlagBits::
+                              eRasterizationOrderAttachmentColorAccessARM);
+    subpass_desc.setInputAttachments(subpass_color_ref);
+  }
   subpass_desc.setColorAttachments(color_refs);
   subpass_desc.setPDepthStencilAttachment(&depth_stencil_ref);
 
@@ -122,6 +141,7 @@ static vk::UniqueRenderPass CreateCompatRenderPassForPipeline(
   render_pass_desc.setAttachments(attachments);
   render_pass_desc.setPSubpasses(&subpass_desc);
   render_pass_desc.setSubpassCount(1u);
+  render_pass_desc.setDependencies(subpass_dependencies);
 
   auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
   if (result != vk::Result::eSuccess) {
@@ -368,8 +388,8 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
     return nullptr;
   }
 
-  auto render_pass =
-      CreateCompatRenderPassForPipeline(strong_device->GetDevice(), desc);
+  auto render_pass = CreateCompatRenderPassForPipeline(
+      strong_device->GetDevice(), desc, supports_framebuffer_fetch_);
   if (render_pass) {
     pipeline_info.setBasePipelineHandle(VK_NULL_HANDLE);
     pipeline_info.setSubpass(0);
