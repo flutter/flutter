@@ -171,29 +171,14 @@ class ElevatedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
-    @Deprecated(
-      'Use backgroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? primary,
-    @Deprecated(
-      'Use foregroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? onPrimary,
-    @Deprecated(
-      'Use disabledForegroundColor and disabledBackgroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? onSurface,
   }) {
-    final Color? background = backgroundColor ?? primary;
-    final Color? disabledBackground = disabledBackgroundColor ?? onSurface?.withOpacity(0.12);
+    final Color? background = backgroundColor;
+    final Color? disabledBackground = disabledBackgroundColor;
     final MaterialStateProperty<Color?>? backgroundColorProp = (background == null && disabledBackground == null)
       ? null
       : _ElevatedButtonDefaultColor(background, disabledBackground);
-    final Color? foreground = foregroundColor ?? onPrimary;
-    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final Color? foreground = foregroundColor;
+    final Color? disabledForeground = disabledForegroundColor;
     final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
       : _ElevatedButtonDefaultColor(foreground, disabledForeground);

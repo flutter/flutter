@@ -158,19 +158,9 @@ class OutlinedButton extends ButtonStyleButton {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
-    @Deprecated(
-      'Use foregroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? primary,
-    @Deprecated(
-      'Use disabledForegroundColor instead. '
-      'This feature was deprecated after v3.1.0.'
-    )
-    Color? onSurface,
   }) {
-    final Color? foreground = foregroundColor ?? primary;
-    final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
+    final Color? foreground = foregroundColor;
+    final Color? disabledForeground = disabledForegroundColor;
     final MaterialStateProperty<Color?>? foregroundColorProp = (foreground == null && disabledForeground == null)
       ? null
       : _OutlinedButtonDefaultColor(foreground, disabledForeground);
