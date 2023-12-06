@@ -139,32 +139,18 @@ class AssembleCommand extends FlutterCommand {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<CustomDimensions> get usageValues async {
-    try {
-      return CustomDimensions(
-        commandBuildBundleTargetPlatform: _environment.defines[kTargetPlatform],
-        commandBuildBundleIsModule: _flutterProject.isModule,
-      );
-    } on Exception {
-      // We've failed to send usage.
-    }
-    return const CustomDimensions();
-  }
+  Future<CustomDimensions> get usageValues async => CustomDimensions(
+    commandBuildBundleTargetPlatform: _environment.defines[kTargetPlatform],
+    commandBuildBundleIsModule: _flutterProject.isModule,
+  );
 
   @override
-  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
-    try {
-      return Event.commandUsageValues(
-        workflow: commandPath,
-        commandHasTerminal: hasTerminal,
-        buildBundleTargetPlatform: _environment.defines[kTargetPlatform],
-        buildBundleIsModule: _flutterProject.isModule,
-      );
-    } on Exception {
-      // We've failed to send usage.
-    }
-    return Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
-  }
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
+    workflow: commandPath,
+    commandHasTerminal: hasTerminal,
+    buildBundleTargetPlatform: _environment.defines[kTargetPlatform],
+    buildBundleIsModule: _flutterProject.isModule,
+  );
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
