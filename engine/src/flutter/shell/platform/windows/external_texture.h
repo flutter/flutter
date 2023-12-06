@@ -12,30 +12,6 @@
 
 namespace flutter {
 
-typedef void (*glGenTexturesProc)(GLsizei n, GLuint* textures);
-typedef void (*glDeleteTexturesProc)(GLsizei n, const GLuint* textures);
-typedef void (*glBindTextureProc)(GLenum target, GLuint texture);
-typedef void (*glTexParameteriProc)(GLenum target, GLenum pname, GLint param);
-typedef void (*glTexImage2DProc)(GLenum target,
-                                 GLint level,
-                                 GLint internalformat,
-                                 GLsizei width,
-                                 GLsizei height,
-                                 GLint border,
-                                 GLenum format,
-                                 GLenum type,
-                                 const void* data);
-
-// A struct containing pointers to resolved gl* functions.
-struct GlProcs {
-  glGenTexturesProc glGenTextures;
-  glDeleteTexturesProc glDeleteTextures;
-  glBindTextureProc glBindTexture;
-  glTexParameteriProc glTexParameteri;
-  glTexImage2DProc glTexImage2D;
-  bool valid;
-};
-
 // Abstract external texture.
 class ExternalTexture {
  public:

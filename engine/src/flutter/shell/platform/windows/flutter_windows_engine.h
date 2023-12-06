@@ -360,9 +360,6 @@ class FlutterWindowsEngine {
   // The texture registrar.
   std::unique_ptr<FlutterWindowsTextureRegistrar> texture_registrar_;
 
-  // Resolved OpenGL functions used by external texture implementations.
-  GlProcs gl_procs_ = {};
-
   // An object used for intializing Angle and creating / destroying render
   // surfaces. Surface creation functionality requires a valid render_target.
   // May be nullptr if ANGLE failed to initialize.
@@ -421,6 +418,8 @@ class FlutterWindowsEngine {
   std::unique_ptr<WindowsLifecycleManager> lifecycle_manager_;
 
   std::shared_ptr<WindowsProcTable> windows_proc_table_;
+
+  std::shared_ptr<GlProcTable> gl_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };

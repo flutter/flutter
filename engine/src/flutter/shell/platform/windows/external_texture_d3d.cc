@@ -14,18 +14,18 @@ ExternalTextureD3d::ExternalTextureD3d(
     const FlutterDesktopGpuSurfaceTextureCallback texture_callback,
     void* user_data,
     const AngleSurfaceManager* surface_manager,
-    const GlProcs& gl_procs)
+    std::shared_ptr<GlProcTable> gl)
     : type_(type),
       texture_callback_(texture_callback),
       user_data_(user_data),
       surface_manager_(surface_manager),
-      gl_(gl_procs) {}
+      gl_(std::move(gl)) {}
 
 ExternalTextureD3d::~ExternalTextureD3d() {
   ReleaseImage();
 
   if (gl_texture_ != 0) {
-    gl_.glDeleteTextures(1, &gl_texture_);
+    gl_->DeleteTextures(1, &gl_texture_);
   }
 }
 
@@ -69,15 +69,15 @@ bool ExternalTextureD3d::CreateOrUpdateTexture(
   }
 
   if (gl_texture_ == 0) {
-    gl_.glGenTextures(1, &gl_texture_);
+    gl_->GenTextures(1, &gl_texture_);
 
-    gl_.glBindTexture(GL_TEXTURE_2D, gl_texture_);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl_->BindTexture(GL_TEXTURE_2D, gl_texture_);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   } else {
-    gl_.glBindTexture(GL_TEXTURE_2D, gl_texture_);
+    gl_->BindTexture(GL_TEXTURE_2D, gl_texture_);
   }
 
   auto handle = SAFE_ACCESS(descriptor, handle, nullptr);
