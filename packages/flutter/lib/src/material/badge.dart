@@ -153,6 +153,18 @@ class Badge extends StatelessWidget {
   /// [BottomNavigationBarItem] or a [NavigationRailDestination].
   final Widget? child;
 
+  /// For example, to override the default text and  colors for a
+  /// [Badge], as well as its  [textColor] color, with all of the
+  /// Default it is just a small point.
+  /// ```dart
+  /// Badge(
+  ///  label: Text("0"),
+  ///  child: Icon(Icons.notifications),
+  ///  textColor: Colors.white,
+  ///  backgroundColor: Colors.red,
+  /// )
+  /// ```
+  
   @override
   Widget build(BuildContext context) {
     if (!isLabelVisible) {
