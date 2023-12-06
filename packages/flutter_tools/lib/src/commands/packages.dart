@@ -389,6 +389,24 @@ class PackagesGetCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
+  late final Future<List<Plugin>> _pluginsFound = (() async {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return <Plugin>[];
+    }
+
+    return findPlugins(rootProject, throwOnError: false);
+  })();
+
+  late final String? _androidEmbeddingVersion = (() {
+    final FlutterProject? rootProject = _rootProject;
+    if (rootProject == null) {
+      return null;
+    }
+
+    return rootProject.android.getEmbeddingVersion().toString().split('.').last;
+  })();
+
   /// The pub packages usage values are incorrect since these are calculated/sent
   /// before pub get completes. This needs to be performed after dependency resolution.
   @override
@@ -405,7 +423,7 @@ class PackagesGetCommand extends FlutterCommand {
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
-      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
+      final List<Plugin> plugins = await _pluginsFound;
       numberPlugins = plugins.length;
     } else {
       numberPlugins = 0;
@@ -414,7 +432,7 @@ class PackagesGetCommand extends FlutterCommand {
     return CustomDimensions(
       commandPackagesNumberPlugins: numberPlugins,
       commandPackagesProjectModule: rootProject.isModule,
-      commandPackagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
+      commandPackagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
     );
   }
 
@@ -434,7 +452,7 @@ class PackagesGetCommand extends FlutterCommand {
     if (hasPlugins) {
       // Do not fail pub get if package config files are invalid before pub has
       // had a chance to run.
-      final List<Plugin> plugins = await findPlugins(rootProject, throwOnError: false);
+      final List<Plugin> plugins = await _pluginsFound;
       numberPlugins = plugins.length;
     } else {
       numberPlugins = 0;
@@ -445,7 +463,7 @@ class PackagesGetCommand extends FlutterCommand {
       commandHasTerminal: hasTerminal,
       packagesNumberPlugins: numberPlugins,
       packagesProjectModule: rootProject.isModule,
-      packagesAndroidEmbeddingVersion: rootProject.android.getEmbeddingVersion().toString().split('.').last,
+      packagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
     );
   }
 }
