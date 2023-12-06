@@ -42,15 +42,15 @@ void main() {
   });
 
   test(
-    'build succeeds targeting string compileSdk Version',
+    'build succeeds targeting string compileSdkVersion',
     () async {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
-      // write a build.gradle with compileSdk Version as `android-UpsideDownCake` which is a string preview version
+      // write a build.gradle with compileSdkVersion as `android-UpsideDownCake` which is a string preview version
       buildGradleFile.writeAsStringSync(
-        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdk "android-UpsideDownCake"'),
+        buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkVersion "android-UpsideDownCake"'),
         flush: true
       );
-      expect(buildGradleFile.readAsStringSync(), contains('compileSdk "android-UpsideDownCake"'));
+      expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion "android-UpsideDownCake"'));
 
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
@@ -73,7 +73,7 @@ void main() {
     'build succeeds targeting string compileSdkPreview',
     () async {
       final File buildGradleFile = exampleAppDir.childDirectory('android').childDirectory('app').childFile('build.gradle');
-      // write a build.gradle with compileSdkPreview as `Tiramisu` which is a string preview version
+      // write a build.gradle with compileSdkPreview as `UpsideDownCake` which is a string preview version
       buildGradleFile.writeAsStringSync(
         buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, 'compileSdkPreview "UpsideDownCake"'),
         flush: true
