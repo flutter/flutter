@@ -776,8 +776,8 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
   final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);
   return TimePickerThemeData(
     backgroundColor: Colors.orange,
-    cancelButtonStyle: TextButton.styleFrom(primary: Colors.red),
-    confirmButtonStyle: TextButton.styleFrom(primary: Colors.green),
+    cancelButtonStyle: TextButton.styleFrom(foregroundColor: Colors.red),
+    confirmButtonStyle: TextButton.styleFrom(foregroundColor: Colors.green),
     hourMinuteTextColor: materialStateColor,
     hourMinuteColor: materialStateColor,
     dayPeriodTextColor: materialStateColor,
