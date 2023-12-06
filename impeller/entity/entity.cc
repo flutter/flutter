@@ -71,7 +71,11 @@ Contents::ClipCoverage Entity::GetClipCoverage(
 }
 
 bool Entity::ShouldRender(const std::optional<Rect>& clip_coverage) const {
+#ifdef IMPELLER_CONTENT_CULLING
   return contents_->ShouldRender(*this, clip_coverage);
+#else
+  return true;
+#endif  // IMPELLER_CONTENT_CULLING
 }
 
 void Entity::SetContents(std::shared_ptr<Contents> contents) {

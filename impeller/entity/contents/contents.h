@@ -123,7 +123,7 @@ class Contents {
       const std::string& label = "Snapshot") const;
 
   virtual bool ShouldRender(const Entity& entity,
-                            const std::optional<Rect>& clip_coverage) const;
+                            const std::optional<Rect> clip_coverage) const;
 
   //----------------------------------------------------------------------------
   /// @brief  Return the color source's intrinsic size, if available.

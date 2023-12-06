@@ -1605,6 +1605,20 @@ TEST_P(EntityTest, SolidFillShouldRenderIsCorrect) {
   }
 }
 
+TEST_P(EntityTest, DoesNotCullEntitiesByDefault) {
+  auto fill = std::make_shared<SolidColorContents>();
+  fill->SetColor(Color::CornflowerBlue());
+  fill->SetGeometry(
+      Geometry::MakeRect(Rect::MakeLTRB(-1000, -1000, -900, -900)));
+
+  Entity entity;
+  entity.SetContents(fill);
+
+  // Even though the entity is offscreen, this should still render because we do
+  // not compute the coverage intersection by default.
+  EXPECT_TRUE(entity.ShouldRender(Rect::MakeLTRB(0, 0, 100, 100)));
+}
+
 TEST_P(EntityTest, ClipContentsShouldRenderIsCorrect) {
   // For clip ops, `ShouldRender` should always return true.
 
