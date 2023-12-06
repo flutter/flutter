@@ -183,7 +183,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
       });
     });
 
-    group('getVersionString', () {
+    group('version', () {
       late Java java;
 
       setUp(() {
@@ -207,6 +207,23 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           ),
         );
       }
+
+      testWithoutContext('is null when java binary cannot be run', () async {
+        addJavaVersionCommand('');
+        processManager.excludedExecutables.add('java');
+
+        expect(java.version, null);
+      });
+
+      testWithoutContext('is null when java --version returns a non-zero exit code', () async {
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[java.binaryPath, '--version'],
+            exitCode: 1,
+          ),
+        );
+        expect(java.version, null);
+      });
 
       testWithoutContext('parses jdk 8', () {
         addJavaVersionCommand('''
