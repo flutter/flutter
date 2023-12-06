@@ -427,7 +427,7 @@ class PackagesGetCommand extends FlutterCommand {
       return Event.commandUsageValues(workflow: commandPath, commandHasTerminal: hasTerminal);
     }
 
-    int numberPlugins;
+    final int numberPlugins;
     // Do not send plugin analytics if pub has not run before.
     final bool hasPlugins = rootProject.flutterPluginsDependenciesFile.existsSync()
       && rootProject.packageConfigFile.existsSync();
