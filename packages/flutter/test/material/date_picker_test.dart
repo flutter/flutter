@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -69,20 +74,24 @@ void main() {
     TextDirection textDirection = TextDirection.ltr,
     bool useMaterial3 = false,
     ThemeData? theme,
+    TextScaler textScaler = TextScaler.noScaling,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       theme: theme ?? ThemeData(useMaterial3: useMaterial3),
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return ElevatedButton(
-              onPressed: () {
-                buttonContext = context;
-              },
-              child: const Text('Go'),
-            );
-          },
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
         ),
       ),
     ));
@@ -1472,7 +1481,7 @@ void main() {
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/131989.
-    testWidgetsWithLeakTracking('Dialog contents do not overflow when resized from landscape to portrait',
+    testWidgetsWithLeakTracking('Dialog contents do not overflow when resized during orientation change',
       (WidgetTester tester) async {
         addTearDown(tester.view.reset);
         // Initial window size is wide for landscape mode.
@@ -1485,6 +1494,36 @@ void main() {
           await tester.pump();
           expect(tester.takeException(), null);
         });
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/139120.
+    testWidgetsWithLeakTracking('Dialog contents are visible - textScaler 0.88, 1.0, 2.0',
+      (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        final List<double> scales = <double>[0.88, 1.0, 2.0];
+
+        for (final double scale in scales) {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Material(
+                  child: DatePickerDialog(
+                    firstDate: DateTime(2001),
+                    lastDate: DateTime(2031, DateTime.december, 31),
+                    initialDate: DateTime(2016, DateTime.january, 15),
+                    initialEntryMode: DatePickerEntryMode.input,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await expectLater(find.byType(Dialog), matchesGoldenFile('date_picker.dialog.contents.visible.$scale.png'));
+        }
     });
   });
 

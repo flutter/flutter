@@ -687,7 +687,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
             final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
             // Make sure the portrait dialog can fit the contents comfortably when
             // resized from the landscape dialog.
-            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+            final bool isFullyPortrait = constraints.maxHeight >= math.min(dialogSize.height, portraitDialogSize.height);
 
             switch (orientation) {
               case Orientation.portrait:
@@ -2874,6 +2874,8 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       ),
     );
 
+    final double textScaleFactor = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _kMaxTextScaleFactor).textScaleFactor;
+    final Size dialogSize = (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2) * textScaleFactor;
     switch (orientation) {
       case Orientation.portrait:
         return LayoutBuilder(
@@ -2881,7 +2883,7 @@ class _InputDateRangePickerDialog extends StatelessWidget {
             final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
             // Make sure the portrait dialog can fit the contents comfortably when
             // resized from the landscape dialog.
-            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+            final bool isFullyPortrait = constraints.maxHeight >= math.min(dialogSize.height, portraitDialogSize.height);
 
             return Column(
               mainAxisSize: MainAxisSize.min,
