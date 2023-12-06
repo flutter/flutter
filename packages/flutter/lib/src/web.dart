@@ -167,7 +167,9 @@ extension WindowExtension on Window {
 
 @JS('XMLHttpRequest')
 @staticInterop
-class XMLHttpRequest implements XMLHttpRequestEventTarget {}
+class XMLHttpRequest implements XMLHttpRequestEventTarget {
+  external factory XMLHttpRequest();
+}
 
 extension XMLHttpRequestExtension on XMLHttpRequest {
   external void open(
