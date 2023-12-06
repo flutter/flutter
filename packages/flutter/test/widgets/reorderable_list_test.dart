@@ -1473,8 +1473,8 @@ void main() {
       (3, 1),
       (3, 3),
       (3, 5),
-      (1, 5),
-      (5, 1),
+      (0, 5),
+      (5, 0),
     ];
     for (final (int, int) element in testCases) {
       await testMove(element.$1, element.$2);
