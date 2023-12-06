@@ -100,38 +100,35 @@ void main() {
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            tooltipTheme: const TooltipThemeData(
-              height: 100.0,
-              padding: EdgeInsets.zero,
-              verticalOffset: 100.0,
-              preferBelow: false,
-            ),
+      MaterialApp(
+        theme: ThemeData(
+          tooltipTheme: const TooltipThemeData(
+            height: 100.0,
+            padding: EdgeInsets.zero,
+            verticalOffset: 100.0,
+            preferBelow: false,
           ),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 400.0,
-                        top: 300.0,
-                        child: Tooltip(
-                          key: key,
-                          message: tooltipText,
-                          child: const SizedBox.shrink(),
-                        ),
+        ),
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 400.0,
+                      top: 300.0,
+                      child: Tooltip(
+                        key: key,
+                        message: tooltipText,
+                        child: const SizedBox.shrink(),
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -161,9 +158,8 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: TooltipTheme(
+      MaterialApp(
+        home: TooltipTheme(
           data: const TooltipThemeData(
             height: 100.0,
             padding: EdgeInsets.zero,
@@ -219,38 +215,35 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            tooltipTheme: const TooltipThemeData(
-              height: 190.0,
-              padding: EdgeInsets.zero,
-              verticalOffset: 100.0,
-              preferBelow: false,
-            ),
+      MaterialApp(
+        theme: ThemeData(
+          tooltipTheme: const TooltipThemeData(
+            height: 190.0,
+            padding: EdgeInsets.zero,
+            verticalOffset: 100.0,
+            preferBelow: false,
           ),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 400.0,
-                        top: 299.0,
-                        child: Tooltip(
-                          key: key,
-                          message: tooltipText,
-                          child: const SizedBox.shrink(),
-                        ),
+        ),
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 400.0,
+                      top: 299.0,
+                      child: Tooltip(
+                        key: key,
+                        message: tooltipText,
+                        child: const SizedBox.shrink(),
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -291,9 +284,8 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: TooltipTheme(
+      MaterialApp(
+        home: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
             padding: EdgeInsets.zero,
@@ -359,38 +351,35 @@ void main() {
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            tooltipTheme: const TooltipThemeData(
-              height: 190.0,
-              padding: EdgeInsets.zero,
-              verticalOffset: 100.0,
-              preferBelow: true,
-            ),
+      MaterialApp(
+        theme: ThemeData(
+          tooltipTheme: const TooltipThemeData(
+            height: 190.0,
+            padding: EdgeInsets.zero,
+            verticalOffset: 100.0,
+            preferBelow: true,
           ),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 400.0,
-                        top: 300.0,
-                        child: Tooltip(
-                          key: key,
-                          message: tooltipText,
-                          child: const SizedBox.shrink(),
-                        ),
+        ),
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 400.0,
+                      top: 300.0,
+                      child: Tooltip(
+                        key: key,
+                        message: tooltipText,
+                        child: const SizedBox.shrink(),
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -419,9 +408,8 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: TooltipTheme(
+      MaterialApp(
+        home: TooltipTheme(
           data: const TooltipThemeData(
             height: 190.0,
             padding: EdgeInsets.zero,
@@ -477,9 +465,8 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
+      MaterialApp(
+        home: Overlay(
           initialEntries: <OverlayEntry>[
             entry = OverlayEntry(
               builder: (BuildContext context) {
@@ -535,9 +522,8 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
+      MaterialApp(
+        home: Overlay(
           initialEntries: <OverlayEntry>[
             entry = OverlayEntry(
               builder: (BuildContext context) {
@@ -692,28 +678,25 @@ void main() {
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            useMaterial3: false,
-            tooltipTheme: const TooltipThemeData(
-              decoration: customDecoration,
+      MaterialApp(
+        theme:  ThemeData(
+          useMaterial3: false,
+          tooltipTheme: const TooltipThemeData(
+            decoration: customDecoration,
+          ),
+        ),
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Tooltip(
+                  key: key,
+                  message: tooltipText,
+                  child: const SizedBox.shrink(),
+                );
+              },
             ),
-          ),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Tooltip(
-                    key: key,
-                    message: tooltipText,
-                    child: const SizedBox.shrink(),
-                  );
-                },
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -736,27 +719,24 @@ void main() {
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            tooltipTheme: const TooltipThemeData(
-              decoration: customDecoration,
+      MaterialApp(
+        theme: ThemeData(
+          tooltipTheme: const TooltipThemeData(
+            decoration: customDecoration,
+          ),
+        ),
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Tooltip(
+                  key: key,
+                  message: tooltipText,
+                  child: const SizedBox.shrink(),
+                );
+              },
             ),
-          ),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Tooltip(
-                    key: key,
-                    message: tooltipText,
-                    child: const SizedBox.shrink(),
-                  );
-                },
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -781,25 +761,22 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Theme(
-        data: ThemeData(useMaterial3: false),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: TooltipTheme(
-            data: const TooltipThemeData(decoration: customDecoration),
-            child: Overlay(
-              initialEntries: <OverlayEntry>[
-                entry = OverlayEntry(
-                  builder: (BuildContext context) {
-                    return Tooltip(
-                      key: key,
-                      message: tooltipText,
-                      child: const SizedBox.shrink(),
-                    );
-                  },
-                ),
-              ],
-            ),
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: TooltipTheme(
+          data: const TooltipThemeData(decoration: customDecoration),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) {
+                  return Tooltip(
+                    key: key,
+                    message: tooltipText,
+                    child: const SizedBox.shrink(),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -825,9 +802,8 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: TooltipTheme(
+      MaterialApp(
+        home: TooltipTheme(
           data: const TooltipThemeData(decoration: customDecoration),
           child: Overlay(
             initialEntries: <OverlayEntry>[
@@ -864,27 +840,24 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            tooltipTheme: const TooltipThemeData(
-              height: customTooltipHeight,
-              padding: EdgeInsets.all(customPaddingVal),
+      MaterialApp(
+        theme: ThemeData(
+          tooltipTheme: const TooltipThemeData(
+            height: customTooltipHeight,
+            padding: EdgeInsets.all(customPaddingVal),
+          ),
+        ),
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Tooltip(
+                  key: key,
+                  message: tooltipText,
+                );
+              },
             ),
-          ),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Tooltip(
-                    key: key,
-                    message: tooltipText,
-                  );
-                },
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -913,9 +886,8 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: TooltipTheme(
+      MaterialApp(
+        home: TooltipTheme(
           data: const TooltipThemeData(
             height: customTooltipHeight,
             padding: EdgeInsets.all(customPaddingValue),

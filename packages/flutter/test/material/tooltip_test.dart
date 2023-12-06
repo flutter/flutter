@@ -542,35 +542,32 @@ void main() {
     addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
-      Theme(
-        data: ThemeData(useMaterial3: false),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry = OverlayEntry(
-                builder: (BuildContext context) {
-                  return Stack(
-                    children: <Widget>[
-                      Positioned(
-                        left: 780.0,
-                        top: 300.0,
-                        child: Tooltip(
-                          key: tooltipKey,
-                          message: tooltipText,
-                          height: 10.0,
-                          padding: EdgeInsets.zero,
-                          verticalOffset: 10.0,
-                          preferBelow: true,
-                          child: const SizedBox.shrink(),
-                        ),
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 780.0,
+                      top: 300.0,
+                      child: Tooltip(
+                        key: tooltipKey,
+                        message: tooltipText,
+                        height: 10.0,
+                        padding: EdgeInsets.zero,
+                        verticalOffset: 10.0,
+                        preferBelow: true,
+                        child: const SizedBox.shrink(),
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -1932,10 +1929,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Material3 - Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
     Widget buildApp(String text, { required double textScaleFactor }) {
-      return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+      return MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(textScaleFactor: textScaleFactor),
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               return MaterialPageRoute<void>(
