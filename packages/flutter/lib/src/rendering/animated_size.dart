@@ -230,6 +230,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final RenderBox? child = this.child;
     _lastValue = _controller.value;
     _hasVisualOverflow = false;
     final BoxConstraints constraints = this.constraints;
@@ -241,7 +242,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       return;
     }
 
-    child!.layout(constraints, parentUsesSize: true);
+    child.layout(constraints, parentUsesSize: true);
 
     switch (_state) {
       case RenderAnimatedSizeState.start:
@@ -266,6 +267,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
+    final RenderBox? child = this.child;
     if (child == null || constraints.isTight) {
       return constraints.smallest;
     }
@@ -273,13 +275,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     // This simplified version of performLayout only calculates the current
     // size without modifying global state. See performLayout for comments
     // explaining the rational behind the implementation.
-    final Size childSize = child!.getDryLayout(constraints);
+    final Size childSize = child.getDryLayout(constraints);
     switch (_state) {
       case RenderAnimatedSizeState.start:
         return constraints.constrain(childSize);
       case RenderAnimatedSizeState.stable:
         if (_sizeTween.end != childSize) {
-          return constraints.constrain(size);
+          return constraints.constrain(_animatedSize!);
         } else if (_controller.value == _controller.upperBound) {
           return constraints.constrain(childSize);
         }
