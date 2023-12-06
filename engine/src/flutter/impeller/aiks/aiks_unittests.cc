@@ -4249,5 +4249,17 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, AdvancedBlendWithClearColorOptimization) {
+  Canvas canvas;
+  canvas.DrawPaint(
+      {.color = {1.0, 1.0, 0.0, 1.0}, .blend_mode = BlendMode::kSource});
+
+  canvas.DrawRect(
+      Rect::MakeXYWH(0, 0, 200, 300),
+      {.color = {1.0, 0.0, 1.0, 1.0}, .blend_mode = BlendMode::kMultiply});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
