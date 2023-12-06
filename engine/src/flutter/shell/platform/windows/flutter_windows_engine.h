@@ -102,7 +102,7 @@ class FlutterWindowsEngine {
   bool Run(std::string_view entrypoint);
 
   // Returns true if the engine is currently running.
-  bool running() { return engine_ != nullptr; }
+  virtual bool running() const { return engine_ != nullptr; }
 
   // Stops the engine. This invalidates the pointer returned by engine().
   //
@@ -141,7 +141,9 @@ class FlutterWindowsEngine {
 
   // The ANGLE surface manager object. If this is nullptr, then we are
   // rendering using software instead of OpenGL.
-  AngleSurfaceManager* surface_manager() { return surface_manager_.get(); }
+  AngleSurfaceManager* surface_manager() const {
+    return surface_manager_.get();
+  }
 
   WindowProcDelegateManager* window_proc_delegate_manager() {
     return window_proc_delegate_manager_.get();
@@ -201,7 +203,7 @@ class FlutterWindowsEngine {
   bool MarkExternalTextureFrameAvailable(int64_t texture_id);
 
   // Posts the given callback onto the raster thread.
-  virtual bool PostRasterThreadTask(fml::closure callback);
+  virtual bool PostRasterThreadTask(fml::closure callback) const;
 
   // Invoke on the embedder's vsync callback to schedule a frame.
   void OnVsync(intptr_t baton);

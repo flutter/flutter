@@ -106,7 +106,7 @@ class WindowBindingHandler {
 
   // If true, rendering to the window should synchronize with the vsync
   // to prevent screen tearing.
-  virtual bool NeedsVSync() = 0;
+  virtual bool NeedsVSync() const = 0;
 };
 
 }  // namespace flutter
