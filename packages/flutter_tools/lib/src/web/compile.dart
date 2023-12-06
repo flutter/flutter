@@ -150,11 +150,17 @@ class WebBuilder {
       settings: buildSettingsString,
     ));
 
+    final Duration elapsedDuration = sw.elapsed;
     _flutterUsage.sendTiming(
       'build',
       compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
-      Duration(milliseconds: sw.elapsedMilliseconds),
+      elapsedDuration,
     );
+    _analytics.send(Event.timing(
+      workflow: 'build',
+      variableName: compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
+      elapsedMilliseconds: elapsedDuration.inMilliseconds,
+    ));
   }
 }
 
