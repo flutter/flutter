@@ -109,7 +109,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
-    String buildMode;
+    final String buildMode;
 
     if (boolArg('release')) {
       buildMode = 'release';

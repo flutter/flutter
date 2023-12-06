@@ -94,12 +94,12 @@ class CreateCommand extends CreateBase {
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
-        workflow: commandPath,
-        commandHasTerminal: hasTerminal,
-        createProjectType: stringArg('template'),
-        createAndroidLanguage: stringArg('android-language'),
-        createIosLanguage: stringArg('ios-language'),
-      );
+    workflow: commandPath,
+    commandHasTerminal: hasTerminal,
+    createProjectType: stringArg('template'),
+    createAndroidLanguage: stringArg('android-language'),
+    createIosLanguage: stringArg('ios-language'),
+  );
 
   // Lazy-initialize the net utilities with values from the context.
   late final Net _net = Net(
