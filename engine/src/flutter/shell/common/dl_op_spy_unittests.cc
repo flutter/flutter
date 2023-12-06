@@ -4,9 +4,11 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/shell/common/dl_op_spy.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkRSXform.h"
 
 namespace flutter {
@@ -545,7 +547,7 @@ TEST(DlOpSpy, DrawTextBlob) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
     std::string string = "xx";
-    SkFont font;
+    SkFont font = CreateTestFontOfSize(12);
     auto text_blob = SkTextBlob::MakeFromString(string.c_str(), font);
     builder.DrawTextBlob(text_blob, 1, 1, paint);
     sk_sp<DisplayList> dl = builder.Build();
@@ -557,7 +559,7 @@ TEST(DlOpSpy, DrawTextBlob) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
     std::string string = "xx";
-    SkFont font;
+    SkFont font = CreateTestFontOfSize(12);
     auto text_blob = SkTextBlob::MakeFromString(string.c_str(), font);
     builder.DrawTextBlob(text_blob, 1, 1, paint);
     sk_sp<DisplayList> dl = builder.Build();
