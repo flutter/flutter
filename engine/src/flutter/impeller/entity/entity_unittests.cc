@@ -2457,6 +2457,14 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
                     "for advanced blends.";
   }
 
+  auto background_contents = std::make_shared<SolidColorContents>();
+  background_contents->SetGeometry(
+      Geometry::MakeRect(Rect::MakeXYWH(200, 200, 200, 200)));
+  background_contents->SetColor(Color::Blue());
+  Entity background_entity;
+  background_entity.SetTransform(Matrix::MakeScale(Vector3(2, 2, 1)));
+  background_entity.SetContents(background_contents);
+
   auto contents = std::make_shared<SolidColorContents>();
   contents->SetGeometry(Geometry::MakeRect(Rect::MakeXYWH(100, 100, 100, 100)));
   contents->SetColor(Color::Red());
@@ -2482,6 +2490,7 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
       RenderTarget::kDefaultColorAttachmentConfig, stencil_config);
   auto content_context = ContentContext(
       GetContext(), TypographerContextSkia::Make(), test_allocator);
+  pass->AddEntity(std::move(background_entity));
   pass->AddEntity(std::move(entity));
 
   EXPECT_TRUE(pass->Render(content_context, rt));
