@@ -13,7 +13,7 @@ dependencies:
     path: ../devicelab
   http_parser: 4.0.2
   meta: 1.11.0
-  path: 1.8.3
+  path: 1.9.0
   platform: 3.1.3
   process: 5.0.1
   test: 1.24.9
@@ -74,4 +74,4 @@ dependencies:
 dev_dependencies:
   test_api: 0.6.1
 
-# PUBSPEC CHECKSUM: 43d4
+# PUBSPEC CHECKSUM: 29d2
