@@ -62,9 +62,8 @@ Contents::ClipCoverage ClipContents::GetClipCoverage(
   FML_UNREACHABLE();
 }
 
-bool ClipContents::ShouldRender(
-    const Entity& entity,
-    const std::optional<Rect>& clip_coverage) const {
+bool ClipContents::ShouldRender(const Entity& entity,
+                                const std::optional<Rect> clip_coverage) const {
   return true;
 }
 
@@ -161,7 +160,7 @@ Contents::ClipCoverage ClipRestoreContents::GetClipCoverage(
 
 bool ClipRestoreContents::ShouldRender(
     const Entity& entity,
-    const std::optional<Rect>& clip_coverage) const {
+    const std::optional<Rect> clip_coverage) const {
   return true;
 }
 

@@ -131,11 +131,10 @@ bool Contents::ApplyColorFilter(
 }
 
 bool Contents::ShouldRender(const Entity& entity,
-                            const std::optional<Rect>& clip_coverage) const {
+                            const std::optional<Rect> clip_coverage) const {
   if (!clip_coverage.has_value()) {
     return false;
   }
-
   auto coverage = GetCoverage(entity);
   if (!coverage.has_value()) {
     return false;
