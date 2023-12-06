@@ -9,14 +9,14 @@ namespace flutter {
 ExternalTexturePixelBuffer::ExternalTexturePixelBuffer(
     const FlutterDesktopPixelBufferTextureCallback texture_callback,
     void* user_data,
-    const GlProcs& gl_procs)
+    std::shared_ptr<GlProcTable> gl)
     : texture_callback_(texture_callback),
       user_data_(user_data),
-      gl_(gl_procs) {}
+      gl_(std::move(gl)) {}
 
 ExternalTexturePixelBuffer::~ExternalTexturePixelBuffer() {
   if (gl_texture_ != 0) {
-    gl_.glDeleteTextures(1, &gl_texture_);
+    gl_->DeleteTextures(1, &gl_texture_);
   }
 }
 
@@ -51,20 +51,20 @@ bool ExternalTexturePixelBuffer::CopyPixelBuffer(size_t& width,
   height = pixel_buffer->height;
 
   if (gl_texture_ == 0) {
-    gl_.glGenTextures(1, &gl_texture_);
+    gl_->GenTextures(1, &gl_texture_);
 
-    gl_.glBindTexture(GL_TEXTURE_2D, gl_texture_);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl_.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl_->BindTexture(GL_TEXTURE_2D, gl_texture_);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl_->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   } else {
-    gl_.glBindTexture(GL_TEXTURE_2D, gl_texture_);
+    gl_->BindTexture(GL_TEXTURE_2D, gl_texture_);
   }
-  gl_.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pixel_buffer->width,
-                   pixel_buffer->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                   pixel_buffer->buffer);
+  gl_->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pixel_buffer->width,
+                  pixel_buffer->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                  pixel_buffer->buffer);
   if (pixel_buffer->release_callback) {
     pixel_buffer->release_callback(pixel_buffer->release_context);
   }
