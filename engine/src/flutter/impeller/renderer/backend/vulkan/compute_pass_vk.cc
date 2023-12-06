@@ -9,6 +9,7 @@
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/command.h"
 
 namespace impeller {
 
@@ -43,7 +44,7 @@ static bool UpdateBindingLayouts(const Bindings& bindings,
 
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
-  for (const auto& [_, data] : bindings.sampled_images) {
+  for (const TextureAndSampler& data : bindings.sampled_images) {
     if (!TextureVK::Cast(*data.texture.resource).SetLayout(barrier)) {
       return false;
     }
@@ -58,7 +59,7 @@ static bool UpdateBindingLayouts(const ComputeCommand& command,
 
 static bool UpdateBindingLayouts(const std::vector<ComputeCommand>& commands,
                                  const vk::CommandBuffer& buffer) {
-  for (const auto& command : commands) {
+  for (const ComputeCommand& command : commands) {
     if (!UpdateBindingLayouts(command, buffer)) {
       return false;
     }

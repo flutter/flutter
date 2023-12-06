@@ -145,12 +145,12 @@ bool BufferBindingsGLES::BindUniformData(const ProcTableGLES& gl,
                                          const Bindings& vertex_bindings,
                                          const Bindings& fragment_bindings) {
   for (const auto& buffer : vertex_bindings.buffers) {
-    if (!BindUniformBuffer(gl, transients_allocator, buffer.second.view)) {
+    if (!BindUniformBuffer(gl, transients_allocator, buffer.view)) {
       return false;
     }
   }
   for (const auto& buffer : fragment_bindings.buffers) {
-    if (!BindUniformBuffer(gl, transients_allocator, buffer.second.view)) {
+    if (!BindUniformBuffer(gl, transients_allocator, buffer.view)) {
       return false;
     }
   }
@@ -345,13 +345,13 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     size_t unit_start_index) {
   size_t active_index = unit_start_index;
   for (const auto& data : bindings.sampled_images) {
-    const auto& texture_gles = TextureGLES::Cast(*data.second.texture.resource);
-    if (data.second.texture.GetMetadata() == nullptr) {
+    const auto& texture_gles = TextureGLES::Cast(*data.texture.resource);
+    if (data.texture.GetMetadata() == nullptr) {
       VALIDATION_LOG << "No metadata found for texture binding.";
       return std::nullopt;
     }
 
-    auto location = ComputeTextureLocation(data.second.texture.GetMetadata());
+    auto location = ComputeTextureLocation(data.texture.GetMetadata());
     if (location == -1) {
       return std::nullopt;
     }
@@ -377,7 +377,7 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     /// If there is a sampler for the texture at the same index, configure the
     /// bound texture using that sampler.
     ///
-    const auto& sampler_gles = SamplerGLES::Cast(*data.second.sampler);
+    const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
     if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
       return std::nullopt;
     }

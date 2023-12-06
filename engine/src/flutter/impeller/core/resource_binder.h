@@ -4,12 +4,8 @@
 
 #pragma once
 
-#include <map>
 #include <memory>
-#include <optional>
-#include <string>
 
-#include "flutter/fml/logging.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler.h"

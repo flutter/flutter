@@ -21,6 +21,7 @@
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+#include "impeller/renderer/command.h"
 #include "impeller/renderer/compute_command.h"
 
 namespace impeller {
@@ -209,7 +210,7 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
   ComputePassBindingsCache pass_bindings(encoder);
 
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
-  for (const auto& command : commands_) {
+  for (const ComputeCommand& command : commands_) {
 #ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
     if (!command.label.empty()) {
@@ -223,16 +224,16 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
         ComputePipelineMTL::Cast(*command.pipeline)
             .GetMTLComputePipelineState());
 
-    for (const auto& buffer : command.bindings.buffers) {
-      if (!Bind(pass_bindings, *allocator, buffer.first,
-                buffer.second.view.resource)) {
+    for (const BufferAndUniformSlot& buffer : command.bindings.buffers) {
+      if (!Bind(pass_bindings, *allocator, buffer.slot.ext_res_0,
+                buffer.view.resource)) {
         return false;
       }
     }
 
-    for (const auto& data : command.bindings.sampled_images) {
-      if (!Bind(pass_bindings, data.first, *data.second.sampler,
-                *data.second.texture.resource)) {
+    for (const TextureAndSampler& data : command.bindings.sampled_images) {
+      if (!Bind(pass_bindings, data.slot.texture_index, *data.sampler,
+                *data.texture.resource)) {
         return false;
       }
     }

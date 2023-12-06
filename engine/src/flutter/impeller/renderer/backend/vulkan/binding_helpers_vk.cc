@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/binding_helpers_vk.h"
 #include "fml/status.h"
+#include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
@@ -28,7 +29,7 @@ static bool BindImages(const Bindings& bindings,
                        vk::DescriptorSet& vk_desc_set,
                        std::vector<vk::DescriptorImageInfo>& images,
                        std::vector<vk::WriteDescriptorSet>& writes) {
-  for (const auto& [index, data] : bindings.sampled_images) {
+  for (const TextureAndSampler& data : bindings.sampled_images) {
     auto texture = data.texture.resource;
     const auto& texture_vk = TextureVK::Cast(*texture);
     const SamplerVK& sampler = SamplerVK::Cast(*data.sampler);
@@ -66,7 +67,7 @@ static bool BindBuffers(const Bindings& bindings,
                         const std::vector<DescriptorSetLayout>& desc_set,
                         std::vector<vk::DescriptorBufferInfo>& buffers,
                         std::vector<vk::WriteDescriptorSet>& writes) {
-  for (const auto& [buffer_index, data] : bindings.buffers) {
+  for (const BufferAndUniformSlot& data : bindings.buffers) {
     const auto& buffer_view = data.view.resource.buffer;
 
     auto device_buffer = buffer_view->GetDeviceBuffer(allocator);
