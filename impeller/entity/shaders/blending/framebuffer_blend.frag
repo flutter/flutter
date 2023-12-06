@@ -10,9 +10,23 @@
 #include <impeller/types.glsl>
 #include "blend_select.glsl"
 
-layout(constant_id = 0) const float blend_type = 0.0;
-layout(constant_id = 1) const float supports_decal = 1.0;
+// Warning: if any of the constant values or layouts are changed in this
+// file, then the hard-coded constant value in
+// impeller/renderer/backend/vulkan/binding_helpers_vk.cc
+layout(constant_id = 0) const float blend_type = 0;
+layout(constant_id = 1) const float supports_decal = 1;
 
+#ifdef IMPELLER_TARGET_VULKAN
+layout(set = 0,
+       binding = 0,
+       input_attachment_index = 0) uniform subpassInputMS uSub;
+
+vec4 ReadDestination() {
+  return (subpassLoad(uSub, 0) + subpassLoad(uSub, 1) + subpassLoad(uSub, 2) +
+          subpassLoad(uSub, 3)) /
+         vec4(4.0);
+}
+#else
 layout(set = 0,
        binding = 0,
        input_attachment_index = 0) uniform subpassInput uSub;
@@ -20,6 +34,7 @@ layout(set = 0,
 vec4 ReadDestination() {
   return subpassLoad(uSub);
 }
+#endif  // IMPELLER_TARGET_VULKAN
 
 uniform sampler2D texture_sampler_src;
 

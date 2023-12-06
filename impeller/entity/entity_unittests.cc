@@ -10,10 +10,12 @@
 
 #include "fml/logging.h"
 #include "gtest/gtest.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -41,6 +43,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command.h"
+#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
@@ -2526,6 +2529,63 @@ TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
   ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
             expected_constants);
 }
+
+TEST_P(EntityTest, FramebufferFetchPipelinesDeclareUsage) {
+  auto content_context =
+      ContentContext(GetContext(), TypographerContextSkia::Make());
+  if (!content_context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    GTEST_SKIP() << "Framebuffer fetch not supported.";
+  }
+
+  ContentContextOptions options;
+  options.color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt;
+  auto color_burn =
+      content_context.GetFramebufferBlendColorBurnPipeline(options);
+
+  EXPECT_TRUE(color_burn->GetDescriptor().UsesSubpassInput());
+}
+
+TEST_P(EntityTest, PipelineDescriptorEqAndHash) {
+  auto desc_1 = std::make_shared<PipelineDescriptor>();
+  auto desc_2 = std::make_shared<PipelineDescriptor>();
+
+  EXPECT_TRUE(desc_1->IsEqual(*desc_2));
+  EXPECT_EQ(desc_1->GetHash(), desc_2->GetHash());
+
+  desc_1->SetUseSubpassInput(UseSubpassInput::kYes);
+
+  EXPECT_FALSE(desc_1->IsEqual(*desc_2));
+  EXPECT_NE(desc_1->GetHash(), desc_2->GetHash());
+
+  desc_2->SetUseSubpassInput(UseSubpassInput::kYes);
+
+  EXPECT_TRUE(desc_1->IsEqual(*desc_2));
+  EXPECT_EQ(desc_1->GetHash(), desc_2->GetHash());
+}
+
+#ifdef FML_OS_LINUX
+TEST_P(EntityTest, FramebufferFetchVulkanBindingOffsetIsTheSame) {
+  // Using framebuffer fetch on Vulkan requires that we maintain a subpass input
+  // binding that we don't have a good route for configuring with the current
+  // metadata approach. This test verifies that the binding value doesn't change
+  // from the expected constant.
+  // See also:
+  //   * impeller/renderer/backend/vulkan/binding_helpers_vk.cc
+  //   * impeller/entity/shaders/blending/framebuffer_blend.frag
+  // This test only works on Linux because macOS hosts incorrectly populate the
+  // Vulkan descriptor sets based on the MSL compiler settings.
+
+  bool expected_layout = false;
+  for (const DescriptorSetLayout& layout : FramebufferBlendColorBurnPipeline::
+           FragmentShader::kDescriptorSetLayouts) {
+    if (layout.binding == 64 &&
+        layout.descriptor_type == DescriptorType::kInputAttachment) {
+      expected_layout = true;
+    }
+  }
+  EXPECT_TRUE(expected_layout);
+}
+#endif
 
 }  // namespace testing
 }  // namespace impeller
