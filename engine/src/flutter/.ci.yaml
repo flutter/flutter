@@ -13,17 +13,6 @@ enabled_branches:
 platform_properties:
   linux:
     properties:
-      build_host: "false"
-      build_fuchsia: "false"
-      build_android_debug: "false"
-      build_android_aot: "false"
-      build_android_vulkan: "false"
-      build_ios: "false"
-      build_android_jit_release: "false"
-      gcs_goldens_bucket: ""
-      ios_debug: "false"
-      ios_profile: "false"
-      ios_release: "false"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
@@ -35,17 +24,6 @@ platform_properties:
       cores: "8"
   mac:
     properties:
-      build_host: "false"
-      build_fuchsia: "false"
-      build_android_debug: "false"
-      build_android_aot: "false"
-      build_android_vulkan: "false"
-      build_ios: "false"
-      build_android_jit_release: "false"
-      gcs_goldens_bucket: ""
-      ios_debug: "false"
-      ios_profile: "false"
-      ios_release: "false"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
@@ -65,17 +43,6 @@ platform_properties:
       mac_model: "Macmini8,1|Macmini9,1"
   windows:
     properties:
-      build_host: "false"
-      build_fuchsia: "false"
-      build_android_debug: "false"
-      build_android_aot: "false"
-      build_android_vulkan: "false"
-      build_ios: "false"
-      build_android_jit_release: "false"
-      gcs_goldens_bucket: ""
-      ios_debug: "false"
-      ios_profile: "false"
-      ios_release: "false"
       # CIPD flutter/java/openjdk/$platform
       dependencies: >-
         [
