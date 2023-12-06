@@ -18,6 +18,7 @@
 #include "impeller/renderer/backend/metal/pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+#include "impeller/renderer/command.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
@@ -408,15 +409,15 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
   auto bind_stage_resources = [&allocator, &pass_bindings](
                                   const Bindings& bindings,
                                   ShaderStage stage) -> bool {
-    for (const auto& buffer : bindings.buffers) {
-      if (!Bind(pass_bindings, *allocator, stage, buffer.first,
-                buffer.second.view.resource)) {
+    for (const BufferAndUniformSlot& buffer : bindings.buffers) {
+      if (!Bind(pass_bindings, *allocator, stage, buffer.slot.ext_res_0,
+                buffer.view.resource)) {
         return false;
       }
     }
-    for (const auto& data : bindings.sampled_images) {
-      if (!Bind(pass_bindings, stage, data.first, *data.second.sampler,
-                *data.second.texture.resource)) {
+    for (const TextureAndSampler& data : bindings.sampled_images) {
+      if (!Bind(pass_bindings, stage, data.slot.texture_index, *data.sampler,
+                *data.texture.resource)) {
         return false;
       }
     }

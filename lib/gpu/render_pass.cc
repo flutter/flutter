@@ -386,7 +386,6 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
 
   impeller::SampledImageSlot image_slot;
   image_slot.texture_index = slot_id;
-  image_slot.sampler_index = slot_id;
   return command.BindResource(flutter::gpu::ToImpellerShaderStage(stage),
                               image_slot, metadata, texture->GetTexture(),
                               sampler);

@@ -21,6 +21,7 @@
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/command.h"
 #include "vulkan/vulkan_enums.hpp"
 #include "vulkan/vulkan_handles.hpp"
 #include "vulkan/vulkan_to_string.hpp"
@@ -315,7 +316,7 @@ static bool UpdateBindingLayouts(const Bindings& bindings,
 
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
-  for (const auto& [_, data] : bindings.sampled_images) {
+  for (const TextureAndSampler& data : bindings.sampled_images) {
     if (!TextureVK::Cast(*data.texture.resource).SetLayout(barrier)) {
       return false;
     }
@@ -331,7 +332,7 @@ static bool UpdateBindingLayouts(const Command& command,
 
 static bool UpdateBindingLayouts(const std::vector<Command>& commands,
                                  const vk::CommandBuffer& buffer) {
-  for (const auto& command : commands) {
+  for (const Command& command : commands) {
     if (!UpdateBindingLayouts(command, buffer)) {
       return false;
     }
