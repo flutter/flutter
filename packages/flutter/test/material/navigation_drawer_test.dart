@@ -11,7 +11,7 @@ void main() {
       (WidgetTester tester) async {
     int mutatedIndex = -1;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
     widgetSetup(tester, 3000, viewHeight: 3000);
     final Widget widget = _buildWidget(
       scaffoldKey,
@@ -54,7 +54,7 @@ void main() {
       (WidgetTester tester) async {
     const Color color = Colors.yellow;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       _buildWidget(
@@ -125,7 +125,7 @@ void main() {
       (WidgetTester tester) async {
     const double elevation = 42.0;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
     final NavigationDrawer drawer = NavigationDrawer(
       elevation: elevation,
       children: <Widget>[
@@ -292,7 +292,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Navigation drawer semantics', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData theme = ThemeData();
     Widget widget({int selectedIndex = 0}) {
       return _buildWidget(
         scaffoldKey,
