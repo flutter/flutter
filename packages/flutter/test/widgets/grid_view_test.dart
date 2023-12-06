@@ -904,35 +904,7 @@ void main() {
       'SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent corrected',
       (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/138871
-    const SliverGridDelegateWithFixedCrossAxisCount delegate =
-        SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 3,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      mainAxisExtent: -100,
-    );
-
-    final SliverGridRegularTileLayout sliverGridRegularTileLayout =
-        delegate.getLayout(
-      const SliverConstraints(
-        axisDirection: AxisDirection.down,
-        growthDirection: GrowthDirection.forward,
-        userScrollDirection: ScrollDirection.forward,
-        scrollOffset: 100.0,
-        precedingScrollExtent: 0.0,
-        overlap: 0.0,
-        remainingPaintExtent: 0.0,
-        crossAxisExtent: 500,
-        crossAxisDirection: AxisDirection.right,
-        viewportMainAxisExtent: 100.0,
-        remainingCacheExtent: 0.0,
-        cacheOrigin: 0.0,
-      ),
-    ) as SliverGridRegularTileLayout;
-
-    expect(sliverGridRegularTileLayout.childMainAxisExtent, 0);
-
-    Widget build(double mainAxisExtent) {
+    Widget buildGridView(double mainAxisExtent) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.builder(
@@ -954,50 +926,17 @@ void main() {
       );
     }
 
-    double mainAxisExtent = 100;
-    await tester.pumpWidget(build(mainAxisExtent));
-
-    expect(tester.takeException(), isNull);
-
-    mainAxisExtent = -100;
-    await tester.pumpWidget(build(mainAxisExtent));
-
-    expect(tester.takeException(), isNull);
+    expect(
+      () => tester.pumpWidget(buildGridView(-100)),
+      throwsA(isA<AssertionError>()),
+    );
   });
 
   testWidgets(
       'SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent corrected',
       (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/138871
-    const SliverGridDelegateWithMaxCrossAxisExtent delegate =
-        SliverGridDelegateWithMaxCrossAxisExtent(
-      maxCrossAxisExtent: 100,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      mainAxisExtent: -100,
-    );
-
-    final SliverGridRegularTileLayout sliverGridRegularTileLayout =
-        delegate.getLayout(
-      const SliverConstraints(
-        axisDirection: AxisDirection.down,
-        growthDirection: GrowthDirection.forward,
-        userScrollDirection: ScrollDirection.forward,
-        scrollOffset: 100.0,
-        precedingScrollExtent: 0.0,
-        overlap: 0.0,
-        remainingPaintExtent: 0.0,
-        crossAxisExtent: 500,
-        crossAxisDirection: AxisDirection.right,
-        viewportMainAxisExtent: 100.0,
-        remainingCacheExtent: 0.0,
-        cacheOrigin: 0.0,
-      ),
-    ) as SliverGridRegularTileLayout;
-
-    expect(sliverGridRegularTileLayout.childMainAxisExtent, 0);
-
-    Widget build(double mainAxisExtent) {
+    Widget buildGridView(double mainAxisExtent) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.builder(
@@ -1019,14 +958,9 @@ void main() {
       );
     }
 
-    double mainAxisExtent = 100;
-    await tester.pumpWidget(build(mainAxisExtent));
-
-    expect(tester.takeException(), isNull);
-
-    mainAxisExtent = -100;
-    await tester.pumpWidget(build(mainAxisExtent));
-
-    expect(tester.takeException(), isNull);
+    expect(
+      () => tester.pumpWidget(buildGridView(-100)),
+      throwsA(isA<AssertionError>()),
+    );
   });
 }
