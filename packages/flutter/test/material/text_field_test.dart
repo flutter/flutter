@@ -623,12 +623,11 @@ void main() {
     if (isTargetPlatformiOS) {
       expect(find.text('Share...'), findsOneWidget);
       await tester.tap(find.text('Share...'));
-      expect(lastShare, 'Test');
     } else {
       expect(find.text('Share'), findsOneWidget);
       await tester.tap(find.text('Share'));
-      expect(lastShare, 'Test');
     }
+    expect(lastShare, 'Test');
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
