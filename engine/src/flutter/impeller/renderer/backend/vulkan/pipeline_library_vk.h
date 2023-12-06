@@ -35,6 +35,7 @@ class PipelineLibraryVK final
   friend ContextVK;
 
   std::weak_ptr<DeviceHolder> device_holder_;
+  bool supports_framebuffer_fetch_ = false;
   std::shared_ptr<PipelineCacheVK> pso_cache_;
   std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   Mutex pipelines_mutex_;

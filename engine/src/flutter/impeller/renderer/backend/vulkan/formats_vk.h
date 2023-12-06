@@ -11,6 +11,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
+#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 
@@ -281,6 +282,8 @@ constexpr vk::DescriptorType ToVKDescriptorType(DescriptorType type) {
     case DescriptorType::kSampler:
       return vk::DescriptorType::eSampler;
       break;
+    case DescriptorType::kInputAttachment:
+      return vk::DescriptorType::eInputAttachment;
   }
 
   FML_UNREACHABLE();
@@ -427,7 +430,8 @@ constexpr vk::AttachmentDescription CreateAttachmentDescription(
     SampleCount sample_count,
     LoadAction load_action,
     StoreAction store_action,
-    vk::ImageLayout current_layout) {
+    vk::ImageLayout current_layout,
+    bool supports_framebuffer_fetch) {
   vk::AttachmentDescription vk_attachment;
 
   vk_attachment.format = ToVKImageFormat(format);
@@ -466,7 +470,11 @@ constexpr vk::AttachmentDescription CreateAttachmentDescription(
   switch (kind) {
     case AttachmentKind::kColor:
       vk_attachment.initialLayout = current_layout;
-      vk_attachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+      if (supports_framebuffer_fetch) {
+        vk_attachment.finalLayout = vk::ImageLayout::eGeneral;
+      } else {
+        vk_attachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+      }
       break;
     case AttachmentKind::kDepth:
     case AttachmentKind::kStencil:

@@ -37,6 +37,7 @@
 #include "flutter/vulkan/procs/vulkan_proc_table.h"               // nogncheck
 #include "flutter/vulkan/swiftshader_path.h"                      // nogncheck
 #include "impeller/entity/vk/entity_shaders_vk.h"                 // nogncheck
+#include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"      // nogncheck
 #include "impeller/entity/vk/modern_shaders_vk.h"                 // nogncheck
 #include "impeller/renderer/backend/vulkan/context_vk.h"          // nogncheck
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"  // nogncheck
@@ -53,6 +54,9 @@ static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
                                              impeller_entity_shaders_vk_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_vk_data,
                                              impeller_modern_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_vk_data,
+          impeller_framebuffer_blend_shaders_vk_length),
 #if IMPELLER_ENABLE_3D
       std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_vk_data,
                                              impeller_scene_shaders_vk_length),

@@ -13,6 +13,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/entity/vk/entity_shaders_vk.h"
+#include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"
 #include "impeller/entity/vk/modern_shaders_vk.h"
 #include "impeller/fixtures/vk/fixtures_shaders_vk.h"
 #include "impeller/playground/imgui/vk/imgui_shaders_vk.h"
@@ -33,6 +34,9 @@ ShaderLibraryMappingsForPlayground() {
                                              impeller_entity_shaders_vk_length),
       std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_vk_data,
                                              impeller_modern_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_vk_data,
+          impeller_framebuffer_blend_shaders_vk_length),
       std::make_shared<fml::NonOwnedMapping>(
           impeller_fixtures_shaders_vk_data,
           impeller_fixtures_shaders_vk_length),

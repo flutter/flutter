@@ -32,6 +32,7 @@ class DescriptorPoolVK {
   fml::StatusOr<std::vector<vk::DescriptorSet>> AllocateDescriptorSets(
       uint32_t buffer_count,
       uint32_t sampler_count,
+      uint32_t subpass_count,
       const std::vector<vk::DescriptorSetLayout>& layouts);
 
  private:

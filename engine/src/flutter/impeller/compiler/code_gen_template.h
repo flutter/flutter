@@ -173,7 +173,14 @@ std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
   // ===========================================================================
   // Metadata for Vulkan =======================================================
   // ===========================================================================
-  static constexpr std::array<DescriptorSetLayout,{{length(buffers)+length(sampled_images)}}> kDescriptorSetLayouts{
+  static constexpr std::array<DescriptorSetLayout,{{length(buffers)+length(sampled_images)+length(subpass_inputs)}}> kDescriptorSetLayouts{
+{% for subpass_input in subpass_inputs %}
+    DescriptorSetLayout{
+      {{subpass_input.binding}}, // binding = {{subpass_input.binding}}
+      {{subpass_input.descriptor_type}}, // descriptor_type = {{subpass_input.descriptor_type}}
+      {{to_shader_stage(shader_stage)}}, // shader_stage = {{to_shader_stage(shader_stage)}}
+    },
+{% endfor %}
 {% for buffer in buffers %}
     DescriptorSetLayout{
       {{buffer.binding}}, // binding = {{buffer.binding}}

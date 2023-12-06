@@ -188,6 +188,21 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
 
   const auto shader_resources = compiler_->get_shader_resources();
 
+  // Subpass Inputs.
+  {
+    auto& subpass_inputs = root["subpass_inputs"] = nlohmann::json::array_t{};
+    if (auto subpass_inputs_json =
+            ReflectResources(shader_resources.subpass_inputs);
+        subpass_inputs_json.has_value()) {
+      for (auto subpass_input : subpass_inputs_json.value()) {
+        subpass_input["descriptor_type"] = "DescriptorType::kInputAttachment";
+        subpass_inputs.emplace_back(std::move(subpass_input));
+      }
+    } else {
+      return std::nullopt;
+    }
+  }
+
   // Uniform and storage buffers.
   {
     auto& buffers = root["buffers"] = nlohmann::json::array_t{};

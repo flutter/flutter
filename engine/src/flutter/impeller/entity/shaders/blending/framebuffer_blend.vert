@@ -5,6 +5,9 @@
 #include <impeller/conversions.glsl>
 #include <impeller/types.glsl>
 
+// Warning: if any of the constant values or layouts are changed in this
+// file, then the hard-coded constant value in
+// impeller/renderer/backend/vulkan/binding_helpers_vk.cc
 uniform FrameInfo {
   mat4 mvp;
   float src_y_coord_scale;
