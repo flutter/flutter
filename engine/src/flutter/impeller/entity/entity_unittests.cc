@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "fml/logging.h"
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
@@ -2192,8 +2193,7 @@ TEST_P(EntityTest, InheritOpacityTest) {
 
   // Text contents can accept opacity if the text frames do not
   // overlap
-  SkFont font;
-  font.setSize(30);
+  SkFont font = flutter::testing::CreateTestFontOfSize(30);
   auto blob = SkTextBlob::MakeFromString("A", font);
   auto frame = MakeTextFrameFromTextBlobSkia(blob);
   auto lazy_glyph_atlas =
