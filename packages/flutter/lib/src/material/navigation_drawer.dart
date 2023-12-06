@@ -198,8 +198,7 @@ class NavigationDrawerDestination extends StatelessWidget {
 
   /// Sets the color of the destination.
   ///
-  /// If this is null, then [NavigationDrawerThemeData.backgroundColor] is used.
-  /// If that is also null, then it falls back to [ColorScheme.surface].
+  /// If this is null, then [NavigationDrawerThemeData.backgroundColor].
   final Color? backgroundColor;
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -362,7 +361,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
     return Container(
       padding: info.tilePadding,
-      color: backgroundColor ?? navigationDrawerTheme.backgroundColor ?? defaults.backgroundColor,
+      color: backgroundColor ?? navigationDrawerTheme.backgroundColor,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
