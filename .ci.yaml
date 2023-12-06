@@ -1076,7 +1076,7 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux android_preview_tool_integration_tests_1_1
+  - name: Linux android_preview_tool_integration_tests
     bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
@@ -1085,7 +1085,7 @@ targets:
       # This makes use of UpsideDownCake, a preview version of android. Preview versions eventually
       # get removed from the sdk manager, so it is hosted on CIPD to ensure integration testing
       # doesn't flake when that happens.
-      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/mac-arm64/+/version:udcv1
+      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/linux-amd64/+/version:udcv1
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:udcv1"},
@@ -1097,7 +1097,6 @@ targets:
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       shard: android_preview_tool_integration_tests
-      subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -3671,31 +3670,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac android_preview_tool_integration_tests_1_1
-    bringup: true
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:udcv1"},
-          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
-        ]
-      shard: android_preview_tool_integration_tests
-      subshard: "1_1"
-      tags: >
-        ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac tool_tests_commands
     recipe: flutter/flutter_drone
     timeout: 60
@@ -5268,31 +5242,6 @@ targets:
         ]
       shard: tool_integration_tests
       subshard: "6_6"
-      tags: >
-        ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Windows android_preview_tool_integration_tests_1_1
-    bringup: true
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:udcv1"},
-          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      shard: android_preview_tool_integration_tests
-      subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
       test_timeout_secs: "2700"
