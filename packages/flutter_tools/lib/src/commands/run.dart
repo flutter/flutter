@@ -448,87 +448,43 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<CustomDimensions> get usageValues async {
-    String deviceType, deviceOsVersion;
-    bool isEmulator;
-    bool anyAndroidDevices = false;
-    bool anyIOSDevices = false;
-    bool anyWirelessIOSDevices = false;
+    final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
 
-    if (devices == null || devices!.isEmpty) {
-      deviceType = 'none';
-      deviceOsVersion = 'none';
-      isEmulator = false;
-    } else if (devices!.length == 1) {
-      final Device device = devices![0];
-      final TargetPlatform platform = await device.targetPlatform;
-      anyAndroidDevices = platform == TargetPlatform.android;
-      anyIOSDevices = platform == TargetPlatform.ios;
-      if (device is IOSDevice && device.isWirelesslyConnected) {
-        anyWirelessIOSDevices = true;
-      }
-      deviceType = getNameForTargetPlatform(platform);
-      deviceOsVersion = await device.sdkNameAndVersion;
-      isEmulator = await device.isLocalEmulator;
-    } else {
-      deviceType = 'multiple';
-      deviceOsVersion = 'multiple';
-      isEmulator = false;
-      for (final Device device in devices!) {
-        final TargetPlatform platform = await device.targetPlatform;
-        anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
-        anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
-        if (device is IOSDevice && device.isWirelesslyConnected) {
-          anyWirelessIOSDevices = true;
-        }
-        if (anyAndroidDevices && anyIOSDevices) {
-          break;
-        }
-      }
-    }
-
-    String? iOSInterfaceType;
-    if (anyIOSDevices) {
-      iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
-    }
-
-    String? androidEmbeddingVersion;
-    final List<String> hostLanguage = <String>[];
-    if (anyAndroidDevices) {
-      final AndroidProject androidProject = FlutterProject.current().android;
-      if (androidProject.existsSync()) {
-        hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
-        androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
-      }
-    }
-    if (anyIOSDevices) {
-      final IosProject iosProject = FlutterProject.current().ios;
-      if (iosProject.exists) {
-        final Iterable<File> swiftFiles = iosProject.hostAppRoot
-            .listSync(recursive: true, followLinks: false)
-            .whereType<File>()
-            .where((File file) => globals.fs.path.extension(file.path) == '.swift');
-        hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
-      }
-    }
-
-    final BuildInfo buildInfo = await getBuildInfo();
-    final String modeName = buildInfo.modeName;
     return CustomDimensions(
-      commandRunIsEmulator: isEmulator,
-      commandRunTargetName: deviceType,
-      commandRunTargetOsVersion: deviceOsVersion,
-      commandRunModeName: modeName,
-      commandRunProjectModule: FlutterProject.current().isModule,
-      commandRunProjectHostLanguage: hostLanguage.join(','),
-      commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
-      commandRunEnableImpeller: enableImpeller.asBool,
-      commandRunIOSInterfaceType: iOSInterfaceType,
-      commandRunIsTest: targetFile.endsWith('_test.dart'),
+      commandRunIsEmulator: record.runIsEmulator,
+      commandRunTargetName: record.runTargetName,
+      commandRunTargetOsVersion: record.runTargetOsVersion,
+      commandRunModeName: record.runModeName,
+      commandRunProjectModule: record.runProjectModule,
+      commandRunProjectHostLanguage: record.runProjectHostLanguage,
+      commandRunAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
+      commandRunEnableImpeller: record.runEnableImpeller,
+      commandRunIOSInterfaceType: record.runIOSInterfaceType,
+      commandRunIsTest: record.runIsTest,
     );
   }
 
   @override
   Future<analytics.Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
+
+    return analytics.Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      runIsEmulator: record.runIsEmulator,
+      runTargetName: record.runTargetName,
+      runTargetOsVersion: record.runTargetOsVersion,
+      runModeName: record.runModeName,
+      runProjectModule: record.runProjectModule,
+      runProjectHostLanguage: record.runProjectHostLanguage,
+      runAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
+      runEnableImpeller: record.runEnableImpeller,
+      runIOSInterfaceType: record.runIOSInterfaceType,
+      runIsTest: record.runIsTest,
+    );
+  }
+
+  late final Future<AnalyticsUsageValuesRecord> _sharedAnalyticsUsageValues = (() async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
     bool anyAndroidDevices = false;
@@ -594,9 +550,7 @@ class RunCommand extends RunCommandBase {
 
     final BuildInfo buildInfo = await getBuildInfo();
     final String modeName = buildInfo.modeName;
-    return analytics.Event.commandUsageValues(
-      workflow: commandPath,
-      commandHasTerminal: hasTerminal,
+    return (
       runIsEmulator: isEmulator,
       runTargetName: deviceType,
       runTargetOsVersion: deviceOsVersion,
@@ -608,7 +562,7 @@ class RunCommand extends RunCommandBase {
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
     );
-  }
+  })();
 
   @override
   bool get shouldRunPub {
@@ -885,3 +839,17 @@ class RunCommand extends RunCommandBase {
     );
   }
 }
+
+/// Schema for the usage values to send for analytics reporting.
+typedef AnalyticsUsageValuesRecord = ({
+  String? runAndroidEmbeddingVersion,
+  bool? runEnableImpeller,
+  String? runIOSInterfaceType,
+  bool runIsEmulator,
+  bool runIsTest,
+  String runModeName,
+  String runProjectHostLanguage,
+  bool runProjectModule,
+  String runTargetName,
+  String runTargetOsVersion,
+});
