@@ -373,7 +373,7 @@ ui::AXPlatformNodeWin* FlutterWindow::GetAlert() {
   return alert_node_.get();
 }
 
-bool FlutterWindow::NeedsVSync() {
+bool FlutterWindow::NeedsVSync() const {
   // If the Desktop Window Manager composition is enabled,
   // the system itself synchronizes with v-sync.
   // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw

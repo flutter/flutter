@@ -36,6 +36,38 @@ bool SurfaceWillUpdate(size_t cur_width,
       (cur_height != target_height) || (cur_width != target_width);
   return non_zero_target_dims && not_same_size;
 }
+
+/// Update the surface's swap interval to block until the v-blank iff
+/// the system compositor is disabled.
+void UpdateVsync(const FlutterWindowsEngine& engine,
+                 const WindowBindingHandler& window) {
+  AngleSurfaceManager* surface_manager = engine.surface_manager();
+  if (!surface_manager) {
+    return;
+  }
+
+  // Updating the vsync makes the EGL context and render surface current.
+  // If the engine is running, the render surface should only be made current on
+  // the raster thread. If the engine is initializing, the raster thread doesn't
+  // exist yet and the render surface can be made current on the platform
+  // thread.
+  auto needs_vsync = window.NeedsVSync();
+  if (engine.running()) {
+    engine.PostRasterThreadTask([surface_manager, needs_vsync]() {
+      surface_manager->SetVSyncEnabled(needs_vsync);
+    });
+  } else {
+    surface_manager->SetVSyncEnabled(needs_vsync);
+
+    // Release the EGL context so that the raster thread can use it.
+    if (!surface_manager->ClearCurrent()) {
+      FML_LOG(ERROR)
+          << "Unable to clear current surface after updating the swap interval";
+      return;
+    }
+  }
+}
+
 }  // namespace
 
 FlutterWindowsView::FlutterWindowsView(
@@ -580,15 +612,10 @@ bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
 void FlutterWindowsView::CreateRenderSurface() {
   if (engine_ && engine_->surface_manager()) {
     PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
-    bool enable_vsync = binding_handler_->NeedsVSync();
     engine_->surface_manager()->CreateSurface(GetRenderTarget(), bounds.width,
-                                              bounds.height, enable_vsync);
+                                              bounds.height);
 
-    // The EGL context cannot be current on multiple threads.
-    // Creating the render surface runs on the platform thread and
-    // makes the EGL context current. Thus, the EGL context must be
-    // released so that the raster thread can use it for rendering.
-    engine_->surface_manager()->ClearCurrent();
+    UpdateVsync(*engine_, *binding_handler_);
 
     resize_target_width_ = bounds.width;
     resize_target_height_ = bounds.height;
@@ -660,24 +687,7 @@ void FlutterWindowsView::UpdateSemanticsEnabled(bool enabled) {
 }
 
 void FlutterWindowsView::OnDwmCompositionChanged() {
-  AngleSurfaceManager* surface_manager = engine_->surface_manager();
-  if (!surface_manager) {
-    return;
-  }
-
-  // Update the surface with the new composition state.
-  // Switch to the raster thread as the render EGL context can only be
-  // current on a single thread a time.
-  auto needs_vsync = binding_handler_->NeedsVSync();
-  engine_->PostRasterThreadTask([surface_manager, needs_vsync]() {
-    if (!surface_manager->MakeCurrent()) {
-      FML_LOG(ERROR)
-          << "Unable to make surface current to update the swap interval";
-      return;
-    }
-
-    surface_manager->SetVSyncEnabled(needs_vsync);
-  });
+  UpdateVsync(*engine_, *binding_handler_);
 }
 
 void FlutterWindowsView::OnWindowStateEvent(HWND hwnd, WindowStateEvent event) {

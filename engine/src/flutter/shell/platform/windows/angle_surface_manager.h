@@ -36,11 +36,11 @@ class AngleSurfaceManager {
   // Target represents the visual entity to bind to. Width and
   // height represent dimensions surface is created at.
   //
-  // This binds |egl_context_| to the current thread.
+  // After the surface is created, |SetVSyncEnabled| should be called on a
+  // thread that can bind the |egl_context_|.
   virtual bool CreateSurface(WindowsRenderTarget* render_target,
                              EGLint width,
-                             EGLint height,
-                             bool enable_vsync);
+                             EGLint height);
 
   // Resizes backing surface from current size to newly requested size
   // based on width and height for the specific case when width and height do
@@ -68,7 +68,7 @@ class AngleSurfaceManager {
   virtual bool MakeCurrent();
 
   // Unbinds the current EGL context from the current thread.
-  bool ClearCurrent();
+  virtual bool ClearCurrent();
 
   // Clears the |egl_context_| draw and read surfaces.
   bool ClearContext();
@@ -91,6 +91,12 @@ class AngleSurfaceManager {
 
   // If enabled, makes the current surface's buffer swaps block until the
   // v-blank.
+  //
+  // If disabled, allows one thread to swap multiple buffers per v-blank
+  // but can result in screen tearing if the system compositor is disabled.
+  //
+  // This binds |egl_context_| to the current thread and makes the render
+  // surface current.
   virtual void SetVSyncEnabled(bool enabled);
 
   // Gets the |ID3D11Device| chosen by ANGLE.

@@ -196,7 +196,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual ui::AXPlatformNodeWin* GetAlert() override;
 
   // |WindowBindingHandler|
-  virtual bool NeedsVSync() override;
+  virtual bool NeedsVSync() const override;
 
   // Called to obtain a pointer to the fragment root delegate.
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate();
