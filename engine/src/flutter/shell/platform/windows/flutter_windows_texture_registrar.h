@@ -13,6 +13,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/common/public/flutter_texture_registrar.h"
 #include "flutter/shell/platform/windows/external_texture.h"
+#include "flutter/shell/platform/windows/gl_proc_table.h"
 
 namespace flutter {
 
@@ -23,7 +24,7 @@ class FlutterWindowsEngine;
 class FlutterWindowsTextureRegistrar {
  public:
   explicit FlutterWindowsTextureRegistrar(FlutterWindowsEngine* engine,
-                                          const GlProcs& gl_procs);
+                                          std::shared_ptr<GlProcTable> gl);
 
   // Registers a texture described by the given |texture_info| object.
   // Returns the non-zero, positive texture id or -1 on error.
@@ -44,12 +45,9 @@ class FlutterWindowsTextureRegistrar {
                        size_t height,
                        FlutterOpenGLTexture* texture);
 
-  // Populates the OpenGL function pointers in |gl_procs|.
-  static void ResolveGlFunctions(GlProcs& gl_procs);
-
  private:
   FlutterWindowsEngine* engine_ = nullptr;
-  const GlProcs& gl_procs_;
+  std::shared_ptr<GlProcTable> gl_;
 
   // All registered textures, keyed by their IDs.
   std::unordered_map<int64_t, std::unique_ptr<flutter::ExternalTexture>>
