@@ -31,143 +31,6 @@ import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
-
-// On web, key events in text fields are handled by the browser.
-const bool areKeyEventsHandledByPlatform = isBrowser;
-
-class CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<CupertinoLocalizations> load(Locale locale) =>
-    DefaultCupertinoLocalizations.load(locale);
-
-  @override
-  bool shouldReload(CupertinoLocalizationsDelegate old) => false;
-}
-
-class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
-
-  @override
-  bool shouldReload(MaterialLocalizationsDelegate old) => false;
-}
-
-class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
-}
-
-Widget overlay({ required Widget child }) {
-  final OverlayEntry entry = OverlayEntry(
-    builder: (BuildContext context) {
-      return Center(
-        child: Material(
-          child: child,
-        ),
-      );
-    },
-  );
-  addTearDown(() => entry..remove()..dispose());
-  return overlayWithEntry(entry);
-}
-
-Widget overlayWithEntry(OverlayEntry entry) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
-      WidgetsLocalizationsDelegate(),
-      MaterialLocalizationsDelegate(),
-      CupertinoLocalizationsDelegate(),
-    ],
-    child: DefaultTextEditingShortcuts(
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              entry,
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Widget boilerplate({ required Widget child, ThemeData? theme }) {
-  return MaterialApp(
-    theme: theme,
-    home: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
-        WidgetsLocalizationsDelegate(),
-        MaterialLocalizationsDelegate(),
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Center(
-            child: Material(
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 200));
-}
-
-double getOpacity(WidgetTester tester, Finder finder) {
-  return tester.widget<FadeTransition>(
-    find.ancestor(
-      of: finder,
-      matching: find.byType(FadeTransition),
-    ),
-  ).opacity.value;
-}
-
-class TestFormatter extends TextInputFormatter {
-  TestFormatter(this.onFormatEditUpdate);
-  FormatEditUpdateCallback onFormatEditUpdate;
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    onFormatEditUpdate(oldValue, newValue);
-    return newValue;
-  }
-}
-
-FocusNode _focusNode() {
-  final FocusNode result = FocusNode();
-  addTearDown(result.dispose);
-  return result;
-}
-
-TextEditingController _textEditingController({String text = ''}) {
-  final TextEditingController result = TextEditingController(text: text);
-  addTearDown(result.dispose);
-  return result;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -6822,6 +6685,154 @@ void main() {
     expect(editableText.style.color, theme.textTheme.bodyLarge!.color!.withOpacity(0.38));
   });
 
+  testWidgets('Enabled TextField statesController', (WidgetTester tester) async {
+    final TextEditingController textEditingController = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController statesController = MaterialStatesController();
+    statesController.addListener(valueChanged);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final Offset center = tester.getCenter(find.byType(EditableText).first);
+    await gesture.moveTo(center);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{});
+    expect(count, 2);
+
+    await gesture.down(center);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(count, 4); // adds hovered and pressed - two changes.
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.focused});
+    expect(count, 5);
+
+    await gesture.down(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{});
+    expect(count, 6);
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(center);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.focused});
+    expect(count, 8); // adds hovered and pressed - two changes.
+
+    // If the text field is rebuilt disabled, then the focused state is
+    // removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(statesController.value, <MaterialState>{MaterialState.hovered, MaterialState.disabled});
+    expect(count, 10); // removes focused and adds disabled - two changes.
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    expect(statesController.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 11);
+
+    // If the text field is rebuilt enabled and in an error state, then the error
+    // state is added.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+              decoration: const InputDecoration(
+                errorText: 'error',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(statesController.value, <MaterialState>{MaterialState.error});
+    expect(count, 13); // removes disabled and adds error - two changes.
+
+    // If the text field is rebuilt without an error, then the error
+    // state is removed.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: statesController,
+              controller: textEditingController,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(statesController.value, <MaterialState>{});
+    expect(count, 14);
+  });
+
+  testWidgets('Disabled TextField statesController', (WidgetTester tester) async {
+    int count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+    final MaterialStatesController controller = MaterialStatesController();
+    controller.addListener(valueChanged);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              statesController: controller,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(controller.value, <MaterialState>{MaterialState.disabled});
+    expect(count, 1);
+  });
+
   testWidgetsWithLeakTracking('Provided style correctly resolves for material states', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -6979,7 +6990,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
-            child: RawKeyboardListener(
+            child: KeyboardListener(
               focusNode: focusNode,
               child: TextField(
                 controller: controller,
@@ -7172,7 +7183,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7246,7 +7257,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7301,7 +7312,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7369,7 +7380,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7420,7 +7431,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
             child: textField,
           ),
@@ -7465,7 +7476,7 @@ void main() {
   testWidgetsWithLeakTracking('Changing positions of text fields', (WidgetTester tester) async {
 
     final FocusNode focusNode = _focusNode();
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final TextEditingController c1 = _textEditingController();
     final TextEditingController c2 = _textEditingController();
@@ -7476,9 +7487,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -7521,9 +7532,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -7559,7 +7570,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final TextEditingController c1 = _textEditingController();
     final TextEditingController c2 = _textEditingController();
@@ -7570,9 +7581,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -17089,4 +17100,142 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
       ),
     );
   }
+}
+
+
+typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
+
+// On web, key events in text fields are handled by the browser.
+const bool areKeyEventsHandledByPlatform = isBrowser;
+
+class CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+    DefaultCupertinoLocalizations.load(locale);
+
+  @override
+  bool shouldReload(CupertinoLocalizationsDelegate old) => false;
+}
+
+class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(MaterialLocalizationsDelegate old) => false;
+}
+
+class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+}
+
+Widget overlay({ required Widget child }) {
+  final OverlayEntry entry = OverlayEntry(
+    builder: (BuildContext context) {
+      return Center(
+        child: Material(
+          child: child,
+        ),
+      );
+    },
+  );
+  addTearDown(() => entry..remove()..dispose());
+  return overlayWithEntry(entry);
+}
+
+Widget overlayWithEntry(OverlayEntry entry) {
+  return Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      WidgetsLocalizationsDelegate(),
+      MaterialLocalizationsDelegate(),
+      CupertinoLocalizationsDelegate(),
+    ],
+    child: DefaultTextEditingShortcuts(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry,
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget boilerplate({ required Widget child, ThemeData? theme }) {
+  return MaterialApp(
+    theme: theme,
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
+}
+
+double getOpacity(WidgetTester tester, Finder finder) {
+  return tester.widget<FadeTransition>(
+    find.ancestor(
+      of: finder,
+      matching: find.byType(FadeTransition),
+    ),
+  ).opacity.value;
+}
+
+class TestFormatter extends TextInputFormatter {
+  TestFormatter(this.onFormatEditUpdate);
+  FormatEditUpdateCallback onFormatEditUpdate;
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    onFormatEditUpdate(oldValue, newValue);
+    return newValue;
+  }
+}
+
+FocusNode _focusNode() {
+  final FocusNode result = FocusNode();
+  addTearDown(result.dispose);
+  return result;
+}
+
+TextEditingController _textEditingController({String text = ''}) {
+  final TextEditingController result = TextEditingController(text: text);
+  addTearDown(result.dispose);
+  return result;
 }

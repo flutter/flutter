@@ -1,4 +1,4 @@
-Versions used, v0_162, v0_158
+Versions used, v0_162, v0_202, v0_158
 md.comp.assist-chip.container.shape,
 md.comp.assist-chip.container.surface-tint-layer.color,
 md.comp.assist-chip.elevated.container.elevation,
@@ -453,6 +453,7 @@ md.comp.outlined-button.disabled.label-text.color,
 md.comp.outlined-button.disabled.label-text.opacity,
 md.comp.outlined-button.disabled.outline.color,
 md.comp.outlined-button.disabled.outline.opacity,
+md.comp.outlined-button.focus.outline.color,
 md.comp.outlined-button.focus.state-layer.color,
 md.comp.outlined-button.focus.state-layer.opacity,
 md.comp.outlined-button.hover.state-layer.color,

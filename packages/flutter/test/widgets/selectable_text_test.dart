@@ -1573,6 +1573,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
+
     await tester.pumpWidget(
       overlay(
         child: SelectableText.rich(
@@ -1581,8 +1584,7 @@ void main() {
               const TextSpan(text: 'text'),
               TextSpan(
                 text: 'link',
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () { },
+                recognizer: recognizer..onTap = () { },
               ),
             ],
           ),
@@ -1893,7 +1895,7 @@ void main() {
   testWidgetsWithLeakTracking('Changing positions of selectable text', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -1902,9 +1904,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -1945,9 +1947,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -1984,7 +1986,7 @@ void main() {
   testWidgetsWithLeakTracking('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final List<KeyEvent> events = <KeyEvent>[];
 
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -1993,9 +1995,9 @@ void main() {
       MaterialApp(
         home:
         Material(
-          child: RawKeyboardListener(
+          child: KeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKeyEvent: events.add,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -2467,6 +2469,8 @@ void main() {
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
+    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2478,7 +2482,7 @@ void main() {
                 const TextSpan(text: onScreenText),
                 TextSpan(
                   text: offScreenText,
-                  recognizer: TapGestureRecognizer()..onTap = () { },
+                  recognizer: recognizer..onTap = () { },
                 ),
               ],
               style: textStyle,
@@ -4640,6 +4644,8 @@ void main() {
       ..onTap = () {
         spyTaps += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -4690,6 +4696,8 @@ void main() {
       ..onLongPress = () {
         spyLongPress += 1;
       };
+    addTearDown(spyRecognizer.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

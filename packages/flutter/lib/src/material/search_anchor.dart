@@ -131,6 +131,8 @@ class SearchAnchor extends StatefulWidget {
     this.viewOnSubmitted,
     required this.builder,
     required this.suggestionsBuilder,
+    this.textInputAction,
+    this.keyboardType,
   });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
@@ -174,7 +176,9 @@ class SearchAnchor extends StatefulWidget {
     bool? isFullScreen,
     SearchController searchController,
     TextCapitalization textCapitalization,
-    required SuggestionsBuilder suggestionsBuilder
+    required SuggestionsBuilder suggestionsBuilder,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -323,6 +327,14 @@ class SearchAnchor extends StatefulWidget {
   /// To get a different layout, use [viewBuilder] to override.
   final SuggestionsBuilder suggestionsBuilder;
 
+  /// {@macro flutter.widgets.TextField.textInputAction}
+  final TextInputAction? textInputAction;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to the default value specified in [TextField].
+  final TextInputType? keyboardType;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -396,6 +408,8 @@ class _SearchAnchorState extends State<SearchAnchor> {
       suggestionsBuilder: widget.suggestionsBuilder,
       textCapitalization: widget.textCapitalization,
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+      textInputAction: widget.textInputAction,
+      keyboardType: widget.keyboardType,
     ));
   }
 
@@ -469,6 +483,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     required this.searchController,
     required this.suggestionsBuilder,
     required this.capturedThemes,
+    this.textInputAction,
+    this.keyboardType,
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -494,6 +510,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final SearchController searchController;
   final SuggestionsBuilder suggestionsBuilder;
   final CapturedThemes capturedThemes;
+  final TextInputAction? textInputAction;
+  final TextInputType? keyboardType;
 
   @override
   Color? get barrierColor => Colors.transparent;
@@ -637,6 +655,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 searchController: searchController,
                 suggestionsBuilder: suggestionsBuilder,
                 textCapitalization: textCapitalization,
+                textInputAction: textInputAction,
+                keyboardType: keyboardType,
               ),
             ),
           );
@@ -673,6 +693,8 @@ class _ViewContent extends StatefulWidget {
     required this.viewRect,
     required this.searchController,
     required this.suggestionsBuilder,
+    this.textInputAction,
+    this.keyboardType,
   });
 
   final ValueChanged<String>? viewOnChanged;
@@ -697,6 +719,8 @@ class _ViewContent extends StatefulWidget {
   final Rect viewRect;
   final SearchController searchController;
   final SuggestionsBuilder suggestionsBuilder;
+  final TextInputAction? textInputAction;
+  final TextInputType? keyboardType;
 
   @override
   State<_ViewContent> createState() => _ViewContentState();
@@ -707,7 +731,6 @@ class _ViewContentState extends State<_ViewContent> {
   late Rect _viewRect;
   late final SearchController _controller;
   Iterable<Widget> result = <Widget>[];
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -715,10 +738,6 @@ class _ViewContentState extends State<_ViewContent> {
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
     _controller.addListener(updateSuggestions);
-
-    if (!_focusNode.hasFocus) {
-      _focusNode.requestFocus();
-    }
   }
 
   @override
@@ -748,7 +767,6 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -865,8 +883,8 @@ class _ViewContentState extends State<_ViewContent> {
                           top: false,
                           bottom: false,
                           child: SearchBar(
+                            autoFocus: true,
                             constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
-                            focusNode: _focusNode,
                             leading: widget.viewLeading ?? defaultLeading,
                             trailing: widget.viewTrailing ?? defaultTrailing,
                             hintText: widget.viewHintText,
@@ -882,6 +900,8 @@ class _ViewContentState extends State<_ViewContent> {
                             },
                             onSubmitted: widget.viewOnSubmitted,
                             textCapitalization: widget.textCapitalization,
+                            textInputAction: widget.textInputAction,
+                            keyboardType: widget.keyboardType,
                           ),
                         ),
                       ),
@@ -945,7 +965,9 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.textCapitalization,
     ValueChanged<String>? onChanged,
     ValueChanged<String>? onSubmitted,
-    required super.suggestionsBuilder
+    required super.suggestionsBuilder,
+    super.textInputAction,
+    super.keyboardType,
   }) : super(
     viewHintText: viewHintText ?? barHintText,
     headerTextStyle: viewHeaderTextStyle,
@@ -976,6 +998,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
         leading: barLeading ?? const Icon(Icons.search),
         trailing: barTrailing,
         textCapitalization: textCapitalization,
+        textInputAction: textInputAction,
+        keyboardType: keyboardType,
       );
     }
   );
@@ -1091,6 +1115,9 @@ class SearchBar extends StatefulWidget {
     this.textStyle,
     this.hintStyle,
     this.textCapitalization,
+    this.autoFocus = false,
+    this.textInputAction,
+    this.keyboardType,
   });
 
   /// Controls the text being edited in the search bar's text field.
@@ -1212,6 +1239,17 @@ class SearchBar extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textCapitalization}
   final TextCapitalization? textCapitalization;
 
+  /// {@macro flutter.widgets.editableText.autofocus}
+  final bool autoFocus;
+
+  /// {@macro flutter.widgets.TextField.textInputAction}
+  final TextInputAction? textInputAction;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to the default value specified in [TextField].
+  final TextInputType? keyboardType;
+
   @override
   State<SearchBar> createState() => _SearchBarState();
 }
@@ -1311,7 +1349,9 @@ class _SearchBarState extends State<SearchBar> {
         child: InkWell(
           onTap: () {
             widget.onTap?.call();
-            _focusNode.requestFocus();
+            if (!_focusNode.hasFocus) {
+              _focusNode.requestFocus();
+            }
           },
           overlayColor: effectiveOverlayColor,
           customBorder: effectiveShape?.copyWith(side: effectiveSide),
@@ -1323,34 +1363,36 @@ class _SearchBarState extends State<SearchBar> {
               children: <Widget>[
                 if (leading != null) leading,
                 Expanded(
-                  child: IgnorePointer(
-                    child: Padding(
-                      padding: effectivePadding,
-                      child: TextField(
-                        focusNode: _focusNode,
-                        onChanged: widget.onChanged,
-                        onSubmitted: widget.onSubmitted,
-                        controller: widget.controller,
-                        style: effectiveTextStyle,
-                        decoration: InputDecoration(
-                          hintText: widget.hintText,
-                        ).applyDefaults(InputDecorationTheme(
-                          hintStyle: effectiveHintStyle,
-
-                          // The configuration below is to make sure that the text field
-                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                          enabledBorder: InputBorder.none,
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          // Setting `isDense` to true to allow the text field height to be
-                          // smaller than 48.0
-                          isDense: true,
-                        )),
-                        textCapitalization: effectiveTextCapitalization,
-                      ),
+                  child: Padding(
+                    padding: effectivePadding,
+                    child: TextField(
+                      autofocus: widget.autoFocus,
+                      onTap: widget.onTap,
+                      onTapAlwaysCalled: true,
+                      focusNode: _focusNode,
+                      onChanged: widget.onChanged,
+                      onSubmitted: widget.onSubmitted,
+                      controller: widget.controller,
+                      style: effectiveTextStyle,
+                      decoration: InputDecoration(
+                        hintText: widget.hintText,
+                      ).applyDefaults(InputDecorationTheme(
+                        hintStyle: effectiveHintStyle,
+                        // The configuration below is to make sure that the text field
+                        // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                        enabledBorder: InputBorder.none,
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        // Setting `isDense` to true to allow the text field height to be
+                        // smaller than 48.0
+                        isDense: true,
+                      )),
+                      textCapitalization: effectiveTextCapitalization,
+                      textInputAction: widget.textInputAction,
+                      keyboardType: widget.keyboardType,
                     ),
-                  )
+                  ),
                 ),
                 if (trailing != null) ...trailing,
               ],
