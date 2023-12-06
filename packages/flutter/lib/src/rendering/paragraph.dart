@@ -2002,7 +2002,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     if (_cachedBoundingBoxes == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
-      );// Maybe we can re-use the getBoxesForSelections results in `_rect`.
+      );
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
         for (final TextBox textBox in boxes) {
