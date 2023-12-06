@@ -120,10 +120,9 @@ struct {{camel_case(shader_name)}}{{camel_case(shader_stage)}}Shader {
 
   static constexpr auto kResource{{camel_case(sampled_image.name)}} = SampledImageSlot { // {{sampled_image.name}}
     "{{sampled_image.name}}",      // name
-    {{sampled_image.ext_res_0}}u,  // texture
-    {{sampled_image.ext_res_1}}u,  // sampler
-    {{sampled_image.binding}}u,    // binding
+    {{sampled_image.ext_res_0}}u,  // ext_res_0
     {{sampled_image.set}}u,        // set
+    {{sampled_image.binding}}u,    // binding
   };
   static ShaderMetadata kMetadata{{camel_case(sampled_image.name)}};
 {% endfor %}

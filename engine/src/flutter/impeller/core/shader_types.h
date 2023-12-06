@@ -90,6 +90,23 @@ struct ShaderUniformSlot {
   size_t binding;
 };
 
+/// @brief Metadata required to bind a combined texture and sampler.
+///
+/// OpenGL binding requires the usage of the separate shader metadata struct.
+struct SampledImageSlot {
+  /// @brief The name of the uniform slot.
+  const char* name;
+
+  /// @brief `ext_res_0` is the Metal binding value.
+  size_t texture_index;
+
+  /// @brief The Vulkan descriptor set index.
+  size_t set;
+
+  /// @brief The Vulkan binding value.
+  size_t binding;
+};
+
 struct ShaderStageIOSlot {
   const char* name;
   size_t location;
@@ -129,32 +146,6 @@ struct ShaderStageBufferLayout {
     return stride == other.stride &&  //
            binding == other.binding;
   }
-};
-
-/// @brief Metadata required to bind a texture and sampler.
-///
-/// OpenGL binding requires the usage of the separate shader metadata struct.
-struct SampledImageSlot {
-  /// @brief The name of the texture slot.
-  const char* name;
-
-  /// @brief This value is `ext_res_0`, the Metal binding value for the texture.
-  size_t texture_index;
-
-  /// @brief This value is `ext_res_1`, the Metal binding value for the sampler.
-  ///
-  /// Since only combined texture and samplers are used, this index is unused.
-  size_t sampler_index;
-
-  /// @brief The Vulkan binding value for a combined texture and sampler.
-  size_t binding;
-
-  /// @brief The Vulkan descriptor set index.
-  size_t set;
-
-  constexpr bool HasTexture() const { return texture_index < 32u; }
-
-  constexpr bool HasSampler() const { return sampler_index < 32u; }
 };
 
 enum class DescriptorType {
