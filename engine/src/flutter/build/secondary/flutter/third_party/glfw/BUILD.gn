@@ -55,6 +55,8 @@ source_set("glfw") {
       "$_checkout_dir/src/win32_window.c",
     ]
 
+    libs = [ "Gdi32.lib" ]
+
     defines = [ "_GLFW_WIN32" ]
   } else if (is_linux) {
     sources += [

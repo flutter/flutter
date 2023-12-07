@@ -7,6 +7,10 @@
 #include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
 #include "txt/platform.h"
 
+#if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
+#include "third_party/skia/include/ports/SkFontMgr_empty.h"
+#endif
+
 namespace txt {
 
 std::vector<std::string> GetDefaultFontFamilies() {
@@ -19,7 +23,12 @@ sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {
     sync_font_provider.Bind(zx::channel(font_initialization_data));
     return SkFontMgr_New_Fuchsia(std::move(sync_font_provider));
   } else {
-    return SkFontMgr::RefDefault();
+#if defined(SK_FONTMGR_FREETYPE_EMPTY_AVAILABLE)
+    static sk_sp<SkFontMgr> mgr = SkFontMgr_New_Custom_Empty();
+#else
+    static sk_sp<SkFontMgr> mgr = SkFontMgr::RefEmpty();
+#endif
+    return mgr;
   }
 }
 

@@ -750,6 +750,11 @@ if (enable_unittests) {
             "$root_gen_dir/flutter/shell/common/assets/shelltest_screenshot.png"
         dest = "assets/shelltest_screenshot.png"
       },
+      {
+        path = rebase_path(
+                "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf")
+        dest = "assets/Roboto-Regular.ttf"
+      },
     ]
 
     libraries = vulkan_validation_libs

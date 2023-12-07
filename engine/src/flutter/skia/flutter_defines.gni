@@ -23,6 +23,12 @@ flutter_defines = [
   # When running Metal, ensure that command buffers are scheduled before
   # returning from submit.
   "SK_METAL_WAIT_UNTIL_SCHEDULED",
+
+  # Staging for b/305780908
+  "SK_DEFAULT_TYPEFACE_IS_EMPTY",
+  "SK_DISABLE_LEGACY_DEFAULT_TYPEFACE",
+  "SK_DISABLE_LEGACY_FONTMGR_FACTORY",
+  "SK_DISABLE_LEGACY_FONTMGR_REFDEFAULT",
 ]
 
 if (!is_fuchsia) {
