@@ -422,7 +422,7 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// ```dart
   /// import 'package:flutter/widgets.dart';
-  /// import '../web.dart' as web;
+  /// import '../../web.dart' as web;
   ///
   /// // ...
   ///
