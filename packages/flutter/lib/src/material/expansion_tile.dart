@@ -253,6 +253,7 @@ class ExpansionTile extends StatefulWidget {
     this.visualDensity,
     this.enableFeedback = true,
     this.enabled = true,
+    this.expansionAnimationStyle,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -516,6 +517,28 @@ class ExpansionTile extends StatefulWidget {
   /// through an [ExpansionTileController].
   final bool enabled;
 
+  /// Used to override the expansion animation curve and duration.
+  ///
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the expansion animation duration. If it is null, then [AnimationStyle.duration]
+  /// from the [ExpansionTileThemeData.expansionAnimationStyle] will be used.
+  /// Otherwise, defaults to 200ms.
+  ///
+  /// If [AnimationStyle.curve] is provided, it will be used to override
+  /// the expansion animation curve. If it is null, then [AnimationStyle.curve]
+  /// from the [ExpansionTileThemeData.expansionAnimationStyle] will be used.
+  /// Otherwise, defaults to [Curves.easeIn].
+  ///
+  /// To disable the theme animation, use [AnimationStyle.noAnimation].
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override the [ExpansionTile] expansion
+  /// animation curve and duration using [AnimationStyle].
+  ///
+  /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.2.dart **
+  /// {@end-tool}
+  final AnimationStyle? expansionAnimationStyle;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -529,6 +552,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   final ColorTween _headerColorTween = ColorTween();
   final ColorTween _iconColorTween = ColorTween();
   final ColorTween _backgroundColorTween = ColorTween();
+  final CurveTween _heightFactorTween = CurveTween(curve: Curves.easeIn);
 
   late AnimationController _animationController;
   late Animation<double> _iconTurns;
@@ -545,7 +569,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   void initState() {
     super.initState();
     _animationController = AnimationController(duration: _kExpand, vsync: this);
-    _heightFactor = _animationController.drive(_easeInTween);
+    _heightFactor = _animationController.drive(_heightFactorTween);
     _iconTurns = _animationController.drive(_halfTween.chain(_easeInTween));
     _border = _animationController.drive(_borderTween.chain(_easeOutTween));
     _headerColor = _animationController.drive(_headerColorTween.chain(_easeInTween));
@@ -722,6 +746,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       || widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
       _updateBackgroundColor(expansionTileTheme);
     }
+    if (widget.expansionAnimationStyle != oldWidget.expansionAnimationStyle) {
+      _updateAnimationDuration(expansionTileTheme);
+      _updateHeightFactorCurve(expansionTileTheme);
+    }
   }
 
   @override
@@ -731,11 +759,19 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ExpansionTileThemeData defaults = theme.useMaterial3
       ? _ExpansionTileDefaultsM3(context)
       : _ExpansionTileDefaultsM2(context);
+    _updateAnimationDuration(expansionTileTheme);
     _updateShapeBorder(expansionTileTheme, theme);
     _updateHeaderColor(expansionTileTheme, defaults);
     _updateIconColor(expansionTileTheme, defaults);
     _updateBackgroundColor(expansionTileTheme);
+    _updateHeightFactorCurve(expansionTileTheme);
     super.didChangeDependencies();
+  }
+
+  void _updateAnimationDuration(ExpansionTileThemeData expansionTileTheme) {
+    _animationController.duration = widget.expansionAnimationStyle?.duration
+      ?? expansionTileTheme.expansionAnimationStyle?.duration
+      ?? _kExpand;
   }
 
   void _updateShapeBorder(ExpansionTileThemeData expansionTileTheme, ThemeData theme) {
@@ -774,6 +810,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _backgroundColorTween
       ..begin = widget.collapsedBackgroundColor ?? expansionTileTheme.collapsedBackgroundColor
       ..end = widget.backgroundColor ?? expansionTileTheme.backgroundColor;
+  }
+
+  void _updateHeightFactorCurve(ExpansionTileThemeData expansionTileTheme) {
+    _heightFactorTween.curve = widget.expansionAnimationStyle?.curve
+      ?? expansionTileTheme.expansionAnimationStyle?.curve
+      ?? Curves.easeIn;
   }
 
   @override

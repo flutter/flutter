@@ -548,15 +548,15 @@ targets:
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
@@ -2519,6 +2519,7 @@ targets:
 
   # Pixel 7 Pro, Impeller (Vulkan)
   - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/139643
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3151,27 +3152,27 @@ targets:
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
     presubmit: false
@@ -4584,7 +4585,6 @@ targets:
       - .ci.yaml
 
   - name: Windows build_tests_1_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4603,7 +4603,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_2_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4622,7 +4621,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_3_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4641,7 +4639,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_4_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4660,7 +4657,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_5_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4679,7 +4675,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_6_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4698,7 +4693,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_7_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5542,15 +5536,15 @@ targets:
 
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
