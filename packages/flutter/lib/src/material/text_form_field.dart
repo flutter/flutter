@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'input_decorator.dart';
+import 'material_state.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
@@ -167,6 +168,7 @@ class TextFormField extends FormField<String> {
     ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
     ContentInsertionConfiguration? contentInsertionConfiguration,
+    MaterialStatesController? statesController,
     Clip clipBehavior = Clip.hardEdge,
     bool scribbleEnabled = true,
     bool canRequestFocus = true,
@@ -212,6 +214,7 @@ class TextFormField extends FormField<String> {
                textDirection: textDirection,
                textCapitalization: textCapitalization,
                autofocus: autofocus,
+               statesController: statesController,
                toolbarOptions: toolbarOptions,
                readOnly: readOnly,
                showCursor: showCursor,

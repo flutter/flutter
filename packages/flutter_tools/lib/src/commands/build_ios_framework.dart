@@ -68,6 +68,11 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag('cocoapods',
         help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
+      ..addFlag('plugins',
+        defaultsTo: true,
+        help: 'Whether to produce frameworks for the plugins. '
+              'This is intended for cases where plugins are already being built separately.',
+      )
       ..addFlag('static',
         help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
       )
@@ -134,6 +139,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
     if ((await getBuildInfos()).isEmpty) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
+    }
+
+    if (!boolArg('plugins') && boolArg('static')) {
+      throwToolExit('--static cannot be used with the --no-plugins flag');
     }
   }
 
@@ -264,7 +273,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
       // Build and copy plugins.
       await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
-      if (hasPlugins(project)) {
+      if (boolArg('plugins') && hasPlugins(project)) {
         await _producePlugins(buildInfo.mode, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
       }
 
@@ -461,6 +470,7 @@ end
           processManager: globals.processManager,
           platform: globals.platform,
           usage: globals.flutterUsage,
+          analytics: globals.analytics,
           engineVersion: globals.artifacts!.isLocalEngine
               ? null
               : globals.flutterVersion.engineRevision,
