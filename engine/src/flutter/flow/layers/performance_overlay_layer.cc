@@ -74,12 +74,11 @@ sk_sp<SkTextBlob> PerformanceOverlayLayer::MakeStatisticsText(
     const std::string& label_prefix,
     const std::string& font_path) {
   SkFont font;
-  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
-  if (font_path == "") {
-    font = SkFont(font_mgr->matchFamilyStyle(nullptr, {}), 15);
-  } else {
-    font = SkFont(font_mgr->makeFromFile(font_path.c_str()), 15);
+  if (font_path != "") {
+    sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+    font = SkFont(font_mgr->makeFromFile(font_path.c_str()));
   }
+  font.setSize(15);
 
   double max_ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
   double average_ms_per_frame = stopwatch.AverageDelta().ToMillisecondsF();
