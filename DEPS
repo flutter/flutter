@@ -36,9 +36,16 @@ vars = {
 
   # As Dart does, we use Fuchsia's GN and Clang toolchain. These revision
   # should be kept up to date with the revisions pulled by Dart.
+  #
   # The list of revisions for these tools comes from Fuchsia, here:
   # https://fuchsia.googlesource.com/integration/+/HEAD/toolchain
   # If there are problems with the toolchain, contact fuchsia-toolchain@.
+  #
+  # Note, if you are *manually* rolling clang (i.e. the auto-roll is disabled)
+  # you'll need to run post-submits (i.e. for Clang Tidy) in order to test that
+  # updates to Clang Tidy will not turn the tree red.
+  #
+  # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
   'clang_version': 'git_revision:00396e6a1a0b79fda008cb4e86b616d7952b33c8',
 
   # The goma version and the clang version can be tightly coupled. If goma
