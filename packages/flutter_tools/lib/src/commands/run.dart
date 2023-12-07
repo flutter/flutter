@@ -612,12 +612,10 @@ class RunCommand extends RunCommandBase {
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
 
     final String? flavor = stringArg('flavor');
-    if (flavor != null) {
-      final bool flavorsSupportedOnEveryDevice = devices!
-        .every((Device device) => device.supportsFlavors);
-      if (!flavorsSupportedOnEveryDevice) {
-        throwToolExit('--flavor is only supported for Android and iOS devices.');
-      }
+    final bool flavorsSupportedOnEveryDevice = devices!
+      .every((Device device) => device.supportsFlavors);
+    if (flavor != null && !flavorsSupportedOnEveryDevice) {
+      throwToolExit('--flavor is only supported for Android and iOS devices.');
     }
   }
 
