@@ -11,6 +11,7 @@
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 #include "flutter/display_list/utils/dl_comparable.h"
 #include "flutter/fml/file.h"
@@ -58,7 +59,7 @@ constexpr SkScalar kRenderRadius = std::min(kRenderWidth, kRenderHeight) / 2.0;
 constexpr SkScalar kRenderCornerRadius = kRenderRadius / 5.0;
 
 constexpr SkPoint kTestCenter = SkPoint::Make(kTestWidth / 2, kTestHeight / 2);
-constexpr SkRect kTestBounds = SkRect::MakeWH(kTestWidth, kTestHeight);
+constexpr SkRect kTestBounds2 = SkRect::MakeWH(kTestWidth, kTestHeight);
 constexpr SkRect kRenderBounds =
     SkRect::MakeLTRB(kRenderLeft, kRenderTop, kRenderRight, kRenderBottom);
 
@@ -486,7 +487,7 @@ struct SkJobRenderer : public MatrixClipJobRenderer {
   sk_sp<SkPicture> MakePicture(const RenderJobInfo& info) {
     SkPictureRecorder recorder;
     SkRTreeFactory rtree_factory;
-    SkCanvas* cv = recorder.beginRecording(kTestBounds, &rtree_factory);
+    SkCanvas* cv = recorder.beginRecording(kTestBounds2, &rtree_factory);
     Render(cv, info);
     return recorder.finishRecordingAsPicture();
   }
@@ -532,7 +533,7 @@ struct DlJobRenderer : public MatrixClipJobRenderer {
   }
 
   sk_sp<DisplayList> MakeDisplayList(const RenderJobInfo& info) {
-    DisplayListBuilder builder(kTestBounds);
+    DisplayListBuilder builder(kTestBounds2);
     Render(&builder, info);
     return builder.Build();
   }
@@ -2750,9 +2751,10 @@ class CanvasCompareTester {
 
   static sk_sp<SkTextBlob> MakeTextBlob(const std::string& string,
                                         SkScalar font_height) {
-    SkFont font(txt::GetDefaultFontManager()->matchFamilyStyle(
-                    "ahem", SkFontStyle::Normal()),
-                font_height);
+    SkFont font = CreateTestFontOfSize(font_height);
+    sk_sp<SkTypeface> face = font.refTypeface();
+    FML_CHECK(face);
+    FML_CHECK(face->countGlyphs() > 0) << "No glyphs in font";
     return SkTextBlob::MakeFromText(string.c_str(), string.size(), font,
                                     SkTextEncoding::kUTF8);
   }
@@ -3801,7 +3803,7 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
   const SkRect draw_rect = SkRect::MakeLTRB(  //
       kRenderRight + 1,                       //
       kRenderTop,                             //
-      kTestBounds.fRight,                     //
+      kTestBounds2.fRight,                    //
       kRenderBottom                           //
   );
   TestParameters test_params(
@@ -3812,7 +3814,7 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
         layer_paint.setImageFilter(layer_filter);
         ctx.canvas->save();
         ctx.canvas->clipRect(kRenderBounds, SkClipOp::kIntersect, false);
-        ctx.canvas->saveLayer(&kTestBounds, &layer_paint);
+        ctx.canvas->saveLayer(&kTestBounds2, &layer_paint);
         ctx.canvas->drawRect(draw_rect, ctx.paint);
         ctx.canvas->restore();
         ctx.canvas->restore();
@@ -3824,7 +3826,7 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
         layer_paint.setImageFilter(layer_filter);
         ctx.canvas->Save();
         ctx.canvas->ClipRect(kRenderBounds, ClipOp::kIntersect, false);
-        ctx.canvas->SaveLayer(&kTestBounds, &layer_paint);
+        ctx.canvas->SaveLayer(&kTestBounds2, &layer_paint);
         ctx.canvas->DrawRect(draw_rect, ctx.paint);
         ctx.canvas->Restore();
         ctx.canvas->Restore();
@@ -3906,19 +3908,19 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
                        const std::string& desc1, const std::string& desc2,
                        const RenderEnvironment* env) {
         DisplayListBuilder nested_builder;
-        nested_builder.SaveLayer(&kTestBounds, &paint1);
-        nested_builder.SaveLayer(&kTestBounds, &paint2);
+        nested_builder.SaveLayer(&kTestBounds2, &paint1);
+        nested_builder.SaveLayer(&kTestBounds2, &paint2);
         render_content(nested_builder);
         auto nested_results = env->getResult(nested_builder.Build());
 
         DisplayListBuilder reverse_builder;
-        reverse_builder.SaveLayer(&kTestBounds, &paint2);
-        reverse_builder.SaveLayer(&kTestBounds, &paint1);
+        reverse_builder.SaveLayer(&kTestBounds2, &paint2);
+        reverse_builder.SaveLayer(&kTestBounds2, &paint1);
         render_content(reverse_builder);
         auto reverse_results = env->getResult(reverse_builder.Build());
 
         DisplayListBuilder combined_builder;
-        combined_builder.SaveLayer(&kTestBounds, &paint_both);
+        combined_builder.SaveLayer(&kTestBounds2, &paint_both);
         render_content(combined_builder);
         auto combined_results = env->getResult(combined_builder.Build());
 
@@ -4056,7 +4058,7 @@ TEST_F(DisplayListRendering, MatrixColorFilterModifyTransparencyCheck) {
     builder2.Translate(kTestCenter.fX, kTestCenter.fY);
     builder2.Rotate(45);
     builder2.Translate(-kTestCenter.fX, -kTestCenter.fY);
-    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder2.SaveLayer(&kTestBounds2, &filter_save_paint);
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
     auto display_list2 = builder2.Build();
@@ -4115,8 +4117,8 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
     DlPaint filter_save_paint = DlPaint().setColorFilter(filter);
 
     DisplayListBuilder builder1;
-    builder1.SaveLayer(&kTestBounds, &opacity_save_paint);
-    builder1.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder1.SaveLayer(&kTestBounds2, &opacity_save_paint);
+    builder1.SaveLayer(&kTestBounds2, &filter_save_paint);
     // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
     builder1.DrawRect(kRenderBounds, paint);
     builder1.Restore();
@@ -4124,8 +4126,8 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
     auto display_list1 = builder1.Build();
 
     DisplayListBuilder builder2;
-    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
-    builder2.SaveLayer(&kTestBounds, &opacity_save_paint);
+    builder2.SaveLayer(&kTestBounds2, &filter_save_paint);
+    builder2.SaveLayer(&kTestBounds2, &opacity_save_paint);
     // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
@@ -4232,7 +4234,7 @@ TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
     builder2.Translate(kTestCenter.fX, kTestCenter.fY);
     builder2.Rotate(45);
     builder2.Translate(-kTestCenter.fX, -kTestCenter.fY);
-    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder2.SaveLayer(&kTestBounds2, &filter_save_paint);
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
     auto display_list2 = builder2.Build();
@@ -4284,8 +4286,8 @@ TEST_F(DisplayListRendering, BlendColorFilterOpacityCommuteCheck) {
     DlPaint filter_save_paint = DlPaint().setColorFilter(&filter);
 
     DisplayListBuilder builder1;
-    builder1.SaveLayer(&kTestBounds, &opacity_save_paint);
-    builder1.SaveLayer(&kTestBounds, &filter_save_paint);
+    builder1.SaveLayer(&kTestBounds2, &opacity_save_paint);
+    builder1.SaveLayer(&kTestBounds2, &filter_save_paint);
     // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
     builder1.DrawRect(kRenderBounds, paint);
     builder1.Restore();
@@ -4293,8 +4295,8 @@ TEST_F(DisplayListRendering, BlendColorFilterOpacityCommuteCheck) {
     auto display_list1 = builder1.Build();
 
     DisplayListBuilder builder2;
-    builder2.SaveLayer(&kTestBounds, &filter_save_paint);
-    builder2.SaveLayer(&kTestBounds, &opacity_save_paint);
+    builder2.SaveLayer(&kTestBounds2, &filter_save_paint);
+    builder2.SaveLayer(&kTestBounds2, &opacity_save_paint);
     // builder1.DrawRect(kRenderBounds.makeOffset(20, 20), DlPaint());
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
