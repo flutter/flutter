@@ -421,8 +421,8 @@ class HtmlElementView extends StatelessWidget {
   /// used by the app to customize the element by adding attributes and styles.
   ///
   /// ```dart
+  /// import 'package:flutter/src/web.dart' as web;
   /// import 'package:flutter/widgets.dart';
-  /// import '../../web.dart' as web;
   ///
   /// // ...
   ///
