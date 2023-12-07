@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
@@ -431,6 +432,43 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<CustomDimensions> get usageValues async {
+    final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
+
+    return CustomDimensions(
+      commandRunIsEmulator: record.runIsEmulator,
+      commandRunTargetName: record.runTargetName,
+      commandRunTargetOsVersion: record.runTargetOsVersion,
+      commandRunModeName: record.runModeName,
+      commandRunProjectModule: record.runProjectModule,
+      commandRunProjectHostLanguage: record.runProjectHostLanguage,
+      commandRunAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
+      commandRunEnableImpeller: record.runEnableImpeller,
+      commandRunIOSInterfaceType: record.runIOSInterfaceType,
+      commandRunIsTest: record.runIsTest,
+    );
+  }
+
+  @override
+  Future<analytics.Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
+
+    return analytics.Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      runIsEmulator: record.runIsEmulator,
+      runTargetName: record.runTargetName,
+      runTargetOsVersion: record.runTargetOsVersion,
+      runModeName: record.runModeName,
+      runProjectModule: record.runProjectModule,
+      runProjectHostLanguage: record.runProjectHostLanguage,
+      runAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
+      runEnableImpeller: record.runEnableImpeller,
+      runIOSInterfaceType: record.runIOSInterfaceType,
+      runIsTest: record.runIsTest,
+    );
+  }
+
+  late final Future<AnalyticsUsageValuesRecord> _sharedAnalyticsUsageValues = (() async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
     bool anyAndroidDevices = false;
@@ -496,19 +534,19 @@ class RunCommand extends RunCommandBase {
 
     final BuildInfo buildInfo = await getBuildInfo();
     final String modeName = buildInfo.modeName;
-    return CustomDimensions(
-      commandRunIsEmulator: isEmulator,
-      commandRunTargetName: deviceType,
-      commandRunTargetOsVersion: deviceOsVersion,
-      commandRunModeName: modeName,
-      commandRunProjectModule: FlutterProject.current().isModule,
-      commandRunProjectHostLanguage: hostLanguage.join(','),
-      commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
-      commandRunEnableImpeller: enableImpeller.asBool,
-      commandRunIOSInterfaceType: iOSInterfaceType,
-      commandRunIsTest: targetFile.endsWith('_test.dart'),
+    return (
+      runIsEmulator: isEmulator,
+      runTargetName: deviceType,
+      runTargetOsVersion: deviceOsVersion,
+      runModeName: modeName,
+      runProjectModule: FlutterProject.current().isModule,
+      runProjectHostLanguage: hostLanguage.join(','),
+      runAndroidEmbeddingVersion: androidEmbeddingVersion,
+      runEnableImpeller: enableImpeller.asBool,
+      runIOSInterfaceType: iOSInterfaceType,
+      runIsTest: targetFile.endsWith('_test.dart'),
     );
-  }
+  })();
 
   @override
   bool get shouldRunPub {
@@ -783,3 +821,17 @@ class RunCommand extends RunCommandBase {
     );
   }
 }
+
+/// Schema for the usage values to send for analytics reporting.
+typedef AnalyticsUsageValuesRecord = ({
+  String? runAndroidEmbeddingVersion,
+  bool? runEnableImpeller,
+  String? runIOSInterfaceType,
+  bool runIsEmulator,
+  bool runIsTest,
+  String runModeName,
+  String runProjectHostLanguage,
+  bool runProjectModule,
+  String runTargetName,
+  String runTargetOsVersion,
+});
