@@ -19,6 +19,7 @@ export 'package:flutter_goldens_client/skia_client.dart';
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
+final RegExp _kReleaseBranch = RegExp(r'flutter-\d+\.\d+-candidate\.\d+');
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
@@ -259,7 +260,9 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
       // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
-      && !platform.environment.containsKey('GOLD_TRYJOB');
+      && !platform.environment.containsKey('GOLD_TRYJOB')
+      // Do not run on release branches
+      && !(platform.environment['GIT_BRANCH'] ?? '').contains(_kReleaseBranch);
 
     return luciPostSubmit;
   }
@@ -346,7 +349,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   static bool isAvailableForEnvironment(Platform platform) {
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
-      && platform.environment.containsKey('GOLD_TRYJOB');
+      && platform.environment.containsKey('GOLD_TRYJOB')
+      // Do not run on release branches
+      && !(platform.environment['GIT_BRANCH'] ?? '').contains(_kReleaseBranch);
     return luciPreSubmit;
   }
 }
@@ -415,7 +420,9 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   static bool isAvailableForEnvironment(Platform platform) {
     return platform.environment.containsKey('SWARMING_TASK_ID')
       // Some builds are still being run on Cirrus, we should skip these.
-      || platform.environment.containsKey('CIRRUS_CI');
+      || platform.environment.containsKey('CIRRUS_CI')
+      // Absolutely run on release branches
+      || (platform.environment['GIT_BRANCH'] ?? '').contains(_kReleaseBranch);
   }
 }
 
