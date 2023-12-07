@@ -616,7 +616,7 @@ class RunCommand extends RunCommandBase {
       final bool flavorsNotSupportedForSomeDevice = devices!
         .every((Device device) => device.supportsFlavors);
       if (!flavorsNotSupportedForSomeDevice) {
-        throwToolExit('--flavor is only supported for Android, iOS, and macOS devices.');
+        throwToolExit('--flavor is only supported for Android and iOS devices.');
       }
     }
   }

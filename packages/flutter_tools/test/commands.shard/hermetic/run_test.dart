@@ -454,7 +454,7 @@ void main() {
           await expectLater(
             () => createTestCommandRunner(command).run(runCommand),
             throwsToolExit(
-              message: '--flavor is only supported for Android, iOS, and macOS '
+              message: '--flavor is only supported for Android and iOS '
                 'devices.'),
               reason: 'should throw a ToolExit when --flavor is used with a '
                 'target platform of ${platform.name}',
