@@ -26,6 +26,7 @@ Widget buildInputDecorator({
   bool isFocused = false,
   bool isHovering = false,
   bool useMaterial3 = false,
+  bool useIntrinsicWidth = false,
   TextStyle? baseStyle,
   TextAlignVertical? textAlignVertical,
   VisualDensity? visualDensity,
@@ -34,6 +35,21 @@ Widget buildInputDecorator({
     style: TextStyle(fontSize: 16.0),
   ),
 }) {
+  Widget widget = InputDecorator(
+    expands: expands,
+    decoration: decoration,
+    isEmpty: isEmpty,
+    isFocused: isFocused,
+    isHovering: isHovering,
+    baseStyle: baseStyle,
+    textAlignVertical: textAlignVertical,
+    child: child,
+  );
+
+  if (useIntrinsicWidth) {
+    widget = IntrinsicWidth(child: widget);
+  }
+
   return MaterialApp(
     theme: ThemeData(useMaterial3: false),
     home: Material(
@@ -50,16 +66,7 @@ Widget buildInputDecorator({
               alignment: Alignment.topLeft,
               child: Directionality(
                 textDirection: textDirection,
-                child: InputDecorator(
-                  expands: expands,
-                  decoration: decoration,
-                  isEmpty: isEmpty,
-                  isFocused: isFocused,
-                  isHovering: isHovering,
-                  baseStyle: baseStyle,
-                  textAlignVertical: textAlignVertical,
-                  child: child,
-                ),
+                child: widget,
               ),
             ),
           );
@@ -6888,6 +6895,48 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
     // The prefix is inside the decorator.
     expect(decoratorRight, lessThanOrEqualTo(prefixRight));
+  });
+
+  testWidgetsWithLeakTracking('instrinic width with prefixIcon/suffixIcon', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/137937
+    for (final TextDirection direction in TextDirection.values) {
+      Future<Size> measureText(InputDecoration decoration) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            useMaterial3: useMaterial3,
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            decoration: decoration,
+            useIntrinsicWidth: true,
+            textDirection: direction,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('text'), findsOneWidget);
+
+        return tester.renderObject<RenderBox>(find.text('text')).size;
+      }
+
+      const EdgeInsetsGeometry padding = EdgeInsetsDirectional.only(end: 24, start: 12);
+
+      final Size textSizeWithoutIcons = await measureText(const InputDecoration(
+        contentPadding: padding,
+      ));
+
+      final Size textSizeWithPrefixIcon = await measureText(const InputDecoration(
+        contentPadding: padding,
+        prefixIcon: Focus(child: Icon(Icons.search)),
+      ));
+
+      final Size textSizeWithSuffixIcon = await measureText(const InputDecoration(
+        contentPadding: padding,
+        suffixIcon: Focus(child: Icon(Icons.search)),
+      ));
+
+      expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
+      expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
+    }
   });
 
   testWidgetsWithLeakTracking('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {

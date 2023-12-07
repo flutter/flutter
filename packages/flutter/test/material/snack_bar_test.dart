@@ -265,6 +265,101 @@ void main() {
     );
   });
 
+  testWidgetsWithLeakTracking('SnackBar dismissDirection can be customised from SnackBarThemeData', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    late double width;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(
+          dismissDirection: DismissDirection.startToEnd,
+        )
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            width = MediaQuery.sizeOf(context).width;
+
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('swipe ltr'),
+                  duration: Duration(seconds: 2),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(find.text('swipe ltr'), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text('swipe ltr'), findsNothing);
+    await tester.pump(); // schedule animation for snack bar
+    expect(find.text('swipe ltr'), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text('swipe ltr'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.drag(find.text('swipe ltr'), Offset(width, 0.0));
+    await tester.pump(); // snack bar dismissed
+    expect(find.text('swipe ltr'), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('dismissDirection from SnackBar should be preferred over SnackBarThemeData', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    late double width;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+          snackBarTheme: const SnackBarThemeData(
+            dismissDirection: DismissDirection.startToEnd,
+          )
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            width = MediaQuery.sizeOf(context).width;
+
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('swipe rtl'),
+                  duration: Duration(seconds: 2),
+                  dismissDirection: DismissDirection.endToStart,
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(find.text('swipe rtl'), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text('swipe rtl'), findsNothing);
+    await tester.pump(); // schedule animation for snack bar
+    expect(find.text('swipe rtl'), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text('swipe rtl'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.drag(find.text('swipe rtl'), Offset(-width, 0.0));
+    await tester.pump(); // snack bar dismissed
+    expect(find.text('swipe rtl'), findsNothing);
+  });
+
   testWidgetsWithLeakTracking('SnackBar cannot be tapped twice', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(MaterialApp(
