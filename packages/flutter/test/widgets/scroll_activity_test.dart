@@ -222,6 +222,19 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  test('$ScrollDragController dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => ScrollDragController(
+          delegate: _ScrollActivityDelegate(),
+          details: DragStartDetails(),
+        ).dispose(),
+        ScrollDragController,
+      ),
+      areCreateAndDispose,
+    );
+  });
 }
 
 class PageView62209 extends StatefulWidget {
