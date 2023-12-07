@@ -37,6 +37,7 @@ void main() {
     expect(theme.textAlign, null);
     expect(theme.waitDuration, null);
     expect(theme.showDuration, null);
+    expect(theme.exitDuration, null);
     expect(theme.triggerMode, null);
     expect(theme.enableFeedback, null);
   });
@@ -57,6 +58,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Duration wait = Duration(milliseconds: 100);
     const Duration show = Duration(milliseconds: 200);
+    const Duration exit = Duration(milliseconds: 100);
     const TooltipTriggerMode triggerMode = TooltipTriggerMode.longPress;
     const bool enableFeedback = true;
     const TooltipThemeData(
@@ -70,6 +72,7 @@ void main() {
       textAlign: TextAlign.center,
       waitDuration: wait,
       showDuration: show,
+      exitDuration: exit,
       triggerMode: triggerMode,
       enableFeedback: enableFeedback,
     ).debugFillProperties(builder);
@@ -90,6 +93,7 @@ void main() {
       'textAlign: TextAlign.center',
       'wait duration: $wait',
       'show duration: $show',
+      'exit duration: $exit',
       'triggerMode: $triggerMode',
       'enableFeedback: true',
     ]);
@@ -967,7 +971,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(customWaitDuration);
+    await tester.pump(const Duration(milliseconds: 100)); // Should disappear after default exitDuration
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1010,7 +1014,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to disappear.
-    await tester.pump(customWaitDuration); // Should disappear after customWaitDuration
+    await tester.pump(const Duration(milliseconds: 100)); // Should disappear after default exitDuration
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1081,6 +1085,92 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 1000));
     await tester.pumpAndSettle(); // Tooltip should fade out after
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('Tooltip exitDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    const Duration customExitDuration = Duration(milliseconds: 500);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(
+              exitDuration: customExitDuration,
+            ),
+          ),
+          child: const Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Wait for it to disappear.
+    await tester.pump(customExitDuration);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('Tooltip exitDuration - TooltipTheme', (WidgetTester tester) async {
+    const Duration customExitDuration = Duration(milliseconds: 500);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: TooltipTheme(
+          data: TooltipThemeData(exitDuration: customExitDuration),
+          child: Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Wait for it to disappear.
+    await tester.pump(customExitDuration);
+    await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
   });
 
