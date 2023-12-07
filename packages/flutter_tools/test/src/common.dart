@@ -373,7 +373,7 @@ bool analyticsTimingEventExists({
   };
 
   for (final Event e in sentEvents) {
-    final Map<String, Object?> eventData = e.eventData;
+    final Map<String, Object?> eventData = <String, Object?>{...e.eventData};
     eventData.remove('elapsedMilliseconds');
 
     if (const DeepCollectionEquality().equals(lookup, eventData)) {

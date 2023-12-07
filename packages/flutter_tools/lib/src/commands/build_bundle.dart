@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -80,6 +82,18 @@ class BuildBundleCommand extends BuildSubCommand {
     return CustomDimensions(
       commandBuildBundleTargetPlatform: stringArg('target-platform'),
       commandBuildBundleIsModule: flutterProject.isModule,
+    );
+  }
+
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectDir));
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildBundleTargetPlatform: stringArg('target-platform'),
+      buildBundleIsModule: flutterProject.isModule,
     );
   }
 
