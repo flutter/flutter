@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -3602,6 +3607,70 @@ void main() {
 
     expect(getIconData(tester).size, 23.0);
     expect(getIconData(tester).color, const Color(0xff112233));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/138287.
+  testWidgetsWithLeakTracking("Enabling and disabling Chip with Tooltip doesn't throw an exception", (WidgetTester tester) async {
+    bool isEnabled = true;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawChip(
+                    tooltip: 'tooltip',
+                    isEnabled: isEnabled,
+                    onPressed: isEnabled ? () {} : null,
+                    label: const Text('RawChip'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isEnabled = !isEnabled;
+                      });
+                    },
+                    child: Text('${isEnabled ? 'Disable' : 'Enable'} Chip'),
+                  )
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Tap the elevated button to disable the chip with a tooltip.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Disable Chip'));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+
+    // Tap the elevated button to enable the chip with a tooltip.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Enable Chip'));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgetsWithLeakTracking('Delete button is visible RawChip is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: RawChip(
+          isEnabled: false,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      ),
+    );
+
+    // Delete button should be visible.
+    expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
   });
 
   group('Material 2', () {
