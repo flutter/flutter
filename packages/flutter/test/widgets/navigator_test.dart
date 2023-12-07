@@ -4287,6 +4287,98 @@ void main() {
     expect(policy, isA<ReadingOrderTraversalPolicy>());
   });
 
+  testWidgetsWithLeakTracking(
+      'Send semantic event to move a11y focus to the last focused item when pop next page',
+      (WidgetTester tester) async {
+    dynamic semanticEvent;
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility, (dynamic message) async {
+      semanticEvent = message;
+    });
+    final Key openSheetKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(primarySwatch: Colors.blue),
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => _LinksPage(
+            title: 'Home page',
+            buttons: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one');
+                },
+                child: const Text('Go to one'),
+              ),
+            ],
+          ),
+          '/one': (BuildContext context) => Scaffold(
+            body: Column(
+              children: <Widget>[
+                const ListTile(title: Text('Title 1')),
+                const ListTile(title: Text('Title 2')),
+                const ListTile(title: Text('Title 3')),
+                ElevatedButton(
+                  key: openSheetKey,
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Center(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close Sheet'),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Open Sheet'),
+                )
+              ],
+            ),
+          ),
+        },
+      ),
+    );
+
+    expect(find.text('Home page'), findsOneWidget);
+
+    await tester.tap(find.text('Go to one'));
+    await tester.pumpAndSettle();
+
+    // The focused node before opening the sheet.
+    final ByteData? fakeMessage =
+        SystemChannels.accessibility.codec.encodeMessage(<String, dynamic>{
+      'type': 'didGainFocus',
+      'nodeId': 5,
+    });
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.accessibility.name,
+      fakeMessage,
+      (ByteData? data) {},
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+    expect(find.text('Close Sheet'), findsOneWidget);
+    await tester.tap(find.text('Close Sheet'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+    // The focused node before opening the sheet regains the focus;
+    expect(semanticEvent, <String, dynamic>{
+      'type': 'focus',
+      'nodeId': 5,
+      'data': <String, dynamic>{},
+    });
+
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+  },
+    variant:  const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS}),
+    skip: isBrowser, // [intended] only non-web supports move a11y focus back to last item.
+  );
+
   group('RouteSettings.toString', () {
     test('when name is not null, should have double quote', () {
       expect(const RouteSettings(name: '/home').toString(), 'RouteSettings("/home", null)');
