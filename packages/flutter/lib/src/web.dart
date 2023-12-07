@@ -5,8 +5,16 @@
 /// A stripped down version of `package:web` to avoid pinning that repo in
 /// Flutter as a dependency.
 ///
-/// This should stay in sync with `package:web` as much as possible to make it
-/// easier to add new members as needed.
+/// These are manually copied over from `package:web` as needed, and should stay
+/// in sync with the latest package version as much as possible.
+///
+/// If missing members are needed, copy them over into the corresponding
+/// extension or interface. If missing interfaces/types are needed, copy them
+/// over while excluding unnecessary inheritance to make the copy minimal. These
+/// types are erased at runtime, so excluding supertypes is safe. If a member is
+/// needed that belongs to a supertype, then add the necessary `implements`
+/// clause to the subtype when you add that supertype. Keep extensions next to
+/// the interface they extend.
 library;
 
 import 'dart:js_interop';
