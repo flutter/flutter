@@ -3519,6 +3519,43 @@ void main() {
     expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
     expect(material.textStyle?.decoration, menuTextStyle.decoration);
   });
+
+  testWidgetsWithLeakTracking('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    int onFocusChangeCalled = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SubmenuButton(
+                focusNode: focusNode,
+                onFocusChange: (bool value) {
+                  setState(() {
+                    onFocusChangeCalled += 1;
+                  });
+                },
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('item 0'))
+                ],
+                child: const Text('Submenu 0'),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+    expect(onFocusChangeCalled, 1);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, false);
+    expect(onFocusChangeCalled, 2);
+  });
 }
 
 List<Widget> createTestMenus({
