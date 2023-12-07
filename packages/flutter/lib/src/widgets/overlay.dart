@@ -1247,7 +1247,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     if (constraints.biggest.isFinite) {
       size = constraints.biggest;
     } else {
-      RenderBox? child = _lastOnstageChild;
+      RenderBox? child = _firstOnstageChild;
       while (child != null) {
         final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
         // Only children that were not created by an OverlayPortal (overlayEntry != null)
@@ -1258,7 +1258,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
           size = child.size;
           break;
         }
-        child = childParentData.previousSibling;
+        child = childParentData.nextSibling;
       }
       // TODO(goderbauer): Provide better error message if we cannot find a size-determining child.
       assert(sizeDeterminingChild != null);
