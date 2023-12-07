@@ -355,6 +355,11 @@ flutter:
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 0);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        0,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -380,6 +385,11 @@ flutter:
 
       // A plugin example depends on the plugin itself, and integration_test.
       expect((await getCommand.usageValues).commandPackagesNumberPlugins, 2);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesNumberPlugins'],
+        2,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -402,6 +412,11 @@ flutter:
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, false);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        false,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -424,6 +439,11 @@ flutter:
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesProjectModule, true);
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesProjectModule'],
+        true,
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -455,6 +475,11 @@ flutter:
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v1');
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesAndroidEmbeddingVersion'],
+        'v1',
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(
@@ -477,6 +502,11 @@ flutter:
       final PackagesGetCommand getCommand = command.subcommands['get']! as PackagesGetCommand;
 
       expect((await getCommand.usageValues).commandPackagesAndroidEmbeddingVersion, 'v2');
+      expect(
+        (await getCommand.unifiedAnalyticsUsageValues('pub/get'))
+            .eventData['packagesAndroidEmbeddingVersion'],
+        'v2',
+      );
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Pub: () => Pub.test(

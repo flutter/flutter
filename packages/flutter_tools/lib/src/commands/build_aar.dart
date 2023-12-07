@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
@@ -91,6 +93,25 @@ class BuildAarCommand extends BuildSubCommand {
     return CustomDimensions(
       commandBuildAarProjectType: projectType,
       commandBuildAarTargetPlatform: stringsArg('target-platform').join(','),
+    );
+  }
+
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
+    final String projectType;
+    if (project.manifest.isModule) {
+      projectType = 'module';
+    } else if (project.manifest.isPlugin) {
+      projectType = 'plugin';
+    } else {
+      projectType = 'app';
+    }
+
+    return Event.commandUsageValues(
+      workflow: commandPath,
+      commandHasTerminal: hasTerminal,
+      buildAarProjectType: projectType,
+      buildAarTargetPlatform: stringsArg('target-platform').join(','),
     );
   }
 
