@@ -202,7 +202,6 @@ if (enable_unittests) {
     fixtures = [
       "fixtures/shelltest_screenshot.png",
       "fixtures/hello_loop_2.gif",
-      "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf",
     ]
   }
 
@@ -323,7 +322,6 @@ if (enable_unittests) {
       ":shell_unittests_fixtures",
       "//flutter/assets",
       "//flutter/common/graphics",
-      "//flutter/display_list/testing:display_list_testing",
       "//flutter/shell/common:base64",
       "//flutter/shell/profiling:profiling_unittests",
       "//flutter/shell/version",

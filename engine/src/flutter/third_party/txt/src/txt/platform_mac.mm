@@ -5,7 +5,6 @@
 #include <TargetConditionals.h>
 
 #include "flutter/fml/platform/darwin/platform_version.h"
-#include "third_party/skia/include/ports/SkFontMgr_mac_ct.h"
 #include "third_party/skia/include/ports/SkTypeface_mac.h"
 #include "txt/platform.h"
 #include "txt/platform_mac.h"
@@ -38,8 +37,7 @@ std::vector<std::string> GetDefaultFontFamilies() {
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager(uint32_t font_initialization_data) {
-  static sk_sp<SkFontMgr> mgr = SkFontMgr_New_CoreText(nullptr);
-  return mgr;
+  return SkFontMgr::RefDefault();
 }
 
 void RegisterSystemFonts(const DynamicFontManager& dynamic_font_manager) {
