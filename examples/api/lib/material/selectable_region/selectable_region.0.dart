@@ -116,8 +116,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   // Selectable APIs.
 
   @override
-  List<Rect> get boundingBoxes => _boundingBoxes;
-  final List<Rect> _boundingBoxes = <Rect>[paintBounds];
+  List<Rect> get boundingBoxes => <Rect>[paintBounds];
 
   // Adjust this value to enlarge or shrink the selection highlight.
   static const double _padding = 10.0;
