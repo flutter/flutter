@@ -2444,6 +2444,17 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
+          // Show the floating cursor
+          SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+              state: FloatingCursorDragState.Start,
+              localPosition: renderEditable.globalToLocal(details.globalPosition),
+              offset: Offset.zero,
+            );
+            editableText.updateFloatingCursor(cursorPoint);
+          }, debugLabel: 'TextSelectionGestureDetectorBuilderDelegate.updateFloatingCursor');
+          continue macOSCase;
+        macOSCase:
         case TargetPlatform.macOS:
           if (!renderEditable.hasFocus) {
             _longPressStartedWithoutFocus = true;
@@ -2465,16 +2476,6 @@ class TextSelectionGestureDetectorBuilder {
 
       _dragStartViewportOffset = renderEditable.offset.pixels;
       _dragStartScrollOffset = _scrollPosition;
-
-      // Show the floating cursor
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-          state: FloatingCursorDragState.Start,
-          localPosition: renderEditable.globalToLocal(details.globalPosition),
-          offset: Offset.zero,
-        );
-        editableText.updateFloatingCursor(cursorPoint);
-      }, debugLabel: 'TextSelectionGestureDetectorBuilderDelegate.updateFloatingCursor');
     }
   }
 
@@ -2501,6 +2502,14 @@ class TextSelectionGestureDetectorBuilder {
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
+          // Update the floating cursor
+          final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+            state: FloatingCursorDragState.Update,
+            offset: details.offsetFromOrigin,
+          );
+          editableText.updateFloatingCursor(cursorPoint);
+          continue macOSCase;
+        macOSCase:
         case TargetPlatform.macOS:
           if (_longPressStartedWithoutFocus) {
             renderEditable.selectWordsInRange(
@@ -2526,13 +2535,6 @@ class TextSelectionGestureDetectorBuilder {
       }
 
       _showMagnifierIfSupportedByPlatform(details.globalPosition);
-
-      // Update the floating cursor
-      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-        state: FloatingCursorDragState.Update,
-        offset: details.offsetFromOrigin,
-      );
-      editableText.updateFloatingCursor(cursorPoint);
     }
   }
 
@@ -2553,13 +2555,14 @@ class TextSelectionGestureDetectorBuilder {
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
-
-    // Update the floating cursor
-    if (delegate.selectionEnabled) {
-      final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-        state: FloatingCursorDragState.End
-      );
-      editableText.updateFloatingCursor(cursorPoint);
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // Update the floating cursor
+      if (delegate.selectionEnabled) {
+        final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+          state: FloatingCursorDragState.End
+        );
+        editableText.updateFloatingCursor(cursorPoint);
+      }
     }
   }
 
