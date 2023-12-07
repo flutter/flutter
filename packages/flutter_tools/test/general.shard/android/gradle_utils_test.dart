@@ -81,7 +81,7 @@ void main() {
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.5-all.zip\n');
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6.3-all.zip\n');
     });
 
     testWithoutContext('injects the wrapper when some files are missing', () {
@@ -126,7 +126,7 @@ void main() {
           'distributionPath=wrapper/dists\n'
           'zipStoreBase=GRADLE_USER_HOME\n'
           'zipStorePath=wrapper/dists\n'
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.5-all.zip\n');
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6.3-all.zip\n');
     });
 
     testWithoutContext(
