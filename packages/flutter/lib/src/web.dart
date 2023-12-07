@@ -25,6 +25,10 @@ external Window get window;
 class CSSStyleDeclaration {}
 
 extension CSSStyleDeclarationExtension on CSSStyleDeclaration {
+  external set backgroundColor(String value);
+  external String get backgroundColor;
+  external set border(String value);
+  external String get border;
   external set height(String value);
   external String get height;
   external set width(String value);
