@@ -10,6 +10,7 @@ import 'package:native_assets_builder/native_assets_builder.dart' as native_asse
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
+import 'android/native_assets.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -61,6 +62,9 @@ abstract class NativeAssetsBuildRunner {
 
   /// The C compiler config to use for compilation.
   Future<CCompilerConfig> get cCompilerConfig;
+
+  /// The NDK compiler to use to use for compilation for Android.
+  Future<CCompilerConfig> get ndkCCompilerConfig;
 }
 
 /// Uses `package:native_assets_builder` for its implementation.
@@ -174,9 +178,15 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     if (globals.platform.isWindows) {
       return cCompilerConfigWindows();
     }
-    throwToolExit(
-      'Native assets feature not yet implemented for Android.',
-    );
+    if (globals.platform.isAndroid) {
+      throwToolExit('Should use ndkCCompilerConfig for Android.');
+    }
+    throwToolExit('Unknown target OS.');
+  }();
+
+  @override
+  late final Future<CCompilerConfig> ndkCCompilerConfig = () {
+    return cCompilerConfigAndroid();
   }();
 }
 
@@ -230,6 +240,9 @@ Future<bool> nativeBuildRequired(NativeAssetsBuildRunner buildRunner) async {
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
+    globals.logger.printTrace(
+      'No packages with native assets. Skipping native assets compilation.',
+    );
     return false;
   }
 
@@ -258,6 +271,9 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   }
   final List<Package> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
   if (packagesWithNativeAssets.isEmpty) {
+    globals.logger.printTrace(
+      'No packages with native assets. Skipping native assets compilation.',
+    );
     return;
   }
   final String packageNames = packagesWithNativeAssets.map((Package p) => p.name).join(' ');
@@ -374,6 +390,11 @@ Future<Uri?> dryRunNativeAssets({
     case build_info.TargetPlatform.android_x64:
     case build_info.TargetPlatform.android_x86:
     case build_info.TargetPlatform.android:
+      nativeAssetsYaml = await dryRunNativeAssetsAndroid(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: buildRunner,
+      );
     case build_info.TargetPlatform.fuchsia_arm64:
     case build_info.TargetPlatform.fuchsia_x64:
     case build_info.TargetPlatform.web_javascript:
@@ -433,7 +454,17 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
         fileSystem,
         projectUri,
         buildRunner,
-      )
+      ),
+    if (targetPlatforms.contains(build_info.TargetPlatform.android) ||
+        targetPlatforms.contains(build_info.TargetPlatform.android_arm) ||
+        targetPlatforms.contains(build_info.TargetPlatform.android_arm64) ||
+        targetPlatforms.contains(build_info.TargetPlatform.android_x64) ||
+        targetPlatforms.contains(build_info.TargetPlatform.android_x86))
+      ...await dryRunNativeAssetsAndroidInternal(
+        fileSystem,
+        projectUri,
+        buildRunner,
+      ),
   ];
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(nativeAssetPaths, buildUri, fileSystem);
   return nativeAssetsUri;
