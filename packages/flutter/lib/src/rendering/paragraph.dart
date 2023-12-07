@@ -1372,7 +1372,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       ? startOffsetInParagraphCoordinates
       : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
     final bool flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
-    final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()..invert();
     final TextSelection selection = TextSelection(
       baseOffset: selectionStart,
       extentOffset: selectionEnd,
@@ -1383,12 +1382,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
-        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
+        localPosition: startOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
         handleType: flipHandles ? TextSelectionHandleType.right : TextSelectionHandleType.left
       ),
       endSelectionPoint: SelectionPoint(
-        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, endOffsetInParagraphCoordinates),
+        localPosition: endOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
         handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
       ),
@@ -1971,10 +1970,6 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     }
   }
 
-  Matrix4 getTransformToParagraph() {
-    return Matrix4.translationValues(_rect.left, _rect.top, 0.0);
-  }
-
   @override
   Matrix4 getTransformTo(RenderObject? ancestor) {
     return paragraph.getTransformTo(ancestor);
@@ -2063,12 +2058,11 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
             textBox.toRect().shift(offset), selectionPaint);
       }
     }
-    final Matrix4 transform = getTransformToParagraph();
     if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
       context.pushLayer(
         LeaderLayer(
           link: _startHandleLayerLink!,
-          offset: offset + MatrixUtils.transformPoint(transform, value.startSelectionPoint!.localPosition),
+          offset: offset + value.startSelectionPoint!.localPosition,
         ),
         (PaintingContext context, Offset offset) { },
         Offset.zero,
@@ -2078,7 +2072,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       context.pushLayer(
         LeaderLayer(
           link: _endHandleLayerLink!,
-          offset: offset + MatrixUtils.transformPoint(transform, value.endSelectionPoint!.localPosition),
+          offset: offset + value.endSelectionPoint!.localPosition,
         ),
         (PaintingContext context, Offset offset) { },
         Offset.zero,
