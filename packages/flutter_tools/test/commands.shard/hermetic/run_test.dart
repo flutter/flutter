@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -433,13 +432,6 @@ void main() {
       });
 
       testUsingContext('fails when --flavor is used with an unsupported target platform', () async {
-        final RunCommand command = RunCommand();
-        final List<PlatformType> unsupportedPlatforms = PlatformType.values
-          .whereNot((PlatformType element) => element == PlatformType.android
-            || element == PlatformType.ios
-            || element == PlatformType.macos
-          ).toList();
-
         const List<String> runCommand = <String>[
           'run',
           '--no-pub',
@@ -447,19 +439,17 @@ void main() {
           '--flavor=vanilla'
         ];
 
-        for (final PlatformType platform in unsupportedPlatforms) {
-          final FakeDevice device = FakeDevice(platformType: platform);
-          testDeviceManager.devices = <Device>[device];
+        // Useful for test readability.
+        // ignore: avoid_redundant_argument_values
+        final FakeDevice device = FakeDevice(supportsFlavors: false);
+        testDeviceManager.devices = <Device>[device];
 
-          await expectLater(
-            () => createTestCommandRunner(command).run(runCommand),
-            throwsToolExit(
-              message: '--flavor is only supported for Android and iOS '
-                'devices.'),
-              reason: 'should throw a ToolExit when --flavor is used with a '
-                'target platform of ${platform.name}',
-          );
-        }
+        await expectLater(
+          () => createTestCommandRunner(RunCommand()).run(runCommand),
+          throwsToolExit(
+            message: '--flavor is only supported for Android and iOS devices.',
+          ),
+        );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
@@ -1342,11 +1332,13 @@ class FakeDevice extends Fake implements Device {
     String sdkNameAndVersion = '',
     PlatformType platformType = PlatformType.ios,
     bool isSupported = true,
+    bool supportsFlavors = false,
   }): _isLocalEmulator = isLocalEmulator,
       _targetPlatform = targetPlatform,
       _sdkNameAndVersion = sdkNameAndVersion,
       _platformType = platformType,
-      _isSupported = isSupported;
+      _isSupported = isSupported,
+      _supportsFlavors = supportsFlavors;
 
   static const int kSuccess = 1;
   static const int kFailure = -1;
@@ -1355,6 +1347,7 @@ class FakeDevice extends Fake implements Device {
   final String _sdkNameAndVersion;
   final PlatformType _platformType;
   final bool _isSupported;
+  final bool _supportsFlavors;
 
   @override
   Category get category => Category.mobile;
@@ -1381,6 +1374,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsFastStart => false;
+
+  @override
+  bool get supportsFlavors => _supportsFlavors;
 
   @override
   bool get ephemeral => true;
