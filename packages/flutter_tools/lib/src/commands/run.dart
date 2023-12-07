@@ -613,13 +613,8 @@ class RunCommand extends RunCommandBase {
 
     final String? flavor = stringArg('flavor');
     if (flavor != null) {
-      const List<PlatformType> platformsWithFlavorsSupport = <PlatformType>[
-        PlatformType.android,
-        PlatformType.ios,
-        PlatformType.macos,
-      ];
       final bool flavorsNotSupportedForSomeDevice = devices!
-        .every((Device element) => platformsWithFlavorsSupport.contains(element.platformType));
+        .every((Device device) => device.supportsFlavors);
       if (!flavorsNotSupportedForSomeDevice) {
         throwToolExit('--flavor is only supported for Android, iOS, and macOS devices.');
       }
