@@ -349,9 +349,14 @@ flutter:
         return bundle;
       }
 
-      setUp(() {
+      late final String? previousCacheFlutterRootValue;
+
+      setUpAll(() {
+        previousCacheFlutterRootValue = Cache.flutterRoot;
         Cache.flutterRoot = Cache.defaultFlutterRoot(platform: platform, fileSystem: testFileSystem, userMessages: UserMessages());
       });
+
+      tearDownAll(() => Cache.flutterRoot = previousCacheFlutterRootValue);
 
       testWithoutContext('correctly bundles assets given a simple asset manifest with flavors', () async {
         testFileSystem.file('.packages').createSync();
