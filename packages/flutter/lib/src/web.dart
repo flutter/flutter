@@ -30,6 +30,7 @@ extension CSSStyleDeclarationExtension on CSSStyleDeclaration {
   external set width(String value);
   external String get width;
 }
+
 @JS('CSSStyleSheet')
 @staticInterop
 class CSSStyleSheet {}
