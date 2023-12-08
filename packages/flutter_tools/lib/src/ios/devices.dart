@@ -680,6 +680,14 @@ class IOSDevice extends Device {
           localUri = await Future.any(
             <Future<Uri?>>[vmUrlFromMDns, vmUrlFromLogs]
           );
+
+          // If the first future to return is null, wait for the other to complete.
+          if (localUri == null) {
+            final List<Uri?> vmUrls = await Future.wait(
+              <Future<Uri?>>[vmUrlFromMDns, vmUrlFromLogs]
+            );
+            localUri = vmUrls.where((Uri? vmUrl) => vmUrl != null).firstOrNull;
+          }
         } else {
           localUri = await vmServiceDiscovery?.uri;
           // If the `ios-deploy` debugger loses connection before it finds the
