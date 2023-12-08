@@ -1634,7 +1634,7 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
-    
+
     final OverlayState overlay = tester.state<OverlayState>(find.byType(Overlay));
 
     final OverlayEntry nonSizingEntry = OverlayEntry(
