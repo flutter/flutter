@@ -1217,8 +1217,10 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(constraints.biggest.isFinite);
-    return constraints.biggest;
+    if (constraints.biggest.isFinite) {
+      return constraints.biggest;
+    }
+    return _findSizeDeterminingChild().getDryLayout(constraints);
   }
 
   @override
@@ -1267,21 +1269,9 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     if (constraints.biggest.isFinite) {
       size = constraints.biggest;
     } else {
-      RenderBox? child = _lastOnstageChild;
-      while (child != null) {
-        final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
-        // Only children that were not created by an OverlayPortal (overlayEntry != null)
-        // and that are non-positioned can determine overall size of Overlay.
-        if ((childParentData.overlayEntry?.canSizeOverlay ?? false) && !childParentData.isPositioned) {
-          sizeDeterminingChild = child;
-          layoutChild(sizeDeterminingChild, constraints);
-          size = child.size;
-          break;
-        }
-        child = childParentData.previousSibling;
-      }
-      // TODO(goderbauer): Provide better error message if we cannot find a size-determining child.
-      assert(sizeDeterminingChild != null);
+      sizeDeterminingChild = _findSizeDeterminingChild();
+      layoutChild(sizeDeterminingChild, constraints);
+      size = sizeDeterminingChild.size;
     }
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
@@ -1291,6 +1281,27 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
         layoutChild(child, nonPositionedChildConstraints);
       }
     }
+  }
+
+  RenderBox _findSizeDeterminingChild() {
+    RenderBox? child = _lastOnstageChild;
+    while (child != null) {
+      final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      if ((childParentData.overlayEntry?.canSizeOverlay ?? false) && !childParentData.isPositioned) {
+        return child;
+      }
+      child = childParentData.previousSibling;
+    }
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Overlay was given infinite constraints and cannot be sized by a suitable child.'),
+      ErrorDescription(
+        'The constraints given to the overlay ($constraints) would result in an illegal '
+        'infinite size (${constraints.biggest}). To avoid that, the Overlay tried to size '
+        'itself to one of its children, but no suitable non-positioned child that has '
+        'OverlayEntry.canSizeOverlay set to true could be found.',
+      ),
+      ErrorHint('Try wrapping the Overlay in a SizedBox to give it a finite size.'),
+    ]);
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
