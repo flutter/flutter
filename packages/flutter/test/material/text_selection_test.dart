@@ -407,8 +407,9 @@ void main() {
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsNothing); // 'More' button.
 
       // Tap to place the cursor and tap again to show the menu without a
       // selection.
@@ -426,6 +427,7 @@ void main() {
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
 
@@ -436,8 +438,9 @@ void main() {
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget); // 'More' button.
       final Offset cutOffset = tester.getTopLeft(find.text('Cut'));
 
       // Tap to clear the selection.
@@ -447,37 +450,39 @@ void main() {
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsNothing); // 'More' button.
 
       // Long press to show the menu.
       await tester.longPressAt(textOffsetToPosition(tester, 1));
       await tester.pumpAndSettle();
 
-      // The last button is missing, and a more button is shown.
+      // The last buttons (share and select all) are missing, and a more button is shown.
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget); // 'More' button.
 
-      // Tapping the button shows the overflow menu.
+      // Tapping the more button shows the overflow menu.
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsNothing);
       expect(find.text('Copy'), findsNothing);
       expect(find.text('Paste'), findsNothing);
+      expect(find.text('Share'), findsOneWidget);
       expect(find.text('Select all'), findsOneWidget);
-      expect(find.byType(IconButton), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget); // Back button.
 
-      // Tapping Select all changes the menu items so that there is no longer
-      // any overflow.
+      // Tapping 'Select all' closes the overflow menu.
       await tester.tap(find.text('Select all'));
       await tester.pumpAndSettle();
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
+      expect(find.text('Share'), findsNothing);
       expect(find.text('Select all'), findsNothing);
-      expect(find.byType(IconButton), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget); // 'More' button.
       final Offset newCutOffset = tester.getTopLeft(find.text('Cut'));
       expect(newCutOffset, equals(cutOffset));
     },
