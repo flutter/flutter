@@ -114,7 +114,7 @@ class PlatformViewAndroidJNI {
   //----------------------------------------------------------------------------
   /// @brief      Acquire the latest image available.
   ///
-  virtual JavaLocalRef ImageTextureEntryAcquireLatestImage(
+  virtual JavaLocalRef ImageProducerTextureEntryAcquireLatestImage(
       JavaLocalRef image_texture_entry) = 0;
 
   //----------------------------------------------------------------------------

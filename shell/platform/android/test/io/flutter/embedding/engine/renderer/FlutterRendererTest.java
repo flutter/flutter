@@ -3,6 +3,8 @@ package io.flutter.embedding.engine.renderer;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,8 +16,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.media.Image;
 import android.os.Looper;
 import android.view.Surface;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -444,5 +448,58 @@ public class FlutterRendererTest {
     verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface));
     verify(fakeFlutterJNI, times(0)).onSurfaceCreated(eq(fakeSurface2));
     verify(fakeFlutterJNI, times(1)).onSurfaceWindowChanged(eq(fakeSurface2));
+  }
+
+  @Test
+  public void ImageRawSurfaceTextureProducesImageOfCorrectSize() {
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer.ImageReaderSurfaceProducer texture =
+        flutterRenderer.new ImageReaderSurfaceProducer(0);
+    texture.disableFenceForTest();
+
+    // Returns a null image when one hasn't been produced.
+    assertNull(texture.acquireLatestImage());
+
+    // Give the texture an initial size.
+    texture.setSize(1, 1);
+
+    // Render a frame.
+    Surface surface = texture.getSurface();
+    assertNotNull(surface);
+    Canvas canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+
+    // Let callbacks run.
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // Extract the image and check its size.
+    Image image = texture.acquireLatestImage();
+    assertEquals(1, image.getWidth());
+    assertEquals(1, image.getHeight());
+    image.close();
+
+    // Resize the texture.
+    texture.setSize(5, 5);
+
+    // Render a frame.
+    surface = texture.getSurface();
+    assertNotNull(surface);
+    canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+
+    // Let callbacks run.
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // Extract the image and check its size.
+    image = texture.acquireLatestImage();
+    assertEquals(5, image.getWidth());
+    assertEquals(5, image.getHeight());
+    image.close();
+
+    assertNull(texture.acquireLatestImage());
+
+    texture.release();
   }
 }
