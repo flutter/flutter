@@ -59,6 +59,7 @@ jobs:
         uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
         with:
           base: ${{ env.RELEASE_BRANCH }}
+          branch: cp-${{ env.CHANNEL }}-${{ env.COMMIT_SHA }}
           path: flutter
           token: ${{ github.token}}
           labels: |
