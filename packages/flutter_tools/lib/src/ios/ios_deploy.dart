@@ -614,13 +614,20 @@ class IOSDeployDebugger {
       return;
     }
 
-    try {
+    runZonedGuarded(() async {
       // Detach lldb from the app process.
       _iosDeployProcess?.stdin.writeln('process detach');
-    } on SocketException catch (error) {
-      // Best effort, try to detach, but maybe the app already exited or already detached.
-      _logger.printTrace('Could not detach from debugger: $error');
-    }
+      await _iosDeployProcess?.stdin.flush();
+    }, (Object error, StackTrace stackTrace) {
+      throw Exception('foo');
+    });
+    //try {
+    //  // Detach lldb from the app process.
+    //  _iosDeployProcess?.stdin.writeln('process detach');
+    //} on SocketException catch (error) {
+    //  // Best effort, try to detach, but maybe the app already exited or already detached.
+    //  _logger.printTrace('Could not detach from debugger: $error');
+    //}
   }
 }
 

@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -385,6 +386,25 @@ void main () {
         processManager: processManager,
       );
       expect(stdin.stream.transform<String>(const Utf8Decoder()), emits('process detach'));
+      await iosDeployDebugger.launchAndAttach();
+      iosDeployDebugger.detach();
+    });
+
+    testWithoutContext('detach handles broken pipe', () async {
+      final StreamController<List<int>> stdin = StreamController<List<int>>();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['ios-deploy'],
+          stdout: '(lldb)     run\nsuccess',
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+      final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+        processManager: processManager,
+      );
+      stdin.stream.transform<String>(const Utf8Decoder()).listen((String s) {
+        throw const SocketException('broken pipe');
+      });
       await iosDeployDebugger.launchAndAttach();
       iosDeployDebugger.detach();
     });
