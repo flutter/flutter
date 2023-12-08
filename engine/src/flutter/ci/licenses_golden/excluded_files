@@ -194,7 +194,6 @@
 ../../../flutter/impeller/scene/importer/importer_unittests.cc
 ../../../flutter/impeller/scene/scene_unittests.cc
 ../../../flutter/impeller/shader_archive/shader_archive_unittests.cc
-../../../flutter/impeller/tessellator/circle_tessellator_unittests.cc
 ../../../flutter/impeller/tessellator/dart/.dart_tool
 ../../../flutter/impeller/tessellator/dart/pubspec.lock
 ../../../flutter/impeller/tessellator/dart/pubspec.yaml

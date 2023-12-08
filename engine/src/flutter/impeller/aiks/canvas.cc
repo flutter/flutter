@@ -318,7 +318,7 @@ void Canvas::DrawLine(const Point& p0, const Point& p1, const Paint& paint) {
   GetCurrentPass().AddEntity(std::move(entity));
 }
 
-void Canvas::DrawRect(Rect rect, const Paint& paint) {
+void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (paint.style == Paint::Style::kStroke) {
     DrawPath(PathBuilder{}.AddRect(rect).TakePath(), paint);
     return;
@@ -334,6 +334,33 @@ void Canvas::DrawRect(Rect rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
   entity.SetContents(
       CreateContentsForGeometryWithFilters(paint, Geometry::MakeRect(rect)));
+
+  GetCurrentPass().AddEntity(std::move(entity));
+}
+
+void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
+  if (rect.IsSquare()) {
+    // Circles have slightly less overhead and can do stroking
+    DrawCircle(rect.GetCenter(), rect.GetSize().width * 0.5f, paint);
+    return;
+  }
+
+  if (paint.style == Paint::Style::kStroke) {
+    // No stroked ellipses yet
+    DrawPath(PathBuilder{}.AddOval(rect).TakePath(), paint);
+    return;
+  }
+
+  if (AttemptDrawBlurredRRect(rect, 0, paint)) {
+    return;
+  }
+
+  Entity entity;
+  entity.SetTransform(GetCurrentTransform());
+  entity.SetClipDepth(GetClipDepth());
+  entity.SetBlendMode(paint.blend_mode);
+  entity.SetContents(
+      CreateContentsForGeometryWithFilters(paint, Geometry::MakeOval(rect)));
 
   GetCurrentPass().AddEntity(std::move(entity));
 }
@@ -362,7 +389,9 @@ void Canvas::DrawRRect(Rect rect, Point corner_radii, const Paint& paint) {
   DrawPath(std::move(path), paint);
 }
 
-void Canvas::DrawCircle(Point center, Scalar radius, const Paint& paint) {
+void Canvas::DrawCircle(const Point& center,
+                        Scalar radius,
+                        const Paint& paint) {
   Size half_size(radius, radius);
   if (AttemptDrawBlurredRRect(
           Rect::MakeOriginSize(center - half_size, half_size * 2), radius,

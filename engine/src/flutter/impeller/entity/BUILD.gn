@@ -191,6 +191,8 @@ impeller_component("entity") {
     "entity_pass_delegate.h",
     "entity_pass_target.cc",
     "entity_pass_target.h",
+    "geometry/circle_geometry.cc",
+    "geometry/circle_geometry.h",
     "geometry/cover_geometry.cc",
     "geometry/cover_geometry.h",
     "geometry/ellipse_geometry.cc",

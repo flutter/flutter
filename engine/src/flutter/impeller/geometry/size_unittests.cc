@@ -50,5 +50,29 @@ TEST(SizeTest, ISizeIsEmpty) {
   EXPECT_TRUE(ISize(-1, 7).IsEmpty());
 }
 
+TEST(SizeTest, IsSquare) {
+  EXPECT_TRUE(Size(20, 20).IsSquare());
+  EXPECT_FALSE(Size(20, 19).IsSquare());
+  EXPECT_FALSE(Size(19, 20).IsSquare());
+
+  EXPECT_TRUE(ISize(20, 20).IsSquare());
+  EXPECT_FALSE(ISize(20, 19).IsSquare());
+  EXPECT_FALSE(ISize(19, 20).IsSquare());
+}
+
+TEST(SizeTest, MaxDimension) {
+  EXPECT_EQ(Size(20, 20).MaxDimension(), 20);
+  EXPECT_EQ(Size(20, 19).MaxDimension(), 20);
+  EXPECT_EQ(Size(19, 20).MaxDimension(), 20);
+  EXPECT_EQ(Size(20, 21).MaxDimension(), 21);
+  EXPECT_EQ(Size(21, 20).MaxDimension(), 21);
+
+  EXPECT_EQ(ISize(20, 20).MaxDimension(), 20);
+  EXPECT_EQ(ISize(20, 19).MaxDimension(), 20);
+  EXPECT_EQ(ISize(19, 20).MaxDimension(), 20);
+  EXPECT_EQ(ISize(20, 21).MaxDimension(), 21);
+  EXPECT_EQ(ISize(21, 20).MaxDimension(), 21);
+}
+
 }  // namespace testing
 }  // namespace impeller

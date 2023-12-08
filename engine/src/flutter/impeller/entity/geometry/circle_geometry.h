@@ -9,14 +9,16 @@
 namespace impeller {
 
 // Geometry class that can generate vertices (with or without texture
-// coordinates) for filled ellipses. Generating vertices for a stroked
-// ellipse would require a lot more work since the line width must be
-// applied perpendicular to the distorted ellipse shape.
-class EllipseGeometry final : public Geometry {
+// coordinates) for either filled or stroked circles
+class CircleGeometry final : public Geometry {
  public:
-  explicit EllipseGeometry(Rect bounds);
+  explicit CircleGeometry(const Point& center, Scalar radius);
 
-  ~EllipseGeometry() = default;
+  explicit CircleGeometry(const Point& center,
+                          Scalar radius,
+                          Scalar stroke_width);
+
+  ~CircleGeometry() = default;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -43,11 +45,13 @@ class EllipseGeometry final : public Geometry {
                                      const Entity& entity,
                                      RenderPass& pass) const override;
 
-  Rect bounds_;
+  Point center_;
+  Scalar radius_;
+  Scalar stroke_width_;
 
-  EllipseGeometry(const EllipseGeometry&) = delete;
+  CircleGeometry(const CircleGeometry&) = delete;
 
-  EllipseGeometry& operator=(const EllipseGeometry&) = delete;
+  CircleGeometry& operator=(const CircleGeometry&) = delete;
 };
 
 }  // namespace impeller
