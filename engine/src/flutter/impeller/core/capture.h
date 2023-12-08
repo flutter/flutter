@@ -214,16 +214,16 @@ struct CaptureElement final : public CaptureCursorListElement<CaptureElement> {
 };
 
 #ifdef IMPELLER_ENABLE_CAPTURE
-#define _CAPTURE_PROPERTY_RECORDER_DECLARATION(type_name, pascal_name,  \
-                                               lower_name)              \
-  type_name Add##pascal_name(const std::string& label, type_name value, \
+#define _CAPTURE_PROPERTY_RECORDER_DECLARATION(type_name, pascal_name, \
+                                               lower_name)             \
+  type_name Add##pascal_name(std::string_view label, type_name value,  \
                              CaptureProperty::Options options = {});
 #else
-#define _CAPTURE_PROPERTY_RECORDER_DECLARATION(type_name, pascal_name,         \
-                                               lower_name)                     \
-  inline type_name Add##pascal_name(const std::string& label, type_name value, \
-                                    CaptureProperty::Options options = {}) {   \
-    return value;                                                              \
+#define _CAPTURE_PROPERTY_RECORDER_DECLARATION(type_name, pascal_name,       \
+                                               lower_name)                   \
+  inline type_name Add##pascal_name(std::string_view label, type_name value, \
+                                    CaptureProperty::Options options = {}) { \
+    return value;                                                            \
   }
 #endif
 
@@ -235,13 +235,14 @@ class Capture {
 
   static Capture MakeInactive();
 
-  inline Capture CreateChild(const std::string& label) {
+  inline Capture CreateChild(std::string_view label) {
 #ifdef IMPELLER_ENABLE_CAPTURE
     if (!active_) {
       return Capture();
     }
 
-    auto new_capture = Capture(label);
+    std::string label_copy = std::string(label);
+    auto new_capture = Capture(label_copy);
     new_capture.element_ =
         element_->children.GetNext(new_capture.element_, false);
     new_capture.element_->Rewind();
