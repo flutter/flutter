@@ -614,7 +614,7 @@ class IOSDeployDebugger {
   /// The flush of any previous writes have completed, because calling
   /// [IOSink.flush()] before a previous flush has completed will throw a
   /// [StateError].
-  Future<void> stdinWriteln(String line) async {
+  Future<void> stdinWriteln(String line, {void Function(Object, StackTrace)? onError}) async {
     final Process? process = _iosDeployProcess;
     if (process == null) {
       return;
@@ -624,10 +624,7 @@ class IOSDeployDebugger {
       return ProcessUtils.writelnToStdin(
         stdin: process.stdin,
         line: line,
-        onError: (Object error, StackTrace trace) {
-          // Best effort, try to detach, but maybe the app already exited or already detached.
-          _logger.printTrace('Could not detach from debugger: $error');
-        },
+        onError: onError,
       );
     }
 
@@ -645,7 +642,13 @@ class IOSDeployDebugger {
       return;
     }
 
-    await stdinWriteln('process detach');
+    await stdinWriteln(
+      'process detach',
+      onError: (Object error, _) {
+        // Best effort, try to detach, but maybe the app already exited or already detached.
+        _logger.printTrace('Could not detach from debugger: $error');
+      }
+    );
   }
 }
 

@@ -240,13 +240,17 @@ abstract class ProcessUtils {
     void Function(Object, StackTrace)? onError,
   }) async {
     final Completer<void> completer = Completer<void>();
-    runZonedGuarded(
-      () {
-        stdin.writeln(line);
-        stdin.flush().whenComplete(() => completer.complete());
-      },
-      onError ?? (Object _, StackTrace __) {},
-    );
+
+    void writeFlushAndComplete() {
+      stdin.writeln(line);
+      stdin.flush().whenComplete(() => completer.complete());
+    }
+
+    if (onError == null) {
+      runZoned(writeFlushAndComplete);
+    } else {
+      runZonedGuarded(writeFlushAndComplete, onError);
+    }
     return completer.future;
   }
 }
