@@ -1063,7 +1063,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
   Exception? getExpectationForTestThrowable;
   @override
-  Future<String> getExpectationForTest(String testName, { bool retryOnFailure = true }) async {
+  Future<String> getExpectationForTest(String testName) async {
     if (getExpectationForTestThrowable != null) {
       throw getExpectationForTestThrowable!;
     }

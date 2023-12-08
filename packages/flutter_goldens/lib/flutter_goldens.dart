@@ -152,7 +152,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   final Platform platform;
 
   /// The logging function to use when reporting messages to the console.
-  final void Function (String) log;
+  final LogCallback log;
 
   /// The prefix that is added to all golden names.
   final String? namePrefix;
@@ -270,7 +270,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     required FileSystem fs,
     required ProcessManager process,
     required io.HttpClient httpClient,
-    required void Function (String) log,
+    required LogCallback log,
   }) async {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -358,7 +358,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     required FileSystem fs,
     required ProcessManager process,
     required io.HttpClient httpClient,
-    required void Function (String) log,
+    required LogCallback log,
   }) async {
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -455,7 +455,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     required ProcessManager process,
     required Platform platform,
     required io.HttpClient httpClient,
-    required void Function (String) log,
+    required LogCallback log,
   }) {
     final Uri basedir = localFileComparator.basedir;
     final SkiaGoldClient skiaClient = SkiaGoldClient(
@@ -545,7 +545,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     required FileSystem fs,
     required ProcessManager process,
     required io.HttpClient httpClient,
-    required void Function (String) log,
+    required LogCallback log,
   }) async {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -579,7 +579,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     final String testName = skiaClient.cleanTestName(golden.path);
     late String? testExpectation;
     try {
-      testExpectation = await skiaClient.getExpectationForTest(testName, retryOnFailure: false);
+      testExpectation = await skiaClient.getExpectationForTest(testName);
       if (testExpectation == null || testExpectation.isEmpty) {
         log(
           'No expectations provided by Skia Gold for test: $golden. '
@@ -590,7 +590,11 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
         update(golden, imageBytes);
         return true;
       }
-    } on io.SocketException {
+    } on Exception catch (error) {
+      if (error is! io.SocketException &&
+          error is! io.OSError) {
+        rethrow; // "uncaught error"
+      }
       log('Auto-passing "$golden" test, ignoring network error when contacting Skia.');
       return true;
     }

@@ -20,6 +20,9 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 
+/// Signature of callbacks used to inject [print] replacements.
+typedef LogCallback = void Function(String);
+
 /// Exception thrown when an error is returned from the [SkiaClient].
 class SkiaException implements Exception {
   /// Creates a new `SkiaException` with a required error [message].
@@ -91,7 +94,7 @@ class SkiaGoldClient {
   /// Uses the [platform] environment in this implementation.
   String get _goldctl => platform.environment[_kGoldctlKey]!;
 
-  static void _indent(void Function(String) writeln, String text) {
+  static void _indent(LogCallback writeln, String text) {
     if (text.isEmpty) {
       writeln('  <empty>');
     } else {
@@ -101,7 +104,7 @@ class SkiaGoldClient {
     }
   }
 
-  static void _dump(void Function(String) writeln, String data, String label) {
+  static void _dump(LogCallback writeln, String data, String label) {
     if (data.isNotEmpty) {
       writeln('');
       writeln('$label:');
@@ -123,6 +126,7 @@ class SkiaGoldClient {
 
       if (result.exitCode != 0 && resultStdout.contains('resulted in a 502: 502 Bad Gateway')) {
         // Probably a transient error, try again.
+        // (See https://issues.skia.org/issues/40044713)
         //
         // This could have false-positives, because there's no standard format
         // for the error messages from Skia gold. Maybe the test name is output
@@ -426,43 +430,30 @@ class SkiaGoldClient {
   }
 
   /// Returns the latest positive digest for the given test known to Flutter
-  /// Gold at head.
-  Future<String?> getExpectationForTest(String testName, { bool retryOnFailure = true }) async {
+  /// Gold at head. Throws without retrying if there's a network failure.
+  Future<String?> getExpectationForTest(String testName) async {
     final String traceID = getTraceID(testName);
     final Uri requestForExpectations = Uri.parse(
       'https://flutter-gold.skia.org/json/v2/latestpositivedigest/$traceID'
     );
-    Duration delay = const Duration(seconds: 5);
-    while (true) {
-      String? rawResponse;
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
-        final io.HttpClientResponse response = await request.close();
-        rawResponse = await utf8.decodeStream(response);
-        final dynamic jsonResponse = json.decode(rawResponse);
-        if (jsonResponse is! Map<String, dynamic>) {
-          throw const FormatException('Skia gold expectations do not match expected format.');
-        }
-        return jsonResponse['digest'] as String?; // success
-      } on FormatException catch (error) {
-        log(
-          'Formatting error detected requesting expectations from Flutter Gold.\n'
-          'error: $error\n'
-          'url: $requestForExpectations\n'
-          'response: $rawResponse'
-        );
-        rethrow; // fail
-      } on io.SocketException catch (error) {
-        if (!retryOnFailure) {
-          rethrow; // fail
-        }
-        log('Transient failure (${error.message}) when contacting Skia Gold.');
-        log('');
-        log('Retrying in ${delay.inSeconds} seconds.');
-        await Future<void>.delayed(delay);
-        delay *= 2;
-        continue; // retry
+    String? rawResponse;
+    try {
+      final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
+      final io.HttpClientResponse response = await request.close();
+      rawResponse = await utf8.decodeStream(response);
+      final dynamic jsonResponse = json.decode(rawResponse);
+      if (jsonResponse is! Map<String, dynamic>) {
+        throw const FormatException('Skia gold expectations do not match expected format.');
       }
+      return jsonResponse['digest'] as String?; // success
+    } on FormatException catch (error) {
+      log(
+        'Formatting error detected requesting expectations from Flutter Gold.\n'
+        'error: $error\n'
+        'url: $requestForExpectations\n'
+        'response: $rawResponse'
+      );
+      rethrow; // fail
     }
   }
 
