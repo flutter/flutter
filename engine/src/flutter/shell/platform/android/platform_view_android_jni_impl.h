@@ -52,7 +52,7 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void SurfaceTextureDetachFromGLContext(JavaLocalRef surface_texture) override;
 
-  JavaLocalRef ImageTextureEntryAcquireLatestImage(
+  JavaLocalRef ImageProducerTextureEntryAcquireLatestImage(
       JavaLocalRef image_texture_entry) override;
 
   JavaLocalRef ImageGetHardwareBuffer(JavaLocalRef image) override;

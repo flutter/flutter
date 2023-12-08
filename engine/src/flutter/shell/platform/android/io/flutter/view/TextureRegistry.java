@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import android.graphics.SurfaceTexture;
 import android.media.Image;
+import android.view.Surface;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +18,14 @@ import androidx.annotation.Nullable;
  * href="https://api.flutter.dev/flutter/widgets/Texture-class.html">Texture</a> widget.
  */
 public interface TextureRegistry {
+  /**
+   * Creates and registers a SurfaceProducer texture managed by the Flutter engine.
+   *
+   * @return A SurfaceProducer.
+   */
+  @NonNull
+  SurfaceProducer createSurfaceProducer();
+
   /**
    * Creates and registers a SurfaceTexture managed by the Flutter engine.
    *
@@ -57,7 +66,38 @@ public interface TextureRegistry {
     void release();
   }
 
+  /** Uses a Surface to populate the texture. */
+  @Keep
+  interface SurfaceProducer extends TextureEntry {
+    /** @return The identity of this texture. */
+    long id();
+
+    /** Deregisters and releases all resources . */
+    void release();
+
+    /** Specify the size of this texture in physical pixels */
+    void setSize(int width, int height);
+
+    /** @return The currently specified width (physical pixels) */
+    int getWidth();
+
+    /** @return The currently specified height (physical pixels) */
+    int getHeight();
+
+    /**
+     * Get a Surface that can be used to update the texture contents.
+     *
+     * <p>NOTE: You should not cache the returned surface but instead invoke getSurface each time
+     * you need to draw. The surface may change when the texture is resized or has its format
+     * changed.
+     *
+     * @return a Surface to use for a drawing target for various APIs.
+     */
+    Surface getSurface();
+  };
+
   /** A registry entry for a managed SurfaceTexture. */
+  @Keep
   interface SurfaceTextureEntry extends TextureEntry {
     /** @return The identity of this texture. */
     long id();
@@ -93,15 +133,6 @@ public interface TextureRegistry {
      * last frame pushed will be used (dropping the missed frames).
      */
     void pushImage(Image image);
-
-    /**
-     * Retrieve the last Image pushed.
-     *
-     * <p>NOTE: Caller must call Image.close() on returned image.
-     *
-     * @return Image or null.
-     */
-    Image acquireLatestImage();
   }
 
   /** Listener invoked when the most recent image has been consumed. */
@@ -117,5 +148,17 @@ public interface TextureRegistry {
   interface OnTrimMemoryListener {
     /** This method will be invoked when a memory pressure warning was forward. */
     void onTrimMemory(int level);
+  }
+
+  @Keep
+  interface ImageConsumer extends TextureEntry {
+    /**
+     * Retrieve the last Image produced. Drops all previously produced images.
+     *
+     * <p>NOTE: Caller must call Image.close() on returned image.
+     *
+     * @return Image or null.
+     */
+    public Image acquireLatestImage();
   }
 }

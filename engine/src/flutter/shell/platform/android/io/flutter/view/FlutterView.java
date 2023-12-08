@@ -906,6 +906,12 @@ public class FlutterView extends SurfaceView
   }
 
   @Override
+  public SurfaceProducer createSurfaceProducer() {
+    throw new UnsupportedOperationException(
+        "SurfaceProducer textures are not supported in this mode.");
+  }
+
+  @Override
   @NonNull
   public TextureRegistry.SurfaceTextureEntry registerSurfaceTexture(
       @NonNull SurfaceTexture surfaceTexture) {
