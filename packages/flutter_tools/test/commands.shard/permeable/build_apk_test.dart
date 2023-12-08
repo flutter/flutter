@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
@@ -16,11 +17,13 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeFlutterVersion;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -29,10 +32,15 @@ void main() {
   group('Usage', () {
     late Directory tempDir;
     late TestUsage testUsage;
+    late FakeAnalytics fakeAnalytics;
 
     setUp(() {
       testUsage = TestUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -46,8 +54,21 @@ void main() {
 
       expect((await command.usageValues).commandBuildApkTargetPlatform, 'android-arm,android-arm64,android-x64');
 
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'apk',
+            commandHasTerminal: false,
+            buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+            buildApkBuildMode: 'release',
+            buildApkSplitPerAbi: false,
+          ),
+        ),
+      );
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+      Analytics: () => fakeAnalytics,
     });
 
     testUsingContext('split per abi', () async {

@@ -286,6 +286,8 @@ class BuildInfo {
       'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
+      if (flavor != null)
+        'FLAVOR': flavor!,
     };
   }
 
@@ -925,6 +927,31 @@ const String kIosArchs = 'IosArchs';
 /// Supported values are x86_64 and arm64.
 const String kDarwinArchs = 'DarwinArchs';
 
+/// The define to control what Android architectures are built for.
+///
+/// This is expected to be a space-delimited list of architectures.
+const String kAndroidArchs = 'AndroidArchs';
+
+/// If the current build is `flutter build aar`.
+///
+/// This is expected to be a boolean.
+///
+/// If not provided, defaults to false.
+const String kIsAndroidLibrary = 'IsAndroidLibrary';
+
+/// The define to control what min Android SDK version is built for.
+///
+/// This is expected to be int.
+///
+/// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
+///
+/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+///
+/// For more info, see:
+/// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
+/// https://developer.android.com/ndk/guides/other_build_systems#overview
+const String kMinSdkVersion = 'MinSdkVersion';
+
 /// Path to the SDK root to be used as the isysroot.
 const String kSdkRoot = 'SdkRoot';
 
@@ -963,6 +990,9 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 
 /// The define to pass build name
 const String kBuildName = 'BuildName';
+
+/// The app flavor to build.
+const String kFlavor = 'Flavor';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';

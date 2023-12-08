@@ -1951,6 +1951,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             child: TextButton(
               style: mergedStyle,
               focusNode: _buttonFocusNode,
+              onFocusChange: _enabled ? widget.onFocusChange : null,
               onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
               onPressed: _enabled ? () => toggleShowMenu(context) : null,
               isSemanticButton: null,
