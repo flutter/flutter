@@ -42,7 +42,8 @@ const String _defaultPlatform = kIsWeb ? 'web' : 'android';
   return (subspan, i);
 }
 
-/// Helper function that returns every Offset to try hit
+/// Helper function that returns 3 special Offsets within the given `box`, to
+/// try performing hit-testing with.
 Iterable<Offset> _testOffsetsForEachTextBox(TextBox box) {
   final Rect rect = box.toRect();
   return rect.isEmpty
@@ -1019,23 +1020,21 @@ abstract class WidgetController {
     return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons);
   }
 
-  /// Dispatch a pointer down / pointer up sequence at , assuming it is exposed.
+  /// Dispatch a pointer down / pointer up sequence at the first hit-testable
+  /// [InlineSpan] (typically a [TextSpan]) within the given text range.
   ///
-  /// {@template flutter.flutter_test.WidgetController.tap.warnIfMissed}
-  /// The `warnIfMissed` argument, if true (the default), causes a warning to be
-  /// displayed on the console if the specified [Finder] indicates a widget and
-  /// location that, were a pointer event to be sent to that location, would not
-  /// actually send any events to the widget (e.g. because the widget is
-  /// obscured, or the location is off-screen, or the widget is transparent to
-  /// pointer events).
+  /// The given [Finder] must find one and only one matching substring, and the
+  /// substring must be hit-testable (meaning, it must not be off-screen, or be
+  /// obscured by other widgets, or in a disabled widget). Otherwise this method
+  /// throws a [FlutterError].
   ///
-  /// Set the argument to false to silence that warning if you intend to not
-  /// actually hit the specified element.
-  /// {@endtemplate}
+  /// If the target substring contains more than one hit-testable [InlineSpan]s,
+  /// [tapOnText] taps on one of them, but does not guarantee which.
   ///
-  /// For example, a test that verifies that tapping a disabled button does not
-  /// trigger the button would set `warnIfMissed` to false, because the button
-  /// would ignore the tap.
+  /// This method currently only works on static text widgets ([Text] or
+  /// [RichText] for example) that use [RenderParagraph] under the hood. It
+  /// currently does not support finding substrings in [TextField]s or
+  /// [SelectableText].
   Future<void> tapOnText(finders.FinderBase<finders.TextRangeContext> textRangeFinder, {int? pointer, int buttons = kPrimaryButton }) {
     final Iterable<finders.TextRangeContext> ranges = textRangeFinder.evaluate();
     if (ranges.isEmpty) {
