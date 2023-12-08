@@ -43,14 +43,13 @@ const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 }
 
 /// Helper function that returns 3 special Offsets within the given `box`, to
-/// try performing hit-testing with.
+/// try performing hit-testing at.
 Iterable<Offset> _testOffsetsForEachTextBox(TextBox box) {
   final Rect rect = box.toRect();
   return rect.isEmpty
     ? const Iterable<Offset>.empty()
     : <Offset>[rect.center, rect.centerLeft, rect.centerRight];
 }
-
 
 
 // Examples can assume:
@@ -1023,6 +1022,9 @@ abstract class WidgetController {
   /// Dispatch a pointer down / pointer up sequence at the first hit-testable
   /// [InlineSpan] (typically a [TextSpan]) within the given text range.
   ///
+  /// This method performs a more spatially precise tap action on a piece of
+  /// static text, than the widget-based [tap] method.
+  ///
   /// The given [Finder] must find one and only one matching substring, and the
   /// substring must be hit-testable (meaning, it must not be off-screen, or be
   /// obscured by other widgets, or in a disabled widget). Otherwise this method
@@ -1045,7 +1047,7 @@ abstract class WidgetController {
         '$textRangeFinder. The "tapOnText" method needs a single non-empty TextRange.',
       );
     }
-    final Offset? tapLocation = _findsHitTestableOffsetIn(ranges.single);
+    final Offset? tapLocation = _findHitTestableOffsetIn(ranges.single);
     if (tapLocation == null) {
       final finders.TextRangeContext found = textRangeFinder.evaluate().single;
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1794,7 +1796,7 @@ abstract class WidgetController {
 
   /// Finds one hit-testable Offset in the given `renderParagraph` that resides
   /// in the given `view`.
-  Offset? _findsHitTestableOffsetIn(finders.TextRangeContext textRangeContext) {
+  Offset? _findHitTestableOffsetIn(finders.TextRangeContext textRangeContext) {
     TestAsyncUtils.guardSync();
     final TextRange range = textRangeContext.textRange;
     assert(range.isNormalized);

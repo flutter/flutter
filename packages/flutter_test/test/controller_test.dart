@@ -1486,7 +1486,7 @@ void main() {
   group('WidgetTester.tapOnText', () {
     final List<String > tapLogs = <String>[];
     final TapGestureRecognizer tapA = TapGestureRecognizer()..onTap = () { tapLogs.add('A'); };
-    final TapGestureRecognizer tapB = TapGestureRecognizer()..onTap = () { tapLogs.add('B'); print('????');};
+    final TapGestureRecognizer tapB = TapGestureRecognizer()..onTap = () { tapLogs.add('B'); };
     final TapGestureRecognizer tapC = TapGestureRecognizer()..onTap = () { tapLogs.add('C'); };
     tearDown(tapLogs.clear);
     tearDownAll(() {
