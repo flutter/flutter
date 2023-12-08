@@ -31,6 +31,7 @@ group("web_sdk") {
   deps = [
     ":flutter_ddc_modules",
     ":flutter_platform_dills",
+    "//flutter/lib/web_ui/flutter_js",
   ]
 }
 
