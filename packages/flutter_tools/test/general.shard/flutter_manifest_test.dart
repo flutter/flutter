@@ -13,17 +13,12 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import '../src/common.dart';
 
 void main() {
-  late BufferLogger logger;
-
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();
   });
 
-  setUp(() {
-    logger = BufferLogger.test();
-  });
-
   testWithoutContext('FlutterManifest is empty when the pubspec.yaml file is empty', () async {
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       '',
       logger: logger,
@@ -39,6 +34,7 @@ void main() {
   });
 
   testWithoutContext('FlutterManifest is null when the pubspec.yaml file is not a map', () async {
+    final BufferLogger logger = BufferLogger.test();
     expect(FlutterManifest.createFromString(
       'Not a map',
       logger: logger,
@@ -54,6 +50,7 @@ dependencies:
   flutter:
     sdk: flutter
 ''';
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -77,6 +74,7 @@ dependencies:
 flutter:
   uses-material-design: true
 ''';
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -94,6 +92,7 @@ dependencies:
 flutter:
   generate: true
 ''';
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -111,6 +110,7 @@ dependencies:
 flutter:
   generate: "invalid"
 ''';
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -128,6 +128,7 @@ dependencies:
 flutter:
   generate: false
 ''';
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -148,36 +149,16 @@ flutter:
     - a/foo
     - a/bar
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
     )!;
 
-    expect(flutterManifest.assets, <AssetsEntry>[
-      AssetsEntry(uri: Uri.parse('a/foo')),
-      AssetsEntry(uri: Uri.parse('a/bar')),
+    expect(flutterManifest.assets, <Uri>[
+      Uri.parse('a/foo'),
+      Uri.parse('a/bar'),
     ]);
-  });
-
-  testWithoutContext('FlutterManifest assets entry flavor is not a string', () async {
-    const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  uses-material-design: true
-  assets:
-    - assets/folder/
-    - path: assets/vanilla/
-      flavors:
-        - key1: value1
-          key2: value2
-''';
-    FlutterManifest.createFromString(manifest, logger: logger);
-    expect(logger.errorText, contains('Asset manifest entry is malformed. '
-      'Expected "flavors" entry to be a list of strings.'));
   });
 
   testWithoutContext('FlutterManifest has one font family with one asset', () async {
@@ -193,7 +174,7 @@ flutter:
       fonts:
         - asset: a/bar
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -230,7 +211,7 @@ flutter:
         - asset: a/bar
           weight: 400
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -270,7 +251,7 @@ flutter:
           weight: 400
           style: italic
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -316,7 +297,7 @@ flutter:
           asset: a/baz
           style: italic
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -378,7 +359,7 @@ flutter:
           asset: a/baz
           style: italic
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -424,7 +405,7 @@ flutter:
           weight: 400
           style: italic
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -467,7 +448,7 @@ flutter:
           style: italic
     - family: bar
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -506,7 +487,7 @@ flutter:
       fonts:
         - weight: 400
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -524,7 +505,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -545,7 +526,7 @@ flutter:
     androidPackage: com.example
     androidX: true
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -563,7 +544,7 @@ flutter:
   plugin:
     androidPackage: com.example
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -584,7 +565,7 @@ flutter:
           package: com.example
           pluginClass: TestPlugin
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -604,7 +585,7 @@ flutter:
         ios:
           pluginClass: HelloPlugin
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -620,7 +601,7 @@ name: test
 flutter:
     plugin:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -640,7 +621,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -662,7 +643,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -683,7 +664,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -705,7 +686,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -727,7 +708,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -744,7 +725,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -766,7 +747,7 @@ flutter:
       fonts:
         -asset: a/bar
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -786,7 +767,7 @@ dependencies:
 flutter:
   fonts: []
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -805,7 +786,7 @@ dependencies:
 flutter:
   assets: []
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -828,7 +809,7 @@ flutter:
       fonts:
         - asset
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -852,7 +833,7 @@ flutter:
     fonts:
       -asset: a/bar
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -877,7 +858,7 @@ flutter:
         - asset: a/bar
     - string
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -899,13 +880,15 @@ flutter:
     - lib/gallery/example_code.dart
     -
 ''';
-
-    FlutterManifest.createFromString(
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
-    );
+    )!;
+    final List<Uri> assets = flutterManifest.assets;
 
     expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
+    expect(assets, hasLength(1));
   });
 
   testWithoutContext('FlutterManifest handles special characters in asset URIs', () {
@@ -921,18 +904,18 @@ flutter:
     - lib/gallery/abc?xyz
     - lib/gallery/aaa bbb
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
     )!;
-    final List<AssetsEntry> assets = flutterManifest.assets;
+    final List<Uri> assets = flutterManifest.assets;
 
     expect(assets, hasLength(3));
-    expect(assets, <AssetsEntry>[
-      AssetsEntry(uri: Uri.parse('lib/gallery/abc%23xyz')),
-      AssetsEntry(uri: Uri.parse('lib/gallery/abc%3Fxyz')),
-      AssetsEntry(uri: Uri.parse('lib/gallery/aaa%20bbb')),
+    expect(assets, <Uri>[
+      Uri.parse('lib/gallery/abc%23xyz'),
+      Uri.parse('lib/gallery/abc%3Fxyz'),
+      Uri.parse('lib/gallery/aaa%20bbb'),
     ]);
   });
 
@@ -946,7 +929,7 @@ dependencies:
 flutter:
   - uses-material-design: true
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -971,7 +954,7 @@ flutter:
 ''';
     final FileSystem fileSystem = MemoryFileSystem.test();
     fileSystem.file('pubspec.yaml').writeAsStringSync(manifest);
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromPath(
        'pubspec.yaml',
       fileSystem: fileSystem,
@@ -992,7 +975,7 @@ flutter:
 
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     fileSystem.file('pubspec.yaml').writeAsStringSync(manifest);
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromPath(
       'pubspec.yaml',
       fileSystem: fileSystem,
@@ -1009,7 +992,7 @@ flutter:
   plugin:
     androidPackage: com.example
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1028,7 +1011,7 @@ flutter:
       some_platform:
         pluginClass: SomeClass
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1049,7 +1032,7 @@ flutter:
       ios:
         pluginClass: SomeClass
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1075,7 +1058,7 @@ flutter:
       ios:
         pluginClass: SomeClass
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1099,7 +1082,7 @@ flutter:
       platforms:
         - android
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1121,7 +1104,7 @@ flutter:
     ios:
       pluginClass: SomeClass
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1141,7 +1124,7 @@ dependencies:
 flutter:
   licenses: []
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1161,7 +1144,7 @@ flutter:
   licenses:
     - foo.txt
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1179,7 +1162,7 @@ dependencies:
 flutter:
   licenses: foo.txt
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1200,7 +1183,7 @@ flutter:
     - foo.txt
     - bar: fizz
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1224,7 +1207,7 @@ flutter:
       assets:
         - path/to/asset.jpg
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1237,7 +1220,7 @@ flutter:
     expect(deferredComponents[0].libraries.length, 1);
     expect(deferredComponents[0].libraries[0], 'lib1');
     expect(deferredComponents[0].assets.length, 1);
-    expect(deferredComponents[0].assets[0].uri.path, 'path/to/asset.jpg');
+    expect(deferredComponents[0].assets[0].path, 'path/to/asset.jpg');
   });
 
   testWithoutContext('FlutterManifest parses multiple deferred components', () async {
@@ -1260,7 +1243,7 @@ flutter:
       assets:
         - path/to/asset2.jpg
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1273,14 +1256,14 @@ flutter:
     expect(deferredComponents[0].libraries.length, 1);
     expect(deferredComponents[0].libraries[0], 'lib1');
     expect(deferredComponents[0].assets.length, 1);
-    expect(deferredComponents[0].assets[0].uri.path, 'path/to/asset.jpg');
+    expect(deferredComponents[0].assets[0].path, 'path/to/asset.jpg');
 
     expect(deferredComponents[1].name, 'component2');
     expect(deferredComponents[1].libraries.length, 2);
     expect(deferredComponents[1].libraries[0], 'lib2');
     expect(deferredComponents[1].libraries[1], 'lib3');
     expect(deferredComponents[1].assets.length, 1);
-    expect(deferredComponents[1].assets[0].uri.path, 'path/to/asset2.jpg');
+    expect(deferredComponents[1].assets[0].path, 'path/to/asset2.jpg');
   });
 
   testWithoutContext('FlutterManifest parses empty deferred components', () async {
@@ -1292,7 +1275,7 @@ dependencies:
 flutter:
   deferred-components:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1313,7 +1296,7 @@ flutter:
     - libraries:
         - lib1
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1332,7 +1315,7 @@ dependencies:
 flutter:
   deferred-components: blah
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1353,7 +1336,7 @@ flutter:
     - name: blah
       libraries: blah
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1375,7 +1358,7 @@ flutter:
       libraries:
         - not-a-string:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1397,14 +1380,14 @@ flutter:
       assets:
         - not-a-string:
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Asset manifest entry is malformed. Expected asset entry to be either a string or a map containing a "path" entry. Got Null instead.\n');
+    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of file paths, but element 0 was a YamlMap\n');
   });
 
   testWithoutContext('FlutterManifest deferred component multiple assets is string', () async {
@@ -1421,14 +1404,14 @@ flutter:
         - also-not-a-string:
           - woo
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Asset manifest entry is malformed. Expected asset entry to be either a string or a map containing a "path" entry. Got Null instead.\n');
+    expect(logger.errorText, 'Expected "assets" key in the 0 element of "deferred-components" to be a list of file paths, but element 1 was a YamlMap\n');
   });
 
   testWithoutContext('FlutterManifest multiple deferred components assets is string', () async {
@@ -1448,14 +1431,14 @@ flutter:
         - not-a-string:
           - woo
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Asset manifest entry is malformed. Expected asset entry to be either a string or a map containing a "path" entry. Got Null instead.\n');
+    expect(logger.errorText, 'Expected "assets" key in the 1 element of "deferred-components" to be a list of file paths, but element 1 was a YamlMap\n');
   });
 
   testWithoutContext('FlutterManifest deferred component assets is list', () async {
@@ -1469,7 +1452,7 @@ flutter:
     - name: blah
       assets: blah
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1493,7 +1476,7 @@ flutter:
         - path/to/asset2.jpg
         - path/to/asset3.jpg
 ''';
-
+    final BufferLogger logger = BufferLogger.test();
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
       manifest,
       logger: logger,
@@ -1505,9 +1488,9 @@ flutter:
     expect(deferredComponents[0].name, 'component1');
     expect(deferredComponents[0].libraries.length, 0);
     expect(deferredComponents[0].assets.length, 3);
-    expect(deferredComponents[0].assets[0].uri.path, 'path/to/asset1.jpg');
-    expect(deferredComponents[0].assets[1].uri.path, 'path/to/asset2.jpg');
-    expect(deferredComponents[0].assets[2].uri.path, 'path/to/asset3.jpg');
+    expect(deferredComponents[0].assets[0].path, 'path/to/asset1.jpg');
+    expect(deferredComponents[0].assets[1].path, 'path/to/asset2.jpg');
+    expect(deferredComponents[0].assets[2].path, 'path/to/asset3.jpg');
   });
 
   testWithoutContext('FlutterManifest can parse empty dependencies', () async {
