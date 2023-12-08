@@ -66,7 +66,8 @@ std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
   // TODO(https://github.com/flutter/flutter/issues/131580): Remove once the new
   // blur handles all cases.
   if (use_new_filter) {
-    auto blur = std::make_shared<GaussianBlurFilterContents>(sigma_x.sigma);
+    auto blur =
+        std::make_shared<GaussianBlurFilterContents>(sigma_x.sigma, tile_mode);
     blur->SetInputs({input});
     return blur;
   }

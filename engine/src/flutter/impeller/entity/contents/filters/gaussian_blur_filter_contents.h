@@ -15,7 +15,7 @@ namespace impeller {
 /// Note: This will replace `DirectionalGaussianBlurFilterContents`.
 class GaussianBlurFilterContents final : public FilterContents {
  public:
-  explicit GaussianBlurFilterContents(Scalar sigma = 0.0f);
+  explicit GaussianBlurFilterContents(Scalar sigma, Entity::TileMode tile_mode);
 
   Scalar GetSigma() const { return sigma_; }
 
@@ -58,6 +58,7 @@ class GaussianBlurFilterContents final : public FilterContents {
       const std::optional<Rect>& coverage_hint) const override;
 
   const Scalar sigma_ = 0.0;
+  const Entity::TileMode tile_mode_;
 };
 
 }  // namespace impeller
