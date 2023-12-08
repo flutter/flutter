@@ -215,7 +215,7 @@ void main() {
   testWidgetsWithLeakTracking('NestedScrollView always scrolls outer scrollable first', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/136199
     final Key innerKey = UniqueKey();
-    final Key outerKey = UniqueKey();
+    final GlobalKey<NestedScrollViewState> outerKey = GlobalKey();
 
     final ScrollController outerController = ScrollController();
 
@@ -263,13 +263,111 @@ void main() {
 
     await tester.pumpWidget(build());
 
+    final ScrollController outer = outerKey.currentState!.outerController;
+    final ScrollController inner = outerKey.currentState!.innerController;
+
+    // Assert the initial positions
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+
     outerController.addListener(() {
       assert(false); // We do not want this to be called.
     });
 
     await tester.drag(find.byKey(innerKey), const Offset(0, 2000)); // Over-scroll the inner Scrollable to the bottom
+
+    const double endPosition = -1974.0862087158384;
+    const Duration nextFrame = Duration(microseconds: 16666);
+
+    // Assert positions after over-scrolling
+    expect(outer.offset, 0.0);
+    expect(inner.offset, endPosition);
+
     await tester.fling(find.byKey(innerKey), const Offset(0, -600), 2000); // Fling the inner Scrollable to the top
+
+    // Assert positions after fling
+    expect(outer.offset, 0.0);
+    expect(inner.offset, endPosition + 600);
+
+    await tester.pump(nextFrame);
+
+    // Assert positions after pump
+    expect(outer.offset, 0.0);
+    expect(inner.offset, endPosition + 600);
+
+    const List<double> innerOffsets = <double>[
+      -1316.1176758537506,
+      -1224.8170160990555,
+      -1117.6097877754744,
+      -1005.5574610794743,
+      -895.4550700899018,
+      -791.264234881037,
+      -695.0886336136309,
+      -607.8349614887205,
+      -529.6581107592709,
+      -460.2586681710882,
+      -399.0796463469083,
+      -345.4347308728091,
+      -298.59021847911447,
+      -257.81584759409844,
+      -222.41491428472293,
+      -191.74075533967326,
+      -165.20440317597044,
+      -142.27665417716244,
+      -122.48672155447044,
+      -105.4189127625281,
+      -90.708274096657,
+      -78.03580827323584,
+      -67.12364411096027,
+      -57.73038610588277,
+      -49.64677176594978,
+      -42.69169955726153,
+      -36.708648893466346,
+      -31.56248801311129,
+      -27.13665053483395,
+      -23.33065334544838,
+      -20.057924812356934,
+      -17.243911468327354,
+      -14.824432188827757,
+      -12.744250738073964,
+      -10.955839921578985,
+      -9.418313143813856,
+      -8.096501738510593,
+      -6.960158902040851,
+      -5.983273353819624,
+      -5.143477941386347,
+      -4.421540292214858,
+      -3.800924292777648,
+      -3.2674126588351187,
+      -2.8087821642406303,
+      -2.4145242353912972,
+      -2.075604611777379,
+      -1.7842566363112475,
+      -1.5338034876418676,
+      -1.318505314594382,
+      -1.1334277929606227,
+      -0.9743291084817788,
+      -0.8375627870831994,
+      -0.7199941531058178,
+      -0.6189285061879893,
+      -0.5320493743534278,
+      -0.4573654306400669,
+      -0.39316485836690424,
+      -0.3379761203023452,
+      0.0,
+    ];
+
+    for (final double offset in innerOffsets) {
+      await tester.pump(nextFrame);
+      expect(inner.offset, offset);
+      expect(outer.offset, 0.0);
+    }
+
     await tester.pumpAndSettle();
+
+    // Assert positions returned to origin after pumpAndSettle
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
   });
 
   testWidgetsWithLeakTracking('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
