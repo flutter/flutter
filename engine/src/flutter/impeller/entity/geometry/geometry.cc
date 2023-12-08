@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 
+#include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
 #include "impeller/entity/geometry/fill_path_geometry.h"
@@ -17,6 +18,75 @@
 #include "impeller/geometry/rect.h"
 
 namespace impeller {
+
+GeometryResult Geometry::ComputePositionGeometry(
+    const Tessellator::VertexGenerator& generator,
+    const Entity& entity,
+    RenderPass& pass) {
+  using VT = SolidFillVertexShader::PerVertexData;
+
+  size_t count = generator.GetVertexCount();
+
+  return GeometryResult{
+      .type = generator.GetTriangleType(),
+      .vertex_buffer =
+          {
+              .vertex_buffer = pass.GetTransientsBuffer().Emplace(
+                  count * sizeof(VT), alignof(VT),
+                  [&generator](uint8_t* buffer) {
+                    auto vertices = reinterpret_cast<VT*>(buffer);
+                    generator.GenerateVertices([&vertices](const Point& p) {
+                      *vertices++ = {
+                          .position = p,
+                      };
+                    });
+                    FML_DCHECK(vertices == reinterpret_cast<VT*>(buffer) +
+                                               generator.GetVertexCount());
+                  }),
+              .vertex_count = count,
+              .index_type = IndexType::kNone,
+          },
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransform(),
+      .prevent_overdraw = false,
+  };
+}
+
+GeometryResult Geometry::ComputePositionUVGeometry(
+    const Tessellator::VertexGenerator& generator,
+    const Matrix& uv_transform,
+    const Entity& entity,
+    RenderPass& pass) {
+  using VT = TextureFillVertexShader::PerVertexData;
+
+  size_t count = generator.GetVertexCount();
+
+  return GeometryResult{
+      .type = generator.GetTriangleType(),
+      .vertex_buffer =
+          {
+              .vertex_buffer = pass.GetTransientsBuffer().Emplace(
+                  count * sizeof(VT), alignof(VT),
+                  [&generator, &uv_transform](uint8_t* buffer) {
+                    auto vertices = reinterpret_cast<VT*>(buffer);
+                    generator.GenerateVertices(
+                        [&vertices, &uv_transform](const Point& p) {  //
+                          *vertices++ = {
+                              .position = p,
+                              .texture_coords = uv_transform * p,
+                          };
+                        });
+                    FML_DCHECK(vertices == reinterpret_cast<VT*>(buffer) +
+                                               generator.GetVertexCount());
+                  }),
+              .vertex_count = count,
+              .index_type = IndexType::kNone,
+          },
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransform(),
+      .prevent_overdraw = false,
+  };
+}
 
 VertexBufferBuilder<TextureFillVertexShader::PerVertexData>
 ComputeUVGeometryCPU(
@@ -108,25 +178,30 @@ std::shared_ptr<Geometry> Geometry::MakeCover() {
   return std::make_shared<CoverGeometry>();
 }
 
-std::shared_ptr<Geometry> Geometry::MakeRect(Rect rect) {
+std::shared_ptr<Geometry> Geometry::MakeRect(const Rect& rect) {
   return std::make_shared<RectGeometry>(rect);
 }
 
-std::shared_ptr<Geometry> Geometry::MakeLine(Point p0,
-                                             Point p1,
+std::shared_ptr<Geometry> Geometry::MakeOval(const Rect& rect) {
+  return std::make_shared<EllipseGeometry>(rect);
+}
+
+std::shared_ptr<Geometry> Geometry::MakeLine(const Point& p0,
+                                             const Point& p1,
                                              Scalar width,
                                              Cap cap) {
   return std::make_shared<LineGeometry>(p0, p1, width, cap);
 }
 
-std::shared_ptr<Geometry> Geometry::MakeCircle(Point center, Scalar radius) {
-  return std::make_shared<EllipseGeometry>(center, radius);
+std::shared_ptr<Geometry> Geometry::MakeCircle(const Point& center,
+                                               Scalar radius) {
+  return std::make_shared<CircleGeometry>(center, radius);
 }
 
-std::shared_ptr<Geometry> Geometry::MakeStrokedCircle(Point center,
+std::shared_ptr<Geometry> Geometry::MakeStrokedCircle(const Point& center,
                                                       Scalar radius,
                                                       Scalar stroke_width) {
-  return std::make_shared<EllipseGeometry>(center, radius, stroke_width);
+  return std::make_shared<CircleGeometry>(center, radius, stroke_width);
 }
 
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {

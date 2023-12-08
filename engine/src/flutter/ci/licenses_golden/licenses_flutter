@@ -5099,6 +5099,8 @@ ORIGIN: ../../../flutter/impeller/entity/entity_pass_target.cc + ../../../flutte
 ORIGIN: ../../../flutter/impeller/entity/entity_pass_target.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/entity_playground.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/entity_playground.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/geometry/circle_geometry.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/geometry/circle_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/cover_geometry.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/cover_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/geometry/ellipse_geometry.cc + ../../../flutter/LICENSE
@@ -5527,8 +5529,6 @@ ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_writer.cc + ../.
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_writer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/tessellator/circle_tessellator.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/tessellator/circle_tessellator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/tessellator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/tessellator.h + ../../../flutter/LICENSE
@@ -7898,6 +7898,8 @@ FILE: ../../../flutter/impeller/entity/entity_pass_target.cc
 FILE: ../../../flutter/impeller/entity/entity_pass_target.h
 FILE: ../../../flutter/impeller/entity/entity_playground.cc
 FILE: ../../../flutter/impeller/entity/entity_playground.h
+FILE: ../../../flutter/impeller/entity/geometry/circle_geometry.cc
+FILE: ../../../flutter/impeller/entity/geometry/circle_geometry.h
 FILE: ../../../flutter/impeller/entity/geometry/cover_geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry/cover_geometry.h
 FILE: ../../../flutter/impeller/entity/geometry/ellipse_geometry.cc
@@ -8327,8 +8329,6 @@ FILE: ../../../flutter/impeller/shader_archive/shader_archive_writer.cc
 FILE: ../../../flutter/impeller/shader_archive/shader_archive_writer.h
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.h
-FILE: ../../../flutter/impeller/tessellator/circle_tessellator.cc
-FILE: ../../../flutter/impeller/tessellator/circle_tessellator.h
 FILE: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart
 FILE: ../../../flutter/impeller/tessellator/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/tessellator.h

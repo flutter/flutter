@@ -82,6 +82,8 @@ struct TSize {
     };
   }
 
+  constexpr Type MaxDimension() const { return std::max(width, height); }
+
   constexpr TSize Abs() const { return {std::fabs(width), std::fabs(height)}; }
 
   constexpr TSize Floor() const {
@@ -98,6 +100,8 @@ struct TSize {
 
   /// Returns true if either of the width or height are 0, negative, or NaN.
   constexpr bool IsEmpty() const { return !(width > 0 && height > 0); }
+
+  constexpr bool IsSquare() const { return width == height; }
 
   template <class U>
   static constexpr TSize Ceil(const TSize<U>& other) {

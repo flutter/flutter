@@ -102,13 +102,15 @@ class Canvas {
 
   void DrawLine(const Point& p0, const Point& p1, const Paint& paint);
 
-  void DrawRect(Rect rect, const Paint& paint);
+  void DrawRect(const Rect& rect, const Paint& paint);
+
+  void DrawOval(const Rect& rect, const Paint& paint);
 
   void DrawRRect(Rect rect, Point corner_radii, const Paint& paint);
 
-  void DrawCircle(Point center, Scalar radius, const Paint& paint);
+  void DrawCircle(const Point& center, Scalar radius, const Paint& paint);
 
-  void DrawPoints(std::vector<Point>,
+  void DrawPoints(std::vector<Point> points,
                   Scalar radius,
                   const Paint& paint,
                   PointStyle point_style);

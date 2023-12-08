@@ -770,16 +770,7 @@ void DlDispatcher::drawRect(const SkRect& rect) {
 
 // |flutter::DlOpReceiver|
 void DlDispatcher::drawOval(const SkRect& bounds) {
-  if (bounds.width() == bounds.height()) {
-    canvas_.DrawCircle(skia_conversions::ToPoint(bounds.center()),
-                       bounds.width() * 0.5, paint_);
-  } else {
-    auto path = PathBuilder{}
-                    .AddOval(skia_conversions::ToRect(bounds))
-                    .SetConvexity(Convexity::kConvex)
-                    .TakePath();
-    canvas_.DrawPath(std::move(path), paint_);
-  }
+  canvas_.DrawOval(skia_conversions::ToRect(bounds), paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -831,9 +822,8 @@ void DlDispatcher::SimplifyOrDrawPath(CanvasType& canvas,
   }
 
   SkRect oval;
-  if (path.isOval(&oval) && oval.width() == oval.height()) {
-    canvas.DrawCircle(skia_conversions::ToPoint(oval.center()),
-                      oval.width() * 0.5, paint);
+  if (path.isOval(&oval)) {
+    canvas.DrawOval(skia_conversions::ToRect(oval), paint);
     return;
   }
 

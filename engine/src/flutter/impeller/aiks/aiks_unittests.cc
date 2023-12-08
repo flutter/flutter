@@ -2193,6 +2193,77 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  Paint paint;
+  const int color_count = 3;
+  Color colors[color_count] = {
+      Color::Blue(),
+      Color::Green(),
+      Color::Crimson(),
+  };
+
+  paint.color = Color::White();
+  canvas.DrawPaint(paint);
+
+  int c_index = 0;
+  int long_radius = 600;
+  int short_radius = 600;
+  while (long_radius > 0 && short_radius > 0) {
+    paint.color = colors[(c_index++) % color_count];
+    canvas.DrawOval(Rect::MakeXYWH(10 - long_radius, 10 - short_radius,
+                                   long_radius * 2, short_radius * 2),
+                    paint);
+    canvas.DrawOval(Rect::MakeXYWH(1000 - short_radius, 750 - long_radius,
+                                   short_radius * 2, long_radius * 2),
+                    paint);
+    if (short_radius > 30) {
+      short_radius -= 10;
+      long_radius -= 5;
+    } else {
+      short_radius -= 2;
+      long_radius -= 1;
+    }
+  }
+
+  std::vector<Color> gradient_colors = {
+      Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+      Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+      Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+      Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+      Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+  std::vector<Scalar> stops = {
+      0.0,
+      (1.0 / 6.0) * 1,
+      (1.0 / 6.0) * 2,
+      (1.0 / 6.0) * 3,
+      (1.0 / 6.0) * 4,
+      (1.0 / 6.0) * 5,
+      1.0,
+  };
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  paint.color = Color::White().WithAlpha(0.5);
+
+  paint.color_source = ColorSource::MakeRadialGradient(
+      {300, 650}, 75, std::move(gradient_colors), std::move(stops),
+      Entity::TileMode::kMirror, {});
+  canvas.DrawOval(Rect::MakeXYWH(200, 625, 200, 50), paint);
+  canvas.DrawOval(Rect::MakeXYWH(275, 550, 50, 200), paint);
+
+  paint.color_source = ColorSource::MakeImage(
+      texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {},
+      Matrix::MakeTranslation({610, 15}));
+  canvas.DrawOval(Rect::MakeXYWH(610, 90, 200, 50), paint);
+  canvas.DrawOval(Rect::MakeXYWH(685, 15, 50, 200), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {

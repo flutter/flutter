@@ -248,5 +248,24 @@ TEST(RectTest, MakePointBoundsQuad) {
   }
 }
 
+TEST(RectTest, IsSquare) {
+  EXPECT_TRUE(Rect::MakeXYWH(10, 30, 20, 20).IsSquare());
+  EXPECT_FALSE(Rect::MakeXYWH(10, 30, 20, 19).IsSquare());
+  EXPECT_FALSE(Rect::MakeXYWH(10, 30, 19, 20).IsSquare());
+
+  EXPECT_TRUE(IRect::MakeXYWH(10, 30, 20, 20).IsSquare());
+  EXPECT_FALSE(IRect::MakeXYWH(10, 30, 20, 19).IsSquare());
+  EXPECT_FALSE(IRect::MakeXYWH(10, 30, 19, 20).IsSquare());
+}
+
+TEST(RectTest, GetCenter) {
+  EXPECT_EQ(Rect::MakeXYWH(10, 30, 20, 20).GetCenter(), Point(20, 40));
+  EXPECT_EQ(Rect::MakeXYWH(10, 30, 20, 19).GetCenter(), Point(20, 39.5));
+
+  // Note that we expect a Point as the answer from an IRect
+  EXPECT_EQ(IRect::MakeXYWH(10, 30, 20, 20).GetCenter(), Point(20, 40));
+  EXPECT_EQ(IRect::MakeXYWH(10, 30, 20, 19).GetCenter(), Point(20, 39.5));
+}
+
 }  // namespace testing
 }  // namespace impeller
