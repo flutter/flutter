@@ -1,4 +1,4 @@
-Signature: ce6b7b2cf44262d5362bb5f61463ba1d
+Signature: 2a9b72ca4d60189f29e24d911bfe11eb
 
 ====================================================================================================
 LIBRARY: dart
@@ -3954,6 +3954,7 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_int.dart + ..
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_int_to_string.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/closure.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/date_patch_patch.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/error_utils.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_common_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_array.dart + ../../../third_party/dart/LICENSE
@@ -4017,6 +4018,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_int.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_int_to_string.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/closure.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/date_patch_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/error_utils.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_common_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_array.dart
