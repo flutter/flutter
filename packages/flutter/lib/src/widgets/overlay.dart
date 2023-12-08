@@ -849,6 +849,7 @@ class _WrappingOverlay extends StatefulWidget {
 
 class _WrappingOverlayState extends State<_WrappingOverlay> {
   late final OverlayEntry _entry = OverlayEntry(
+    canSizeOverlay: true,
     opaque: true,
     builder: (BuildContext context) {
       return widget.child;
