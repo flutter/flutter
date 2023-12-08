@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show ViewConstraints;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,14 +18,14 @@ void main() {
     Size size = const Size(20, 20),
     double devicePixelRatio = 2.0,
   }) {
-    return ViewConfiguration(size: size, devicePixelRatio: devicePixelRatio);
+    return ViewConfiguration(constraints: ViewConstraints.tight(size), devicePixelRatio: devicePixelRatio);
   }
 
   group('RenderView', () {
     test('accounts for device pixel ratio in paintBounds', () {
       layout(RenderAspectRatio(aspectRatio: 1.0));
       pumpFrame();
-      final Size logicalSize = TestRenderingFlutterBinding.instance.renderView.configuration.size;
+      final Size logicalSize = TestRenderingFlutterBinding.instance.renderView.size;
       final double devicePixelRatio = TestRenderingFlutterBinding.instance.renderView.configuration.devicePixelRatio;
       final Size physicalSize = logicalSize * devicePixelRatio;
       expect(TestRenderingFlutterBinding.instance.renderView.paintBounds, Offset.zero & physicalSize);
@@ -126,10 +128,37 @@ void main() {
     final RenderView view = RenderView(
       view: RendererBinding.instance.platformDispatcher.views.single,
     );
-    view.configuration = const ViewConfiguration(size: Size(100, 200), devicePixelRatio: 3.0);
-    view.configuration = const ViewConfiguration(size: Size(200, 300), devicePixelRatio: 2.0);
+    view.configuration = ViewConfiguration(constraints: ViewConstraints.tight(const Size(100, 200)), devicePixelRatio: 3.0);
+    view.configuration = ViewConfiguration(constraints: ViewConstraints.tight(const Size(200, 300)), devicePixelRatio: 2.0);
     PipelineOwner().rootNode = view;
     view.prepareInitialFrame();
+  });
+
+  test('Constraints are derived from configuration', () {
+    const ViewConfiguration config = ViewConfiguration(
+      constraints: ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
+      devicePixelRatio: 3.0,
+    );
+    const BoxConstraints constraints = BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4);
+
+    // Configuration set via setter.
+    final RenderView view = RenderView(
+      view: RendererBinding.instance.platformDispatcher.views.single,
+    );
+    expect(() => view.constraints, throwsA(isA<StateError>().having(
+      (StateError e) => e.message,
+      'message',
+      contains('RenderView has not been given a configuration yet'),
+    )));
+    view.configuration = config;
+    expect(view.constraints, constraints);
+
+    // Configuration set in constructor.
+    final RenderView view2 = RenderView(
+      view: RendererBinding.instance.platformDispatcher.views.single,
+      configuration: config,
+    );
+    expect(view2.constraints, constraints);
   });
 }
 

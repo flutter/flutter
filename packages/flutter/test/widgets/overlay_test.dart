@@ -1561,6 +1561,38 @@ void main() {
       );
     });
   });
+
+  testWidgets('Overlay.wrap', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay.wrap(
+          child: const Center(
+            child: Text('Hello World'),
+          ),
+        ),
+      ),
+    );
+
+    final State overlayState = tester.state(find.byType(Overlay));
+    expect(find.text('Hello World'), findsOneWidget);
+    expect(find.text('Bye, bye'), findsNothing);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay.wrap(
+          child: const Center(
+            child: Text('Bye, bye'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Hello World'), findsNothing);
+    expect(find.text('Bye, bye'), findsOneWidget);
+    expect(tester.state(find.byType(Overlay)), same(overlayState));
+  });
 }
 
 class StatefulTestWidget extends StatefulWidget {
