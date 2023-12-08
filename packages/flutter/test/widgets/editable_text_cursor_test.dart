@@ -1337,7 +1337,13 @@ void main() {
     );
     final EditableTextState state = tester.state(find.byType(EditableText));
 
-    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero, localPosition: Offset.zero));
+    state.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start,
+        offset: Offset.zero,
+        startLocation: (Offset.zero, TextPosition(offset: controller.selection.baseOffset, affinity: controller.selection.affinity))
+      )
+    );
     await tester.pump();
 
     expect(key.currentContext!.findRenderObject(), paints..rrect(
@@ -1360,7 +1366,13 @@ void main() {
     state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
 
-    state.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: Offset.zero, localPosition: const Offset(800, 10)));
+    state.updateFloatingCursor(
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Start,
+        offset: Offset.zero,
+        startLocation: (const Offset(800, 10), TextPosition(offset: controller.selection.baseOffset, affinity: controller.selection.affinity))
+      )
+    );
     await tester.pump();
 
     expect(key.currentContext!.findRenderObject(), paints..rrect(

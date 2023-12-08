@@ -3196,9 +3196,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // We want to send in points that are centered around a (0,0) origin, so
         // we cache the position.
         _pointOffsetOrigin = point.offset;
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
 
-        _startCaretCenter = point.localPosition ?? renderEditable.getLocalRectForCaret(currentTextPosition).center;
+        late final Offset startCaretCenter;
+        late final TextPosition currentTextPosition;
+        if (point.startLocation != null) {
+          (startCaretCenter, currentTextPosition) = point.startLocation!;
+        } else {
+          currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
+          startCaretCenter = renderEditable.getLocalRectForCaret(currentTextPosition).center;
+        }
+
+        _startCaretCenter = startCaretCenter;
         _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(_startCaretCenter! - _floatingCursorOffset);
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);

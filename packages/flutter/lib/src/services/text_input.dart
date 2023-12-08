@@ -744,15 +744,16 @@ class RawFloatingCursorPoint {
   /// [FloatingCursorDragState.Update].
   RawFloatingCursorPoint({
     this.offset,
-    this.localPosition,
+    this.startLocation,
     required this.state,
   }) : assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset? offset;
 
-  /// The local position of the cursor in the text field.
-  final Offset? localPosition;
+  /// (local offset, new caret location)
+  ///  Only non-null when starting a floating cursor via long press.
+  final (Offset, TextPosition)? startLocation;
 
   /// The state of the floating cursor.
   final FloatingCursorDragState state;

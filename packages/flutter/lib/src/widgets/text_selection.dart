@@ -2444,19 +2444,6 @@ class TextSelectionGestureDetectorBuilder {
     if (delegate.selectionEnabled) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
-          SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-            // Show the floating cursor
-            if (editableText.textEditingValue.selection.isCollapsed) {
-              final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-                state: FloatingCursorDragState.Start,
-                localPosition: renderEditable.globalToLocal(details.globalPosition),
-                offset: Offset.zero,
-              );
-              editableText.updateFloatingCursor(cursorPoint);
-            }
-          }, debugLabel: 'TextSelectionGestureDetectorBuilderDelegate.updateFloatingCursor');
-          continue macOSCase;
-        macOSCase:
         case TargetPlatform.macOS:
           if (!renderEditable.hasFocus) {
             _longPressStartedWithoutFocus = true;
@@ -2478,6 +2465,22 @@ class TextSelectionGestureDetectorBuilder {
 
       _dragStartViewportOffset = renderEditable.offset.pixels;
       _dragStartScrollOffset = _scrollPosition;
+
+      if (editableText.textEditingValue.selection.isCollapsed && defaultTargetPlatform == TargetPlatform.iOS) {
+        // Show the floating cursor
+        final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+          state: FloatingCursorDragState.Start,
+          startLocation: (
+            renderEditable.globalToLocal(details.globalPosition),
+            TextPosition(
+              offset: editableText.textEditingValue.selection.baseOffset,
+              affinity: editableText.textEditingValue.selection.affinity,
+            ),
+          ),
+          offset: Offset.zero,
+        );
+        editableText.updateFloatingCursor(cursorPoint);
+      }
     }
   }
 
@@ -2503,16 +2506,6 @@ class TextSelectionGestureDetectorBuilder {
       );
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
-          if (editableText.textEditingValue.selection.isCollapsed) {
-            // Update the floating cursor
-            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-              state: FloatingCursorDragState.Update,
-              offset: details.offsetFromOrigin,
-            );
-            editableText.updateFloatingCursor(cursorPoint);
-          }
-          continue macOSCase;
-        macOSCase:
         case TargetPlatform.macOS:
           if (_longPressStartedWithoutFocus) {
             renderEditable.selectWordsInRange(
@@ -2538,6 +2531,15 @@ class TextSelectionGestureDetectorBuilder {
       }
 
       _showMagnifierIfSupportedByPlatform(details.globalPosition);
+
+      if (editableText.textEditingValue.selection.isCollapsed && defaultTargetPlatform == TargetPlatform.iOS) {
+        // Update the floating cursor
+        final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+          state: FloatingCursorDragState.Update,
+          offset: details.offsetFromOrigin,
+        );
+        editableText.updateFloatingCursor(cursorPoint);
+      }
     }
   }
 
