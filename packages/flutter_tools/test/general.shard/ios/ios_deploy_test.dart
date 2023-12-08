@@ -388,7 +388,7 @@ void main () {
       );
       expect(stdin.stream.transform<String>(const Utf8Decoder()), emits('process detach'));
       await iosDeployDebugger.launchAndAttach();
-      iosDeployDebugger.detach();
+      await iosDeployDebugger.detach();
     });
 
     testWithoutContext('detach handles broken pipe', () async {
@@ -406,7 +406,7 @@ void main () {
         logger: logger,
       );
       await iosDeployDebugger.launchAndAttach();
-      iosDeployDebugger.detach();
+      await iosDeployDebugger.detach();
       expect(logger.traceText, contains('Could not detach from debugger'));
     });
 
@@ -427,11 +427,21 @@ void main () {
         processManager: processManager,
       );
       await iosDeployDebugger.launchAndAttach();
-      await iosDeployDebugger.stopAndDumpBacktrace();
-      expect(await stdinStream.take(3).toList(), const <String>[
+      List<String>? stdinLines;
+
+      // These two futures will deadlock if await-ed sequentially
+      await Future.wait(<Future<void>>[
+        iosDeployDebugger.stopAndDumpBacktrace(),
+        stdinStream.take(5).toList().then<void>(
+          (List<String> lines) => stdinLines = lines,
+        ),
+      ]);
+      expect(stdinLines, const <String>[
         'thread backtrace all',
         '\n',
         'process detach',
+        '\n',
+        'process signal SIGSTOP',
       ]);
     });
 

@@ -625,7 +625,6 @@ class IOSDeployDebugger {
       runZonedGuarded(
         () {
           process.stdin.writeln(line);
-          //process.stdin.flush().then<void>((_) => completer.complete());
           process.stdin.flush().whenComplete(() => completer.complete());
         },
         (Object error, StackTrace trace) {
@@ -641,14 +640,16 @@ class IOSDeployDebugger {
     } else {
       _stdinWriteFuture = writeln();
     }
+
+    return _stdinWriteFuture;
   }
 
-  void detach() {
+  Future<void> detach() async {
     if (!debuggerAttached) {
       return;
     }
 
-    stdinWriteln('process detach');
+    await stdinWriteln('process detach');
   }
 }
 
