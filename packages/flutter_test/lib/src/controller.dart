@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:clock/clock.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -23,6 +24,33 @@ import 'window.dart';
 const double kDragSlopDefault = 20.0;
 
 const String _defaultPlatform = kIsWeb ? 'web' : 'android';
+
+// Finds the end index (exclusive) of the span at `startIndex`, or `endIndex` if
+// there are no other spans between `startIndex` and `endIndex`.
+// The InlineSpan protocol doesn't expose the length of the span so we'll
+// have to iterate through the whole range.
+(InlineSpan, int)? _findEndOfSpan(InlineSpan rootSpan, int startIndex, int endIndex) {
+  assert(endIndex > startIndex);
+  final InlineSpan? subspan = rootSpan.getSpanForPosition(TextPosition(offset: startIndex));
+  if (subspan == null) {
+    return null;
+  }
+  int i = startIndex + 1;
+  while (i < endIndex && rootSpan.getSpanForPosition(TextPosition(offset: i)) == subspan) {
+    i += 1;
+  }
+  return (subspan, i);
+}
+
+/// Helper function that returns every Offset to try hit
+Iterable<Offset> _testOffsetsForEachTextBox(TextBox box) {
+  final Rect rect = box.toRect();
+  return rect.isEmpty
+    ? const Iterable<Offset>.empty()
+    : <Offset>[rect.center, rect.centerLeft, rect.centerRight];
+}
+
+
 
 // Examples can assume:
 // typedef MyWidget = Placeholder;
@@ -991,6 +1019,47 @@ abstract class WidgetController {
     return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons);
   }
 
+  /// Dispatch a pointer down / pointer up sequence at , assuming it is exposed.
+  ///
+  /// {@template flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  /// The `warnIfMissed` argument, if true (the default), causes a warning to be
+  /// displayed on the console if the specified [Finder] indicates a widget and
+  /// location that, were a pointer event to be sent to that location, would not
+  /// actually send any events to the widget (e.g. because the widget is
+  /// obscured, or the location is off-screen, or the widget is transparent to
+  /// pointer events).
+  ///
+  /// Set the argument to false to silence that warning if you intend to not
+  /// actually hit the specified element.
+  /// {@endtemplate}
+  ///
+  /// For example, a test that verifies that tapping a disabled button does not
+  /// trigger the button would set `warnIfMissed` to false, because the button
+  /// would ignore the tap.
+  Future<void> tapOnText(finders.FinderBase<finders.TextRangeContext> textRangeFinder, {int? pointer, int buttons = kPrimaryButton }) {
+    final Iterable<finders.TextRangeContext> ranges = textRangeFinder.evaluate();
+    if (ranges.isEmpty) {
+      throw FlutterError(textRangeFinder.toString());
+    }
+    if (ranges.length > 1) {
+      throw FlutterError(
+        '$textRangeFinder. The "tapOnText" method needs a single non-empty TextRange.',
+      );
+    }
+    final Offset? tapLocation = _findsHitTestableOffsetIn(ranges.single);
+    if (tapLocation == null) {
+      final finders.TextRangeContext found = textRangeFinder.evaluate().single;
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Finder specifies a TextRange that would not receive pointer events.'),
+          ErrorDescription('${textRangeFinder.toString(describeSelf: true)} found a matching substring in a static text widget, within ${found.textRange}.'),
+          ErrorDescription('But the "tapOnText" method could not find a hit-testable Offset with in that text range.'),
+          found.renderObject.toDiagnosticsNode(name: 'The RenderBox of that static text widget was', style: DiagnosticsTreeStyle.shallow),
+        ]
+      );
+    }
+    return tapAt(tapLocation, pointer: pointer, buttons: buttons);
+  }
+
   /// Dispatch a pointer down / pointer up sequence at the given location.
   Future<void> tapAt(Offset location, {int? pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
@@ -1724,6 +1793,44 @@ abstract class WidgetController {
   /// in the documentation for the [flutter_test] library.
   static bool hitTestWarningShouldBeFatal = false;
 
+  /// Finds one hit-testable Offset in the given `renderParagraph` that resides
+  /// in the given `view`.
+  Offset? _findsHitTestableOffsetIn(finders.TextRangeContext textRangeContext) {
+    TestAsyncUtils.guardSync();
+    final TextRange range = textRangeContext.textRange;
+    assert(range.isNormalized);
+    assert(range.isValid);
+    final Offset renderParagraphPaintOffset = textRangeContext.renderObject.localToGlobal(Offset.zero);
+    assert(renderParagraphPaintOffset.isFinite);
+
+    int i = range.start;
+    while (i < range.end) {
+      switch (_findEndOfSpan(textRangeContext.renderObject.text, i, range.end)) {
+        case (final HitTestTarget target, final int endIndex):
+          bool isHitTestable(Offset localOffset) {
+            final HitTestResult result = HitTestResult();
+            binding.hitTestInView(result, localOffset + renderParagraphPaintOffset, textRangeContext.view.view.viewId);
+            return result.path.any((HitTestEntry entry) => entry.target == target);
+          }
+          // Uses BoxHeightStyle.tight in getBoxesForSelection to make sure the
+          // returned boxes don't extend outside of the hit-testable region.
+          final Offset? firstUnobstructedOffset = textRangeContext.renderObject
+            .getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: endIndex))
+            .expand(_testOffsetsForEachTextBox)
+            .firstWhereOrNull(isHitTestable);
+          if (firstUnobstructedOffset != null) {
+            return firstUnobstructedOffset + renderParagraphPaintOffset;
+          }
+          i = endIndex;
+        case (_, final int endIndex):
+          i = endIndex;
+        case null:
+          break;
+      }
+    }
+    return null;
+  }
+
   Offset _getElementPoint(finders.FinderBase<Element> finder, Offset Function(Size size) sizeToPoint, { required bool warnIfMissed, required String callee }) {
     TestAsyncUtils.guardSync();
     final Iterable<Element> elements = finder.evaluate();
@@ -1753,17 +1860,10 @@ abstract class WidgetController {
       final FlutterView view = _viewOf(finder);
       final HitTestResult result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
-      bool found = false;
-      for (final HitTestEntry entry in result.path) {
-        if (entry.target == box) {
-          found = true;
-          break;
-        }
-      }
+      final bool found = result.path.any((HitTestEntry entry) => entry.target == box);
       if (!found) {
         final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
-        bool outOfBounds = false;
-        outOfBounds = !(Offset.zero & renderView.size).contains(location);
+        final bool outOfBounds = !(Offset.zero & renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),

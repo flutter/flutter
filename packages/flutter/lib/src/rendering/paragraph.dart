@@ -303,6 +303,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   }
 
   static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
+
   final TextPainter _textPainter;
 
   List<AttributedString>? _cachedAttributedLabels;

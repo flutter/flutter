@@ -331,6 +331,73 @@ void main() {
     });
   });
 
+  group('text range finders', () {
+    testWidgets('basic text span test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const IndexedStack(
+          sizing: StackFit.expand,
+          children: <Widget>[
+            Text.rich(TextSpan(
+              text: 'sub',
+              children: <InlineSpan>[
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+              ],
+            )),
+            Text('substringsub'),
+          ],
+        )),
+      );
+
+      expect(find.textRange.of('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
+      expect(find.textRange.of('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.of('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+
+      expect(
+        find.textRange.of('substringsub').first.evaluate().single.renderObject,
+        find.textRange.of('substringsub').last.evaluate().single.renderObject,
+      );
+
+      expect(find.textRange.of('substringsub', skipOffstage: false), findsExactly(3));
+    });
+
+    testWidgets('WidgetSpan test', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const Text.rich(TextSpan(
+          text: 'substringsub',
+          children: <InlineSpan>[
+            WidgetSpan(child: Text('substringsub')),
+          ],
+        ))),
+      );
+
+      expect(find.textRange.of('substringsub'), findsExactly(2));
+      expect(find.textRange.of('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.of('substringsub').first.evaluate().last.textRange, const TextRange(start: 0, end: 12));
+      expect(
+        find.textRange.of('substringsub').first.evaluate().single.renderObject,
+        isNot(find.textRange.of('substringsub').last.evaluate().single.renderObject),
+      );
+    });
+
+    testWidgets('finds only static text for now', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          EditableText(
+            controller: TextEditingController(text: 'text'),
+            focusNode: FocusNode(),
+            style: const TextStyle(),
+            cursorColor: const Color(0x00000000),
+            backgroundCursorColor: const Color(0x00000000),
+          )
+        ),
+      );
+
+      expect(find.textRange.of('text'), findsNothing);
+    });
+  });
+
   testWidgets('ChainedFinders chain properly', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     await tester.pumpWidget(

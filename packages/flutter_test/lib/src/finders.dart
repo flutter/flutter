@@ -23,6 +23,26 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
 
+/// The `CandidateType` of finders that search for and filter subtrings,
+/// within static text rendered by [RenderParagraph]s.
+final class TextRangeContext {
+  const TextRangeContext._(this.view, this.renderObject, this.textRange);
+
+  /// The [View] containing the static text.
+  ///
+  /// This is used for hit-testing.
+  final View view;
+
+  /// The RenderObject that contains the static text.
+  final RenderParagraph renderObject;
+
+  /// The [TextRange] of the subtring within [renderObject]'s text.
+  final TextRange textRange;
+
+  @override
+  String toString() => 'TextRangeContext($view, $renderObject, $textRange)';
+}
+
 /// Some frequently used [Finder]s and [SemanticsFinder]s.
 const CommonFinders find = CommonFinders._();
 
@@ -41,6 +61,9 @@ class CommonFinders {
 
   /// Some frequently used semantics finders.
   CommonSemanticsFinders get semantics => const CommonSemanticsFinders._();
+
+  /// Some frequently used text range finders.
+  CommonTextRangeFinders get textRange => const CommonTextRangeFinders._();
 
   /// Finds [Text], [EditableText], and optionally [RichText] widgets
   /// containing string equal to the `text` argument.
@@ -677,6 +700,23 @@ class CommonSemanticsFinders {
   }
 }
 
+/// Provides lightweight syntax for getting frequently used text range finders.
+///
+/// This class is instantiated once, as [CommonFinders.textRange], under [find].
+final class CommonTextRangeFinders {
+  const CommonTextRangeFinders._();
+
+  /// Finds all occurrances of the given `substring` in the static text and
+  /// returns the [TextRange]s.
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// static text inside widgets that are [Offstage], or that are from inactive
+  /// [Route]s.
+  FinderBase<TextRangeContext> of(String substring, { bool skipOffstage = true }) {
+    return _StaticTextRangeFinder(_TextContainingWidgetFinder(substring, skipOffstage: skipOffstage));
+  }
+}
+
 /// Describes how a string of text should be pluralized.
 enum Plurality {
   /// Text should be pluralized to describe zero items.
@@ -998,7 +1038,7 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
   @override
   String describeMatch(Plurality plurality) {
     return switch (plurality) {
-      Plurality.zero ||Plurality.many => 'widgets with $description',
+      Plurality.zero || Plurality.many => 'widgets with $description',
       Plurality.one => 'widget with $description',
     };
   }
@@ -1024,6 +1064,69 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
   Iterable<SemanticsNode> get allCandidates {
     return collectAllSemanticsNodesFrom(root);
   }
+}
+
+/// A base class for creating finders that search for static text rendered by a
+/// [RenderParagraph].
+class _StaticTextRangeFinder extends _MapFinder<TextRangeContext, Element> {
+  /// Creates a new [SemanticsFinder] that will search starting at the given
+  /// `root`.
+  _StaticTextRangeFinder(this._parent);
+
+  @override
+  final _TextContainingWidgetFinder _parent;
+
+  @override
+  Iterable<TextRangeContext> _flatMap(Element from) {
+    final RenderObject? renderObject = from.renderObject;
+    // This is currenly only exposed on text matchers. Only consider RenderBoxes.
+    if (renderObject is! RenderBox) {
+      return const Iterable<TextRangeContext>.empty();
+    }
+
+    final View view = from.findAncestorWidgetOfExactType<View>()!;
+    final List<RenderParagraph> paragraphs = <RenderParagraph>[];
+
+    void visitor(RenderObject child) {
+      switch (child) {
+        case RenderParagraph():
+          paragraphs.add(child);
+          // No need to continue, we are piggybacking off of a text matcher, so
+          // inline text widgets will be reported separately.
+        case RenderBox():
+          child.visitChildren(visitor);
+        case _:
+      }
+    }
+    visitor(renderObject);
+    Iterable<TextRangeContext> searchInParagraph(RenderParagraph paragraph) {
+      final String text = paragraph.text.toPlainText();
+      return _parent.pattern.allMatches(text)
+        .map((Match match) => TextRangeContext._(view, paragraph, TextRange(start: match.start, end: match.end)));
+    }
+    return paragraphs.expand(searchInParagraph);
+  }
+
+  @override
+  String describeMatch(Plurality plurality) {
+    return switch (plurality) {
+      Plurality.zero || Plurality.many => 'non-overlapping TextRanges that match the Pattern "${_parent.pattern}"',
+      Plurality.one => 'non-overlapping TextRange that matches the Pattern "${_parent.pattern}"',
+    };
+  }
+}
+
+abstract class _MapFinder<To, From> extends FinderBase<To> {
+  /// Another finder whose results will be further filtered.
+  FinderBase<From> get _parent;
+
+  Iterable<To> _flatMap(From from);
+
+  @override
+  Iterable<To> findInCandidates(Iterable<To> candidates) => candidates;
+
+  @override
+  Iterable<To> get allCandidates => _parent.evaluate().expand(_flatMap);
 }
 
 /// A mixin that applies additional filtering to the results of a parent [Finder].
