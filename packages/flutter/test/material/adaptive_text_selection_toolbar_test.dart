@@ -11,6 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 import '../widgets/live_text_utils.dart';
+import '../widgets/text_selection_toolbar_utils.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
@@ -25,13 +26,6 @@ void main() {
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
-
-  Finder findOverflowNextButton() {
-    return find.byWidgetPredicate((Widget widget) =>
-    widget is CustomPaint &&
-        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
-    );
-  }
 
   testWidgetsWithLeakTracking('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
@@ -206,30 +200,74 @@ void main() {
     );
 
     expect(find.byKey(key), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Cut'), findsOneWidget);
-    expect(find.text('Paste'), findsOneWidget);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        expect(find.text('Select all'), findsOneWidget);
         expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(6));
-      case TargetPlatform.fuchsia:
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Share'), findsOneWidget);
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(8));
-      case TargetPlatform.iOS:
-        expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
-        await tester.tapAt(tester.getCenter(findOverflowNextButton()));
-        await tester.pumpAndSettle();
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(findMaterialOverflowNextButton(), findsOneWidget); // Material overflow buttons are not TextSelectionToolbarTextButton.
+
+        await tapMaterialOverflowNextButton(tester);
+
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(2));
+        expect(find.text('Search Web'), findsOneWidget);
         expect(findLiveTextButton(), findsOneWidget);
+        expect(findMaterialOverflowBackButton(), findsOneWidget); // Material overflow buttons are not TextSelectionToolbarTextButton.
+
+      case TargetPlatform.iOS:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsOneWidget);
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(findCupertinoOverflowNextButton(), findsOneWidget);
+
+        await tapCupertinoOverflowNextButton(tester);
+
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+        expect(findCupertinoOverflowBackButton(), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share...'), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
+
+      case TargetPlatform.fuchsia:
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(8));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select all'), findsOneWidget);
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share'), findsOneWidget);
+
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.text('Select all'), findsOneWidget);
         expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(8));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select all'), findsOneWidget);
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share'), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
+
       case TargetPlatform.macOS:
-        expect(find.text('Select All'), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(8));
+        expect(find.text('Cut'), findsOneWidget);
+        expect(find.text('Copy'), findsOneWidget);
+        expect(find.text('Paste'), findsOneWidget);
+        expect(find.text('Select All'), findsOneWidget);
+        expect(find.text('Look Up'), findsOneWidget);
+        expect(find.text('Search Web'), findsOneWidget);
+        expect(find.text('Share...'), findsOneWidget);
+        expect(findLiveTextButton(), findsOneWidget);
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
