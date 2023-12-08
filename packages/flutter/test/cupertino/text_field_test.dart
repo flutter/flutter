@@ -664,8 +664,6 @@ void main() {
             selectionColor: selectionColor,
             cursorColor: cursorColor,
             child: Column(
-              // TODO(bleroux): investigate why the test fail without setting the mainAxisAlignment.
-              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 CupertinoTextField(
                   key: key1,
@@ -689,7 +687,7 @@ void main() {
 
     await tester.tap(find.byKey(key2));
     await tester.enterText(find.byKey(key2), 'dcba');
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Focus and selection is active on first TextField, so the second TextFields
     // selectionColor should be dropped.
