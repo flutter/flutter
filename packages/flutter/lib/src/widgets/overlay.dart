@@ -82,6 +82,7 @@ class OverlayEntry implements Listenable {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
+    this.canSizeOverlay = false,
   }) : _opaque = opaque,
        _maintainState = maintainState {
     if (kFlutterMemoryAllocationsEnabled) {
@@ -137,6 +138,24 @@ class OverlayEntry implements Listenable {
     assert(_overlay != null);
     _overlay!._didChangeEntryOpacity();
   }
+
+  /// Whether the content of this [OverlayEntry] can be used to size the
+  /// [Overlay].
+  ///
+  /// In most situations the Overlay sizes itself based on its incoming
+  /// constraints to be as large as possible. However, if that would result in
+  /// an infinite size, it has to rely on one of its children to size itself. In
+  /// this situation, the Overlay will consult the topmost [OverlayEntry] that
+  /// has this property set to true, lay it out with unconstrained
+  /// [BoxConstraints], and force all other OverlayEntries to have the same
+  /// size.
+  ///
+  /// OverlayEntries that set this to true must be able to handle unconstrained
+  /// [BoxConstraints].
+  ///
+  /// Setting this to true has no effect if the OverlayEntry uses a [Positioned]
+  /// widget to position itself in the Overlay.
+  final bool canSizeOverlay;
 
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
@@ -1247,18 +1266,18 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
     if (constraints.biggest.isFinite) {
       size = constraints.biggest;
     } else {
-      RenderBox? child = _firstOnstageChild;
+      RenderBox? child = _lastOnstageChild;
       while (child != null) {
         final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
         // Only children that were not created by an OverlayPortal (overlayEntry != null)
         // and that are non-positioned can determine overall size of Overlay.
-        if (childParentData.overlayEntry != null && !childParentData.isPositioned) {
+        if ((childParentData.overlayEntry?.canSizeOverlay ?? false) && !childParentData.isPositioned) {
           sizeDeterminingChild = child;
           layoutChild(sizeDeterminingChild, constraints);
           size = child.size;
           break;
         }
-        child = childParentData.nextSibling;
+        child = childParentData.previousSibling;
       }
       // TODO(goderbauer): Provide better error message if we cannot find a size-determining child.
       assert(sizeDeterminingChild != null);
