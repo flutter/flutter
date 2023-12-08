@@ -533,7 +533,6 @@ abstract class IosAssetBundle extends Target {
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
       ],
-      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,
