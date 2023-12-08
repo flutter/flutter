@@ -598,15 +598,49 @@ class IOSDeployDebugger {
     if (!debuggerAttached) {
       return;
     }
-    try {
-      // Stop the app, which will prompt the backtrace to be printed for all threads in the stdoutSubscription handler.
-      _iosDeployProcess?.stdin.writeln(_signalStop);
-    } on SocketException catch (error) {
-      // Best effort, try to detach, but maybe the app already exited or already detached.
-      _logger.printTrace('Could not stop app from debugger: $error');
-    }
+    // Stop the app, which will prompt the backtrace to be printed for all
+    // threads in the stdoutSubscription handler.
+    await stdinWriteln(_signalStop);
+
     // Wait for logging to finish on process exit.
     return logLines.drain();
+  }
+
+  Future<void>? _stdinWriteFuture;
+
+  /// Queue write of [line] to STDIN of [_iosDeployProcess].
+  ///
+  /// No-op if [_iosDeployProcess] is null. This write will not happen until
+  /// The flush of any previous writes have completed, because calling
+  /// [IOSink.flush()] before a previous flush has completed will throw a
+  /// [StateError].
+  Future<void> stdinWriteln(String line) async {
+    final Process? process = _iosDeployProcess;
+    if (process == null) {
+      return;
+    }
+
+    Future<void> writeln() {
+      final Completer<void> completer = Completer<void>();
+      runZonedGuarded(
+        () {
+          process.stdin.writeln(line);
+          //process.stdin.flush().then<void>((_) => completer.complete());
+          process.stdin.flush().whenComplete(() => completer.complete());
+        },
+        (Object error, StackTrace trace) {
+          // Best effort, try to detach, but maybe the app already exited or already detached.
+          _logger.printTrace('Could not detach from debugger: $error');
+        }
+      );
+      return completer.future;
+    }
+
+    if (_stdinWriteFuture != null) {
+      _stdinWriteFuture = _stdinWriteFuture!.then<void>((_) => writeln());
+    } else {
+      _stdinWriteFuture = writeln();
+    }
   }
 
   void detach() {
@@ -614,20 +648,7 @@ class IOSDeployDebugger {
       return;
     }
 
-    runZonedGuarded(() async {
-      // Detach lldb from the app process.
-      _iosDeployProcess?.stdin.writeln('process detach');
-      await _iosDeployProcess?.stdin.flush();
-    }, (Object error, StackTrace stackTrace) {
-      throw Exception('foo');
-    });
-    //try {
-    //  // Detach lldb from the app process.
-    //  _iosDeployProcess?.stdin.writeln('process detach');
-    //} on SocketException catch (error) {
-    //  // Best effort, try to detach, but maybe the app already exited or already detached.
-    //  _logger.printTrace('Could not detach from debugger: $error');
-    //}
+    stdinWriteln('process detach');
   }
 }
 
