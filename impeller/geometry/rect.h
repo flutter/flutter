@@ -132,6 +132,9 @@ struct TRect {
   /// Returns true if either of the width or height are 0, negative, or NaN.
   constexpr bool IsEmpty() const { return size.IsEmpty(); }
 
+  /// Returns true if width and height are equal and neither is NaN.
+  constexpr bool IsSquare() const { return size.IsSquare(); }
+
   constexpr bool IsMaximum() const { return *this == MakeMaximum(); }
 
   /// @brief Returns the upper left corner of the rectangle as specified
@@ -184,6 +187,11 @@ struct TRect {
 
   constexpr TPoint<T> GetRightBottom() const {
     return {GetRight(), GetBottom()};
+  }
+
+  /// @brief  Get the center point as a |Point|.
+  constexpr Point GetCenter() const {
+    return Point(origin.x + size.width * 0.5f, origin.y + size.height * 0.5f);
   }
 
   constexpr std::array<T, 4> GetLTRB() const {
