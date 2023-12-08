@@ -314,13 +314,19 @@ class AnsiTerminal implements Terminal {
       return;
     }
     final io.Stdin stdin = _stdio.stdin as io.Stdin;
-    // The order of setting lineMode and echoMode is important on Windows.
-    if (value) {
-      stdin.echoMode = false;
-      stdin.lineMode = false;
-    } else {
-      stdin.lineMode = true;
-      stdin.echoMode = true;
+
+    try {
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
+      }
+    } on io.StdinException {
+      // If the pipe to STDIN has been closed it's probably because the
+      // terminal has been closed, and there is nothing actionable to do here.
     }
   }
 
