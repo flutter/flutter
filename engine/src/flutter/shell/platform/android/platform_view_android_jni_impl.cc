@@ -51,8 +51,8 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_weak_reference_class =
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_texture_wrapper_class = nullptr;
 
-static fml::jni::ScopedJavaGlobalRef<jclass>* g_image_texture_entry_class =
-    nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>*
+    g_image_consumer_texture_registry_interface = nullptr;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_image_class = nullptr;
 
@@ -1182,25 +1182,26 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     FML_LOG(ERROR) << "Could not locate detachFromGlContext method";
     return false;
   }
-  g_image_texture_entry_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-      env, env->FindClass("io/flutter/view/TextureRegistry$ImageTextureEntry"));
-  if (g_image_texture_entry_class->is_null()) {
-    FML_LOG(ERROR) << "Could not locate ImageTextureEntry class";
+  g_image_consumer_texture_registry_interface =
+      new fml::jni::ScopedJavaGlobalRef<jclass>(
+          env, env->FindClass("io/flutter/view/TextureRegistry$ImageConsumer"));
+  if (g_image_consumer_texture_registry_interface->is_null()) {
+    FML_LOG(ERROR) << "Could not locate TextureRegistry.ImageConsumer class";
     return false;
   }
 
   g_acquire_latest_image_method =
-      env->GetMethodID(g_image_texture_entry_class->obj(), "acquireLatestImage",
-                       "()Landroid/media/Image;");
+      env->GetMethodID(g_image_consumer_texture_registry_interface->obj(),
+                       "acquireLatestImage", "()Landroid/media/Image;");
   if (g_acquire_latest_image_method == nullptr) {
     FML_LOG(ERROR) << "Could not locate acquireLatestImage on "
-                      "ImageTextureEntry class";
+                      "TextureRegistry.ImageConsumer class";
     return false;
   }
 
   g_image_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("android/media/Image"));
-  if (g_image_texture_entry_class->is_null()) {
+  if (g_image_class->is_null()) {
     FML_LOG(ERROR) << "Could not locate Image class";
     return false;
   }
@@ -1551,28 +1552,29 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureDetachFromGLContext(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
-JavaLocalRef PlatformViewAndroidJNIImpl::ImageTextureEntryAcquireLatestImage(
-    JavaLocalRef image_texture_entry) {
+JavaLocalRef
+PlatformViewAndroidJNIImpl::ImageProducerTextureEntryAcquireLatestImage(
+    JavaLocalRef image_producer_texture_entry) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
-  if (image_texture_entry.is_null()) {
+  if (image_producer_texture_entry.is_null()) {
     // Return null.
     return JavaLocalRef();
   }
 
   // Convert the weak reference to ImageTextureEntry into a strong local
   // reference.
-  fml::jni::ScopedJavaLocalRef<jobject> image_texture_entry_local_ref(
-      env, env->CallObjectMethod(image_texture_entry.obj(),
+  fml::jni::ScopedJavaLocalRef<jobject> image_producer_texture_entry_local_ref(
+      env, env->CallObjectMethod(image_producer_texture_entry.obj(),
                                  g_java_weak_reference_get_method));
 
-  if (image_texture_entry_local_ref.is_null()) {
+  if (image_producer_texture_entry_local_ref.is_null()) {
     // Return null.
     return JavaLocalRef();
   }
 
   JavaLocalRef r = JavaLocalRef(
-      env, env->CallObjectMethod(image_texture_entry_local_ref.obj(),
+      env, env->CallObjectMethod(image_producer_texture_entry_local_ref.obj(),
                                  g_acquire_latest_image_method));
   FML_CHECK(fml::jni::CheckException(env));
   return r;

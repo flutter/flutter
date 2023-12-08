@@ -73,8 +73,9 @@ JavaLocalRef ImageExternalTexture::AcquireLatestImage() {
   FML_CHECK(env != nullptr);
 
   // ImageTextureEntry.acquireLatestImage.
-  JavaLocalRef image_java = jni_facade_->ImageTextureEntryAcquireLatestImage(
-      JavaLocalRef(image_texture_entry_));
+  JavaLocalRef image_java =
+      jni_facade_->ImageProducerTextureEntryAcquireLatestImage(
+          JavaLocalRef(image_texture_entry_));
   return image_java;
 }
 
