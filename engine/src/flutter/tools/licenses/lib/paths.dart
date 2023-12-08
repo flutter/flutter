@@ -123,8 +123,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/boringssl/src/fuzz', // testing tools, not shipped
   r'third_party/boringssl/src/rust', // rust-related code is not shipped
   r'third_party/boringssl/src/util', // code generators, not shipped
-  r'third_party/colorama/src/demos',
-  r'third_party/colorama/src/screenshots',
   r'third_party/dart/benchmarks', // not shipped in binary
   r'third_party/dart/build', // not shipped in binary
   r'third_party/dart/docs', // not shipped in binary
