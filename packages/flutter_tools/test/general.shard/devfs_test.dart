@@ -733,14 +733,7 @@ class FakeBundle extends AssetBundle {
   List<File> get additionalDependencies => <File>[];
 
   @override
-  Future<int> build({
-    String manifestPath = defaultManifestPath,
-    String? assetDirPath,
-    String? packagesPath,
-    bool deferredComponentsEnabled = false,
-    TargetPlatform? targetPlatform,
-    String? flavor,
-  }) async {
+  Future<int> build({String manifestPath = defaultManifestPath, String? assetDirPath, String? packagesPath, bool deferredComponentsEnabled = false, TargetPlatform? targetPlatform}) async {
     return 0;
   }
 

@@ -231,12 +231,29 @@ class FlutterManifest {
         _logger.printError('Expected deferred component manifest to be a map.');
         continue;
       }
+      List<Uri> assetsUri = <Uri>[];
+      final List<Object?>? assets = component['assets'] as List<Object?>?;
+      if (assets == null) {
+        assetsUri = const <Uri>[];
+      } else {
+        for (final Object? asset in assets) {
+          if (asset is! String || asset == '') {
+            _logger.printError('Deferred component asset manifest contains a null or empty uri.');
+            continue;
+          }
+          try {
+            assetsUri.add(Uri.parse(asset));
+          } on FormatException {
+            _logger.printError('Asset manifest contains invalid uri: $asset.');
+          }
+        }
+      }
       components.add(
         DeferredComponent(
           name: component['name'] as String,
           libraries: component['libraries'] == null ?
               <String>[] : (component['libraries'] as List<dynamic>).cast<String>(),
-          assets: _computeAssets(component['assets']),
+          assets: assetsUri,
         )
       );
     }
@@ -294,7 +311,26 @@ class FlutterManifest {
         : fontList.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>().toList();
   }
 
-  late final List<AssetsEntry> assets = _computeAssets(_flutterDescriptor['assets']);
+  late final List<Uri> assets = _computeAssets();
+  List<Uri> _computeAssets() {
+    final List<Object?>? assets = _flutterDescriptor['assets'] as List<Object?>?;
+    if (assets == null) {
+      return const <Uri>[];
+    }
+    final List<Uri> results = <Uri>[];
+    for (final Object? asset in assets) {
+      if (asset is! String || asset == '') {
+        _logger.printError('Asset manifest contains a null or empty uri.');
+        continue;
+      }
+      try {
+        results.add(Uri(pathSegments: asset.split('/')));
+      } on FormatException {
+        _logger.printError('Asset manifest contains invalid uri: $asset.');
+      }
+    }
+    return results;
+  }
 
   late final List<Font> fonts = _extractFonts();
 
@@ -485,7 +521,15 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           errors.add('Expected "$yamlKey" to be a bool, but got $yamlValue (${yamlValue.runtimeType}).');
         }
       case 'assets':
-        errors.addAll(_validateAssets(yamlValue));
+        if (yamlValue is! YamlList) {
+          errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
+        } else if (yamlValue.isEmpty) {
+          break;
+        } else if (yamlValue[0] is! String) {
+          errors.add(
+            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
+          );
+        }
       case 'shaders':
         if (yamlValue is! YamlList) {
           errors.add('Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).');
@@ -596,50 +640,15 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
         }
       }
       if (valueMap.containsKey('assets')) {
-        errors.addAll(_validateAssets(valueMap['assets']));
+        final Object? assets = valueMap['assets'];
+        if (assets is! YamlList) {
+          errors.add('Expected "assets" to be a list, but got $assets (${assets.runtimeType}).');
+        } else {
+          _validateListType<String>(assets, errors, '"assets" key in the $i element of "${kvp.key}"', 'file paths');
+        }
       }
     }
   }
-}
-
-List<String> _validateAssets(Object? yaml) {
-  final (_, List<String> errors) = _computeAssetsSafe(yaml);
-  return errors;
-}
-
-// TODO(andrewkolos): We end up parsing the assets section twice, once during
-// validation and once when the assets getter is called. We should consider
-// refactoring this class to parse and store everything in the constructor.
-// https://github.com/flutter/flutter/issues/139183
-(List<AssetsEntry>, List<String> errors) _computeAssetsSafe(Object? yaml) {
-  if (yaml == null) {
-    return (const <AssetsEntry>[], const <String>[]);
-  }
-  if (yaml is! YamlList) {
-    final String error = 'Expected "assets" to be a list, but got $yaml (${yaml.runtimeType}).';
-    return (const <AssetsEntry>[], <String>[error]);
-  }
-  final List<AssetsEntry> results = <AssetsEntry>[];
-  final List<String> errors = <String>[];
-  for (final Object? rawAssetEntry in yaml) {
-    final (AssetsEntry? parsed, String? error) = AssetsEntry.parseFromYamlSafe(rawAssetEntry);
-    if (parsed != null) {
-      results.add(parsed);
-    }
-    if (error != null) {
-      errors.add(error);
-    }
-  }
-  return (results, errors);
-}
-
-List<AssetsEntry> _computeAssets(Object? assetsSection) {
-  final (List<AssetsEntry> result, List<String> errors) = _computeAssetsSafe(assetsSection);
-  if (errors.isNotEmpty) {
-    throw Exception('Uncaught error(s) in assets section: '
-      '${errors.join('\n')}');
-  }
-  return result;
 }
 
 void _validateFonts(YamlList fonts, List<String> errors) {
@@ -693,104 +702,4 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       }
     }
   }
-}
-
-/// Represents an entry under the `assets` section of a pubspec.
-@immutable
-class AssetsEntry {
-  const AssetsEntry({
-    required this.uri,
-    this.flavors = const <String>[],
-  });
-
-  final Uri uri;
-  final List<String> flavors;
-
-  static const String _pathKey = 'path';
-  static const String _flavorKey = 'flavors';
-
-  static AssetsEntry? parseFromYaml(Object? yaml) {
-    final (AssetsEntry? value, String? error) = parseFromYamlSafe(yaml);
-    if (error != null) {
-      throw Exception('Unexpected error when parsing assets entry');
-    }
-    return value!;
-  }
-
-  static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
-
-    (Uri?, String?) tryParseUri(String uri) {
-      try {
-        return (Uri(pathSegments: uri.split('/')), null);
-      } on FormatException {
-        return (null, 'Asset manifest contains invalid uri: $uri.');
-      }
-    }
-
-    if (yaml == null || yaml == '') {
-      return (null, 'Asset manifest contains a null or empty uri.');
-    }
-
-    if (yaml is String) {
-      final (Uri? uri, String? error) = tryParseUri(yaml);
-      return uri == null ? (null, error) : (AssetsEntry(uri: uri), null);
-    }
-
-    if (yaml is Map) {
-      if (yaml.keys.isEmpty) {
-        return (null, null);
-      }
-
-      final Object? path = yaml[_pathKey];
-      final Object? flavors = yaml[_flavorKey];
-
-      if (path == null || path is! String) {
-        return (null, 'Asset manifest entry is malformed. '
-          'Expected asset entry to be either a string or a map '
-          'containing a "$_pathKey" entry. Got ${path.runtimeType} instead.');
-      }
-
-      final Uri uri = Uri(pathSegments: path.split('/'));
-
-      if (flavors == null) {
-        return (AssetsEntry(uri: uri), null);
-      }
-
-      if (flavors is! YamlList) {
-        return(null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings. '
-          'Got ${flavors.runtimeType} instead.');
-      }
-
-      final List<String> flavorsListErrors = <String>[];
-      _validateListType<String>(flavors, flavorsListErrors, 'flavors list of entry "$path"', 'String');
-      if (flavorsListErrors.isNotEmpty) {
-        return (null, 'Asset manifest entry is malformed. '
-          'Expected "$_flavorKey" entry to be a list of strings.\n'
-          '${flavorsListErrors.join('\n')}');
-      }
-
-      final AssetsEntry entry = AssetsEntry(
-        uri: Uri(pathSegments: path.split('/')),
-        flavors: List<String>.from(flavors),
-      );
-
-      return (entry, null);
-    }
-
-    return (null, 'Assets entry had unexpected shape. '
-      'Expected a string or an object. Got ${yaml.runtimeType} instead.');
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! AssetsEntry) {
-      return false;
-    }
-
-    return uri == other.uri && flavors == other.flavors;
-  }
-
-  @override
-  int get hashCode => Object.hash(uri.hashCode, flavors.hashCode);
 }

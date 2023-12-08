@@ -141,8 +141,6 @@ class HotRunner extends ResidentRunner {
 
   NativeAssetsBuildRunner? _buildRunner;
 
-  String? flavor;
-
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatform != null) {
       return;
@@ -496,10 +494,7 @@ class HotRunner extends ResidentRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
-      final int result = await assetBundle.build(
-        packagesPath: '.packages',
-        flavor: debuggingOptions.buildInfo.flavor,
-      );
+      final int result = await assetBundle.build(packagesPath: '.packages');
       if (result != 0) {
         return UpdateFSReport();
       }
