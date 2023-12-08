@@ -46,7 +46,6 @@ abstract class AndroidAssetBundle extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets')
@@ -69,7 +68,6 @@ abstract class AndroidAssetBundle extends Target {
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
       shaderTarget: ShaderTarget.impellerAndroid,
-      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,

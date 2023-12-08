@@ -1042,7 +1042,6 @@ class FlutterPlugin implements Plugin<Project> {
             boolean isAndroidLibraryValue = isBuildingAar || isUsedAsSubproject
 
             String variantBuildMode = buildModeFor(variant.buildType)
-            String flavorValue = variant.getFlavorName()
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             // Be careful when configuring task below, Groovy has bizarre
             // scoping rules: writing `verbose isVerbose()` means calling
@@ -1080,7 +1079,6 @@ class FlutterPlugin implements Plugin<Project> {
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
                 isAndroidLibrary isAndroidLibraryValue
-                flavor flavorValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -1338,8 +1336,6 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean validateDeferredComponents
     @Optional @Input
     Boolean isAndroidLibrary
-    @Optional @Input
-    String flavor
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -1419,9 +1415,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"
-            }
-            if (flavor != null) {
-                args "-dFlavor=${flavor}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
