@@ -233,6 +233,22 @@ abstract class ProcessUtils {
     List<String> cli, {
     Map<String, String>? environment,
   });
+
+  static Future<void> writelnToStdin({
+    required IOSink stdin,
+    required String line,
+    void Function(Object, StackTrace)? onError,
+  }) async {
+    final Completer<void> completer = Completer<void>();
+    runZonedGuarded(
+      () {
+        stdin.writeln(line);
+        stdin.flush().whenComplete(() => completer.complete());
+      },
+      onError ?? (Object _, StackTrace __) {},
+    );
+    return completer.future;
+  }
 }
 
 class _DefaultProcessUtils implements ProcessUtils {

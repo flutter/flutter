@@ -621,18 +621,14 @@ class IOSDeployDebugger {
     }
 
     Future<void> writeln() {
-      final Completer<void> completer = Completer<void>();
-      runZonedGuarded(
-        () {
-          process.stdin.writeln(line);
-          process.stdin.flush().whenComplete(() => completer.complete());
-        },
-        (Object error, StackTrace trace) {
+      return ProcessUtils.writelnToStdin(
+        stdin: process.stdin,
+        line: line,
+        onError: (Object error, StackTrace trace) {
           // Best effort, try to detach, but maybe the app already exited or already detached.
           _logger.printTrace('Could not detach from debugger: $error');
-        }
+        },
       );
-      return completer.future;
     }
 
     if (_stdinWriteFuture != null) {
