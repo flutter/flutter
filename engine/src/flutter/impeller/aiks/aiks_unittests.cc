@@ -4257,7 +4257,43 @@ TEST_P(AiksTest, AdvancedBlendWithClearColorOptimization) {
   canvas.DrawRect(
       Rect::MakeXYWH(0, 0, 200, 300),
       {.color = {1.0, 0.0, 1.0, 1.0}, .blend_mode = BlendMode::kMultiply});
+}
 
+TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
+  Canvas canvas;
+
+  canvas.Scale(GetContentScale());
+  canvas.DrawRRect(Rect::MakeLTRB(0, 0, GetWindowSize().width, 100),
+                   Point(10, 10), Paint{.color = Color::LimeGreen()});
+  canvas.DrawRRect(Rect::MakeLTRB(0, 110, GetWindowSize().width, 210),
+                   Point(10, 10), Paint{.color = Color::Magenta()});
+  canvas.ClipRect(Rect::MakeLTRB(100, 0, 200, GetWindowSize().height));
+  canvas.SaveLayer({.blend_mode = BlendMode::kSource}, std::nullopt,
+                   ImageFilter::MakeBlur(Sigma(20.0), Sigma(20.0),
+                                         FilterContents::BlurStyle::kNormal,
+                                         Entity::TileMode::kClamp));
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
+  Canvas canvas;
+
+  canvas.Scale(GetContentScale());
+  std::shared_ptr<Texture> boston = CreateTextureForFixture("boston.jpg");
+  canvas.DrawImageRect(
+      std::make_shared<Image>(boston),
+      Rect::MakeXYWH(0, 0, boston->GetSize().width, boston->GetSize().height),
+      Rect::MakeLTRB(0, 0, GetWindowSize().width, 100), Paint{});
+  canvas.DrawRRect(Rect::MakeLTRB(0, 110, GetWindowSize().width, 210),
+                   Point(10, 10), Paint{.color = Color::Magenta()});
+  canvas.ClipRect(Rect::MakeLTRB(0, 50, GetWindowSize().width, 150));
+  canvas.SaveLayer({.blend_mode = BlendMode::kSource}, std::nullopt,
+                   ImageFilter::MakeBlur(Sigma(20.0), Sigma(20.0),
+                                         FilterContents::BlurStyle::kNormal,
+                                         Entity::TileMode::kClamp));
+  canvas.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
