@@ -67,7 +67,7 @@ Future<void> main() async {
       );
 
       const String ffiPackageName = 'ffi_package';
-      await _createFfiPackage(ffiPackageName, tempDir);
+      await createFfiPackage(ffiPackageName, tempDir);
 
       section('Add FFI package');
 
@@ -729,31 +729,4 @@ class $dartPluginClass {
 
   // Remove the native plugin code.
   await Directory(path.join(pluginDir, 'ios')).delete(recursive: true);
-}
-
-Future<void> _createFfiPackage(String name, Directory parent) async {
-  await inDirectory(parent, () async {
-    await flutter(
-      'create',
-      options: <String>[
-        '--no-pub',
-        '--org',
-        'io.flutter.devicelab',
-        '--template=package_ffi',
-        name,
-      ],
-    );
-    await _pinDependencies(
-      File(path.join(parent.path, name, 'pubspec.yaml')),
-    );
-    await _pinDependencies(
-      File(path.join(parent.path, name, 'example', 'pubspec.yaml')),
-    );
-  });
-}
-
-Future<void> _pinDependencies(File pubspecFile) async {
-  final String oldPubspec = await pubspecFile.readAsString();
-  final String newPubspec = oldPubspec.replaceAll(': ^', ': ');
-  await pubspecFile.writeAsString(newPubspec);
 }
