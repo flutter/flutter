@@ -13,11 +13,11 @@
 #include <vector>
 
 #include "flutter/fml/mapping.h"
+#include "flutter/third_party/tinygltf/tiny_gltf.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/scene/importer/conversions.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 #include "impeller/scene/importer/vertices_builder.h"
-#include "third_party/tinygltf/tiny_gltf.h"
 
 namespace impeller {
 namespace scene {

@@ -91,6 +91,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/skia/third_party/vello', // not linked in
   r'flutter/third_party/skia/tools', // contains nothing that ends up in the binary executable
   r'flutter/third_party/test_shaders', // for tests only
+  r'flutter/third_party/tinygltf',
   r'flutter/third_party/txt/third_party/fonts',
   r'flutter/third_party/wuffs/docs',
   r'flutter/third_party/wuffs/script',
@@ -184,7 +185,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/root_certificates/certdata.txt',
   r'third_party/stb',
   r'third_party/swiftshader', // only used on hosts for tests
-  r'third_party/tinygltf',
   r'third_party/vulkan-deps/glslang/LICENSE', // excluded to make sure we don't accidentally apply it as a default license
   r'third_party/vulkan-deps/glslang/src/LICENSE.txt', // redundant with licenses inside files
   r'third_party/vulkan-deps/glslang/src/glslang/OSDependent/Web', // we only use glslang in impellerc, not in web apps
