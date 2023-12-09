@@ -21,7 +21,7 @@ dependencies:
   http: 0.13.6
   intl: 0.18.1
   meta: 1.11.0
-  multicast_dns: 0.3.2+5
+  multicast_dns: 0.3.2+6
   mustache_template: 2.0.0
   package_config: 2.1.0
   process: 5.0.1
@@ -115,4 +115,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 77a1
+# PUBSPEC CHECKSUM: 45a2
