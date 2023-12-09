@@ -49,12 +49,18 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
     'install',
     options: <String>['--flavor', 'paid'],
   );
-
-  print('@andrewkolos@');
-  Directory(path.join(projectDir, 'build')).listSync(recursive: true).forEach((FileSystemEntity element) {print(element.path);});
-
   final Uint8List assetManifestFileData = File(
-    path.join(projectDir, 'build', 'ios', 'Release-iphoneos', 'App.framework', 'flutter_assets', 'AssetManifest.bin'),
+    path.join(
+      projectDir,
+      'build',
+      'ios',
+      'Debug Paid-iphoneos',
+      'Paid App.framework',
+      'Frameworks',
+      'App.framework',
+      'flutter_assets',
+      'AssetManifest.bin',
+    ),
   ).readAsBytesSync();
 
   final Map<Object?, Object?> assetManifest = const StandardMessageCodec()
