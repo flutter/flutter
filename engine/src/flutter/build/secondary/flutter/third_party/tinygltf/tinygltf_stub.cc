@@ -8,4 +8,4 @@
 #define TINYGLTF_NO_INCLUDE_JSON
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "third_party/tinygltf/tiny_gltf.h"
+#include "flutter/third_party/tinygltf/tiny_gltf.h"
