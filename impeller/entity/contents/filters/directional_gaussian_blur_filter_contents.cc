@@ -24,20 +24,13 @@
 
 namespace impeller {
 
-// This function was derived with polynomial regression when comparing the
-// results with Skia.  Changing the curve below should invalidate this.
-//
-// The following data points were used:
-//   0 | 1
-//  75 | 0.8
-// 150 | 0.5
-// 300 | 0.22
-// 400 | 0.2
-// 500 | 0.15
+// This function was calculated by observing Skia's behavior. Its blur at 500
+// seemed to be 0.15.  Since we clamp at 500 I solved the quadratic equation
+// that puts the minima there and a f(0)=1.
 Sigma ScaleSigma(Sigma sigma) {
   // Limit the kernel size to 1000x1000 pixels, like Skia does.
   Scalar clamped = std::min(sigma.sigma, 500.0f);
-  Scalar scalar = 1.02 - 3.89e-3 * clamped + 4.36e-06 * clamped * clamped;
+  Scalar scalar = 1.0 - 3.4e-3 * clamped + 3.4e-06 * clamped * clamped;
   return Sigma(clamped * scalar);
 }
 
