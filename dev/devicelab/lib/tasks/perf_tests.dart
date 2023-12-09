@@ -28,6 +28,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool measureCpuGpu = true,
   bool badScroll = false,
   bool? enableImpeller,
+  bool forceOpenGLES = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -37,6 +38,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
     'complex_layout_scroll_perf',
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
   ).run;
 }
 
@@ -2089,14 +2091,11 @@ enum ReportedDurationTestFlavor {
 }
 
 String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
-  switch (flavor) {
-    case ReportedDurationTestFlavor.debug:
-      return 'debug';
-    case ReportedDurationTestFlavor.profile:
-      return 'profile';
-    case ReportedDurationTestFlavor.release:
-      return 'release';
-  }
+  return switch (flavor) {
+    ReportedDurationTestFlavor.debug   => 'debug',
+    ReportedDurationTestFlavor.profile => 'profile',
+    ReportedDurationTestFlavor.release => 'release',
+  };
 }
 
 class ReportedDurationTest {

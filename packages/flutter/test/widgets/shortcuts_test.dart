@@ -175,7 +175,7 @@ void main() {
       expect(invoked, 0);
       invoked = 0;
 
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     });
 
     test('LogicalKeySet.hashCode is stable', () {
@@ -352,7 +352,7 @@ void main() {
       expect(invoked, 1);
       invoked = 0;
 
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('handles repeated events', (WidgetTester tester) async {
@@ -378,7 +378,7 @@ void main() {
       expect(invoked, 2);
       invoked = 0;
 
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('rejects repeated events if requested', (WidgetTester tester) async {
@@ -405,7 +405,7 @@ void main() {
       expect(invoked, 1);
       invoked = 0;
 
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('handles Shift-Ctrl-C', (WidgetTester tester) async {
@@ -455,7 +455,7 @@ void main() {
       expect(invoked, 0);
       invoked = 0;
 
-      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
     });
 
     testWidgetsWithLeakTracking('isActivatedBy works as expected', (WidgetTester tester) async {

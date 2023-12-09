@@ -135,6 +135,10 @@ class Java {
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
   late final Version? version = (() {
+    if (!canRun()) {
+      return null;
+    }
+
     final RunResult result = _processUtils.runSync(
       <String>[binaryPath, '--version'],
       environment: environment,
@@ -142,14 +146,15 @@ class Java {
     if (result.exitCode != 0) {
       _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
         ' stdout: ${result.stdout} stderr: ${result.stderr}');
+      return null;
     }
     final String rawVersionOutput = result.stdout;
     final List<String> versionLines = rawVersionOutput.split('\n');
     // Should look something like 'openjdk 19.0.2 2023-01-17'.
     final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
 
-    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
-    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
+    // The contents that matter come in the format '11.0.18', '1.8.0_202 or 21'.
+    final RegExp jdkVersionRegex = RegExp(r'(?<version>\d+(\.\d+(\.\d+(?:_\d+)?)?)?)');
     final Iterable<RegExpMatch> matches =
         jdkVersionRegex.allMatches(rawVersionOutput);
     if (matches.isEmpty) {
@@ -167,7 +172,7 @@ class Java {
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;
     }
-    final String? version = matches.first.group(0);
+    final String? version = matches.first.namedGroup('version');
     if (version == null || version.split('_').isEmpty) {
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;

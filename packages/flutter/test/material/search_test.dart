@@ -1025,7 +1025,31 @@ void main() {
     expect(selectedResults, <String>['Result']);
   });
 
-  testWidgetsWithLeakTracking('showSearch with useRootNavigator', (WidgetTester tester) async {
+  testWidgets('Leading width size is 16', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final List<String> selectedResults = <String>[];
+    delegate.leadingWidth = 16;
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+      results: selectedResults,
+    ));
+
+    // Open the search page with check leading width smaller than 16.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(16, 16));
+    expect(find.text('Suggestions'), findsOneWidget);
+    final Finder appBarFinder = find.byType(AppBar);
+    final AppBar appBar = tester.widget<AppBar>(appBarFinder);
+    expect(appBar.leadingWidth, 16);
+    await tester.tapAt(const Offset(8, 16));
+    await tester.pumpAndSettle();
+    expect(find.text('Suggestions'), findsNothing);
+    expect(find.text('HomeBody'), findsOneWidget);
+  });
+
+ testWidgetsWithLeakTracking('showSearch with useRootNavigator', (WidgetTester tester) async {
     final _MyNavigatorObserver rootObserver = _MyNavigatorObserver();
     final _MyNavigatorObserver localObserver = _MyNavigatorObserver();
 
@@ -1066,20 +1090,33 @@ void main() {
     expect(rootObserver.pushCount, 0);
     expect(localObserver.pushCount, 0);
 
-    // showSearch normal and back
+    // showSearch normal and back.
     await tester.tap(find.text('showSearchLocalNavigator'));
     await tester.pumpAndSettle();
+    final Finder backButtonFinder = find.byType(BackButton);
+    expect(backButtonFinder, findsWidgets);
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
     expect(rootObserver.pushCount, 0);
     expect(localObserver.pushCount, 1);
 
-    // showSearch with rootNavigator
+    // showSearch with rootNavigator.
     await tester.tap(find.text('showSearchRootNavigator'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
-    expect(rootObserver.pushCount, 1);
+
+    // showSearch without back button.
+    delegate.automaticallyImplyLeading = false;
+    await tester.tap(find.text('showSearchRootNavigator'));
+    await tester.pumpAndSettle();
+    final Finder appBarFinder = find.byType(AppBar);
+    final AppBar appBar = tester.widget<AppBar>(appBarFinder);
+    expect(appBar.automaticallyImplyLeading, false);
+    expect(find.byTooltip('Back'), findsNothing);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(rootObserver.pushCount, 2);
     expect(localObserver.pushCount, 1);
   });
 

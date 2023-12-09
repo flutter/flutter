@@ -32,6 +32,8 @@ void main() {
   late MemoryFileSystem fileSystem;
 
   group('runner', () {
+    late FakeAnalytics fakeAnalytics;
+
     setUp(() {
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
@@ -50,6 +52,11 @@ void main() {
 
       Cache.disableLocking();
       fileSystem = MemoryFileSystem.test();
+
+      fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
     });
 
     tearDown(() {
@@ -92,6 +99,7 @@ void main() {
       // attempt.
       final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
       expect(crashingUsage.sentException.toString(), 'Exception: an exception % --');
+      expect(fakeAnalytics.sentEvents, contains(Event.exception(exception: '_Exception')));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -102,6 +110,7 @@ void main() {
       Usage: () => CrashingUsage(),
       Artifacts: () => Artifacts.test(),
       HttpClientFactory: () => () => FakeHttpClient.any(),
+      Analytics: () => fakeAnalytics,
     });
 
     // This Completer completes when CrashingFlutterCommand.runCommand

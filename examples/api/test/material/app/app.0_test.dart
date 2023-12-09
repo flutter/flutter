@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/app/app.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Theme Animation can be customized using AnimationStyle', (WidgetTester tester) async {
+  testWidgets('Theme animation can be customized using AnimationStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MaterialAppExample(),
     );

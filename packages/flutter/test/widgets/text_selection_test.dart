@@ -1242,6 +1242,19 @@ void main() {
       );
     }
 
+    testWidgetsWithLeakTracking('dispatches memory events', (WidgetTester tester) async {
+      await expectLater(
+        await memoryEvents(
+          () async {
+            final SelectionOverlay overlay = await pumpApp(tester);
+            overlay.dispose();
+          },
+          SelectionOverlay,
+        ),
+        areCreateAndDispose,
+      );
+    });
+
     testWidgetsWithLeakTracking('can show and hide handles', (WidgetTester tester) async {
       final TextSelectionControlsSpy spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(
@@ -1702,6 +1715,71 @@ void main() {
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, controller.text.length);
     expect(scrollController.position.pixels, scrollController.position.maxScrollExtent);
+  });
+
+  group('TextSelectionOverlay', () {
+    Future<TextSelectionOverlay> pumpApp(WidgetTester tester) async {
+      final UniqueKey column = UniqueKey();
+      final LayerLink startHandleLayerLink = LayerLink();
+      final LayerLink endHandleLayerLink = LayerLink();
+      final LayerLink toolbarLayerLink = LayerLink();
+
+      final UniqueKey editableText = UniqueKey();
+      final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Column(
+          key: column,
+          children: <Widget>[
+            FakeEditableText(
+              key: editableText,
+              controller: controller,
+              focusNode: focusNode,
+            ),
+            CompositedTransformTarget(
+              link: startHandleLayerLink,
+              child: const Text('start handle'),
+            ),
+            CompositedTransformTarget(
+              link: endHandleLayerLink,
+              child: const Text('end handle'),
+            ),
+            CompositedTransformTarget(
+              link: toolbarLayerLink,
+              child: const Text('toolbar'),
+            ),
+          ],
+        ),
+      ));
+
+      return TextSelectionOverlay(
+        value: TextEditingValue.empty,
+        renderObject: tester.state<EditableTextState>(find.byKey(editableText)).renderEditable,
+        context: tester.element(find.byKey(column)),
+        onSelectionHandleTapped: () {},
+        startHandleLayerLink: startHandleLayerLink,
+        endHandleLayerLink: endHandleLayerLink,
+        selectionDelegate: FakeTextSelectionDelegate(),
+        toolbarLayerLink: toolbarLayerLink,
+        magnifierConfiguration: TextMagnifierConfiguration.disabled,
+      );
+    }
+
+    testWidgetsWithLeakTracking('dispatches memory events', (WidgetTester tester) async {
+      await expectLater(
+        await memoryEvents(
+          () async {
+            final TextSelectionOverlay overlay = await pumpApp(tester);
+            overlay.dispose();
+          },
+          TextSelectionOverlay,
+        ),
+        areCreateAndDispose,
+      );
+    });
   });
 }
 
