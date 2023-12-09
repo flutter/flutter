@@ -82,21 +82,23 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     super.textDirection,
     super.child,
     Clip clipBehavior = Clip.hardEdge,
-  }) : _vsync = vsync,
-       _clipBehavior = clipBehavior {
+    VoidCallback? onEnd,
+  })  : _vsync = vsync,
+        _clipBehavior = clipBehavior {
     _controller = AnimationController(
       vsync: vsync,
       duration: duration,
       reverseDuration: reverseDuration,
     )..addListener(() {
-      if (_controller.value != _lastValue) {
-        markNeedsLayout();
-      }
-    });
+        if (_controller.value != _lastValue) {
+          markNeedsLayout();
+        }
+      });
     _animation = CurvedAnimation(
       parent: _controller,
       curve: curve,
     );
+    _onEnd = onEnd;
   }
 
   /// When asserts are enabled, returns the animation controller that is used
@@ -203,6 +205,19 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     _controller.resync(vsync);
   }
 
+  /// Called every time an animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  VoidCallback? get onEnd => _onEnd;
+  VoidCallback? _onEnd;
+  set onEnd(VoidCallback? value) {
+    if (value == _onEnd) {
+      return;
+    }
+    _onEnd = value;
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -216,11 +231,13 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
         // already, to resume interrupted resizing animation.
         markNeedsLayout();
     }
+    _controller.addStatusListener(_animationStatusListener);
   }
 
   @override
   void detach() {
     _controller.stop();
+    _controller.removeStatusListener(_animationStatusListener);
     super.detach();
   }
 
@@ -360,6 +377,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       // Child size stabilized.
       _controller.stop();
       _state = RenderAnimatedSizeState.stable;
+    }
+  }
+
+  void _animationStatusListener(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _onEnd?.call();
     }
   }
 
