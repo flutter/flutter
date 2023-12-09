@@ -301,7 +301,7 @@ void main() {
 
     while (inner.offset < 0) {
       maxNumberOfSteps--;
-      if(maxNumberOfSteps <= 0) {
+      if (maxNumberOfSteps <= 0) {
         fail('Scrolling did not settle in an expected number of steps.');
       }
       await tester.pump(nextFrame);
