@@ -36,7 +36,7 @@ jobs:
           token: ${{ github.token }}
           path: flutter
           ref: master
-          # Use depth 0 to checkout history of master branch, so the cp commit is a known object
+          # Checkout all history commits on master branch, so that the cp commit is a known object
           fetch-depth: 0
       # use same name when checking out branch, since the marketplace action does a hard reset.
       - name: Attempt CP
