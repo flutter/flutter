@@ -16,9 +16,36 @@ namespace testing {
 
 namespace {
 
-Scalar CalculateSigmaForBlurRadius(Scalar blur_radius) {
-  // See Sigma.h
-  return (blur_radius / kKernelRadiusPerSigma) + 0.5;
+// Use newtonian method to give the closest answer to target where
+// f(x) is less than the target. We do this because the value is `ceil`'d to
+// grab fractional pixels.
+float LowerBoundNewtonianMethod(const std::function<float(float)>& func,
+                                float target,
+                                float guess,
+                                float tolerance) {
+  const float delta = 1e-6;
+  float x = guess;
+  float fx;
+
+  do {
+    fx = func(x) - target;
+    float derivative = (func(x + delta) - func(x)) / delta;
+    x = x - fx / derivative;
+
+  } while (std::abs(fx) > tolerance ||
+           fx < 0.0);  // fx < 0.0 makes this lower bound.
+
+  return x;
+}
+
+Scalar CalculateSigmaForBlurRadius(Scalar radius) {
+  auto f = [](Scalar x) -> Scalar {
+    return GaussianBlurFilterContents::CalculateBlurRadius(
+        GaussianBlurFilterContents::ScaleSigma(x));
+  };
+  // The newtonian method is used here since inverting the function is
+  // non-trivial because of conditional logic and would be fragile to changes.
+  return LowerBoundNewtonianMethod(f, radius, 2.f, 0.001f);
 }
 
 }  // namespace
@@ -67,7 +94,10 @@ TEST(GaussianBlurFilterContentsTest, CoverageWithSigma) {
   Entity entity;
   std::optional<Rect> coverage =
       contents.GetFilterCoverage(inputs, entity, /*effect_transform=*/Matrix());
-  ASSERT_EQ(coverage, Rect::MakeLTRB(99, 99, 201, 201));
+  EXPECT_TRUE(coverage.has_value());
+  if (coverage.has_value()) {
+    EXPECT_RECT_NEAR(coverage.value(), Rect::MakeLTRB(99, 99, 201, 201));
+  }
 }
 
 TEST_P(GaussianBlurFilterContentsTest, CoverageWithTexture) {
@@ -87,7 +117,10 @@ TEST_P(GaussianBlurFilterContentsTest, CoverageWithTexture) {
   entity.SetTransform(Matrix::MakeTranslation({100, 100, 0}));
   std::optional<Rect> coverage =
       contents.GetFilterCoverage(inputs, entity, /*effect_transform=*/Matrix());
-  ASSERT_EQ(coverage, Rect::MakeLTRB(99, 99, 201, 201));
+  EXPECT_TRUE(coverage.has_value());
+  if (coverage.has_value()) {
+    EXPECT_RECT_NEAR(coverage.value(), Rect::MakeLTRB(99, 99, 201, 201));
+  }
 }
 
 TEST_P(GaussianBlurFilterContentsTest, CoverageWithEffectTransform) {
@@ -107,7 +140,11 @@ TEST_P(GaussianBlurFilterContentsTest, CoverageWithEffectTransform) {
   entity.SetTransform(Matrix::MakeTranslation({100, 100, 0}));
   std::optional<Rect> coverage = contents.GetFilterCoverage(
       inputs, entity, /*effect_transform=*/Matrix::MakeScale({2.0, 2.0, 1.0}));
-  ASSERT_EQ(coverage, Rect::MakeLTRB(100 - 2, 100 - 2, 200 + 2, 200 + 2));
+  EXPECT_TRUE(coverage.has_value());
+  if (coverage.has_value()) {
+    EXPECT_RECT_NEAR(coverage.value(),
+                     Rect::MakeLTRB(100 - 2, 100 - 2, 200 + 2, 200 + 2));
+  }
 }
 
 TEST(GaussianBlurFilterContentsTest, FilterSourceCoverage) {
@@ -326,6 +363,15 @@ TEST_P(GaussianBlurFilterContentsTest,
                            Rect::MakeLTRB(98.f, 78.f, 302.f, 282.f)));
     }
   }
+}
+
+TEST(GaussianBlurFilterContentsTest, CalculateSigmaForBlurRadius) {
+  Scalar sigma = 1.0;
+  Scalar radius = GaussianBlurFilterContents::CalculateBlurRadius(
+      GaussianBlurFilterContents::ScaleSigma(sigma));
+  Scalar derived_sigma = CalculateSigmaForBlurRadius(radius);
+
+  EXPECT_NEAR(sigma, derived_sigma, 0.01f);
 }
 
 }  // namespace testing

@@ -47,6 +47,15 @@ class GaussianBlurFilterContents final : public FilterContents {
   /// Visible for testing.
   static Scalar CalculateScale(Scalar sigma);
 
+  /// Scales down the sigma value to match Skia's behavior.
+  ///
+  /// effective_blur_radius = CalculateBlurRadius(ScaleSigma(sigma_));
+  ///
+  /// This function was calculated by observing Skia's behavior. Its blur at
+  /// 500 seemed to be 0.15.  Since we clamp at 500 I solved the quadratic
+  /// equation that puts the minima there and a f(0)=1.
+  static Scalar ScaleSigma(Scalar sigma);
+
  private:
   // |FilterContents|
   std::optional<Entity> RenderFilter(
