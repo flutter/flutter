@@ -69,7 +69,7 @@ jobs:
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
         run: |
           FAILURE_MSG="Failed to create CP due to merge conflicts.<br>"
-          FAILURE_MSG+="You will need to create the PR manually. See https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process<br>"
+          FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for more info."
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
