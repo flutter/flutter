@@ -709,7 +709,7 @@ deps = {
   'src/flutter/third_party/imgui':
   Var('flutter_git') + '/third_party/imgui.git' + '@' + '3ea0fad204e994d669f79ed29dcaf61cd5cb571d',
 
-  'src/third_party/tinygltf':
+  'src/flutter/third_party/tinygltf':
   Var('flutter_git') + '/third_party/tinygltf.git' + '@' + '9bb5806df4055ac973b970ba5b3e27ce27d98148',
 
   'src/third_party/json':
