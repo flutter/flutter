@@ -600,7 +600,12 @@ class IOSDeployDebugger {
     }
     // Stop the app, which will prompt the backtrace to be printed for all
     // threads in the stdoutSubscription handler.
-    await stdinWriteln(_signalStop);
+    await stdinWriteln(
+      _signalStop,
+      onError: (Object error, _) {
+        _logger.printTrace('Could not stop the app: $error');
+      },
+    );
 
     // Wait for logging to finish on process exit.
     return logLines.drain();
@@ -610,18 +615,22 @@ class IOSDeployDebugger {
 
   /// Queue write of [line] to STDIN of [_iosDeployProcess].
   ///
-  /// No-op if [_iosDeployProcess] is null. This write will not happen until
-  /// The flush of any previous writes have completed, because calling
-  /// [IOSink.flush()] before a previous flush has completed will throw a
-  /// [StateError].
-  Future<void> stdinWriteln(String line, {void Function(Object, StackTrace)? onError}) async {
+  /// No-op if [_iosDeployProcess] is null.
+  ///
+  /// This write will not happen until the flush of any previous writes have
+  /// completed, because calling [IOSink.flush()] before a previous flush has
+  /// completed will throw a [StateError].
+  ///
+  /// This method needs to keep track of the [_stdinWriteFuture] from previous
+  /// calls because the future returned by [detach] is not always await-ed.
+  Future<void> stdinWriteln(String line, {required void Function(Object, StackTrace) onError}) async {
     final Process? process = _iosDeployProcess;
     if (process == null) {
       return;
     }
 
     Future<void> writeln() {
-      return ProcessUtils.writelnToStdin(
+      return ProcessUtils.writelnToStdinGuarded(
         stdin: process.stdin,
         line: line,
         onError: onError,
@@ -642,7 +651,7 @@ class IOSDeployDebugger {
       return;
     }
 
-    await stdinWriteln(
+    return stdinWriteln(
       'process detach',
       onError: (Object error, _) {
         // Best effort, try to detach, but maybe the app already exited or already detached.

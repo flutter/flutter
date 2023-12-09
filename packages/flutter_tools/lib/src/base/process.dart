@@ -234,10 +234,28 @@ abstract class ProcessUtils {
     Map<String, String>? environment,
   });
 
-  static Future<void> writelnToStdin({
+  /// Write [line] to [stdin] and catch any errors with [onError].
+  ///
+  /// Specifically with [Process] file descriptors, an exception that is
+  /// thrown as part of a write can be most reliably caught with a
+  /// [ZoneSpecification] error handler.
+  ///
+  /// On some platforms, the following code appears to work:
+  ///
+  /// ```dart
+  /// stdin.writeln(line);
+  /// try {
+  ///   await stdin.flush(line);
+  /// } catch (err) {
+  ///   // handle error
+  /// }
+  /// ```
+  ///
+  /// However it did not catch a [SocketException] on Linux.
+  static Future<void> writelnToStdinGuarded({
     required IOSink stdin,
     required String line,
-    void Function(Object, StackTrace)? onError,
+    required void Function(Object, StackTrace) onError,
   }) async {
     final Completer<void> completer = Completer<void>();
 
@@ -246,11 +264,7 @@ abstract class ProcessUtils {
       stdin.flush().whenComplete(() => completer.complete());
     }
 
-    if (onError == null) {
-      runZoned(writeFlushAndComplete);
-    } else {
-      runZonedGuarded(writeFlushAndComplete, onError);
-    }
+    runZonedGuarded(writeFlushAndComplete, onError);
     return completer.future;
   }
 }
