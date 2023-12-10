@@ -90,7 +90,7 @@ void testUsingContext(
   PersistentToolState buildPersistentToolState(FileSystem fs) {
     configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return PersistentToolState.test(
-      directory: configDir!,
+      directory: configDir,
       logger: globals.logger,
     );
   }
