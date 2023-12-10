@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import 'file_system.dart';
 import 'logger.dart';
 
 /// Project is generated from a template on Flutter project creation.

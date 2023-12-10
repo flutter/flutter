@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/dds.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';

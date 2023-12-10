@@ -16,7 +16,7 @@ import 'semantics_tester.dart';
 void main() {
   testWidgetsWithLeakTracking('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(const MediaQuery(
-      data: MediaQueryData(textScaleFactor: 1.3),
+      data: MediaQueryData(textScaler: TextScaler.linear(1.3)),
       child: Center(
         child: Text('Hello', textDirection: TextDirection.ltr),
       ),
@@ -1570,10 +1570,9 @@ void main() {
             maxWidth: screenWidth,
             child: RichText(
               key: textKey,
-              textScaleFactor: textScaleFactor,
               text: const TextSpan(children: <InlineSpan>[
                 WidgetSpan(child: Text('one two')),
-              ]),
+              ]), textScaler: TextScaler.linear(textScaleFactor),
             ),
           ),
         ),

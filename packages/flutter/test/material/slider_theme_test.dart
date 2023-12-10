@@ -911,7 +911,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData(textScaleFactor: textScale),
+              data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -1095,7 +1095,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData(textScaleFactor: textScale),
+              data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -2035,7 +2035,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData(textScaleFactor: textScale),
+              data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -2248,7 +2248,7 @@ void main() {
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScale),
+                data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
                 child: Material(
                   child: Row(
                     children: <Widget>[

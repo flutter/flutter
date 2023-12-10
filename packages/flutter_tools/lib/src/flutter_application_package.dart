@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 import 'android/android_sdk.dart';
 import 'android/application_package.dart';
 import 'application_package.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';

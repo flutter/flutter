@@ -38,8 +38,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
+          bottomAppBarTheme: theme, bottomAppBarTheme: const BottomAppBarTheme(color: themeColor)
         ),
         home: const Scaffold(body: BottomAppBar(color: babColor)),
       ));
@@ -56,8 +55,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
+          bottomAppBarTheme: theme, bottomAppBarTheme: const BottomAppBarTheme(color: themeColor)
         ),
         home: const Scaffold(body: BottomAppBar()),
       ));
@@ -70,7 +68,7 @@ void main() {
       const Color themeColor = Colors.white10;
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(useMaterial3: false, bottomAppBarColor: themeColor),
+        theme: ThemeData(useMaterial3: false, bottomAppBarTheme: const BottomAppBarTheme(color: themeColor)),
         home: const Scaffold(body: BottomAppBar()),
       ));
 
@@ -139,8 +137,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
+          bottomAppBarTheme: theme, bottomAppBarTheme: const BottomAppBarTheme(color: themeColor)
         ),
         home: const Scaffold(body: BottomAppBar(color: babColor, surfaceTintColor: Colors.transparent)),
       ));
@@ -157,8 +154,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
+          bottomAppBarTheme: theme, bottomAppBarTheme: const BottomAppBarTheme(color: themeColor)
         ),
         home: const Scaffold(body: BottomAppBar(surfaceTintColor: Colors.transparent)),
       ));
@@ -214,8 +210,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          bottomAppBarTheme: theme,
-          bottomAppBarColor: themeSurfaceTintColor
+          bottomAppBarTheme: theme, bottomAppBarTheme: const BottomAppBarTheme(color: themeSurfaceTintColor)
         ),
         home: const Scaffold(
           body: BottomAppBar(color: color, surfaceTintColor: babSurfaceTintColor)
@@ -237,8 +232,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
-          bottomAppBarTheme: theme,
-          bottomAppBarColor: themeColor
+          bottomAppBarTheme: theme, bottomAppBarTheme: const BottomAppBarTheme(color: themeColor)
         ),
         home: const Scaffold(body: BottomAppBar(color: color)),
       ));

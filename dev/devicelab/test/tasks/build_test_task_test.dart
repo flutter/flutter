@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 
-import '../common.dart';
 
 void main() {
   final Map<String, String> isolateParams = <String, String>{

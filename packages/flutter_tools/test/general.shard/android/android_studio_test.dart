@@ -129,7 +129,7 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
@@ -171,7 +171,7 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
@@ -213,7 +213,7 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
@@ -254,7 +254,7 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
@@ -442,7 +442,7 @@ void main() {
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
       expect(studio, isNotNull);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
@@ -481,7 +481,7 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio.javaPath, equals(fileSystem.path.join(
         studioInApplicationPlistFolder,
@@ -520,7 +520,7 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio.javaPath, equals(fileSystem.path.join(
         studioInApplicationPlistFolder,
@@ -564,7 +564,7 @@ void main() {
       );
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio.version, null);
       expect(studio.javaPath, jdkPath);
@@ -594,7 +594,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
+      );
 
       expect(studio.version, equals(Version(99999, 99, 99)));
       expect(studio.javaPath, jdkPathFor2022);
@@ -1067,7 +1067,7 @@ void main() {
       fileSystem.file(homeFile).writeAsStringSync(installPath);
 
       final AndroidStudio studio =
-        AndroidStudio.fromHomeDot(fileSystem.directory(studioHome))!;
+        AndroidStudio.fromHomeDot(fileSystem.directory(studioHome));
       expect(studio, isNotNull);
       expect(studio.pluginsPath,
           equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
@@ -1261,7 +1261,7 @@ void main() {
         ));
       }
 
-      final AndroidStudio chosenInstall = AndroidStudio.latestValid()!;
+      final AndroidStudio chosenInstall = AndroidStudio.latestValid();
       expect(chosenInstall.directory, configuredAndroidStudioDir);
       expect(chosenInstall.isValid, false);
     }, overrides: <Type, Generator>{

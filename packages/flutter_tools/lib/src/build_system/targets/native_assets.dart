@@ -7,7 +7,6 @@ import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
-import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';

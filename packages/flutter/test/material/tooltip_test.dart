@@ -1480,7 +1480,7 @@ void main() {
       return Theme(
         data: ThemeData(useMaterial3: false),
         child: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Navigator(

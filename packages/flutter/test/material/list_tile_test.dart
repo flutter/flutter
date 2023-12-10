@@ -67,8 +67,7 @@ void main() {
         theme: ThemeData(useMaterial3: true),
         home: MediaQuery(
           data: MediaQueryData(
-            padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
-            textScaleFactor: textScaleFactor,
+            padding: const EdgeInsets.only(left: leftPadding, right: rightPadding), textScaler: TextScaler.linear(textScaleFactor),
           ),
           child: Material(
             child: Center(
@@ -2507,8 +2506,7 @@ void main() {
           theme: ThemeData(useMaterial3: false),
           home: MediaQuery(
             data: MediaQueryData(
-              padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
-              textScaleFactor: textScaleFactor,
+              padding: const EdgeInsets.only(left: leftPadding, right: rightPadding), textScaler: TextScaler.linear(textScaleFactor),
             ),
             child: Material(
               child: Center(

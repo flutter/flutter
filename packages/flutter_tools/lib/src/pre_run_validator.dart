@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'base/common.dart';
-import 'base/file_system.dart';
 import 'cache.dart';
 
 /// A validator that runs before the tool runs any command.

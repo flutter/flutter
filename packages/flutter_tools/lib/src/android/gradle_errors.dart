@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../base/error_handling_io.dart';
-import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart' as globals;

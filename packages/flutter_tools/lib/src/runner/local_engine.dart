@@ -6,7 +6,6 @@ import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
@@ -134,7 +133,7 @@ class LocalEngineLocator {
     // Skip if sky_engine is the version in bin/cache.
     Uri? engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
     final String cachedPath = _fileSystem.path.join(_flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib');
-    if (engineUri != null && _fileSystem.identicalSync(cachedPath, engineUri.path)) {
+    if (_fileSystem.identicalSync(cachedPath, engineUri.path)) {
       _logger.printTrace('Local engine auto-detection sky_engine in $packagePath is the same version in bin/cache.');
       engineUri = null;
     }

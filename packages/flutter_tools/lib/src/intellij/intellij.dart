@@ -4,7 +4,6 @@
 
 import 'package:archive/archive.dart';
 
-import '../base/file_system.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';

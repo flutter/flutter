@@ -188,7 +188,7 @@ void main() {
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
-      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
+      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
           const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
@@ -214,7 +214,7 @@ void main() {
       pubspecFile.writeAsStringSync('name: $appName');
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
-      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far)!;
+      final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
       final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
           const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,

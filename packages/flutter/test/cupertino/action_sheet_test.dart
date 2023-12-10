@@ -295,7 +295,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),
@@ -363,7 +363,7 @@ void main() {
         Builder(builder: (BuildContext context) {
           screenHeight = MediaQuery.sizeOf(context).height;
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: Text('Very long content' * 200),
@@ -1041,7 +1041,7 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),

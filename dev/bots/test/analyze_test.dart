@@ -8,7 +8,6 @@ import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
 import '../utils.dart';
-import 'common.dart';
 
 typedef AsyncVoidCallback = Future<void> Function();
 

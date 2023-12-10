@@ -5,7 +5,6 @@
 import 'package:process/process.dart';
 
 import '../base/config.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';

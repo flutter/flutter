@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../convert.dart';

@@ -8,7 +8,6 @@ import 'package:customer_testing/customer_test.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 
-import 'common.dart';
 
 void main() {
   test('constructs expected model', () async {

@@ -6,7 +6,6 @@ import 'package:native_assets_builder/native_assets_builder.dart' show BuildResu
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
-import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';

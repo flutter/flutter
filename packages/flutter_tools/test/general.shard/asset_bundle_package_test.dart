@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:standard_message_codec/standard_message_codec.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {

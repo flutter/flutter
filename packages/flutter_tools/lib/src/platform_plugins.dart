@@ -5,7 +5,6 @@
 import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
-import 'base/file_system.dart';
 
 /// Constant for 'pluginClass' key in plugin maps.
 const String kPluginClass = 'pluginClass';

@@ -577,7 +577,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Builder(
           builder: (BuildContext context) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: Material(
               child: Center(
                 child: DropdownButtonFormField<String>(

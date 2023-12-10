@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -879,7 +878,7 @@ class IOSDevice extends Device {
         debugProject = XcodeDebugProject(
           scheme: scheme,
           xcodeProject: project.xcodeProject,
-          xcodeWorkspace: project.xcodeWorkspace!,
+          xcodeWorkspace: project.xcodeWorkspace,
           hostAppProjectName: project.hostAppProjectName,
           expectedConfigurationBuildDir: bundle.parent.absolute.path,
           verboseLogging: _logger.isVerbose,

@@ -8,7 +8,6 @@ import '../artifacts.dart';
 import '../build_info.dart';
 import '../macos/xcode.dart';
 
-import 'file_system.dart';
 import 'logger.dart';
 import 'process.dart';
 

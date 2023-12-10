@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 import '../test.dart';
-import 'common.dart';
 
 /// Fails a test if the exit code of `result` is not the expected value. This
 /// is favored over `expect(result.exitCode, expectedExitCode)` because this

@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
-import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';

@@ -1198,7 +1198,7 @@ void main() {
                   builder: (BuildContext context) {
                     return MediaQuery(
                       data: MediaQuery.of(context).copyWith(
-                        textScaleFactor: textScaleFactor,
+                        textScaler: TextScaler.linear(textScaleFactor),
                       ),
                       child: Directionality(
                         textDirection: textDirection,
@@ -1334,7 +1334,7 @@ void main() {
           builder: (BuildContext context) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
-                textScaleFactor: 2,
+                textScaler: const TextScaler.linear(2),
               ),
               child: Scaffold(
                 body: Center(

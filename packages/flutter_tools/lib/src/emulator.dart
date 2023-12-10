@@ -12,7 +12,6 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'android/java.dart';
 import 'base/context.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
 import 'device.dart';

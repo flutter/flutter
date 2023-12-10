@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../convert.dart';

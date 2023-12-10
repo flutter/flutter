@@ -185,9 +185,8 @@ void main() {
       wrap(
         child: MediaQuery(
           data: const MediaQueryData(
-            textScaleFactor: 2.0,
             size: Size(111.0, 111.0),
-            devicePixelRatio: 1.1,
+            devicePixelRatio: 1.1, textScaler: TextScaler.linear(2.0),
             padding: EdgeInsets.all(11.0),
           ),
           child: CircleAvatar(

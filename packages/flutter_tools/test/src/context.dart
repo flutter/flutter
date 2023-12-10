@@ -38,7 +38,6 @@ import 'package:test/fake.dart';
 
 import 'common.dart';
 import 'fake_http_client.dart';
-import 'fake_process_manager.dart';
 import 'fakes.dart';
 import 'throwing_pub.dart';
 
@@ -76,7 +75,7 @@ void testUsingContext(
   Directory? configDir;
   tearDown(() {
     if (configDir != null) {
-      tryToDelete(configDir!);
+      tryToDelete(configDir);
       configDir = null;
     }
   });

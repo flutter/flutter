@@ -1021,7 +1021,7 @@ void main() {
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+            trackVisibility: true,
           ),
         ),
         home: const SingleChildScrollView(
@@ -1236,7 +1236,7 @@ void main() {
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+            trackVisibility: true,
           ),
         ),
         home: const SingleChildScrollView(

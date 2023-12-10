@@ -11,7 +11,6 @@ import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -179,7 +178,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
         logger.printTrace('Connecting to service protocol: $forwardingUri');
         final FlutterVmService vmService = await connectToVmServiceImpl(
-          forwardingUri!,
+          forwardingUri,
           compileExpression: compileExpression,
           logger: logger,
         );

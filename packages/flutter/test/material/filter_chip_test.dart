@@ -19,7 +19,7 @@ Widget wrapForChip({
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
         child: Material(child: child),
       ),
     ),

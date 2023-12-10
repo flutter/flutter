@@ -302,7 +302,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('Very long content ' * 20),
@@ -403,7 +403,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -464,7 +464,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(textScaleFactor)),
             child: CupertinoAlertDialog(
               actions: const <Widget>[
                 CupertinoDialogAction(
@@ -517,7 +517,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(textScaleFactor)),
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -707,7 +707,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('The message\n' * 20),
@@ -1183,7 +1183,7 @@ void main() {
         useMaterial3: false,
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: const RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: Text('Title'),
@@ -1214,7 +1214,7 @@ void main() {
         useMaterial3: true,
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: const RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: Text('Title'),
@@ -1317,7 +1317,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(textScaleFactor)),
             child: CupertinoAlertDialog(
               title: const Text('Test Title'),
               content: const Text('Test Content'),
@@ -1496,7 +1496,7 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(3.0)),
             child: RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: const Text('Title'),

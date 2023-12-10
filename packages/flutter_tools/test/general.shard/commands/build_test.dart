@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';

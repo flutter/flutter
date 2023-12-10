@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 
 import '../check_code_samples.dart';
 import '../utils.dart';
-import 'common.dart';
 
 void main() {
   late SampleChecker checker;

@@ -7,7 +7,6 @@ import 'package:yaml/yaml.dart';
 
 import '../base/deferred_component.dart';
 import '../base/error_handling_io.dart';
-import '../base/file_system.dart';
 import '../build_system/build_system.dart';
 import 'deferred_components_validator.dart';
 

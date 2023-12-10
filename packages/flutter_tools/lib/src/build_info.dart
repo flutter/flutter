@@ -6,7 +6,6 @@ import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
 import 'base/config.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';

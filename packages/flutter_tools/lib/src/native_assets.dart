@@ -11,7 +11,6 @@ import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 import 'base/common.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart' as build_info;

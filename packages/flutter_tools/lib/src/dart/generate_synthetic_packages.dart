@@ -5,7 +5,6 @@
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';

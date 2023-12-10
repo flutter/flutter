@@ -5,7 +5,6 @@
 import 'package:archive/archive.dart';
 
 import '../application_package.dart';
-import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cmake.dart';

@@ -234,7 +234,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -260,7 +260,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -288,7 +288,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true).copyWith(
-          bottomAppBarColor: const Color(0xffffff00),
+          bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00)),
         ),
         home: Builder(
           builder: (BuildContext context) {

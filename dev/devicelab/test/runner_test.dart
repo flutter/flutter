@@ -4,7 +4,6 @@
 
 import 'package:flutter_devicelab/framework/runner.dart';
 
-import 'common.dart';
 
 void main() {
   final Map<String, String> isolateParams = <String, String>{

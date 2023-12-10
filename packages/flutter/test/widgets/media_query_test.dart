@@ -165,9 +165,8 @@ void main() {
 
   testWidgetsWithLeakTracking('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
-      textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
-      accessibleNavigation: true,
+      accessibleNavigation: true, textScaler: TextScaler.linear(1234),
       invertColors: true,
       disableAnimations: true,
       boldText: true,
@@ -232,9 +231,8 @@ void main() {
 
   testWidgetsWithLeakTracking('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
-      textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
-      accessibleNavigation: true,
+      accessibleNavigation: true, textScaler: TextScaler.linear(1234),
       invertColors: true,
       disableAnimations: true,
       boldText: true,
@@ -1155,7 +1153,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
-    final MediaQueryData windowData = MediaQueryData.fromWindow(tester.view);
+    final MediaQueryData windowData = MediaQueryData.fromView(tester.view);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
@@ -1495,8 +1493,8 @@ void main() {
       const _MediaQueryAspectCase(MediaQuery.maybeOrientationOf, MediaQueryData(size: Size(2, 1))),
       const _MediaQueryAspectCase(MediaQuery.devicePixelRatioOf, MediaQueryData(devicePixelRatio: 1.1)),
       const _MediaQueryAspectCase(MediaQuery.maybeDevicePixelRatioOf, MediaQueryData(devicePixelRatio: 1.1)),
-      const _MediaQueryAspectCase(MediaQuery.textScaleFactorOf, MediaQueryData(textScaleFactor: 1.1)),
-      const _MediaQueryAspectCase(MediaQuery.maybeTextScaleFactorOf, MediaQueryData(textScaleFactor: 1.1)),
+      const _MediaQueryAspectCase(MediaQuery.textScaleFactorOf, MediaQueryData(textScaler: TextScaler.linear(1.1))),
+      const _MediaQueryAspectCase(MediaQuery.maybeTextScaleFactorOf, MediaQueryData(textScaler: TextScaler.linear(1.1))),
       const _MediaQueryAspectCase(MediaQuery.textScalerOf, MediaQueryData(textScaler: TextScaler.linear(1.1))),
       const _MediaQueryAspectCase(MediaQuery.maybeTextScalerOf, MediaQueryData(textScaler: TextScaler.linear(1.1))),
       const _MediaQueryAspectCase(MediaQuery.platformBrightnessOf, MediaQueryData(platformBrightness: Brightness.dark)),

@@ -509,7 +509,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     late String? testExpectation;
     testExpectation = await skiaClient.getExpectationForTest(testName);
 
-    if (testExpectation == null || testExpectation.isEmpty) {
+    if (testExpectation.isEmpty) {
       // There is no baseline for this test.
       // Ideally we would use markTestSkipped here but in some situations,
       // comparators are called outside of tests.

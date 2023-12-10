@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'globals.dart' as globals;

@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:package_config/package_config.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 
 /// Load the package configuration from [file] or throws a [ToolExit]

@@ -76,16 +76,16 @@ void main() {
     test('deprecated clipBehavior is backwards compatible', (){
       const ScrollableDetails deprecatedClip = ScrollableDetails(
         direction: AxisDirection.right,
-        clipBehavior: Clip.hardEdge,
+        decorationClipBehavior: Clip.hardEdge,
       );
-      expect(deprecatedClip.clipBehavior, Clip.hardEdge);
+      expect(deprecatedClip.decorationClipBehavior, Clip.hardEdge);
       expect(deprecatedClip.decorationClipBehavior, Clip.hardEdge);
 
       const ScrollableDetails newClip = ScrollableDetails(
         direction: AxisDirection.right,
         decorationClipBehavior: Clip.hardEdge,
       );
-      expect(newClip.clipBehavior, Clip.hardEdge);
+      expect(newClip.decorationClipBehavior, Clip.hardEdge);
       expect(newClip.decorationClipBehavior, Clip.hardEdge);
     });
   });

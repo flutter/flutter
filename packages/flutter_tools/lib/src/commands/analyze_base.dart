@@ -9,7 +9,6 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';

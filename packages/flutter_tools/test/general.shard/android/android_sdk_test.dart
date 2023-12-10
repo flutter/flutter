@@ -48,7 +48,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion!.sdkLevel, 23);
     }, overrides: <Type, Generator>{
@@ -64,7 +64,7 @@ void main() {
       );
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion!.sdkLevel, 24);
     }, overrides: <Type, Generator>{
@@ -77,7 +77,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'sdkmanager')
       ).createSync(recursive: true);
@@ -97,7 +97,7 @@ void main() {
       );
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       final List<String> versions = <String>['3.0', '2.1', '1.0'];
       for (final String version in versions) {
         fileSystem.file(
@@ -120,7 +120,7 @@ void main() {
       );
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'tools/bin/sdkmanager')
       ).createSync(recursive: true);
@@ -140,7 +140,7 @@ void main() {
       );
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'tools/bin/foo')
       ).createSync(recursive: true);
@@ -157,7 +157,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       final File adbFile = fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'adb.exe')
       )..createSync(recursive: true);
@@ -178,7 +178,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'sdkmanager.bat')
       ).createSync(recursive: true);
@@ -204,7 +204,7 @@ void main() {
           stdout: '26.1.1\n',
         ),
       );
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
@@ -221,7 +221,7 @@ void main() {
         '--version',
       ]));
       config.setValue('android-sdk', sdkDir.path);
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
       final List<String> validationIssues = sdk.validateSdkWellFormed();
       expect(validationIssues.first, 'No valid Android SDK platforms found in'
@@ -250,7 +250,7 @@ void main() {
         ),
       );
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
@@ -278,7 +278,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager')
       ).createSync(recursive: true);
@@ -295,7 +295,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'avdmanager.bat')
       ).createSync(recursive: true);
@@ -312,7 +312,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager')
       ).createSync(recursive: true);
@@ -329,7 +329,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
       config.setValue('android-sdk', sdkDir.path);
 
-      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       fileSystem.file(
         fileSystem.path.join(sdk.directory.path, 'tools', 'bin', 'avdmanager.bat')
       ).createSync(recursive: true);

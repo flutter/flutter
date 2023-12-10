@@ -7,7 +7,6 @@ import 'package:conductor_core/src/state.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 
-import './common.dart';
 
 void main() {
   test('writeStateToFile() pretty-prints JSON with 2 spaces', () {

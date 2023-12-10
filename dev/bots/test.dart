@@ -867,7 +867,7 @@ Future<void> _runFrameworkTests() async {
           workingDirectory: tracingDirectory,
         );
         final Archive archive = ZipDecoder().decodeBytes(File(path.join(tracingDirectory, 'build', 'app', 'outputs', 'bundle', modeArgument, 'app-$modeArgument.aab')).readAsBytesSync());
-        final ArchiveFile libapp = archive.findFile('base/lib/arm64-v8a/libapp.so')!;
+        final ArchiveFile libapp = archive.findFile('base/lib/arm64-v8a/libapp.so');
         final Uint8List libappBytes = libapp.content as Uint8List; // bytes decompressed here
         final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
         await runCommand(flutter, <String>['clean'], workingDirectory: tracingDirectory);

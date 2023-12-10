@@ -40,7 +40,7 @@ void main() {
   group('MediaQuery', () {
     test('specifying both textScaler and textScalingFactor asserts', () {
       expect(
-        () => MediaQueryData(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
+        () => const MediaQueryData(textScaler: TextScaler.linear(2.0), textScaler: TextScaler.linear(2)),
         throwsAssertionError,
       );
     });
@@ -48,7 +48,7 @@ void main() {
     test('copyWith is backward compatible', () {
       const MediaQueryData data = MediaQueryData(textScaler: TextScaler.linear(2.0));
 
-      final MediaQueryData data1 = data.copyWith(textScaleFactor: 42);
+      final MediaQueryData data1 = data.copyWith(textScaler: const TextScaler.linear(42));
       expect(data1.textScaler, const TextScaler.linear(42));
       expect(data1.textScaleFactor, 42);
 
@@ -60,7 +60,7 @@ void main() {
     test('copyWith specifying both textScaler and textScalingFactor asserts', () {
       const MediaQueryData data = MediaQueryData();
        expect(
-        () => data.copyWith(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
+        () => data.copyWith(textScaler: const TextScaler.linear(2.0), textScaler: const TextScaler.linear(2)),
         throwsAssertionError,
       );
     });
@@ -78,7 +78,7 @@ void main() {
             outsideTextScaler = MediaQuery.textScalerOf(context);
             return MediaQuery(
               data: const MediaQueryData(
-                textScaleFactor: 4.0,
+                textScaler: TextScaler.linear(4.0),
               ),
               child: Builder(
                 builder: (BuildContext context) {
@@ -188,8 +188,7 @@ void main() {
       await tester.pumpWidget(
         RichText(
           textDirection: TextDirection.ltr,
-          text: const TextSpan(),
-          textScaleFactor: 2.0,
+          text: const TextSpan(), textScaler: const TextScaler.linear(2.0),
         ),
       );
 

@@ -2021,8 +2021,7 @@ Future<void> mediaQueryBoilerplate(
         child: MediaQuery(
           data: MediaQueryData(
             alwaysUse24HourFormat: alwaysUse24HourFormat,
-            textScaleFactor: textScaleFactor,
-            accessibleNavigation: accessibleNavigation,
+            accessibleNavigation: accessibleNavigation, textScaler: TextScaler.linear(textScaleFactor),
             size: tester.view.physicalSize / tester.view.devicePixelRatio,
           ),
           child: Material(

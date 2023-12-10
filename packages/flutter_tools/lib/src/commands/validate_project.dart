@@ -4,7 +4,6 @@
 
 import 'package:process/process.dart';
 
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../project.dart';
 import '../project_validator.dart';

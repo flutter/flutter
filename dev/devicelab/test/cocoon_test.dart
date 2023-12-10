@@ -13,7 +13,6 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 
-import 'common.dart';
 
 void main() {
   late ProcessResult processResult;

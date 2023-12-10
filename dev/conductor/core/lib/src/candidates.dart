@@ -39,7 +39,7 @@ class CandidatesCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final ArgResults results = argResults!;
+    final ArgResults results = argResults;
     await git.run(
       <String>['fetch', results[kRemote] as String],
       'Fetch from remote ${results[kRemote]}',

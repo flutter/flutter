@@ -1137,7 +1137,7 @@ class FakeVmService extends Fake implements vms.VmService {
   Future<vms.Isolate> getIsolate(String isolateId) async {
     connectionLog.add('getIsolate');
     if (isolateId == vm!.isolate!.id) {
-      onGetIsolate?.call(vm!.isolate!);
+      onGetIsolate?.call(vm!.isolate);
       return vm!.isolate!;
     }
     throw UnimplementedError('getIsolate called with unrecognized $isolateId');

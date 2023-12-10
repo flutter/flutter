@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-final String analyzerSeparator = platform.isWindows ? '-' : '•';
+const String analyzerSeparator = platform.isWindows ? '-' : '•';
 
 void main() {
   late Directory tempDir;

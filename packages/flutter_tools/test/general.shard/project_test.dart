@@ -347,7 +347,7 @@ void main() {
         final FlutterManifest manifest = FlutterManifest.createFromString('''
     name: test
     version: 1.0.0+3
-    ''', logger: BufferLogger.test())!;
+    ''', logger: BufferLogger.test());
         final FlutterProject project = FlutterProject(fileSystem.systemTempDirectory, manifest, manifest);
         final Map<String, dynamic> versionInfo = jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
         expect(versionInfo['app_name'],'test');

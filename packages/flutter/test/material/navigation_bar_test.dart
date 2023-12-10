@@ -310,7 +310,7 @@ void main() {
 
     Widget buildApp({ required double textScaleFactor }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -369,7 +369,7 @@ void main() {
 
     Widget buildApp({ required double textScaleFactor }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -601,7 +601,7 @@ void main() {
     Widget widget({double textScaleFactor = 1}) {
       return _buildWidget(
         MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
           child: NavigationBar(
             animationDuration: const Duration(milliseconds: animationMilliseconds),
             destinations: const <NavigationDestination>[

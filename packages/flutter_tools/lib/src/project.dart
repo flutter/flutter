@@ -11,7 +11,6 @@ import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'base/version.dart';

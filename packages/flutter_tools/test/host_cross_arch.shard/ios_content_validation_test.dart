@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/convert.dart';
 
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
 
 void main() {
   group('iOS app validation', () {

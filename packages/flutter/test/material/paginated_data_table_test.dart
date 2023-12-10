@@ -463,7 +463,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
-          textScaleFactor: 20.0,
+          textScaler: TextScaler.linear(20.0),
         ),
         child: PaginatedDataTable(
           header: const Text('HEADER'),

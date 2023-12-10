@@ -1076,7 +1076,7 @@ void main() {
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+            data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(99)),
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(

@@ -10,7 +10,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import 'test_wrapper.dart';
 
 export 'package:process/process.dart' show ProcessManager;
 

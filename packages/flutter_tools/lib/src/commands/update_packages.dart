@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/task_queue.dart';

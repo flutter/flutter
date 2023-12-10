@@ -45,7 +45,7 @@ class EmulatorsCommand extends FlutterCommand {
           'Android AVD images ${globals.platform.isMacOS ? 'or an iOS Simulator ' : ''}available.',
           exitCode: 1);
     }
-    final ArgResults argumentResults = argResults!;
+    final ArgResults argumentResults = argResults;
     if (argumentResults.wasParsed('launch')) {
       final bool coldBoot = argumentResults.wasParsed('cold');
       await _launchEmulator(stringArg('launch')!, coldBoot: coldBoot);

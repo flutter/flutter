@@ -6,7 +6,6 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
-import 'base/file_system.dart';
 import 'platform_plugins.dart';
 
 class Plugin {

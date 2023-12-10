@@ -188,7 +188,7 @@ class _DefaultUsage implements Usage {
       }
     }
 
-    final Analytics analytics = setupAnalytics!;
+    final Analytics analytics = setupAnalytics;
     if (!skipAnalyticsSessionSetup) {
       // Report a more detailed OS version string than package:usage does by default.
       analytics.setSessionValue(

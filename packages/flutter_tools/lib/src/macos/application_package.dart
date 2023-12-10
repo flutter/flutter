@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../application_package.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';

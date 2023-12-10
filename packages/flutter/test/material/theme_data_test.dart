@@ -175,10 +175,10 @@ void main() {
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.colorScheme.background, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
-    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.colorScheme.error, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, false);
   });
 
@@ -224,10 +224,10 @@ void main() {
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.colorScheme.background, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onSurface);
-    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.colorScheme.error, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, true);
   });
 
@@ -270,10 +270,10 @@ void main() {
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.colorScheme.background, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
-    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.colorScheme.error, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, false);
   });
 
@@ -317,10 +317,10 @@ void main() {
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.colorScheme.background, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onPrimary);
-    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.colorScheme.error, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, false);
   });
 
@@ -364,10 +364,10 @@ void main() {
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
     expect(theme.dividerColor, theme.colorScheme.outline);
-    expect(theme.backgroundColor, theme.colorScheme.background);
+    expect(theme.colorScheme.background, theme.colorScheme.background);
     expect(theme.dialogBackgroundColor, theme.colorScheme.background);
     expect(theme.indicatorColor, theme.colorScheme.onSurface);
-    expect(theme.errorColor, theme.colorScheme.error);
+    expect(theme.colorScheme.error, theme.colorScheme.error);
     expect(theme.applyElevationOverlayColor, true);
   });
 
@@ -378,11 +378,11 @@ void main() {
     expect(theme.brightness, equals(Brightness.light));
     expect(theme.primaryColor, equals(lightColors.primary));
     expect(theme.cardColor, equals(lightColors.surface));
-    expect(theme.backgroundColor, equals(lightColors.background));
+    expect(theme.colorScheme.background, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
     expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
-    expect(theme.errorColor, equals(lightColors.error));
+    expect(theme.colorScheme.error, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
   });
 
@@ -394,11 +394,11 @@ void main() {
     // in dark theme's the color used for main components is surface instead of primary
     expect(theme.primaryColor, equals(darkColors.surface));
     expect(theme.cardColor, equals(darkColors.surface));
-    expect(theme.backgroundColor, equals(darkColors.background));
+    expect(theme.colorScheme.background, equals(darkColors.background));
     expect(theme.canvasColor, equals(darkColors.background));
     expect(theme.scaffoldBackgroundColor, equals(darkColors.background));
     expect(theme.dialogBackgroundColor, equals(darkColors.background));
-    expect(theme.errorColor, equals(darkColors.error));
+    expect(theme.colorScheme.error, equals(darkColors.error));
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
@@ -738,7 +738,6 @@ void main() {
       // COLOR
       canvasColor: Colors.black,
       cardColor: Colors.black,
-      colorScheme: const ColorScheme.light(),
       dialogBackgroundColor: Colors.black,
       disabledColor: Colors.black,
       dividerColor: Colors.black,
@@ -782,7 +781,7 @@ void main() {
       dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
-      filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(foregroundColor: Colors.green)),
+      filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(foregroundColor: Colors.green)), colorScheme: const ColorScheme.light().copyWith(background: Colors.black).copyWith(error: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: Colors.pink)),
       listTileTheme: const ListTileThemeData(),
@@ -799,7 +798,7 @@ void main() {
       searchBarTheme: const SearchBarThemeData(),
       searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
-      sliderTheme: sliderTheme,
+      sliderTheme: sliderTheme, bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
       switchTheme: const SwitchThemeData(),
       tabBarTheme: const TabBarTheme(labelColor: Colors.black),
@@ -807,13 +806,30 @@ void main() {
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
-      tooltipTheme: const TooltipThemeData(height: 100),
-      // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: Colors.black,
-      selectedRowColor: Colors.black,
-      errorColor: Colors.black,
-      backgroundColor: Colors.black,
-      bottomAppBarColor: Colors.black,
+      tooltipTheme: const TooltipThemeData(height: 100), checkboxTheme: const CheckboxThemeData().copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ ), radioTheme: const RadioThemeData().copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ ), switchTheme: const SwitchThemeData().copyWith(
+ thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ ),
     );
 
     final SliderThemeData otherSliderTheme = SliderThemeData.fromPrimaryColors(
@@ -853,7 +869,6 @@ void main() {
       // COLOR
       canvasColor: Colors.white,
       cardColor: Colors.white,
-      colorScheme: const ColorScheme.light(),
       dialogBackgroundColor: Colors.white,
       disabledColor: Colors.white,
       dividerColor: Colors.white,
@@ -899,7 +914,7 @@ void main() {
       dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
-      filledButtonTheme: const FilledButtonThemeData(),
+      filledButtonTheme: const FilledButtonThemeData(), colorScheme: const ColorScheme.light().copyWith(background: Colors.white).copyWith(error: Colors.white),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.white),
       iconButtonTheme: const IconButtonThemeData(),
       listTileTheme: const ListTileThemeData(),
@@ -916,7 +931,7 @@ void main() {
       searchBarTheme: const SearchBarThemeData(),
       searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
-      sliderTheme: otherSliderTheme,
+      sliderTheme: otherSliderTheme, bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
       switchTheme: const SwitchThemeData(),
       tabBarTheme: const TabBarTheme(labelColor: Colors.white),
@@ -924,14 +939,30 @@ void main() {
       textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
-      tooltipTheme: const TooltipThemeData(height: 100),
-
-      // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: Colors.white,
-      selectedRowColor: Colors.white,
-      errorColor: Colors.white,
-      backgroundColor: Colors.white,
-      bottomAppBarColor: Colors.white,
+      tooltipTheme: const TooltipThemeData(height: 100), checkboxTheme: const CheckboxThemeData().copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.white; }
+ return null;
+ }),
+ ), radioTheme: const RadioThemeData().copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.white; }
+ return null;
+ }),
+ ), switchTheme: const SwitchThemeData().copyWith(
+ thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.white; }
+ return null;
+ }),
+ trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.white; }
+ return null;
+ }),
+ ),
     );
 
     final ThemeData themeDataCopy = theme.copyWith(
@@ -950,13 +981,11 @@ void main() {
       platform: otherTheme.platform,
       scrollbarTheme: otherTheme.scrollbarTheme,
       splashFactory: otherTheme.splashFactory,
-      useMaterial3: otherTheme.useMaterial3,
       visualDensity: otherTheme.visualDensity,
 
       // COLOR
       canvasColor: otherTheme.canvasColor,
       cardColor: otherTheme.cardColor,
-      colorScheme: otherTheme.colorScheme,
       dialogBackgroundColor: otherTheme.dialogBackgroundColor,
       disabledColor: otherTheme.disabledColor,
       dividerColor: otherTheme.dividerColor,
@@ -1003,7 +1032,7 @@ void main() {
       expansionTileTheme: otherTheme.expansionTileTheme,
       filledButtonTheme: otherTheme.filledButtonTheme,
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
-      iconButtonTheme: otherTheme.iconButtonTheme,
+      iconButtonTheme: otherTheme.iconButtonTheme, colorScheme: otherTheme.colorScheme.copyWith(background: otherTheme.colorScheme.background).copyWith(error: otherTheme.colorScheme.error),
       listTileTheme: otherTheme.listTileTheme,
       menuBarTheme: otherTheme.menuBarTheme,
       menuButtonTheme: otherTheme.menuButtonTheme,
@@ -1019,20 +1048,36 @@ void main() {
       searchViewTheme: otherTheme.searchViewTheme,
       sliderTheme: otherTheme.sliderTheme,
       snackBarTheme: otherTheme.snackBarTheme,
-      switchTheme: otherTheme.switchTheme,
+      switchTheme: otherTheme.switchTheme, bottomAppBarTheme: BottomAppBarTheme(color: otherTheme.bottomAppBarColor),
       tabBarTheme: otherTheme.tabBarTheme,
       textButtonTheme: otherTheme.textButtonTheme,
       textSelectionTheme: otherTheme.textSelectionTheme,
       timePickerTheme: otherTheme.timePickerTheme,
       toggleButtonsTheme: otherTheme.toggleButtonsTheme,
-      tooltipTheme: otherTheme.tooltipTheme,
-
-      // DEPRECATED (newest deprecations at the bottom)
-      toggleableActiveColor: otherTheme.toggleableActiveColor,
-      selectedRowColor: otherTheme.selectedRowColor,
-      errorColor: otherTheme.errorColor,
-      backgroundColor: otherTheme.backgroundColor,
-      bottomAppBarColor: otherTheme.bottomAppBarColor,
+      tooltipTheme: otherTheme.tooltipTheme, checkboxTheme: otherTheme.checkboxTheme.copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return otherTheme.toggleableActiveColor; }
+ return null;
+ }),
+ ), radioTheme: otherTheme.radioTheme.copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return otherTheme.toggleableActiveColor; }
+ return null;
+ }),
+ ), switchTheme: otherTheme.switchTheme.copyWith(
+ thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return otherTheme.toggleableActiveColor; }
+ return null;
+ }),
+ trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return otherTheme.toggleableActiveColor; }
+ return null;
+ }),
+ ),
     );
 
     // For the sanity of the reader, make sure these properties are in the same
@@ -1132,8 +1177,8 @@ void main() {
     // DEPRECATED (newest deprecations at the bottom)
     expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
     expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
-    expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
-    expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
+    expect(themeDataCopy.colorScheme.error, equals(otherTheme.colorScheme.error));
+    expect(themeDataCopy.colorScheme.background, equals(otherTheme.colorScheme.background));
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
   });
 
@@ -1166,11 +1211,11 @@ void main() {
     expect(theme.colorScheme.brightness, equals(Brightness.dark));
     expect(theme.primaryColor, equals(lightColors.primary));
     expect(theme.cardColor, equals(lightColors.surface));
-    expect(theme.backgroundColor, equals(lightColors.background));
+    expect(theme.colorScheme.background, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
     expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
     expect(theme.dialogBackgroundColor, equals(lightColors.background));
-    expect(theme.errorColor, equals(lightColors.error));
+    expect(theme.colorScheme.error, equals(lightColors.error));
     expect(theme.applyElevationOverlayColor, isFalse);
   });
 

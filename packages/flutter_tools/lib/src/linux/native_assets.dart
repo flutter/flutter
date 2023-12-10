@@ -5,7 +5,6 @@
 import 'package:native_assets_cli/native_assets_cli.dart' hide BuildMode;
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;

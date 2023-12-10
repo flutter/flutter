@@ -1068,7 +1068,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.25),
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.25)),
             child: Center(
               child: OutlinedButton(
                 style: const ButtonStyle(
@@ -1096,7 +1096,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 3.0),
+            data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
             child: Center(
               child: OutlinedButton(
                 onPressed: () {},
@@ -1289,7 +1289,7 @@ void main() {
                   builder: (BuildContext context) {
                     return MediaQuery(
                       data: MediaQuery.of(context).copyWith(
-                        textScaleFactor: textScaleFactor,
+                        textScaler: TextScaler.linear(textScaleFactor),
                       ),
                       child: Directionality(
                         textDirection: textDirection,
@@ -1428,7 +1428,7 @@ void main() {
           builder: (BuildContext context) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
-                textScaleFactor: 2,
+                textScaler: const TextScaler.linear(2),
               ),
               child: Scaffold(
                 body: Center(

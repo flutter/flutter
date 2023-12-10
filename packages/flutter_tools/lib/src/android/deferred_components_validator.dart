@@ -4,7 +4,6 @@
 
 import '../base/common.dart';
 import '../base/deferred_component.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';

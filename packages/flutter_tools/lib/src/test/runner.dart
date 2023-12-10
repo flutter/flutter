@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../artifacts.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
 import '../globals.dart' as globals;

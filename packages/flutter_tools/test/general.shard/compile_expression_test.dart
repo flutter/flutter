@@ -17,7 +17,6 @@ import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {

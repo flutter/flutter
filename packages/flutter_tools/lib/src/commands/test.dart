@@ -7,7 +7,6 @@ import 'package:package_config/package_config_types.dart';
 
 import '../asset.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../devfs.dart';

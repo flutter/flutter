@@ -6,7 +6,6 @@ import 'package:xml/xml.dart';
 
 import '../base/deferred_component.dart';
 import '../base/error_handling_io.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -149,7 +148,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
           final String? name = element.getAttribute('name');
           if (requiredEntriesMap.containsKey(name)) {
             if (element.innerText != requiredEntriesMap[name]) {
-              element.innerText = requiredEntriesMap[name]!;
+              element.innerText = requiredEntriesMap[name];
               modified = true;
             }
             requiredEntriesMap.remove(name);

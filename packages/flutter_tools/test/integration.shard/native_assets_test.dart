@@ -23,7 +23,7 @@ import '../src/common.dart';
 import 'test_utils.dart' show fileSystem, platform;
 import 'transition_test_utils.dart';
 
-final String hostOs = platform.operatingSystem;
+const String hostOs = platform.operatingSystem;
 
 final List<String> devices = <String>[
   'flutter-tester',

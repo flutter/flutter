@@ -7,7 +7,6 @@ import 'package:pool/pool.dart';
 
 import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';

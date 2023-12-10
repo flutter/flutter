@@ -1405,9 +1405,9 @@ testWidgetsWithLeakTracking('Stepper custom indexed controls test', (WidgetTeste
         home: Material(
           child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            bodyLargeStyle = Theme.of(context).textTheme.bodyText1!;
-            bodyMediumStyle = Theme.of(context).textTheme.bodyText2!;
-            bodySmallStyle = Theme.of(context).textTheme.caption!;
+            bodyLargeStyle = Theme.of(context).textTheme.bodyLarge!;
+            bodyMediumStyle = Theme.of(context).textTheme.bodyMedium!;
+            bodySmallStyle = Theme.of(context).textTheme.bodySmall!;
             return Stepper(
               type: StepperType.horizontal,
               currentStep: index,

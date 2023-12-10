@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:native_stack_traces/native_stack_traces.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../convert.dart';
 import '../runner/flutter_command.dart';

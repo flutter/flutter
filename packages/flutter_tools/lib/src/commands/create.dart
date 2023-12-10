@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';

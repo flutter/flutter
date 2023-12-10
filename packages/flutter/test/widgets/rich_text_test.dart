@@ -179,8 +179,7 @@ void main() {
       textDirection: TextDirection.rtl,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
-      textScaleFactor: 1.3,
-      maxLines: 1,
+      maxLines: 1, textScaler: const TextScaler.linear(1.3),
       locale: const Locale('zh', 'HK'),
       strutStyle: const StrutStyle(
         fontSize: 16,

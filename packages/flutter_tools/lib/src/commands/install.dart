@@ -5,7 +5,6 @@
 import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../device.dart';
 import '../globals.dart' as globals;

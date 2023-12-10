@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../base/error_handling_io.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 
 /// A service for creating and parsing [Depfile]s.

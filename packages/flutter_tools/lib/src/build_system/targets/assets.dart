@@ -5,7 +5,6 @@
 import 'package:pool/pool.dart';
 
 import '../../asset.dart';
-import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';

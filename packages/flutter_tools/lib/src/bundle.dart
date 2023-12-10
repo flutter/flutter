@@ -6,7 +6,6 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 
 import 'base/config.dart';
-import 'base/file_system.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;

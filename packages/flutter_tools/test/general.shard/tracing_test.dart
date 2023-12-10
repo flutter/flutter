@@ -90,19 +90,19 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameBuiltEventName,
               'ts': 2,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameRasterizedEventName,
               'ts': 3,
-            })!,
+            }),
           ],
         ).toJson(),
       ),
@@ -250,11 +250,11 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            })!,
+            }),
           ],
         ).toJson(),
       ),
@@ -285,11 +285,11 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            })!,
+            }),
           ],
         ).toJson(),
       ),
@@ -330,19 +330,19 @@ void main() {
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFlutterEngineMainEnterEventName,
               'ts': 0,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFrameworkInitEventName,
               'ts': 1,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameBuiltEventName,
               'ts': 2,
-            })!,
+            }),
             vm_service.TimelineEvent.parse(<String, Object>{
               'name': kFirstFrameRasterizedEventName,
               'ts': 3,
-            })!,
+            }),
           ],
         ).toJson(),
       ),

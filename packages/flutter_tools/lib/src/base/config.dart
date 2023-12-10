@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 
 import '../convert.dart';
 import 'error_handling_io.dart';
-import 'file_system.dart';
 import 'logger.dart';
 import 'platform.dart';
 import 'utils.dart';

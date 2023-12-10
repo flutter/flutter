@@ -7,7 +7,6 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/deferred_component.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';

@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';

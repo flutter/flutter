@@ -1374,7 +1374,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaleFactor: 2.0),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2.0)),
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -1448,7 +1448,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(textScaleFactor: 2.0),
+          data: const MediaQueryData(textScaler: TextScaler.linear(2.0)),
           child: Scaffold(
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -1476,7 +1476,7 @@ void main() {
 
     Widget buildApp({ required double textScaleFactor }) {
       return MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
         child: Localizations(
           locale: const Locale('en', 'US'),
           delegates: const <LocalizationsDelegate<dynamic>>[

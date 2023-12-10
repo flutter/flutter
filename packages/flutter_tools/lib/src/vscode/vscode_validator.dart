@@ -4,7 +4,6 @@
 
 import 'package:process/process.dart';
 
-import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart';
 import '../doctor_validator.dart';

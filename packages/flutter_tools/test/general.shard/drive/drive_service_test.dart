@@ -456,7 +456,7 @@ FlutterDriverService setUpDriverService({
       if (httpUri.path.endsWith('/ws')) {
         fail('Expected HTTP uri to not contain `/ws`, found $httpUri');
       }
-      return vmService!;
+      return vmService;
     }
   );
 }

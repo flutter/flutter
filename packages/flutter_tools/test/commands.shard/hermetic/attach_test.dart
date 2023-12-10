@@ -1561,19 +1561,19 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     Duration timeout = const Duration(seconds: 5),
   }) {
     if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
-      return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
+      return Stream<PtrResourceRecord>.fromIterable(ptrRecords);
     }
     if (T == SrvResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<SrvResourceRecord>.fromIterable(srvResponse[key] ?? <SrvResourceRecord>[]) as Stream<T>;
+      return Stream<SrvResourceRecord>.fromIterable(srvResponse[key] ?? <SrvResourceRecord>[]);
     }
     if (T == TxtResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[]) as Stream<T>;
+      return Stream<TxtResourceRecord>.fromIterable(txtResponse[key] ?? <TxtResourceRecord>[]);
     }
     if (T == IPAddressResourceRecord) {
       final String key = query.fullyQualifiedName;
-      return Stream<IPAddressResourceRecord>.fromIterable(ipResponse[key] ?? <IPAddressResourceRecord>[]) as Stream<T>;
+      return Stream<IPAddressResourceRecord>.fromIterable(ipResponse[key] ?? <IPAddressResourceRecord>[]);
     }
     throw UnsupportedError('Unsupported query type $T');
   }

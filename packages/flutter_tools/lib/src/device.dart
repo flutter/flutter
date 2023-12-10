@@ -10,7 +10,6 @@ import 'package:meta/meta.dart';
 import 'application_package.dart';
 import 'base/context.dart';
 import 'base/dds.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';

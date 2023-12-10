@@ -213,28 +213,28 @@ void main() {
           'id': 'isolates/1',
           'name': 'file://thingThatWillNotMatch:main()',
           'number': '1',
-        })!,
+        }),
         vms.IsolateRef.parse(<String, dynamic>{
           'type': '@Isolate',
           'fixedId': 'true',
           'id': 'isolates/2',
           'name': '0:dart_name_pattern()',
           'number': '2',
-        })!,
+        }),
         vms.IsolateRef.parse(<String, dynamic>{
           'type': '@Isolate',
           'fixedId': 'true',
           'id': 'isolates/3',
           'name': 'flutterBinary.cm',
           'number': '3',
-        })!,
+        }),
         vms.IsolateRef.parse(<String, dynamic>{
           'type': '@Isolate',
           'fixedId': 'true',
           'id': 'isolates/4',
           'name': '0:some_other_dart_name_pattern()',
           'number': '4',
-        })!,
+        }),
       ];
 
       Future<vms.VmService> fakeVmConnectionFunction(

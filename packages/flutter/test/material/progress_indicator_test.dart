@@ -1172,7 +1172,7 @@ void main() {
   testWidgetsWithLeakTracking('default size of CircularProgressIndicator is 36x36 - M3', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: theme.copyWith(useMaterial3: true),
+        theme: theme.copyWith(),
         home: const Scaffold(
           body: Material(
             child: CircularProgressIndicator(),

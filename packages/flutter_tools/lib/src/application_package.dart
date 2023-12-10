@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'base/context.dart';
-import 'base/file_system.dart';
 import 'build_info.dart';
 
 abstract class ApplicationPackageFactory {

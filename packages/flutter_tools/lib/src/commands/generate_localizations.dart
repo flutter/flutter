@@ -6,7 +6,6 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';

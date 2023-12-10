@@ -229,9 +229,9 @@ class TestContext extends Context {
     Map<String, String> environment, {
     required this.fileSystem,
     required List<FakeCommand> commands,
-    File? scriptOutputStreamFile,
+    File? super.scriptOutputStreamFile,
   })  : processManager = FakeProcessManager.list(commands),
-        super(arguments: arguments, environment: environment, scriptOutputStreamFile: scriptOutputStreamFile);
+        super(arguments: arguments, environment: environment);
 
   final FileSystem fileSystem;
   final FakeProcessManager processManager;

@@ -400,7 +400,7 @@ Future<void> _buildValueIndicatorStaticSlider(
           builder: (BuildContext context) {
             return Center(
               child: MediaQuery(
-                data: MediaQueryData(textScaleFactor: textScale),
+                data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
                 child: SliderTheme(
                   data: Theme.of(context).sliderTheme.copyWith(
                     showValueIndicator: ShowValueIndicator.always,

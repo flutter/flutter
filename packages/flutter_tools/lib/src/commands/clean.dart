@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 
 import '../../src/macos/xcode.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;

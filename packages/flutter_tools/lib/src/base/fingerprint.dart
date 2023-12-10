@@ -6,7 +6,6 @@ import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
 
 import '../convert.dart' show json;
-import 'file_system.dart';
 import 'logger.dart';
 import 'utils.dart';
 

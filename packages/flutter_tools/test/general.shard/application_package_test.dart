@@ -144,10 +144,10 @@ void main() {
         )
       );
 
-      final ApplicationPackage applicationPackage = (await ApplicationPackageFactory.instance!.getPackageForPlatform(
+      final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
         applicationBinary: apkFile,
-      ))!;
+      );
       expect(applicationPackage.name, 'app-debug.apk');
       expect(applicationPackage, isA<PrebuiltApplicationPackage>());
       expect((applicationPackage as PrebuiltApplicationPackage).applicationPackage.path, apkFile.path);
@@ -206,7 +206,7 @@ void main() {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(
         _aaptDataWithExplicitEnabledAndMainLauncherActivity,
         BufferLogger.test(),
-      )!;
+      );
 
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -217,7 +217,7 @@ void main() {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(
         _aaptDataWithDefaultEnabledAndMainLauncherActivity,
         BufferLogger.test(),
-      )!;
+      );
 
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -228,7 +228,7 @@ void main() {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(
         _aaptDataWithDistNamespace,
         BufferLogger.test(),
-      )!;
+      );
 
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -281,7 +281,7 @@ void main() {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(
         _aaptDataWithLauncherAndDefaultActivity,
         BufferLogger.test(),
-      )!;
+      );
 
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');

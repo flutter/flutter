@@ -213,7 +213,7 @@ void main() {
     expect(result.stdout.toString(), isNot(contains('Deferred components prebuild validation passed.')));
     expect(result.stdout.toString(), isNot(contains('Deferred components gen_snapshot validation passed.')));
 
-    final String pathSeparator = fileSystem.path.separator;
+    const String pathSeparator = fileSystem.path.separator;
     expect(result.stdout.toString(), contains('build${pathSeparator}android_deferred_components_setup_files${pathSeparator}component1${pathSeparator}build.gradle'));
     expect(result.stdout.toString(), contains('build${pathSeparator}android_deferred_components_setup_files${pathSeparator}component1${pathSeparator}src${pathSeparator}main${pathSeparator}AndroidManifest.xml'));
   });

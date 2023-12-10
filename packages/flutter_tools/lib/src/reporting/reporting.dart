@@ -12,7 +12,6 @@ import 'package:package_config/package_config.dart';
 import 'package:usage/usage_io.dart';
 
 import '../base/error_handling_io.dart';
-import '../base/file_system.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../dart/language_version.dart';

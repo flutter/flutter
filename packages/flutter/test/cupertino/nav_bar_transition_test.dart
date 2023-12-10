@@ -27,7 +27,7 @@ Future<void> startTransitionBetween(
       theme: theme,
       builder: (BuildContext context, Widget? navigator) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
           child: Directionality(
             textDirection: textDirection,
             child: navigator!,

@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';

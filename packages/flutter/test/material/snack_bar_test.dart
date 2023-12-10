@@ -531,7 +531,6 @@ void main() {
       canvasColor: Colors.black,
       shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
-      bottomAppBarColor: Colors.black,
       cardColor: Colors.black,
       dividerColor: Colors.black,
       focusColor: Colors.black,
@@ -544,12 +543,9 @@ void main() {
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       secondaryHeaderColor: Colors.black,
-      backgroundColor: Colors.black,
       dialogBackgroundColor: Colors.black,
       indicatorColor: Colors.black,
       hintColor: Colors.black,
-      errorColor: Colors.black,
-      toggleableActiveColor: Colors.black,
       textTheme: ThemeData.dark().textTheme,
       primaryTextTheme: ThemeData.dark().textTheme,
       inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
@@ -567,7 +563,6 @@ void main() {
       appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
       scrollbarTheme: const ScrollbarThemeData(radius: Radius.circular(10.0)),
       bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
-      colorScheme: const ColorScheme.light(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(backgroundColor: Colors.black),
       navigationRailTheme: const NavigationRailThemeData(backgroundColor: Colors.black),
@@ -582,12 +577,35 @@ void main() {
       textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: Colors.red)),
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
       outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(foregroundColor: Colors.blue)),
-      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black),
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.black), colorScheme: const ColorScheme.light().copyWith(background: Colors.black).copyWith(error: Colors.black),
       dataTableTheme: const DataTableThemeData(),
       checkboxTheme: const CheckboxThemeData(),
       radioTheme: const RadioThemeData(),
       switchTheme: const SwitchThemeData(),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(), checkboxTheme: const CheckboxThemeData().copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ ), radioTheme: const RadioThemeData().copyWith(
+ fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ ), switchTheme: const SwitchThemeData().copyWith(
+ thumbColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ trackColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+ if (states.contains(MaterialState.disabled)) { return null; }
+ if (states.contains(MaterialState.selected)) { return Colors.black; }
+ return null;
+ }),
+ ), bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
     );
 
     ThemeData? themeBeforeSnackBar;

@@ -6,7 +6,6 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:yaml/yaml.dart';
 
-import 'common.dart';
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({
@@ -20,7 +19,7 @@ void validatePubspecForPlugin({
 }) {
   assert(pluginClass != null || ffiPlugin);
   final FlutterManifest manifest =
-      FlutterManifest.createFromPath('$projectDir/pubspec.yaml', fileSystem: globals.fs, logger: globals.logger)!;
+      FlutterManifest.createFromPath('$projectDir/pubspec.yaml', fileSystem: globals.fs, logger: globals.logger);
   final YamlMap platformMaps = YamlMap.wrap(manifest.supportedPlatforms!);
   for (final String platform in expectedPlatforms) {
     expect(platformMaps[platform], isNotNull);

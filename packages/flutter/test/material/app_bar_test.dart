@@ -2901,7 +2901,6 @@ void main() {
       MaterialApp(
         key: GlobalKey(),
         theme: ThemeData.light().copyWith(
-          useMaterial3: false,
           appBarTheme: const AppBarTheme(),
         ),
         home: Scaffold(
@@ -2920,7 +2919,6 @@ void main() {
       MaterialApp(
         key: GlobalKey(),
         theme: ThemeData.light().copyWith(
-          useMaterial3: true,
           appBarTheme: const AppBarTheme(),
         ),
         home: Scaffold(
@@ -3121,7 +3119,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+              data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
               child: Scaffold(
                 appBar: AppBar(
                   centerTitle: false,
@@ -3168,7 +3166,7 @@ void main() {
                     appBar: AppBar(
                       centerTitle: centerTitle,
                       title: MediaQuery(
-                        data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
                         child: const Text('Jumbo'),
                       ),
                     ),
@@ -5172,7 +5170,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[
@@ -5213,7 +5211,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[
@@ -5251,7 +5249,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[
@@ -5292,7 +5290,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: MediaQuery(
-          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
           child: Material(
             child: CustomScrollView(
               slivers: <Widget>[

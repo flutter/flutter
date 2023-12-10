@@ -10,7 +10,6 @@ import 'package:package_config/package_config.dart';
 import 'android/java.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';

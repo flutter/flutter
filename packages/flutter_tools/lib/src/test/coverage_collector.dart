@@ -5,7 +5,6 @@
 import 'package:coverage/coverage.dart' as coverage;
 import 'package:meta/meta.dart';
 
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../globals.dart' as globals;

@@ -4,7 +4,6 @@
 
 import 'package:package_config/package_config.dart';
 
-import 'base/file_system.dart';
 
 /// Processes dependencies into a string representing the NOTICES file.
 ///

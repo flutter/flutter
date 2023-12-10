@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:test/fake.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {

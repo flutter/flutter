@@ -8,7 +8,6 @@ import 'package:package_config/package_config_types.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/template.dart';
 import 'cache.dart';

@@ -2293,7 +2293,7 @@ void main() {
                   setState(() {
                     item = newItem;
                     mediaQuery = mediaQuery.copyWith(
-                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
+                      textScaler: TextScaler.linear(mediaQuery.textScaleFactor + 0.1),
                     );
                   });
                 },

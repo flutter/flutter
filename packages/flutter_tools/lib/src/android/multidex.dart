@@ -4,7 +4,6 @@
 
 import 'package:xml/xml.dart';
 
-import '../base/file_system.dart';
 
 // These utility methods are used to generate the code for multidex support as
 // well as verifying the project is properly set up.

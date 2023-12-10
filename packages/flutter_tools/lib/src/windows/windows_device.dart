@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:process/process.dart';
 
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';

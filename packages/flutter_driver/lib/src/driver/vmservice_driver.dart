@@ -113,13 +113,13 @@ class VMServiceFlutterDriver extends FlutterDriver {
       }
     }
 
-    final vms.IsolateRef isolateRef = (await _warnIfSlow<vms.IsolateRef?>(
+    final vms.IsolateRef isolateRef = await _warnIfSlow<vms.IsolateRef?>(
       future: waitForRootIsolate(),
       timeout: kUnusuallyLongTimeout,
       message: isolateNumber == null
         ? 'The root isolate is taking an unusually long time to start.'
         : 'Isolate $isolateNumber is taking an unusually long time to start.',
-    ))!;
+    );
     _log('Isolate found with number: ${isolateRef.number}');
     final vms.Isolate isolate = await _warnIfSlow<vms.Isolate>(
       future: waitForIsolateToBeRunnable(isolateRef),
@@ -323,7 +323,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
         _flutterExtensionMethodName,
         isolateId: _appIsolate.id,
         args: serialized,
-      ).then<Map<String, dynamic>>((vms.Response value) => value.json!);
+      ).then<Map<String, dynamic>>((vms.Response value) => value.json);
       response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
         timeout: command.timeout ?? kUnusuallyLongTimeout,

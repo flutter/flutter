@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../base/version.dart';
 import '../../project.dart';

@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
-import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';

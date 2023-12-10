@@ -10,7 +10,6 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 
 import 'base/context.dart';
 import 'base/deferred_component.dart';
-import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'build_info.dart';

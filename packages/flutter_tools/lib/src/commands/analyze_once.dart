@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../dart/analysis.dart';
 import 'analyze_base.dart';

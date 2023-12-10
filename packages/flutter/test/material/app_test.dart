@@ -1345,7 +1345,7 @@ void main() {
   testWidgetsWithLeakTracking('Overscroll indicator can be set by theme', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       // The current default is M3 and stretch overscroll, setting via the theme should override.
-      theme: ThemeData().copyWith(useMaterial3: false),
+      theme: ThemeData().copyWith(),
       home: ListView(
         children: const <Widget>[
           SizedBox(
