@@ -208,9 +208,9 @@ WidgetTesterCallback _wrapWithLeakTracking(
   final LeakTesting settings = leakTesting ?? LeakTesting.settings;
 
   Future<void> wrappedCallBack(WidgetTester tester) async {
-    mayBeSetupLeakTrackingForTest(settings, description);
+    maybeSetupLeakTrackingForTest(settings, description);
     await callback(tester);
-    ignoreAllLeaks();
+    maybeTearDownLeakTrackingForTest();
   }
   return wrappedCallBack;
 }

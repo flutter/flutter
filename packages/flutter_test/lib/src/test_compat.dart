@@ -275,7 +275,7 @@ void _configureTearDownForTestFile() {
 
 /// Tear down that should happen after all user defined tear down.
 Future<void> _tearDownForTestFile() async {
-  await maybeTearDownLeakTracking();
+  await maybeTearDownLeakTrackingForAll();
 }
 
 /// A reporter that prints each test on its own line.
