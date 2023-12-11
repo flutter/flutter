@@ -21,20 +21,26 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
+late EngineFlutterView view;
+DomElement get rootElement => view.dom.rootElement;
+
 void testMain() {
-  ensureFlutterViewEmbedderInitialized();
-  final DomElement rootElement =
-      EnginePlatformDispatcher.instance.implicitView!.dom.rootElement;
+  final DomElement hostElement = createDomHTMLDivElement();
+
+  setUpAll(() {
+    domDocument.body!.append(hostElement);
+    // Remove <body> margins to avoid messing up with all the test coordinates.
+    domDocument.body!.style.margin = '0';
+  });
+  tearDownAll(() {
+    hostElement.remove();
+  });
+
+  late List<ui.KeyData> keyDataList;
+  late KeyboardConverter keyboardConverter;
+  late PointerBinding instance;
   late double dpi;
 
-  setUp(() {
-    ui.PlatformDispatcher.instance.onPointerDataPacket = null;
-    dpi = EngineFlutterDisplay.instance.devicePixelRatio;
-  });
-
-  tearDown(() {
-    PointerBinding.instance?.debugReset();
-  });
 
   KeyboardConverter createKeyboardConverter(List<ui.KeyData> keyDataList) {
     return KeyboardConverter((ui.KeyData key) {
@@ -43,19 +49,37 @@ void testMain() {
     }, OperatingSystem.linux);
   }
 
+  setUp(() {
+    keyDataList = <ui.KeyData>[];
+    keyboardConverter = createKeyboardConverter(keyDataList);
+
+    view = EngineFlutterView(EnginePlatformDispatcher.instance, hostElement);
+    instance = view.pointerBinding;
+    instance.debugOverrideKeyboardConverter(keyboardConverter);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    dpi = EngineFlutterDisplay.instance.devicePixelRatio;
+  });
+
+  tearDown(() {
+    keyboardConverter.dispose();
+    view.dispose();
+    PointerBinding.debugResetGlobalState();
+  });
+
   test('ios workaround', () {
     debugEmulateIosSafari = true;
     addTearDown(() {
       debugEmulateIosSafari = false;
     });
 
-    final MockSafariPointerEventWorkaround mockSafariPointer =
+    final MockSafariPointerEventWorkaround mockSafariWorkaround =
         MockSafariPointerEventWorkaround();
-    SafariPointerEventWorkaround.instance = mockSafariPointer;
-    final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-    final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-    final PointerBinding instance = PointerBinding(createDomHTMLDivElement(), keyboardConverter);
-    expect(mockSafariPointer.workAroundInvoked, isIosSafari);
+    final PointerBinding instance = PointerBinding(
+      view,
+      safariWorkaround: mockSafariWorkaround,
+    );
+    expect(mockSafariWorkaround.workAroundInvoked, isIosSafari);
     instance.dispose();
   }, skip: !isSafari);
 
@@ -328,10 +352,6 @@ void testMain() {
         final int physicalRight = kWebToPhysicalKey['${key}Right']!;
         final int logicalLeft = kWebLogicalLocationMap[key]![kLocationLeft]!;
 
-        final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-        final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-        PointerBinding.instance!.debugOverrideKeyboardConverter(keyboardConverter);
-
         expect(keyboardConverter.keyIsPressed(physicalLeft), false);
         expect(keyboardConverter.keyIsPressed(physicalRight), false);
         rootElement.dispatchEvent(context.primaryDown());
@@ -344,6 +364,8 @@ void testMain() {
           character: null,
           synthesized: true,
         );
+        keyDataList.clear();
+        keyboardConverter.clearPressedKeys();
       }
 
       context.altPressed = true;
@@ -373,10 +395,6 @@ void testMain() {
         final int physicalLeft = kWebToPhysicalKey['${key}Left']!;
         final int physicalRight = kWebToPhysicalKey['${key}Right']!;
 
-        final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-        final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-        PointerBinding.instance!.debugOverrideKeyboardConverter(keyboardConverter);
-
         keyboardConverter.handleEvent(keyDownEvent('${key}Left', key, modifiers, kLocationLeft));
         expect(keyboardConverter.keyIsPressed(physicalLeft), true);
         expect(keyboardConverter.keyIsPressed(physicalRight), false);
@@ -384,6 +402,7 @@ void testMain() {
 
         rootElement.dispatchEvent(context.primaryDown());
         expect(keyDataList.length, 0);
+        keyboardConverter.clearPressedKeys();
       }
 
       // Should not synthesize a modifier down event when DOM event indicates
@@ -393,10 +412,6 @@ void testMain() {
         final int physicalLeft = kWebToPhysicalKey['${key}Left']!;
         final int physicalRight = kWebToPhysicalKey['${key}Right']!;
 
-        final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-        final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-        PointerBinding.instance!.debugOverrideKeyboardConverter(keyboardConverter);
-
         keyboardConverter.handleEvent(keyDownEvent('${key}Right', key, modifiers, kLocationRight));
         expect(keyboardConverter.keyIsPressed(physicalLeft), false);
         expect(keyboardConverter.keyIsPressed(physicalRight), true);
@@ -404,6 +419,7 @@ void testMain() {
 
         rootElement.dispatchEvent(context.primaryDown());
         expect(keyDataList.length, 0);
+        keyboardConverter.clearPressedKeys();
       }
 
       context.altPressed = true;
@@ -438,10 +454,6 @@ void testMain() {
         final int physicalRight = kWebToPhysicalKey['${key}Right']!;
         final int logicalLeft = kWebLogicalLocationMap[key]![kLocationLeft]!;
 
-        final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-        final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-        PointerBinding.instance!.debugOverrideKeyboardConverter(keyboardConverter);
-
         keyboardConverter.handleEvent(keyDownEvent('${key}Left', key, modifiers, kLocationLeft));
         expect(keyboardConverter.keyIsPressed(physicalLeft), true);
         expect(keyboardConverter.keyIsPressed(physicalRight), false);
@@ -458,6 +470,7 @@ void testMain() {
           synthesized: true,
         );
         expect(keyboardConverter.keyIsPressed(physicalLeft), false);
+        keyboardConverter.clearPressedKeys();
       }
 
       // Should synthesize a modifier right key up event when DOM event indicates
@@ -467,10 +480,6 @@ void testMain() {
         final int physicalLeft = kWebToPhysicalKey['${key}Left']!;
         final int physicalRight = kWebToPhysicalKey['${key}Right']!;
         final int logicalRight = kWebLogicalLocationMap[key]![kLocationRight]!;
-
-        final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-        final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-        PointerBinding.instance!.debugOverrideKeyboardConverter(keyboardConverter);
 
         keyboardConverter.handleEvent(keyDownEvent('${key}Right', key, modifiers, kLocationRight));
         expect(keyboardConverter.keyIsPressed(physicalLeft), false);
@@ -488,6 +497,7 @@ void testMain() {
           synthesized: true,
         );
         expect(keyboardConverter.keyIsPressed(physicalRight), false);
+        keyboardConverter.clearPressedKeys();
       }
 
       context.altPressed = false;
@@ -517,16 +527,13 @@ void testMain() {
         final int physicalLeft = kWebToPhysicalKey['${key}Left']!;
         final int physicalRight = kWebToPhysicalKey['${key}Right']!;
 
-        final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-        final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-        PointerBinding.instance!.debugOverrideKeyboardConverter(keyboardConverter);
-
         expect(keyboardConverter.keyIsPressed(physicalLeft), false);
         expect(keyboardConverter.keyIsPressed(physicalRight), false);
         keyDataList.clear(); // Remove key data generated by handleEvent
 
         rootElement.dispatchEvent(context.primaryDown());
         expect(keyDataList.length, 0);
+        keyboardConverter.clearPressedKeys();
       }
 
       context.altPressed = false;
@@ -544,10 +551,6 @@ void testMain() {
     'should synthesize modifier keys up event for AltGraph',
     () {
       final _BasicEventContext context = _PointerEventContext();
-
-      final List<ui.KeyData> keyDataList = <ui.KeyData>[];
-      final KeyboardConverter keyboardConverter = createKeyboardConverter(keyDataList);
-      PointerBinding.instance!.debugOverrideKeyboardConverter(keyboardConverter);
 
       final int physicalAltRight = kWebToPhysicalKey['AltRight']!;
       final int logicalAltGraph = kWebLogicalLocationMap['AltGraph']![0]!;
@@ -568,6 +571,7 @@ void testMain() {
         synthesized: true,
       );
       expect(keyboardConverter.keyIsPressed(physicalAltRight), false);
+      keyDataList.clear();
     },
   );
 
@@ -1151,6 +1155,8 @@ void testMain() {
         packets.add(packet);
       };
 
+      debugOperatingSystemOverride = OperatingSystem.macOs;
+
       rootElement.dispatchEvent(context.wheel(
         buttons: 0,
         clientX: 10,
@@ -1168,8 +1174,7 @@ void testMain() {
         ctrlKey: true,
       ));
 
-      debugOperatingSystemOverride = OperatingSystem.macOs;
-      KeyboardBinding.instance?.converter.handleEvent(keyDownEvent('ControlLeft', 'Control', kCtrl));
+      keyboardConverter.handleEvent(keyDownEvent('ControlLeft', 'Control', kCtrl));
 
       rootElement.dispatchEvent(context.wheel(
         buttons: 0,
@@ -1180,7 +1185,7 @@ void testMain() {
         ctrlKey: true,
       ));
 
-      KeyboardBinding.instance?.converter.handleEvent(keyUpEvent('ControlLeft', 'Control', kCtrl));
+      keyboardConverter.handleEvent(keyUpEvent('ControlLeft', 'Control', kCtrl));
 
       expect(packets, hasLength(3));
 
@@ -2638,17 +2643,13 @@ void testMain() {
 
   test('throws if browser does not support pointer events', () {
     expect(
-      () => PointerBinding(
-        createDomHTMLDivElement(),
-        createKeyboardConverter(<ui.KeyData>[]),
-        MockPointerSupportDetector(false),
-      ),
+      () => PointerBinding(view, detector: MockPointerSupportDetector(false)),
       throwsUnsupportedError,
     );
   });
 
   group('ClickDebouncer', () {
-    _testClickDebouncer();
+    _testClickDebouncer(getBinding: () => instance);
   });
 }
 
@@ -2657,7 +2658,7 @@ typedef CapturedSemanticsEvent = ({
   int nodeId,
 });
 
-void _testClickDebouncer() {
+void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   final DateTime testTime = DateTime(2018, 12, 17);
   late List<ui.PointerChange> pointerPackets;
   late List<CapturedSemanticsEvent> semanticsActions;
@@ -2692,39 +2693,34 @@ void _testClickDebouncer() {
     EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
       semanticsActions.add((type: event.type, nodeId: event.nodeId));
     };
-    binding = PointerBinding.instance!;
-    binding.clickDebouncer.reset();
-  });
-
-  tearDown(() {
-    binding.clickDebouncer.reset();
+    binding = getBinding();
   });
 
   test('Forwards to framework when semantics is off', () {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, false);
-    expect(binding.clickDebouncer.isDebouncing, false);
-    binding.flutterViewElement.dispatchEvent(context.primaryDown());
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+    binding.rootElement.dispatchEvent(context.primaryDown());
     expect(pointerPackets, <ui.PointerChange>[
       ui.PointerChange.add,
       ui.PointerChange.down,
     ]);
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
     expect(semanticsActions, isEmpty);
   });
 
   testWithSemantics('Forwards to framework when not debouncing', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     // This test DOM element is missing the `flt-tappable` attribute on purpose
     // so that the debouncer does not debounce events and simply lets
     // everything through.
     final DomElement testElement = createDomElement('flt-semantics');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
     testElement.dispatchEvent(context.primaryUp());
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     expect(pointerPackets, <ui.PointerChange>[
       ui.PointerChange.add,
@@ -2736,23 +2732,23 @@ void _testClickDebouncer() {
 
   testWithSemantics('Accumulates pointer events starting from pointerdown', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
     expect(
       reason: 'Should start debouncing at first pointerdown',
-      binding.clickDebouncer.isDebouncing,
+      PointerBinding.clickDebouncer.isDebouncing,
       true,
     );
 
     testElement.dispatchEvent(context.primaryUp());
     expect(
       reason: 'Should still be debouncing after pointerup',
-      binding.clickDebouncer.isDebouncing,
+      PointerBinding.clickDebouncer.isDebouncing,
       true,
     );
 
@@ -2762,22 +2758,22 @@ void _testClickDebouncer() {
       <ui.PointerChange>[],
     );
     expect(
-      binding.clickDebouncer.debugState!.target,
+      PointerBinding.clickDebouncer.debugState!.target,
       testElement,
     );
     expect(
-      binding.clickDebouncer.debugState!.timer.isActive,
+      PointerBinding.clickDebouncer.debugState!.timer.isActive,
       isTrue,
     );
     expect(
-      binding.clickDebouncer.debugState!.queue.map<String>((QueuedEvent e) => e.event.type),
+      PointerBinding.clickDebouncer.debugState!.queue.map<String>((QueuedEvent e) => e.event.type),
       <String>['pointerdown', 'pointerup'],
     );
 
     await Future<void>.delayed(const Duration(milliseconds: 250));
     expect(
       reason: 'Should stop debouncing after timer expires.',
-      binding.clickDebouncer.isDebouncing,
+      PointerBinding.clickDebouncer.isDebouncing,
       false,
     );
     expect(
@@ -2794,32 +2790,32 @@ void _testClickDebouncer() {
 
   testWithSemantics('Flushes events to framework when target changes', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
     expect(
       reason: 'Should start debouncing at first pointerdown',
-      binding.clickDebouncer.isDebouncing,
+      PointerBinding.clickDebouncer.isDebouncing,
       true,
     );
 
     final DomElement newTarget = createDomElement('flt-semantics');
     newTarget.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(newTarget);
+    view.dom.semanticsHost.appendChild(newTarget);
     newTarget.dispatchEvent(context.primaryUp());
 
     expect(
       reason: 'Should stop debouncing when target changes.',
-      binding.clickDebouncer.isDebouncing,
+      PointerBinding.clickDebouncer.isDebouncing,
       false,
     );
     expect(
       reason: 'The state should be cleaned up after stopping debouncing.',
-      binding.clickDebouncer.debugState,
+      PointerBinding.clickDebouncer.debugState,
       isNull,
     );
     expect(
@@ -2835,11 +2831,11 @@ void _testClickDebouncer() {
   });
 
   testWithSemantics('Forwards click to framework when not debouncing but listening', () async {
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
 
     final DomEvent click = createDomMouseEvent(
       'click',
@@ -2849,8 +2845,8 @@ void _testClickDebouncer() {
       }
     );
 
-    binding.clickDebouncer.onClick(click, 42, true);
-    expect(binding.clickDebouncer.isDebouncing, false);
+    PointerBinding.clickDebouncer.onClick(click, 42, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[
       (type: ui.SemanticsAction.tap, nodeId: 42)
@@ -2858,13 +2854,13 @@ void _testClickDebouncer() {
   });
 
   testWithSemantics('Forwards click to framework when debouncing and listening', () async {
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
     testElement.dispatchEvent(context.primaryDown());
-    expect(binding.clickDebouncer.isDebouncing, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     final DomEvent click = createDomMouseEvent(
       'click',
@@ -2874,7 +2870,7 @@ void _testClickDebouncer() {
       }
     );
 
-    binding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, 42, true);
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[
       (type: ui.SemanticsAction.tap, nodeId: 42)
@@ -2882,13 +2878,13 @@ void _testClickDebouncer() {
   });
 
   testWithSemantics('Dedupes click if debouncing but not listening', () async {
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
     testElement.dispatchEvent(context.primaryDown());
-    expect(binding.clickDebouncer.isDebouncing, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     final DomEvent click = createDomMouseEvent(
       'click',
@@ -2898,7 +2894,7 @@ void _testClickDebouncer() {
       }
     );
 
-    binding.clickDebouncer.onClick(click, 42, false);
+    PointerBinding.clickDebouncer.onClick(click, 42, false);
     expect(
       reason: 'When tappable declares that it is not listening to click events '
               'the debouncer flushes the pointer events to the framework and '
@@ -2914,11 +2910,11 @@ void _testClickDebouncer() {
 
   testWithSemantics('Dedupes click if pointer down/up flushed recently', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
 
@@ -2930,7 +2926,7 @@ void _testClickDebouncer() {
     await Future<void>.delayed(const Duration(milliseconds: 190));
 
     testElement.dispatchEvent(context.primaryUp());
-    expect(binding.clickDebouncer.isDebouncing, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
     expect(
       reason: 'Timer has not expired yet',
       pointerPackets, isEmpty,
@@ -2957,7 +2953,7 @@ void _testClickDebouncer() {
         'clientY': testElement.getBoundingClientRect().y,
       }
     );
-    binding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, 42, true);
 
     expect(
       reason: 'Because the DOM click event was deduped.',
@@ -2969,11 +2965,11 @@ void _testClickDebouncer() {
 
   testWithSemantics('Forwards click if enough time passed after the last flushed pointerup', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-    expect(binding.clickDebouncer.isDebouncing, false);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
-    EnginePlatformDispatcher.instance.implicitView!.dom.semanticsHost.appendChild(testElement);
+    view.dom.semanticsHost.appendChild(testElement);
 
     testElement.dispatchEvent(context.primaryDown());
 
@@ -2985,7 +2981,7 @@ void _testClickDebouncer() {
     await Future<void>.delayed(const Duration(milliseconds: 190));
 
     testElement.dispatchEvent(context.primaryUp());
-    expect(binding.clickDebouncer.isDebouncing, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
     expect(
       reason: 'Timer has not expired yet',
       pointerPackets, isEmpty,
@@ -3012,7 +3008,7 @@ void _testClickDebouncer() {
         'clientY': testElement.getBoundingClientRect().y,
       }
     );
-    binding.clickDebouncer.onClick(click, 42, true);
+    PointerBinding.clickDebouncer.onClick(click, 42, true);
 
     expect(
       reason: 'The DOM click should still be sent to the framework because it '
@@ -3033,6 +3029,9 @@ class MockSafariPointerEventWorkaround implements SafariPointerEventWorkaround {
   void workAroundMissingPointerEvents() {
     workAroundInvoked = true;
   }
+
+  @override
+  void dispose() {}
 }
 
 abstract class _BasicEventContext {

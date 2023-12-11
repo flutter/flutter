@@ -18,6 +18,7 @@ import 'pointer_binding/event_position_helper.dart';
 import 'pointer_converter.dart';
 import 'safe_browser_api.dart';
 import 'semantics.dart';
+import 'window.dart';
 
 /// Set this flag to true to log all the browser events.
 const bool _debugLogPointerEvents = false;
@@ -73,72 +74,80 @@ int convertButtonToButtons(int button) {
 /// Wrapping the Safari iOS workaround that adds a dummy event listener
 /// More info about the issue and workaround: https://github.com/flutter/flutter/issues/70858
 class SafariPointerEventWorkaround {
-  static SafariPointerEventWorkaround instance = SafariPointerEventWorkaround();
+  SafariPointerEventWorkaround._();
+
+  DomEventListener? _listener;
 
   void workAroundMissingPointerEvents() {
-    domDocument.addEventListener('touchstart', createDomEventListener((DomEvent event) {}));
+    // We only need to attach the listener once.
+    if (_listener == null) {
+      _listener = createDomEventListener((_) {});
+      domDocument.addEventListener('touchstart', _listener);
+    }
+  }
+
+  void dispose() {
+    if (_listener != null) {
+      domDocument.removeEventListener('touchstart', _listener);
+      _listener = null;
+    }
   }
 }
 
 class PointerBinding {
   PointerBinding(
-    this.flutterViewElement,
-    this._keyboardConverter, [
-    this._detector = const PointerSupportDetector(),
-  ]) : _pointerDataConverter = PointerDataConverter() {
+    this.view, {
+    PointerSupportDetector detector = const PointerSupportDetector(),
+    SafariPointerEventWorkaround? safariWorkaround,
+  })  : _pointerDataConverter = PointerDataConverter(),
+        _detector = detector {
     if (isIosSafari) {
-      SafariPointerEventWorkaround.instance.workAroundMissingPointerEvents();
+      _safariWorkaround = safariWorkaround ?? _defaultSafariWorkaround;
+      _safariWorkaround!.workAroundMissingPointerEvents();
     }
     _adapter = _createAdapter();
+    assert(() {
+      registerHotRestartListener(dispose);
+      return true;
+    }());
   }
 
-  /// The singleton instance of this object.
-  static PointerBinding? get instance => _instance;
-  static PointerBinding? _instance;
+  static final SafariPointerEventWorkaround _defaultSafariWorkaround = SafariPointerEventWorkaround._();
+  static final ClickDebouncer clickDebouncer = ClickDebouncer();
 
-  static void initInstance(DomElement flutterViewElement, KeyboardConverter keyboardConverter) {
-    if (_instance == null) {
-      _instance = PointerBinding(flutterViewElement, keyboardConverter);
-      assert(() {
-        registerHotRestartListener(_instance!.dispose);
-        return true;
-      }());
-    }
+  /// Resets global pointer state that's not tied to any single [PointerBinding]
+  /// instance.
+  @visibleForTesting
+  static void debugResetGlobalState() {
+    clickDebouncer.reset();
+    PointerDataConverter.globalPointerState.reset();
   }
 
-  final ClickDebouncer clickDebouncer = ClickDebouncer();
+  SafariPointerEventWorkaround? _safariWorkaround;
 
   /// Performs necessary clean up for PointerBinding including removing event listeners
   /// and clearing the existing pointer state
   void dispose() {
-    _adapter.clearListeners();
-    _pointerDataConverter.clearPointerState();
-    clickDebouncer.reset();
+    _adapter.dispose();
+    _safariWorkaround?.dispose();
   }
 
-  final DomElement flutterViewElement;
+  final EngineFlutterView view;
+  DomElement get rootElement => view.dom.rootElement;
 
   final PointerSupportDetector _detector;
   final PointerDataConverter _pointerDataConverter;
-  KeyboardConverter _keyboardConverter;
+  KeyboardConverter? _keyboardConverter = KeyboardBinding.instance?.converter;
   late _BaseAdapter _adapter;
 
   @visibleForTesting
-  void debugReset() {
-    _adapter.clearListeners();
-    _adapter = _createAdapter();
-    _pointerDataConverter.clearPointerState();
-  }
-
-  @visibleForTesting
-  void debugOverrideKeyboardConverter(KeyboardConverter keyboardConverter) {
+  void debugOverrideKeyboardConverter(KeyboardConverter? keyboardConverter) {
     _keyboardConverter = keyboardConverter;
-    debugReset();
   }
 
   _BaseAdapter _createAdapter() {
     if (_detector.hasPointerEvents) {
-      return _PointerAdapter(clickDebouncer.onPointerData, flutterViewElement, _pointerDataConverter, _keyboardConverter);
+      return _PointerAdapter(this);
     }
     throw UnsupportedError(
       'This browser does not support pointer events which '
@@ -183,6 +192,13 @@ typedef DebounceState = ({
 ///
 /// This mechanism is in place to deal with https://github.com/flutter/flutter/issues/130162.
 class ClickDebouncer {
+  ClickDebouncer() {
+    assert(() {
+      registerHotRestartListener(reset);
+      return true;
+    }());
+  }
+
   DebounceState? _state;
 
   @visibleForTesting
@@ -468,29 +484,30 @@ class _Listener {
 
 /// Common functionality that's shared among adapters.
 abstract class _BaseAdapter {
-  _BaseAdapter(
-    this._callback,
-    this.flutterViewElement,
-    this._pointerDataConverter,
-    this._keyboardConverter,
-  ) {
+  _BaseAdapter(this._owner) {
     setup();
   }
 
+  final PointerBinding _owner;
+
+  EngineFlutterView get _view => _owner.view;
+  _PointerDataCallback get _callback => PointerBinding.clickDebouncer.onPointerData;
+  PointerDataConverter get _pointerDataConverter => _owner._pointerDataConverter;
+  KeyboardConverter? get _keyboardConverter => _owner._keyboardConverter;
+
   final List<_Listener> _listeners = <_Listener>[];
-  final DomElement flutterViewElement;
-  final _PointerDataCallback _callback;
-  final PointerDataConverter _pointerDataConverter;
-  final KeyboardConverter _keyboardConverter;
   DomWheelEvent? _lastWheelEvent;
   bool _lastWheelEventWasTrackpad = false;
+
+  DomEventTarget get _viewTarget => _view.dom.rootElement;
+  DomEventTarget get _globalTarget => _view.embeddingStrategy.globalEventTarget;
 
   /// Each subclass is expected to override this method to attach its own event
   /// listeners and convert events into pointer events.
   void setup();
 
-  /// Remove all active event listeners.
-  void clearListeners() {
+  /// Cleans up all event listeners attached by this adapter.
+  void dispose() {
     for (final _Listener listener in _listeners) {
       listener.unregister();
     }
@@ -499,7 +516,7 @@ abstract class _BaseAdapter {
 
   /// Adds a listener for the given [eventName] to [target].
   ///
-  /// Generally speaking, down and leave events should use [flutterViewElement]
+  /// Generally speaking, down and leave events should use [_rootElement]
   /// as the [target], while move and up events should use [domWindow]
   /// instead, because the browser doesn't fire the latter two for DOM elements
   /// when the pointer is outside the window.
@@ -512,7 +529,7 @@ abstract class _BaseAdapter {
       if (_debugLogPointerEvents) {
         if (domInstanceOfString(event, 'PointerEvent')) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
-          final ui.Offset offset = computeEventOffsetToTarget(event, flutterViewElement);
+          final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print('${pointerEvent.type}    '
               '${offset.dx.toStringAsFixed(1)},'
               '${offset.dy.toStringAsFixed(1)}');
@@ -636,36 +653,37 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         deltaX *= _defaultScrollLineHeight!;
         deltaY *= _defaultScrollLineHeight!;
       case domDeltaPage:
-        deltaX *= ui.window.physicalSize.width;
-        deltaY *= ui.window.physicalSize.height;
+        deltaX *= _view.physicalSize.width;
+        deltaY *= _view.physicalSize.height;
       case domDeltaPixel:
         if (operatingSystem == OperatingSystem.macOs && (isSafari || isFirefox)) {
           // Safari and Firefox seem to report delta in logical pixels while
           // Chrome uses physical pixels.
-          deltaX *= ui.window.devicePixelRatio;
-          deltaY *= ui.window.devicePixelRatio;
+          deltaX *= _view.devicePixelRatio;
+          deltaY *= _view.devicePixelRatio;
         }
       default:
         break;
     }
 
     final List<ui.PointerData> data = <ui.PointerData>[];
-    final ui.Offset offset = computeEventOffsetToTarget(event, flutterViewElement);
+    final ui.Offset offset = computeEventOffsetToTarget(event, _view);
     bool ignoreCtrlKey = false;
     if (operatingSystem == OperatingSystem.macOs) {
-      ignoreCtrlKey = (KeyboardBinding.instance?.converter.keyIsPressed(kPhysicalControlLeft) ?? false) ||
-                      (KeyboardBinding.instance?.converter.keyIsPressed(kPhysicalControlRight) ?? false);
+      ignoreCtrlKey = (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
+                      (_keyboardConverter?.keyIsPressed(kPhysicalControlRight) ?? false);
     }
     if (event.ctrlKey && !ignoreCtrlKey) {
       _pointerDataConverter.convert(
         data,
+        viewId: _view.viewId,
         change: ui.PointerChange.hover,
         timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
         kind: kind,
         signalKind: ui.PointerSignalKind.scale,
         device: deviceId,
-        physicalX: offset.dx * ui.window.devicePixelRatio,
-        physicalY: offset.dy * ui.window.devicePixelRatio,
+        physicalX: offset.dx * _view.devicePixelRatio,
+        physicalY: offset.dy * _view.devicePixelRatio,
         buttons: event.buttons!.toInt(),
         pressure: 1.0,
         pressureMax: 1.0,
@@ -674,13 +692,14 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     } else {
       _pointerDataConverter.convert(
         data,
+        viewId: _view.viewId,
         change: ui.PointerChange.hover,
         timeStamp: _BaseAdapter._eventTimeStampToDuration(event.timeStamp!),
         kind: kind,
         signalKind: ui.PointerSignalKind.scroll,
         device: deviceId,
-        physicalX: offset.dx * ui.window.devicePixelRatio,
-        physicalY: offset.dy * ui.window.devicePixelRatio,
+        physicalX: offset.dx * _view.devicePixelRatio,
+        physicalY: offset.dy * _view.devicePixelRatio,
         buttons: event.buttons!.toInt(),
         pressure: 1.0,
         pressureMax: 1.0,
@@ -696,7 +715,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
   void _addWheelEventListener(DartDomEventListener handler) {
     _listeners.add(_Listener.register(
       event: 'wheel',
-      target: flutterViewElement,
+      target: _viewTarget,
       handler: handler,
       passive: false,
     ));
@@ -884,12 +903,7 @@ typedef _PointerEventListener = dynamic Function(DomPointerEvent event);
 ///
 /// For the difference between MouseEvent and PointerEvent, see _MouseAdapter.
 class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
-  _PointerAdapter(
-    super.callback,
-    super.flutterViewElement,
-    super.pointerDataConverter,
-    super.keyboardConverter,
-  );
+  _PointerAdapter(super.owner);
 
   final Map<int, _ButtonSanitizer> _sanitizers = <int, _ButtonSanitizer>{};
 
@@ -931,7 +945,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   }
 
   void _checkModifiersState(DomPointerEvent event) {
-    _keyboardConverter.synthesizeModifiersIfNeeded(
+    _keyboardConverter?.synthesizeModifiersIfNeeded(
       event.getModifierState('Alt'),
       event.getModifierState('Control'),
       event.getModifierState('Meta'),
@@ -942,7 +956,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   @override
   void setup() {
-    _addPointerEventListener(flutterViewElement, 'pointerdown', (DomPointerEvent event) {
+    _addPointerEventListener(_viewTarget, 'pointerdown', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
@@ -961,7 +975,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     });
 
     // Why `domWindow` you ask? See this fiddle: https://jsfiddle.net/ditman/7towxaqp
-    _addPointerEventListener(domWindow, 'pointermove', (DomPointerEvent event) {
+    _addPointerEventListener(_globalTarget, 'pointermove', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
@@ -977,7 +991,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       _callback(event, pointerData);
     });
 
-    _addPointerEventListener(flutterViewElement, 'pointerleave', (DomPointerEvent event) {
+    _addPointerEventListener(_viewTarget, 'pointerleave', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       final _ButtonSanitizer sanitizer = _ensureSanitizer(device);
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
@@ -989,7 +1003,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     }, checkModifiers: false);
 
     // TODO(dit): This must happen in the flutterViewElement, https://github.com/flutter/flutter/issues/116561
-    _addPointerEventListener(domWindow, 'pointerup', (DomPointerEvent event) {
+    _addPointerEventListener(_globalTarget, 'pointerup', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
         final List<ui.PointerData> pointerData = <ui.PointerData>[];
@@ -1006,7 +1020,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
     // A browser fires cancel event if it concludes the pointer will no longer
     // be able to generate events (example: device is deactivated)
-    _addPointerEventListener(flutterViewElement, 'pointercancel', (DomPointerEvent event) {
+    _addPointerEventListener(_viewTarget, 'pointercancel', (DomPointerEvent event) {
       final int device = _getPointerId(event);
       if (_hasSanitizer(device)) {
         final List<ui.PointerData> pointerData = <ui.PointerData>[];
@@ -1033,16 +1047,17 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     final double tilt = _computeHighestTilt(event);
     final Duration timeStamp = _BaseAdapter._eventTimeStampToDuration(event.timeStamp!);
     final num? pressure = event.pressure;
-    final ui.Offset offset = computeEventOffsetToTarget(event, flutterViewElement);
+    final ui.Offset offset = computeEventOffsetToTarget(event, _view);
     _pointerDataConverter.convert(
       data,
+      viewId: _view.viewId,
       change: details.change,
       timeStamp: timeStamp,
       kind: kind,
       signalKind: ui.PointerSignalKind.none,
       device: _getPointerId(event),
-      physicalX: offset.dx * ui.window.devicePixelRatio,
-      physicalY: offset.dy * ui.window.devicePixelRatio,
+      physicalX: offset.dx * _view.devicePixelRatio,
+      physicalY: offset.dy * _view.devicePixelRatio,
       buttons: details.buttons,
       pressure:  pressure == null ? 0.0 : pressure.toDouble(),
       pressureMax: 1.0,

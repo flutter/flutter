@@ -14,6 +14,9 @@ import 'embedding_strategy.dart';
 /// and ensures that the root Flutter view covers the whole screen.
 class FullPageEmbeddingStrategy implements EmbeddingStrategy {
   @override
+  DomEventTarget get globalEventTarget => domWindow;
+
+  @override
   void initialize({
     Map<String, String>? hostElementAttributes,
   }) {
@@ -28,18 +31,18 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
   }
 
   @override
-  void attachGlassPane(DomElement glassPaneElement) {
-    /// Tweaks style so the glassPane works well with the hostElement.
-    glassPaneElement.style
+  void attachViewRoot(DomElement rootElement) {
+    /// Tweaks style so the rootElement works well with the hostElement.
+    rootElement.style
       ..position = 'absolute'
       ..top = '0'
       ..right = '0'
       ..bottom = '0'
       ..left = '0';
 
-    domDocument.body!.append(glassPaneElement);
+    domDocument.body!.append(rootElement);
 
-    registerElementForCleanup(glassPaneElement);
+    registerElementForCleanup(rootElement);
   }
 
   @override

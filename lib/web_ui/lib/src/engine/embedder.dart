@@ -8,9 +8,7 @@ import '../engine.dart' show buildMode, renderer;
 import 'browser_detection.dart';
 import 'configuration.dart';
 import 'dom.dart';
-import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
-import 'pointer_binding.dart';
 import 'text_editing/text_editing.dart';
 import 'view_embedder/style_manager.dart';
 import 'window.dart';
@@ -66,14 +64,6 @@ class FlutterViewEmbedder {
     );
 
     renderer.reset(this);
-
-    // TODO(mdebbar): Move these to `engine/initialization.dart`.
-
-    KeyboardBinding.initInstance();
-    PointerBinding.initInstance(
-      _flutterViewElement,
-      KeyboardBinding.instance!.converter,
-    );
 
     window.onResize.listen(_metricsDidChange);
   }

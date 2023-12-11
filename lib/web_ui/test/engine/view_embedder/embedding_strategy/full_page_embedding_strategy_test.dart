@@ -64,7 +64,7 @@ void doTests() {
     });
   });
 
-  group('attachGlassPane', () {
+  group('attachViewRoot', () {
     setUp(() {
       strategy = FullPageEmbeddingStrategy();
       strategy.initialize();
@@ -81,7 +81,7 @@ void doTests() {
           reason:
               'Should not have any top/right/bottom/left positioning/inset.');
 
-      strategy.attachGlassPane(glassPane);
+      strategy.attachViewRoot(glassPane);
 
       // Assert injection into <body>
       expect(glassPane.isConnected, isTrue,
@@ -110,7 +110,7 @@ void doTests() {
       glassPane = createDomElement('some-tag-for-tests');
       strategy = FullPageEmbeddingStrategy();
       strategy.initialize();
-      strategy.attachGlassPane(glassPane);
+      strategy.attachViewRoot(glassPane);
     });
 
     test(
