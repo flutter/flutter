@@ -17355,6 +17355,48 @@ void main() {
     },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
+
+
+  testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final TextEditingController controller = _textEditingController(
+      text: 'abcd',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              key: const ValueKey<int>(1),
+              child: TextField(
+                autofocus: true,
+                controller: controller,
+              ),
+            )
+          ),
+        ),
+      ),
+    );
+    // Wait for autofocus.
+    await tester.pumpAndSettle();
+    final Offset textFieldCenter = tester.getCenter(find.byType(TextField));
+    final TestGesture gesture = await tester.startGesture(textFieldCenter);
+    await tester.pump(kLongPressTimeout);
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.regular_and_floating_both.material.0.png'),
+    );
+    await gesture.moveTo(Offset(10, textFieldCenter.dy));
+    await tester.pump();
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.only_floating_cursor.material.0.png'),
+    );
+    await gesture.up();
+    EditableText.debugDeterministicCursor = false;
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
 
 /// A Simple widget for testing the obscure text.

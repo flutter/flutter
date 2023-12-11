@@ -3197,17 +3197,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // we cache the position.
         _pointOffsetOrigin = point.offset;
 
-        late final Offset startCaretCenter;
-        late final TextPosition currentTextPosition;
+        final Offset startCaretCenter;
+        final TextPosition currentTextPosition;
+        final bool shouldResetOrigin;
+        // Only non-null when starting a floating cursor via long press.
         if (point.startLocation != null) {
+          shouldResetOrigin = false;
           (startCaretCenter, currentTextPosition) = point.startLocation!;
         } else {
+          shouldResetOrigin = true;
           currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
           startCaretCenter = renderEditable.getLocalRectForCaret(currentTextPosition).center;
         }
 
         _startCaretCenter = startCaretCenter;
-        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(_startCaretCenter! - _floatingCursorOffset);
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(_startCaretCenter! - _floatingCursorOffset, shouldResetOrigin: shouldResetOrigin);
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.Update:

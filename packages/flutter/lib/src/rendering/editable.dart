@@ -2359,19 +2359,39 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // difference in the rendering position and the raw offset value.
   Offset _relativeOrigin = Offset.zero;
   Offset? _previousOffset;
+  bool _shouldResetOrigin = true;
   bool _resetOriginOnLeft = false;
   bool _resetOriginOnRight = false;
   bool _resetOriginOnTop = false;
   bool _resetOriginOnBottom = false;
   double? _resetFloatingCursorAnimationValue;
 
-  /// Returns the position within the text field closest to the raw cursor offset.
-  Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
-    Offset deltaPosition = Offset.zero;
+  EdgeInsets _calculateFloatingCursorBounds() {
     final double topBound = -floatingCursorAddedMargin.top;
     final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
     final double leftBound = -floatingCursorAddedMargin.left;
     final double rightBound = _textPainter.width + floatingCursorAddedMargin.right;
+    return EdgeInsets.fromLTRB(leftBound, topBound, rightBound, bottomBound);
+  }
+
+  Offset _calculateAdjustedCursorOffset(Offset offset, EdgeInsets boundingRect) {
+    final double adjustedX = math.min(math.max(offset.dx, boundingRect.left), boundingRect.right);
+    final double adjustedY = math.min(math.max(offset.dy, boundingRect.top), boundingRect.bottom);
+    return Offset(adjustedX, adjustedY);
+  }
+
+  /// Returns the position within the text field closest to the raw cursor offset.
+  Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset, {bool? shouldResetOrigin}) {
+    Offset deltaPosition = Offset.zero;
+    final EdgeInsets boundingRect = _calculateFloatingCursorBounds();
+
+    if (shouldResetOrigin != null) {
+      _shouldResetOrigin = shouldResetOrigin;
+    }
+
+    if (!_shouldResetOrigin) {
+      return _calculateAdjustedCursorOffset(rawCursorOffset, boundingRect);
+    }
 
     if (_previousOffset != null) {
       deltaPosition = rawCursorOffset - _previousOffset!;
@@ -2380,34 +2400,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the raw cursor offset has gone off an edge, we want to reset the relative
     // origin of the dragging when the user drags back into the field.
     if (_resetOriginOnLeft && deltaPosition.dx > 0) {
-      _relativeOrigin = Offset(rawCursorOffset.dx - leftBound, _relativeOrigin.dy);
+      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRect.left, _relativeOrigin.dy);
       _resetOriginOnLeft = false;
     } else if (_resetOriginOnRight && deltaPosition.dx < 0) {
-      _relativeOrigin = Offset(rawCursorOffset.dx - rightBound, _relativeOrigin.dy);
+      _relativeOrigin = Offset(rawCursorOffset.dx - boundingRect.right, _relativeOrigin.dy);
       _resetOriginOnRight = false;
     }
     if (_resetOriginOnTop && deltaPosition.dy > 0) {
-      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - topBound);
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRect.top);
       _resetOriginOnTop = false;
     } else if (_resetOriginOnBottom && deltaPosition.dy < 0) {
-      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - bottomBound);
+      _relativeOrigin = Offset(_relativeOrigin.dx, rawCursorOffset.dy - boundingRect.bottom);
       _resetOriginOnBottom = false;
     }
 
     final double currentX = rawCursorOffset.dx - _relativeOrigin.dx;
     final double currentY = rawCursorOffset.dy - _relativeOrigin.dy;
-    final double adjustedX = math.min(math.max(currentX, leftBound), rightBound);
-    final double adjustedY = math.min(math.max(currentY, topBound), bottomBound);
-    final Offset adjustedOffset = Offset(adjustedX, adjustedY);
+    final Offset adjustedOffset = _calculateAdjustedCursorOffset(Offset(currentX, currentY), boundingRect);
 
-    if (currentX < leftBound && deltaPosition.dx < 0) {
+    if (currentX < boundingRect.left && deltaPosition.dx < 0) {
       _resetOriginOnLeft = true;
-    } else if (currentX > rightBound && deltaPosition.dx > 0) {
+    } else if (currentX > boundingRect.right && deltaPosition.dx > 0) {
       _resetOriginOnRight = true;
     }
-    if (currentY < topBound && deltaPosition.dy < 0) {
+    if (currentY < boundingRect.top && deltaPosition.dy < 0) {
       _resetOriginOnTop = true;
-    } else if (currentY > bottomBound && deltaPosition.dy > 0) {
+    } else if (currentY > boundingRect.bottom && deltaPosition.dy > 0) {
       _resetOriginOnBottom = true;
     }
 
@@ -2422,6 +2440,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (state == FloatingCursorDragState.Start) {
       _relativeOrigin = Offset.zero;
       _previousOffset = null;
+      _shouldResetOrigin = true;
       _resetOriginOnBottom = false;
       _resetOriginOnTop = false;
       _resetOriginOnRight = false;

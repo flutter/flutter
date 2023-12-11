@@ -2453,6 +2453,19 @@ class TextSelectionGestureDetectorBuilder {
               from: details.globalPosition,
               cause: SelectionChangedCause.longPress,
             );
+            // Show the floating cursor
+            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+              state: FloatingCursorDragState.Start,
+              startLocation: (
+                renderEditable.globalToLocal(details.globalPosition),
+                TextPosition(
+                  offset: editableText.textEditingValue.selection.baseOffset,
+                  affinity: editableText.textEditingValue.selection.affinity,
+                ),
+              ),
+              offset: Offset.zero,
+            );
+            editableText.updateFloatingCursor(cursorPoint);
           }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -2466,21 +2479,6 @@ class TextSelectionGestureDetectorBuilder {
       _dragStartViewportOffset = renderEditable.offset.pixels;
       _dragStartScrollOffset = _scrollPosition;
 
-      if (editableText.textEditingValue.selection.isCollapsed && defaultTargetPlatform == TargetPlatform.iOS) {
-        // Show the floating cursor
-        final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-          state: FloatingCursorDragState.Start,
-          startLocation: (
-            renderEditable.globalToLocal(details.globalPosition),
-            TextPosition(
-              offset: editableText.textEditingValue.selection.baseOffset,
-              affinity: editableText.textEditingValue.selection.affinity,
-            ),
-          ),
-          offset: Offset.zero,
-        );
-        editableText.updateFloatingCursor(cursorPoint);
-      }
     }
   }
 
@@ -2518,6 +2516,12 @@ class TextSelectionGestureDetectorBuilder {
               from: details.globalPosition,
               cause: SelectionChangedCause.longPress,
             );
+            // Update the floating cursor
+            final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
+              state: FloatingCursorDragState.Update,
+              offset: details.offsetFromOrigin,
+            );
+            editableText.updateFloatingCursor(cursorPoint);
           }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -2531,15 +2535,6 @@ class TextSelectionGestureDetectorBuilder {
       }
 
       _showMagnifierIfSupportedByPlatform(details.globalPosition);
-
-      if (editableText.textEditingValue.selection.isCollapsed && defaultTargetPlatform == TargetPlatform.iOS) {
-        // Update the floating cursor
-        final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
-          state: FloatingCursorDragState.Update,
-          offset: details.offsetFromOrigin,
-        );
-        editableText.updateFloatingCursor(cursorPoint);
-      }
     }
   }
 

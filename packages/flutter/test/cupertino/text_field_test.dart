@@ -12,7 +12,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kDoubleTapTimeout, kSecondaryMouseButton;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind, kDoubleTapTimeout, kLongPressTimeout, kSecondaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -10094,4 +10094,45 @@ void main() {
     // placeholder.
     expect(rectWithText.height, greaterThan(100));
   });
+
+  testWidgetsWithLeakTracking('Start the floating cursor on long tap', (WidgetTester tester) async {
+    EditableText.debugDeterministicCursor = true;
+    final TextEditingController controller = TextEditingController(
+      text: 'abcd',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              key: const ValueKey<int>(1),
+              child: CupertinoTextField(
+                autofocus: true,
+                controller: controller,
+              ),
+            )
+          ),
+        ),
+      ),
+    );
+    // wait focus
+    await tester.pumpAndSettle();
+    final Offset textFieldCenter = tester.getCenter(find.byType(CupertinoTextField));
+    final TestGesture gesture = await tester.startGesture(textFieldCenter);
+    await tester.pump(kLongPressTimeout);
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.regular_and_floating_both.cupertino.0.png'),
+    );
+    await gesture.moveTo(Offset(10, textFieldCenter.dy));
+    await tester.pump();
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_floating_cursor.only_floating_cursor.cupertino.0.png'),
+    );
+    await gesture.up();
+    EditableText.debugDeterministicCursor = false;
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
