@@ -271,10 +271,10 @@ abstract class ProcessUtils {
     runZonedGuarded(
       writeFlushAndComplete,
       (Object error, StackTrace stackTrace) {
+        onError(error, stackTrace);
         if (!completer.isCompleted) {
           completer.complete();
         }
-        onError(error, stackTrace);
       },
     );
     return completer.future;
