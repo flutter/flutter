@@ -108,9 +108,7 @@ void foundError(List<String> messages) {
   _pendingLogs.clear();
   _errorMessages.add(messages);
   _hasError = true;
-  if (onError != null) {
-    onError!();
-  }
+  onError?.call();
 }
 
 @visibleForTesting
