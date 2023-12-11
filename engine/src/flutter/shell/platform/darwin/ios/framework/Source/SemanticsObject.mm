@@ -524,6 +524,17 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return YES;
 }
 
+- (NSString*)accessibilityIdentifier {
+  if (![self isAccessibilityBridgeAlive]) {
+    return nil;
+  }
+
+  if ([self node].identifier.empty()) {
+    return nil;
+  }
+  return @([self node].identifier.data());
+}
+
 - (NSString*)accessibilityLabel {
   if (![self isAccessibilityBridgeAlive]) {
     return nil;
