@@ -261,10 +261,22 @@ abstract class ProcessUtils {
 
     void writeFlushAndComplete() {
       stdin.writeln(line);
-      stdin.flush().whenComplete(() => completer.complete());
+      stdin.flush().whenComplete(() {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
     }
 
-    runZonedGuarded(writeFlushAndComplete, onError);
+    runZonedGuarded(
+      writeFlushAndComplete,
+      (Object error, StackTrace stackTrace) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+        onError(error, stackTrace);
+      },
+    );
     return completer.future;
   }
 }
