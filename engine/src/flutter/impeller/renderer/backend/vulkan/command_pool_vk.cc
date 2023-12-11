@@ -212,8 +212,6 @@ std::optional<vk::UniqueCommandPool> CommandPoolRecyclerVK::Reuse() {
 }
 
 void CommandPoolRecyclerVK::Reclaim(vk::UniqueCommandPool&& pool) {
-  TRACE_EVENT0("impeller", "ReclaimCommandPool");
-
   // Reset the pool on a background thread.
   auto strong_context = context_.lock();
   if (!strong_context) {
