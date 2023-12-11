@@ -1,4 +1,4 @@
-Signature: dde8839403593dbd5e31543debe363d6
+Signature: c4324b6fd67943d9d2f413c587ab64fc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -387,6 +387,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
 FILE: ../../../flutter/third_party/skia/relnotes/Tick.md
+FILE: ../../../flutter/third_party/skia/relnotes/font.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -8621,7 +8622,6 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_hardco
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu4x.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkExif.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegConstants.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMultiPicture.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegSegmentScan.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -8671,7 +8671,6 @@ FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_hardcode
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu4x.cpp
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkExif.cpp
-FILE: ../../../flutter/third_party/skia/src/codec/SkJpegConstants.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMultiPicture.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMultiPicture.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegSegmentScan.cpp
@@ -8819,6 +8818,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/base/SkSafeMath.cpp + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkTime.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkTime.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkImageGenerator_FromEncoded.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegConstants.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9102,6 +9102,7 @@ FILE: ../../../flutter/third_party/skia/src/base/SkSafeMath.cpp
 FILE: ../../../flutter/third_party/skia/src/base/SkTime.cpp
 FILE: ../../../flutter/third_party/skia/src/base/SkTime.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkImageGenerator_FromEncoded.cpp
+FILE: ../../../flutter/third_party/skia/src/codec/SkJpegConstants.h
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp
