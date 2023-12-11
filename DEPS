@@ -314,7 +314,7 @@ deps = {
   'src/third_party/boringssl':
    Var('dart_git') + '/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
 
-  'src/third_party/yapf':
+  'src/flutter/third_party/yapf':
   Var('github_git') + '/google/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
 
   'src/third_party/boringssl/src':
