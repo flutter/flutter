@@ -3178,13 +3178,11 @@ void main() {
   testWidgets('BottomNavigationBar keys passed through', (WidgetTester tester) async {
     const Key key1 = Key('key1');
     const Key key2 = Key('key2');
-    int selectedItem = 0;
 
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
         bottomNavigationBar: BottomNavigationBar(
-          currentIndex: selectedItem,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               key: key1,
