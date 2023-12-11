@@ -3432,7 +3432,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(value, isNot(equals(0.5)));
-    // The slider does not have have focus after the value is changed.
+    // The slider does not have focus after the value is changed.
     expect(focusNode.hasFocus, false);
   });
 
@@ -3618,8 +3618,8 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Value indicator disappears after adjusting the slider', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/123313.
+  // Regression test for https://github.com/flutter/flutter/issues/123313, which only occurs on desktop platforms.
+  testWidgetsWithLeakTracking('Value indicator disappears after adjusting the slider on desktop', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const double currentValue = 0.5;
     await tester.pumpWidget(MaterialApp(
@@ -3630,7 +3630,7 @@ void main() {
             value: currentValue,
             divisions: 5,
             label: currentValue.toStringAsFixed(1),
-            onChanged: (double value) {},
+            onChanged: (_) {},
           ),
         ),
       ),
@@ -3647,8 +3647,8 @@ void main() {
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
     final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
 
-    // Tap the slider to bring up the value indicator.
-    await tester.tapAt(tapLocation);
+    // Tap the slider by mouse to bring up the value indicator.
+    await tester.tapAt(tapLocation, kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
 
     // Value indicator is visible.
@@ -3666,7 +3666,7 @@ void main() {
       valueIndicatorBox,
       isNot(paints..scale()..path(color: theme.colorScheme.primary)),
     );
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgetsWithLeakTracking('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
