@@ -1594,7 +1594,7 @@ void main() {
     expect(tester.state(find.byType(Overlay)), same(overlayState));
   });
 
-  testWidgets('Overlay.wrap works in an unconstrained environment', (WidgetTester tester) async {
+  testWidgets('Overlay.wrap is sized by child in an unconstrained environment', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1614,7 +1614,7 @@ void main() {
     expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
   });
 
-  testWidgets('Overlay works in an unconstrained environment', (WidgetTester tester) async {
+  testWidgets('Overlay is sized by child in an unconstrained environment', (WidgetTester tester) async {
     final OverlayEntry initialEntry = OverlayEntry(
       opaque: true,
       canSizeOverlay: true,
@@ -1682,7 +1682,7 @@ void main() {
     expect(find.text('World'), findsNothing);
   });
 
-  testWidgets('Overlay throws if unconstrained and no child', (WidgetTester tester) async {
+  testWidgets('Overlay throws if unconstrained and has no child', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = errors.add;

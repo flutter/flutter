@@ -142,19 +142,20 @@ class OverlayEntry implements Listenable {
   /// Whether the content of this [OverlayEntry] can be used to size the
   /// [Overlay].
   ///
-  /// In most situations the Overlay sizes itself based on its incoming
+  /// In most situations the overlay sizes itself based on its incoming
   /// constraints to be as large as possible. However, if that would result in
   /// an infinite size, it has to rely on one of its children to size itself. In
-  /// this situation, the Overlay will consult the topmost [OverlayEntry] that
-  /// has this property set to true, lay it out with unconstrained
-  /// [BoxConstraints], and force all other OverlayEntries to have the same
-  /// size.
+  /// this situation, the overlay will consult the topmost non-[Positioned]
+  /// overlay entry that has this property set to true, lay it out with the
+  /// incoming [BoxConstraints] of the overlay, and force all other
+  /// non-[Positioned] overlay entries to have the same size. The [Positioned]
+  /// entries are laid out as usual based on the calculated size of the overlay.
   ///
-  /// OverlayEntries that set this to true must be able to handle unconstrained
+  /// Overlay entries that set this to true must be able to handle unconstrained
   /// [BoxConstraints].
   ///
-  /// Setting this to true has no effect if the OverlayEntry uses a [Positioned]
-  /// widget to position itself in the Overlay.
+  /// Setting this to true has no effect if the overlay entry uses a [Positioned]
+  /// widget to position itself in the overlay.
   final bool canSizeOverlay;
 
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
@@ -1297,10 +1298,13 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       ErrorDescription(
         'The constraints given to the overlay ($constraints) would result in an illegal '
         'infinite size (${constraints.biggest}). To avoid that, the Overlay tried to size '
-        'itself to one of its children, but no suitable non-positioned child that has '
-        'OverlayEntry.canSizeOverlay set to true could be found.',
+        'itself to one of its children, but no suitable non-positioned child that belongs to an '
+        'OverlayEntry with canSizeOverlay set to true could be found.',
       ),
-      ErrorHint('Try wrapping the Overlay in a SizedBox to give it a finite size.'),
+      ErrorHint(
+        'Try wrapping the Overlay in a SizedBox to give it a finite size or '
+        'use an OverlayEntry with canSizeOverlay set to true.',
+      ),
     ]);
   }
 
