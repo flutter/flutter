@@ -116,8 +116,6 @@ DescriptorPoolVK::AllocateDescriptorSets(
 
 void DescriptorPoolRecyclerVK::Reclaim(vk::UniqueDescriptorPool&& pool,
                                        uint32_t allocated_capacity) {
-  TRACE_EVENT0("impeller", "DescriptorPoolRecyclerVK::Reclaim");
-
   // Reset the pool on a background thread.
   auto strong_context = context_.lock();
   if (!strong_context) {
@@ -172,8 +170,6 @@ DescriptorPoolAndSize DescriptorPoolRecyclerVK::Get(uint32_t minimum_capacity) {
 
 DescriptorPoolAndSize DescriptorPoolRecyclerVK::Create(
     uint32_t minimum_capacity) {
-  TRACE_EVENT0("impeller", "DescriptorPoolRecyclerVK::Create");
-
   FML_DCHECK(Allocation::NextPowerOfTwoSize(minimum_capacity) ==
              minimum_capacity);
   auto strong_context = context_.lock();
@@ -204,8 +200,6 @@ DescriptorPoolAndSize DescriptorPoolRecyclerVK::Create(
 
 std::optional<DescriptorPoolAndSize> DescriptorPoolRecyclerVK::Reuse(
     uint32_t minimum_capacity) {
-  TRACE_EVENT0("impeller", "DescriptorPoolRecyclerVK::Reuse");
-
   FML_DCHECK(Allocation::NextPowerOfTwoSize(minimum_capacity) ==
              minimum_capacity);
   Lock lock(recycled_mutex_);

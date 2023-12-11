@@ -91,8 +91,6 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
                          const vk::Instance& instance,
                          const CapabilitiesVK& capabilities)
     : context_(std::move(context)), device_holder_(device_holder) {
-  TRACE_EVENT0("impeller", "CreateAllocatorVK");
-
   auto limits = physical_device.getProperties().limits;
   max_texture_size_.width = max_texture_size_.height =
       limits.maxImageDimension2D;
@@ -273,7 +271,6 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                            bool supports_framebuffer_fetch)
       : TextureSourceVK(desc), resource_(std::move(resource_manager)) {
     FML_DCHECK(desc.format != PixelFormat::kUnknown);
-    TRACE_EVENT0("impeller", "CreateDeviceTexture");
     vk::ImageCreateInfo image_info;
     image_info.flags = ToVKImageCreateFlags(desc.type);
     image_info.imageType = vk::ImageType::e2D;
@@ -402,7 +399,6 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 // |Allocator|
 std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
     const TextureDescriptor& desc) {
-  TRACE_EVENT0("impeller", "AllocatorVK::OnCreateTexture");
   if (!IsValid()) {
     return nullptr;
   }
@@ -436,7 +432,6 @@ void AllocatorVK::DidAcquireSurfaceFrame() {
 // |Allocator|
 std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
     const DeviceBufferDescriptor& desc) {
-  TRACE_EVENT0("impeller", "AllocatorVK::OnCreateBuffer");
   vk::BufferCreateInfo buffer_info;
   buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer |
                       vk::BufferUsageFlagBits::eIndexBuffer |
