@@ -1043,6 +1043,7 @@
 ../../../flutter/third_party/sqlite/Makefile
 ../../../flutter/third_party/sqlite/README.md
 ../../../flutter/third_party/sqlite/VERSION
+../../../flutter/third_party/stb
 ../../../flutter/third_party/test_shaders
 ../../../flutter/third_party/tinygltf
 ../../../flutter/third_party/tonic/.clang-format
@@ -3020,7 +3021,6 @@
 ../../../third_party/root_certificates/certdata.pem
 ../../../third_party/root_certificates/certdata.txt
 ../../../third_party/root_certificates/codereview.settings
-../../../third_party/stb
 ../../../third_party/swiftshader
 ../../../third_party/vulkan-deps/.git
 ../../../third_party/vulkan-deps/.gitattributes

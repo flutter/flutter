@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_root = "//third_party/stb"
+source_root = "//flutter/third_party/stb"
 
 source_set("stb_truetype") {
   testonly = true
@@ -11,5 +11,7 @@ source_set("stb_truetype") {
 
   include_dirs = [ "$source_root" ]
 
-  sources = [ "//flutter/build/secondary/third_party/stb/stb_truetype_stub.cc" ]
+  sources = [
+    "//flutter/build/secondary/flutter/third_party/stb/stb_truetype_stub.cc",
+  ]
 }

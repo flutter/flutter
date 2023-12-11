@@ -6,9 +6,9 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/third_party/stb/stb_truetype.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/typographer/typeface.h"
-#include "third_party/stb/stb_truetype.h"
 
 namespace impeller {
 

@@ -715,7 +715,7 @@ deps = {
   'src/third_party/json':
   Var('flutter_git') + '/third_party/json.git' + '@' + '17d9eacd248f58b73f4d1be518ef649fe2295642',
 
-  'src/third_party/stb':
+  'src/flutter/third_party/stb':
   Var('flutter_git') + '/third_party/stb.git' + '@' + '5736b15f7ea0ffb08dd38af21067c314d6a3aae9',
 
   'src/third_party/gradle': {
