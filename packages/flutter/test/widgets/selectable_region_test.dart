@@ -1869,11 +1869,11 @@ void main() {
             child: Center(
               child: Text.rich(
                 const TextSpan(
-                    children: <InlineSpan>[
-                      TextSpan(text: 'How are you?'),
-                      WidgetSpan(child: Text('Good, and you?')),
-                      TextSpan(text: 'Fine, thank you.'),
-                    ]
+                  children: <InlineSpan>[
+                    TextSpan(text: 'How are you?'),
+                    WidgetSpan(child: Text('Good, and you?')),
+                    TextSpan(text: 'Fine, thank you.'),
+                  ],
                 ),
                 key: outerText,
               ),
@@ -1898,6 +1898,198 @@ void main() {
     );
 
     testWidgetsWithLeakTracking(
+      'double click + drag mouse selection can handle widget span', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text.rich(
+                const TextSpan(
+                  children: <InlineSpan>[
+                    TextSpan(text: 'How are you?'),
+                    WidgetSpan(child: Text('Good, and you?')),
+                    TextSpan(text: 'Fine, thank you.'),
+                  ],
+                ),
+                key: outerText,
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 0), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 0));
+      await tester.pump();
+      await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
+      await gesture.up();
+
+      // keyboard copy.
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
+      final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+      expect(clipboardData['text'], 'How are you?Good, and you?Fine,');
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
+      'double click + drag mouse selection can handle widget span - multiline', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final UniqueKey innerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    const TextSpan(text: 'How are you\n?'),
+                    WidgetSpan(
+                      child: Text(
+                        'Good, and you?',
+                        key: innerText,
+                      ),
+                    ),
+                    const TextSpan(text: 'Fine, thank you.'),
+                  ],
+                ),
+                key: outerText,
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      final RenderParagraph innerParagraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(innerText), matching: find.byType(RichText)).first);
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 0), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 0));
+      await tester.pump();
+      await gesture.moveTo(textOffsetToPosition(innerParagraph, 2)); // on `Good`.
+
+      // Should not crash.
+      expect(tester.takeException(), isNull);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
+      'select word event can select inline widget', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final UniqueKey innerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Center(
+              child: Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    const TextSpan(text: 'How are\n you?'),
+                    WidgetSpan(
+                      child: Text(
+                        'Good, and you?',
+                        key: innerText,
+                      ),
+                    ),
+                    const TextSpan(text: 'Fine, thank you.'),
+                  ],
+                ),
+                key: outerText,
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      final RenderParagraph innerParagraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(innerText), matching: find.byType(RichText)).first);
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(innerText)), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      // Should select "and".
+      expect(paragraph.selections.isEmpty, isTrue);
+      expect(innerParagraph.selections[0], const TextSelection(baseOffset: 6, extentOffset: 9));
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
+      'select word event should not crash when its position is at an unselectable inline element', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      final UniqueKey flutterLogo = UniqueKey();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      const TextSpan(
+                        text:
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      ),
+                      WidgetSpan(child: FlutterLogo(key: flutterLogo)),
+                      const TextSpan(text: 'Hello, world.'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset gestureOffset = tester.getCenter(find.byKey(flutterLogo).first);
+
+      // Right click on unseletable element.
+      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      // Should not crash.
+      expect(tester.takeException(), isNull);
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
       'can select word when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/127076.
       final UniqueKey outerText = UniqueKey();
@@ -1913,14 +2105,64 @@ void main() {
               body: Center(
                 child: Text.rich(
                   const TextSpan(
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text:
-                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                        ),
-                        WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
-                        TextSpan(text: 'Hello, world.'),
-                      ],
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text:
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      ),
+                      WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
+                      TextSpan(text: 'Hello, world.'),
+                    ],
+                  ),
+                  key: outerText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+
+      // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
+      // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
+      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
+
+      // Right click to select word at position.
+      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Should select "Hello".
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgetsWithLeakTracking(
+      'can select word when selectable is broken up by an unselectable WidgetSpan', (WidgetTester tester) async {
+      final UniqueKey outerText = UniqueKey();
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text.rich(
+                  const TextSpan(
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text:
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      ),
+                      WidgetSpan(child: SizedBox.shrink()),
+                      TextSpan(text: 'Hello, world.'),
+                    ],
                   ),
                   key: outerText,
                 ),
@@ -1963,11 +2205,11 @@ void main() {
               child: Center(
                 child: Text.rich(
                   const TextSpan(
-                      children: <InlineSpan>[
-                        TextSpan(text: 'How are you?'),
-                        WidgetSpan(child: Placeholder()),
-                        TextSpan(text: 'Fine, thank you.'),
-                      ]
+                    children: <InlineSpan>[
+                      TextSpan(text: 'How are you?'),
+                      WidgetSpan(child: Placeholder()),
+                      TextSpan(text: 'Fine, thank you.'),
+                    ],
                   ),
                   key: outerText,
                 ),
@@ -2006,11 +2248,11 @@ void main() {
               child: Center(
                 child: Text.rich(
                   const TextSpan(
-                      children: <InlineSpan>[
-                        TextSpan(text: 'How are you?'),
-                        WidgetSpan(child: Placeholder()),
-                        TextSpan(text: 'Fine, thank you.'),
-                      ]
+                    children: <InlineSpan>[
+                      TextSpan(text: 'How are you?'),
+                      WidgetSpan(child: Placeholder()),
+                      TextSpan(text: 'Fine, thank you.'),
+                    ],
                   ),
                   key: outerText,
                 ),
@@ -3543,6 +3785,9 @@ class RenderSelectionSpy extends RenderProxyBox
   Size _size = Size.zero;
 
   @override
+  List<Rect> get boundingBoxes => <Rect>[paintBounds];
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     _size = Size(constraints.maxWidth, constraints.maxHeight);
     return _size;
@@ -3609,6 +3854,9 @@ class RenderSelectAll extends RenderProxyBox
   ) {
     this.registrar = registrar;
   }
+
+  @override
+  List<Rect> get boundingBoxes => <Rect>[paintBounds];
 
   final Set<VoidCallback> listeners = <VoidCallback>{};
   LayerLink? startHandle;
