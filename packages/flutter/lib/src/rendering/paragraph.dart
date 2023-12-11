@@ -1736,6 +1736,10 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       return SelectionResult.end;
     }
     final _WordBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
+    // This fragment may not contain the word, decide what direction the target
+    // fragment is located in. Because fragments are separated by placeholder
+    // spans, we also check if the beginning or end of the word is touching
+    // either edge of this fragment.
     if (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset <= range.start) {
       return SelectionResult.previous;
     } else if (wordBoundary.wordStart.offset >= range.end && wordBoundary.wordEnd.offset > range.end) {
