@@ -50,6 +50,25 @@ source_set("availability_version_check") {
   public_configs = [ "//flutter:config" ]
 }
 
+test_fixtures("availability_version_check_fixtures") {
+  fixtures = []
+}
+
+executable("availability_version_check_unittests") {
+  testonly = true
+
+  sources = [ "availability_version_check_unittests.cc" ]
+
+  deps = [
+    ":availability_version_check",
+    ":availability_version_check_fixtures",
+    "//flutter/fml",
+    "//flutter/testing",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+}
+
 # Shared framework headers end up in the same folder as platform-specific
 # framework headers when consumed by clients, so the include paths assume they
 # are next to each other.
