@@ -1333,4 +1333,36 @@ void main() {
     expect(tileWidget.enableFeedback, enableFeedback);
     expect(tileWidget.visualDensity, visualDensity);
   });
+
+  testWidgetsWithLeakTracking('ExpansionTileController should not toggle if disabled', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          controller: controller,
+          title: const Text('Title'),
+          children: const <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+  });
 }
