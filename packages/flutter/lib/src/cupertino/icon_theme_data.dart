@@ -19,6 +19,7 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
     super.color,
     super.opacity,
     super.shadows,
+    super.applyTextScaling,
   });
 
   /// Called by [IconTheme.of] to resolve [color] against the given [BuildContext].
@@ -40,6 +41,7 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
     Color? color,
     double? opacity,
     List<Shadow>? shadows,
+    bool? applyTextScaling,
   }) {
     return CupertinoIconThemeData(
       size: size ?? this.size,
@@ -50,6 +52,7 @@ class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
       shadows: shadows ?? this.shadows,
+      applyTextScaling: applyTextScaling ?? this.applyTextScaling,
     );
   }
 

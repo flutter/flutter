@@ -2762,6 +2762,190 @@ void main() {
     ).first);
     expect(suggestionMaterial.color, localTheme.cardTheme.color);
   });
+
+  testWidgetsWithLeakTracking('SearchBar respects keyboardType property', (WidgetTester tester) async {
+    Widget buildSearchBar(TextInputType keyboardType) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchBar(
+              keyboardType: keyboardType,
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchBar(TextInputType.number));
+    await tester.pump();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.number);
+
+    await tester.pumpWidget(buildSearchBar(TextInputType.phone));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.phone);
+  });
+
+  testWidgetsWithLeakTracking('SearchAnchor respects keyboardType property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextInputType keyboardType) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              keyboardType: keyboardType,
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.ac_unit),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextInputType.number));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.number);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pump();
+
+    await tester.pumpWidget(buildSearchAnchor(TextInputType.phone));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.phone);
+  });
+
+  testWidgetsWithLeakTracking('SearchAnchor.bar respects keyboardType property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextInputType keyboardType) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor.bar(
+              keyboardType: keyboardType,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextInputType.number));
+    await tester.pump();
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder textFieldFinder = find.descendant(of: findViewContent(), matching: find.byType(TextField));
+    final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
+    expect(textFieldInView.keyboardType, TextInputType.number);
+    // Close search view.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pumpAndSettle();
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.keyboardType, TextInputType.number);
+  });
+
+  testWidgetsWithLeakTracking('SearchBar respects textInputAction property', (WidgetTester tester) async {
+    Widget buildSearchBar(TextInputAction textInputAction) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchBar(
+              textInputAction: textInputAction,
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchBar(TextInputAction.previous));
+    await tester.pump();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.previous);
+
+    await tester.pumpWidget(buildSearchBar(TextInputAction.send));
+    await tester.pump();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.send);
+  });
+
+  testWidgetsWithLeakTracking('SearchAnchor respects textInputAction property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextInputAction textInputAction) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor(
+              textInputAction: textInputAction,
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.ac_unit),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextInputAction.previous));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.previous);
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pump();
+
+    await tester.pumpWidget(buildSearchAnchor(TextInputAction.send));
+    await tester.pump();
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.ac_unit));
+    await tester.pumpAndSettle();
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.send);
+  });
+
+  testWidgetsWithLeakTracking('SearchAnchor.bar respects textInputAction property', (WidgetTester tester) async {
+    Widget buildSearchAnchor(TextInputAction textInputAction) {
+      return MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor.bar(
+              textInputAction: textInputAction,
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildSearchAnchor(TextInputAction.previous));
+    await tester.pump();
+    await tester.tap(find.byType(SearchBar)); // Open search view.
+    await tester.pumpAndSettle();
+    final Finder textFieldFinder = find.descendant(of: findViewContent(), matching: find.byType(TextField));
+    final TextField textFieldInView = tester.widget<TextField>(textFieldFinder);
+    expect(textFieldInView.textInputAction, TextInputAction.previous);
+    // Close search view.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_back));
+    await tester.pumpAndSettle();
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.textInputAction, TextInputAction.previous);
+  });
 }
 
 Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
