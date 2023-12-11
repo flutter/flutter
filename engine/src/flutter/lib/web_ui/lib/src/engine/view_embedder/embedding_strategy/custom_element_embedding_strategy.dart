@@ -17,8 +17,14 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
     _hostElement.clearChildren();
   }
 
-  /// The target element in which this strategy will embedd Flutter.
+  @override
+  DomEventTarget get globalEventTarget => _rootElement;
+
+  /// The target element in which this strategy will embed the Flutter view.
   final DomElement _hostElement;
+
+  /// The root element of the Flutter view.
+  late final DomElement _rootElement;
 
   @override
   void initialize({
@@ -32,17 +38,18 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
   }
 
   @override
-  void attachGlassPane(DomElement glassPaneElement) {
-    glassPaneElement
+  void attachViewRoot(DomElement rootElement) {
+    rootElement
       ..style.width = '100%'
       ..style.height = '100%'
       ..style.display = 'block'
       ..style.overflow = 'hidden'
       ..style.position = 'relative';
 
-    _hostElement.appendChild(glassPaneElement);
+    _hostElement.appendChild(rootElement);
 
-    registerElementForCleanup(glassPaneElement);
+    registerElementForCleanup(rootElement);
+    _rootElement = rootElement;
   }
 
   @override

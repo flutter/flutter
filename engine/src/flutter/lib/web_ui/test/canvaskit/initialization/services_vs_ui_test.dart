@@ -21,7 +21,7 @@ void testMain() {
     expect(findGlassPane(), isNull);
     expect(RawKeyboard.instance, isNull);
     expect(KeyboardBinding.instance, isNull);
-    expect(PointerBinding.instance, isNull);
+    expect(EnginePlatformDispatcher.instance.implicitView, isNull);
 
     // After initializing services the UI should remain intact.
     await initializeEngineServices(jsConfiguration: config);
@@ -31,14 +31,14 @@ void testMain() {
     expect(findGlassPane(), isNull);
     expect(RawKeyboard.instance, isNull);
     expect(KeyboardBinding.instance, isNull);
-    expect(PointerBinding.instance, isNull);
+    expect(EnginePlatformDispatcher.instance.implicitView, isNull);
 
     // Now UI should be taken over by Flutter.
     await initializeEngineUi();
     expect(findGlassPane(), isNotNull);
     expect(RawKeyboard.instance, isNotNull);
     expect(KeyboardBinding.instance, isNotNull);
-    expect(PointerBinding.instance, isNotNull);
+    expect(EnginePlatformDispatcher.instance.implicitView, isNotNull);
   });
 }
 

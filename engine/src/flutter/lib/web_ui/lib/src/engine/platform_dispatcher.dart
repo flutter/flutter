@@ -634,7 +634,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         const StandardMessageCodec codec = StandardMessageCodec();
         // TODO(yjbanov): Dispatch the announcement to the correct view?
         //                https://github.com/flutter/flutter/issues/137445
-        implicitView!.accessibilityAnnouncements.handleMessage(codec, data);
+        implicitView?.accessibilityAnnouncements.handleMessage(codec, data);
         replyToPlatformMessage(callback, codec.encodeMessage(true));
         return;
 

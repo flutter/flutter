@@ -9,9 +9,7 @@ import 'dart:async';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/embedder.dart';
-import 'package:ui/src/engine/pointer_binding/event_position_helper.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui show Offset;
 
 void main() {
@@ -19,9 +17,8 @@ void main() {
 }
 
 void doTests() {
-  ensureFlutterViewEmbedderInitialized();
-
-  late DomElement target;
+  late EngineFlutterView view;
+  late DomElement rootElement;
   late DomElement eventSource;
   final StreamController<DomEvent> events = StreamController<DomEvent>.broadcast();
 
@@ -34,14 +31,14 @@ void doTests() {
 
   group('computeEventOffsetToTarget', () {
     setUp(() {
-      target = createDomElement('div-target');
+      view = EngineFlutterView(EnginePlatformDispatcher.instance, domDocument.body!);
+      rootElement = view.dom.rootElement;
       eventSource = createDomElement('div-event-source');
-      target.append(eventSource);
-      domDocument.body!.append(target);
+      rootElement.append(eventSource);
 
       // make containers known fixed sizes, absolutely positioned elements, so
       // we can reason about screen coordinates relatively easily later!
-      target.style
+      rootElement.style
         ..position = 'absolute'
         ..width = '320px'
         ..height = '240px'
@@ -55,18 +52,18 @@ void doTests() {
         ..top = '100px'
         ..left = '120px';
 
-      target.addEventListener('click', createDomEventListener((DomEvent e) {
+      rootElement.addEventListener('click', createDomEventListener((DomEvent e) {
         events.add(e);
       }));
     });
 
     tearDown(() {
-      target.remove();
+      view.dispose();
     });
 
     test('Event dispatched by target returns offsetX, offsetY', () async {
       // Fire an event contained within target...
-      final DomMouseEvent event = await dispatchAndCatch(target, createDomPointerEvent(
+      final DomMouseEvent event = await dispatchAndCatch(rootElement, createDomPointerEvent(
         'click',
         <String, Object>{
           'bubbles': true,
@@ -78,7 +75,7 @@ void doTests() {
       expect(event.offsetX, 10);
       expect(event.offsetY, 20);
 
-      final ui.Offset offset = computeEventOffsetToTarget(event, target);
+      final ui.Offset offset = computeEventOffsetToTarget(event, view);
 
       expect(offset.dx, event.offsetX);
       expect(offset.dy, event.offsetY);
@@ -98,7 +95,7 @@ void doTests() {
       expect(event.offsetX, 20);
       expect(event.offsetY, 10);
 
-      final ui.Offset offset = computeEventOffsetToTarget(event, target);
+      final ui.Offset offset = computeEventOffsetToTarget(event, view);
 
       expect(offset.dx, 140);
       expect(offset.dy, 110);
