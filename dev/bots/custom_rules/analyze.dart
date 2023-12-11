@@ -12,11 +12,12 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
-/// Analyzes the given `flutterRootDirectory` with the given [AnalyzeRule]s.
+/// Analyzes the given `flutterRootDirectory` containing the flutter framework
+/// source files, with the given [AnalyzeRule]s.
 ///
 /// If a compilation unit can not be resolved, this function ignores the
 /// corresponding dart source file and logs an error using [foundError].
-Future<void> analyzeDirectoryWithRules(String flutterRootDirectory, List<AnalyzeRule> rules) async {
+Future<void> analyzeFrameworkWithRules(String flutterRootDirectory, List<AnalyzeRule> rules) async {
   final String flutterLibPath = path.canonicalize('$flutterRootDirectory/packages/flutter/lib');
   if (!Directory(flutterLibPath).existsSync()) {
     foundError(<String>['Analyzer error: the specified $flutterLibPath does not exist.']);
@@ -54,7 +55,7 @@ Future<void> analyzeDirectoryWithRules(String flutterRootDirectory, List<Analyze
 /// An interface that defines a set of best practices, and collects information
 /// about code that violates the best practices in a [ResolvedUnitResult].
 ///
-/// The [analyzeDirectoryWithRules] function scans and analyzes the specified
+/// The [analyzeFrameworkWithRules] function scans and analyzes the specified
 /// source directory using the dart analyzer package, and applies custom rules
 /// defined in the form of this interface on each resulting [ResolvedUnitResult].
 /// The [reportViolations] method will be called at the end, once all

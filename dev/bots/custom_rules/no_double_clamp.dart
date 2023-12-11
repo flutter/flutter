@@ -24,6 +24,16 @@ class _NoDoubleClamp implements AnalyzeRule {
   final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
 
   @override
+  void applyTo(ResolvedUnitResult unit) {
+    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
+    unit.unit.visitChildren(visitor);
+    final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
+    if (violationsInUnit.isNotEmpty) {
+      _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(violationsInUnit);
+    }
+  }
+
+  @override
   void reportViolations(String workingDirectory) {
     if (_errors.isEmpty) {
       return;
@@ -39,16 +49,6 @@ class _NoDoubleClamp implements AnalyzeRule {
           '${locationInFile(entry.key, node)}: ${node.parent}',
       '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
     ]);
-  }
-
-  @override
-  void applyTo(ResolvedUnitResult unit) {
-    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
-    unit.unit.visitChildren(visitor);
-    final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
-    if (violationsInUnit.isNotEmpty) {
-      _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(violationsInUnit);
-    }
   }
 
   @override

@@ -178,7 +178,7 @@ Future<void> run(List<String> arguments) async {
     final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp];
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
-    await analyzeDirectoryWithRules(flutterRoot, rules);
+    await analyzeFrameworkWithRules(flutterRoot, rules);
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }

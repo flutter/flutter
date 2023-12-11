@@ -230,7 +230,7 @@ void main() {
   });
 
   test('analyze.dart - clampDouble', () async {
-    final String result = await capture(() => analyzeDirectoryWithRules(
+    final String result = await capture(() => analyzeFrameworkWithRules(
       testRootPath,
       <AnalyzeRule>[noDoubleClamp],
     ), shouldHaveErrors: true);
