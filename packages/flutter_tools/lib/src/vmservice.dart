@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
@@ -39,6 +40,7 @@ const String kFlutterVersionServiceName = 'flutterVersion';
 const String kCompileExpressionServiceName = 'compileExpression';
 const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 const String kFlutterGetSkSLServiceName = 'flutterGetSkSL';
+const String kFlutterHostScreenshotServiceName = 'flutterHostScreenshot';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -280,6 +282,24 @@ Future<vm_service.VmService> setUpVmService({
     registrationRequests.add(vmService.registerService(kCompileExpressionServiceName, kFlutterToolAlias));
   }
   if (device != null) {
+    if (device.supportsScreenshot) {
+      vmService.registerServiceCallback(kFlutterHostScreenshotServiceName, (Map<String, Object?> params) async {
+      final String fileName = params['file']! as String;
+      final File file = globals.fs.file(fileName);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+      await device.takeScreenshot(file);
+
+      final bool success = file.existsSync();
+      return <String, Object>{
+        'result': <String, Object>{
+          kResultType: kResultTypeSuccess,
+          'success': success,
+        }};
+      });
+      registrationRequests.add(vmService.registerService(kFlutterHostScreenshotServiceName, kFlutterToolAlias));
+    }
     vmService.registerServiceCallback(kFlutterMemoryInfoServiceName, (Map<String, Object?> params) async {
       final MemoryInfo result = await device.queryMemoryInfo();
       return <String, Object>{

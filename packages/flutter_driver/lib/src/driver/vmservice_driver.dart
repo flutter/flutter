@@ -312,6 +312,14 @@ class VMServiceFlutterDriver extends FlutterDriver {
   /// Getter for file pathname where logs are written when _logCommunicationToFile is true.
   String get logFilePathName => _logFilePathName;
 
+  @override
+  Future<bool> takeHostScreenshot(String filename) async {
+    final vms.Response response = await serviceClient.callServiceExtension('flutterHostScreenshot', args: <String, Object?>{
+      'filename': filename,
+    });
+    print(response);
+    return true;
+  }
 
   @override
   Future<Map<String, dynamic>> sendCommand(Command command) async {

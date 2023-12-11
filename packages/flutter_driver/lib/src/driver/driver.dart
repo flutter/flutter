@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
@@ -186,6 +187,14 @@ abstract class FlutterDriver {
   )
   Future<void> enableAccessibility() async {
     await setSemantics(true);
+  }
+
+  /// Take a screenshot of the current screen.
+  ///
+  /// The screenshot will be written into the provided file name. Only the
+  /// vm_service based flutter driver supports this method.
+  Future<bool> takeHostScreenshot(String filename) async {
+    return false;
   }
 
   /// Sends [command] to the Flutter Driver extensions.

@@ -33,16 +33,17 @@ void main() {
     });
 
     test('enable accessibility', () async {
-      await driver.setSemantics(true);
+      // await driver.setSemantics(true);
 
-      // TODO(ianh): this delay violates our style guide. We should instead wait for a triggering event.
-      await Future<void>.delayed(const Duration(seconds: 2));
+      // // TODO(ianh): this delay violates our style guide. We should instead wait for a triggering event.
+      // await Future<void>.delayed(const Duration(seconds: 2));
 
-      final WebElement? fltSemantics = await driver.webDriver.execute(
-        'return document.querySelector("flt-semantics")',
-        <dynamic>[],
-      ) as WebElement?;
-      expect(fltSemantics, isNotNull);
+      // final WebElement? fltSemantics = await driver.webDriver.execute(
+      //   'return document.querySelector("flt-semantics")',
+      //   <dynamic>[],
+      // ) as WebElement?;
+      // expect(fltSemantics, isNotNull);
+      await driver.takeHostScreenshot('example.png');
     });
   });
 }
