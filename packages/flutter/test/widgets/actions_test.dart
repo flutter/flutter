@@ -981,7 +981,7 @@ void main() {
         expect(buttonNode2.hasFocus, isFalse);
         primaryFocus!.nextFocus();
         await tester.pump();
-        expect(buttonNode1.hasFocus, isTrue);
+        expect(buttonNode1.hasFocus, isFalse);
         expect(buttonNode2.hasFocus, isFalse);
       },
     );

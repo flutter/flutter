@@ -22,8 +22,6 @@ import 'routes.dart';
 class WillPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
-  ///
-  /// The [child] argument must not be null.
   @Deprecated(
     'Use PopScope instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',

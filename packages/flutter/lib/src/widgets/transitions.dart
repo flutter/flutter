@@ -168,8 +168,6 @@ class _AnimatedState extends State<AnimatedWidget> {
 ///    position based on the value of a rectangle relative to a bounding box.
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
-  ///
-  /// The [position] argument must not be null.
   const SlideTransition({
     super.key,
     required Animation<Offset> position,
@@ -380,8 +378,6 @@ class ScaleTransition extends MatrixTransition {
 ///    aligns its child.
 class RotationTransition extends MatrixTransition {
   /// Creates a rotation transition.
-  ///
-  /// The [turns] argument must not be null.
   const RotationTransition({
     super.key,
     required Animation<double> turns,
@@ -437,17 +433,18 @@ class RotationTransition extends MatrixTransition {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [axis], [sizeFactor], and [axisAlignment] arguments must not be null.
   /// The [axis] argument defaults to [Axis.vertical]. The [axisAlignment]
-  /// defaults to 0.0, which centers the child along the main axis during the
+  /// defaults to zero, which centers the child along the main axis during the
   /// transition.
   const SizeTransition({
     super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
+    this.fixedCrossAxisSizeFactor,
     this.child,
-  }) : super(listenable: sizeFactor);
+  }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
+    super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
   /// [Axis.vertical].
@@ -476,6 +473,14 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
   final double axisAlignment;
 
+  /// The factor by which to multiply the cross axis size of the child.
+  ///
+  /// If the value of [fixedCrossAxisSizeFactor] is less than one, the child
+  /// will be clipped along the appropriate axis.
+  ///
+  /// If `null` (the default), the cross axis size is as large as the parent.
+  final double? fixedCrossAxisSizeFactor;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -492,8 +497,8 @@ class SizeTransition extends AnimatedWidget {
     return ClipRect(
       child: Align(
         alignment: alignment,
-        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : null,
-        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : null,
+        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
+        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : fixedCrossAxisSizeFactor,
         child: child,
       ),
     );
@@ -545,8 +550,6 @@ class SizeTransition extends AnimatedWidget {
 ///  * [SliverFadeTransition], the sliver version of this widget.
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
-  ///
-  /// The [opacity] argument must not be null.
   const FadeTransition({
     super.key,
     required this.opacity,
@@ -637,8 +640,6 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 ///  * [FadeTransition], the box version of this widget.
 class SliverFadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
-  ///
-  /// The [opacity] argument must not be null.
   const SliverFadeTransition({
     super.key,
     required this.opacity,
@@ -738,8 +739,6 @@ class RelativeRectTween extends Tween<RelativeRect> {
 ///    aligns its child.
 class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
-  ///
-  /// The [rect] argument must not be null.
   const PositionedTransition({
     super.key,
     required Animation<RelativeRect> rect,
@@ -797,7 +796,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   ///
   /// Each frame, the [Positioned] widget will be configured to represent the
   /// current value of the [rect] argument assuming that the stack has the given
-  /// [size]. Both [rect] and [size] must not be null.
+  /// [size].
   const RelativePositionedTransition({
     super.key,
     required Animation<Rect?> rect,
@@ -859,8 +858,6 @@ class RelativePositionedTransition extends AnimatedWidget {
 class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecoratedBox] whose [Decoration] animation updates
   /// the widget.
-  ///
-  /// The [decoration] and [position] must not be null.
   ///
   /// See also:
   ///
@@ -1094,8 +1091,6 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   reports the new value in its builder callback.
 class ListenableBuilder extends AnimatedWidget {
   /// Creates a builder that responds to changes in [listenable].
-  ///
-  /// The [listenable] and [builder] arguments must not be null.
   const ListenableBuilder({
     super.key,
     required super.listenable,

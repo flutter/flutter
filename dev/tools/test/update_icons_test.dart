@@ -41,7 +41,7 @@ void main() {
   });
 
   test('no double underscores', () {
-    expect(Icon(codepointsUnderscore.entries.first), 'abc_123');
+    expect(Icon(codepointsUnderscore.entries.first).usage, 'Icon(Icons.airplane_123),');
   });
 
   test('usage string is correct', () {

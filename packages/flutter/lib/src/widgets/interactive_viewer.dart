@@ -44,8 +44,6 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 /// don't set [clipBehavior] or be sure that the InteractiveViewer widget is the
 /// size of the area that should be interactive.
 ///
-/// The [child] must not be null.
-///
 /// See also:
 ///   * The [Flutter Gallery's transformations demo](https://github.com/flutter/gallery/blob/master/lib/demos/reference/transformations_demo.dart),
 ///     which includes the use of InteractiveViewer.
@@ -62,8 +60,6 @@ typedef InteractiveViewerWidgetBuilder = Widget Function(BuildContext context, Q
 @immutable
 class InteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
-  ///
-  /// The [child] parameter must not be null.
   InteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
@@ -111,8 +107,8 @@ class InteractiveViewer extends StatefulWidget {
   /// Can be used to render a child that changes in response to the current
   /// transformation.
   ///
-  /// The [builder] parameter must not be null. See its docs for an example of
-  /// using it to optimize a large child.
+  /// See the [builder] attribute docs for an example of using it to optimize a
+  /// large child.
   InteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
@@ -307,7 +303,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to 2.5.
   ///
-  /// Cannot be null, and must be greater than zero and greater than minScale.
+  /// Must be greater than zero and greater than [minScale].
   final double maxScale;
 
   /// The minimum allowed scale.
@@ -321,15 +317,14 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to 0.8.
   ///
-  /// Cannot be null, and must be a finite number greater than zero and less
-  /// than maxScale.
+  /// Must be a finite number greater than zero and less than [maxScale].
   final double minScale;
 
   /// Changes the deceleration behavior after a gesture.
   ///
   /// Defaults to 0.0000135.
   ///
-  /// Cannot be null, and must be a finite number greater than zero.
+  /// Must be a finite number greater than zero.
   final double interactionEndFrictionCoefficient;
 
   /// Called when the user ends a pan or scale gesture on the widget.

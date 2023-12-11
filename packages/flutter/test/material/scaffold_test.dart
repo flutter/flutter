@@ -273,6 +273,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Floating action button shrinks when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     const double kBottomSheetDominatesPercentage = 0.3;
 
     await tester.pumpWidget(MaterialApp(home: Scaffold(
@@ -312,6 +313,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Scaffold shows scrim when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     const double kBottomSheetDominatesPercentage = 0.3;
     const double kMinBottomSheetScrimOpacity = 0.1;
     const double kMaxBottomSheetScrimOpacity = 0.6;
@@ -594,7 +596,7 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+                  Scaffold.of(context).showBottomSheet((BuildContext context) {
                     return Container(
                       key: sheetKey,
                       color: Colors.blue[500],
@@ -2171,7 +2173,7 @@ void main() {
         );
         late FlutterError error;
         try {
-          key.currentState!.showBottomSheet<void>((BuildContext context) {
+          key.currentState!.showBottomSheet((BuildContext context) {
             final ThemeData themeData = Theme.of(context);
             return Container(
               decoration: BoxDecoration(
@@ -2232,7 +2234,7 @@ void main() {
             ),
           ),
         );
-        key.currentState!.showBottomSheet<void>((_) => Container());
+        key.currentState!.showBottomSheet((_) => Container());
         await tester.tap(find.byKey(buttonKey));
         await tester.pump();
         expect(errors, isNotEmpty);
@@ -2264,7 +2266,7 @@ void main() {
         MaterialApp(
           home: Builder(
             builder: (BuildContext context) {
-              Scaffold.of(context).showBottomSheet<void>((BuildContext context) {
+              Scaffold.of(context).showBottomSheet((BuildContext context) {
                 return Container();
               });
               return Container();
@@ -2762,8 +2764,9 @@ void main() {
 
   testWidgetsWithLeakTracking('showBottomSheet removes scrim when draggable sheet is dismissed', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
+    addTearDown(draggableController.dispose);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
-    PersistentBottomSheetController<void>? sheetController;
+    PersistentBottomSheetController? sheetController;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -2772,7 +2775,7 @@ void main() {
       ),
     ));
 
-    sheetController = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    sheetController = scaffoldKey.currentState!.showBottomSheet((_) {
       return DraggableScrollableSheet(
         expand: false,
         controller: draggableController,
@@ -2808,7 +2811,7 @@ void main() {
 
   testWidgetsWithLeakTracking("Closing bottom sheet & removing FAB at the same time doesn't throw assertion", (WidgetTester tester) async {
       final Key bottomSheetKey = UniqueKey();
-      PersistentBottomSheetController<void>? controller;
+      PersistentBottomSheetController? controller;
       bool show = true;
 
       await tester.pumpWidget(StatefulBuilder(

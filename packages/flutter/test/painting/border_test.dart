@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -316,7 +317,7 @@ void main() {
     expect(nonUniformBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20));
   });
 
-  testWidgets('Non-Uniform Border variations', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Non-Uniform Border variations', (WidgetTester tester) async {
 
     Widget buildWidget({ required BoxBorder border, BorderRadius? borderRadius, BoxShape boxShape = BoxShape.rectangle}) {
       return Directionality(

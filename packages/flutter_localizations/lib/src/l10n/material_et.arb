@@ -51,7 +51,6 @@
   "reorderItemRight": "Teisalda paremale",
   "expandedIconTapHint": "Ahenda",
   "collapsedIconTapHint": "Laienda",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Jäänud on 1 tähemärk",
   "remainingTextFieldCharacterCountOther": "Jäänud on $remainingCount tähemärki",
   "refreshIndicatorSemanticLabel": "Värskendamine",
@@ -144,6 +143,6 @@
   "collapsedHint": "Laiendatud",
   "menuDismissLabel": "Sulge menüü",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "searchWebButtonLabel": "Otsi veebist",
+  "shareButtonLabel": "Jaga …"
 }

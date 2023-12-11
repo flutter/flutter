@@ -23,7 +23,7 @@ import 'theme.dart';
 // Apple Design Resources(https://developer.apple.com/design/resources/).
 // However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
-  fontFamily: '.SF UI Display',
+  fontFamily: 'CupertinoSystemDisplay',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -33,7 +33,7 @@ const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -43,7 +43,7 @@ const TextStyle _kCupertinoDialogContentStyle = TextStyle(
 );
 
 const TextStyle _kCupertinoDialogActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 16.8,
   fontWeight: FontWeight.w400,
@@ -52,7 +52,7 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 
 // CupertinoActionSheet-specific text styles.
 const TextStyle _kActionSheetActionStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 20.0,
   fontWeight: FontWeight.w400,
@@ -60,7 +60,7 @@ const TextStyle _kActionSheetActionStyle = TextStyle(
 );
 
 const TextStyle _kActionSheetContentStyle = TextStyle(
-  fontFamily: '.SF UI Text',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
@@ -190,8 +190,6 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatefulWidget {
   /// Creates an iOS-style alert dialog.
-  ///
-  /// The [actions] must not be null.
   const CupertinoAlertDialog({
     super.key,
     this.title,
@@ -686,8 +684,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 ///    more choices related to the current context.
 class CupertinoActionSheetAction extends StatelessWidget {
   /// Creates an action for an iOS-style action sheet.
-  ///
-  /// The [child] and [onPressed] arguments must not be null.
   const CupertinoActionSheetAction({
     super.key,
     required this.onPressed,
@@ -697,8 +693,6 @@ class CupertinoActionSheetAction extends StatelessWidget {
   });
 
   /// The callback that is called when the button is tapped.
-  ///
-  /// This attribute must not be null.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
@@ -1632,14 +1626,14 @@ class CupertinoDialogAction extends StatelessWidget {
   /// but more than one action can have this attribute set to true in the same
   /// [CupertinoAlertDialog].
   ///
-  /// This parameters defaults to false and cannot be null.
+  /// This parameters defaults to false.
   final bool isDefaultAction;
 
   /// Whether this action destroys an object.
   ///
   /// For example, an action that deletes an email is destructive.
   ///
-  /// Defaults to false and cannot be null.
+  /// Defaults to false.
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.

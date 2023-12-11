@@ -204,6 +204,9 @@ class TableBorder {
     required Iterable<double> rows,
     required Iterable<double> columns,
   }) {
+    // properties can't be null
+
+    // arguments can't be null
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 

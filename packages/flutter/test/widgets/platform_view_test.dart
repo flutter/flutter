@@ -332,7 +332,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
 
       expect(
         viewsController.motionEvents[currentViewId + 1],
@@ -342,6 +342,10 @@ void main() {
         numPointerDownsOnParent,
         1,
       );
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgetsWithLeakTracking('Android view translucent hit test behavior', (WidgetTester tester) async {
@@ -377,7 +381,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
 
       expect(
         viewsController.motionEvents[currentViewId + 1],
@@ -389,6 +393,10 @@ void main() {
         numPointerDownsOnParent,
         1,
       );
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgetsWithLeakTracking('Android view opaque hit test behavior', (WidgetTester tester) async {
@@ -423,7 +431,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
 
       expect(
         viewsController.motionEvents[currentViewId + 1],
@@ -435,6 +443,10 @@ void main() {
         numPointerDownsOnParent,
         0,
       );
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgetsWithLeakTracking("Android view touch events are in virtual display's coordinate system", (WidgetTester tester) async {
@@ -626,7 +638,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -672,7 +686,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -715,7 +731,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -841,7 +859,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -851,7 +873,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
@@ -863,6 +885,10 @@ void main() {
           const FakeAndroidMotionEvent(AndroidViewController.kActionDown, <int>[0], <Offset>[Offset(50.0, 50.0)]),
         ]),
       );
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     // This test makes sure it doesn't crash.
@@ -877,7 +903,11 @@ void main() {
           viewType: 'webview',
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
             Factory<EagerGestureRecognizer>(
-              () => EagerGestureRecognizer(),
+              () {
+                final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                addTearDown(recognizer.dispose);
+                return recognizer;
+              },
             ),
           },
           layoutDirection: TextDirection.ltr,
@@ -896,7 +926,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -1712,7 +1744,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1756,7 +1790,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1798,7 +1834,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -1921,7 +1959,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -1935,7 +1977,7 @@ void main() {
       // is not yet in the tree.
       await tester.pump();
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
@@ -1943,6 +1985,10 @@ void main() {
       // pointer down event is immediately dispatched.
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgetsWithLeakTracking('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
@@ -2032,7 +2078,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -2633,7 +2681,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2677,7 +2727,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<LongPressGestureRecognizer>(
                     () {
-                      return LongPressGestureRecognizer();
+                      final LongPressGestureRecognizer recognizer = LongPressGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2719,7 +2771,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<TapGestureRecognizer>(
                     () {
-                      return TapGestureRecognizer();
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -2842,7 +2896,11 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -2856,7 +2914,7 @@ void main() {
       // is not yet in the tree.
       await tester.pump();
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
@@ -2864,6 +2922,10 @@ void main() {
       // pointer down event is immediately dispatched.
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
       expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgetsWithLeakTracking('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
@@ -2953,7 +3015,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         factoryInvocationCount += 1;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(
@@ -3217,7 +3281,9 @@ void main() {
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
                     () {
-                      return VerticalDragGestureRecognizer();
+                      final VerticalDragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
                     },
                   ),
                 },
@@ -3329,7 +3395,11 @@ void main() {
                 hitTestBehavior: PlatformViewHitTestBehavior.opaque,
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
+                    () {
+                      final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+                      addTearDown(recognizer.dispose);
+                      return recognizer;
+                    },
                   ),
                 },
               ),
@@ -3338,7 +3408,7 @@ void main() {
         ),
       );
 
-      await tester.startGesture(const Offset(50.0, 50.0));
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
 
       // Normally (without the eager gesture recognizer) after just the pointer down event
       // no gesture arena member will claim the arena (so no motion events will be dispatched to
@@ -3348,13 +3418,19 @@ void main() {
         controller.dispatchedPointerEvents.length,
         1,
       );
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
 
     testWidgetsWithLeakTracking('PlatformViewRenderBox reconstructed with same gestureRecognizers', (WidgetTester tester) async {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       final PlatformViewSurface platformViewSurface = PlatformViewSurface(
@@ -3378,7 +3454,9 @@ void main() {
       int factoryInvocationCount = 0;
       EagerGestureRecognizer constructRecognizer() {
         ++factoryInvocationCount;
-        return EagerGestureRecognizer();
+        final EagerGestureRecognizer recognizer = EagerGestureRecognizer();
+        addTearDown(recognizer.dispose);
+        return recognizer;
       }
 
       await tester.pumpWidget(

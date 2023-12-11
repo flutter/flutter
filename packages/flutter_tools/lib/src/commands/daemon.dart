@@ -545,6 +545,7 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         systemClock: globals.systemClock,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -561,6 +562,7 @@ class AppDomain extends Domain {
         multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
+        analytics: globals.analytics,
       );
     } else {
       runner = ColdRunner(

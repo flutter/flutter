@@ -2337,7 +2337,7 @@ class LayerLink {
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         _debugLeaderCheckScheduled = false;
         assert(_debugPreviousLeaders!.isEmpty);
-      });
+      }, debugLabel: 'LayerLink.leadersCleanUpCheck');
       return true;
     }());
   }

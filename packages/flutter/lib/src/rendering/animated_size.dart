@@ -264,7 +264,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     if (child == null || constraints.isTight) {
       return constraints.smallest;
     }

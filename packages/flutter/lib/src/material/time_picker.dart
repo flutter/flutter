@@ -1631,6 +1631,14 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   final RestorableBool minuteHasError = RestorableBool(false);
 
   @override
+  void dispose() {
+    _selectedTime.dispose();
+    hourHasError.dispose();
+    minuteHasError.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -1986,6 +1994,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       controllerHasBeenSet.value = true;
       controller.value.text = _formattedValue;
     }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    controllerHasBeenSet.dispose();
+    focusNode.dispose();
+    super.dispose();
   }
 
   @override

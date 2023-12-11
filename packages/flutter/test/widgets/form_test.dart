@@ -78,7 +78,7 @@ void main() {
 
     Future<void> checkText(String testValue) async {
       await tester.enterText(find.byType(TextField), testValue);
-      // pump'ing is unnecessary because callback happens regardless of frames
+      // Pumping is unnecessary because callback happens regardless of frames.
       expect(fieldValue, equals(testValue));
     }
 
@@ -944,5 +944,72 @@ void main() {
     // after resetting the field, it has not been interacted with again
     fieldKey.currentState!.reset();
     expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
+  });
+
+  testWidgets('Validator is nullified and error text behaves accordingly',
+      (WidgetTester tester) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    bool useValidator = false;
+    late StateSetter setState;
+
+    String? validator(String? value) {
+      if (value == null || value.isEmpty) {
+        return 'test_error';
+      }
+      return null;
+    }
+
+    Widget builder() {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: Form(
+                      key: formKey,
+                      child: TextFormField(
+                        validator: useValidator ? validator : null,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    // Start with no validator.
+    await tester.enterText(find.byType(TextFormField), '');
+    await tester.pump();
+    formKey.currentState!.validate();
+    await tester.pump();
+    expect(find.text('test_error'), findsNothing);
+
+    // Now use the validator.
+    setState(() {
+      useValidator = true;
+    });
+    await tester.pump();
+    formKey.currentState!.validate();
+    await tester.pump();
+    expect(find.text('test_error'), findsOneWidget);
+
+    // Remove the validator again and expect the error to disappear.
+    setState(() {
+      useValidator = false;
+    });
+    await tester.pump();
+    formKey.currentState!.validate();
+    await tester.pump();
+    expect(find.text('test_error'), findsNothing);
   });
 }
