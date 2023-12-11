@@ -137,6 +137,7 @@ Future<void> a11y_main() async {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder()
     ..updateNode(
       id: 42,
+      identifier: '',
       label: 'A: root',
       labelAttributes: <StringAttribute>[],
       rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
@@ -170,6 +171,7 @@ Future<void> a11y_main() async {
     )
     ..updateNode(
       id: 84,
+      identifier: '',
       label: 'B: leaf',
       labelAttributes: <StringAttribute>[],
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
@@ -203,6 +205,7 @@ Future<void> a11y_main() async {
     )
     ..updateNode(
       id: 96,
+      identifier: '',
       label: 'C: branch',
       labelAttributes: <StringAttribute>[],
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
@@ -236,6 +239,7 @@ Future<void> a11y_main() async {
     )
     ..updateNode(
       id: 128,
+      identifier: '',
       label: 'D: leaf',
       labelAttributes: <StringAttribute>[],
       rect: Rect.fromLTRB(40.0, 40.0, 80.0, 80.0),
@@ -301,6 +305,7 @@ Future<void> a11y_string_attributes() async {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder()
     ..updateNode(
       id: 42,
+      identifier: 'identifier',
       label: 'What is the meaning of life?',
       labelAttributes: <StringAttribute>[
         LocaleStringAttribute(

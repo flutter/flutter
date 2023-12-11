@@ -807,8 +807,7 @@ abstract class SemanticsUpdateBuilder {
     required double elevation,
     required double thickness,
     required Rect rect,
-    // TODO(bartekpacia): Re-add once migration is complete
-    // String identifier,
+    required String identifier,
     required String label,
     required List<StringAttribute> labelAttributes,
     required String value,
@@ -878,8 +877,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implem
     required double elevation,
     required double thickness,
     required Rect rect,
-    // TODO(bartekpacia): Re-add once migration is complete
-    // String identifier,
+    required String identifier,
     required String label,
     required List<StringAttribute> labelAttributes,
     required String value,
@@ -918,8 +916,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implem
       rect.bottom,
       elevation,
       thickness,
-      // TODO(bartekpacia): Pass real identifier parameter once migration is complete
-      '',
+      identifier,
       label,
       labelAttributes,
       value,

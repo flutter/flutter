@@ -3097,8 +3097,7 @@ void updateNode(
     elevation: elevation,
     thickness: thickness,
     rect: rect,
-    // TODO(bartekpacia): Pass real identifier parameter once migration is complete
-    // identifier: '',
+    identifier: identifier,
     label: label,
     labelAttributes: labelAttributes,
     hint: hint,

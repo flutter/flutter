@@ -49,6 +49,7 @@ class LocaleInitialization extends Scenario {
         // SemanticsAction.tap.
         actions: 1,
         rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
+        identifier: '',
         label: view.platformDispatcher.locales.toString(),
         labelAttributes: <StringAttribute>[],
         textDirection: TextDirection.ltr,
@@ -107,6 +108,7 @@ class LocaleInitialization extends Scenario {
         // SemanticsAction.tap.
         actions: 1,
         rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
+        identifier: '',
         label: label,
         labelAttributes: <StringAttribute>[],
         textDirection: TextDirection.ltr,

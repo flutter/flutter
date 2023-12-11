@@ -360,8 +360,7 @@ class SemanticsUpdateBuilder {
     required double elevation,
     required double thickness,
     required Rect rect,
-    // TODO(bartekpacia): Re-add once migration is complete
-    // String identifier,
+    required String identifier,
     required String label,
     required List<StringAttribute> labelAttributes,
     required String value,
@@ -396,8 +395,7 @@ class SemanticsUpdateBuilder {
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
       rect: rect,
-      // TODO(bartekpacia): Pass real identifier parameter once migration is complete
-      identifier: '',
+      identifier: identifier,
       label: label,
       labelAttributes: labelAttributes,
       value: value,
