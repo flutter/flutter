@@ -64,7 +64,7 @@ void main() {
       cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1))),
       confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2))),
       dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3)),
-      dayPeriodColor: Color(0xfffffff4),
+      dayPeriodColor: Color(0x00000000),
       dayPeriodShape: RoundedRectangleBorder(
         side: BorderSide(color: Color(0xfffffff5)),
       ),
@@ -102,7 +102,7 @@ void main() {
       'cancelButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff1)))',
       'confirmButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff2)))',
       'dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3))',
-      'dayPeriodColor: Color(0xfffffff4)',
+      'dayPeriodColor: Color(0x00000000)',
       'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff5)), BorderRadius.zero)',
       'dayPeriodTextColor: Color(0xfffffff6)',
       'dayPeriodTextStyle: TextStyle(inherit: true, color: Color(0xfffffff7))',
