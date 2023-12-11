@@ -35,6 +35,6 @@ function follow_links() (
 
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
 SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
-YAPF_DIR="$(cd "$SRC_DIR/third_party/yapf"; pwd -P)"
+YAPF_DIR="$(cd "$SRC_DIR/flutter/third_party/yapf"; pwd -P)"
 
 PYTHONPATH="$YAPF_DIR" python3 "$YAPF_DIR/yapf" "$@"

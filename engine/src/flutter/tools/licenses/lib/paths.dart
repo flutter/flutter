@@ -96,6 +96,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/txt/third_party/fonts',
   r'flutter/third_party/wuffs/docs',
   r'flutter/third_party/wuffs/script',
+  r'flutter/third_party/yapf', // only used for code formatting
   r'flutter/tools',
   r'flutter/web_sdk', // this code is not linked into Flutter apps; it's only used by engine tests and tools
   r'fuchsia/sdk/linux/docs',
@@ -212,7 +213,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/vulkan_memory_allocator/src',
   r'third_party/vulkan_memory_allocator/tools',
   r'third_party/web_dependencies/canvaskit', // redundant; covered by Skia dependencies
-  r'third_party/yapf', // only used for code formatting
   r'third_party/zlib/contrib/minizip/miniunz.c', // sample file
   r'third_party/zlib/contrib/minizip/minizip.c', // sample file
   r'tools', // not distributed in binary
