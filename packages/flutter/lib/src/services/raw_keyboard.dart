@@ -756,12 +756,12 @@ typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
 ///
 /// See also:
 ///
-/// * [RawKeyDownEvent] and [RawKeyUpEvent], the classes used to describe
-///   specific raw key events.
-/// * [RawKeyboardListener], a widget that listens for raw key events.
-/// * [SystemChannels.keyEvent], the low-level channel used for receiving events
-///   from the system.
-/// * [HardwareKeyboard], the recommended replacement.
+///  * [RawKeyDownEvent] and [RawKeyUpEvent], the classes used to describe
+///    specific raw key events.
+///  * [RawKeyboardListener], a widget that listens for raw key events.
+///  * [SystemChannels.keyEvent], the low-level channel used for receiving events
+///    from the system.
+///  * [HardwareKeyboard], the recommended replacement.
 @Deprecated(
   'Use HardwareKeyboard instead. '
   'This feature was deprecated after v3.18.0-2.0.pre.',

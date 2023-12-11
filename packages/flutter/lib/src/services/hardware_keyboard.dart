@@ -992,7 +992,8 @@ class KeyEventManager {
   /// lifecycle (such as `initState`), or after calling
   /// `WidgetManager.instance`.
   ///
-  /// {@tool dartpad} This example shows how to process key events that are not
+  /// {@tool dartpad}
+  /// This example shows how to process key events that are not
   /// handled by any focus handler (such as `Shortcuts`) by patching
   /// [keyMessageHandler].
   ///

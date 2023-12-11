@@ -26,10 +26,10 @@ export 'package:flutter/services.dart' show RawKeyEvent;
 ///
 /// See also:
 ///
-/// * [EditableText], which should be used instead of this widget for text
-///   entry.
-/// * [KeyboardListener], a similar widget based on the newer [HardwareKeyboard]
-///   API.
+///  * [EditableText], which should be used instead of this widget for text
+///    entry.
+///  * [KeyboardListener], a similar widget based on the newer [HardwareKeyboard]
+///    API.
 @Deprecated(
   'Use KeyboardListener instead. '
   'This feature was deprecated after v3.18.0-2.0.pre.',
