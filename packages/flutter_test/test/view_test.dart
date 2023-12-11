@@ -313,7 +313,8 @@ void main() {
     });
 
     testWidgets('updateSemantics is passed through to backing FlutterView', (WidgetTester tester) async {
-      final SemanticsUpdate expectedUpdate = SemanticsUpdateBuilder().build();
+      // ignore: deprecated_member_use
+      final SemanticsUpdate expectedUpdate = SemanticsUpdateBuilderNew().build();
       final _FakeFlutterView backingView = _FakeFlutterView();
       final TestFlutterView view = TestFlutterView(
         view: backingView,
