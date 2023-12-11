@@ -90,7 +90,7 @@ void main() {
         ),
       );
 
-      final TestGesture longpress = await tester.startGesture(const Offset(10, 10));
+      final TestGesture longpress = await tester.startGesture(tester.getCenter(find.byType(Text)));
       addTearDown(longpress.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await longpress.up();
