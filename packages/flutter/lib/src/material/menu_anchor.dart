@@ -3417,7 +3417,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.symmetric(horizontal: dx, vertical: dy))
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     BoxConstraints effectiveConstraints = visualDensity.effectiveConstraints(
       BoxConstraints(
@@ -3562,7 +3562,7 @@ class _Submenu extends StatelessWidget {
     final double dx = math.max(0, densityAdjustment.dx);
     final EdgeInsetsGeometry resolvedPadding = padding
         .add(EdgeInsets.fromLTRB(dx, dy, dx, dy))
-        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
     return Theme(
       data: Theme.of(context).copyWith(

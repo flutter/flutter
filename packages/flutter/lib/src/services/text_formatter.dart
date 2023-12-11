@@ -419,7 +419,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
       return replacedLength - removedLength;
     }
 
