@@ -61,6 +61,7 @@ targets:
     timeout: 60
     runIf:
       - .ci.yaml
+      - DEPS
       - lib/ui/**
       - shell/platform/android/**
 
