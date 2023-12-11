@@ -2283,6 +2283,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: hot_mode_dev_cycle_linux__benchmark
     runIf:
+      - .ci.yaml
       - dev/**
 
   - name: Linux_android hybrid_android_views_integration_test
