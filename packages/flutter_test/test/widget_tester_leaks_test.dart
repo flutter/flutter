@@ -81,10 +81,7 @@ void verifyLeaks(Leaks leaks) {
 
   try {
     expect(leaks, isLeakFree);
-  } catch (e) {
-    if (e is! TestFailure) {
-      rethrow;
-    }
+  } on TestFailure catch (e) {
     expect(e.message, contains('https://github.com/dart-lang/leak_tracker'));
 
     expect(e.message, isNot(contains(_test1TrackingOnNoLeaks)));
