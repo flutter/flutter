@@ -258,6 +258,7 @@ class KeyboardConverter {
   bool _disposed = false;
   void dispose() {
     _disposed = true;
+    clearPressedKeys();
   }
 
   // On macOS, CapsLock behaves differently in that, a keydown event occurs when
@@ -698,5 +699,9 @@ class KeyboardConverter {
 
   bool keyIsPressed(int physical) {
     return _pressingRecords.containsKey(physical);
+  }
+
+  void clearPressedKeys() {
+    _pressingRecords.clear();
   }
 }

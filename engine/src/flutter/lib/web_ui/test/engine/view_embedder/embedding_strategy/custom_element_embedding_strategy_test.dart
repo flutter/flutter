@@ -45,7 +45,7 @@ void doTests() {
     });
   });
 
-  group('attachGlassPane', () {
+  group('attachViewRoot', () {
     setUp(() {
       target = createDomElement('this-is-the-target');
       domDocument.body!.append(target);
@@ -66,7 +66,7 @@ void doTests() {
           reason: 'Should not have any specific position.');
       expect(style.width, '', reason: 'Should not have any size set.');
 
-      strategy.attachGlassPane(glassPane);
+      strategy.attachViewRoot(glassPane);
 
       // Assert injection into <body>
       expect(glassPane.isConnected, isTrue,
@@ -98,7 +98,7 @@ void doTests() {
       domDocument.body!.append(target);
       strategy = CustomElementEmbeddingStrategy(target);
       strategy.initialize();
-      strategy.attachGlassPane(glassPane);
+      strategy.attachViewRoot(glassPane);
     });
 
     tearDown(() {
