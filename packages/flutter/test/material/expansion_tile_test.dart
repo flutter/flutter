@@ -9,8 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
-
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
 
