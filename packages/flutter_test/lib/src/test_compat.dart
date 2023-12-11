@@ -253,6 +253,10 @@ void tearDownAll(dynamic Function() body) {
   _declarer.tearDownAll(body);
 }
 
+/// Registers a function to be called after all tests in the test library are completed.
+void addTearDownLibrary(dynamic Function() body) {
+  _declarer.addTearDownLibrary(body);
+}
 
 /// A reporter that prints each test on its own line.
 ///
