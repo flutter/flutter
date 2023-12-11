@@ -252,6 +252,7 @@ class ExpansionTile extends StatefulWidget {
     this.dense,
     this.visualDensity,
     this.enableFeedback = true,
+    this.enabled = true,
     this.expansionAnimationStyle,
   }) : assert(
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
@@ -507,6 +508,15 @@ class ExpansionTile extends StatefulWidget {
   /// {@macro flutter.material.ListTile.enableFeedback}
   final bool? enableFeedback;
 
+  /// Whether this expansion tile is interactive.
+  ///
+  /// If false, the internal [ListTile] will be disabled, changing its
+  /// appearance according to the theme and disabling user interaction.
+  ///
+  /// Even if disabled, the expansion can still be toggled programmatically
+  /// through an [ExpansionTileController].
+  final bool enabled;
+
   /// Used to override the expansion animation curve and duration.
   ///
   /// If [AnimationStyle.duration] is provided, it will be used to override
@@ -685,6 +695,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
               iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
               textColor: _headerColor.value,
               child: ListTile(
+                enabled: widget.enabled,
                 onTap: _handleTap,
                 dense: widget.dense,
                 visualDensity: widget.visualDensity,
