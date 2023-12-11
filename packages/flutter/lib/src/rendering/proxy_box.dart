@@ -576,6 +576,11 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return super.computeDryBaseline(BoxConstraints.tight(computeDryLayout(constraints)), baseline);
+  }
+
+  @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     return _applyAspectRatio(constraints);
