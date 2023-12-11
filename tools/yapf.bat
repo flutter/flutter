@@ -11,6 +11,6 @@ REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
-SET yapf_path=%~dp0\..\..\third_party\yapf
+SET yapf_path=%~dp0\..\..\flutter\third_party\yapf
 
 cmd /V /C "SET PYTHONPATH=%yapf_path%&& vpython3 %yapf_path%\yapf %*"
