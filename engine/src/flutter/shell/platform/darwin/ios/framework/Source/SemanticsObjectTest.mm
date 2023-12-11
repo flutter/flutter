@@ -508,6 +508,20 @@ FLUTTER_ASSERT_ARC
   XCTAssertFalse(scrollView.isAccessibilityElement);
 }
 
+- (void)testFlutterSemanticsObjectHasIdentifier {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.identifier = "identifier";
+
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  XCTAssertTrue([object.accessibilityIdentifier isEqualToString:@"identifier"]);
+}
+
 - (void)testFlutterScrollableSemanticsObjectWithLabelValueHintIsNotHiddenWhenVoiceOverIsRunning {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
