@@ -20,6 +20,6 @@ impeller_component("typographer_stb_backend") {
 
   public_deps = [
     "//flutter/impeller/typographer",
-    "//third_party/stb:stb_truetype",
+    "//flutter/third_party/stb:stb_truetype",
   ]
 }
