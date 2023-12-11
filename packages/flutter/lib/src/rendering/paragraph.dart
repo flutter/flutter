@@ -1757,10 +1757,13 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   }
 
   SelectionResult _handleSelectTextBoundary(_TextBoundaryRecord textBoundary) {
-    if (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset < range.start) {
+    // This fragment may not contain the boundary, decide what direction the target
+    // fragment is located in. Because fragments are separated by placeholder
+    // spans, we also check if the beginning or end of the boundary is touching
+    // either edge of this fragment.
+    if (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset <= range.start) {
       return SelectionResult.previous;
-    } else if (textBoundary.boundaryStart.offset > range.end && textBoundary.boundaryEnd.offset > range.end) {
-      //make this || instead of && to fix double tap to select inline element.
+    } else if (textBoundary.boundaryStart.offset >= range.end && textBoundary.boundaryEnd.offset > range.end) {
       return SelectionResult.next;
     }
     // Fragments are separated by placeholder span, the text boundary shouldn't
