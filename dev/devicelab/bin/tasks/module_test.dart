@@ -13,8 +13,6 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:path/path.dart' as path;
-
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable =
     Platform.isWindows ? '.\\$gradlew' : './$gradlew';
