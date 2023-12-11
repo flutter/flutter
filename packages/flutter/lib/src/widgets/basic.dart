@@ -7077,7 +7077,7 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
 ///    be enabled using [WidgetsApp.showSemanticsDebugger] or
-///    [MaterialApp.showSemanticsDebugger].
+///    [MaterialApp.showSemanticsDebugger] or [CupertinoApp.showSemanticsDebugger].
 @immutable
 class Semantics extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
