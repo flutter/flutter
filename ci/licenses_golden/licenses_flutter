@@ -6465,6 +6465,7 @@ ORIGIN: ../../../flutter/shell/platform/common/text_input_model.cc + ../../../fl
 ORIGIN: ../../../flutter/shell/platform/common/text_input_model.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/text_range.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/availability_version_check.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/common/availability_version_check.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/buffer_conversions.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/buffer_conversions.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/command_line.h + ../../../flutter/LICENSE
@@ -6597,6 +6598,7 @@ ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibilit
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_test.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/availability_version_check_test.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection_test.mm + ../../../flutter/LICENSE
@@ -9281,6 +9283,7 @@ FILE: ../../../flutter/shell/platform/common/text_input_model.cc
 FILE: ../../../flutter/shell/platform/common/text_input_model.h
 FILE: ../../../flutter/shell/platform/common/text_range.h
 FILE: ../../../flutter/shell/platform/darwin/common/availability_version_check.cc
+FILE: ../../../flutter/shell/platform/darwin/common/availability_version_check.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.mm
 FILE: ../../../flutter/shell/platform/darwin/common/command_line.h
@@ -9414,6 +9417,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_test.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/availability_version_check_test.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/connection_collection_test.mm

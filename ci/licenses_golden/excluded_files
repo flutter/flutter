@@ -303,6 +303,7 @@
 ../../../flutter/shell/platform/common/text_input_model_unittests.cc
 ../../../flutter/shell/platform/common/text_range_unittests.cc
 ../../../flutter/shell/platform/darwin/Doxyfile
+../../../flutter/shell/platform/darwin/common/availability_version_check_unittests.cc
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_codecs_unittest.mm
 ../../../flutter/shell/platform/darwin/common/framework/Source/flutter_standard_codec_unittest.mm
 ../../../flutter/shell/platform/darwin/macos/README.md

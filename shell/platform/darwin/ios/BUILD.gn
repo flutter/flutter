@@ -273,6 +273,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
     "framework/Source/VsyncWaiterIosTest.mm",
     "framework/Source/accessibility_bridge_test.mm",
+    "framework/Source/availability_version_check_test.mm",
     "framework/Source/connection_collection_test.mm",
     "platform_message_handler_ios_test.mm",
   ]
