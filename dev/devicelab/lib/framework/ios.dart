@@ -66,7 +66,6 @@ Future<void> testWithNewIOSSimulator(
     workingDirectory: flutterDirectory.path,
   );
 
-  // Get the runtime build identifier for the default runtime Xcode would use.
   final String runtimesForSelectedXcode = await eval(
     'xcrun',
     <String>[
@@ -74,19 +73,24 @@ Future<void> testWithNewIOSSimulator(
       'runtime',
       'match',
       'list',
-      '--json'
+      '--json',
     ],
     workingDirectory: flutterDirectory.path,
   );
 
+  // Get the preferred runtime build for the selected Xcode version. Preferred
+  // means the runtime was either bundled with Xcode, exactly matched your SDK
+  // version, or it's indicated a better match for your SDK.
   final Map<String, Object?> decodeResult = json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
-  final String? iosKey = decodeResult.keys.where((String key) => key.contains('iphoneos')).firstOrNull;
+  final String? iosKey = decodeResult.keys
+      .where((String key) => key.contains('iphoneos'))
+      .firstOrNull;
   final Object? iosDetails = decodeResult[iosKey];
   String? runtimeBuildForSelectedXcode;
   if (iosDetails != null && iosDetails is Map<String, Object?>) {
-    final Object? runtimeBuildObj = iosDetails['preferredBuild'];
-    if (runtimeBuildObj is String) {
-      runtimeBuildForSelectedXcode = runtimeBuildObj;
+    final Object? preferredBuild = iosDetails['preferredBuild'];
+    if (preferredBuild is String) {
+      runtimeBuildForSelectedXcode = preferredBuild;
     }
   }
 
@@ -100,7 +104,8 @@ Future<void> testWithNewIOSSimulator(
   // For example, iOS 17 (released with Xcode 15) may be available even if the
   // selected Xcode version is 14.
   for (final String runtime in LineSplitter.split(availableRuntimes)) {
-    if (runtimeBuildForSelectedXcode != null && !runtime.contains(runtimeBuildForSelectedXcode)) {
+    if (runtimeBuildForSelectedXcode != null &&
+        !runtime.contains(runtimeBuildForSelectedXcode)) {
       continue;
     }
     // These seem to be in order, so allow matching multiple lines so it grabs
