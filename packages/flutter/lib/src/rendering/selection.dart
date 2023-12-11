@@ -299,6 +299,12 @@ enum SelectionEventType {
   /// Used by [SelectWordSelectionEvent].
   selectWord,
 
+  /// An event to select a word at the location
+  /// [SelectParagraphSelectionEvent.globalPosition].
+  ///
+  /// Used by [SelectParagraphSelectionEvent].
+  selectParagraph,
+
   /// An event that extends the selection by a specific [TextGranularity].
   granularlyExtendSelection,
 
@@ -316,6 +322,9 @@ enum TextGranularity {
 
   /// Treats word as an atomic unit when moving the selection handles.
   word,
+
+  /// Treats a paragraph as an atomic unit when moving the selection handles.
+  paragraph,
 
   /// Treats each line break as an atomic unit when moving the selection handles.
   line,
@@ -367,6 +376,17 @@ class SelectWordSelectionEvent extends SelectionEvent {
   const SelectWordSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectWord);
 
   /// The position in global coordinates to select word at.
+  final Offset globalPosition;
+}
+
+/// Selects the entire paragraph at the location.
+///
+/// This event can be sent as the result of a triple click to select.
+class SelectParagraphSelectionEvent extends SelectionEvent {
+  /// Creates a select paragraph event at the [globalPosition].
+  const SelectParagraphSelectionEvent({required this.globalPosition}): super._(SelectionEventType.selectParagraph);
+
+  /// The position in global coordinates to select paragraph at.
   final Offset globalPosition;
 }
 
