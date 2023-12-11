@@ -3075,11 +3075,18 @@ Future<void> testMain() async {
 
       final DomHTMLElement input = editingStrategy!.activeDomElement;
       expect(input.style.color, contains('transparent'));
-      expect(input.style.background, contains('transparent'));
+      if (isSafari) {
+        // macOS 13 returns different values than macOS 12.
+        expect(input.style.background, anyOf(contains('transparent'), contains('none')));
+        expect(input.style.outline, anyOf(contains('none'), contains('currentcolor')));
+        expect(input.style.border, anyOf(contains('none'), contains('medium')));
+      } else {
+        expect(input.style.background, contains('transparent'));
+        expect(input.style.outline, contains('none'));
+        expect(input.style.border, contains('none'));
+      }
       expect(input.style.backgroundColor, contains('transparent'));
       expect(input.style.caretColor, contains('transparent'));
-      expect(input.style.outline, contains('none'));
-      expect(input.style.border, contains('none'));
       expect(input.style.textShadow, contains('none'));
     });
 
