@@ -508,9 +508,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// Whether this activator accepts repeat events of the [trigger] key.
   ///
   /// If [includeRepeats] is true, the activator is checked on all
-  /// [RawKeyDownEvent] events for the [trigger] key. If [includeRepeats] is
-  /// false, only [trigger] key events which are not [KeyRepeatEvent]s will be
-  /// considered.
+  /// [KeyDownEvent] or [KeyRepeatEvent]s for the [trigger] key. If
+  /// [includeRepeats] is false, only [trigger] key events which are
+  /// [KeyDownEvent]s will be considered.
   final bool includeRepeats;
 
   @override
@@ -601,10 +601,10 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 /// Shift keys are pressed or not, as long as the key event produces the
 /// correct character.
 ///
-/// By default, the activator is checked on all [RawKeyDownEvent] events for
-/// the [character] in combination with the requested modifier keys. If
-/// `includeRepeats` is false, only the [character] events with a false
-/// [RawKeyDownEvent.repeat] attribute will be considered.
+/// By default, the activator is checked on all [KeyDownEvent] or
+/// [KeyRepeatEvent]s for the [character] in combination with the requested
+/// modifier keys. If `includeRepeats` is false, only the [character] events
+/// with that are [KeyDownEvent]s will be considered.
 ///
 /// {@template flutter.widgets.shortcuts.CharacterActivator.alt}
 /// On macOS and iOS, the [alt] flag indicates that the Option key (⌥) is
@@ -679,9 +679,9 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   /// Whether this activator accepts repeat events of the [character].
   ///
   /// If [includeRepeats] is true, the activator is checked on all
-  /// [RawKeyDownEvent] events for the [character]. If [includeRepeats] is
-  /// false, only the [character] events with a false [RawKeyDownEvent.repeat]
-  /// attribute will be considered.
+  /// [KeyDownEvent] and [KeyRepeatEvent]s for the [character]. If
+  /// [includeRepeats] is false, only the [character] events that are
+  /// [KeyDownEvent]s will be considered.
   final bool includeRepeats;
 
   /// The character which triggers the shortcut.
@@ -694,7 +694,7 @@ class CharacterActivator with Diagnosticable, MenuSerializableShortcut implement
   ///
   /// See also:
   ///
-  ///  * [RawKeyEvent.character], the character of a key event.
+  ///  * [KeyEvent.character], the character of a key event.
   final String character;
 
   @override

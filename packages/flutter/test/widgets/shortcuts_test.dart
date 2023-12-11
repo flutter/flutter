@@ -353,6 +353,7 @@ void main() {
       invoked = 0;
 
       expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('handles repeated events', (WidgetTester tester) async {
@@ -379,6 +380,7 @@ void main() {
       invoked = 0;
 
       expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('rejects repeated events if requested', (WidgetTester tester) async {
@@ -406,6 +408,7 @@ void main() {
       invoked = 0;
 
       expect(HardwareKeyboard.instance.logicalKeysPressed, isEmpty);
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('handles Shift-Ctrl-C', (WidgetTester tester) async {
@@ -1169,6 +1172,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('handles repeated events', (WidgetTester tester) async {
@@ -1189,6 +1193,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 2);
       invoked = 0;
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('rejects repeated events if requested', (WidgetTester tester) async {
@@ -1209,6 +1214,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, 1);
       invoked = 0;
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('handles Alt, Ctrl and Meta', (WidgetTester tester) async {
@@ -1255,6 +1261,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
       expect(invoked, 1);
       invoked = 0;
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('isActivatedBy works as expected', (WidgetTester tester) async {

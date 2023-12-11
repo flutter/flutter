@@ -7022,6 +7022,9 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
+      // TODO(gspencergoog): Remove the variant when the deprecated
+      // KeySimulatorTransitModeVariant API is removed.
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Shift test 2', (WidgetTester tester) async {
@@ -7040,6 +7043,9 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+      // TODO(gspencergoog): Remove the variant when the deprecated
+      // KeySimulatorTransitModeVariant API is removed.
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Control Shift test', (WidgetTester tester) async {
@@ -7057,6 +7063,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+      // TODO(gspencergoog): Remove the variant when the deprecated
+      // KeySimulatorTransitModeVariant API is removed.
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Down and up test', (WidgetTester tester) async {
@@ -7084,6 +7093,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+      // TODO(gspencergoog): Remove the variant when the deprecated
+      // KeySimulatorTransitModeVariant API is removed.
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Down and up test 2', (WidgetTester tester) async {
@@ -7140,6 +7152,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
+      // TODO(gspencergoog): Remove the variant when the deprecated
+      // KeySimulatorTransitModeVariant API is removed.
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Read only keyboard selection test', (WidgetTester tester) async {
@@ -7160,6 +7175,9 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
+      // TODO(gspencergoog): Remove the variant when the deprecated
+      // KeySimulatorTransitModeVariant API is removed.
+      // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
@@ -7237,6 +7255,9 @@ void main() {
     expect(find.text(expected), findsOneWidget, reason: 'Because text contains ${controller.text}');
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    // TODO(gspencergoog): Remove the variant when the deprecated
+    // KeySimulatorTransitModeVariant API is removed.
+    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7290,6 +7311,9 @@ void main() {
     expect(find.text(clipboardContent), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    // TODO(gspencergoog): Remove the variant when the deprecated
+    // KeySimulatorTransitModeVariant API is removed.
+    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
@@ -7369,6 +7393,9 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    // TODO(gspencergoog): Remove the variant when the deprecated
+    // KeySimulatorTransitModeVariant API is removed.
+    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7420,6 +7447,9 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    // TODO(gspencergoog): Remove the variant when the deprecated
+    // KeySimulatorTransitModeVariant API is removed.
+    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7474,6 +7504,9 @@ void main() {
     expect(find.text(expected2), findsOneWidget);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    // TODO(gspencergoog): Remove the variant when the deprecated
+    // KeySimulatorTransitModeVariant API is removed.
+    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
@@ -7569,6 +7602,9 @@ void main() {
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    // TODO(gspencergoog): Remove the variant when the deprecated
+    // KeySimulatorTransitModeVariant API is removed.
+    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 
@@ -7646,6 +7682,9 @@ void main() {
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   },
     skip: areKeyEventsHandledByPlatform, // [intended] only applies to platforms where we handle key events.
+    // TODO(gspencergoog): Remove the variant when the deprecated
+    // KeySimulatorTransitModeVariant API is removed.
+    // ignore: deprecated_member_use
     variant: KeySimulatorTransitModeVariant.all()
   );
 

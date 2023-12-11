@@ -445,6 +445,7 @@ void main() {
 
     debugDefaultTargetPlatformOverride = null;
   },
+  // ignore: deprecated_member_use
   variant: KeySimulatorTransitModeVariant.all(),
   );
 
