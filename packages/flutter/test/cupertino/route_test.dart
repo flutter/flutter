@@ -758,6 +758,40 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/137033.
+  testWidgetsWithLeakTracking('Update pages during a drag gesture will not stuck', (WidgetTester tester) async {
+
+    await tester.pumpWidget(const _TestPageUpdate());
+
+    // Tap this button will update the pages in two seconds.
+    await tester.tap(find.text('Update Pages'));
+    await tester.pump();
+
+    // Start swiping.
+    final TestGesture swipeGesture = await tester.startGesture(const Offset(5, 100));
+    await swipeGesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+
+    expect(
+      tester.stateList<NavigatorState>(find.byType(Navigator)).last.userGestureInProgress,
+      true,
+    );
+
+    // Wait for pages to update.
+    await tester.pump(const Duration(seconds: 3));
+
+    // Verify pages are updated.
+    expect(
+      find.text('New page'),
+      findsOneWidget,
+    );
+    // Verify `userGestureInProgress` is set to false.
+    expect(
+      tester.stateList<NavigatorState>(find.byType(Navigator)).last.userGestureInProgress,
+      false,
+    );
+  });
+
   testWidgetsWithLeakTracking('Pop gesture snapping is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2247,6 +2281,68 @@ Widget buildNavigator({
 }
 
 
+// A test target to updating pages in navigator.
+//
+// It contains 3 routes:
+//
+//  * The initial route, 'home'.
+//  * The 'old' route, displays a button showing 'Update pages'. Tap the button
+//    will update pages.
+//  * The 'new' route, displays the new page.
+class _TestPageUpdate extends StatefulWidget {
+  const _TestPageUpdate();
+
+  @override
+  State<StatefulWidget> createState() => _TestPageUpdateState();
+}
+class _TestPageUpdateState extends State<_TestPageUpdate> {
+  bool updatePages = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final GlobalKey<State<StatefulWidget>> navKey = GlobalKey();
+    return MaterialApp(
+      home: Navigator(
+        key: navKey,
+        pages: updatePages
+            ? <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                const CupertinoPage<dynamic>(name: '/home/new', child: Text('New page')),
+              ]
+            : <Page<dynamic>>[
+                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
+                CupertinoPage<dynamic>(name: '/home/old', child: buildMainPage()),
+              ],
+        onPopPage: (_, __) {
+          return false;
+        },
+      ),
+    );
+  }
+
+  Widget buildMainPage() {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text('Main'),
+            ElevatedButton(
+              onPressed: () {
+                Future<void>.delayed(const Duration(seconds: 2), () {
+                  setState(() {
+                    updatePages = true;
+                  });
+                });
+              },
+              child: const Text('Update Pages'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 // A test target for post-route cancel events.
 //
 // It contains 2 routes:
