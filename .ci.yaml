@@ -3822,6 +3822,7 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -3833,6 +3834,7 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -3844,6 +3846,7 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -3855,6 +3858,7 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -4087,6 +4091,7 @@ targets:
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
+      - .ci.yaml
       - dev/**
 
   - name: Mac_ios integration_test_test_ios
