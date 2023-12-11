@@ -100,12 +100,11 @@ class AnimatedIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final _AnimatedIconData iconData = icon as _AnimatedIconData;
-    final IconThemeData iconTheme = IconTheme.of(context);
-    assert(iconTheme.isConcrete);
-    final double iconSize = size ?? iconTheme.size!;
+    final ConcreteIconThemeData iconTheme = IconTheme.of(context);
+    final double iconSize = size ?? iconTheme.size;
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
-    final double iconOpacity = iconTheme.opacity!;
-    Color iconColor = color ?? iconTheme.color!;
+    final double iconOpacity = iconTheme.opacity;
+    Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0) {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     }

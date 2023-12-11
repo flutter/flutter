@@ -735,7 +735,7 @@ class IconButton extends StatelessWidget {
       minHeight: _kMinButtonSize,
     );
     final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
-    final double effectiveIconSize = iconSize ?? IconTheme.of(context).size ?? 24.0;
+    final double effectiveIconSize = iconSize ?? IconTheme.of(context).size;
     final EdgeInsetsGeometry effectivePadding = padding ?? const EdgeInsets.all(8.0);
     final AlignmentGeometry effectiveAlignment = alignment ?? Alignment.center;
     final bool effectiveEnableFeedback = enableFeedback ?? true;
@@ -973,7 +973,7 @@ class _IconButtonM3 extends ButtonStyleButton {
       return identical(color, kDefaultIconDarkColor);
     }
     final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
-    final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
+    final bool isDefaultSize = iconTheme.size == IconThemeData.defaultIconThemeData.size;
 
     final ButtonStyle iconThemeStyle = IconButton.styleFrom(
       foregroundColor: isDefaultColor ? null : iconTheme.color,

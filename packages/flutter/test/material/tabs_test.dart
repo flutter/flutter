@@ -1340,13 +1340,13 @@ void main() {
           tabs: <Widget>[
             Builder(
               builder: (BuildContext context) {
-                firstColor = IconTheme.of(context).color!;
+                firstColor = IconTheme.of(context).color;
                 return const Text('First');
               },
             ),
             Builder(
               builder: (BuildContext context) {
-                secondColor = IconTheme.of(context).color!;
+                secondColor = IconTheme.of(context).color;
                 return const Text('Second');
               },
             ),

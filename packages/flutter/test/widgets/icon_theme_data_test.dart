@@ -21,7 +21,7 @@ void main() {
     expect(data, equals(data.copyWith()));
     expect(data.hashCode, equals(data.copyWith().hashCode));
 
-    final IconThemeData lerped = IconThemeData.lerp(data, const IconThemeData.fallback(), 0.25);
+    final IconThemeData lerped = IconThemeData.lerp(data, IconThemeData.defaultIconThemeData, 0.25);
     expect(lerped.size, 18.0);
     expect(lerped.fill, 0.375);
     expect(lerped.weight, 550.0);

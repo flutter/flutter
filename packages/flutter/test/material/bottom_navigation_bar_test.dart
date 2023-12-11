@@ -1453,7 +1453,7 @@ void main() {
                 label: 'B',
                 icon: Builder(
                   builder: (BuildContext context) {
-                    builderIconSize = IconTheme.of(context).size!;
+                    builderIconSize = IconTheme.of(context).size;
                     return SizedBox(
                       width: builderIconSize,
                       height: builderIconSize,

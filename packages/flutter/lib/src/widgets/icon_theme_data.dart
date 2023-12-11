@@ -37,20 +37,11 @@ class IconThemeData with Diagnosticable {
        assert(weight == null || (0.0 < weight)),
        assert(opticalSize == null || (0.0 < opticalSize));
 
-  /// Creates an icon theme with some reasonable default values.
+  /// Returns a [ConcreteIconThemeData] with reasonable default values.
   ///
   /// The [size] is 24.0, [fill] is 0.0, [weight] is 400.0, [grade] is 0.0,
   /// opticalSize is 48.0, [color] is black, and [opacity] is 1.0.
-  const IconThemeData.fallback()
-      : size = 24.0,
-        fill = 0.0,
-        weight = 400.0,
-        grade = 0.0,
-        opticalSize = 48.0,
-        color = const Color(0xFF000000),
-        _opacity = 1.0,
-        shadows = null,
-        applyTextScaling = false;
+  static const ConcreteIconThemeData fallback = ConcreteIconThemeData._fallback();
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
@@ -126,6 +117,22 @@ class IconThemeData with Diagnosticable {
     && opacity != null
     && applyTextScaling != null;
 
+  /// Returns a [ConcreteIconThemeData] with null properties set to the
+  /// corresponding default values in [fallback].
+  ConcreteIconThemeData get concreteIconThemeData {
+    return fallback.copyWith(
+      size: size,
+      fill: fill,
+      weight: weight,
+      grade: grade,
+      opticalSize: opticalSize,
+      color: color,
+      opacity: opacity,
+      shadows: shadows,
+      applyTextScaling: applyTextScaling,
+    );
+  }
+
   /// The default for [Icon.size].
   ///
   /// Falls back to 24.0.
@@ -194,6 +201,8 @@ class IconThemeData with Diagnosticable {
 
   @override
   bool operator ==(Object other) {
+    // Pessimistically compare the runtimeType to ensure the equality check is
+    // symmetric, in case `other` uses a different implementation of `==`.
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -221,6 +230,131 @@ class IconThemeData with Diagnosticable {
     shadows == null ? null : Object.hashAll(shadows!),
     applyTextScaling,
   );
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('size', size, defaultValue: null));
+    properties.add(DoubleProperty('fill', fill, defaultValue: null));
+    properties.add(DoubleProperty('weight', weight, defaultValue: null));
+    properties.add(DoubleProperty('grade', grade, defaultValue: null));
+    properties.add(DoubleProperty('opticalSize', opticalSize, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
+    properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null));
+  }
+}
+
+/// A concrete [IconThemeData].
+@immutable
+final class ConcreteIconThemeData with Diagnosticable implements IconThemeData {
+  const ConcreteIconThemeData._({
+    required this.size,
+    required this.fill,
+    required this.weight,
+    required this.grade,
+    required this.opticalSize,
+    required this.color,
+    required this.shadows,
+    required double opacity,
+    required this.applyTextScaling,
+  }) : _opacity = opacity;
+
+  const ConcreteIconThemeData._fallback()
+    : size = 24.0,
+      fill = 0.0,
+      weight = 400.0,
+      grade = 0.0,
+      opticalSize = 48.0,
+      color = const Color(0xFF000000),
+      _opacity = 1.0,
+      shadows = const <Shadow>[],
+      applyTextScaling = false;
+
+  @override
+  final double size;
+
+  @override
+  final double fill;
+
+  @override
+  final double weight;
+
+  @override
+  final double grade;
+
+  @override
+  final double opticalSize;
+
+  @override
+  final Color color;
+
+  @override
+  final List<Shadow> shadows;
+
+  @override
+  double get opacity => _opacity;
+  @override
+  final double _opacity;
+
+  @override
+  final bool applyTextScaling;
+
+  @override
+  bool get isConcrete => true;
+
+  @override
+  ConcreteIconThemeData resolve(BuildContext context) => this;
+
+  @override
+  ConcreteIconThemeData get concreteIconThemeData => this;
+
+  @override
+  ConcreteIconThemeData copyWith({
+    double? size,
+    double? fill,
+    double? weight,
+    double? grade,
+    double? opticalSize,
+    Color? color,
+    double? opacity,
+    List<Shadow>? shadows,
+    bool? applyTextScaling,
+  }) {
+    return ConcreteIconThemeData._(
+      size: size ?? this.size,
+      fill: fill ?? this.fill,
+      weight: weight ?? this.weight,
+      grade: grade ?? this.grade,
+      opticalSize: opticalSize ?? this.opticalSize,
+      color: color ?? this.color,
+      opacity: opacity ?? this.opacity,
+      shadows: shadows ?? this.shadows,
+      applyTextScaling: applyTextScaling ?? this.applyTextScaling,
+    );
+  }
+
+  /// Returns a new icon theme that matches this icon theme but with some values
+  /// replaced by the non-null parameters of the given icon theme. If the given
+  /// icon theme is null, returns this icon theme.
+  @override
+  ConcreteIconThemeData merge(IconThemeData? other) {
+    if (other == null) {
+      return this;
+    }
+    return copyWith(
+      size: other.size,
+      fill: other.fill,
+      weight: other.weight,
+      grade: other.grade,
+      opticalSize: other.opticalSize,
+      color: other.color,
+      opacity: other.opacity,
+      shadows: other.shadows,
+      applyTextScaling: other.applyTextScaling,
+    );
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
