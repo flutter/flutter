@@ -409,7 +409,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         if (end == -1) {
           end = plainText.length;
         }
-        result.add(_SelectableFragment(paragraph: this, range: TextRange(start: start, end: end), fullText: plainText));
+        result.add(
+          _SelectableFragment(
+            paragraph: this,
+            range: TextRange(start: start, end: end),
+            fullText: plainText,
+          ),
+        );
         start = end;
       }
       start += 1;
@@ -1314,7 +1320,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 /// [PlaceholderSpan]. The [RenderParagraph] splits itself on [PlaceholderSpan]
 /// to create multiple `_SelectableFragment`s so that they can be selected
 /// separately.
-class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutMetrics {
+class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implements TextLayoutMetrics {
   _SelectableFragment({
     required this.paragraph,
     required this.fullText,
@@ -1366,7 +1372,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       ? startOffsetInParagraphCoordinates
       : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
     final bool flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
-    final Matrix4 paragraphToFragmentTransform = getTransformToParagraph()..invert();
     final TextSelection selection = TextSelection(
       baseOffset: selectionStart,
       extentOffset: selectionEnd,
@@ -1377,12 +1382,12 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
-        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
+        localPosition: startOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
         handleType: flipHandles ? TextSelectionHandleType.right : TextSelectionHandleType.left
       ),
       endSelectionPoint: SelectionPoint(
-        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, endOffsetInParagraphCoordinates),
+        localPosition: endOffsetInParagraphCoordinates,
         lineHeight: paragraph._textPainter.preferredLineHeight,
         handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
       ),
@@ -1665,7 +1670,16 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // we do not need to look up the word boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
-    final _WordBoundaryRecord? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
+    _WordBoundaryRecord? wordBoundary = _rect.contains(localPosition) ? _getWordBoundaryAtPosition(position) : null;
+    if (wordBoundary != null
+        && (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset <= range.start
+        || wordBoundary.wordStart.offset >= range.end && wordBoundary.wordEnd.offset > range.end)) {
+      // When the position is located at a placeholder inside of the text, then we may compute
+      // a word boundary that does not belong to the current selectable fragment. In this case
+      // we should invalidate the word boundary so that it is not taken into account when
+      // computing the target position.
+      wordBoundary = null;
+    }
     final TextPosition targetPosition = _clampTextPosition(isEnd ? _updateSelectionEndEdgeByWord(wordBoundary, position, existingSelectionStart, existingSelectionEnd) : _updateSelectionStartEdgeByWord(wordBoundary, position, existingSelectionStart, existingSelectionEnd));
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
@@ -1717,16 +1731,18 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
-    _selectableContainsOriginWord = true;
-
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
       return SelectionResult.end;
     }
     final _WordBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
-    if (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset < range.start) {
+    // This fragment may not contain the word, decide what direction the target
+    // fragment is located in. Because fragments are separated by placeholder
+    // spans, we also check if the beginning or end of the word is touching
+    // either edge of this fragment.
+    if (wordBoundary.wordStart.offset < range.start && wordBoundary.wordEnd.offset <= range.start) {
       return SelectionResult.previous;
-    } else if (wordBoundary.wordStart.offset > range.end && wordBoundary.wordEnd.offset > range.end) {
+    } else if (wordBoundary.wordStart.offset >= range.end && wordBoundary.wordEnd.offset > range.end) {
       return SelectionResult.next;
     }
     // Fragments are separated by placeholder span, the word boundary shouldn't
@@ -1734,6 +1750,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
     _textSelectionStart = wordBoundary.wordStart;
     _textSelectionEnd = wordBoundary.wordEnd;
+    _selectableContainsOriginWord = true;
     return SelectionResult.end;
   }
 
@@ -1957,13 +1974,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
   }
 
-  Matrix4 getTransformToParagraph() {
-    return Matrix4.translationValues(_rect.left, _rect.top, 0.0);
-  }
-
   @override
   Matrix4 getTransformTo(RenderObject? ancestor) {
-    return getTransformToParagraph()..multiply(paragraph.getTransformTo(ancestor));
+    return paragraph.getTransformTo(ancestor);
   }
 
   @override
@@ -1982,6 +1995,28 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
   }
 
+  List<Rect>? _cachedBoundingBoxes;
+  @override
+  List<Rect> get boundingBoxes {
+    if (_cachedBoundingBoxes == null) {
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(
+        TextSelection(baseOffset: range.start, extentOffset: range.end),
+      );
+      if (boxes.isNotEmpty) {
+        _cachedBoundingBoxes = <Rect>[];
+        for (final TextBox textBox in boxes) {
+          _cachedBoundingBoxes!.add(textBox.toRect());
+        }
+      } else {
+        final Offset offset = paragraph._getOffsetForPosition(TextPosition(offset: range.start));
+        final Rect rect = Rect.fromPoints(offset, offset.translate(0, - paragraph._textPainter.preferredLineHeight));
+        _cachedBoundingBoxes = <Rect>[rect];
+      }
+    }
+    return _cachedBoundingBoxes!;
+  }
+
+  Rect? _cachedRect;
   Rect get _rect {
     if (_cachedRect == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
@@ -2000,7 +2035,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
     return _cachedRect!;
   }
-  Rect? _cachedRect;
 
   void didChangeParagraphLayout() {
     _cachedRect = null;
@@ -2028,12 +2062,11 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             textBox.toRect().shift(offset), selectionPaint);
       }
     }
-    final Matrix4 transform = getTransformToParagraph();
     if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
       context.pushLayer(
         LeaderLayer(
           link: _startHandleLayerLink!,
-          offset: offset + MatrixUtils.transformPoint(transform, value.startSelectionPoint!.localPosition),
+          offset: offset + value.startSelectionPoint!.localPosition,
         ),
         (PaintingContext context, Offset offset) { },
         Offset.zero,
@@ -2043,7 +2076,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       context.pushLayer(
         LeaderLayer(
           link: _endHandleLayerLink!,
-          offset: offset + MatrixUtils.transformPoint(transform, value.endSelectionPoint!.localPosition),
+          offset: offset + value.endSelectionPoint!.localPosition,
         ),
         (PaintingContext context, Offset offset) { },
         Offset.zero,
@@ -2054,8 +2087,8 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   @override
   TextSelection getLineAtOffset(TextPosition position) {
     final TextRange line = paragraph._getLineAtOffset(position);
-    final int start = line.start.clamp(range.start, range.end); // ignore_clamp_double_lint
-    final int end = line.end.clamp(range.start, range.end); // ignore_clamp_double_lint
+    final int start = line.start.clamp(range.start, range.end);
+    final int end = line.end.clamp(range.start, range.end);
     return TextSelection(baseOffset: start, extentOffset: end);
   }
 
@@ -2071,4 +2104,12 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
 
   @override
   TextRange getWordBoundary(TextPosition position) => paragraph.getWordBoundary(position);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('textInsideRange', range.textInside(fullText)));
+    properties.add(DiagnosticsProperty<TextRange>('range', range));
+    properties.add(DiagnosticsProperty<String>('fullText', fullText));
+  }
 }
