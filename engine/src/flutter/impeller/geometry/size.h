@@ -68,6 +68,8 @@ struct TSize {
     return {width - s.width, height - s.height};
   }
 
+  constexpr TSize operator-() const { return {-width, -height}; }
+
   constexpr TSize Min(const TSize& o) const {
     return {
         std::min(width, o.width),

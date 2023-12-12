@@ -468,6 +468,34 @@ EllipticalVertexGenerator Tessellator::FilledEllipse(
                                    });
 }
 
+EllipticalVertexGenerator Tessellator::FilledRoundRect(
+    const Matrix& view_transform,
+    const Rect& bounds,
+    const Size& radii) {
+  if (radii.width * 2 < bounds.GetSize().width &&
+      radii.height * 2 < bounds.GetSize().height) {
+    auto max_radius = radii.MaxDimension();
+    auto divisions = ComputeQuadrantDivisions(
+        view_transform.GetMaxBasisLength() * max_radius);
+    auto upper_left = bounds.GetLeftTop() + radii;
+    auto lower_right = bounds.GetRightBottom() - radii;
+    return EllipticalVertexGenerator(Tessellator::GenerateFilledRoundRect,
+                                     GetTrigsForDivisions(divisions),
+                                     PrimitiveType::kTriangleStrip, 4,
+                                     {
+                                         .reference_centers =
+                                             {
+                                                 upper_left,
+                                                 lower_right,
+                                             },
+                                         .radii = radii,
+                                         .half_width = -1.0f,
+                                     });
+  } else {
+    return FilledEllipse(view_transform, bounds);
+  }
+}
+
 void Tessellator::GenerateFilledCircle(
     const Trigs& trigs,
     const EllipticalVertexGenerator::Data& data,
@@ -612,6 +640,37 @@ void Tessellator::GenerateFilledEllipse(
     auto offset = Point(trig.sin * radii.width, trig.cos * radii.height);
     proc({center.x + offset.x, center.y + offset.y});
     proc({center.x + offset.x, center.y - offset.y});
+  }
+}
+
+void Tessellator::GenerateFilledRoundRect(
+    const Trigs& trigs,
+    const EllipticalVertexGenerator::Data& data,
+    const TessellatedVertexProc& proc) {
+  Scalar left = data.reference_centers[0].x;
+  Scalar top = data.reference_centers[0].y;
+  Scalar right = data.reference_centers[1].x;
+  Scalar bottom = data.reference_centers[1].y;
+  auto radii = data.radii;
+
+  FML_DCHECK(data.half_width < 0);
+
+  // Quadrant 1 connecting with Quadrant 4:
+  for (auto& trig : trigs) {
+    auto offset = trig * radii;
+    proc({left - offset.x, bottom + offset.y});
+    proc({left - offset.x, top - offset.y});
+  }
+
+  // The second half of the round rect should be iterated in reverse, but
+  // we can instead iterate forward and swap the x/y values of the
+  // offset as the angles should be symmetric and thus should generate
+  // symmetrically reversed trig vectors.
+  // Quadrant 2 connecting with Quadrant 2:
+  for (auto& trig : trigs) {
+    auto offset = Point(trig.sin * radii.width, trig.cos * radii.height);
+    proc({right + offset.x, bottom + offset.y});
+    proc({right + offset.x, top - offset.y});
   }
 }
 

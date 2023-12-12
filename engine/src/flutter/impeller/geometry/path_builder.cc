@@ -139,8 +139,8 @@ PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Scalar radius) {
                        : AddRoundedRect(rect, RoundingRadii(radius));
 }
 
-PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Point radii) {
-  return radii.x <= 0 || radii.y <= 0
+PathBuilder& PathBuilder::AddRoundedRect(Rect rect, Size radii) {
+  return radii.width <= 0 || radii.height <= 0
              ? AddRect(rect)
              : AddRoundedRect(rect, RoundingRadii(radii));
 }

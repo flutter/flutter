@@ -85,6 +85,9 @@ class Geometry {
                                                      Scalar radius,
                                                      Scalar stroke_width);
 
+  static std::shared_ptr<Geometry> MakeRoundRect(const Rect& rect,
+                                                 const Size& radii);
+
   static std::shared_ptr<Geometry> MakePointField(std::vector<Point> points,
                                                   Scalar radius,
                                                   bool round);
