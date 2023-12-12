@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../analyze.dart';
+import '../custom_rules/analyze.dart';
+import '../custom_rules/no_double_clamp.dart';
 import '../utils.dart';
 import 'common.dart';
 
@@ -225,5 +227,29 @@ void main() {
     expect(result, isNot(contains(':19')));
     expect(result, contains(':20'));
     expect(result, contains(':21'));
+  });
+
+  test('analyze.dart - clampDouble', () async {
+    final String result = await capture(() => analyzeFrameworkWithRules(
+      testRootPath,
+      <AnalyzeRule>[noDoubleClamp],
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+        '║ packages/flutter/lib/bar.dart:37: input.clamp(0.0, 2)',
+        '║ packages/flutter/lib/bar.dart:38: input.toDouble().clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:42: nullableInt?.clamp(0, 2.0)',
+        '║ packages/flutter/lib/bar.dart:43: nullableDouble?.clamp(0, 2)',
+        '║ packages/flutter/lib/bar.dart:48: nullableInt?.clamp',
+        '║ packages/flutter/lib/bar.dart:50: nullableDouble?.clamp',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ \n'
+      '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
   });
 }
