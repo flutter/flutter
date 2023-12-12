@@ -354,7 +354,7 @@ void main() {
         final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
 
         final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
-        
+
         final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
 
         // Send proxy.writeTempFile.
@@ -392,7 +392,7 @@ void main() {
         final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
 
         final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
-        
+
         final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
 
         // Send proxy.calculateFileHashes.
@@ -453,7 +453,7 @@ void main() {
         final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
 
         final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
-        
+
         final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
 
         // Send proxy.calculateFileHashes.

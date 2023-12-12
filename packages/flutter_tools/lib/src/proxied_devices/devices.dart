@@ -177,7 +177,7 @@ class ProxiedDevice extends Device {
   final bool _deltaFileTransfer;
 
   final bool _enableDdsProxy;
-  
+
   final FileTransfer _fileTransfer;
 
   @override
