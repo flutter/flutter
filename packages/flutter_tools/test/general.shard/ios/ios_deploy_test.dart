@@ -9,12 +9,14 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -386,7 +388,26 @@ void main () {
       );
       expect(stdin.stream.transform<String>(const Utf8Decoder()), emits('process detach'));
       await iosDeployDebugger.launchAndAttach();
-      iosDeployDebugger.detach();
+      await iosDeployDebugger.detach();
+    });
+
+    testWithoutContext('detach handles broken pipe', () async {
+      final StreamSink<List<int>> stdinSink = _ClosedStdinController();
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['ios-deploy'],
+          stdout: '(lldb)     run\nsuccess',
+          stdin: IOSink(stdinSink),
+        ),
+      ]);
+      final BufferLogger logger = BufferLogger.test();
+      final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+        processManager: processManager,
+        logger: logger,
+      );
+      await iosDeployDebugger.launchAndAttach();
+      await iosDeployDebugger.detach();
+      expect(logger.traceText, contains('Could not detach from debugger'));
     });
 
     testWithoutContext('stop with backtrace', () async {
@@ -399,18 +420,28 @@ void main () {
           ],
           stdout:
           '(lldb)     run\nsuccess\nLog on attach\n(lldb) Process 6156 stopped\n* thread #1, stop reason = Assertion failed:\n(lldb) Process 6156 detached',
-          stdin: IOSink(stdin.sink),
+          stdin: IOSink(stdin),
         ),
       ]);
       final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
         processManager: processManager,
       );
       await iosDeployDebugger.launchAndAttach();
-      await iosDeployDebugger.stopAndDumpBacktrace();
-      expect(await stdinStream.take(3).toList(), <String>[
+      List<String>? stdinLines;
+
+      // These two futures will deadlock if await-ed sequentially
+      await Future.wait(<Future<void>>[
+        iosDeployDebugger.stopAndDumpBacktrace(),
+        stdinStream.take(5).toList().then<void>(
+          (List<String> lines) => stdinLines = lines,
+        ),
+      ]);
+      expect(stdinLines, const <String>[
         'thread backtrace all',
         '\n',
         'process detach',
+        '\n',
+        'process signal SIGSTOP',
       ]);
     });
 
@@ -614,6 +645,11 @@ process continue
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+}
+
+class _ClosedStdinController extends Fake implements StreamSink<List<int>> {
+  @override
+  Future<Object?> addStream(Stream<List<int>> stream) async => throw const SocketException('Bad pipe');
 }
 
 IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
