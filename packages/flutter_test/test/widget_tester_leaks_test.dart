@@ -19,7 +19,7 @@ late final String _test7TrackingOnNoLeaks;
 late final String _test8TrackingOnNotDisposed;
 
 void main() {
-  collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
+  LeakTesting.collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
   LeakTesting.settings = LeakTesting.settings.copyWith(ignore: false);
 
   // It is important that the test file starts with group, to test that leaks are collected for all tests after group too.
@@ -151,9 +151,10 @@ void verifyLeaks(Leaks leaks) {
   );
 }
 
-/// Verifies [allLeaks] contains expected number of leaks for the test [testName].
+/// Verifies [allLeaks] contains expected number of leaks for the test [testDescription].
 ///
 /// [notDisposed] and [notGCed] set number for expected leaks by leak type.
+/// The method will fail if the leaks context does not contain [expectedContextKeys].
 void _verifyLeaks(
   Leaks allLeaks,
   String testDescription, {
