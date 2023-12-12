@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
@@ -90,6 +91,15 @@ class CreateCommand extends CreateBase {
       commandCreateIosLanguage: stringArg('ios-language'),
     );
   }
+
+  @override
+  Future<Event> unifiedAnalyticsUsageValues(String commandPath) async => Event.commandUsageValues(
+    workflow: commandPath,
+    commandHasTerminal: hasTerminal,
+    createProjectType: stringArg('template'),
+    createAndroidLanguage: stringArg('android-language'),
+    createIosLanguage: stringArg('ios-language'),
+  );
 
   // Lazy-initialize the net utilities with values from the context.
   late final Net _net = Net(

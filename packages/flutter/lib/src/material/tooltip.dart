@@ -185,6 +185,7 @@ class Tooltip extends StatefulWidget {
     this.textAlign,
     this.waitDuration,
     this.showDuration,
+    this.exitDuration,
     this.enableTapToDismiss = true,
     this.triggerMode,
     this.enableFeedback,
@@ -301,12 +302,27 @@ class Tooltip extends StatefulWidget {
 
   /// The length of time that the tooltip will be shown after a long press is
   /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
-  /// released (if triggerMode is [TooltipTriggerMode.tap]) or mouse pointer
-  /// exits the widget.
+  /// released (if triggerMode is [TooltipTriggerMode.tap]). This property
+  /// does not affect mouse pointer devices.
   ///
-  /// Defaults to 1.5 seconds for long press and tap released or 0.1 seconds
-  /// for mouse pointer exits the widget.
+  /// Defaults to 1.5 seconds for long press and tap released
+  ///
+  /// See also:
+  ///
+  ///  * [exitDuration], which allows configuring the time untill a pointer
+  /// dissapears when hovering.
   final Duration? showDuration;
+
+  /// The length of time that a pointer must have stopped hovering over a
+  /// tooltip's widget before the tooltip will be hidden.
+  ///
+  /// Defaults to 100 milliseconds.
+  ///
+  /// See also:
+  ///
+  ///  * [showDuration], which allows configuring the length of time that a
+  /// tooltip will be visible after touch events are released.
+  final Duration? exitDuration;
 
   /// Whether the tooltip can be dismissed by tap.
   ///
@@ -388,6 +404,7 @@ class Tooltip extends StatefulWidget {
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -405,7 +422,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
+  static const Duration _defaultHoverExitDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
   static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
@@ -419,7 +436,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late TooltipThemeData _tooltipTheme;
 
   Duration get _showDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration;
-  Duration get _hoverShowDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultHoverShowDuration;
+  Duration get _hoverExitDuration => widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultHoverExitDuration;
   Duration get _waitDuration => widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration;
   TooltipTriggerMode get _triggerMode => widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode;
   bool get _enableFeedback => widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
@@ -669,7 +686,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
     _activeHoveringPointerDevices.remove(event.device);
     if (_activeHoveringPointerDevices.isEmpty) {
-      _scheduleDismissTooltip(withDelay: _hoverShowDuration);
+      _scheduleDismissTooltip(withDelay: _hoverExitDuration);
     }
   }
 
