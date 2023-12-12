@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
+import 'browser_detection.dart';
 import 'display.dart';
 import 'dom.dart';
 import 'mouse/context_menu.dart';
@@ -20,9 +21,11 @@ import 'platform_views/message_handler.dart';
 import 'pointer_binding.dart';
 import 'semantics.dart';
 import 'services.dart';
+import 'text_editing/text_editing.dart';
 import 'util.dart';
 import 'view_embedder/dom_manager.dart';
 import 'view_embedder/embedding_strategy/embedding_strategy.dart';
+import 'view_embedder/style_manager.dart';
 
 typedef _HandleMessageCallBack = Future<bool> Function();
 
@@ -61,6 +64,7 @@ base class EngineFlutterView implements ui.FlutterView {
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
     pointerBinding = PointerBinding(this);
+    _resizeSubscription = onResize.listen(_didResize);
     registerHotRestartListener(dispose);
   }
 
@@ -78,6 +82,8 @@ base class EngineFlutterView implements ui.FlutterView {
   /// Abstracts all the DOM manipulations required to embed a Flutter view in a user-supplied `hostElement`.
   final EmbeddingStrategy embeddingStrategy;
 
+  late final StreamSubscription<ui.Size?> _resizeSubscription;
+
   final ViewConfiguration _viewConfiguration = const ViewConfiguration();
 
   /// Whether this [EngineFlutterView] has been disposed or not.
@@ -91,6 +97,7 @@ base class EngineFlutterView implements ui.FlutterView {
       return;
     }
     isDisposed = true;
+    _resizeSubscription.cancel();
     dimensionsProvider.close();
     pointerBinding.dispose();
     dom.rootElement.remove();
@@ -136,11 +143,7 @@ base class EngineFlutterView implements ui.FlutterView {
 
   @override
   ui.Size get physicalSize {
-    if (_physicalSize == null) {
-      computePhysicalSize();
-    }
-    assert(_physicalSize != null);
-    return _physicalSize!;
+    return _physicalSize ??= _computePhysicalSize();
   }
 
   /// Lazily populated and cleared at the end of the frame.
@@ -148,29 +151,24 @@ base class EngineFlutterView implements ui.FlutterView {
 
   ui.Size? debugPhysicalSizeOverride;
 
-  /// Computes the physical size of the screen from [domWindow].
+  /// Computes the physical size of the view.
   ///
   /// This function is expensive. It triggers browser layout if there are
   /// pending DOM writes.
-  void computePhysicalSize() {
-    bool override = false;
+  ui.Size _computePhysicalSize() {
+    ui.Size? physicalSizeOverride;
 
     assert(() {
-      if (debugPhysicalSizeOverride != null) {
-        _physicalSize = debugPhysicalSizeOverride;
-        override = true;
-      }
+      physicalSizeOverride = debugPhysicalSizeOverride;
       return true;
     }());
 
-    if (!override) {
-      _physicalSize = dimensionsProvider.computePhysicalSize();
-    }
+    return physicalSizeOverride ?? dimensionsProvider.computePhysicalSize();
   }
 
   /// Forces the view to recompute its physical size. Useful for tests.
   void debugForceResize() {
-    computePhysicalSize();
+    _physicalSize = _computePhysicalSize();
   }
 
   @override
@@ -202,6 +200,69 @@ base class EngineFlutterView implements ui.FlutterView {
   final DimensionsProvider dimensionsProvider;
 
   Stream<ui.Size?> get onResize => dimensionsProvider.onResize;
+
+  /// Called immediately after the view has been resized.
+  ///
+  /// When there is a text editing going on in mobile devices, do not change
+  /// the physicalSize, change the [window.viewInsets]. See:
+  /// https://api.flutter.dev/flutter/dart-ui/FlutterView/viewInsets.html
+  /// https://api.flutter.dev/flutter/dart-ui/FlutterView/physicalSize.html
+  ///
+  /// Note: always check for rotations for a mobile device. Update the physical
+  /// size if the change is caused by a rotation.
+  void _didResize(ui.Size? newSize) {
+    StyleManager.scaleSemanticsHost(dom.semanticsHost, devicePixelRatio);
+    final ui.Size newPhysicalSize = _computePhysicalSize();
+    final bool isEditingOnMobile =
+        isMobile && !_isRotation(newPhysicalSize) && textEditing.isEditing;
+    if (isEditingOnMobile) {
+      _computeOnScreenKeyboardInsets(true);
+    } else {
+      _physicalSize = newPhysicalSize;
+      // When physical size changes this value has to be recalculated.
+      _computeOnScreenKeyboardInsets(false);
+    }
+    platformDispatcher.invokeOnMetricsChanged();
+  }
+
+  /// Uses the previous physical size and current innerHeight/innerWidth
+  /// values to decide if a device is rotating.
+  ///
+  /// During a rotation the height and width values will (almost) swap place.
+  /// Values can slightly differ due to space occupied by the browser header.
+  /// For example the following values are collected for Pixel 3 rotation:
+  ///
+  /// height: 658 width: 393
+  /// new height: 313 new width: 738
+  ///
+  /// The following values are from a changed caused by virtual keyboard.
+  ///
+  /// height: 658 width: 393
+  /// height: 368 width: 393
+  bool _isRotation(ui.Size newPhysicalSize) {
+    // This method compares the new dimensions with the previous ones.
+    // Return false if the previous dimensions are not set.
+    if (_physicalSize != null) {
+      // First confirm both height and width are effected.
+      if (_physicalSize!.height != newPhysicalSize.height && _physicalSize!.width != newPhysicalSize.width) {
+        // If prior to rotation height is bigger than width it should be the
+        // opposite after the rotation and vice versa.
+        if ((_physicalSize!.height > _physicalSize!.width && newPhysicalSize.height < newPhysicalSize.width) ||
+            (_physicalSize!.width > _physicalSize!.height && newPhysicalSize.width < newPhysicalSize.height)) {
+          // Rotation detected
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  void _computeOnScreenKeyboardInsets(bool isEditingOnMobile) {
+    _viewInsets = dimensionsProvider.computeKeyboardInsets(
+      _physicalSize!.height,
+      isEditingOnMobile,
+    );
+  }
 }
 
 final class _EngineFlutterViewImpl extends EngineFlutterView {
@@ -541,46 +602,6 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
       return true;
     }());
     display.debugOverrideDevicePixelRatio(value);
-  }
-
-  void computeOnScreenKeyboardInsets(bool isEditingOnMobile) {
-    _viewInsets = dimensionsProvider.computeKeyboardInsets(
-      _physicalSize!.height,
-      isEditingOnMobile,
-    );
-  }
-
-  /// Uses the previous physical size and current innerHeight/innerWidth
-  /// values to decide if a device is rotating.
-  ///
-  /// During a rotation the height and width values will (almost) swap place.
-  /// Values can slightly differ due to space occupied by the browser header.
-  /// For example the following values are collected for Pixel 3 rotation:
-  ///
-  /// height: 658 width: 393
-  /// new height: 313 new width: 738
-  ///
-  /// The following values are from a changed caused by virtual keyboard.
-  ///
-  /// height: 658 width: 393
-  /// height: 368 width: 393
-  bool isRotation() {
-    // This method compares the new dimensions with the previous ones.
-    // Return false if the previous dimensions are not set.
-    if (_physicalSize != null) {
-      final ui.Size current = dimensionsProvider.computePhysicalSize();
-      // First confirm both height and width are effected.
-      if (_physicalSize!.height != current.height && _physicalSize!.width != current.width) {
-        // If prior to rotation height is bigger than width it should be the
-        // opposite after the rotation and vice versa.
-        if ((_physicalSize!.height > _physicalSize!.width && current.height < current.width) ||
-            (_physicalSize!.width > _physicalSize!.height && current.width < current.height)) {
-          // Rotation detected
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   // TODO(mdebbar): Deprecate this and remove it.
