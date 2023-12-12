@@ -14,6 +14,9 @@ late final String _test2TrackingOffLeaks;
 late final String _test3TrackingOnLeaks;
 late final String _test4TrackingOnWithCreationStackTrace;
 late final String _test5TrackingOnWithDisposalStackTrace;
+late final String _test61TrackingOnNoLeaks;
+late final String _test62TrackingOnNoLeaks;
+late final String _test63TrackingOnNotDisposed;
 
 void main() {
   collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
@@ -71,6 +74,21 @@ void main() {
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     },
   );
+
+  group('dispose in tear down', () {
+    test(_test61TrackingOnNoLeaks = 'test61, tracking-on, no leaks', () {
+      LeakTrackedClass().dispose();
+    });
+
+    test(_test62TrackingOnNoLeaks = 'test62, tracking-on, no leaks', () {
+      final LeakTrackedClass myClass = LeakTrackedClass();
+      addTearDown(myClass.dispose);
+    });
+
+    test(_test63TrackingOnNotDisposed = 'test63, tracking-on, not disposed leak', () {
+      LeakTrackedClass();
+    });
+  });
 }
 
 bool _leakReporterIsInvoked = false;
@@ -89,6 +107,9 @@ void verifyLeaks(Leaks leaks) {
     expect(e.message, contains('test: $_test3TrackingOnLeaks'));
     expect(e.message, contains('test: $_test4TrackingOnWithCreationStackTrace'));
     expect(e.message, contains('test: $_test5TrackingOnWithDisposalStackTrace'));
+    expect(e.message, isNot(contains(_test61TrackingOnNoLeaks)));
+    expect(e.message, isNot(contains(_test62TrackingOnNoLeaks)));
+    expect(e.message, contains('test: $_test63TrackingOnNotDisposed'));
   }
 
   _verifyLeaks(
@@ -120,6 +141,12 @@ void verifyLeaks(Leaks leaks) {
       LeakType.notGCed: <String>['disposal'],
       LeakType.notDisposed: <String>[],
     },
+  );
+  _verifyLeaks(
+    leaks,
+    _test63TrackingOnNotDisposed,
+    notDisposed: 1,
+    expectedContextKeys: <LeakType, List<String>>{},
   );
 }
 

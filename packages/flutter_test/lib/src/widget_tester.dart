@@ -119,7 +119,8 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// The argument [experimentalLeakTesting] is experimental and is not recommended
 /// for use outside of the Flutter framework.
-/// When [experimentalLeakTesting] is set, it is used for leak tracking.
+/// When [experimentalLeakTesting] is set, it is used to leak track objects created
+/// during test execution.
 /// Otherwise [LeakTesting.settings] is used.
 /// Adjust [LeakTesting.settings] in flutter_test_config.dart
 /// (see https://github.com/flutter/flutter/blob/master/packages/flutter_test/lib/flutter_test.dart)
@@ -152,7 +153,6 @@ void testWidgets(
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-  callback = _wrapWithLeakTracking(description, callback, experimentalLeakTesting);
   for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
     // IDEs may make assumptions about the format of this suffix in order to
@@ -179,9 +179,11 @@ void testWidgets(
             Object? memento;
             try {
               memento = await variant.setUp(value);
+              maybeSetupLeakTrackingForTest(experimentalLeakTesting, combinedDescription);
               await callback(tester);
             } finally {
               await variant.tearDown(value, memento);
+              maybeTearDownLeakTrackingForTest();
             }
             semanticsHandle?.dispose();
           },
@@ -195,24 +197,6 @@ void testWidgets(
       retry: retry,
     );
   }
-}
-
-WidgetTesterCallback _wrapWithLeakTracking(
-  String description,
-  WidgetTesterCallback callback,
-  LeakTesting? leakTesting,
-) {
-  // It is important to resolve settings outside of callback, to take
-  // value of LeakTesting.settings at the moment of this function execution,
-  // not at the moment of callback execution.
-  final LeakTesting settings = leakTesting ?? LeakTesting.settings;
-
-  Future<void> wrappedCallBack(WidgetTester tester) async {
-    maybeSetupLeakTrackingForTest(settings, description);
-    await callback(tester);
-    maybeTearDownLeakTrackingForTest();
-  }
-  return wrappedCallBack;
 }
 
 /// An abstract base class for describing test environment variants.
