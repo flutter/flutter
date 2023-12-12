@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import com.android.build.OutputFile
+import com.android.build.api.AndroidPluginVersion
 import groovy.json.JsonSlurper
 import groovy.json.JsonGenerator
 import groovy.xml.QName
@@ -481,19 +482,19 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Checks if the projects Android build time dependencies are each within the respective
+     * Checks if the project's Android build time dependencies are each within the respective
      * version range that we support. When we can't find a version for a given dependency
      * we treat it as within the range for the purpose of this check.
      */
     private void checkDependencyVersions() {
         String gradleVersion = getGradleVersion()
-        String javaVersion = getJavaVersion()
+        JavaVersion javaVersion = getJavaVersion()
         String kgpVersion = getKGPVersion()
-        String agpVersion = getAGPVersion()
+        AndroidPluginVersion agpVersion = getAGPVersion()
         // TODO: check each version and project.logger.error if it doesn't meet. Or warn. Also
         // check inter-compatibility if we want.
 
-        print("HI GRAY, VERSIONS ARE:\nGradle: $gradleVersion\nJava: $javaVersion\nKGP: $kgpVersion\nAGP: $agpVersion\n")
+        print("HI GRAY, VERSIONS ARE:\nGradle: $gradleVersion\nJava: $javaVersion\nKGP: $kgpVersion\nAGP: ${agpVersion.toString()}\n")
     }
 
     private String getGradleVersion() {
@@ -505,7 +506,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private String getJavaVersion() {
+    private JavaVersion getJavaVersion() {
         try {
             return JavaVersion.current()
         } catch (Exception ignored) {
@@ -516,6 +517,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     private String getKGPVersion() {
         try {
+            //TODO(gmackall): See if there is a more robust way to get this version.
             return project.plugins.getPlugin("kotlin-android").properties.pluginVersion
         } catch (Exception ignored) {
             //TODO(gmackall): Log a warning
@@ -523,15 +525,9 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private String getAGPVersion() {
+    private AndroidPluginVersion getAGPVersion() {
         try {
-            // This approach of getting the AGP version is mostly copied from AGP's own internal
-            // version checker.
-            // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#64
-            project.plugins.withId("com.android.base") {
-                Class clazz = it.class.classLoader.loadClass("com.android.Version")
-                return clazz.fields.find {it.name == "ANDROID_GRADLE_PLUGIN_VERSION"}.get(null) as String
-            }
+            return project.androidComponents.pluginVersion
         } catch (Exception ignored) {
             //TODO(gmackall): Log a warning
             return null;
