@@ -62,5 +62,14 @@ TEST(EntityGeometryTest, LineGeometryCoverage) {
   }
 }
 
+TEST(EntityGeometryTest, RoundRectGeometryCoversArea) {
+  auto geometry =
+      Geometry::MakeRoundRect(Rect::MakeLTRB(0, 0, 100, 100), Size(20, 20));
+  EXPECT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(15, 15, 85, 85)));
+  EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(20, 20, 80, 80)));
+  EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(30, 1, 70, 99)));
+  EXPECT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(1, 30, 99, 70)));
+}
+
 }  // namespace testing
 }  // namespace impeller

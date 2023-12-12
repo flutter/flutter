@@ -141,6 +141,10 @@ Point ToPoint(const SkPoint& point) {
   return Point::MakeXY(point.fX, point.fY);
 }
 
+Size ToSize(const SkPoint& point) {
+  return Size(point.fX, point.fY);
+}
+
 Color ToColor(const flutter::DlColor& color) {
   return {
       static_cast<Scalar>(color.getRedF()),    //

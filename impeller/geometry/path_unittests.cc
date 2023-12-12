@@ -79,6 +79,17 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
     ASSERT_TRUE(contour.is_closed);
   }
 
+  {
+    Path path =
+        PathBuilder{}
+            .AddRoundedRect(Rect::MakeXYWH(100, 100, 100, 100), Size(10, 20))
+            .TakePath();
+    ContourComponent contour;
+    path.GetContourComponentAtIndex(0, contour);
+    ASSERT_POINT_NEAR(contour.destination, Point(110, 100));
+    ASSERT_TRUE(contour.is_closed);
+  }
+
   // Open shapes.
   {
     Point p(100, 100);

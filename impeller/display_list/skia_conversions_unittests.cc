@@ -11,6 +11,24 @@
 namespace impeller {
 namespace testing {
 
+TEST(SkiaConversionsTest, SkPointToPoint) {
+  for (int x = -100; x < 100; x += 4) {
+    for (int y = -100; y < 100; y += 4) {
+      EXPECT_EQ(skia_conversions::ToPoint(SkPoint::Make(x * 0.25f, y * 0.25f)),
+                Point(x * 0.25f, y * 0.25f));
+    }
+  }
+}
+
+TEST(SkiaConversionsTest, SkPointToSize) {
+  for (int x = -100; x < 100; x += 4) {
+    for (int y = -100; y < 100; y += 4) {
+      EXPECT_EQ(skia_conversions::ToSize(SkPoint::Make(x * 0.25f, y * 0.25f)),
+                Size(x * 0.25f, y * 0.25f));
+    }
+  }
+}
+
 TEST(SkiaConversionsTest, ToColor) {
   // Create a color with alpha, red, green, and blue values that are all
   // trivially divisible by 255 so that we can test the conversion results in

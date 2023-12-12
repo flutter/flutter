@@ -132,6 +132,12 @@ class PathBuilder {
           top_right(radii),
           bottom_right(radii) {}
 
+    explicit RoundingRadii(Size radii)
+        : top_left(radii),
+          bottom_left(radii),
+          top_right(radii),
+          bottom_right(radii) {}
+
     bool AreAllZero() const {
       return top_left.IsZero() &&     //
              bottom_left.IsZero() &&  //
@@ -142,7 +148,7 @@ class PathBuilder {
 
   PathBuilder& AddRoundedRect(Rect rect, RoundingRadii radii);
 
-  PathBuilder& AddRoundedRect(Rect rect, Point radii);
+  PathBuilder& AddRoundedRect(Rect rect, Size radii);
 
   PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
 

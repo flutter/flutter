@@ -195,7 +195,9 @@ class CanvasRecorder {
                                paint);
   }
 
-  void DrawRRect(Rect rect, Point corner_radii, const Paint& paint) {
+  void DrawRRect(const Rect& rect,
+                 const Size& corner_radii,
+                 const Paint& paint) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(DrawRRect), rect,
                                corner_radii, paint);
   }
@@ -248,7 +250,7 @@ class CanvasRecorder {
 
   void ClipRRect(
       const Rect& rect,
-      Point corner_radii,
+      const Size& corner_radii,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect) {
     return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(ClipRRect), rect,
                                corner_radii, clip_op);
