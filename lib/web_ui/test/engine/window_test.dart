@@ -536,4 +536,68 @@ Future<void> testMain() async {
       throwsAssertionError,
     );
   });
+
+  group('resizing', () {
+    late DomHTMLDivElement host;
+    late EngineFlutterView view;
+    late int metricsChangedCount;
+
+    setUp(() async {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.5);
+      host = createDomHTMLDivElement();
+      view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+
+      host.style
+        ..width = '10px'
+        ..height = '10px';
+      domDocument.body!.append(host);
+      // Let the DOM settle before starting the test, so we don't get the first
+      // 10,10 Size in the test. Otherwise, the ResizeObserver may trigger
+      // unexpectedly after the test has started, and break our "first" result.
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+
+      metricsChangedCount = 0;
+      view.platformDispatcher.onMetricsChanged = () {
+        metricsChangedCount++;
+      };
+    });
+
+    tearDown(() {
+      view.dispose();
+      host.remove();
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
+      view.platformDispatcher.onMetricsChanged = null;
+    });
+
+    test('listens to resize', () async {
+      // Initial size is 10x10, with a 2.5 dpr, is equal to 25x25 physical pixels.
+      expect(view.physicalSize, const ui.Size(25.0, 25.0));
+      expect(metricsChangedCount, 0);
+
+      // Resize the host to 20x20.
+      host.style
+        ..width = '20px'
+        ..height = '20px';
+      await view.onResize.first;
+      expect(view.physicalSize, const ui.Size(50.0, 50.0));
+      expect(metricsChangedCount, 1);
+    });
+
+    test('maintains debugPhysicalSizeOverride', () async {
+      // Initial size is 10x10, with a 2.5 dpr, is equal to 25x25 physical pixels.
+      expect(view.physicalSize, const ui.Size(25.0, 25.0));
+
+      view.debugPhysicalSizeOverride = const ui.Size(100.0, 100.0);
+      view.debugForceResize();
+      expect(view.physicalSize, const ui.Size(100.0, 100.0));
+
+      // Resize the host to 20x20.
+      host.style
+        ..width = '20px'
+        ..height = '20px';
+      await view.onResize.first;
+      // The view should maintain the debugPhysicalSizeOverride.
+      expect(view.physicalSize, const ui.Size(100.0, 100.0));
+    });
+  });
 }
