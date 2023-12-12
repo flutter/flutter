@@ -1460,6 +1460,32 @@ void main() {
       icon = tester.widget<Icon>(find.byType(Icon).last);
       expect(icon.color, initialColor);
     });
+
+    testWidgetsWithLeakTracking('NavigationDestinationInfo is reachable and usable in navigation destinations', (WidgetTester tester) async {
+
+      Widget buildNavigationBar() {
+        return const MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: _StatefulNavigationBar()
+          ),
+        );
+      }
+
+      final Widget navBar = buildNavigationBar();
+      await tester.pumpWidget(navBar);
+
+      // as the selected index is the 0, only the first text should be visible
+      expect(find.text('label 1/2'), findsOneWidget);
+      expect(find.text('label 2/2'), findsNothing);
+
+      // tap the unselected destination
+      await tester.tap(find.byIcon(Icons.ac_unit));
+      // Trigger a rebuild.
+      await tester.pumpAndSettle();
+      // ensure the text shown is the not previously selected
+      expect(find.text('label 1/2'), findsNothing);
+      expect(find.text('label 2/2'), findsOneWidget);
+    });
   });
 }
 
@@ -1498,5 +1524,55 @@ class IconWithRandomColor extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
     return Icon(icon, color: randomColor);
+  }
+}
+
+class _StatefulNavigationBar extends StatefulWidget {
+  const _StatefulNavigationBar({super.key});
+
+  @override
+  State<_StatefulNavigationBar> createState() => _StatefulNavigationBarState();
+}
+
+class _StatefulNavigationBarState extends State<_StatefulNavigationBar> {
+  int selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationBar(
+      animationDuration: const Duration(milliseconds: 100),
+      selectedIndex: selectedIndex,
+      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+      destinations: const <Widget>[
+        _CustomDestination(Icons.alarm),
+        _CustomDestination(Icons.ac_unit),
+      ],
+      onDestinationSelected: (int i) {
+        setState(() {
+          selectedIndex = i;
+        });
+      },
+    );
+  }
+}
+
+class _CustomDestination extends StatelessWidget {
+  const _CustomDestination(this.icon, {super.key});
+
+  final IconData icon;
+
+  Widget build(BuildContext context) {
+    final NavigationDestinationInfo info =
+        NavigationDestinationInfo.of(context);
+    return InkWell(
+      onTap: info.onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon),
+          if(info.selectedIndex == info.index) Text('label ${info.index + 1}/${info.totalNumberOfDestinations}')
+        ],
+      ),
+    );
   }
 }
