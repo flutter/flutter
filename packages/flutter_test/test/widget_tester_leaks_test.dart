@@ -151,7 +151,7 @@ void verifyLeaks(Leaks leaks) {
   );
 }
 
-/// Verifies [allLeaks] contains expected number of leaks for the test [testDescription].
+/// Verifies [allLeaks] contain expected number of leaks for the test [testDescription].
 ///
 /// [notDisposed] and [notGCed] set number for expected leaks by leak type.
 /// The method will fail if the leaks context does not contain [expectedContextKeys].
