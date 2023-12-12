@@ -74,5 +74,12 @@ TEST(SizeTest, MaxDimension) {
   EXPECT_EQ(ISize(21, 20).MaxDimension(), 21);
 }
 
+TEST(SizeTest, NegationOperator) {
+  EXPECT_EQ(-Size(10, 20), Size(-10, -20));
+  EXPECT_EQ(-Size(-10, 20), Size(10, -20));
+  EXPECT_EQ(-Size(10, -20), Size(-10, 20));
+  EXPECT_EQ(-Size(-10, -20), Size(10, 20));
+}
+
 }  // namespace testing
 }  // namespace impeller

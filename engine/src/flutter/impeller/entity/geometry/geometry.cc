@@ -14,6 +14,7 @@
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/rect.h"
 
@@ -202,6 +203,11 @@ std::shared_ptr<Geometry> Geometry::MakeStrokedCircle(const Point& center,
                                                       Scalar radius,
                                                       Scalar stroke_width) {
   return std::make_shared<CircleGeometry>(center, radius, stroke_width);
+}
+
+std::shared_ptr<Geometry> Geometry::MakeRoundRect(const Rect& rect,
+                                                  const Size& radii) {
+  return std::make_shared<RoundRectGeometry>(rect, radii);
 }
 
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {
