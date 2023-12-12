@@ -314,8 +314,11 @@ void main() {
   );
   final Clip clip = details.decorationClipBehavior;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXX
+  // Changes made in https://github.com/flutter/flutter/pull/134417
   const Curve curve = Easing.legacy;
   const Curve curve = Easing.legacyAccelerate;
   const Curve curve = Easing.legacyDecelerate;
+
+  final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], child: const SizedBox());
+  final Widget bodyValue = platformMenuBar.child;
 }

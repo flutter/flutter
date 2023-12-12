@@ -5,9 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('OverflowBox control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverflowBox control test', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Align(
       alignment: Alignment.bottomRight,
@@ -30,7 +31,65 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
-  testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
+  // Adapted from https://github.com/flutter/flutter/issues/129094
+  group('when fit is OverflowBoxFit.deferToChild', () {
+    group('OverflowBox behavior with long and short content', () {
+      for (final bool contentSuperLong in <bool>[false, true]) {
+        testWidgetsWithLeakTracking('contentSuperLong=$contentSuperLong', (WidgetTester tester) async {
+          final GlobalKey<State<StatefulWidget>> key = GlobalKey();
+
+          final Column child = Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(width: 100, height: contentSuperLong ? 10000 : 100),
+            ],
+          );
+
+          await tester.pumpWidget(Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  key: key,
+                  child: OverflowBox(
+                    maxHeight: 1000000,
+                    fit: OverflowBoxFit.deferToChild,
+                    child: child,
+                  ),
+                ),
+              ],
+            ),
+          ));
+
+          expect(tester.getBottomLeft(find.byKey(key)).dy, contentSuperLong ? 600 : 100);
+        });
+      }
+    });
+
+    testWidgetsWithLeakTracking('no child', (WidgetTester tester) async {
+      final GlobalKey<State<StatefulWidget>> key = GlobalKey();
+
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              key: key,
+              child: const OverflowBox(
+                maxHeight: 1000000,
+                fit: OverflowBoxFit.deferToChild,
+                // no child
+              ),
+            ),
+          ],
+        ),
+      ));
+
+      expect(tester.getBottomLeft(find.byKey(key)).dy, 0);
+    });
+  });
+
+  testWidgetsWithLeakTracking('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
@@ -47,10 +106,11 @@ void main() {
       'maxWidth: 2.0',
       'minHeight: 3.0',
       'maxHeight: 4.0',
+      'fit: max',
     ]);
   });
 
-  testWidgets('SizedOverflowBox alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedOverflowBox alignment', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
@@ -73,7 +133,7 @@ void main() {
     );
   });
 
-  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,

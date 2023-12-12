@@ -35,8 +35,8 @@
   "timePickerHourModeAnnouncement": "选择小时",
   "timePickerMinuteModeAnnouncement": "选择分钟",
   "signedInLabel": "已登录",
-  "hideAccountsLabel": "隐藏帐号",
-  "showAccountsLabel": "显示帐号",
+  "hideAccountsLabel": "隐藏账号",
+  "showAccountsLabel": "显示账号",
   "modalBarrierDismissLabel": "关闭",
   "drawerLabel": "导航菜单",
   "popupMenuLabel": "弹出菜单",
@@ -51,7 +51,6 @@
   "reorderItemRight": "右移",
   "expandedIconTapHint": "收起",
   "collapsedIconTapHint": "展开",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "还可输入 1 个字符",
   "remainingTextFieldCharacterCountOther": "还可输入 $remainingCount 个字符",
   "refreshIndicatorSemanticLabel": "刷新",
@@ -143,7 +142,7 @@
   "expandedHint": "已收起",
   "collapsedHint": "已展开",
   "menuDismissLabel": "关闭菜单",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "向上看",
+  "searchWebButtonLabel": "在网络上搜索",
+  "shareButtonLabel": "分享…"
 }

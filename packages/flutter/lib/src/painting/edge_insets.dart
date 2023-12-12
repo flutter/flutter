@@ -400,7 +400,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// Creates insets that match the given view padding.
   ///
   /// If you need the current system padding or view insets in the context of a
-  /// widget, consider using [MediaQuery.of] to obtain these values rather than
+  /// widget, consider using [MediaQuery.paddingOf] to obtain these values rather than
   /// using the value from a [FlutterView] directly, so that you get notified of
   /// changes.
   EdgeInsets.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio)
@@ -903,6 +903,22 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
       case TextDirection.ltr:
         return EdgeInsets.fromLTRB(start, top, end, bottom);
     }
+  }
+
+  /// Creates a copy of this EdgeInsetsDirectional but with the given
+  /// fields replaced with the new values.
+  EdgeInsetsDirectional copyWith({
+    double? start,
+    double? top,
+    double? end,
+    double? bottom,
+  }) {
+    return EdgeInsetsDirectional.only(
+      start: start ?? this.start,
+      top: top ?? this.top,
+      end: end ?? this.end,
+      bottom: bottom ?? this.bottom,
+    );
   }
 }
 

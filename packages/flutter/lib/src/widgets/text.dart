@@ -40,11 +40,6 @@ class DefaultTextStyle extends InheritedTheme {
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
   /// from the current default text style for a given [BuildContext].
   ///
-  /// The [style] and [child] arguments are required and must not be null.
-  ///
-  /// The [softWrap] and [overflow] arguments must not be null (though they do
-  /// have default values).
-  ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   const DefaultTextStyle({
@@ -235,8 +230,6 @@ class _NullWidget extends StatelessWidget {
 ///    [Text] widgets.
 class DefaultTextHeightBehavior extends InheritedTheme {
   /// Creates a default text height behavior for the given subtree.
-  ///
-  /// The [textHeightBehavior] and [child] arguments are required and must not be null.
   const DefaultTextHeightBehavior({
     super.key,
     required this.textHeightBehavior,
@@ -419,8 +412,6 @@ class Text extends StatelessWidget {
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
   ///
-  /// The [data] parameter must not be null.
-  ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
   /// If the [softWrap] is true or null, the glyph causing overflow, and those
   /// that follow, will not be rendered. Otherwise, it will be shown with the
@@ -459,8 +450,6 @@ class Text extends StatelessWidget {
   ///
   /// * [TextSpan]s define text and children [InlineSpan]s.
   /// * [WidgetSpan]s define embedded inline widgets.
-  ///
-  /// The [textSpan] parameter must not be null.
   ///
   /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(

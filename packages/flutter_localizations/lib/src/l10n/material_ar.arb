@@ -153,7 +153,7 @@
   "expandedHint": "مصغَّر",
   "collapsedHint": "موسَّع",
   "menuDismissLabel": "إغلاق القائمة",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "النظر إلى أعلى",
+  "searchWebButtonLabel": "البحث على الويب",
+  "shareButtonLabel": "مشاركة…"
 }

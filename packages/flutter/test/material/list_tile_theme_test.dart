@@ -746,7 +746,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();

@@ -611,7 +611,7 @@ class _DropdownRoutePage<T> extends StatefulWidget {
 }
 
 class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
-  late ScrollController _scrollSontroller;
+  late ScrollController _scrollController;
 
   @override
   void initState(){
@@ -624,7 +624,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
     // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractiveDimension.
     final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.selectedIndex);
-    _scrollSontroller = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
+    _scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
   }
 
 
@@ -641,7 +641,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
       dropdownColor: widget.dropdownColor,
       enableFeedback: widget.enableFeedback,
       borderRadius: widget.borderRadius,
-      scrollController: _scrollSontroller,
+      scrollController: _scrollController,
     );
 
     return MediaQuery.removePadding(
@@ -667,7 +667,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
 
   @override
   void dispose() {
-    _scrollSontroller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 }
@@ -730,7 +730,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   /// Defines how the item is positioned within the container.
   ///
-  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
+  /// Defaults to [AlignmentDirectional.centerStart].
   ///
   /// See also:
   ///
@@ -911,12 +911,6 @@ class DropdownButton<T> extends StatefulWidget {
   /// If [value] is null and the button is disabled, [disabledHint] will be displayed
   /// if it is non-null. If [disabledHint] is null, then [hint] will be displayed
   /// if it is non-null.
-  ///
-  /// The [elevation] and [iconSize] arguments must not be null (they both have
-  /// defaults, so do not need to be specified). The boolean [isDense] and
-  /// [isExpanded] arguments must not be null.
-  ///
-  /// The [autofocus] argument must not be null.
   ///
   /// The [dropdownColor] argument specifies the background color of the
   /// dropdown when it is open. If it is null, the current theme's
@@ -1215,7 +1209,7 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// Defines how the hint or the selected item is positioned within the button.
   ///
-  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
+  /// Defaults to [AlignmentDirectional.centerStart].
   ///
   /// See also:
   ///
@@ -1589,9 +1583,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
   /// parameters, see [FormField]. For the rest (other than [decoration]), see
   /// [DropdownButton].
-  ///
-  /// The `items`, `elevation`, `iconSize`, `isDense`, `isExpanded`,
-  /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
     super.key,
     required List<DropdownMenuItem<T>>? items,
@@ -1745,13 +1736,12 @@ class DropdownButtonFormField<T> extends FormField<T> {
 }
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
+  DropdownButtonFormField<T> get _dropdownButtonFormField => widget as DropdownButtonFormField<T>;
 
   @override
   void didChange(T? value) {
     super.didChange(value);
-    final DropdownButtonFormField<T> dropdownButtonFormField = widget as DropdownButtonFormField<T>;
-    assert(dropdownButtonFormField.onChanged != null);
-    dropdownButtonFormField.onChanged!(value);
+    _dropdownButtonFormField.onChanged!(value);
   }
 
   @override
@@ -1760,5 +1750,11 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
     if (oldWidget.initialValue != widget.initialValue) {
       setValue(widget.initialValue);
     }
+  }
+
+ @override
+  void reset() {
+    super.reset();
+    _dropdownButtonFormField.onChanged!(value);
   }
 }

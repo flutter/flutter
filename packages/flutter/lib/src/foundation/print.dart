@@ -66,7 +66,8 @@ int _debugPrintedCharacters = 0;
 const int _kDebugPrintCapacity = 12 * 1024;
 const Duration _kDebugPrintPauseTime = Duration(seconds: 1);
 final Queue<String> _debugPrintBuffer = Queue<String>();
-final Stopwatch _debugPrintStopwatch = Stopwatch();
+final Stopwatch _debugPrintStopwatch = Stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)
+// Ignore context: This is not used in tests, only for throttled logging.
 Completer<void>? _debugPrintCompleter;
 bool _debugPrintScheduled = false;
 void _debugPrintTask() {

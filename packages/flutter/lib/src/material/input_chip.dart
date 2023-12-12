@@ -83,10 +83,8 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
-  /// arguments must not be null. The [pressElevation] and [elevation] must be
-  /// null or non-negative. Typically, [pressElevation] is greater than
-  /// [elevation].
+  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// Typically, [pressElevation] is greater than [elevation].
   const InputChip({
     super.key,
     this.avatar,
@@ -123,11 +121,6 @@ class InputChip extends StatelessWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated(
-      'Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.'
-    )
-    this.useDeleteButtonTooltip = true,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -199,12 +192,6 @@ class InputChip extends StatelessWidget
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
-  @override
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +210,6 @@ class InputChip extends StatelessWidget
       deleteIcon: resolvedDeleteIcon,
       onDeleted: onDeleted,
       deleteIconColor: deleteIconColor,
-      useDeleteButtonTooltip: useDeleteButtonTooltip,
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       onSelected: onSelected,
       onPressed: onPressed,
@@ -250,6 +236,7 @@ class InputChip extends StatelessWidget
       checkmarkColor: checkmarkColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
+      iconTheme: iconTheme,
     );
   }
 }

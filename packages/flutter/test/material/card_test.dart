@@ -9,6 +9,79 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  testWidgetsWithLeakTracking('Material3 - Card defaults (Elevated card)', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Scaffold(
+        body: Card(),
+      ),
+    ));
+
+    final Container container = _getCardContainer(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, Clip.none);
+    expect(material.elevation, 1.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surface);
+    expect(material.shadowColor, colors.shadow);
+    expect(material.surfaceTintColor, colors.surfaceTint); // Default primary color
+    expect(material.shape, const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    ));
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Card.filled defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Scaffold(
+        body: Card.filled(),
+      ),
+    ));
+
+    final Container container = _getCardContainer(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, Clip.none);
+    expect(material.elevation, 0.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surfaceVariant);
+    expect(material.shadowColor, colors.shadow);
+    expect(material.surfaceTintColor, Colors.transparent);
+    expect(material.shape, const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    ));
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Card.outlined defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Scaffold(
+        body: Card.outlined(),
+      ),
+    ));
+
+    final Container container = _getCardContainer(tester);
+    final Material material = _getCardMaterial(tester);
+
+    expect(material.clipBehavior, Clip.none);
+    expect(material.elevation, 0.0);
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(material.color, colors.surface);
+    expect(material.shadowColor, colors.shadow);
+    expect(material.surfaceTintColor, colors.surfaceTint);
+    expect(material.shape, RoundedRectangleBorder(
+      side: BorderSide(color: colors.outlineVariant),
+      borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+    ));
+  });
+
   testWidgetsWithLeakTracking('Card can take semantic text from multiple children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -218,4 +291,22 @@ void main() {
     expect(getCardMaterial(tester).shadowColor, getCard(tester).shadowColor);
     expect(getCardMaterial(tester).shadowColor, Colors.red);
   });
+}
+
+Material _getCardMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+Container _getCardContainer(WidgetTester tester) {
+  return tester.widget<Container>(
+    find.descendant(
+      of: find.byType(Card),
+      matching: find.byType(Container),
+    ),
+  );
 }

@@ -46,7 +46,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
-      addPostFrameCallback(_handleWebFirstFrame);
+      addPostFrameCallback(_handleWebFirstFrame, debugLabel: 'RendererBinding.webFirstFrame');
     }
     rootPipelineOwner.attach(_manifold);
   }
@@ -350,7 +350,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     final FlutterView view = renderView.flutterView;
     final double devicePixelRatio = view.devicePixelRatio;
     return ViewConfiguration(
-      size: view.physicalSize / devicePixelRatio,
+      constraints: view.physicalConstraints / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
@@ -385,7 +385,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [MediaQuery] directly. Preferred.
+  /// Querying [MediaQuery.platformBrightnessOf] directly. Preferred.
   ///
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
@@ -397,15 +397,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
-  /// Querying [MediaQueryData].
-  ///
-  /// ```dart
-  /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
-  /// final Brightness brightness = mediaQueryData.platformBrightness;
   /// ```
   /// {@end-tool}
   ///
@@ -472,7 +463,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         return true;
       }());
       _mouseTracker!.updateAllDevices();
-    });
+    }, debugLabel: 'RendererBinding.mouseTrackerUpdate');
   }
 
   int _firstFrameDeferredCount = 0;

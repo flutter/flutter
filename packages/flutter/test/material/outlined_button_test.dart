@@ -259,6 +259,8 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Does OutlinedButton work with focus', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
     const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -267,9 +269,9 @@ void main() {
 
     final FocusNode focusNode = FocusNode(debugLabel: 'OutlinedButton Node');
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: OutlinedButton(
+      MaterialApp(
+        theme: theme,
+        home: OutlinedButton(
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
           ),
@@ -287,10 +289,21 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
 
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(Material),
+    );
+
+    final Material material = tester.widget<Material>(buttonMaterial);
+
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colors.primary)));
+
     focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does OutlinedButton work with autofocus', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final ColorScheme colors = theme.colorScheme;
     const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -299,9 +312,9 @@ void main() {
 
     final FocusNode focusNode = FocusNode(debugLabel: 'OutlinedButton Node');
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: OutlinedButton(
+      MaterialApp(
+        theme: theme,
+        home: OutlinedButton(
           autofocus: true,
           style: ButtonStyle(
             overlayColor: MaterialStateProperty.resolveWith<Color?>(getOverlayColor),
@@ -319,10 +332,19 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
 
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(OutlinedButton),
+      matching: find.byType(Material),
+    );
+
+    final Material material = tester.widget<Material>(buttonMaterial);
+
+    expect(material.shape, StadiumBorder(side: BorderSide(color: colors.primary)));
     focusNode.dispose();
   });
 
-  testWidgets('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -371,7 +393,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     Color getTextColor(Set<MaterialState> states) {
@@ -1454,6 +1476,37 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
+  testWidgetsWithLeakTracking('Override theme fontSize changes padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(
+          colorScheme: const ColorScheme.light(),
+          textTheme: const TextTheme(labelLarge: TextStyle(fontSize: 28.0)),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Center(
+                child: OutlinedButton(
+                  onPressed: () {},
+                  child: const Text('text'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byType(OutlinedButton),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12));
+  });
+
   testWidgetsWithLeakTracking('M3 OutlinedButton has correct padding', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
@@ -1837,7 +1890,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('OutlinedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(

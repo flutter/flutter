@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart' show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, FlutterError;
@@ -319,6 +320,36 @@ void main() {
         final Uri key = Uri.parse('foo.png');
         final Uri keyNull = comparator.getTestUri(key, null);
         expect(keyNull, Uri.parse('foo.png'));
+      });
+    });
+  });
+
+  group('ComparisonResult', () {
+    group('dispose', () {
+      test('disposes diffs images', () async {
+        final ui.Image image1 = await createTestImage(width: 10, height: 10, cache: false);
+        final ui.Image image2 = await createTestImage(width: 15, height: 5, cache: false);
+        final ui.Image image3 = await createTestImage(width: 5, height: 10, cache: false);
+
+        final ComparisonResult result = ComparisonResult(
+          passed: false,
+          diffPercent: 1.0,
+          diffs: <String, ui.Image>{
+            'image1': image1,
+            'image2': image2,
+            'image3': image3,
+          }
+        );
+
+        expect(image1.debugDisposed, isFalse);
+        expect(image2.debugDisposed, isFalse);
+        expect(image3.debugDisposed, isFalse);
+
+        result.dispose();
+
+        expect(image1.debugDisposed, isTrue);
+        expect(image2.debugDisposed, isTrue);
+        expect(image3.debugDisposed, isTrue);
       });
     });
   });

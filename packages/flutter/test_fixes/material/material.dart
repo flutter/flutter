@@ -318,8 +318,11 @@ void main() {
   );
   final Clip clip = details.clipBehavior;
 
-  // Changes made in https://github.com/flutter/flutter/pull/XXX
+  // Changes made in https://github.com/flutter/flutter/pull/134417
   const Curve curve = standardEasing;
   const Curve curve = accelerateEasing;
   const Curve curve = decelerateEasing;
+
+  final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], body: const SizedBox());
+  final Widget bodyValue = platformMenuBar.body;
 }

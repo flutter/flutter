@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../rendering/rendering_tester.dart';
@@ -58,7 +59,6 @@ void main() {
         config: config,
         childrenInInversePaintOrder: <SemanticsNode>[
           SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
             ..tags = tags,
         ],
@@ -172,6 +172,135 @@ void main() {
       );
     });
 
+    test('provides the correct isMergedIntoParent value', () {
+      final SemanticsNode root = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node1 = SemanticsNode()..rect = const Rect.fromLTRB(1.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node11 = SemanticsNode()..rect = const Rect.fromLTRB(2.0, 0.0, 10.0, 10.0);
+      final SemanticsNode node12 = SemanticsNode()..rect = const Rect.fromLTRB(3.0, 0.0, 10.0, 10.0);
+
+      final SemanticsConfiguration noMergeConfig = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = false;
+
+      final SemanticsConfiguration mergeConfig = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
+
+      node1.updateWith(config: noMergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node11, node12]);
+
+      expect(node1.isMergedIntoParent, false);
+      expect(node1.mergeAllDescendantsIntoThisNode, false);
+      expect(node11.isMergedIntoParent, false);
+      expect(node12.isMergedIntoParent, false);
+      expect(root.isMergedIntoParent, false);
+
+      root.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node1]);
+      expect(node1.isMergedIntoParent, true);
+      expect(node1.mergeAllDescendantsIntoThisNode, false);
+      expect(node11.isMergedIntoParent, true);
+      expect(node12.isMergedIntoParent, true);
+      expect(root.isMergedIntoParent, false);
+      expect(root.mergeAllDescendantsIntoThisNode, true);
+
+      // Change config
+      node1.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node11, node12]);
+      expect(node1.isMergedIntoParent, true);
+      expect(node1.mergeAllDescendantsIntoThisNode, true);
+      expect(node11.isMergedIntoParent, true);
+      expect(node12.isMergedIntoParent, true);
+      expect(root.isMergedIntoParent, false);
+      expect(root.mergeAllDescendantsIntoThisNode, true);
+
+      root.updateWith(config: noMergeConfig, childrenInInversePaintOrder: <SemanticsNode>[node1]);
+      expect(node1.isMergedIntoParent, false);
+      expect(node1.mergeAllDescendantsIntoThisNode, true);
+      expect(node11.isMergedIntoParent, true);
+      expect(node12.isMergedIntoParent, true);
+      expect(root.isMergedIntoParent, false);
+      expect(root.mergeAllDescendantsIntoThisNode, false);
+    });
+
+    test('sendSemanticsUpdate verifies no invisible nodes', () {
+      const Rect invisibleRect = Rect.fromLTRB(0.0, 0.0, 0.0, 10.0);
+      const Rect visibleRect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+
+      final SemanticsOwner owner = SemanticsOwner(
+        onSemanticsUpdate: (SemanticsUpdate update) {},
+      );
+      final SemanticsNode root = SemanticsNode.root(owner: owner)..rect = invisibleRect;
+      final SemanticsNode child = SemanticsNode();
+
+      // It's ok to have an invisible root.
+      expect(owner.sendSemanticsUpdate, returnsNormally);
+
+      // It's ok to have an invisible child if it's merged to an ancestor.
+      root
+        ..rect = visibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = true,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, returnsNormally);
+
+      // It's ok if all nodes are visible.
+      root
+        ..rect = visibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = false,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = visibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, returnsNormally);
+
+      // Invisible root with children bad.
+      root
+        ..rect = invisibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = true,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message, 'message', equals(
+          'Invisible SemanticsNodes should not be added to the tree.\n'
+          'The following invisible SemanticsNodes were added to the tree:\n'
+          'SemanticsNode#0(dirty, merge boundary ⛔️, Rect.fromLTRB(0.0, 0.0, 0.0, 10.0), invisible)\n'
+          'which was added as the root SemanticsNode\n'
+          'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.\n'
+          'An invisible SemantiscNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
+          'Consider removing the above invisible SemanticsNodes if they were added by your RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml'
+        ),
+      )));
+
+      // Invisible children bad.
+      root
+        ..rect = visibleRect
+        ..updateWith(
+        config: SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = false,
+        childrenInInversePaintOrder: <SemanticsNode>[child..rect = invisibleRect],
+      );
+      expect(owner.sendSemanticsUpdate, throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message, 'message', equals(
+          'Invisible SemanticsNodes should not be added to the tree.\n'
+          'The following invisible SemanticsNodes were added to the tree:\n'
+          'SemanticsNode#1(dirty, Rect.fromLTRB(0.0, 0.0, 0.0, 10.0), invisible)\n'
+          'which was added as a child of:\n'
+          '  SemanticsNode#0(dirty, Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))\n'
+          'An invisible SemanticsNode is one whose rect is not on screen hence not reachable for users, and its semantic information is not merged into a visible parent.\n'
+          'An invisible SemantiscNode makes the accessibility experience confusing, as it does not provide any visual indication when the user selects it via accessibility technologies.\n'
+          'Consider removing the above invisible SemanticsNodes if they were added by your RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml'
+        ),
+      )));
+    });
+
     test('mutate existing semantic node list errors', () {
       final SemanticsNode node = SemanticsNode()
         ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
@@ -182,7 +311,6 @@ void main() {
 
       final List<SemanticsNode> children = <SemanticsNode>[
         SemanticsNode()
-          ..isMergedIntoParent = true
           ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
       ];
 
@@ -193,8 +321,7 @@ void main() {
 
       children.add(
         SemanticsNode()
-          ..isMergedIntoParent = true
-          ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0),
+          ..rect = const Rect.fromLTRB(42.0, 42.0, 52.0, 52.0),
       );
 
       {
@@ -223,10 +350,8 @@ void main() {
         late FlutterError error;
         final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
           SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
           SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
         ];
         node.updateWith(
@@ -235,11 +360,9 @@ void main() {
         );
         try {
           modifiedChildren[0] = SemanticsNode()
-            ..isMergedIntoParent = true
             ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
           modifiedChildren[1] = SemanticsNode()
-            ..isMergedIntoParent = true
-            ..rect = const Rect.fromLTRB(40.0, 14.0, 20.0, 20.0);
+            ..rect = const Rect.fromLTRB(40.0, 14.0, 60.0, 60.0);
           node.updateWith(
             config: config,
             childrenInInversePaintOrder: modifiedChildren,
@@ -255,12 +378,12 @@ void main() {
           '   containing the desired `SemanticsNode`s.\n'
           '   Error details:\n'
           '   Child node at position 0 was replaced:\n'
-          '   Previous child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
+          '   Previous child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
+          '   New child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
           '\n'
           '   Child node at position 1 was replaced:\n'
-          '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
-          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n',
+          '   Previous child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 60.0, 60.0))\n',
         ));
 
         expect(
@@ -559,6 +682,7 @@ void main() {
       '   flags: []\n'
       '   invisible\n'
       '   isHidden: false\n'
+      '   identifier: ""\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -682,6 +806,7 @@ void main() {
       '   flags: []\n'
       '   invisible\n'
       '   isHidden: false\n'
+      '   identifier: ""\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'
@@ -843,6 +968,16 @@ void main() {
     expect(config.onTap, same(onTap));
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
+
+  test('SemanticsOwner dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() =>  SemanticsOwner(
+        onSemanticsUpdate: (SemanticsUpdate update) {},
+      ).dispose(), SemanticsOwner),
+      areCreateAndDispose,
+    );
+  });
+
 }
 
 class TestRender extends RenderProxyBox {

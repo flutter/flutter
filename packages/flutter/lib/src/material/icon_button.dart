@@ -173,8 +173,6 @@ class IconButton extends StatelessWidget {
   /// Requires one of its ancestors to be a [Material] widget. This requirement
   /// no longer exists if [ThemeData.useMaterial3] is set to true.
   ///
-  /// [autofocus] argument must not be null (though it has default value).
-  ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
   const IconButton({
@@ -312,6 +310,9 @@ class IconButton extends StatelessWidget {
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
   ///
+  /// This property is only used when [icon] is or contains an [Icon] widget. It will be
+  /// ignored if other widgets are used, such as an [Image].
+  ///
   /// If [ThemeData.useMaterial3] is set to true and this is null, the size of the
   /// [IconButton] would default to 24.0. The size given here is passed down to the
   /// [ButtonStyle.iconSize] property.
@@ -361,8 +362,6 @@ class IconButton extends StatelessWidget {
   /// based on the [iconSize] and [color] properties of _this_ widget using an
   /// [IconTheme] and therefore should not be explicitly given in the icon
   /// widget.
-  ///
-  /// This property must not be null.
   ///
   /// See [Icon], [ImageIcon].
   final Widget icon;

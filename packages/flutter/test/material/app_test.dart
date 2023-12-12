@@ -334,15 +334,7 @@ void main() {
       expect(find.text('route "/a/b"'), findsNothing);
       expect(find.text('route "/b"'), findsNothing);
     }
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/133695
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?> {
-      'ValueNotifier<String?>': 3,
-      'MaterialPageRoute<dynamic>': 3,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('Make sure initialRoute is only used the first time', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -1068,6 +1060,7 @@ void main() {
 
   testWidgetsWithLeakTracking('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
     final HeroController controller = MaterialApp.createMaterialHeroController();
+    addTearDown(controller.dispose);
     final Tween<Rect?> tween = controller.createRectTween!(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
@@ -1091,12 +1084,13 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgets('MaterialApp.router works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1108,6 +1102,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
@@ -1122,7 +1117,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1134,6 +1129,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
@@ -1159,6 +1155,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
@@ -1185,6 +1182,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(MaterialApp.router(
@@ -1194,15 +1192,19 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router router config works', (WidgetTester tester) async {
+    late SimpleNavigatorRouterDelegate routerDelegate;
+    addTearDown(() => routerDelegate.dispose());
+    late PlatformRouteInformationProvider provider;
+    addTearDown(() => provider.dispose());
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
-        routeInformationProvider: PlatformRouteInformationProvider(
+        routeInformationProvider: provider = PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
             uri: Uri.parse('initial'),
           ),
         ),
         routeInformationParser: SimpleRouteInformationParser(),
-        routerDelegate: SimpleNavigatorRouterDelegate(
+        routerDelegate: routerDelegate = SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
             return Text(information.uri.toString());
           },
@@ -1523,6 +1525,83 @@ void main() {
         defaultBehavior.buildScrollbar(capturedContext, child, details);
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgetsWithLeakTracking('Override theme animation using AnimationStyle', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData darkTheme = ThemeData.dark();
+
+    Widget buildWidget({ ThemeMode themeMode = ThemeMode.light, AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
+        themeAnimationStyle: animationStyle,
+        home: const Scaffold(body: Text('body')),
+      );
+    }
+
+    // Test the initial Scaffold background color.
+    await tester.pumpWidget(buildWidget());
+
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xfffffbfe));
+
+    // Test the Scaffold background color animation from light to dark theme.
+    await tester.pumpWidget(buildWidget(themeMode: ThemeMode.dark));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance animation by 50 milliseconds.
+
+    // Scaffold background color is slightly updated.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffc6c3c6));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xff1c1b1f));
+
+    // Reset to light theme to compare the Scaffold background color animation
+    // with the default animation curve.
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+
+    // Switch to dark theme with overriden animation curve.
+    await tester.pumpWidget(buildWidget(
+      themeMode: ThemeMode.dark,
+      animationStyle: AnimationStyle(curve: Curves.easeIn,
+    )));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Scaffold background color is slightly updated but with a different
+    // color than the default animation curve.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffe9e5e9));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xff1c1b1f));
+
+    // Switch from dark to light theme with overriden animation duration.
+    await tester.pumpWidget(buildWidget(animationStyle: AnimationStyle.noAnimation));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(tester.widget<Material>(find.byType(Material)).color, isNot(const Color(0xff1c1b1f)));
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xfffffbfe));
+  });
+
+  testWidgetsWithLeakTracking('AnimationStyle.noAnimation removes AnimatedTheme from the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle()));
+
+    expect(find.byType(AnimatedTheme), findsOneWidget);
+    expect(find.byType(Theme), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle.noAnimation));
+
+    expect(find.byType(AnimatedTheme), findsNothing);
+    expect(find.byType(Theme), findsOneWidget);
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
@@ -1553,7 +1632,9 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   SimpleNavigatorRouterDelegate({
     required this.builder,
     required this.onPopPage,
-  });
+  }) {
+    ChangeNotifier.maybeDispatchObjectCreation(this);
+  }
 
   @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

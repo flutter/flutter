@@ -7,6 +7,7 @@ import 'dart:ui' as ui show Image;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -16,7 +17,7 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
-  testWidgets('ShapeDecoration.image', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ShapeDecoration.image', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DecoratedBox(
@@ -39,7 +40,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('ShapeDecoration.color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ShapeDecoration.color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DecoratedBox(
@@ -68,7 +69,7 @@ Future<void> main() async {
     expect(decoration.padding, isA<EdgeInsetsDirectional>());
   });
 
-  testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TestBorder and Directionality - 1', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -89,7 +90,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('TestBorder and Directionality - 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TestBorder and Directionality - 2', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(
@@ -113,7 +114,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Does not crash with directional gradient', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not crash with directional gradient', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/76967.
 
     await tester.pumpWidget(

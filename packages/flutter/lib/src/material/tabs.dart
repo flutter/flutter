@@ -531,8 +531,8 @@ class _IndicatorPainter extends CustomPainter {
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
     final bool ltr = index > value;
-    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex); // ignore_clamp_double_lint
-    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex); // ignore_clamp_double_lint
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex);
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex);
     final Rect fromRect = indicatorRect(size, from);
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
@@ -731,20 +731,20 @@ class _TabBarScrollController extends ScrollController {
 ///  * [TabBar.secondary], for a secondary tab bar.
 ///  * [TabBarView], which displays page views that correspond to each tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+///  * https://m3.material.io/components/tabs/overview, the Material 3
 ///     tab bar specification.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design primary tab bar.
   ///
-  /// The [tabs] argument must not be null and its length must match the [controller]'s
+  /// The length of the [tabs] argument must match the [controller]'s
   /// [TabController.length].
   ///
   /// If a [TabController] is not provided, then there must be a
   /// [DefaultTabController] ancestor.
   ///
-  /// The [indicatorWeight] parameter defaults to 2, and must not be null.
+  /// The [indicatorWeight] parameter defaults to 2.
   ///
-  /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
+  /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero].
   ///
   /// If [indicator] is not null or provided from [TabBarTheme],
   /// then [indicatorWeight] and [indicatorColor] are ignored.
@@ -797,7 +797,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [TabBar], for a primary tab bar.
   ///  * [TabBarView], which displays page views that correspond to each tab.
   ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-  ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+  ///  * https://m3.material.io/components/tabs/overview, the Material 3
   ///     tab bar specification.
   const TabBar.secondary({
     super.key,
@@ -1380,6 +1380,7 @@ class _TabBarState extends State<TabBar> {
       _controller!.removeListener(_handleTabControllerTick);
     }
     _controller = null;
+    _scrollController?.dispose();
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1506,7 +1507,7 @@ class _TabBarState extends State<TabBar> {
         }
         return true;
       }());
-    });
+    }, debugLabel: 'TabBar.tabsCountCheck');
     _debugHasScheduledValidTabsCountCheck = true;
     return true;
   }
@@ -1866,6 +1867,13 @@ class _TabBarViewState extends State<TabBarView> {
       _currentIndex = _controller!.index;
       _jumpToPage(_currentIndex!);
     }
+    if (widget.viewportFraction != oldWidget.viewportFraction) {
+      _pageController?.dispose();
+      _pageController = PageController(
+        initialPage: _currentIndex!,
+        viewportFraction: widget.viewportFraction,
+      );
+    }
     // While a warp is under way, we stop updating the tab page contents.
     // This is tracked in https://github.com/flutter/flutter/issues/31269.
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0) {
@@ -2016,7 +2024,7 @@ class _TabBarViewState extends State<TabBarView> {
         }
         return true;
       }());
-    });
+    }, debugLabel: 'TabBarView.validChildrenCountCheck');
     _debugHasScheduledValidChildrenCountCheck = true;
     return true;
   }
@@ -2046,8 +2054,6 @@ class _TabBarViewState extends State<TabBarView> {
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
   /// Creates an indicator used by [TabPageSelector].
-  ///
-  /// The [backgroundColor], [borderColor], and [size] parameters must not be null.
   const TabPageSelectorIndicator({
     super.key,
     required this.backgroundColor,

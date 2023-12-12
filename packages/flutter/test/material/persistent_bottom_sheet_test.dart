@@ -23,7 +23,7 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
-  testWidgets('Persistent draggableScrollableSheet localHistoryEntries test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Persistent draggableScrollableSheet localHistoryEntries test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/110123
     Widget buildFrame(Widget? bottomSheet) {
       return MaterialApp(
@@ -79,7 +79,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/83668
-  testWidgets('Scaffold.bottomSheet update test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.bottomSheet update test', (WidgetTester tester) async {
     Widget buildFrame(Widget? bottomSheet) {
       return MaterialApp(
         home: Scaffold(
@@ -107,7 +107,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
@@ -123,7 +123,7 @@ void main() {
     expect(buildCount, equals(2));
   });
 
-  testWidgets('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: const Center(child: Text('body')),
@@ -164,7 +164,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -186,7 +186,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgets('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -196,7 +196,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return DraggableScrollableSheet(
         expand: false,
         shouldCloseOnMinExtent: false,
@@ -234,7 +234,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -259,7 +259,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgets('Verify that a scrollControlled BottomSheet can be dismissed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a scrollControlled BottomSheet can be dismissed', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -269,7 +269,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -298,7 +298,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgets('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -348,7 +348,7 @@ void main() {
     expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
   });
 
-  testWidgets('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -409,7 +409,7 @@ void main() {
     expect(find.text('Item 22'), findsNothing);
   });
 
-  testWidgets('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -423,7 +423,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>(
+    scaffoldKey.currentState!.showBottomSheet(
       (BuildContext context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -472,7 +472,7 @@ void main() {
     ));
 
     int buildCount = 0;
-    showBottomSheet<void>(
+    showBottomSheet(
       context: key.currentContext!,
       builder: (BuildContext context) {
         return Builder(
@@ -510,7 +510,7 @@ void main() {
 
     await tester.pump();
 
-    showBottomSheet<void>(
+    showBottomSheet(
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
@@ -530,7 +530,7 @@ void main() {
     );
   });
 
-  testWidgets('Scaffold.bottomSheet', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.bottomSheet', (WidgetTester tester) async {
     final Key bottomSheetKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -589,7 +589,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71435
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Scaffold.bottomSheet should be updated without creating a new RO'
     ' when the new widget has the same key and type.',
     (WidgetTester tester) async {
@@ -627,7 +627,7 @@ void main() {
       ),
     ));
 
-    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    scaffoldKey.currentState!.showBottomSheet((BuildContext context) {
       return ListView(
         shrinkWrap: true,
         primary: false,
@@ -657,7 +657,7 @@ void main() {
       ),
     ));
 
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+    final PersistentBottomSheetController bottomSheet = scaffoldKey.currentState!.showBottomSheet((_) {
       return Builder(
         builder: (BuildContext context) {
           return Container(height: 200.0);

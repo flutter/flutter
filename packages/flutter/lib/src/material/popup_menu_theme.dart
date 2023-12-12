@@ -225,8 +225,6 @@ class PopupMenuThemeData with Diagnosticable {
 class PopupMenuTheme extends InheritedTheme {
   /// Creates a popup menu theme that controls the configurations for
   /// popup menus in its widget subtree.
-  ///
-  /// The data argument must not be null.
   const PopupMenuTheme({
     super.key,
     required this.data,

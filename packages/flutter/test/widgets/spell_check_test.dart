@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 late TextStyle composingStyle;
 late TextStyle misspelledTextStyle;
@@ -17,7 +18,7 @@ void main() {
     misspelledTextStyle = TextField.materialMisspelledTextStyle;
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
   'buildTextSpanWithSpellCheckSuggestions ignores composing region when composing region out of range',
       (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
@@ -46,7 +47,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions, isolated misspelled word with separate composing region example',
       (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
@@ -77,7 +78,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions, composing region and misspelled words overlap example',
       (WidgetTester tester) async {
     const String text = 'Right worng worng right';
@@ -111,7 +112,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions, consecutive misspelled words example',
       (WidgetTester tester) async {
     const String text = 'Right worng worng right';
@@ -144,7 +145,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text shorter than actual text example',
       (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
@@ -174,7 +175,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text longer with more misspelled words than actual text example',
       (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
@@ -206,7 +207,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text mismatched example',
       (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
@@ -233,7 +234,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted forward example',
       (WidgetTester tester) async {
     const String text = 'Hello, there wrold! Hey';
@@ -263,7 +264,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards example',
       (WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
@@ -293,7 +294,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards and forwards example',
       (WidgetTester tester) async {
     const String text = 'Hello, wrold! And Hye!';
@@ -326,7 +327,7 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'buildTextSpanWithSpellCheckSuggestions discards result when additions are made to misspelled word example',
       (WidgetTester tester) async {
     const String text = 'Hello, wroldd!';

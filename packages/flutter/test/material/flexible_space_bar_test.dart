@@ -909,6 +909,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byType(Text)).dx, 72.0);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/135698.
+  testWidgetsWithLeakTracking('_FlexibleSpaceHeaderOpacity with near zero opacity avoids compositing', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: const SliverAppBar(
+                    pinned: true,
+                    expandedHeight: 200.0,
+                    collapsedHeight: 56.0,
+                    flexibleSpace: FlexibleSpaceBar(background: SizedBox()),
+                  ),
+                ),
+              ];
+            },
+            body: const SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Placeholder(fallbackHeight: 300.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag the scroll view to the top to collapse the sliver app bar.
+    // Ensure collapsed height - current extent is near zero for the
+    // FlexibleSpaceBar to avoid compositing.
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -(200.0 - 56.08787892026129)));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.mobile());
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

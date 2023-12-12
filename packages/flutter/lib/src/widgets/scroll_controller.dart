@@ -57,8 +57,6 @@ typedef ScrollControllerCallback = void Function(ScrollPosition position);
 ///    listen to scrolling occur without using a [ScrollController].
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
-  ///
-  /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
     double initialScrollOffset = 0.0,
     this.keepScrollOffset = true,
@@ -67,7 +65,7 @@ class ScrollController extends ChangeNotifier {
     this.onDetach,
   }) : _initialScrollOffset = initialScrollOffset {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -382,6 +380,8 @@ class TrackingScrollController extends ScrollController {
     super.initialScrollOffset,
     super.keepScrollOffset,
     super.debugLabel,
+    super.onAttach,
+    super.onDetach,
   });
 
   final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};

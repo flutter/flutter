@@ -710,7 +710,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
           if (isActive) {
             changedInternalState();
           }
-        });
+        }, debugLabel: 'LocalHistoryRoute.changedInternalState');
       } else {
         changedInternalState();
       }
@@ -1672,7 +1672,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
             return;
           }
           notification.dispatch(subtreeContext);
-        });
+        }, debugLabel: 'ModalRoute.dispatchNotification');
     }
   }
 
@@ -1849,14 +1849,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       _modalBarrier = OverlayEntry(builder: _buildModalBarrier),
       _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState),
     ];
-  }
-
-  @override
-  bool get willHandlePopInternally {
-    final bool popEntriesCanPop = _popEntries.every((PopEntry popEntry) {
-      return popEntry.canPopNotifier.value;
-    });
-    return !popEntriesCanPop || super.willHandlePopInternally;
   }
 
   @override
@@ -2182,7 +2174,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
         child: child,
       );
     }
-    return _transitionBuilder!(context, animation, secondaryAnimation, child);
+    return _transitionBuilder(context, animation, secondaryAnimation, child);
   }
 }
 
@@ -2195,8 +2187,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
 /// does not share a context with the location that [showGeneralDialog] is
 /// originally called from. Use a [StatefulBuilder] or a custom
-/// [StatefulWidget] if the dialog needs to update dynamically. The
-/// `pageBuilder` argument can not be null.
+/// [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the
 /// dialog. It is only used when the method is called. Its corresponding widget

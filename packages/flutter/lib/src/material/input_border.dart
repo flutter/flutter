@@ -31,10 +31,9 @@ import 'package:flutter/widgets.dart';
 abstract class InputBorder extends ShapeBorder {
   /// Creates a border for an [InputDecorator].
   ///
-  /// The [borderSide] parameter must not be null. Applications typically do
-  /// not specify a [borderSide] parameter because the input decorator
-  /// substitutes its own, using [copyWith], based on the current theme and
-  /// [InputDecorator.isFocused].
+  /// Applications typically do not specify a [borderSide] parameter because the
+  /// [InputDecorator] substitutes its own, using [copyWith], based on the
+  /// current theme and [InputDecorator.isFocused].
   const InputBorder({
     this.borderSide = BorderSide.none,
   });
@@ -149,8 +148,7 @@ class UnderlineInputBorder extends InputBorder {
   /// on the current theme and [InputDecorator.isFocused].
   ///
   /// The [borderRadius] parameter defaults to a value where the top left
-  /// and right corners have a circular radius of 4.0. The [borderRadius]
-  /// parameter must not be null.
+  /// and right corners have a circular radius of 4.0.
   const UnderlineInputBorder({
     super.borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.only(
@@ -246,9 +244,22 @@ class UnderlineInputBorder extends InputBorder {
     TextDirection? textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
-      canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
+      // This prevents the border from leaking the color due to anti-aliasing rounding errors.
+      final BorderRadius updatedBorderRadius = BorderRadius.only(
+        bottomLeft: borderRadius.bottomLeft.clamp(maximum: Radius.circular(rect.height / 2)),
+        bottomRight: borderRadius.bottomRight.clamp(maximum: Radius.circular(rect.height / 2)),
+      );
+
+      // We set the strokeAlign to center, so the behavior is consistent with
+      // drawLine and with the historical behavior of this border.
+      BoxBorder.paintNonUniformBorder(canvas, rect,
+          textDirection: textDirection,
+          borderRadius: updatedBorderRadius,
+          bottom: borderSide.copyWith(strokeAlign: BorderSide.strokeAlignCenter),
+          color: borderSide.color);
+    } else {
+      canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
     }
-    canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
   }
 
   @override
@@ -292,10 +303,9 @@ class OutlineInputBorder extends InputBorder {
   /// value [BorderSide.none], the input decorator substitutes its own, using
   /// [copyWith], based on the current theme and [InputDecorator.isFocused].
   ///
-  /// The [borderRadius] parameter defaults to a value where all four
-  /// corners have a circular radius of 4.0. The [borderRadius] parameter
-  /// must not be null and the corner radii must be circular, i.e. their
-  /// [Radius.x] and [Radius.y] values must be the same.
+  /// The [borderRadius] parameter defaults to a value where all four corners
+  /// have a circular radius of 4.0. The corner radii must be circular, i.e.
+  /// their [Radius.x] and [Radius.y] values must be the same.
   ///
   /// See also:
   ///

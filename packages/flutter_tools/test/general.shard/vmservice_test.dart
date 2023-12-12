@@ -443,10 +443,6 @@ void main() {
           errorCode: RPCErrorCodes.kServiceDisappeared,
         ),
         const FakeVmServiceRequest(
-          method: kScreenshotMethod,
-          errorCode: RPCErrorCodes.kServiceDisappeared,
-        ),
-        const FakeVmServiceRequest(
           method: kScreenshotSkpMethod,
           errorCode: RPCErrorCodes.kServiceDisappeared,
         ),
@@ -479,9 +475,6 @@ void main() {
 
     final List<FlutterView> views = await fakeVmServiceHost.vmService.getFlutterViews();
     expect(views, isEmpty);
-
-    final vm_service.Response? screenshot = await fakeVmServiceHost.vmService.screenshot();
-    expect(screenshot, isNull);
 
     final vm_service.Response? screenshotSkp = await fakeVmServiceHost.vmService.screenshotSkp();
     expect(screenshotSkp, isNull);

@@ -8,6 +8,8 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
+const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
+
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
@@ -19,8 +21,6 @@ import 'package:flutter/scheduler.dart';
 @immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
-  ///
-  /// Both the [image] and the [scale] must not be null.
   ///
   /// The [debugLabel] may be used to identify the source of this image.
   const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
@@ -159,8 +159,6 @@ class ImageInfo {
 @immutable
 class ImageStreamListener {
   /// Creates a new [ImageStreamListener].
-  ///
-  /// The [onImage] parameter must not be null.
   const ImageStreamListener(
     this.onImage, {
     this.onChunk,
@@ -441,6 +439,15 @@ class ImageStream with Diagnosticable {
 class ImageStreamCompleterHandle {
   ImageStreamCompleterHandle._(ImageStreamCompleter this._completer) {
     _completer!._keepAliveHandles += 1;
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterWidgetsLibrary,
+        className: '$ImageStreamCompleterHandle',
+        object: this,
+      );
+    }
   }
 
   ImageStreamCompleter? _completer;
@@ -457,6 +464,11 @@ class ImageStreamCompleterHandle {
     _completer!._keepAliveHandles -= 1;
     _completer!._maybeDispose();
     _completer = null;
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
   }
 }
 
