@@ -36,13 +36,11 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// adding Flutter to an existing Android app.
 class ModuleTest {
   ModuleTest(
-    this.buildTarget,
-    this.options, {
+    this.buildTarget, {
     this.gradleVersion = '7.6.3',
   });
 
   final String buildTarget;
-  final List<String> options;
   final String gradleVersion;
 
   Future<TaskResult> call() async {
@@ -289,7 +287,7 @@ exitCode: $exitCode
       String propertyContent = await gradleWrapperProperties.readAsString();
       propertyContent = propertyContent.replaceFirst(
         'REPLACEME',
-        '$gradleVersion',
+        gradleVersion,
       );
       section(propertyContent);
       await gradleWrapperProperties.writeAsString(propertyContent, flush: true);
@@ -478,15 +476,16 @@ exitCode: $exitCode
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      // rmTree(tempDir); DO NOT SUBMIT
+      rmTree(tempDir);
     }
   }
 }
 
 Future<void> main() async {
   await task(combine(<TaskFunction>[
-    ModuleTest('module-gradle-7.6', <String>[''], gradleVersion: "7.6.3").call,
+    // ignore: avoid_redundant_argument_values
+    ModuleTest('module-gradle-7.6', gradleVersion: '7.6.3').call,
     // Test that read only protection applies in gradle 8.3 and beyond
-    ModuleTest('module-gradle-8.3', <String>[''], gradleVersion: '8.3').call,
+    ModuleTest('module-gradle-8.3', gradleVersion: '8.3').call,
   ]));
 }
