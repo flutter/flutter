@@ -253,6 +253,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
@@ -468,6 +469,20 @@ Future<void> _runIntegrationToolTests() async {
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
+
+  await _runDartTest(
+    _toolsPath,
+    forceSingleCore: true,
+    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
+  );
+}
+
+Future<void> _runAndroidPreviewIntegrationToolTests() async {
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'android_preview_integration.shard'))
+      .listSync(recursive: true).whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .toList();
 
   await _runDartTest(
     _toolsPath,
