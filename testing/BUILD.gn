@@ -169,8 +169,8 @@ if (enable_unittests && shell_enable_vulkan) {
     ]
 
     if (!is_fuchsia) {
-      deps += [ "//third_party/swiftshader" ]
-      configs += [ "//third_party/swiftshader:swiftshader_config" ]
+      deps += [ "//flutter/third_party/swiftshader" ]
+      configs += [ "//flutter/third_party/swiftshader:swiftshader_config" ]
     }
   }
 }
@@ -260,12 +260,12 @@ if (use_swiftshader) {
     configs -= [ "//build/config/clang:extra_warnings" ]
     configs += [
       "//third_party/angle:gl_prototypes",
-      "//third_party/swiftshader:swiftshader_config",
+      "//flutter/third_party/swiftshader:swiftshader_config",
     ]
     deps += [
+      "//flutter/third_party/swiftshader",
       "//third_party/angle:libEGL_static",
       "//third_party/angle:libGLESv2_static",
-      "//third_party/swiftshader",
     ]
   }
 }
