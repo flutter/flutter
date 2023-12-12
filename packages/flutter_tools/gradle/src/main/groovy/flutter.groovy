@@ -1079,15 +1079,6 @@ class FlutterPlugin implements Plugin<Project> {
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
                 isAndroidLibrary isAndroidLibraryValue
-                doLast {
-                    project.exec {
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
-                        } else {
-                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
-                        }
-                    }
-                }
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -1161,12 +1152,6 @@ class FlutterPlugin implements Plugin<Project> {
             def bundleAarTask = project.tasks.findByName("bundle${variant.name.capitalize()}Aar")
             if (bundleAarTask) {
                 bundleAarTask.dependsOn copyFlutterAssetsTask
-                bundleAarTask.mustRunAfter copyFlutterAssetsTask
-            }
-            def bundleAarTask2 = project.tasks.findByName("bundle${variant.name.capitalize()}LocalLintAar")
-            if (bundleAarTask2) {
-                bundleAarTask2.dependsOn copyFlutterAssetsTask
-                bundleAarTask2.mustRunAfter copyFlutterAssetsTask
             }
 
             return copyFlutterAssetsTask
