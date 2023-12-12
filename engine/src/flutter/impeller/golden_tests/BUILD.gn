@@ -75,8 +75,8 @@ if (is_mac) {
       "//flutter/impeller/aiks",
       "//flutter/impeller/aiks:aiks_unittests_golden",
       "//flutter/impeller/fixtures",
+      "//flutter/third_party/swiftshader",
       "//third_party/googletest:gtest",
-      "//third_party/swiftshader",
     ]
   }
 }
