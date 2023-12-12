@@ -18,14 +18,14 @@ extension CallExtension on JSFunction {
 @JS('Promise')
 external JSAny get _promiseConstructor;
 
-JSPromise createPromise(JSFunction executor) =>
+JSPromise<JSAny?> createPromise(JSFunction executor) =>
   js_util.callConstructor(
     _promiseConstructor,
     <Object>[executor],
   );
 
 
-JSPromise futureToPromise<T extends JSAny?>(Future<T> future) {
+JSPromise<JSAny?> futureToPromise<T extends JSAny?>(Future<T> future) {
   return createPromise((JSFunction resolver, JSFunction rejecter) {
     future.then(
       (T value) => resolver.call(null, value),
