@@ -295,7 +295,6 @@ void main() {
     expect(outer.offset, 0.0);
     expect(inner.offset, endPosition + 600);
 
-    // Since there is a difference between scrolling on devices and the web absolute values are not checked...
     double currentOffset = inner.offset;
     int maxNumberOfSteps = 100;
 
@@ -312,6 +311,12 @@ void main() {
     }
 
     // Assert positions returned to/stayed at 0.0
+    expect(outer.offset, 0.0);
+    expect(inner.offset, 0.0);
+
+    await tester.pumpAndSettle();
+
+    // Assert values settle at 0.0
     expect(outer.offset, 0.0);
     expect(inner.offset, 0.0);
   });
