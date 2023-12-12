@@ -50,6 +50,18 @@ void main() {
       uriConverter: (String input) => '$input/converted',
     );
 
+  testUsingContext('Missing dir error caught for FontConfigManger.dispose', () async {
+    final FontConfigManager fontConfigManager = FontConfigManager();
+
+    final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
+    fontsDirectory.deleteSync(recursive: true);
+
+    await fontConfigManager.dispose();
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
     setUp(() {
       processManager = FakeProcessManager.list(<FakeCommand>[]);

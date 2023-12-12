@@ -54,6 +54,7 @@ changelog:
       labels:
         - tool
     - title: DevTools
+      labels:
         - "d: devtools"
         - "d: intellij"
     - title: Documentation

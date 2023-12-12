@@ -326,6 +326,16 @@ void main() {
     await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
   },
   skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+
+  test('SnapshotPainter dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => TestPainter().dispose(),
+        TestPainter,
+      ),
+      areCreateAndDispose,
+    );
+  });
 }
 
 class TestPlatformView extends SingleChildRenderObjectWidget {

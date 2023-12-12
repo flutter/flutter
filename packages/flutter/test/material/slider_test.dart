@@ -3396,6 +3396,99 @@ void main() {
     expect(dragStarted, false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/139281
+  testWidgetsWithLeakTracking('Slider does not request focus when the value is changed', (WidgetTester tester) async {
+    double value = 0.5;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return Slider(
+                value: value,
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                }
+            );
+          }),
+        ),
+      ),
+    ));
+    // Initially, the slider does not have focus whe enabled and not tapped.
+    await tester.pumpAndSettle();
+    expect(value, equals(0.5));
+    // Get FocusNode from the state of the slider to include auto-generated FocusNode.
+    // ignore: avoid_dynamic_calls, invalid_assignment
+    final FocusNode focusNode = (tester.firstState(find.byType(Slider)) as dynamic).focusNode;
+    // The slider does not have focus.
+    expect(focusNode.hasFocus, false);
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
+    // Tap on the slider to change the value.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.addPointer();
+    await gesture.down(tapLocation);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(value, isNot(equals(0.5)));
+    // The slider does not have focus after the value is changed.
+    expect(focusNode.hasFocus, false);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/139281
+  testWidgetsWithLeakTracking('Overlay remains when Slider thumb is interacted', (WidgetTester tester) async {
+    double value = 0.5;
+    const Color overlayColor = Color(0xffff0000);
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return Slider(
+                value: value,
+                overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                }
+            );
+          }),
+        ),
+      ),
+    ));
+    // Slider does not have overlay when enabled and not tapped.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    // Tap and hold down on the thumb to keep it active.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.addPointer();
+    await gesture.down(sliderCenter);
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: overlayColor),
+    );
+    // Hover on the slider but outside the thumb.
+    await gesture.moveTo(tester.getTopLeft(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: overlayColor),
+    );
+    // Tap up on the slider.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: overlayColor)),
+    );
+  });
+
   testWidgetsWithLeakTracking('Overlay appear only when hovered on the thumb on desktop', (WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
@@ -3525,8 +3618,8 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Value indicator disappears after adjusting the slider', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/123313.
+  // Regression test for https://github.com/flutter/flutter/issues/123313, which only occurs on desktop platforms.
+  testWidgetsWithLeakTracking('Value indicator disappears after adjusting the slider on desktop', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const double currentValue = 0.5;
     await tester.pumpWidget(MaterialApp(
@@ -3537,7 +3630,7 @@ void main() {
             value: currentValue,
             divisions: 5,
             label: currentValue.toStringAsFixed(1),
-            onChanged: (double value) {},
+            onChanged: (_) {},
           ),
         ),
       ),
@@ -3554,8 +3647,8 @@ void main() {
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
     final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
 
-    // Tap the slider to bring up the value indicator.
-    await tester.tapAt(tapLocation);
+    // Tap the slider by mouse to bring up the value indicator.
+    await tester.tapAt(tapLocation, kind: PointerDeviceKind.mouse);
     await tester.pumpAndSettle();
 
     // Value indicator is visible.
@@ -3573,7 +3666,7 @@ void main() {
       valueIndicatorBox,
       isNot(paints..scale()..path(color: theme.colorScheme.primary)),
     );
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgetsWithLeakTracking('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
@@ -3650,6 +3743,7 @@ void main() {
     double value = 0.0;
     final ValueNotifier<bool> shouldShowSliderListenable =
         ValueNotifier<bool>(true);
+    addTearDown(shouldShowSliderListenable.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
