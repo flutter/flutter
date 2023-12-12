@@ -6,5 +6,5 @@ alignment:third_party/dart
 null:third_party/dart
 
 # Ignore errors in SwiftShader
-undefined:third_party/swiftshader
+undefined:flutter/third_party/swiftshader
 
