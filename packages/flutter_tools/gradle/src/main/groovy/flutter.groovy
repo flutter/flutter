@@ -492,7 +492,8 @@ class FlutterPlugin implements Plugin<Project> {
         String kgpVersion = getKGPVersion()
         AndroidPluginVersion agpVersion = getAGPVersion()
         // TODO: check each version and project.logger.error if it doesn't meet. Or warn. Also
-        // check inter-compatibility if we want.
+        // check inter-compatibility if we want. AndroidPluginVersion is already a comparable,
+        // will need to manually compare the others.
 
         print("HI GRAY, VERSIONS ARE:\nGradle: $gradleVersion\nJava: $javaVersion\nKGP: $kgpVersion\nAGP: ${agpVersion.toString()}\n")
     }
