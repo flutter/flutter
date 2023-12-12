@@ -20,7 +20,7 @@ late final String _test8TrackingOnNotDisposed;
 
 void main() {
   collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
-  LeakTesting.settings = LeakTesting.settings.copyWith(ignoredLeaks: const IgnoredLeaks(), ignore: false);
+  LeakTesting.settings = LeakTesting.settings.copyWith(ignore: false);
 
   // It is important that the test file starts with group, to test that leaks are collected for all tests after group too.
   group('Group', () {
