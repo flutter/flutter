@@ -2874,7 +2874,6 @@
 ../../../third_party/libpng/projects
 ../../../third_party/libpng/scripts
 ../../../third_party/libpng/tests
-../../../third_party/libxml
 ../../../third_party/perfetto/.clang-format
 ../../../third_party/perfetto/.clang-tidy
 ../../../third_party/perfetto/.git
