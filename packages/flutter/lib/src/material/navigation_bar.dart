@@ -566,6 +566,13 @@ class _IndicatorInkWell extends InkResponse {
 ///
 /// Useful for building [NavigationBar.destinations] using:
 /// `NavigationDestinationInfo.of(context)`.
+///
+/// {@tool dartpad}
+/// This example shows a [NavigationBar] being built with the aid of
+/// [NavigationDestinationInfo] for customizing the destinations.
+///
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.3.dart **
+/// {@end-tool}
 class NavigationDestinationInfo extends InheritedWidget {
   /// Adds the information needed to build a navigation destination to the
   /// [child] and descendants.
