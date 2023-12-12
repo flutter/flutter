@@ -33,11 +33,18 @@ void main() {
   });
 
   group('Unit testing util:', () {
-    testWithoutContext('getEnabledFeatures', () {
+    test('getEnabledFeatures is null', () {
+      final String? enabledFeatures = getEnabledFeatures(config);
+      expect(enabledFeatures, isNull);
+    });
+
+    testWithoutContext('getEnabledFeatures not null', () {
       config.setValue('cli-animations', true);
       config.setValue('enable-flutter-preview', true);
 
-      expect(getEnabledFeatures(config), 'cli-animations,enable-flutter-preview');
+      final String? enabledFeatures = getEnabledFeatures(config);
+      expect(enabledFeatures, isNotNull);
+      expect(enabledFeatures!.split(','), unorderedEquals(<String>['enable-flutter-preview', 'cli-animations']));
     });
   });
 
