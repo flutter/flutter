@@ -1,4 +1,4 @@
-Signature: b3e3a0d81c7c89d74cd05b2879f175c8
+Signature: aa1ac33edf804b7c6ff2ac7584b0c6d0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8749,6 +8749,7 @@ ORIGIN: ../../../flutter/third_party/skia/gm/png_codec.cpp + ../../../flutter/th
 ORIGIN: ../../../flutter/third_party/skia/gm/rippleshadergm.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/scaledrects.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/workingspace.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/android/AHardwareBufferUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/android/SkCanvasAndroid.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/android/SkHeifDecoder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/android/SkImageAndroid.h + ../../../flutter/third_party/skia/LICENSE
@@ -8881,6 +8882,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/PipelineUtils.h + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/SkBackingFit.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/android/AHardwareBufferUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/GrBackendSemaphorePriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/GrBackendSurfacePriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/GrCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9033,6 +9035,7 @@ FILE: ../../../flutter/third_party/skia/gm/png_codec.cpp
 FILE: ../../../flutter/third_party/skia/gm/rippleshadergm.cpp
 FILE: ../../../flutter/third_party/skia/gm/scaledrects.cpp
 FILE: ../../../flutter/third_party/skia/gm/workingspace.cpp
+FILE: ../../../flutter/third_party/skia/include/android/AHardwareBufferUtils.h
 FILE: ../../../flutter/third_party/skia/include/android/SkCanvasAndroid.h
 FILE: ../../../flutter/third_party/skia/include/android/SkHeifDecoder.h
 FILE: ../../../flutter/third_party/skia/include/android/SkImageAndroid.h
@@ -9165,6 +9168,7 @@ FILE: ../../../flutter/third_party/skia/src/gpu/PipelineUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/SkBackingFit.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/TiledTextureUtils.h
+FILE: ../../../flutter/third_party/skia/src/gpu/android/AHardwareBufferUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/GrBackendSemaphorePriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/GrBackendSurfacePriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/GrCanvas.cpp
