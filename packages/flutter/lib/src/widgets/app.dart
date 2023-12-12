@@ -1171,7 +1171,7 @@ class WidgetsApp extends StatefulWidget {
   final String? restorationScopeId;
 
   /// {@template flutter.widgets.widgetsApp.useInheritedMediaQuery}
-  /// Deprecated. This setting is not ignored.
+  /// Deprecated. This setting is now ignored.
   ///
   /// The widget never introduces its own [MediaQuery]; the [View] widget takes
   /// care of that.
