@@ -440,6 +440,20 @@ class Overlay extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
   });
 
+  /// Wrap the provided `child` in an [Overlay] to allow other visual elements
+  /// (packed in [OverlayEntry]s) to float on top of the child.
+  ///
+  /// This is a convenience method over the regular [Overlay] constructor: It
+  /// creates an [Overlay] and puts the provided `child` in an [OverlayEntry]
+  /// at the bottom of that newly created Overlay.
+  static Widget wrap({
+    Key? key,
+    Clip clipBehavior = Clip.hardEdge,
+    required Widget child,
+  }) {
+    return _WrappingOverlay(key: key, clipBehavior: clipBehavior, child: child);
+  }
+
   /// The entries to include in the overlay initially.
   ///
   /// These entries are only used when the [OverlayState] is initialized. If you
@@ -801,6 +815,39 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     // TODO(jacobr): use IterableProperty instead as that would
     // provide a slightly more consistent string summary of the List.
     properties.add(DiagnosticsProperty<List<OverlayEntry>>('entries', _entries));
+  }
+}
+
+class _WrappingOverlay extends StatefulWidget {
+  const _WrappingOverlay({super.key, this.clipBehavior = Clip.hardEdge, required this.child});
+
+  final Clip clipBehavior;
+  final Widget child;
+
+  @override
+  State<_WrappingOverlay> createState() => _WrappingOverlayState();
+}
+
+class _WrappingOverlayState extends State<_WrappingOverlay> {
+  late final OverlayEntry _entry = OverlayEntry(
+    opaque: true,
+    builder: (BuildContext context) {
+      return widget.child;
+    }
+  );
+
+  @override
+  void didUpdateWidget(_WrappingOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _entry.markNeedsBuild();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Overlay(
+      clipBehavior: widget.clipBehavior,
+      initialEntries: <OverlayEntry>[_entry],
+    );
   }
 }
 

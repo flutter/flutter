@@ -548,15 +548,15 @@ targets:
 
   - name: Linux flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Linux flutter_plugins
     recipe: flutter/flutter_drone
@@ -1067,6 +1067,36 @@ targets:
         ]
       shard: tool_integration_tests
       subshard: "4_4"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      test_timeout_secs: "2700"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux android_preview_tool_integration_tests
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      # This makes use of UpsideDownCake, a preview version of android. Preview versions eventually
+      # get removed from the sdk manager, so it is hosted on CIPD to ensure integration testing
+      # doesn't flake when that happens.
+      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/linux-amd64/+/version:udcv1
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:udcv1"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "open_jdk", "version": "version:11"}
+        ]
+      shard: android_preview_tool_integration_tests
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700"
@@ -2283,6 +2313,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: hot_mode_dev_cycle_linux__benchmark
     runIf:
+      - .ci.yaml
       - dev/**
 
   - name: Linux_android hybrid_android_views_integration_test
@@ -2403,6 +2434,16 @@ targets:
       tags: >
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_impeller_perf__e2e_summary
+
+  - name: Linux_android native_assets_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: native_assets_android
 
   - name: Linux_android new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
@@ -3152,27 +3193,27 @@ targets:
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Mac_arm64 flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Mac_benchmark flutter_view_macos__start_up
     presubmit: false
@@ -3797,10 +3838,21 @@ targets:
         ["devicelab", "android", "mac"]
       task_name: microbenchmarks
 
+  - name: Mac_android native_assets_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac"]
+      task_name: native_assets_android
+
   - name: Mac_android run_debug_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -3812,6 +3864,7 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -3823,6 +3876,7 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -3834,6 +3888,7 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
+      - .ci.yaml
       - dev/**
     timeout: 60
     properties:
@@ -4066,6 +4121,7 @@ targets:
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
     runIf:
+      - .ci.yaml
       - dev/**
 
   - name: Mac_ios integration_test_test_ios
@@ -4585,7 +4641,6 @@ targets:
       - .ci.yaml
 
   - name: Windows build_tests_1_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4604,7 +4659,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_2_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4623,7 +4677,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_3_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4642,7 +4695,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_4_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4661,7 +4713,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_5_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4680,7 +4731,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_6_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -4699,7 +4749,6 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
 
   - name: Windows build_tests_7_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5532,6 +5581,16 @@ targets:
         ["devicelab", "android", "windows"]
       task_name: hot_mode_dev_cycle_win__benchmark
 
+  - name: Windows_android native_assets_android
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "windows"]
+      task_name: native_assets_android
+
   - name: Windows_android windows_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5543,15 +5602,15 @@ targets:
 
   - name: Windows flutter_packaging_test
     recipe: packaging/packaging
-    timeout: 60
     enabled_branches:
       - master
-      - beta
-      - stable
     properties:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    runIf:
+      - .ci.yaml
+      - dev/bots/**
 
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
