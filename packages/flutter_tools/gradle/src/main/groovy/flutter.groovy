@@ -481,13 +481,56 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void checkDependencyVersions() {
-        String gradleVersion = project.gradle.gradleVersion;
-        String javaVersion = JavaVersion.current();
-        String kgpVersion = project.plugins.getPlugin("kotlin-android").properties.pluginVersion;
-        // TODO: get AGP version
-
+        String gradleVersion = getGradleVersion()
+        String javaVersion = getJavaVersion()
+        String kgpVersion = getKGPVersion()
+        String agpVersion = getAGPVersion()
         // TODO: check each version and project.logger.error if it doesn't meet. Or warn. Also
         // check inter-compatibility if we want.
+
+        print("HI GRAY, VERSIONS ARE:\nGradle: $gradleVersion\nJava: $javaVersion\nKGP: $kgpVersion\nAGP: $agpVersion\n")
+    }
+
+    private String getGradleVersion() {
+        try {
+            return project.gradle.gradleVersion
+        } catch (Exception ignored) {
+            //TODO(gmackall): Log a warning
+            return null;
+        }
+    }
+
+    private String getJavaVersion() {
+        try {
+            return JavaVersion.current()
+        } catch (Exception ignored) {
+            //TODO(gmackall): Log a warning
+            return null;
+        }
+    }
+
+    private String getKGPVersion() {
+        try {
+            return project.plugins.getPlugin("kotlin-android").properties.pluginVersion
+        } catch (Exception ignored) {
+            //TODO(gmackall): Log a warning
+            return null;
+        }
+    }
+
+    private String getAGPVersion() {
+        try {
+            // This approach of getting the AGP version is mostly copied from AGP's own internal
+            // version checker.
+            // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/utils/agpVersionChecker.kt#64
+            project.plugins.withId("com.android.base") {
+                Class clazz = it.class.classLoader.loadClass("com.android.Version")
+                return clazz.fields.find {it.name == "ANDROID_GRADLE_PLUGIN_VERSION"}.get(null) as String
+            }
+        } catch (Exception ignored) {
+            //TODO(gmackall): Log a warning
+            return null;
+        }
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
