@@ -18,7 +18,7 @@ import '../utils.dart';
 /// If a compilation unit can not be resolved, this function ignores the
 /// corresponding dart source file and logs an error using [foundError].
 Future<void> analyzeFrameworkWithRules(String flutterRootDirectory, List<AnalyzeRule> rules) async {
-  final String flutterLibPath = path.canonicalize('$flutterRootDirectory/packages/flutter/lib');
+  final String flutterLibPath = path.canonicalize('$flutterRootDirectory/packages/flutter/lib/src/foundation');
   if (!Directory(flutterLibPath).existsSync()) {
     foundError(<String>['Analyzer error: the specified $flutterLibPath does not exist.']);
   }
@@ -36,7 +36,7 @@ Future<void> analyzeFrameworkWithRules(String flutterRootDirectory, List<Analyze
       final SomeResolvedUnitResult unit = await session.getResolvedUnit(filePath);
       if (unit is ResolvedUnitResult) {
         for (final AnalyzeRule rule in rules) {
-          rule.applyTo(unit);
+          rule.applyTo(unit, collection);
         }
       } else {
         analyzerErrors.add('Analyzer error: file $unit could not be resolved. Expected "ResolvedUnitResult", got ${unit.runtimeType}.');
@@ -67,7 +67,7 @@ Future<void> analyzeFrameworkWithRules(String flutterRootDirectory, List<Analyze
 abstract class AnalyzeRule {
   /// Applies this rule to the given [ResolvedUnitResult] (typically a file), and
   /// collects information about violations occurred in the compilation unit.
-  void applyTo(ResolvedUnitResult unit);
+  void applyTo(ResolvedUnitResult unit, AnalysisContextCollection analysisContextCollection);
 
   /// Reports all violations in the resolved compilation units [applyTo] was
   /// called on, if any.

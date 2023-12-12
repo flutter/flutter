@@ -19,6 +19,7 @@ import 'package:path/path.dart' as path;
 import 'allowlist.dart';
 import 'custom_rules/analyze.dart';
 import 'custom_rules/no_double_clamp.dart';
+import 'custom_rules/no_stop_watches.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -88,6 +89,10 @@ Future<void> run(List<String> arguments) async {
   if (!assertsEnabled) {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noStopWatches];
+    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
+    await analyzeFrameworkWithRules(flutterRoot, rules);
 
   printProgress('TargetPlatform tool/framework consistency');
   await verifyTargetPlatform(flutterRoot);
@@ -175,7 +180,7 @@ Future<void> run(List<String> arguments) async {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
-    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp];
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopWatches];
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
     await analyzeFrameworkWithRules(flutterRoot, rules);

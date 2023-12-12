@@ -8,6 +8,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/source/line_info.dart';
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
@@ -19,16 +20,16 @@ import 'analyze.dart';
 /// See also:
 ///   * https://github.com/flutter/flutter/pull/103559
 ///   * https://github.com/flutter/flutter/issues/103917
-final AnalyzeRule noDoubleClamp = _NoDoubleClamp();
+final AnalyzeRule noStopWatches = _NoStopWatches();
 
-class _NoDoubleClamp implements AnalyzeRule {
+class _NoStopWatches implements AnalyzeRule {
   final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
 
   @override
   void applyTo(ResolvedUnitResult unit, AnalysisContextCollection analysisContextCollection) {
-    final _DoubleClampVisitor visitor = _DoubleClampVisitor();
+    final _StopwatchVisitor visitor = _StopwatchVisitor(analysisContextCollection, unit.lineInfo);
     unit.unit.visitChildren(visitor);
-    final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
+    final List<AstNode> violationsInUnit = visitor.stopwatchAccessNodes;
     if (violationsInUnit.isNotEmpty) {
       _errors.putIfAbsent(unit, () => <AstNode>[]).addAll(violationsInUnit);
     }
@@ -53,11 +54,49 @@ class _NoDoubleClamp implements AnalyzeRule {
   }
 
   @override
-  String toString() => 'No "double.clamp"';
+  String toString() => 'No "Stopwatch"';
 }
 
-class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
-  final List<AstNode> clampAccessNodes = <AstNode>[];
+class _StopwatchVisitor extends RecursiveAstVisitor<void> {
+  _StopwatchVisitor(this.analysisContextCollection, this.lineInfo);
+
+  final AnalysisContextCollection analysisContextCollection;
+  final LineInfo lineInfo;
+
+  final List<AstNode> stopwatchAccessNodes = <AstNode>[];
+
+  final Map<ClassElement, bool> _isStopwatchClassElementCache = <ClassElement, bool>{};
+
+  bool _isStopwatchClassElement(ClassElement classElement) {
+    if (classElement.library.isDartCore) {
+      return classElement.name == 'Stopwatch';
+    }
+    return classElement.interfaces.any((InterfaceType interface) {
+      final InterfaceElement interfaceElement = interface.element;
+      return interfaceElement is ClassElement && _getIsStopwatchClassElement(interfaceElement);
+    });
+  }
+
+  bool _getIsStopwatchClassElement(ClassElement classElement) {
+    if (classElement.library.isDartCore) {
+      return classElement.name == 'Stopwatch';
+    }
+    return _isStopwatchClassElementCache.putIfAbsent(classElement, () => _isStopwatchClassElement(classElement));
+  }
+
+  bool _isInternal(LibraryElement libraryElement) {
+    if (libraryElement.isInSdk) {
+      return false;
+    }
+    bool isInternal = true;
+    try {
+      analysisContextCollection.contextFor(libraryElement.source.fullName);
+    } catch (e) {
+      printProgress(e.toString());
+      isInternal = false;
+    }
+    return isInternal;
+  }
 
   // We don't care about directives or comments.
   @override
@@ -71,7 +110,8 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
-    if (node.name != 'clamp' || node.staticElement is! MethodElement) {
+    const Set<String> methodNames = <String>{ 'elapsed', 'elapsedMicroseconds', 'elapsedMilliseconds', 'elapsedTicks' };
+    if (methodNames.contains(node.name) || node.staticElement is! MethodElement) {
       return;
     }
     final bool isAllowed = switch (node.parent) {
@@ -82,10 +122,9 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
       // final f = 1.clamp;
       // final y = f(0, 2)       // The inferred return type is num.
       PropertyAccess(
-        target: Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true) || DartType(isDartCoreInt: true)),
+        target: Expression(staticType: ),
       ) => false,
 
-      // Expressions like `final int x = 1.clamp(0, 2);` should be allowed.
       MethodInvocation(
         target: Expression(staticType: DartType(isDartCoreInt: true)),
         argumentList: ArgumentList(arguments: [Expression(staticType: DartType(isDartCoreInt: true)), Expression(staticType: DartType(isDartCoreInt: true))]),
@@ -99,7 +138,7 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<void> {
       _ => true,
     };
     if (!isAllowed) {
-      clampAccessNodes.add(node);
+      stopwatchAccessNodes.add(node);
     }
   }
 }
