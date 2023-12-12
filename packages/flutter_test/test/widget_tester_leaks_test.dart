@@ -90,7 +90,6 @@ void main() {
     expect(LeakTracking.phase.ignoreLeaks, false);
     LeakTrackedClass();
   });
-
 }
 
 int _leakReporterInvocationCount = 0;
