@@ -21,7 +21,7 @@ dependencies:
   http: 0.13.6
   intl: 0.18.1
   meta: 1.11.0
-  multicast_dns: 0.3.2+5
+  multicast_dns: 0.3.2+6
   mustache_template: 2.0.0
   package_config: 2.1.0
   process: 5.0.1
@@ -48,7 +48,7 @@ dependencies:
   http_multi_server: 3.2.1
   convert: 3.1.1
   async: 2.11.0
-  unified_analytics: 5.7.0
+  unified_analytics: 5.8.0
 
   cli_config: 0.1.2
   graphs: 2.3.1
@@ -115,4 +115,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 77a1
+# PUBSPEC CHECKSUM: 18a3
