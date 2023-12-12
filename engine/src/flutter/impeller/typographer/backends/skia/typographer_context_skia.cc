@@ -446,6 +446,20 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   }
   atlas_context_skia.UpdateBitmap(bitmap);
 
+  // If the new atlas size is the same size as the previous texture, reuse the
+  // texture and treat this as an updated that replaces all glyphs.
+  if (last_atlas && last_atlas->GetTexture()) {
+    std::shared_ptr<Texture> last_texture = last_atlas->GetTexture();
+    if (atlas_size == last_texture->GetSize()) {
+      if (!UpdateGlyphTextureAtlas(bitmap, last_texture)) {
+        return nullptr;
+      }
+
+      glyph_atlas->SetTexture(last_texture);
+      return glyph_atlas;
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Step 7b: Upload the atlas as a texture.
   // ---------------------------------------------------------------------------

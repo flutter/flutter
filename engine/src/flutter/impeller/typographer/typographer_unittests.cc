@@ -9,7 +9,6 @@
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/lazy_glyph_atlas.h"
 #include "impeller/typographer/rectangle_packer.h"
-#include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkRect.h"
@@ -337,6 +336,42 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
   packer->reset();
   // Should be empty now.
   ASSERT_EQ(packer->percentFull(), 0);
+}
+
+TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledWhenContentsAreRecreated) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context = context->CreateGlyphAtlasContext();
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("ABCDEFGHIJKLMNOPQRSTUVQXYZ123456789",
+                                         sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), GlyphAtlas::Type::kColorBitmap, 32.0f,
+      atlas_context, *MakeTextFrameFromTextBlobSkia(blob));
+  auto old_packer = atlas_context->GetRectPacker();
+
+  ASSERT_NE(atlas, nullptr);
+  ASSERT_NE(atlas->GetTexture(), nullptr);
+  ASSERT_EQ(atlas, atlas_context->GetGlyphAtlas());
+
+  auto* first_texture = atlas->GetTexture().get();
+
+  // Now create a new glyph atlas with a completely different textblob.
+  // everything should be different except for the underlying atlas texture.
+
+  auto blob2 = SkTextBlob::MakeFromString("abcdefghijklmnopqrstuvwxyz123456789",
+                                          sk_font);
+  auto next_atlas = CreateGlyphAtlas(
+      *GetContext(), context.get(), GlyphAtlas::Type::kColorBitmap, 32.0f,
+      atlas_context, *MakeTextFrameFromTextBlobSkia(blob2));
+  ASSERT_NE(atlas, next_atlas);
+  auto* second_texture = next_atlas->GetTexture().get();
+
+  auto new_packer = atlas_context->GetRectPacker();
+
+  ASSERT_EQ(second_texture, first_texture);
+  ASSERT_NE(old_packer, new_packer);
 }
 
 }  // namespace testing
