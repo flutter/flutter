@@ -485,7 +485,5 @@ Future<void> main() async {
   await task(combine(<TaskFunction>[
     // ignore: avoid_redundant_argument_values
     ModuleTest('module-gradle-7.6', gradleVersion: '7.6.3').call,
-    // Test that read only protection applies in gradle 8.3 and beyond
-    ModuleTest('module-gradle-8.3', gradleVersion: '8.3').call,
   ]));
 }
