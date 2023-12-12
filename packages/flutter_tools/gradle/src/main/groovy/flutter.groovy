@@ -480,6 +480,11 @@ class FlutterPlugin implements Plugin<Project> {
         return version2
     }
 
+    /**
+     * Checks if the projects Android build time dependencies are each within the respective
+     * version range that we support. When we can't find a version for a given dependency
+     * we treat it as within the range for the purpose of this check.
+     */
     private void checkDependencyVersions() {
         String gradleVersion = getGradleVersion()
         String javaVersion = getJavaVersion()
