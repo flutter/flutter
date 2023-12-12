@@ -480,6 +480,16 @@ class FlutterPlugin implements Plugin<Project> {
         return version2
     }
 
+    private void checkDependencyVersions() {
+        String gradleVersion = project.gradle.gradleVersion;
+        String javaVersion = JavaVersion.current();
+        String kgpVersion = project.plugins.getPlugin("kotlin-android").properties.pluginVersion;
+        // TODO: get AGP version
+
+        // TODO: check each version and project.logger.error if it doesn't meet. Or warn. Also
+        // check inter-compatibility if we want.
+    }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
@@ -949,6 +959,13 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void addFlutterTasks(Project project) {
+        //TODO(gmackall): Determine if this is the right place.
+        if (project.hasProperty('skipDependencyChecks') && project.property('skipDependencyChecks')) {
+            println('HI GRAY, SKIPPING!')
+        } else {
+            println('HI GRAY, NOT SKIPPING!')
+            checkDependencyVersions()
+        }
         if (project.state.failure) {
             return
         }
@@ -1336,6 +1353,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean validateDeferredComponents
     @Optional @Input
     Boolean isAndroidLibrary
+    @Optional @Input
+    Boolean skipDependencyChecks
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
