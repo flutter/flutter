@@ -725,22 +725,40 @@ void DlDispatcher::clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) {
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcher::clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) {
+void DlDispatcher::clipRRect(const SkRRect& rrect, ClipOp sk_op, bool is_aa) {
+  auto clip_op = ToClipOperation(sk_op);
   if (rrect.isRect()) {
-    canvas_.ClipRect(skia_conversions::ToRect(rrect.rect()),
-                     ToClipOperation(clip_op));
+    canvas_.ClipRect(skia_conversions::ToRect(rrect.rect()), clip_op);
+  } else if (rrect.isOval()) {
+    canvas_.ClipOval(skia_conversions::ToRect(rrect.rect()), clip_op);
   } else if (rrect.isSimple()) {
     canvas_.ClipRRect(skia_conversions::ToRect(rrect.rect()),
                       skia_conversions::ToSize(rrect.getSimpleRadii()),
-                      ToClipOperation(clip_op));
+                      clip_op);
   } else {
-    canvas_.ClipPath(skia_conversions::ToPath(rrect), ToClipOperation(clip_op));
+    canvas_.ClipPath(skia_conversions::ToPath(rrect), clip_op);
   }
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcher::clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) {
-  canvas_.ClipPath(skia_conversions::ToPath(path), ToClipOperation(clip_op));
+void DlDispatcher::clipPath(const SkPath& path, ClipOp sk_op, bool is_aa) {
+  auto clip_op = ToClipOperation(sk_op);
+
+  SkRect rect;
+  if (path.isRect(&rect)) {
+    canvas_.ClipRect(skia_conversions::ToRect(rect), clip_op);
+  } else if (path.isOval(&rect)) {
+    canvas_.ClipOval(skia_conversions::ToRect(rect), clip_op);
+  } else {
+    SkRRect rrect;
+    if (path.isRRect(&rrect) && rrect.isSimple()) {
+      canvas_.ClipRRect(skia_conversions::ToRect(rrect.rect()),
+                        skia_conversions::ToSize(rrect.getSimpleRadii()),
+                        clip_op);
+    } else {
+      canvas_.ClipPath(skia_conversions::ToPath(path), clip_op);
+    }
+  }
 }
 
 // |flutter::DlOpReceiver|

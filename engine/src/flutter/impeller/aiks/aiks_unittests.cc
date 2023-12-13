@@ -318,6 +318,74 @@ TEST_P(AiksTest, CanRenderClips) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderSimpleClips) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  Paint paint;
+
+  paint.color = Color::White();
+  canvas.DrawPaint(paint);
+
+  auto draw = [&canvas](const Paint& paint, Scalar x, Scalar y) {
+    canvas.Save();
+    canvas.Translate({x, y});
+    {
+      canvas.Save();
+      canvas.ClipRect(Rect::MakeLTRB(50, 50, 150, 150));
+      canvas.DrawPaint(paint);
+      canvas.Restore();
+    }
+    {
+      canvas.Save();
+      canvas.ClipOval(Rect::MakeLTRB(200, 50, 300, 150));
+      canvas.DrawPaint(paint);
+      canvas.Restore();
+    }
+    {
+      canvas.Save();
+      canvas.ClipRRect(Rect::MakeLTRB(50, 200, 150, 300), {20, 20});
+      canvas.DrawPaint(paint);
+      canvas.Restore();
+    }
+    canvas.Restore();
+  };
+
+  paint.color = Color::Blue();
+  draw(paint, 0, 0);
+
+  std::vector<Color> gradient_colors = {
+      Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+      Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+      Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+      Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+      Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+  std::vector<Scalar> stops = {
+      0.0,
+      (1.0 / 6.0) * 1,
+      (1.0 / 6.0) * 2,
+      (1.0 / 6.0) * 3,
+      (1.0 / 6.0) * 4,
+      (1.0 / 6.0) * 5,
+      1.0,
+  };
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  paint.color_source = ColorSource::MakeRadialGradient(
+      {500, 600}, 75, std::move(gradient_colors), std::move(stops),
+      Entity::TileMode::kMirror, {});
+  draw(paint, 0, 300);
+
+  paint.color_source = ColorSource::MakeImage(
+      texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {},
+      Matrix::MakeTranslation({0, 0}));
+  draw(paint, 300, 0);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderNestedClips) {
   Canvas canvas;
   Paint paint;
