@@ -11877,9 +11877,9 @@ void main() {
 
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
       final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
-      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
-      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
-      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+      // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
 
       expect(
         contextMenuButtonFinder,
@@ -11958,9 +11958,9 @@ void main() {
       );
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
       final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
-      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
-      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
-      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+      // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
       expect(
         contextMenuButtonFinder,
         isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),
@@ -12027,9 +12027,9 @@ void main() {
 
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
       final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
-      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
-      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
-      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+      // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
 
       expect(
         contextMenuButtonFinder,
@@ -12165,9 +12165,9 @@ void main() {
       );
       final bool targetPlatformIsiOS = defaultTargetPlatform == TargetPlatform.iOS;
       final Finder contextMenuButtonFinder = targetPlatformIsiOS ? find.byType(CupertinoButton) : find.byType(TextButton);
-      // Context menu shows 4 buttons: cut, copy, paste, select all on Android
-      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS
-      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 4;
+      // Context menu shows 5 buttons: cut, copy, paste, select all, share on Android.
+      // Context menu shows 6 buttons: cut, copy, paste, select all, lookup, share on iOS.
+      final int numberOfContextMenuButtons = targetPlatformIsiOS ? 6 : 5;
       expect(
         contextMenuButtonFinder,
         isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(numberOfContextMenuButtons),

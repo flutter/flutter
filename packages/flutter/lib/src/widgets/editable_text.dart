@@ -2875,10 +2875,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
-    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
-    _scrollNotificationObserver?.addListener(_handleContextMenuOnParentScroll);
-
     _style = MediaQuery.boldTextOf(context)
         ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
         : widget.style;
@@ -3032,6 +3028,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  void _disposeScrollNotificationObserver() {
+    if (_scrollNotificationObserver != null) {
+      _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
+      _scrollNotificationObserver = null;
+    }
+  }
+
   @override
   void dispose() {
     _internalScrollController?.dispose();
@@ -3055,10 +3058,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
-      _scrollNotificationObserver = null;
-    }
+    _disposeScrollNotificationObserver();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
   }
@@ -3720,7 +3720,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
       _valueWhenToolbarShowScheduled = toolbarIsVisible ? _value : null;
       if (_valueWhenToolbarShowScheduled != null) {
-        hideToolbar(false);
+        if (_selectionOverlay?.toolbarIsVisible ?? false) {
+          _selectionOverlay?.hideToolbar();
+        }
       }
     } else if (notification is ScrollEndNotification) {
       _internalScrolling = false;
@@ -4430,11 +4432,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _liveTextInputStatus?.update();
     clipboardStatus.update();
     _selectionOverlay!.showToolbar();
+    // Listen to parent scroll events when the toolbar is visible so it can be
+    // hidden during a scroll on supported platforms.
+    if (_platformSupportsFadeOnScroll) {
+      _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
+      _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+      _scrollNotificationObserver?.addListener(_handleContextMenuOnParentScroll);
+    }
     return true;
   }
 
   @override
   void hideToolbar([bool hideHandles = true]) {
+    // Stop listening to parent scroll events when toolbar is hidden.
+    _disposeScrollNotificationObserver();
     if (hideHandles) {
       // Hide the handles and the toolbar.
       _selectionOverlay?.hide();
