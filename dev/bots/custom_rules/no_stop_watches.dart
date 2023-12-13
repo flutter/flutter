@@ -12,8 +12,8 @@ import 'package:path/path.dart' as path;
 import '../utils.dart';
 import 'analyze.dart';
 
-// The inline directive that indictates the line should be exempt from the
-// stopwatch check.
+// The comment pattern representing the "flutter_ignore" inline directive that
+// indicates the line should be exempt from the stopwatch check.
 final Pattern _ignoreStopwatch = RegExp(r'// flutter_ignore: .*stopwatch .*\(see analyze\.dart\)');
 
 /// Use of Stopwatches can introduce test flakes as the logical time of a
@@ -58,6 +58,9 @@ class _NoStopwatches implements AnalyzeRule {
   String toString() => 'No "Stopwatch"';
 }
 
+// This visitor finds invocation sites of Stopwatch (and subclasses) constructors
+// and references to "external" functions that return a Stopwatch (and subclasses),
+// including constructors, and put them in the stopwatchAccessNodes list.
 class _StopwatchVisitor extends RecursiveAstVisitor<void> {
   _StopwatchVisitor(this.compilationUnit);
 
@@ -77,6 +80,7 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
     });
   }
 
+  // The cached version, call this method instead of _checkIfImplementsStopwatchRecurively.
   bool _implementsStopwatch(ClassElement classElement) {
     return classElement.library.isDartCore
       ? classElement.name == 'Stopwatch'
@@ -96,7 +100,7 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
       .contains(_ignoreStopwatch);
   }
 
-  // We don't care about directives or comments.
+  // We don't care about directives or comments, skip them.
   @override
   void visitImportDirective(ImportDirective node) { }
 
@@ -115,7 +119,7 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
     }
     final bool isAllowed = switch (element.returnType) {
       InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(classElement),
-      InterfaceType() => true,
+      InterfaceType(element: InterfaceElement()) => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {
       return;
@@ -126,7 +130,10 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
     final bool isAllowed = switch (node.staticElement) {
-      ExecutableElement(returnType: DartType(element: final ClassElement classElement), library: final LibraryElement libraryElement) => _isInternal(libraryElement) || !_implementsStopwatch(classElement),
+      ExecutableElement(
+        returnType: DartType(element: final ClassElement classElement),
+        library: final LibraryElement libraryElement
+      ) => _isInternal(libraryElement) || !_implementsStopwatch(classElement),
       Element() || null => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {
