@@ -74,6 +74,7 @@ bool EmbedderExternalView::HasEngineRenderedContents() {
   DlOpSpy dl_op_spy;
   slice_->dispatch(dl_op_spy);
   has_engine_rendered_contents_ = dl_op_spy.did_draw() && !slice_->is_empty();
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   return has_engine_rendered_contents_.value();
 }
 
