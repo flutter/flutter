@@ -2,32 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/source/line_info.dart';
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 import 'analyze.dart';
 
-/// Verify that we use clampDouble instead of double.clamp for performance
-/// reasons.
-///
-/// See also:
-///   * https://github.com/flutter/flutter/pull/103559
-///   * https://github.com/flutter/flutter/issues/103917
-final AnalyzeRule noStopWatches = _NoStopWatches();
+// The inline directive that indictates the line should be exempt from the
+// stopwatch check.
+final Pattern _ignoreStopwatch = RegExp(r'// flutter_ignore: .*stopwatch .*\(see analyze\.dart\)');
 
-class _NoStopWatches implements AnalyzeRule {
+/// Use of Stopwatches can introduce test flakes as the logical time of a
+/// stopwatch can fall out of sync with the mocked time of FakeAsync in testing.
+/// The Clock object provides a safe stopwatch instead, which is paired with
+/// FakeAsync as part of the test binding.
+final AnalyzeRule noStopwatches = _NoStopwatches();
+
+class _NoStopwatches implements AnalyzeRule {
   final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
 
   @override
-  void applyTo(ResolvedUnitResult unit, AnalysisContextCollection analysisContextCollection) {
-    final _StopwatchVisitor visitor = _StopwatchVisitor(analysisContextCollection, unit.lineInfo);
+  void applyTo(ResolvedUnitResult unit) {
+    final _StopwatchVisitor visitor = _StopwatchVisitor(unit);
     unit.unit.visitChildren(visitor);
     final List<AstNode> violationsInUnit = visitor.stopwatchAccessNodes;
     if (violationsInUnit.isNotEmpty) {
@@ -49,7 +49,8 @@ class _NoStopWatches implements AnalyzeRule {
       for (final MapEntry<ResolvedUnitResult, List<AstNode>> entry in _errors.entries)
         for (final AstNode node in entry.value)
           '${locationInFile(entry.key, node)}: ${node.parent}',
-      '\n${bold}For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".$reset',
+      '\n${bold}Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.$reset',
+      'A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.'
     ]);
   }
 
@@ -58,44 +59,41 @@ class _NoStopWatches implements AnalyzeRule {
 }
 
 class _StopwatchVisitor extends RecursiveAstVisitor<void> {
-  _StopwatchVisitor(this.analysisContextCollection, this.lineInfo);
+  _StopwatchVisitor(this.compilationUnit);
 
-  final AnalysisContextCollection analysisContextCollection;
-  final LineInfo lineInfo;
+  final ResolvedUnitResult compilationUnit;
 
   final List<AstNode> stopwatchAccessNodes = <AstNode>[];
 
   final Map<ClassElement, bool> _isStopwatchClassElementCache = <ClassElement, bool>{};
 
-  bool _isStopwatchClassElement(ClassElement classElement) {
+  bool _checkIfImplementsStopwatchRecurively(ClassElement classElement) {
     if (classElement.library.isDartCore) {
       return classElement.name == 'Stopwatch';
     }
-    return classElement.interfaces.any((InterfaceType interface) {
+    return classElement.allSupertypes.any((InterfaceType interface) {
       final InterfaceElement interfaceElement = interface.element;
-      return interfaceElement is ClassElement && _getIsStopwatchClassElement(interfaceElement);
+      return interfaceElement is ClassElement && _implementsStopwatch(interfaceElement);
     });
   }
 
-  bool _getIsStopwatchClassElement(ClassElement classElement) {
-    if (classElement.library.isDartCore) {
-      return classElement.name == 'Stopwatch';
-    }
-    return _isStopwatchClassElementCache.putIfAbsent(classElement, () => _isStopwatchClassElement(classElement));
+  bool _implementsStopwatch(ClassElement classElement) {
+    return classElement.library.isDartCore
+      ? classElement.name == 'Stopwatch'
+      :_isStopwatchClassElementCache.putIfAbsent(classElement, () => _checkIfImplementsStopwatchRecurively(classElement));
   }
 
   bool _isInternal(LibraryElement libraryElement) {
-    if (libraryElement.isInSdk) {
-      return false;
-    }
-    bool isInternal = true;
-    try {
-      analysisContextCollection.contextFor(libraryElement.source.fullName);
-    } catch (e) {
-      printProgress(e.toString());
-      isInternal = false;
-    }
-    return isInternal;
+    return path.isWithin(
+      compilationUnit.session.analysisContext.contextRoot.root.path,
+      libraryElement.source.fullName,
+    );
+  }
+
+  bool _hasTrailingFlutterIgnore(AstNode node) {
+    return compilationUnit.content
+      .substring(node.offset + node.length, compilationUnit.lineInfo.getOffsetOfLineAfter(node.offset + node.length))
+      .contains(_ignoreStopwatch);
   }
 
   // We don't care about directives or comments.
@@ -109,36 +107,31 @@ class _StopwatchVisitor extends RecursiveAstVisitor<void> {
   void visitComment(Comment node) { }
 
   @override
-  void visitSimpleIdentifier(SimpleIdentifier node) {
-    const Set<String> methodNames = <String>{ 'elapsed', 'elapsedMicroseconds', 'elapsedMilliseconds', 'elapsedTicks' };
-    if (methodNames.contains(node.name) || node.staticElement is! MethodElement) {
+  void visitConstructorName(ConstructorName node) {
+    final Element? element = node.staticElement;
+    if (element is! ConstructorElement) {
+      assert(false, '$element of $node is not a ConstructorElement.');
       return;
     }
-    final bool isAllowed = switch (node.parent) {
-      // PropertyAccess matches num.clamp in tear-off form. Always prefer
-      // doubleClamp over tear-offs: even when all 3 operands are int literals,
-      // the return type doesn't get promoted to int:
-      // final x = 1.clamp(0, 2); // The inferred return type is int, where as:
-      // final f = 1.clamp;
-      // final y = f(0, 2)       // The inferred return type is num.
-      PropertyAccess(
-        target: Expression(staticType: ),
-      ) => false,
-
-      MethodInvocation(
-        target: Expression(staticType: DartType(isDartCoreInt: true)),
-        argumentList: ArgumentList(arguments: [Expression(staticType: DartType(isDartCoreInt: true)), Expression(staticType: DartType(isDartCoreInt: true))]),
-      ) => true,
-
-      // Otherwise, disallow num.clamp() invocations.
-      MethodInvocation(
-        target: Expression(staticType: DartType(isDartCoreDouble: true) || DartType(isDartCoreNum: true) || DartType(isDartCoreInt: true)),
-      ) => false,
-
-      _ => true,
+    final bool isAllowed = switch (element.returnType) {
+      InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(classElement),
+      InterfaceType() => true,
     };
-    if (!isAllowed) {
-      stopwatchAccessNodes.add(node);
+    if (isAllowed || _hasTrailingFlutterIgnore(node)) {
+      return;
     }
+    stopwatchAccessNodes.add(node);
+  }
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    final bool isAllowed = switch (node.staticElement) {
+      ExecutableElement(returnType: DartType(element: final ClassElement classElement), library: final LibraryElement libraryElement) => _isInternal(libraryElement) || !_implementsStopwatch(classElement),
+      Element() || null => true,
+    };
+    if (isAllowed || _hasTrailingFlutterIgnore(node)) {
+      return;
+    }
+    stopwatchAccessNodes.add(node);
   }
 }

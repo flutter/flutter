@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
@@ -25,7 +24,7 @@ class _NoDoubleClamp implements AnalyzeRule {
   final Map<ResolvedUnitResult, List<AstNode>> _errors = <ResolvedUnitResult, List<AstNode>>{};
 
   @override
-  void applyTo(ResolvedUnitResult unit, AnalysisContextCollection analysisContextCollection) {
+  void applyTo(ResolvedUnitResult unit) {
     final _DoubleClampVisitor visitor = _DoubleClampVisitor();
     unit.unit.visitChildren(visitor);
     final List<AstNode> violationsInUnit = visitor.clampAccessNodes;
