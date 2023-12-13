@@ -1201,6 +1201,9 @@ class FontVariation {
 ///  * [Paragraph.getClosestGlyphInfoForOffset], which finds the [GlyphInfo] of
 ///    the glyph(s) onscreen that's closest to the given [Offset].
 final class GlyphInfo {
+  /// Creates a [GlyphInfo] with the specified values.
+  GlyphInfo(this.graphemeClusterLayoutBounds, this.graphemeClusterCodeUnitRange, this.writingDirection);
+
   GlyphInfo._(double left, double top, double right, double bottom, int graphemeStart, int graphemeEnd, bool isLTR)
     : graphemeClusterLayoutBounds = Rect.fromLTRB(left, top, right, bottom),
       graphemeClusterCodeUnitRange = TextRange(start: graphemeStart, end: graphemeEnd),
@@ -1209,7 +1212,7 @@ final class GlyphInfo {
   /// The layout bounding rect of the associated character, in the paragraph's
   /// coordinates.
   ///
-  /// This is **not** the tight bounding box that encloses the character's outline.
+  /// This is **not** a tight bounding box that encloses the character's outline.
   /// The vertical extent reported is derived from the font metrics (instead of
   /// glyph metrics), and the horizontal extent is the horizontal advance of the
   /// character.
@@ -3017,18 +3020,24 @@ abstract class Paragraph {
   List<TextBox> getBoxesForPlaceholders();
 
   /// Returns the text position closest to the given offset.
+  ///
+  /// This method always returns a [TextPosition] for any given [offset], even
+  /// when the [offset] is not close to any text, or when the paragraph is empty.
+  /// This is useful for determining the text to select when the user drags the
+  /// text selection handle.
+  ///
+  /// See also:
+  ///
+  ///  * [getClosestGlyphInfoForOffset], which returns more information about
+  ///    the closest character to an [Offset].
   TextPosition getPositionForOffset(Offset offset);
 
   /// Returns the [GlyphInfo] of the glyph closest to the given `offset` in the
-  /// paragraph coordinate system, or null if the glyph is not in the visible
-  /// range.
+  /// paragraph coordinate system, or null if if the text is empty, or is
+  /// entirely clipped or ellipsized away.
   ///
   /// This method first finds the line closest to `offset.dy`, and then returns
   /// the [GlyphInfo] of the closest glyph(s) within that line.
-  ///
-  /// This method can be used to implement per-glyph hit-testing. The returned
-  /// [GlyphInfo] can help determine whether the given `offset` directly hits a
-  /// glyph in the paragraph.
   GlyphInfo? getClosestGlyphInfoForOffset(Offset offset);
 
   /// Returns the [GlyphInfo] located at the given UTF-16 `codeUnitOffset` in

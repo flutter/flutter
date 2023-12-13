@@ -193,6 +193,18 @@ void testTextRange() {
   });
 }
 
+void testGlyphInfo() {
+  test('constructor', () {
+    const Rect testRect = Rect.fromLTWH(1, 2, 3, 4);
+    const TextRange testRange = TextRange(start: 5, end: 6);
+    const TextDirection testDirection = TextDirection.ltr;
+    final GlyphInfo info = GlyphInfo(testRect, testRange, testDirection);
+    expect(info.graphemeClusterLayoutBounds, testRect);
+    expect(info.graphemeClusterCodeUnitRange, testRange);
+    expect(info.writingDirection, testDirection);
+  });
+}
+
 void testLoadFontFromList() {
   test('loadFontFromList will send platform message after font is loaded', () async {
     late String message;
@@ -336,6 +348,7 @@ void main() {
   testTextStyle();
   testTextHeightBehavior();
   testTextRange();
+  testGlyphInfo();
   testLoadFontFromList();
   testFontFeatureClass();
   testFontVariation();
