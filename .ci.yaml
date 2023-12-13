@@ -3841,7 +3841,6 @@ targets:
   - name: Mac_android native_assets_android
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
