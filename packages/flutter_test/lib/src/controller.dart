@@ -1054,8 +1054,8 @@ abstract class WidgetController {
       final finders.TextRangeContext found = textRangeFinder.evaluate().single;
       throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Finder specifies a TextRange that can not receive pointer events.'),
-          ErrorDescription('Found a matching substring in a static text widget, within ${found.textRange}.'),
           ErrorDescription('The finder used was: ${textRangeFinder.toString(describeSelf: true)}'),
+          ErrorDescription('Found a matching substring in a static text widget, within ${found.textRange}.'),
           ErrorDescription('But the "tapOnText" method could not find a hit-testable Offset with in that text range.'),
           found.renderObject.toDiagnosticsNode(name: 'The RenderBox of that static text widget was', style: DiagnosticsTreeStyle.shallow),
         ]

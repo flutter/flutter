@@ -52,54 +52,6 @@ enum TextOverflow {
   visible,
 }
 
-/// The measurements of a character (or a sequence of visually connected
-/// characters) within a paragraph.
-///
-/// See also:
-///
-///  * [TextPainter.getClosestGlyphForOffset], which finds the [GlyphInfo] of
-///    the glyph(s) onscreen that's closest to the given [Offset].
-@immutable
-final class GlyphInfo {
-  GlyphInfo._fromGlyphInfo(ui.GlyphInfo glyphInfo, Offset paintOffset)
-    : graphemeClusterLayoutBounds = glyphInfo.graphemeClusterLayoutBounds.shift(paintOffset),
-      graphemeClusterCodeUnitRange = glyphInfo.graphemeClusterCodeUnitRange,
-      writingDirection = glyphInfo.writingDirection;
-
-  /// The layout bounding rect of the associated character, in the paragraph's
-  /// coordinates.
-  ///
-  /// This is **not** a tight bounding box that encloses the character's outline.
-  /// The vertical extent reported is derived from the font metrics (instead of
-  /// glyph metrics), and the horizontal extent is the horizontal advance from
-  /// the leading x-offset of the character to the leading x-offset to the next
-  /// character.
-  final Rect graphemeClusterLayoutBounds;
-
-  /// The UTF-16 range of the associated character in the text.
-  final TextRange graphemeClusterCodeUnitRange;
-
-  /// The writing direction within the [GlyphInfo].
-  final TextDirection writingDirection;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is GlyphInfo
-        && graphemeClusterLayoutBounds == other.graphemeClusterLayoutBounds
-        && graphemeClusterCodeUnitRange == other.graphemeClusterCodeUnitRange
-        && writingDirection == other.writingDirection;
-  }
-
-  @override
-  int get hashCode => Object.hash(graphemeClusterLayoutBounds, graphemeClusterCodeUnitRange, writingDirection);
-
-  @override
-  String toString() => 'Glyph($graphemeClusterLayoutBounds, textRange: $graphemeClusterCodeUnitRange, direction: $writingDirection)';
-}
-
 /// Holds the [Size] and baseline required to represent the dimensions of
 /// a placeholder in text.
 ///
@@ -1542,23 +1494,21 @@ class TextPainter {
       ? boxes
       : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
   }
-
   /// Returns the [GlyphInfo] of the glyph closest to the given `offset` in the
-  /// paragraph coordinate system, or null if the glyph is not in the visible
-  /// range.
+  /// paragraph coordinate system, or null if if the text is empty, or is
+  /// entirely clipped or ellipsized away.
   ///
   /// This method first finds the line closest to `offset.dy`, and then returns
   /// the [GlyphInfo] of the closest glyph(s) within that line.
-  ///
-  /// This method can be used to implement per-glyph hit-testing. The returned
-  /// [GlyphInfo] can help determine whether the given `offset` directly hits a
-  /// glyph in the paragraph.
-  GlyphInfo? getClosestGlyphForOffset(Offset offset) {
+   ui.GlyphInfo? getClosestGlyphForOffset(Offset offset) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
     final ui.GlyphInfo? rawGlyphInfo = cachedLayout.paragraph.getClosestGlyphInfoForOffset(offset - cachedLayout.paintOffset);
-    return rawGlyphInfo == null ? null : GlyphInfo._fromGlyphInfo(rawGlyphInfo, cachedLayout.paintOffset);
+    if (rawGlyphInfo == null || cachedLayout.paintOffset == Offset.zero) {
+      return rawGlyphInfo;
+    }
+    return ui.GlyphInfo(rawGlyphInfo.graphemeClusterLayoutBounds.shift(cachedLayout.paintOffset), rawGlyphInfo.graphemeClusterCodeUnitRange, rawGlyphInfo.writingDirection);
   }
 
   /// Returns the closest position within the text for the given pixel offset.
