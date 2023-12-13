@@ -3929,7 +3929,6 @@ void main() {
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('e'));
 
-
     // Paste right before the 'e'.
     await tester.tap(find.text('Paste'));
     await tester.pump();
@@ -17252,7 +17251,7 @@ void main() {
       // The text field was not updated.
       expect(controller.text, initialText);
 
-      // The toolbar is no more visible.
+      // The toolbar is no longer visible.
       expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
@@ -17301,7 +17300,7 @@ void main() {
       // The text field was updated.
       expect(controller.text, 'I love Flutter!!!');
 
-      // The toolbar is no more visible.
+      // The toolbar is no longer visible.
       expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
@@ -17351,7 +17350,7 @@ void main() {
       // The text field was not updated.
       expect(controller.text, initialText);
 
-      // The toolbar is no more visible.
+      // The toolbar is no longer visible.
       expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
