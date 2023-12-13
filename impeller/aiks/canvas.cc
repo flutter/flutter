@@ -448,23 +448,34 @@ void Canvas::ClipRect(const Rect& rect, Entity::ClipOperation clip_op) {
   }
 }
 
+void Canvas::ClipOval(const Rect& bounds, Entity::ClipOperation clip_op) {
+  auto geometry = Geometry::MakeOval(bounds);
+  auto& cull_rect = transform_stack_.back().cull_rect;
+  if (clip_op == Entity::ClipOperation::kIntersect &&                      //
+      cull_rect.has_value() &&                                             //
+      geometry->CoversArea(transform_stack_.back().transform, *cull_rect)  //
+  ) {
+    return;  // This clip will do nothing, so skip it.
+  }
+
+  ClipGeometry(geometry, clip_op);
+  switch (clip_op) {
+    case Entity::ClipOperation::kIntersect:
+      IntersectCulling(bounds);
+      break;
+    case Entity::ClipOperation::kDifference:
+      break;
+  }
+}
+
 void Canvas::ClipRRect(const Rect& rect,
                        const Size& corner_radii,
                        Entity::ClipOperation clip_op) {
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
-                  .AddRoundedRect(rect, corner_radii)
-                  .SetBounds(rect)
-                  .TakePath();
-
   auto size = rect.GetSize();
   // Does the rounded rect have a flat part on the top/bottom or left/right?
   bool flat_on_TB = corner_radii.width * 2 < size.width;
   bool flat_on_LR = corner_radii.height * 2 < size.height;
-  std::optional<Rect> inner_rect = (flat_on_LR && flat_on_TB)
-                                       ? rect.Expand(-corner_radii)
-                                       : std::make_optional<Rect>();
-  auto geometry = Geometry::MakeFillPath(std::move(path), inner_rect);
+  auto geometry = Geometry::MakeRoundRect(rect, corner_radii);
   auto& cull_rect = transform_stack_.back().cull_rect;
   if (clip_op == Entity::ClipOperation::kIntersect &&                      //
       cull_rect.has_value() &&                                             //
