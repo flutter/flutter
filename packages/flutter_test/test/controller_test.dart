@@ -1640,7 +1640,8 @@ void main() {
           (FlutterError error) => error.message,
           'message',
           stringContainsInOrder(<String>[
-            'A finder that searches for non-overlapping TextRanges that match the Pattern "match". found a matching substring in a static text widget, within TextRange(start: 0, end: 5).',
+            'Found a matching substring in a static text widget, within TextRange(start: 0, end: 5).',
+            'The finder used was: A finder that searches for non-overlapping TextRanges that match the Pattern "match".',
             'But the "tapOnText" method could not find a hit-testable Offset with in that text range.',
           ])
         )),
