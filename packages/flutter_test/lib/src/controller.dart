@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:clock/clock.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -50,7 +49,6 @@ Iterable<Offset> _testOffsetsForEachTextBox(TextBox box) {
     ? const Iterable<Offset>.empty()
     : <Offset>[rect.center, rect.centerLeft, rect.centerRight];
 }
-
 
 // Examples can assume:
 // typedef MyWidget = Placeholder;
@@ -1019,7 +1017,7 @@ abstract class WidgetController {
     return tapAt(getCenter(finder, warnIfMissed: warnIfMissed, callee: 'tap'), pointer: pointer, buttons: buttons);
   }
 
-  /// Dispatch a pointer down / pointer up sequence at the first hit-testable
+  /// Dispatch a pointer down / pointer up sequence at a hit-testable
   /// [InlineSpan] (typically a [TextSpan]) within the given text range.
   ///
   /// This method performs a more spatially precise tap action on a piece of
@@ -1033,10 +1031,8 @@ abstract class WidgetController {
   /// If the target substring contains more than one hit-testable [InlineSpan]s,
   /// [tapOnText] taps on one of them, but does not guarantee which.
   ///
-  /// This method currently only works on static text widgets ([Text] or
-  /// [RichText] for example) that use [RenderParagraph] under the hood. It
-  /// currently does not support finding substrings in [TextField]s or
-  /// [SelectableText].
+  /// The `pointer` and `button` arguments specify [PointerEvent.pointer] and
+  /// [PointerEvent.buttons] of the tap event.
   Future<void> tapOnText(finders.FinderBase<finders.TextRangeContext> textRangeFinder, {int? pointer, int buttons = kPrimaryButton }) {
     final Iterable<finders.TextRangeContext> ranges = textRangeFinder.evaluate();
     if (ranges.isEmpty) {
@@ -1051,7 +1047,7 @@ abstract class WidgetController {
     if (tapLocation == null) {
       final finders.TextRangeContext found = textRangeFinder.evaluate().single;
       throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Finder specifies a TextRange that would not receive pointer events.'),
+          ErrorSummary('Finder specifies a TextRange that can not receive pointer events.'),
           ErrorDescription('${textRangeFinder.toString(describeSelf: true)} found a matching substring in a static text widget, within ${found.textRange}.'),
           ErrorDescription('But the "tapOnText" method could not find a hit-testable Offset with in that text range.'),
           found.renderObject.toDiagnosticsNode(name: 'The RenderBox of that static text widget was', style: DiagnosticsTreeStyle.shallow),
@@ -1794,8 +1790,8 @@ abstract class WidgetController {
   /// in the documentation for the [flutter_test] library.
   static bool hitTestWarningShouldBeFatal = false;
 
-  /// Finds one hit-testable Offset in the given `renderParagraph` that resides
-  /// in the given `view`.
+  /// Finds one hit-testable Offset in the given `textRangeContext`'s render
+  /// object.
   Offset? _findHitTestableOffsetIn(finders.TextRangeContext textRangeContext) {
     TestAsyncUtils.guardSync();
     final TextRange range = textRangeContext.textRange;
@@ -1804,27 +1800,27 @@ abstract class WidgetController {
     final Offset renderParagraphPaintOffset = textRangeContext.renderObject.localToGlobal(Offset.zero);
     assert(renderParagraphPaintOffset.isFinite);
 
-    int i = range.start;
-    while (i < range.end) {
-      switch (_findEndOfSpan(textRangeContext.renderObject.text, i, range.end)) {
+    int spanStart = range.start;
+    while (spanStart < range.end) {
+      switch (_findEndOfSpan(textRangeContext.renderObject.text, spanStart, range.end)) {
         case (final HitTestTarget target, final int endIndex):
-          bool isHitTestable(Offset localOffset) {
-            final HitTestResult result = HitTestResult();
-            binding.hitTestInView(result, localOffset + renderParagraphPaintOffset, textRangeContext.view.view.viewId);
-            return result.path.any((HitTestEntry entry) => entry.target == target);
-          }
           // Uses BoxHeightStyle.tight in getBoxesForSelection to make sure the
           // returned boxes don't extend outside of the hit-testable region.
-          final Offset? firstUnobstructedOffset = textRangeContext.renderObject
-            .getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: endIndex))
-            .expand(_testOffsetsForEachTextBox)
-            .firstWhereOrNull(isHitTestable);
-          if (firstUnobstructedOffset != null) {
-            return firstUnobstructedOffset + renderParagraphPaintOffset;
+          final Iterable<Offset> testOffsets = textRangeContext.renderObject
+            .getBoxesForSelection(TextSelection(baseOffset: spanStart, extentOffset: endIndex))
+            .expand(_testOffsetsForEachTextBox);
+
+          for (final Offset localOffset in testOffsets) {
+            final HitTestResult result = HitTestResult();
+            final Offset globalOffset = localOffset + renderParagraphPaintOffset;
+            binding.hitTestInView(result, globalOffset, textRangeContext.view.view.viewId);
+            if (result.path.any((HitTestEntry entry) => entry.target == target)) {
+              return globalOffset;
+            }
           }
-          i = endIndex;
+          spanStart = endIndex;
         case (_, final int endIndex):
-          i = endIndex;
+          spanStart = endIndex;
         case null:
           break;
       }

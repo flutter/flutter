@@ -777,48 +777,40 @@ void main() {
 
     // Hit-testing the first line
     // First A
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanA]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
     // The last A.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanA]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
     // Far away from the line.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(200.0, 5.0)), isFalse);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(200.0, 5.0)), isFalse);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
 
     // Hit-testing the second line
     // Tapping on B (startX = letter-spacing / 2 = 13.0).
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(18.0, 15.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanBC]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(18.0, 15.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
 
     // Between B and C, with large letter-spacing.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(31.0, 15.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanBC]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(31.0, 15.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
 
     // On C.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(54.0, 15.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanBC]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(54.0, 15.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanBC]);
 
     // After C.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(100.0, 15.0)), isFalse);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(100.0, 15.0)), isFalse);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
 
     // Not even remotely close.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(9999.0, 9999.0)), isFalse);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(9999.0, 9999.0)), isFalse);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[]);
   });
 
   test('TextSpan Hit testing with text justification', () {
     const TextSpan textSpanA = TextSpan(text: 'A ');      // The space is a word break.
-    const TextSpan textSpanB = TextSpan(text: 'B\u200B'); // The ZWS is used as a line break.
+    const TextSpan textSpanB = TextSpan(text: 'B\u200B'); // The zero-width space is used as a line break.
     final TextSpan textSpanC = TextSpan(text: 'C' * 10);  // The third span starts a new line since it's too long for the first line.
 
     // The text should look like:
@@ -835,19 +827,16 @@ void main() {
     BoxHitTestResult result;
 
     // Tapping on A.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanA]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(5.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
 
     // Between A and B.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(50.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanA]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(50.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanA]);
 
     // On B.
-    // ignore: invalid_use_of_protected_member
-    expect(paragraph.hitTestChildren(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
-    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target as TextSpan), <TextSpan>[textSpanB]);
+    expect(paragraph.hitTest(result = BoxHitTestResult(), position: const Offset(95.0, 5.0)), isTrue);
+    expect(result.path.map((HitTestEntry<HitTestTarget> entry) => entry.target).whereType<TextSpan>(), <TextSpan>[textSpanB]);
   });
 
   group('Selection', () {

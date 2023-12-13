@@ -1503,7 +1503,7 @@ void main() {
         ),
       );
 
-      await tester.tapOnText(find.textRange.of('match'));
+      await tester.tapOnText(find.textRange.ofSubstring('match'));
       expect(tapLogs, <String>['A']);
     });
 
@@ -1529,7 +1529,7 @@ void main() {
       );
 
       await expectLater(
-        () => tester.tapOnText(find.textRange.of('text match')),
+        () => tester.tapOnText(find.textRange.ofSubstring('text match')),
         returnsNormally,
       );
     });
@@ -1575,14 +1575,14 @@ void main() {
         ),
       );
 
-      await tester.tapOnText(find.textRange.of('AAAAAAAAA BBBBBBBBB CCCCCCCCC '));
+      await tester.tapOnText(find.textRange.ofSubstring('AAAAAAAAA BBBBBBBBB CCCCCCCCC '));
       expect(tapLogs, <String>['B']);
     });
 
     testWidgets('error message: no matching text', (WidgetTester tester) async {
       await tester.pumpWidget(const SizedBox());
       await expectLater(
-        () => tester.tapOnText(find.textRange.of('nonexistent')),
+        () => tester.tapOnText(find.textRange.ofSubstring('nonexistent')),
         throwsA(isFlutterError.having(
           (FlutterError error) => error.message,
           'message',
@@ -1606,7 +1606,7 @@ void main() {
       );
 
       await expectLater(
-        () => tester.tapOnText(find.textRange.of('match')),
+        () => tester.tapOnText(find.textRange.ofSubstring('match')),
         throwsA(isFlutterError.having(
           (FlutterError error) => error.message,
           'message',
@@ -1635,7 +1635,7 @@ void main() {
       );
 
       await expectLater(
-        () => tester.tapOnText(find.textRange.of('match')),
+        () => tester.tapOnText(find.textRange.ofSubstring('match')),
         throwsA(isFlutterError.having(
           (FlutterError error) => error.message,
           'message',

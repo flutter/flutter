@@ -350,35 +350,62 @@ void main() {
         )),
       );
 
-      expect(find.textRange.of('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
-      expect(find.textRange.of('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
-      expect(find.textRange.of('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
+      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
 
       expect(
-        find.textRange.of('substringsub').first.evaluate().single.renderObject,
-        find.textRange.of('substringsub').last.evaluate().single.renderObject,
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.renderObject,
       );
 
-      expect(find.textRange.of('substringsub', skipOffstage: false), findsExactly(3));
+      expect(find.textRange.ofSubstring('substringsub', skipOffstage: false), findsExactly(3));
     });
 
-    testWidgets('WidgetSpan test', (WidgetTester tester) async {
+    testWidgets('basic text span test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        _boilerplate(const Text.rich(TextSpan(
-          text: 'substringsub',
-          children: <InlineSpan>[
-            WidgetSpan(child: Text('substringsub')),
+        _boilerplate(const IndexedStack(
+          sizing: StackFit.expand,
+          children: <Widget>[
+            Text.rich(TextSpan(
+              text: 'sub',
+              children: <InlineSpan>[
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+                TextSpan(text: 'stringsub'),
+              ],
+            )),
+            Text('substringsub'),
           ],
-        ))),
+        )),
       );
 
-      expect(find.textRange.of('substringsub'), findsExactly(2));
-      expect(find.textRange.of('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
-      expect(find.textRange.of('substringsub').first.evaluate().last.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.ofSubstring('substringsub'), findsExactly(2)); // Pattern skips overlapping matches.
+      expect(find.textRange.ofSubstring('substringsub').first.evaluate().single.textRange, const TextRange(start: 0, end: 12));
+      expect(find.textRange.ofSubstring('substringsub').last.evaluate().single.textRange, const TextRange(start: 18, end: 30));
+
       expect(
-        find.textRange.of('substringsub').first.evaluate().single.renderObject,
-        isNot(find.textRange.of('substringsub').last.evaluate().single.renderObject),
+        find.textRange.ofSubstring('substringsub').first.evaluate().single.renderObject,
+        find.textRange.ofSubstring('substringsub').last.evaluate().single.renderObject,
       );
+
+      expect(find.textRange.ofSubstring('substringsub', skipOffstage: false), findsExactly(3));
+    });
+
+    testWidgets('descendentOf', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          const Column(
+            children: <Widget>[
+              Text.rich(TextSpan(text: 'text')),
+              Text.rich(TextSpan(text: 'text')),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.textRange.ofSubstring('text'), findsExactly(2));
+      expect(find.textRange.ofSubstring('text', descendentOf: find.text('text').first), findsOne);
     });
 
     testWidgets('finds only static text for now', (WidgetTester tester) async {
@@ -394,7 +421,7 @@ void main() {
         ),
       );
 
-      expect(find.textRange.of('text'), findsNothing);
+      expect(find.textRange.ofSubstring('text'), findsNothing);
     });
   });
 

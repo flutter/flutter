@@ -1942,8 +1942,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final Offset effectivePosition = position - _paintOffset;
     final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(effectivePosition);
-    // This currently works even with large letter-spacing and text justification,
-    // as graphemeClusterLayoutBounds.width is the x layout advance to the next
+    // This works even with large letter-spacing and text justification, as
+    // graphemeClusterLayoutBounds.width is the x layout advance to the next
     // character.
     final InlineSpan? spanHit = glyph != null && glyph.graphemeClusterLayoutBounds.contains(effectivePosition)
       ? _textPainter.text!.getSpanForPosition(TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start))

@@ -706,14 +706,20 @@ class CommonSemanticsFinders {
 final class CommonTextRangeFinders {
   const CommonTextRangeFinders._();
 
-  /// Finds all occurrances of the given `substring` in the static text and
-  /// returns the [TextRange]s.
+  /// Finds all occurrances of the given `substring` in the static text widgets
+  /// and returns the [TextRange]s.
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// static text inside widgets that are [Offstage], or that are from inactive
   /// [Route]s.
-  FinderBase<TextRangeContext> of(String substring, { bool skipOffstage = true }) {
-    return _StaticTextRangeFinder(_TextContainingWidgetFinder(substring, skipOffstage: skipOffstage));
+  ///
+  /// If the `descendentOf` argument is non-null, this method only searches in
+  /// the descendents of that parameter for the given substring.
+  FinderBase<TextRangeContext> ofSubstring(String substring, { bool skipOffstage = true, FinderBase<Element>? descendentOf, }) {
+    final Finder elementFinder = descendentOf == null
+      ? _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage)
+      : _DescendantWidgetFinder(descendentOf, _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage), matchRoot: true, skipOffstage: skipOffstage);
+    return _StaticTextRangeFinder(elementFinder, substring);
   }
 }
 
@@ -1069,12 +1075,13 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
 /// A base class for creating finders that search for static text rendered by a
 /// [RenderParagraph].
 class _StaticTextRangeFinder extends _MapFinder<TextRangeContext, Element> {
-  /// Creates a new [SemanticsFinder] that will search starting at the given
-  /// `root`.
-  _StaticTextRangeFinder(this._parent);
+  /// Creates a new [_StaticTextRangeFinder] that searches for the given
+  /// `pattern` in the [Element]s found by `_parent`.
+  _StaticTextRangeFinder(this._parent, this.pattern);
 
   @override
-  final _TextContainingWidgetFinder _parent;
+  final FinderBase<Element> _parent;
+  final Pattern pattern;
 
   @override
   Iterable<TextRangeContext> _flatMap(Element from) {
@@ -1101,7 +1108,7 @@ class _StaticTextRangeFinder extends _MapFinder<TextRangeContext, Element> {
     visitor(renderObject);
     Iterable<TextRangeContext> searchInParagraph(RenderParagraph paragraph) {
       final String text = paragraph.text.toPlainText();
-      return _parent.pattern.allMatches(text)
+      return pattern.allMatches(text)
         .map((Match match) => TextRangeContext._(view, paragraph, TextRange(start: match.start, end: match.end)));
     }
     return paragraphs.expand(searchInParagraph);
@@ -1110,8 +1117,8 @@ class _StaticTextRangeFinder extends _MapFinder<TextRangeContext, Element> {
   @override
   String describeMatch(Plurality plurality) {
     return switch (plurality) {
-      Plurality.zero || Plurality.many => 'non-overlapping TextRanges that match the Pattern "${_parent.pattern}"',
-      Plurality.one => 'non-overlapping TextRange that matches the Pattern "${_parent.pattern}"',
+      Plurality.zero || Plurality.many => 'non-overlapping TextRanges that match the Pattern "$pattern"',
+      Plurality.one => 'non-overlapping TextRange that matches the Pattern "$pattern"',
     };
   }
 }
