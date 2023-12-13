@@ -867,12 +867,16 @@ class DeviceDomain extends Domain {
   final Map<String, DeviceLogReader> _logReaders = <String, DeviceLogReader>{};
 
   void addDeviceDiscoverer(DeviceDiscovery discoverer) {
+    print('adding discoverer $discoverer');
     if (!discoverer.supportsPlatform) {
+      print('unsupported');
       return;
     }
 
+    _discoverers.add(discoverer);
+    print('supported');
     if (discoverer is PollingDeviceDiscovery) {
-      _discoverers.add(discoverer);
+      print('is polling...');
       discoverer.onAdded.listen(_onDeviceEvent('device.added'));
       discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
     }
