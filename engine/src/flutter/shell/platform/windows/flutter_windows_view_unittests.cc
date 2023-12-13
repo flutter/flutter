@@ -19,6 +19,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
+#include "flutter/shell/platform/windows/testing/mock_angle_surface_manager.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
 
@@ -116,28 +117,6 @@ class MockFlutterWindowsEngine : public FlutterWindowsEngine {
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsEngine);
-};
-
-class MockAngleSurfaceManager : public AngleSurfaceManager {
- public:
-  MockAngleSurfaceManager() : AngleSurfaceManager(false) {}
-
-  MOCK_METHOD(bool,
-              CreateSurface,
-              (WindowsRenderTarget*, EGLint, EGLint),
-              (override));
-  MOCK_METHOD(void,
-              ResizeSurface,
-              (WindowsRenderTarget*, EGLint, EGLint, bool),
-              (override));
-  MOCK_METHOD(void, DestroySurface, (), (override));
-
-  MOCK_METHOD(bool, MakeCurrent, (), (override));
-  MOCK_METHOD(bool, ClearCurrent, (), (override));
-  MOCK_METHOD(void, SetVSyncEnabled, (bool), (override));
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(MockAngleSurfaceManager);
 };
 
 }  // namespace
@@ -264,7 +243,7 @@ TEST(FlutterWindowsViewTest, Shutdown) {
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
-  modifier.SetSurfaceManager(surface_manager.release());
+  modifier.SetSurfaceManager(std::move(surface_manager));
   view.SetEngine(engine.get());
 }
 
@@ -847,7 +826,7 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
   EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
   FlutterWindowsView view(std::move(window_binding_handler));
-  modifier.SetSurfaceManager(surface_manager.release());
+  modifier.SetSurfaceManager(std::move(surface_manager));
   view.SetEngine(engine.get());
 
   fml::AutoResetWaitableEvent metrics_sent_latch;
@@ -1250,7 +1229,7 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAtStartup) {
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
-  modifier.SetSurfaceManager(surface_manager.release());
+  modifier.SetSurfaceManager(std::move(surface_manager));
   view.SetEngine(engine.get());
 
   view.CreateRenderSurface();
@@ -1283,7 +1262,7 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAtStartup) {
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
-  modifier.SetSurfaceManager(surface_manager.release());
+  modifier.SetSurfaceManager(std::move(surface_manager));
   view.SetEngine(engine.get());
 
   view.CreateRenderSurface();
@@ -1320,7 +1299,7 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAfterStartup) {
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
-  modifier.SetSurfaceManager(surface_manager.release());
+  modifier.SetSurfaceManager(std::move(surface_manager));
   view.SetEngine(engine.get());
 
   view.CreateRenderSurface();
@@ -1358,7 +1337,7 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAfterStartup) {
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
-  modifier.SetSurfaceManager(surface_manager.release());
+  modifier.SetSurfaceManager(std::move(surface_manager));
   view.SetEngine(engine.get());
 
   view.CreateRenderSurface();
@@ -1399,7 +1378,7 @@ TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
   EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
-  modifier.SetSurfaceManager(surface_manager.release());
+  modifier.SetSurfaceManager(std::move(surface_manager));
   view.SetEngine(engine.get());
 
   view.GetEngine()->OnDwmCompositionChanged();
