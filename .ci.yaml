@@ -1695,6 +1695,7 @@ targets:
       - .ci.yaml
 
   - name: Linux_android android_defines_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/140047
     recipe: devicelab/devicelab_drone
     presubmit: true
     timeout: 60
