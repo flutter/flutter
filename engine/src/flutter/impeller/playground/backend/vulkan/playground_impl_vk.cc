@@ -182,4 +182,11 @@ void PlaygroundImplVK::InitGlobalVulkanInstance() {
   global_instance_ = std::move(instance_result.value);
 }
 
+fml::Status PlaygroundImplVK::SetCapabilities(
+    const std::shared_ptr<Capabilities>& capabilities) {
+  return fml::Status(
+      fml::StatusCode::kUnimplemented,
+      "PlaygroundImplVK doesn't support setting the capabilities.");
+}
+
 }  // namespace impeller

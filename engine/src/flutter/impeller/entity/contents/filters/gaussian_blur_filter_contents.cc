@@ -146,6 +146,7 @@ std::shared_ptr<Texture> MakeBlurSubpass(
     const ContentContext& renderer,
     std::shared_ptr<Texture> input_texture,
     const SamplerDescriptor& sampler_descriptor,
+    Entity::TileMode tile_mode,
     const GaussianBlurFragmentShader::BlurInfo& blur_info) {
   // TODO(gaaclarke): This blurs the whole image, but because we know the clip
   //                  region we could focus on just blurring that.
@@ -161,7 +162,15 @@ std::shared_ptr<Texture> MakeBlurSubpass(
         Command cmd;
         ContentContextOptions options = OptionsFromPass(pass);
         options.primitive_type = PrimitiveType::kTriangleStrip;
-        cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+
+        if (tile_mode == Entity::TileMode::kDecal &&
+            !renderer.GetDeviceCapabilities()
+                 .SupportsDecalSamplerAddressMode()) {
+          cmd.pipeline = renderer.GetGaussianBlurDecalPipeline(options);
+        } else {
+          cmd.pipeline = renderer.GetGaussianBlurPipeline(options);
+        }
+
         BindVertices<GaussianBlurVertexShader>(cmd, host_buffer,
                                                {
                                                    {Point(0, 0), Point(0, 0)},
@@ -300,24 +309,26 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   Vector2 pass1_pixel_size = 1.0 / Vector2(pass1_out_texture->GetSize());
 
-  std::shared_ptr<Texture> pass2_out_texture = MakeBlurSubpass(
-      renderer, pass1_out_texture, input_snapshot->sampler_descriptor,
-      GaussianBlurFragmentShader::BlurInfo{
-          .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
-          .blur_sigma = scaled_sigma * effective_scalar.y,
-          .blur_radius = blur_radius * effective_scalar.y,
-          .step_size = 1.0,
-      });
+  std::shared_ptr<Texture> pass2_out_texture =
+      MakeBlurSubpass(renderer, pass1_out_texture,
+                      input_snapshot->sampler_descriptor, tile_mode_,
+                      GaussianBlurFragmentShader::BlurInfo{
+                          .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
+                          .blur_sigma = scaled_sigma * effective_scalar.y,
+                          .blur_radius = blur_radius * effective_scalar.y,
+                          .step_size = 1.0,
+                      });
 
   // TODO(gaaclarke): Make this pass reuse the texture from pass1.
-  std::shared_ptr<Texture> pass3_out_texture = MakeBlurSubpass(
-      renderer, pass2_out_texture, input_snapshot->sampler_descriptor,
-      GaussianBlurFragmentShader::BlurInfo{
-          .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
-          .blur_sigma = scaled_sigma * effective_scalar.x,
-          .blur_radius = blur_radius * effective_scalar.x,
-          .step_size = 1.0,
-      });
+  std::shared_ptr<Texture> pass3_out_texture =
+      MakeBlurSubpass(renderer, pass2_out_texture,
+                      input_snapshot->sampler_descriptor, tile_mode_,
+                      GaussianBlurFragmentShader::BlurInfo{
+                          .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
+                          .blur_sigma = scaled_sigma * effective_scalar.x,
+                          .blur_radius = blur_radius * effective_scalar.x,
+                          .step_size = 1.0,
+                      });
 
   SamplerDescriptor sampler_desc = MakeSamplerDescriptor(
       MinMagFilter::kLinear, SamplerAddressMode::kClampToEdge);

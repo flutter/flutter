@@ -376,6 +376,11 @@ const std::shared_ptr<const Capabilities>& ContextMTL::GetCapabilities() const {
   return device_capabilities_;
 }
 
+void ContextMTL::SetCapabilities(
+    const std::shared_ptr<const Capabilities>& capabilities) {
+  device_capabilities_ = capabilities;
+}
+
 // |Context|
 bool ContextMTL::UpdateOffscreenLayerPixelFormat(PixelFormat format) {
   device_capabilities_ = InferMetalCapabilities(device_, format);

@@ -10,6 +10,7 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/status.h"
 #include "flutter/fml/time/time_delta.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/point.h"
@@ -87,6 +88,13 @@ class Playground {
       std::string asset_name) const = 0;
 
   virtual std::string GetWindowTitle() const = 0;
+
+  [[nodiscard]] fml::Status SetCapabilities(
+      const std::shared_ptr<Capabilities>& capabilities);
+
+  /// TODO(https://github.com/flutter/flutter/issues/139950): Remove this.
+  /// Returns true if `OpenPlaygroundHere` will actually render anything.
+  bool WillRenderSomething() const;
 
  protected:
   const PlaygroundSwitches switches_;

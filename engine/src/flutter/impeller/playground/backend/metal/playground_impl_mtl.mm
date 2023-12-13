@@ -123,4 +123,10 @@ std::unique_ptr<Surface> PlaygroundImplMTL::AcquireSurfaceFrame(
   return SurfaceMTL::MakeFromMetalLayerDrawable(context, drawable);
 }
 
+fml::Status PlaygroundImplMTL::SetCapabilities(
+    const std::shared_ptr<Capabilities>& capabilities) {
+  context_->SetCapabilities(capabilities);
+  return fml::Status();
+}
+
 }  // namespace impeller

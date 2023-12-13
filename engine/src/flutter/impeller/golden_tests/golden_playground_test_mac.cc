@@ -198,4 +198,9 @@ void GoldenPlaygroundTest::GoldenPlaygroundTest::SetWindowSize(ISize size) {
   pimpl_->window_size = size;
 }
 
+fml::Status GoldenPlaygroundTest::SetCapabilities(
+    const std::shared_ptr<Capabilities>& capabilities) {
+  return pimpl_->screenshotter->GetPlayground().SetCapabilities(capabilities);
+}
+
 }  // namespace impeller

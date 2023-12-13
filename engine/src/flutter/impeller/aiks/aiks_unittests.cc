@@ -35,6 +35,7 @@
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/snapshot.h"
+#include "impeller/renderer/testing/mocks.h"
 #include "impeller/scene/material.h"
 #include "impeller/scene/node.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
@@ -4501,6 +4502,56 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
                                          FilterContents::BlurStyle::kNormal,
                                          Entity::TileMode::kClamp));
   canvas.Restore();
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+#define FLT_FORWARD(mock, real, method) \
+  EXPECT_CALL(*mock, method())          \
+      .WillRepeatedly(::testing::Return(real->method()));
+
+TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP_(
+        "This backend doesn't yet support setting device capabilities.");
+  }
+  if (!WillRenderSomething()) {
+    // Sometimes these tests are run without playgrounds enabled which is
+    // pointless for this test since we are asserting that
+    // `SupportsDecalSamplerAddressMode` is called.
+    GTEST_SKIP_("This test requires playgrounds.");
+  }
+
+  std::shared_ptr<const Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  auto mock_capabilities = std::make_shared<MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsDecalSamplerAddressMode())
+      .Times(::testing::AtLeast(1))
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsFramebufferFetch);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsTextureToTextureBlits);
+  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+
+  auto texture = std::make_shared<Image>(CreateTextureForFixture("boston.jpg"));
+  Canvas canvas;
+  canvas.Scale(GetContentScale() * 0.5);
+  canvas.DrawPaint({.color = Color::Black()});
+  canvas.DrawImage(
+      texture, Point(200, 200),
+      {
+          .image_filter = ImageFilter::MakeBlur(
+              Sigma(20.0), Sigma(20.0), FilterContents::BlurStyle::kNormal,
+              Entity::TileMode::kDecal),
+      });
+
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

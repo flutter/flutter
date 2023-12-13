@@ -14,11 +14,17 @@
 
 namespace impeller {
 
+// Forward declared to avoid objc in a C++ header.
+class ContextMTL;
+
 class PlaygroundImplMTL final : public PlaygroundImpl {
  public:
   explicit PlaygroundImplMTL(PlaygroundSwitches switches);
 
   ~PlaygroundImplMTL();
+
+  fml::Status SetCapabilities(
+      const std::shared_ptr<Capabilities>& capabilities) override;
 
  private:
   struct Data;
@@ -29,7 +35,7 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
 
   // To ensure that ObjC stuff doesn't leak into C++ TUs.
   std::unique_ptr<Data> data_;
-  std::shared_ptr<Context> context_;
+  std::shared_ptr<ContextMTL> context_;
   std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;
   std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 
