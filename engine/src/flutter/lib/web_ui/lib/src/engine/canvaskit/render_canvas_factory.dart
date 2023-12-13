@@ -9,7 +9,7 @@ import '../../engine.dart';
 class RenderCanvasFactory {
   RenderCanvasFactory() {
     assert(() {
-      registerHotRestartListener(debugClear);
+      registerHotRestartListener(dispose);
       return true;
     }());
   }
@@ -102,8 +102,8 @@ class RenderCanvasFactory {
     return false;
   }
 
-  /// Dispose all canvases created by this factory. Used in tests.
-  void debugClear() {
+  /// Dispose all canvases created by this factory.
+  void dispose() {
     for (final RenderCanvas canvas in _cache) {
       canvas.dispose();
     }

@@ -61,6 +61,8 @@ void testMain() {
           reason: 'The slot reenables pointer events.');
       expect(contentsHost.getAttribute('slot'), slot.getAttribute('name'),
           reason: 'The contents and slot are correctly related.');
+
+      await disposePlatformView(0);
     });
 
     test('clips platform views with RRects', () async {
@@ -101,6 +103,8 @@ void testMain() {
         sceneHost.querySelectorAll('flt-clip').single.style.height,
         '100%',
       );
+
+      await disposePlatformView(0);
     });
 
     test('correctly transforms platform views', () async {
@@ -131,6 +135,8 @@ void testMain() {
         // 503 (5 * 100 + 3).
         'matrix3d(5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 515, 515, 0, 1)',
       );
+
+      await disposePlatformView(0);
     });
 
     test('correctly offsets platform views', () async {
@@ -157,6 +163,8 @@ void testMain() {
       expect(slotRect.top, 4);
       expect(slotRect.right, 8);
       expect(slotRect.bottom, 10);
+
+      await disposePlatformView(0);
     });
 
     // Returns the list of CSS transforms applied to the ancestor chain of
@@ -189,8 +197,7 @@ void testMain() {
       CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
 
       // Transformations happen on the slot element.
-      DomElement slotHost =
-          sceneHost.querySelector('flt-platform-view-slot')!;
+      DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
 
       expect(
         getTransformChain(slotHost),
@@ -220,6 +227,8 @@ void testMain() {
           'matrix(1, 0, 0, 1, 3, 3)',
         ],
       );
+
+      await disposePlatformView(0);
     });
 
     test('converts device pixels to logical pixels (no clips)', () async {
@@ -245,6 +254,8 @@ void testMain() {
         getTransformChain(slotHost),
         <String>['matrix(0.25, 0, 0, 0.25, 1.5, 1.5)'],
       );
+
+      await disposePlatformView(0);
     });
 
     test('converts device pixels to logical pixels (with clips)', () async {
@@ -276,6 +287,8 @@ void testMain() {
           'matrix(0.25, 0, 0, 0.25, 0.75, 0.75)',
         ],
       );
+
+      await disposePlatformView(0);
     });
 
     test('renders overlays on top of platform views', () async {
@@ -428,8 +441,11 @@ void testMain() {
       await createPlatformView(0, 'test-platform-view');
       renderTestScene(viewCount: 0);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay]);
-      // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
-    }, skip: isSafari);
+
+      for (int i = 0; i < 16; i++) {
+        await disposePlatformView(i);
+      }
+    });
 
     test('correctly reuses overlays', () async {
       final CkPicture testPicture =
@@ -561,8 +577,11 @@ void testMain() {
         _overlay,
       ]);
 
-      // TODO(yjbanov): skipped due to https://github.com/flutter/flutter/issues/73867
-    }, skip: isSafari);
+      for (int i = 0; i < 20; i++) {
+        await disposePlatformView(i);
+      }
+
+    });
 
     test('embeds and disposes of a platform view', () async {
       ui_web.platformViewRegistry.registerViewFactory(
@@ -641,6 +660,8 @@ void testMain() {
 
       implicitView.debugPhysicalSizeOverride = null;
       implicitView.debugForceResize();
+
+      await disposePlatformView(0);
       // ImageDecoder is not supported in Safari or Firefox.
     }, skip: isSafari || isFirefox);
 
@@ -695,6 +716,9 @@ void testMain() {
         platformViewsHost.querySelectorAll('flt-platform-view'),
         hasLength(2),
       );
+
+      await disposePlatformView(0);
+      await disposePlatformView(1);
     });
 
     test(
@@ -729,6 +753,8 @@ void testMain() {
       await Future<void>.delayed(Duration.zero);
       renderTestScene();
       expect(skPathDefs.childNodes, hasLength(1));
+
+      await disposePlatformView(0);
     });
 
     test('does not crash when a prerolled platform view is not composited',
@@ -749,6 +775,8 @@ void testMain() {
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
       ]);
+
+      await disposePlatformView(0);
     });
 
     test('does not create overlays for invisible platform views', () async {
@@ -951,6 +979,9 @@ void testMain() {
         _platformView,
         _overlay,
       ]);
+      for (int i = 0; i < 7; i++) {
+        await disposePlatformView(i);
+      }
     });
   });
 }

@@ -657,8 +657,8 @@ class HtmlViewEmbedder {
     element.remove();
   }
 
-  /// Clears the state of this view embedder. Used in tests.
-  void debugClear() {
+  /// Disposes the state of this view embedder.
+  void dispose() {
     final Set<int> allViews = PlatformViewManager.instance.debugClear();
     disposeViews(allViews);
     _context = EmbedderFrameContext();

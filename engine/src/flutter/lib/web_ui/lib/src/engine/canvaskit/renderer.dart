@@ -55,6 +55,11 @@ class CanvasKitRenderer implements Renderer {
   /// is supported.
   final Surface pictureToImageSurface = Surface();
 
+  // Listens for view creation events from the view manager.
+  StreamSubscription<int>? _onViewCreatedListener;
+  // Listens for view disposal events from the view manager.
+  StreamSubscription<int>? _onViewDisposedListener;
+
   @override
   Future<void> initialize() async {
     _initialized ??= () async {
@@ -64,6 +69,20 @@ class CanvasKitRenderer implements Renderer {
         canvasKit = await downloadCanvasKit();
         windowFlutterCanvasKit = canvasKit;
       }
+      // Views may have been registered before this renderer was initialized.
+      // Create rasterizers for them and then start listening for new view
+      // creation/disposal events.
+      final FlutterViewManager viewManager =
+          EnginePlatformDispatcher.instance.viewManager;
+      if (_onViewCreatedListener == null) {
+        for (final EngineFlutterView view in viewManager.views) {
+          _onViewCreated(view.viewId);
+        }
+      }
+      _onViewCreatedListener ??=
+          viewManager.onViewCreated.listen(_onViewCreated);
+      _onViewDisposedListener ??=
+          viewManager.onViewDisposed.listen(_onViewDisposed);
       _instance = this;
     }();
     return _initialized;
@@ -394,37 +413,44 @@ class CanvasKitRenderer implements Renderer {
     frameTimingsOnBuildFinish();
     frameTimingsOnRasterStart();
 
-    // TODO(harryterkelsen): Use `FlutterViewManager.onViewsChanged` to manage
-    // the lifecycle of Rasterizers,
-    // https://github.com/flutter/flutter/issues/137073.
-    final Rasterizer rasterizer =
-        _getRasterizerForView(view as EngineFlutterView);
+    assert(_rasterizers.containsKey(view.viewId),
+        "Unable to render to a view which hasn't been registered");
+    final Rasterizer rasterizer = _rasterizers[view.viewId]!;
 
     rasterizer.draw((scene as LayerScene).layerTree);
     frameTimingsOnRasterFinish();
   }
 
-  final Map<EngineFlutterView, Rasterizer> _rasterizers =
-      <EngineFlutterView, Rasterizer>{};
+  // Map from view id to the associated Rasterizer for that view.
+  final Map<int, Rasterizer> _rasterizers = <int, Rasterizer>{};
 
-  Rasterizer _getRasterizerForView(EngineFlutterView view) {
-    return _rasterizers.putIfAbsent(view, () {
-      return Rasterizer(view);
-    });
+  void _onViewCreated(int viewId) {
+    final EngineFlutterView view =
+        EnginePlatformDispatcher.instance.viewManager[viewId]!;
+    _rasterizers[view.viewId] = Rasterizer(view);
   }
 
-  /// Returns the [Rasterizer] that has been created for the given [view].
-  /// Used in tests.
-  Rasterizer debugGetRasterizerForView(EngineFlutterView view) {
-    return _getRasterizerForView(view);
-  }
-
-  /// Resets the state of the renderer. Used in tests.
-  void debugClear() {
-    for (final Rasterizer rasterizer in _rasterizers.values) {
-      rasterizer.renderCanvasFactory.debugClear();
-      rasterizer.viewEmbedder.debugClear();
+  void _onViewDisposed(int viewId) {
+    // The view has already been disposed.
+    if (!_rasterizers.containsKey(viewId)) {
+      return;
     }
+    final Rasterizer rasterizer = _rasterizers.remove(viewId)!;
+    rasterizer.dispose();
+  }
+
+  Rasterizer? debugGetRasterizerForView(EngineFlutterView view) {
+    return _rasterizers[view.viewId];
+  }
+
+  /// Disposes this renderer.
+  void dispose() {
+    _onViewCreatedListener?.cancel();
+    _onViewDisposedListener?.cancel();
+    for (final Rasterizer rasterizer in _rasterizers.values) {
+      rasterizer.dispose();
+    }
+    _rasterizers.clear();
   }
 
   @override
