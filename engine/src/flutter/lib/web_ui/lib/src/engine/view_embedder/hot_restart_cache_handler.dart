@@ -13,10 +13,10 @@ import '../dom.dart';
 /// to clear.  Delay removal of old visible state to make the
 /// transition appear smooth.
 @JS('window.__flutterState')
-external JSArray<JSAny?>? get _jsHotRestartStore;
+external JSArray? get _jsHotRestartStore;
 
 @JS('window.__flutterState')
-external set _jsHotRestartStore(JSArray<JSAny?>? nodes);
+external set _jsHotRestartStore(JSArray? nodes);
 
 /// Handles [DomElement]s that need to be removed after a hot-restart.
 ///
@@ -36,7 +36,7 @@ class HotRestartCacheHandler {
   /// Removes every element that was registered prior to the hot-restart from
   /// the DOM.
   void _resetHotRestartStore() {
-    final JSArray<JSAny?>? jsStore = _jsHotRestartStore;
+    final JSArray? jsStore = _jsHotRestartStore;
 
     if (jsStore != null) {
       // We are in a post hot-restart world, clear the elements now.
@@ -47,7 +47,7 @@ class HotRestartCacheHandler {
         }
       }
     }
-    _jsHotRestartStore = JSArray<JSAny?>();
+    _jsHotRestartStore = JSArray();
   }
 
   /// Registers a [DomElement] to be removed after hot-restart.

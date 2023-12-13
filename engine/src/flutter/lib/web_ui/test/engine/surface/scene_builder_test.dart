@@ -487,7 +487,7 @@ void testMain() {
 
       // Watches DOM mutations and counts deletions and additions to the child
       // list of the `<flt-scene>` element.
-      final DomMutationObserver observer = createDomMutationObserver((JSArray<JSAny?> mutations, _) {
+      final DomMutationObserver observer = createDomMutationObserver((JSArray mutations, _) {
         for (final DomMutationRecord record in mutations.toDart.cast<DomMutationRecord>()) {
           actualDeletions.addAll(record.removedNodes!);
           actualAdditions.addAll(record.addedNodes!);

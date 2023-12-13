@@ -986,8 +986,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void _addFontSizeObserver() {
     const String styleAttribute = 'style';
 
-    _fontSizeObserver = createDomMutationObserver(
-        (JSArray<JSAny?> mutations, DomMutationObserver _) {
+    _fontSizeObserver =
+        createDomMutationObserver((JSArray mutations, DomMutationObserver _) {
       for (final JSAny? mutation in mutations.toDart) {
         final DomMutationRecord record = mutation! as DomMutationRecord;
         if (record.type == 'attributes' &&
