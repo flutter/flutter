@@ -71,12 +71,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // If the view is resizing, this returns false if the frame is not the target
   // size. Otherwise, it unblocks the platform thread and blocks the raster
   // thread until the v-blank.
-  bool SwapBuffers();
+  virtual bool SwapBuffers();
 
   // Callback for presenting a software bitmap.
-  bool PresentSoftwareBitmap(const void* allocation,
-                             size_t row_bytes,
-                             size_t height);
+  virtual bool PresentSoftwareBitmap(const void* allocation,
+                                     size_t row_bytes,
+                                     size_t height);
 
   // Send initial bounds to embedder.  Must occur after engine has initialized.
   void SendInitialBounds();
