@@ -209,6 +209,7 @@ class MultidexProject extends Project {
           android:name="${applicationName}">
           <activity
               android:name=".MainActivity"
+              android:exported="true"
               android:launchMode="singleTop"
               android:theme="@style/LaunchTheme"
               android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
