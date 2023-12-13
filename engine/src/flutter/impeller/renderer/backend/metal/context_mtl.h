@@ -83,6 +83,8 @@ class ContextMTL final : public Context,
   // |Context|
   const std::shared_ptr<const Capabilities>& GetCapabilities() const override;
 
+  void SetCapabilities(const std::shared_ptr<const Capabilities>& capabilities);
+
   // |Context|
   bool UpdateOffscreenLayerPixelFormat(PixelFormat format) override;
 

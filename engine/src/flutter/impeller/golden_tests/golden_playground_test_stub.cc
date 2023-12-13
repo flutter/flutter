@@ -66,4 +66,11 @@ ISize GoldenPlaygroundTest::GetWindowSize() const {
 
 void GoldenPlaygroundTest::SetWindowSize(ISize size) {}
 
+fml::Status GoldenPlaygroundTest::SetCapabilities(
+    const std::shared_ptr<Capabilities>& capabilities) {
+  return fml::Status(
+      fml::StatusCode::kUnimplemented,
+      "GoldenPlaygroundTest-Stub doesn't support SetCapabilities.");
+}
+
 }  // namespace impeller

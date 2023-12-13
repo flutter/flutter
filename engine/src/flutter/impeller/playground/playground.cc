@@ -532,4 +532,13 @@ bool Playground::ShouldKeepRendering() const {
   return true;
 }
 
+fml::Status Playground::SetCapabilities(
+    const std::shared_ptr<Capabilities>& capabilities) {
+  return impl_->SetCapabilities(capabilities);
+}
+
+bool Playground::WillRenderSomething() const {
+  return switches_.enable_playground;
+}
+
 }  // namespace impeller
