@@ -156,6 +156,10 @@ std::string DescriptionGLES::GetString() const {
   return stream.str();
 }
 
+Version DescriptionGLES::GetGlVersion() const {
+  return gl_version_;
+}
+
 bool DescriptionGLES::IsES() const {
   return is_es_;
 }
