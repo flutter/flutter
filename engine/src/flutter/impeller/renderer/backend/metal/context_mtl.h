@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_METAL_CONTEXT_MTL_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_METAL_CONTEXT_MTL_H_
 
 #include <Metal/Metal.h>
 
@@ -145,3 +146,5 @@ class ContextMTL final : public Context,
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_METAL_CONTEXT_MTL_H_

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_FILTERS_INPUTS_CONTENTS_FILTER_INPUT_H_
+#define FLUTTER_IMPELLER_ENTITY_CONTENTS_FILTERS_INPUTS_CONTENTS_FILTER_INPUT_H_
 
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
@@ -41,3 +42,5 @@ class ContentsFilterInput final : public FilterInput {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_FILTERS_INPUTS_CONTENTS_FILTER_INPUT_H_

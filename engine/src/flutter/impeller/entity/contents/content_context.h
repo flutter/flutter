@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_CONTENT_CONTEXT_H_
+#define FLUTTER_IMPELLER_ENTITY_CONTENTS_CONTENT_CONTEXT_H_
 
 #include <initializer_list>
 #include <memory>
@@ -909,3 +910,5 @@ class ContentContext {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_CONTENT_CONTEXT_H_

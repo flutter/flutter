@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_STB_TYPEFACE_STB_H_
+#define FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_STB_TYPEFACE_STB_H_
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
@@ -46,3 +47,5 @@ class TypefaceSTB final : public Typeface,
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_STB_TYPEFACE_STB_H_

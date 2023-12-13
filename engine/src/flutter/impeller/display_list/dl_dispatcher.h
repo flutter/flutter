@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 
 #include "flutter/display_list/dl_op_receiver.h"
 #include "impeller/aiks/canvas_type.h"
@@ -235,3 +236,5 @@ class DlDispatcher final : public flutter::DlOpReceiver {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_

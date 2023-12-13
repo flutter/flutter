@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_SHADER_ARCHIVE_MULTI_ARCH_SHADER_ARCHIVE_H_
+#define FLUTTER_IMPELLER_SHADER_ARCHIVE_MULTI_ARCH_SHADER_ARCHIVE_H_
 
 #include <map>
 #include <memory>
@@ -44,3 +45,5 @@ class MultiArchShaderArchive {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_SHADER_ARCHIVE_MULTI_ARCH_SHADER_ARCHIVE_H_

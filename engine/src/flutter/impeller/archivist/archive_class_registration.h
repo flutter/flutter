@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_ARCHIVIST_ARCHIVE_CLASS_REGISTRATION_H_
+#define FLUTTER_IMPELLER_ARCHIVIST_ARCHIVE_CLASS_REGISTRATION_H_
 
 #include <map>
 #include <optional>
@@ -49,3 +50,5 @@ class ArchiveClassRegistration {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_ARCHIVIST_ARCHIVE_CLASS_REGISTRATION_H_

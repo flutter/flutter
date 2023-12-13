@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_CORE_VERTEX_BUFFER_H_
+#define FLUTTER_IMPELLER_CORE_VERTEX_BUFFER_H_
 
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
@@ -34,3 +35,5 @@ struct VertexBuffer {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_CORE_VERTEX_BUFFER_H_

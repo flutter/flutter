@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_PLAYGROUND_IMGUI_IMGUI_IMPL_IMPELLER_H_
+#define FLUTTER_IMPELLER_PLAYGROUND_IMGUI_IMGUI_IMPL_IMPELLER_H_
 
 #include <memory>
 
@@ -23,3 +24,5 @@ IMGUI_IMPL_API void ImGui_ImplImpeller_Shutdown();
 IMGUI_IMPL_API void ImGui_ImplImpeller_RenderDrawData(
     ImDrawData* draw_data,
     impeller::RenderPass& renderpass);
+
+#endif  // FLUTTER_IMPELLER_PLAYGROUND_IMGUI_IMGUI_IMPL_IMPELLER_H_

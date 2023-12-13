@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEST_MOCK_VULKAN_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEST_MOCK_VULKAN_H_
 
 #include <functional>
 #include <memory>
@@ -95,3 +96,5 @@ class MockVulkanContextBuilder {
 
 }  // namespace testing
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEST_MOCK_VULKAN_H_

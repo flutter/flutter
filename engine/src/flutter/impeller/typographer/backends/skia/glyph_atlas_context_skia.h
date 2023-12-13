@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_GLYPH_ATLAS_CONTEXT_SKIA_H_
+#define FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_GLYPH_ATLAS_CONTEXT_SKIA_H_
 
 #include "impeller/base/backend_cast.h"
 #include "impeller/typographer/glyph_atlas.h"
@@ -37,3 +38,5 @@ class GlyphAtlasContextSkia
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_GLYPH_ATLAS_CONTEXT_SKIA_H_

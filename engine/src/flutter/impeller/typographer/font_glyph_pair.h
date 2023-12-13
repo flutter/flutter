@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
+#define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 
 #include <optional>
 #include <unordered_map>
@@ -54,3 +55,5 @@ struct std::equal_to<impeller::ScaledFont> {
     return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale;
   }
 };
+
+#endif  // FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TOOLKIT_EGL_IMAGE_H_
+#define FLUTTER_IMPELLER_TOOLKIT_EGL_IMAGE_H_
 
 #include "flutter/fml/unique_object.h"
 #include "flutter/impeller/toolkit/egl/egl.h"
@@ -72,3 +73,5 @@ using UniqueEGLImageKHR =
     fml::UniqueObject<EGLImageKHRWithDisplay, EGLImageKHRWithDisplayTraits>;
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_TOOLKIT_EGL_IMAGE_H_
