@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
+#include "flutter/shell/platform/windows/testing/mock_angle_surface_manager.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/mock_windows_proc_table.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
@@ -131,7 +132,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
       }));
 
   // Set the AngleSurfaceManager to !nullptr to test ANGLE rendering.
-  modifier.SetSurfaceManager(reinterpret_cast<AngleSurfaceManager*>(1));
+  modifier.SetSurfaceManager(std::make_unique<MockAngleSurfaceManager>());
 
   engine->Run();
 
