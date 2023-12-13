@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
 import 'text_button.dart';
 import 'theme.dart';
@@ -44,9 +42,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
          text,
          overflow: TextOverflow.ellipsis,
          style: _kToolbarButtonFontStyle.copyWith(
-           color: Theme.of(context).colorScheme.brightness == Brightness.dark
-               ? Colors.white
-               : Colors.black87,
+           color: Theme.of(context).colorScheme.onSurface,
          ),
        );
 
@@ -58,11 +54,6 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(hansmuller): Should be colorScheme.onSurface
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.colorScheme.brightness == Brightness.dark;
-    final Color foregroundColor = isDark ? Colors.white : Colors.black87;
-
     return SizedBox(
       width: double.infinity,
       child: TextButton(
@@ -70,7 +61,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
           alignment: Alignment.centerLeft,
           enabledMouseCursor: SystemMouseCursors.basic,
           disabledMouseCursor: SystemMouseCursors.basic,
-          foregroundColor: foregroundColor,
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
           shape: const RoundedRectangleBorder(),
           minimumSize: const Size(kMinInteractiveDimension, 36.0),
           padding: _kToolbarButtonPadding,
