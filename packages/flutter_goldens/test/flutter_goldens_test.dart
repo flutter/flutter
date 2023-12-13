@@ -554,16 +554,11 @@ void main() {
     process.fallbackProcessResult = io.ProcessResult(123, 1, 'Fallback failure', 'Fallback failure');
 
     expect(
-        skiaClient.imgtestAdd('golden_file_test', goldenFile),
+      skiaClient.imgtestAdd('golden_file_test', goldenFile),
       throwsA(
         isA<SkiaException>().having((SkiaException error) => error.message,
           'message',
-          'Skia Gold received an unapproved image in post-submit testing. '
-          'Golden file images in flutter/flutter are triaged in pre-submit during code review for the given PR.\n'
-          '\n'
-          'Visit https://flutter-gold.skia.org/ to view and approve the image(s), or revert the associated change. '
-          'For more information, visit the wiki:\n'
-          '  https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter\n'
+          'Golden test for "golden_file_test" failed for a reason unrelated to pixel comparison.\n'
           '\n'
           'imgtest add failed with exit code 1.\n'
           '\n'
@@ -770,7 +765,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  test('FlutterGoldenFileComparator - Post-Submit - calls init during compare', () {
+  test('FlutterGoldenFileComparator - Post-Submit - calls init during compare', () async {
     final Platform platform = FakePlatform(
       environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
       operatingSystem: 'macos'
@@ -786,7 +781,7 @@ void main() {
       log: log.add,
     );
     expect(fakeSkiaClient.initCalls, 0);
-    comparator.compare(
+    await comparator.compare(
       Uint8List.fromList(_kTestPngBytes),
       Uri.parse('flutter.golden_test.1.png'),
     );
@@ -849,7 +844,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  test('FlutterGoldenFileComparator - Pre-Submit - calls init during compare', () {
+  test('FlutterGoldenFileComparator - Pre-Submit - calls init during compare', () async {
     final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
     final (FileSystem fs, Directory libDirectory) = createFakeFileSystemWithLibDirectory();
     final List<String> log = <String>[];
@@ -864,7 +859,7 @@ void main() {
       log: log.add,
     );
     expect(fakeSkiaClient.tryInitCalls, 0);
-    comparator.compare(
+    await comparator.compare(
       Uint8List.fromList(_kTestPngBytes),
       Uri.parse('flutter.golden_test.1.png'),
     );
@@ -1062,8 +1057,10 @@ class FakeProcessManager extends Fake implements ProcessManager {
 class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
   Exception? getExpectationForTestThrowable;
+
   @override
   Future<String> getExpectationForTest(String testName) async {
+    await null; // force this to be async
     if (getExpectationForTestThrowable != null) {
       throw getExpectationForTestThrowable!;
     }
@@ -1071,30 +1068,51 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   }
 
   @override
-  Future<void> auth() async {}
+  Future<void> auth() async {
+    await null; // force this to be async
+  }
 
   final List<String> testNames = <String>[];
 
   int initCalls = 0;
+
   @override
-  Future<void> imgtestInit() async => initCalls += 1;
+  Future<void> imgtestInit() async {
+    await null; // force this to be async
+    initCalls += 1;
+  }
+
   @override
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
+    await null; // force this to be async
     testNames.add(testName);
     return true;
   }
 
   int tryInitCalls = 0;
+
   @override
-  Future<void> tryjobInit() async => tryInitCalls += 1;
+  Future<void> tryjobInit() async {
+    await null; // force this to be async
+    tryInitCalls += 1;
+  }
+
   @override
-  Future<bool> tryjobAdd(String testName, File goldenFile) async => true;
+  Future<bool> tryjobAdd(String testName, File goldenFile) async {
+    await null; // force this to be async
+    return true;
+  }
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
+
   @override
-  Future<List<int>> getImageBytes(String imageHash) async => imageBytesValues[imageHash]!;
+  Future<List<int>> getImageBytes(String imageHash) async {
+    await null; // force this to be async
+    return imageBytesValues[imageHash]!;
+  }
 
   Map<String, String> cleanTestNameValues = <String, String>{};
+
   @override
   String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
 }

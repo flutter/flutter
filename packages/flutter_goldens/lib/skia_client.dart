@@ -23,6 +23,14 @@ const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 /// Signature of callbacks used to inject [print] replacements.
 typedef LogCallback = void Function(String);
 
+/// Signature of callbacks used to determine if a Skia Gold command succeeded,
+/// and if not, what the error message should be.
+///
+/// Return null if the given arguments indicate success.
+///
+/// Otherwise, return the error message to show.
+typedef SkiaErrorCallback = String? Function(int exitCode, String stdout, String stderr);
+
 /// Exception thrown when an error is returned from the [SkiaClient].
 class SkiaException implements Exception {
   /// Creates a new `SkiaException` with a required error [message].
@@ -115,8 +123,7 @@ class SkiaGoldClient {
   Future<void> _retry({
     required Future<io.ProcessResult> Function() task,
     required String taskName,
-    bool Function(int exitCode, String stdout, String stderr)? success,
-    String? errorMessage,
+    SkiaErrorCallback? errorMessage,
   }) async {
     Duration delay = const Duration(seconds: 5);
     while (true) {
@@ -144,17 +151,21 @@ class SkiaGoldClient {
         continue; // retry
       }
 
-      if (success == null) {
+      String? message;
+      if (errorMessage != null) {
+        message = errorMessage(result.exitCode, resultStdout, resultStderr);
+        if (message == null) {
+          return; // success
+        }
+      } else {
         if (result.exitCode == 0) {
           return; // success
         }
-      } else if (success(result.exitCode, resultStdout, resultStderr)) {
-        return; // success
       }
 
       final StringBuffer buffer = StringBuffer();
-      if (errorMessage != null) {
-        buffer.writeln(errorMessage);
+      if (message != null) {
+        buffer.writeln(message);
         buffer.writeln();
       }
       buffer.writeln('$taskName failed with exit code ${result.exitCode}.');
@@ -191,11 +202,16 @@ class SkiaGoldClient {
         '--luci',
       ]),
       taskName: 'auth',
-      errorMessage: 'Skia Gold authorization failed.\n'
-                    '\n'
-                    'Luci environments authenticate using the file provided by '
-                    'LUCI_CONTEXT. There may be an error with this file or Gold '
-                    'authentication.',
+      errorMessage: (int exitCode, String resultStdout, String resultStderr) {
+        if (exitCode == 0) {
+          return null;
+        }
+        return 'Skia Gold authorization failed.\n'
+               '\n'
+               'Luci environments authenticate using the file provided by '
+               'LUCI_CONTEXT. There may be an error with this file or Gold '
+               'authentication.';
+      },
     );
   }
 
@@ -252,7 +268,12 @@ class SkiaGoldClient {
     await _retry(
       task: () => process.run(imgtestInitCommand),
       taskName: 'imgtest init',
-      errorMessage: 'An error occurred when initializing golden file test with goldctl.',
+      errorMessage: (int exitCode, String resultStdout, String resultStderr) {
+        if (exitCode == 0) {
+          return null;
+        }
+        return 'An error occurred when initializing golden file test with goldctl.';
+      },
     );
     _initialized = true;
   }
@@ -283,14 +304,23 @@ class SkiaGoldClient {
         ..._getPixelMatchingArguments(),
       ]),
       taskName: 'imgtest add',
-      errorMessage: 'Skia Gold received an unapproved image in post-submit '
-                    'testing. Golden file images in flutter/flutter are triaged '
-                    'in pre-submit during code review for the given PR.\n'
-                    '\n'
-                    'Visit https://flutter-gold.skia.org/ to view and approve '
-                    'the image(s), or revert the associated change. For more '
-                    'information, visit the wiki:\n'
-                    '  https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter'
+      errorMessage: (int exitCode, String resultStdout, String resultStderr) {
+        if (exitCode == 0) {
+          return null;
+        }
+        if (resultStdout.contains('Untriaged') ||
+            resultStdout.contains('negative image')) {
+          return 'Skia Gold received an unapproved image in post-submit '
+                 'testing. Golden file images in flutter/flutter are triaged '
+                 'in pre-submit during code review for the given PR.\n'
+                 '\n'
+                 'Visit https://flutter-gold.skia.org/ to view and approve '
+                 'the image(s), or revert the associated change. For more '
+                 'information, visit the wiki:\n'
+                 '  https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter';
+        }
+        return 'Golden test for "$testName" failed for a reason unrelated to pixel comparison.';
+      },
     );
   }
 
@@ -350,7 +380,12 @@ class SkiaGoldClient {
     await _retry(
       task: () => process.run(imgtestInitCommand),
       taskName: 'imgtest init',
-      errorMessage: 'An error occurred when initializing golden file tryjob with goldctl.'
+      errorMessage: (int exitCode, String resultStdout, String resultStderr) {
+        if (exitCode == 0) {
+          return null;
+        }
+        return 'An error occurred when initializing golden file tryjob with goldctl.';
+      },
     );
     _tryjobInitialized = true;
   }
@@ -375,12 +410,14 @@ class SkiaGoldClient {
         ..._getPixelMatchingArguments(),
       ]),
       taskName: 'imgtest add',
-      success: (int exitCode, String resultStdout, String resultStderr) {
-        return exitCode == 0
-            || resultStdout.contains('Untriaged')
-            || resultStdout.contains('negative image');
+      errorMessage: (int exitCode, String resultStdout, String resultStderr) {
+        if (exitCode == 0 ||
+            resultStdout.contains('Untriaged') ||
+            resultStdout.contains('negative image')) {
+          return null;
+        }
+        return 'Golden test for "$testName" failed for a reason unrelated to pixel comparison.';
       },
-      errorMessage: 'Golden test for "$testName" failed for a reason unrelated to pixel comparison.',
     );
   }
 
