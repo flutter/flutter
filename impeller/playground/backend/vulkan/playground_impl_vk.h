@@ -17,6 +17,9 @@ class PlaygroundImplVK final : public PlaygroundImpl {
 
   ~PlaygroundImplVK();
 
+  fml::Status SetCapabilities(
+      const std::shared_ptr<Capabilities>& capabilities) override;
+
  private:
   std::shared_ptr<Context> context_;
 

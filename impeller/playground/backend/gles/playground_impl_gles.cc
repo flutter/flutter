@@ -156,4 +156,11 @@ std::unique_ptr<Surface> PlaygroundImplGLES::AcquireSurfaceFrame(
   );
 }
 
+fml::Status PlaygroundImplGLES::SetCapabilities(
+    const std::shared_ptr<Capabilities>& capabilities) {
+  return fml::Status(
+      fml::StatusCode::kUnimplemented,
+      "PlaygroundImplGLES doesn't support setting the capabilities.");
+}
+
 }  // namespace impeller

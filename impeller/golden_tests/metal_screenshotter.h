@@ -25,7 +25,7 @@ class MetalScreenshotter {
                                                                        300},
                                                   bool scale_content = true);
 
-  const PlaygroundImpl& GetPlayground() const { return *playground_; }
+  PlaygroundImpl& GetPlayground() { return *playground_; }
 
  private:
   std::unique_ptr<PlaygroundImpl> playground_;
