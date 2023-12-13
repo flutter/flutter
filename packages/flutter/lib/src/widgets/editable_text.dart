@@ -2418,12 +2418,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Paste text from [Clipboard].
   @override
-  Future<void> pasteText(SelectionChangedCause cause, {String? text}) async {
-    if (widget.readOnly) {
-      return;
-    }
-    final TextSelection selection = textEditingValue.selection;
-    if (!selection.isValid) {
+  Future<void> pasteText(SelectionChangedCause cause) async {
+    if (!_allowPaste) {
       return;
     }
     // Snapshot the input before using `await`.
@@ -2432,16 +2428,26 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (data == null) {
       return;
     }
+    _pasteText(cause, data.text!);
+  }
+
+  bool get _allowPaste {
+    return !widget.readOnly && textEditingValue.selection.isValid;
+  }
+
+  void _pasteText(SelectionChangedCause cause, String text) {
+    assert(_allowPaste);
 
     // After the paste, the cursor should be collapsed and located after the
     // pasted content.
+    final TextSelection selection = textEditingValue.selection;
     final int lastSelectionIndex = math.max(selection.baseOffset, selection.extentOffset);
     final TextEditingValue collapsedTextEditingValue = textEditingValue.copyWith(
       selection: TextSelection.collapsed(offset: lastSelectionIndex),
     );
 
     userUpdateTextEditingValue(
-      collapsedTextEditingValue.replaced(selection, text ?? data.text!),
+      collapsedTextEditingValue.replaced(selection, text),
       cause,
     );
     if (cause == SelectionChangedCause.toolbar) {
@@ -2812,9 +2818,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           final String selectedText = textEditingValue.selection.textInside(textEditingValue.text);
           if (selectedText.isNotEmpty) {
             final String? processedText = await _processTextService.processTextAction(action.id, selectedText, widget.readOnly);
-            if (processedText != null && !widget.readOnly) {
-              // Reuse the paste logic.
-              pasteText(SelectionChangedCause.toolbar, text: processedText);
+            if (processedText != null && _allowPaste) {
+              _pasteText(SelectionChangedCause.toolbar, processedText);
             } else {
               hideToolbar();
             }
