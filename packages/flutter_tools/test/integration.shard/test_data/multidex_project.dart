@@ -83,7 +83,7 @@ class MultidexProject extends Project {
 
   String get androidBuild => r'''
   buildscript {
-      ext.kotlin_version = '1.3.50'
+      ext.kotlin_version = '1.7.10'
       repositories {
           google()
           mavenCentral()
