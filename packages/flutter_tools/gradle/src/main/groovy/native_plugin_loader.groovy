@@ -17,6 +17,8 @@ class NativePluginLoader {
      *     "dependencies": ["plugin-b", "plugin-c"],
      *     "native_build": true
      * }
+     *
+     * Therefore the map value can either be a `String`, a `List<String>` or a `boolean`.
      */
     List<Map<String, Object>> getPlugins(File flutterSourceDirectory) {
         List<Map<String, Object>> nativePlugins = []

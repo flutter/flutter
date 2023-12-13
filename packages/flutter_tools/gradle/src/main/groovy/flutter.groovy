@@ -615,7 +615,13 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    /** Gets the list of plugins that support the Android platform. */
+    /**
+     * Gets the list of plugins (as map) that support the Android platform.
+     *
+     * The map value contains either the plugins `name` (String),
+     * its `path` (String), or its `dependencies` (List<String>).
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     */
     private List<Map<String, Object>> getPluginList() {
         return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
     }
