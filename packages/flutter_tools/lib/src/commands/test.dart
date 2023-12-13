@@ -333,8 +333,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       testTimeRecorder = TestTimeRecorder(globals.logger);
     }
 
-    if (!flutterProject.manifest.devDependencies.contains('flutter_test') &&
-        !flutterProject.manifest.dependencies.contains('flutter_test')) {
+    if (buildInfo.packageConfig['flutter_test'] == null) {
       throwToolExit(
         'Error: cannot run without a dependency on "package:flutter_test". '
         'Ensure the following lines are present in your pubspec.yaml:'
