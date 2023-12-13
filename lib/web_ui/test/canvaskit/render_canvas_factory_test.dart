@@ -71,7 +71,7 @@ void testMain() {
           EnginePlatformDispatcher.instance.implicitView!;
 
       final RenderCanvasFactory originalFactory = CanvasKitRenderer.instance
-          .debugGetRasterizerForView(implicitView)
+          .debugGetRasterizerForView(implicitView)!
           .renderCanvasFactory;
 
       // Cause the surface and its canvas to be attached to the page

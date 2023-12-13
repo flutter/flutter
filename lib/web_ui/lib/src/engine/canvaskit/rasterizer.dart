@@ -43,8 +43,8 @@ class Rasterizer {
     final CkPictureRecorder pictureRecorder = CkPictureRecorder();
     pictureRecorder.beginRecording(ui.Offset.zero & _currentFrameSize);
     pictureRecorder.recordingCanvas!.clear(const ui.Color(0x00000000));
-    final Frame compositorFrame = context.acquireFrame(
-        pictureRecorder.recordingCanvas!, viewEmbedder);
+    final Frame compositorFrame =
+        context.acquireFrame(pictureRecorder.recordingCanvas!, viewEmbedder);
 
     compositorFrame.raster(layerTree, ignoreRasterCache: true);
 
@@ -53,5 +53,11 @@ class Rasterizer {
         <CkPicture>[pictureRecorder.endRecording()]);
 
     viewEmbedder.submitFrame();
+  }
+
+  /// Disposes of this rasterizer.
+  void dispose() {
+    viewEmbedder.dispose();
+    renderCanvasFactory.dispose();
   }
 }

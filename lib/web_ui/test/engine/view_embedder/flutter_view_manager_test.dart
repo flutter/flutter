@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 
 import '../../common/matchers.dart';
+import '../../html/image_test.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => doTests);
@@ -69,8 +70,13 @@ Future<void> doTests() async {
       // Prepares a "timed-out" version of the onViewsChanged Stream so tests
       // can't hang "forever" waiting for this to complete. This stream will close
       // after 100ms of inactivity, regardless of what the test or the code do.
-      final Stream<void> onViewsChanged = viewManager.onViewsChanged
-        .timeout(const Duration(milliseconds: 100), onTimeout: (EventSink<void> sink) {
+      final Stream<int> onViewCreated = viewManager.onViewCreated.timeout(
+          const Duration(milliseconds: 100), onTimeout: (EventSink<int> sink) {
+        sink.close();
+      });
+
+      final Stream<int> onViewDisposed = viewManager.onViewDisposed.timeout(
+          const Duration(milliseconds: 100), onTimeout: (EventSink<int> sink) {
         sink.close();
       });
 
@@ -78,15 +84,21 @@ Future<void> doTests() async {
         final EngineFlutterView view = EngineFlutterView(platformDispatcher, createDomElement('div'));
         final int viewId = view.viewId;
 
-        final Future<List<void>> viewChangeEvents = onViewsChanged.toList();
+        final Future<List<void>> viewCreatedEvents = onViewCreated.toList();
+        final Future<List<void>> viewDisposedEvents = onViewDisposed.toList();
         viewManager.registerView(view);
         viewManager.unregisterView(viewId);
 
-        expect(viewChangeEvents, completes);
+        expect(viewCreatedEvents, completes);
+        expect(viewDisposedEvents, completes);
 
-        final List<void> events = await viewChangeEvents;
+        final List<void> createdViewsList = await viewCreatedEvents;
+        final List<void> disposedViewsList = await viewCreatedEvents;
 
-        expect(events, hasLength(2), reason: 'Should fire once per viewManager register/unregister call.');
+        expect(createdViewsList, listEqual(<int>[viewId]),
+            reason: 'Should fire creation event for view');
+        expect(disposedViewsList, listEqual(<int>[viewId]),
+            reason: 'Should fire dispose event for view');
       });
     });
   });
