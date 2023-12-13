@@ -8,7 +8,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('IconTheme.of works', (WidgetTester tester) async {
-    const IconThemeData data = IconThemeData(
+    final IconThemeData data = const IconThemeData(
       size: 16.0,
       fill: 0.0,
       weight: 400.0,
@@ -17,7 +17,7 @@ void main() {
       color: Color(0xAAAAAAAA),
       opacity: 0.5,
       applyTextScaling: true,
-    );
+    ).concreteIconThemeData;
 
     late IconThemeData retrieved;
     await tester.pumpWidget(
