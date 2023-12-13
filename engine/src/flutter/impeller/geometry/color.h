@@ -56,7 +56,7 @@ enum class YUVColorSpace { kBT601LimitedRange, kBT601FullRange };
 
 /// All blend modes assume that both the source (fragment output) and
 /// destination (first color attachment) have colors with premultiplied alpha.
-enum class BlendMode {
+enum class BlendMode : uint8_t {
   // The following blend modes are able to be used as pipeline blend modes or
   // via `BlendFilterContents`.
   kClear = 0,

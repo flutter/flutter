@@ -11,9 +11,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/build_config.h"
-#include "flutter/fml/hash_combine.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/entity.h"
@@ -280,11 +278,25 @@ struct ContentContextOptions {
   bool is_for_rrect_blur_clear = false;
 
   struct Hash {
-    constexpr std::size_t operator()(const ContentContextOptions& o) const {
-      return fml::HashCombine(
-          o.sample_count, o.blend_mode, o.stencil_compare, o.stencil_operation,
-          o.primitive_type, o.color_attachment_pixel_format,
-          o.has_stencil_attachment, o.wireframe, o.is_for_rrect_blur_clear);
+    constexpr uint64_t operator()(const ContentContextOptions& o) const {
+      static_assert(sizeof(o.sample_count) == 1);
+      static_assert(sizeof(o.blend_mode) == 1);
+      static_assert(sizeof(o.sample_count) == 1);
+      static_assert(sizeof(o.stencil_compare) == 1);
+      static_assert(sizeof(o.stencil_operation) == 1);
+      static_assert(sizeof(o.primitive_type) == 1);
+      static_assert(sizeof(o.color_attachment_pixel_format) == 1);
+
+      return (o.is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |
+             (o.wireframe ? 1llu : 0llu) << 1 |
+             (o.has_stencil_attachment ? 1llu : 0llu) << 2 |
+             // enums
+             static_cast<uint64_t>(o.color_attachment_pixel_format) << 16 |
+             static_cast<uint64_t>(o.primitive_type) << 24 |
+             static_cast<uint64_t>(o.stencil_operation) << 32 |
+             static_cast<uint64_t>(o.stencil_compare) << 40 |
+             static_cast<uint64_t>(o.blend_mode) << 48 |
+             static_cast<uint64_t>(o.sample_count) << 56;
     }
   };
 
