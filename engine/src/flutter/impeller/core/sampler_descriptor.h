@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_CORE_SAMPLER_DESCRIPTOR_H_
+#define FLUTTER_IMPELLER_CORE_SAMPLER_DESCRIPTOR_H_
 
 #include "impeller/base/comparable.h"
 #include "impeller/core/formats.h"
@@ -47,3 +48,5 @@ struct SamplerDescriptor final : public Comparable<SamplerDescriptor> {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_CORE_SAMPLER_DESCRIPTOR_H_

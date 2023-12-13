@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_HARDWARE_BUFFER_TEXTURE_SOURCE_VK_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_HARDWARE_BUFFER_TEXTURE_SOURCE_VK_H_
 
 #include "flutter/fml/build_config.h"
 #include "vulkan/vulkan_core.h"
@@ -57,3 +58,5 @@ class AndroidHardwareBufferTextureSourceVK final : public TextureSourceVK {
 }  // namespace impeller
 
 #endif
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_HARDWARE_BUFFER_TEXTURE_SOURCE_VK_H_

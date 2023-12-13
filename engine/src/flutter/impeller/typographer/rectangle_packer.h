@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TYPOGRAPHER_RECTANGLE_PACKER_H_
+#define FLUTTER_IMPELLER_TYPOGRAPHER_RECTANGLE_PACKER_H_
 
 #include "flutter/fml/logging.h"
 
@@ -69,3 +70,5 @@ class RectanglePacker {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_TYPOGRAPHER_RECTANGLE_PACKER_H_

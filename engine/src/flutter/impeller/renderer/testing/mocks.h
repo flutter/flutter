@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_TESTING_MOCKS_H_
+#define FLUTTER_IMPELLER_RENDERER_TESTING_MOCKS_H_
 
 #include "gmock/gmock.h"
 #include "impeller/core/allocator.h"
@@ -215,3 +216,5 @@ class MockSampler : public Sampler {
 
 }  // namespace testing
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_TESTING_MOCKS_H_

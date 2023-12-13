@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_ANONYMOUS_CONTENTS_H_
+#define FLUTTER_IMPELLER_ENTITY_CONTENTS_ANONYMOUS_CONTENTS_H_
 
 #include <functional>
 #include <memory>
@@ -40,3 +41,5 @@ class AnonymousContents final : public Contents {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_ANONYMOUS_CONTENTS_H_

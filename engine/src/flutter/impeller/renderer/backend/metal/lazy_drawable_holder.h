@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_METAL_LAZY_DRAWABLE_HOLDER_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_METAL_LAZY_DRAWABLE_HOLDER_H_
 
 #include <Metal/Metal.h>
 
@@ -28,3 +29,5 @@ std::shared_ptr<TextureMTL> CreateTextureFromDrawableFuture(
     const std::shared_future<id<CAMetalDrawable>>& drawble_future);
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_METAL_LAZY_DRAWABLE_HOLDER_H_

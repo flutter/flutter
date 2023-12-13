@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VMA_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VMA_H_
 
 #include "flutter/flutter_vma/flutter_vma.h"
 #include "flutter/fml/trace_event.h"
@@ -132,3 +133,5 @@ struct ImageVMATraits {
 using UniqueImageVMA = fml::UniqueObject<ImageVMA, ImageVMATraits>;
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VMA_H_

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_AIKS_PAINT_H_
+#define FLUTTER_IMPELLER_AIKS_PAINT_H_
 
 #include <memory>
 
@@ -106,3 +107,5 @@ struct Paint {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_AIKS_PAINT_H_

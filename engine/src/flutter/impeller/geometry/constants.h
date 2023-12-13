@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_GEOMETRY_CONSTANTS_H_
+#define FLUTTER_IMPELLER_GEOMETRY_CONSTANTS_H_
 
 namespace impeller {
 
@@ -55,3 +56,5 @@ constexpr float kPhi = 1.61803398874989484820f;
 constexpr float kEhCloseEnough = 1e-3f;
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_GEOMETRY_CONSTANTS_H_

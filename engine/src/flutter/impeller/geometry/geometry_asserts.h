@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_GEOMETRY_GEOMETRY_ASSERTS_H_
+#define FLUTTER_IMPELLER_GEOMETRY_GEOMETRY_ASSERTS_H_
 
 #include <array>
 #include <iostream>
@@ -175,3 +176,5 @@ inline ::testing::AssertionResult ColorsNear(std::vector<impeller::Color> a,
 #define EXPECT_ARRAY_4_NEAR(a, b) EXPECT_PRED2(&::Array4Near, a, b)
 #define EXPECT_COLOR_BUFFER_NEAR(a, b) EXPECT_PRED2(&::ColorBufferNear, a, b)
 #define EXPECT_COLORS_NEAR(a, b) EXPECT_PRED2(&::ColorsNear, a, b)
+
+#endif  // FLUTTER_IMPELLER_GEOMETRY_GEOMETRY_ASSERTS_H_

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_GEOMETRY_PATH_COMPONENT_H_
+#define FLUTTER_IMPELLER_GEOMETRY_PATH_COMPONENT_H_
 
 #include <type_traits>
 #include <variant>
@@ -184,3 +185,5 @@ static_assert(!std::is_polymorphic<QuadraticPathComponent>::value);
 static_assert(!std::is_polymorphic<CubicPathComponent>::value);
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_GEOMETRY_PATH_COMPONENT_H_

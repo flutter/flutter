@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_SCENE_IMPORTER_VERTICES_BUILDER_H_
+#define FLUTTER_IMPELLER_SCENE_IMPORTER_VERTICES_BUILDER_H_
 
 #include <cstddef>
 #include <map>
@@ -169,3 +170,5 @@ class SkinnedVerticesBuilder final : public VerticesBuilder {
 }  // namespace importer
 }  // namespace scene
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_SCENE_IMPORTER_VERTICES_BUILDER_H_

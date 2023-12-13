@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_PIPELINE_DESCRIPTOR_H_
+#define FLUTTER_IMPELLER_RENDERER_PIPELINE_DESCRIPTOR_H_
 
 #include <map>
 #include <memory>
@@ -167,3 +168,5 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_PIPELINE_DESCRIPTOR_H_

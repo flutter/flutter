@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_ENTITY_GEOMETRY_ROUND_RECT_GEOMETRY_H_
+#define FLUTTER_IMPELLER_ENTITY_GEOMETRY_ROUND_RECT_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
 
@@ -52,3 +53,5 @@ class RoundRectGeometry final : public Geometry {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_ENTITY_GEOMETRY_ROUND_RECT_GEOMETRY_H_

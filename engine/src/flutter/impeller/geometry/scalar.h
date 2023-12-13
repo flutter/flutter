@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_GEOMETRY_SCALAR_H_
+#define FLUTTER_IMPELLER_GEOMETRY_SCALAR_H_
 
 #include <cfloat>
 #include <type_traits>
@@ -57,3 +58,5 @@ struct Degrees {
 // NOLINTEND(google-explicit-constructor)
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_GEOMETRY_SCALAR_H_

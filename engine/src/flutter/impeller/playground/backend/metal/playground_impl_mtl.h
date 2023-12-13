@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_PLAYGROUND_BACKEND_METAL_PLAYGROUND_IMPL_MTL_H_
+#define FLUTTER_IMPELLER_PLAYGROUND_BACKEND_METAL_PLAYGROUND_IMPL_MTL_H_
 
 #include <memory>
 
@@ -48,3 +49,5 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_PLAYGROUND_BACKEND_METAL_PLAYGROUND_IMPL_MTL_H_

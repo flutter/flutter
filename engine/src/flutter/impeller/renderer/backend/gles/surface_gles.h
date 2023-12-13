@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SURFACE_GLES_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SURFACE_GLES_H_
 
 #include <functional>
 #include <memory>
@@ -42,3 +43,5 @@ class SurfaceGLES final : public Surface {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_SURFACE_GLES_H_

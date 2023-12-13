@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TOOLKIT_EGL_EGL_H_
+#define FLUTTER_IMPELLER_TOOLKIT_EGL_EGL_H_
 
 #include <EGL/egl.h>
 #define EGL_EGLEXT_PROTOTYPES
@@ -21,3 +22,5 @@ void LogEGLError(const char* file, int line);
 
 }  // namespace egl
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_TOOLKIT_EGL_EGL_H_

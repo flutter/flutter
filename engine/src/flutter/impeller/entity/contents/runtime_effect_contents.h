@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_RUNTIME_EFFECT_CONTENTS_H_
+#define FLUTTER_IMPELLER_ENTITY_CONTENTS_RUNTIME_EFFECT_CONTENTS_H_
 
 #include <memory>
 #include <vector>
@@ -41,3 +42,5 @@ class RuntimeEffectContents final : public ColorSourceContents {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_RUNTIME_EFFECT_CONTENTS_H_

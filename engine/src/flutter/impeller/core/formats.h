@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_CORE_FORMATS_H_
+#define FLUTTER_IMPELLER_CORE_FORMATS_H_
 
 #include <cstdint>
 #include <functional>
@@ -679,3 +680,5 @@ struct hash<impeller::StencilAttachmentDescriptor> {
 };
 
 }  // namespace std
+
+#endif  // FLUTTER_IMPELLER_CORE_FORMATS_H_

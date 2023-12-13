@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_PASS_BINDINGS_CACHE_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_PASS_BINDINGS_CACHE_H_
 
 #include <cstdint>
 #include <optional>
@@ -45,3 +46,5 @@ class PassBindingsCache {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_PASS_BINDINGS_CACHE_H_

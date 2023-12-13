@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
+#define FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 
 #include "flutter/fml/macros.h"
 #include "impeller/typographer/glyph_atlas.h"
@@ -75,3 +76,5 @@ class TextFrame {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_SHADER_ARCHIVE_SHADER_ARCHIVE_WRITER_H_
+#define FLUTTER_IMPELLER_SHADER_ARCHIVE_SHADER_ARCHIVE_WRITER_H_
 
 #include <memory>
 #include <string>
@@ -43,3 +44,5 @@ class ShaderArchiveWriter {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_SHADER_ARCHIVE_SHADER_ARCHIVE_WRITER_H_
