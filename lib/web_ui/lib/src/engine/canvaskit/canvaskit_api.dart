@@ -2942,7 +2942,7 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
   external set fontStyle(SkFontStyle? value);
 
   @JS('shadows')
-  external set _shadows(JSArray<JSAny?>? value);
+  external set _shadows(JSArray? value);
   set shadows(List<SkTextShadow>? value) =>
       // TODO(joshualitt): remove this cast when we reify JS types on JS
       // backends.
@@ -2950,7 +2950,7 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
       _shadows = (value as List<JSAny>?)?.toJS;
 
   @JS('fontFeatures')
-  external set _fontFeatures(JSArray<JSAny?>? value);
+  external set _fontFeatures(JSArray? value);
   set fontFeatures(List<SkFontFeature>? value) =>
       // TODO(joshualitt): remove this cast when we reify JS types on JS
       // backends.
@@ -2958,7 +2958,7 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
       _fontFeatures = (value as List<JSAny>?)?.toJS;
 
   @JS('fontVariations')
-  external set _fontVariations(JSArray<JSAny?>? value);
+  external set _fontVariations(JSArray? value);
   set fontVariations(List<SkFontVariation>? value) =>
       // TODO(joshualitt): remove this cast when we reify JS types on JS
       // backends.
@@ -3200,7 +3200,7 @@ class SkGlyphClusterInfo {}
 
 extension SkGlyphClusterInfoExtension on SkGlyphClusterInfo {
   @JS('graphemeLayoutBounds')
-  external JSArray<JSAny?> get _bounds;
+  external JSArray get _bounds;
 
   @JS('dir')
   external SkTextDirection get _direction;
@@ -3256,7 +3256,7 @@ extension SkParagraphExtension on SkParagraph {
   double getIdeographicBaseline() => _getIdeographicBaseline().toDartDouble;
 
   @JS('getLineMetrics')
-  external JSArray<JSAny?> _getLineMetrics();
+  external JSArray _getLineMetrics();
   List<SkLineMetrics> getLineMetrics() =>
       _getLineMetrics().toDart.cast<SkLineMetrics>();
 
@@ -3289,7 +3289,7 @@ extension SkParagraphExtension on SkParagraph {
   double getMaxWidth() => _getMaxWidth().toDartDouble;
 
   @JS('getRectsForRange')
-  external JSArray<JSAny?> _getRectsForRange(
+  external JSArray _getRectsForRange(
     JSNumber start,
     JSNumber end,
     SkRectHeightStyle heightStyle,
@@ -3304,7 +3304,7 @@ extension SkParagraphExtension on SkParagraph {
                          widthStyle).toDart.cast<SkRectWithDirection>();
 
   @JS('getRectsForPlaceholders')
-  external JSArray<JSAny?> _getRectsForPlaceholders();
+  external JSArray _getRectsForPlaceholders();
   List<SkRectWithDirection> getRectsForPlaceholders() =>
       _getRectsForPlaceholders().toDart.cast<SkRectWithDirection>();
 
