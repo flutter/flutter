@@ -90,7 +90,7 @@ class MultidexProject extends Project {
       }
 
       dependencies {
-          classpath 'com.android.tools.build:gradle:4.1.0'
+          classpath 'com.android.tools.build:gradle:7.3.0'
           classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
       }
   }
