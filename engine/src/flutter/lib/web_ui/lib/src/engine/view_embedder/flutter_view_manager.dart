@@ -15,12 +15,18 @@ class FlutterViewManager {
   // A map of (optional) JsFlutterViewOptions, indexed by their viewId.
   final Map<int, JsFlutterViewOptions> _jsViewOptions =
       <int, JsFlutterViewOptions>{};
-  // The controller of the [onViewsChanged] stream.
-  final StreamController<void> _onViewsChangedController =
-      StreamController<void>.broadcast();
+  // The controller of the [onViewCreated] stream.
+  final StreamController<int> _onViewCreatedController =
+      StreamController<int>.broadcast(sync: true);
+  // The controller of the [onViewDisposed] stream.
+  final StreamController<int> _onViewDisposedController =
+      StreamController<int>.broadcast(sync: true);
 
-  /// A stream of `void` events that will fire when a view is registered/unregistered.
-  Stream<void> get onViewsChanged => _onViewsChangedController.stream;
+  /// A stream of viewIds that will fire when a view is created.
+  Stream<int> get onViewCreated => _onViewCreatedController.stream;
+
+  /// A stream of viewIds that will fire when a view is disposed.
+  Stream<int> get onViewDisposed => _onViewDisposedController.stream;
 
   /// Exposes all the [EngineFlutterView]s registered so far.
   Iterable<EngineFlutterView> get views => _viewData.values;
@@ -33,7 +39,8 @@ class FlutterViewManager {
   EngineFlutterView createAndRegisterView(
     JsFlutterViewOptions jsViewOptions,
   ) {
-    final EngineFlutterView view = EngineFlutterView(_dispatcher, jsViewOptions.hostElement);
+    final EngineFlutterView view =
+        EngineFlutterView(_dispatcher, jsViewOptions.hostElement);
     registerView(view, jsViewOptions: jsViewOptions);
     return view;
   }
@@ -53,7 +60,7 @@ class FlutterViewManager {
     if (jsViewOptions != null) {
       _jsViewOptions[viewId] = jsViewOptions;
     }
-    _onViewsChangedController.add(null);
+    _onViewCreatedController.add(viewId);
 
     return view;
   }
@@ -74,7 +81,7 @@ class FlutterViewManager {
   JsFlutterViewOptions? unregisterView(int viewId) {
     _viewData.remove(viewId); // .dispose();
     final JsFlutterViewOptions? jsViewOptions = _jsViewOptions.remove(viewId);
-    _onViewsChangedController.add(null);
+    _onViewDisposedController.add(viewId);
     return jsViewOptions;
   }
 
@@ -91,7 +98,8 @@ class FlutterViewManager {
     // inside the loop.
     _viewData.keys.toList().forEach(disposeAndUnregisterView);
     // Let listeners receive the unregistration events from the loop above, then
-    // close the stream.
-    _onViewsChangedController.close();
+    // close the streams.
+    _onViewCreatedController.close();
+    _onViewDisposedController.close();
   }
 }

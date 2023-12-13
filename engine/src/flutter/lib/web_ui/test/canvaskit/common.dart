@@ -22,10 +22,6 @@ void setUpCanvasKitTest() {
     setUpTestViewDimensions: false,
   );
 
-  tearDown(() {
-    CanvasKitRenderer.instance.debugClear();
-  });
-
   setUp(() => renderer.fontCollection.fontFallbackManager!.downloadQueue
       .fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/');
   tearDown(() => renderer.fontCollection.fontFallbackManager!.downloadQueue
