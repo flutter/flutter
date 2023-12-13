@@ -419,8 +419,12 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private configureLegacyPluginEachProjects() {
         File settingsGradle = new File(project.projectDir.parentFile, 'settings.gradle')
-        if(!settingsGradle.exists() || !settingsGradle.text.contains("'.flutter-plugins'")) {
-            return
+        try {
+            if (!settingsGradle.text.contains("'.flutter-plugins'")) {
+                return
+            }
+        } catch (FileNotFoundException ignored) {
+            throw new GradleException("settings.gradle does not exist: ${settingsGradle.absolutePath}")
         }
         List<Map<String, Object>> deps = getPluginDependencies()
         List<String> plugins = getPluginList().collect { it.name as String }
