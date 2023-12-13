@@ -199,6 +199,7 @@ executable("flutter_windows_unittests") {
     "testing/flutter_window_test.h",
     "testing/flutter_windows_engine_builder.cc",
     "testing/flutter_windows_engine_builder.h",
+    "testing/mock_angle_surface_manager.h",
     "testing/mock_direct_manipulation.h",
     "testing/mock_gl_proc_table.h",
     "testing/mock_text_input_manager.cc",
