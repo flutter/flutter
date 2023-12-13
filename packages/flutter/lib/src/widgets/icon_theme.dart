@@ -70,7 +70,7 @@ class IconTheme extends InheritedTheme {
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {
     final IconTheme? iconTheme = context.dependOnInheritedWidgetOfExactType<IconTheme>();
-    return iconTheme?.data ?? IconThemeData.fallbackValue;
+    return iconTheme?.data ?? IconThemeData.fallback;
   }
 
   @override

@@ -552,7 +552,7 @@ void main() {
         ),
       ),
     );
-    final double iconSize = IconThemeData.defaultIconThemeData.size;
+    final double iconSize = IconThemeData.fallback.size;
     expect(
       tester.getSize(find.byIcon(Icons.menu)),
       equals(Size(iconSize, iconSize)),
@@ -649,7 +649,7 @@ void main() {
       ),
     );
 
-    final double iconSize = IconThemeData.defaultIconThemeData.size;
+    final double iconSize = IconThemeData.fallback.size;
     expect(
       tester.getSize(find.byIcon(Icons.menu)),
       equals(Size(iconSize, iconSize)),

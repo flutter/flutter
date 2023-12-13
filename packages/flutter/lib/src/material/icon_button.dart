@@ -973,7 +973,7 @@ class _IconButtonM3 extends ButtonStyleButton {
       return identical(color, kDefaultIconDarkColor);
     }
     final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
-    final bool isDefaultSize = iconTheme.size == IconThemeData.defaultIconThemeData.size;
+    final bool isDefaultSize = iconTheme.size == IconThemeData.fallback.size;
 
     final ButtonStyle iconThemeStyle = IconButton.styleFrom(
       foregroundColor: isDefaultColor ? null : iconTheme.color,
