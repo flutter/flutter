@@ -359,7 +359,7 @@ class FlutterPlugin implements Plugin<Project> {
         // This prevents duplicated classes when using custom build types. That is, a custom build
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
-        if (!isFlutterAppProject() || getPluginList().size() == 0) {
+        if (!isFlutterAppProject() || getPluginList(project).size() == 0) {
             addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -395,10 +395,10 @@ class FlutterPlugin implements Plugin<Project> {
      * the tool generates a `.flutter-plugins-dependencies` file, which contains a map to each plugin location.
      * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
      */
-    private void configurePlugins() {
-        configureLegacyPluginEachProjects()
-        getPluginList().each this.&configurePluginProject
-        getPluginList().each this.&configurePluginDependencies
+    private void configurePlugins(Project project) {
+        configureLegacyPluginEachProjects(project)
+        getPluginList(project).each this.&configurePluginProject
+        getPluginList(project).each this.&configurePluginDependencies
     }
 
     // TODO(54566, 48918): Can remove once the issues are resolved.
@@ -417,7 +417,7 @@ class FlutterPlugin implements Plugin<Project> {
      * So in summary the plugins are currently selected from the `dependencyGraph` and filtered then with the
      * [doesSupportAndroidPlatform] method instead of just using the `plugins.android` list.
      */
-    private configureLegacyPluginEachProjects() {
+    private configureLegacyPluginEachProjects(Project project) {
         File settingsGradle = new File(project.projectDir.parentFile, 'settings.gradle')
         try {
             if (!settingsGradle.text.contains("'.flutter-plugins'")) {
@@ -426,8 +426,8 @@ class FlutterPlugin implements Plugin<Project> {
         } catch (FileNotFoundException ignored) {
             throw new GradleException("settings.gradle does not exist: ${settingsGradle.absolutePath}")
         }
-        List<Map<String, Object>> deps = getPluginDependencies()
-        List<String> plugins = getPluginList().collect { it.name as String }
+        List<Map<String, Object>> deps = getPluginDependencies(project)
+        List<String> plugins = getPluginList(project).collect { it.name as String }
         deps.removeIf { plugins.contains(it.name) }
         deps.each {
             Project pluginProject = project.rootProject.findProject(":${it.name}")
@@ -548,9 +548,9 @@ class FlutterPlugin implements Plugin<Project> {
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
             String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
             String maxPluginNdkVersion = projectNdkVersion
-            int numProcessedPlugins = getPluginList().size()
+            int numProcessedPlugins = getPluginList(project).size()
 
-            getPluginList().each { pluginObject ->
+            getPluginList(project).each { pluginObject ->
                 assert pluginObject.name instanceof String
                 Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
                 if (pluginProject == null) {
@@ -626,14 +626,14 @@ class FlutterPlugin implements Plugin<Project> {
      * its `path` (String), or its `dependencies` (List<String>).
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
-    private List<Map<String, Object>> getPluginList() {
+    private List<Map<String, Object>> getPluginList(Project project) {
         return project.ext.nativePluginLoader.getPlugins(getFlutterSourceDirectory())
     }
 
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    private List<Map<String, Object>> getPluginDependencies() {
+    private List<Map<String, Object>> getPluginDependencies(Project project) {
         Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(getFlutterSourceDirectory())
         if (meta == null) {
             return []
@@ -1241,7 +1241,7 @@ class FlutterPlugin implements Plugin<Project> {
                 def nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
                 project.android.sourceSets.main.jniLibs.srcDir nativeAssetsDir
             }
-            configurePlugins()
+            configurePlugins(project)
             detectLowCompileSdkVersionOrNdkVersion()
             return
         }
@@ -1293,7 +1293,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-        configurePlugins()
+        configurePlugins(project)
         detectLowCompileSdkVersionOrNdkVersion()
     }
 }
