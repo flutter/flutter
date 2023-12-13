@@ -367,6 +367,7 @@ class IosProject extends XcodeBasedProject {
       configuration: buildContext.configuration,
     );
     final BuildableIOSApp app = BuildableIOSApp(this, bundleIdentifier, hostAppBundleName);
+    // Archiving app bundle will evaluate the variables in entitlements.
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: _generateBuildInfoFrom(buildContext),

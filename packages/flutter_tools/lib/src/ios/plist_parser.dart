@@ -178,11 +178,8 @@ class PlistParser {
     return parsed[key] as T?;
   }
 
-  /// Parses the xml Plist content located at [plistFilePath] and returns the value
-  /// that's associated with the specified [key] within the property list.
-  ///
-  /// If [plistFilePath] points to a non-existent file or a file that's not a
-  /// valid property list file, this will return null.
+  /// Parses the xml Plist content and returns the value that's associated with
+  /// the specified [key] within the property list.
   ///
   /// If [key] is not found in the property list, this will return null.
   T? getValueFromXml<T>(String xmlContent, String key) {
