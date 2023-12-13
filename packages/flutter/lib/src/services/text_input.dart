@@ -889,7 +889,7 @@ class TextEditingValue {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(replacementRange.start, replacementRange.end) - replacementRange.start;
       return originalIndex + replacedLength - removedLength;
     }
 

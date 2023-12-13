@@ -16,6 +16,7 @@ import 'debug.dart';
 import 'hardware_keyboard.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
+import 'raw_keyboard.dart' show RawKeyboard;
 import 'restoration.dart';
 import 'service_extensions.dart';
 import 'system_channels.dart';
@@ -66,6 +67,13 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// The global singleton instance of [KeyEventManager], which is used
   /// internally to dispatch key messages.
+  ///
+  /// This property is deprecated, and will be removed. See
+  /// [HardwareKeyboard.addHandler] instead.
+  @Deprecated(
+    'No longer supported. Add a handler to HardwareKeyboard instead. '
+    'This feature was deprecated after v3.18.0-2.0.pre.',
+  )
   KeyEventManager get keyEventManager => _keyEventManager;
   late final KeyEventManager _keyEventManager;
 
@@ -89,8 +97,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   late final BinaryMessenger _defaultBinaryMessenger;
 
-  /// A token that represents the root isolate, used for coordinating with background
-  /// isolates.
+  /// A token that represents the root isolate, used for coordinating with
+  /// background isolates.
   ///
   /// This property is primarily intended for use with
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized], which takes a

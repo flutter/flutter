@@ -666,7 +666,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final double lerpValue = _lerp(value);
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
-      _focusNode?.requestFocus();
     }
   }
 
@@ -1376,8 +1375,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (hovered && hoveringThumb) {
       _state.overlayController.forward();
     } else {
-      // Only remove overlay when Slider is unfocused.
-      if (!hasFocus) {
+      // Only remove overlay when Slider is inactive and unfocused.
+      if (!_active && !hasFocus) {
         _state.overlayController.reverse();
       }
     }
