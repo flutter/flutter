@@ -41,15 +41,6 @@ const String _defaultPlatform = kIsWeb ? 'web' : 'android';
   return (subspan, i);
 }
 
-/// Helper function that returns 3 special Offsets within the given `box`, to
-/// try performing hit-testing at.
-Iterable<Offset> _testOffsetsForEachTextBox(TextBox box) {
-  final Rect rect = box.toRect();
-  return rect.isEmpty
-    ? const Iterable<Offset>.empty()
-    : <Offset>[rect.center, rect.centerLeft, rect.centerRight];
-}
-
 // Examples can assume:
 // typedef MyWidget = Placeholder;
 
@@ -1847,7 +1838,8 @@ abstract class WidgetController {
           // returned boxes don't extend outside of the hit-testable region.
           final Iterable<Offset> testOffsets = textRangeContext.renderObject
             .getBoxesForSelection(TextSelection(baseOffset: spanStart, extentOffset: endIndex))
-            .expand(_testOffsetsForEachTextBox);
+            // Try hit-testing the center of each TextBox.
+            .map((TextBox textBox) => textBox.toRect().center);
 
           for (final Offset localOffset in testOffsets) {
             final HitTestResult result = HitTestResult();

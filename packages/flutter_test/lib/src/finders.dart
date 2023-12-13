@@ -1074,16 +1074,14 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
 
 /// A base class for creating finders that search for static text rendered by a
 /// [RenderParagraph].
-class _StaticTextRangeFinder extends _MapFinder<TextRangeContext, Element> {
+class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
   /// Creates a new [_StaticTextRangeFinder] that searches for the given
   /// `pattern` in the [Element]s found by `_parent`.
   _StaticTextRangeFinder(this._parent, this.pattern);
 
-  @override
   final FinderBase<Element> _parent;
   final Pattern pattern;
 
-  @override
   Iterable<TextRangeContext> _flatMap(Element from) {
     final RenderObject? renderObject = from.renderObject;
     // This is currenly only exposed on text matchers. Only consider RenderBoxes.
@@ -1115,25 +1113,18 @@ class _StaticTextRangeFinder extends _MapFinder<TextRangeContext, Element> {
   }
 
   @override
+  Iterable<TextRangeContext> findInCandidates(Iterable<TextRangeContext> candidates) => candidates;
+
+  @override
+  Iterable<TextRangeContext> get allCandidates => _parent.evaluate().expand(_flatMap);
+
+  @override
   String describeMatch(Plurality plurality) {
     return switch (plurality) {
       Plurality.zero || Plurality.many => 'non-overlapping TextRanges that match the Pattern "$pattern"',
       Plurality.one => 'non-overlapping TextRange that matches the Pattern "$pattern"',
     };
   }
-}
-
-abstract class _MapFinder<To, From> extends FinderBase<To> {
-  /// Another finder whose results will be further filtered.
-  FinderBase<From> get _parent;
-
-  Iterable<To> _flatMap(From from);
-
-  @override
-  Iterable<To> findInCandidates(Iterable<To> candidates) => candidates;
-
-  @override
-  Iterable<To> get allCandidates => _parent.evaluate().expand(_flatMap);
 }
 
 /// A mixin that applies additional filtering to the results of a parent [Finder].
