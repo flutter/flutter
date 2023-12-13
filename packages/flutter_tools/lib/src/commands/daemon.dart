@@ -444,6 +444,9 @@ class DaemonDomain extends Domain {
       if (featureFlags.areCustomDevicesEnabled) {
         result.add('custom');
       }
+      if (featureFlags.isPreviewDeviceEnabled && supportedPlatforms.contains(SupportedPlatform.windows)) {
+        result.add('preview');
+      }
       return <String, Object>{
         'platforms': result,
       };
@@ -454,8 +457,8 @@ class DaemonDomain extends Domain {
         'error': true,
       });
       // On any sort of failure, fall back to Android and iOS for backwards
-      // comparability.
-      return <String, Object>{
+      // compatibility.
+      return const <String, Object>{
         'platforms': <String>[
           'android',
           'ios',
