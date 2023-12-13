@@ -45,6 +45,7 @@ Future<void> main() async {
 }
 
 Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
+  print('unstuck CI');
   await evalFlutter(
     'install',
     options: <String>['--flavor', 'paid'],
