@@ -124,7 +124,7 @@ void main() {
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
 
-  // TODO(/issues/54566): Remove test when issue is resolved.
+  // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
   /// with until Flutter v1.22.0.
   /// It uses the `.flutter-plugins` file to load EACH plugin.
@@ -141,7 +141,7 @@ void main() {
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
 
-  // TODO(/issues/54566): Remove test when issue is resolved.
+  // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
   /// with until Flutter v1.22.0.
   /// It uses the `.flutter-plugins` file to load EACH plugin.
@@ -159,7 +159,7 @@ void main() {
             'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
   });
 
-  // TODO(/issues/54566): Remove test when issue is resolved.
+  // TODO(54566): Remove test when issue is resolved.
   /// Test project with a `settings.gradle` (PluginEach) that apps were created
   /// with until Flutter v1.22.0.
   /// It is compromised by removing the 'include' statement of the plugins.
@@ -198,7 +198,7 @@ class PluginWithPathAndroidProject extends PluginProject {
   String get pubspec => pubspecWithPluginPath;
 }
 
-// TODO(/issues/54566): Remove class when issue is resolved.
+// TODO(54566): Remove class when issue is resolved.
 /// [PluginEachSettingsGradleProject] that load's a plugin from the specified
 /// path.
 class PluginEachWithPathAndroidProject extends PluginEachSettingsGradleProject {
@@ -206,7 +206,7 @@ class PluginEachWithPathAndroidProject extends PluginEachSettingsGradleProject {
   String get pubspec => pubspecWithPluginPath;
 }
 
-// TODO(/issues/54566): Remove class when issue is resolved.
+// TODO(54566): Remove class when issue is resolved.
 /// [PluginCompromisedEachSettingsGradleProject] that load's a plugin from the
 /// specified path.
 class PluginCompromisedEachWithPathAndroidProject

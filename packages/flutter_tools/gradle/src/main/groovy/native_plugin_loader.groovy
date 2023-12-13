@@ -114,7 +114,7 @@ class NativePluginLoader {
     }
 }
 
-// TODO(/issues/135392): Remove and use declarative form when migrated
+// TODO(135392): Remove and use declarative form when migrated
 ext {
     nativePluginLoader = NativePluginLoader.instance
 }
