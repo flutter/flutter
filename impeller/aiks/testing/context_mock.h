@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_AIKS_TESTING_CONTEXT_MOCK_H_
+#define FLUTTER_IMPELLER_AIKS_TESTING_CONTEXT_MOCK_H_
 
 #include <string>
 #include <utility>
@@ -115,3 +116,5 @@ class ContextMock : public Context {
 
 }  // namespace testing
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_AIKS_TESTING_CONTEXT_MOCK_H_

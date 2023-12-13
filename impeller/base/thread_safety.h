@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_BASE_THREAD_SAFETY_H_
+#define FLUTTER_IMPELLER_BASE_THREAD_SAFETY_H_
 
 #if defined(__clang__)
 #define IPLR_THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
@@ -67,3 +68,5 @@
 
 #define IPLR_NO_THREAD_SAFETY_ANALYSIS \
   IPLR_THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
+
+#endif  // FLUTTER_IMPELLER_BASE_THREAD_SAFETY_H_

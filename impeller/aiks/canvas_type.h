@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_AIKS_CANVAS_TYPE_H_
+#define FLUTTER_IMPELLER_AIKS_CANVAS_TYPE_H_
 
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/canvas_recorder.h"
@@ -20,3 +21,5 @@ using CanvasType = Canvas;
 #endif
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_AIKS_CANVAS_TYPE_H_

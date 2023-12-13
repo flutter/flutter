@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_DISPLAY_LIST_SKIA_CONVERSIONS_H_
+#define FLUTTER_IMPELLER_DISPLAY_LIST_SKIA_CONVERSIONS_H_
 
 #include "display_list/dl_color.h"
 #include "display_list/effects/dl_color_source.h"
@@ -70,3 +71,5 @@ void ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
 
 }  // namespace skia_conversions
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_DISPLAY_LIST_SKIA_CONVERSIONS_H_

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_GEOMETRY_MATRIX_H_
+#define FLUTTER_IMPELLER_GEOMETRY_MATRIX_H_
 
 #include <cmath>
 #include <iomanip>
@@ -527,3 +528,5 @@ inline std::ostream& operator<<(std::ostream& out, const impeller::Matrix& m) {
 }
 
 }  // namespace std
+
+#endif  // FLUTTER_IMPELLER_GEOMETRY_MATRIX_H_

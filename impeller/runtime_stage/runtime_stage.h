@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RUNTIME_STAGE_RUNTIME_STAGE_H_
+#define FLUTTER_IMPELLER_RUNTIME_STAGE_RUNTIME_STAGE_H_
 
 #include <memory>
 #include <string>
@@ -56,3 +57,5 @@ class RuntimeStage {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RUNTIME_STAGE_RUNTIME_STAGE_H_

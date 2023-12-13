@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_TYPOGRAPHER_GLYPH_H_
+#define FLUTTER_IMPELLER_TYPOGRAPHER_GLYPH_H_
 
 #include <cstdint>
 #include <functional>
@@ -69,3 +70,5 @@ struct std::less<impeller::Glyph> {
     return lhs.index < rhs.index;
   }
 };
+
+#endif  // FLUTTER_IMPELLER_TYPOGRAPHER_GLYPH_H_

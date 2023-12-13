@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_GEOMETRY_MATRIX_DECOMPOSITION_H_
+#define FLUTTER_IMPELLER_GEOMETRY_MATRIX_DECOMPOSITION_H_
 
 #include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/scalar.h"
@@ -30,3 +31,5 @@ struct MatrixDecomposition {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_GEOMETRY_MATRIX_DECOMPOSITION_H_

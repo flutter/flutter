@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VK_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VK_H_
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
@@ -68,3 +69,5 @@
 #include "vulkan/vulkan.hpp"  // IWYU pragma: keep.
 
 static_assert(VK_HEADER_VERSION >= 215, "Vulkan headers must not be too old.");
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_VK_H_

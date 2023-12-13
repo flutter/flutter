@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_AIKS_PICTURE_H_
+#define FLUTTER_IMPELLER_AIKS_PICTURE_H_
 
 #include <deque>
 #include <memory>
@@ -31,3 +32,5 @@ struct Picture {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_AIKS_PICTURE_H_

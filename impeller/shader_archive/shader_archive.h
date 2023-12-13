@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_SHADER_ARCHIVE_SHADER_ARCHIVE_H_
+#define FLUTTER_IMPELLER_SHADER_ARCHIVE_SHADER_ARCHIVE_H_
 
 #include <memory>
 #include <type_traits>
@@ -75,3 +76,5 @@ class ShaderArchive {
 };
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_SHADER_ARCHIVE_SHADER_ARCHIVE_H_

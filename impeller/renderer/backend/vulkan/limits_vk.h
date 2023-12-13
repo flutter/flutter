@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_LIMITS_VK_H_
+#define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_LIMITS_VK_H_
 
 #include <stdint.h>
 
@@ -12,3 +13,5 @@ constexpr size_t kImageSizeThresholdForDedicatedMemoryAllocation =
     4 * 1024 * 1024;
 
 }  // namespace impeller
+
+#endif  // FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_LIMITS_VK_H_

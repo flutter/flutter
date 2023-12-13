@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_IMPELLER_BASE_VALIDATION_H_
+#define FLUTTER_IMPELLER_BASE_VALIDATION_H_
 
 #ifndef IMPELLER_ENABLE_VALIDATION
 #ifdef IMPELLER_DEBUG
@@ -64,3 +65,5 @@ struct ScopedValidationDisable {
 ///   happens in test environments.
 ///
 #define VALIDATION_LOG ::impeller::ValidationLog{}.GetStream()
+
+#endif  // FLUTTER_IMPELLER_BASE_VALIDATION_H_
