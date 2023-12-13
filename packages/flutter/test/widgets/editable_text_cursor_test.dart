@@ -984,7 +984,7 @@ void main() {
       ),
     );
 
-    // Move the cursor away from characters, this will show the regular cursor
+    // Move the cursor away from characters, this will show the regular cursor.
     editableTextState.updateFloatingCursor(
       RawFloatingCursorPoint(
         state: FloatingCursorDragState.Update,

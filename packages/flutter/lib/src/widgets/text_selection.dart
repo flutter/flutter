@@ -2478,7 +2478,6 @@ class TextSelectionGestureDetectorBuilder {
 
       _dragStartViewportOffset = renderEditable.offset.pixels;
       _dragStartScrollOffset = _scrollPosition;
-
     }
   }
 
@@ -2516,7 +2515,7 @@ class TextSelectionGestureDetectorBuilder {
               from: details.globalPosition,
               cause: SelectionChangedCause.longPress,
             );
-            // Update the floating cursor
+            // Update the floating cursor.
             final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
               state: FloatingCursorDragState.Update,
               offset: details.offsetFromOrigin,
@@ -2556,7 +2555,7 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartViewportOffset = 0.0;
     _dragStartScrollOffset = 0.0;
     if (defaultTargetPlatform == TargetPlatform.iOS && delegate.selectionEnabled && editableText.textEditingValue.selection.isCollapsed) {
-      // Update the floating cursor
+      // Update the floating cursor.
       final RawFloatingCursorPoint cursorPoint = RawFloatingCursorPoint(
         state: FloatingCursorDragState.End
       );

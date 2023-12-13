@@ -10115,7 +10115,7 @@ void main() {
         ),
       ),
     );
-    // wait focus
+    // Wait for autofocus.
     await tester.pumpAndSettle();
     final Offset textFieldCenter = tester.getCenter(find.byType(CupertinoTextField));
     final TestGesture gesture = await tester.startGesture(textFieldCenter);
