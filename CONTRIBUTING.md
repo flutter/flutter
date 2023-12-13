@@ -143,6 +143,32 @@ are generally excited about improving the Dart & Flutter developer experience.
 Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
 guide to get started.
 
+
+Where to get Started
+--------------------
+There are many different methods of contributing to Flutter, and it can be overwhelming for new developers when trying to figure out where and how to get started. The first step is identifying where you are interested in contributing; Flutter is a large project that benefits from a wide variety of contributors' expertise. Whether your interests lie in the technical side of development, technical writing, issue triage, documentation, or community outreach, there is a way for you to get involved!
+
+### GitHub Issues
+Once your development environment is set up, the best place to get started is the Issues page on GitHub.
+Look for tags 'good first issue', 'easy fix', ‘good first contribution’, ‘entertaining new contributor project’, ‘documentation’, ‘d: API docs’. These issues have been tagged by the team as being good for new developers and are usually small in scope to help new contributors acclimate to the project.
+
+
+### PRs (Pull Requests)
+When submitting PRs, it's important to follow Flutter guidelines outlined [here](https://github.com/flutter/flutter/wiki/Tree-hygiene). This document covers how to submit code to Flutter and best practices for using Git. Submitted PRs go through a code review process where trusted team members with commit access review suggested changes and "approve" the PR in the GitHub UI, also known as "getting an LGTM" ("Looks good to me").
+
+PRs will provide an opportunity to get valuable feedback from the Flutter team and allow you to grow your skillset. Don't get discouraged by closed PRs, but rather, use the comments to make improvements to your workflow.
+
+
+#### PR Tips
+1. Always submit a GitHub Issue before sending a PR. Submitting the GitHub Issue first will allow you to discuss it with other developers and get valuable feedback before sending a PR.
+2. Read the full contents of this Contributors guide and the Flutter Style guide before getting started. This will help to ensure that your PR is in line with Flutter guidelines.
+3. Only submit one PR for one fix, no matter how small that fix is. This makes it easier if for some reason a change needs to be reverted.
+4. Most importantly, be open to changes and discussions on your work! New contributors will likely get a lot of comments on their PRs as they adapt to the project, and you must be open to receiving healthy constructive comments.
+
+
+### Getting Help
+If you are unsure about how to resolve an issue, don't be afraid to ask for help! You can comment directly on the GitHub Issue with questions and take some leads from the team members who respond. The Discord server is also a great place to ask questions and get help. The Flutter team foresters a sense of inclusion and community. We are all here to help each other, learn from our mistakes, and grow, so don't be afraid to reach out and ask questions!
+
 Outreach
 --------
 
