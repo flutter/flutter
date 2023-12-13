@@ -2598,6 +2598,27 @@ TEST_P(EntityTest, PipelineDescriptorEqAndHash) {
   EXPECT_EQ(desc_1->GetHash(), desc_2->GetHash());
 }
 
+// This doesn't really tell you if the hashes will have frequent
+// collisions, but since this type is only used to hash a bounded
+// set of options, we can just compare benchmarks.
+TEST_P(EntityTest, ContentContextOptionsHasReasonableHashFunctions) {
+  ContentContextOptions opts;
+  auto hash_a = ContentContextOptions::Hash{}(opts);
+
+  opts.blend_mode = BlendMode::kColorBurn;
+  auto hash_b = ContentContextOptions::Hash{}(opts);
+
+  opts.has_stencil_attachment = false;
+  auto hash_c = ContentContextOptions::Hash{}(opts);
+
+  opts.primitive_type = PrimitiveType::kPoint;
+  auto hash_d = ContentContextOptions::Hash{}(opts);
+
+  EXPECT_NE(hash_a, hash_b);
+  EXPECT_NE(hash_b, hash_c);
+  EXPECT_NE(hash_c, hash_d);
+}
+
 #ifdef FML_OS_LINUX
 TEST_P(EntityTest, FramebufferFetchVulkanBindingOffsetIsTheSame) {
   // Using framebuffer fetch on Vulkan requires that we maintain a subpass input
