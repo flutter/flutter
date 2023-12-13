@@ -147,10 +147,12 @@ class BuildableIOSApp extends IOSApp {
   String get archiveBundleOutputPath =>
       globals.fs.path.setExtension(archiveBundlePath, '.xcarchive');
 
-  String get builtInfoPlistPathAfterArchive => globals.fs.path.join(archiveBundleOutputPath,
+  String get builtAppBundlePathAfterArchive => globals.fs.path.join(archiveBundleOutputPath,
       'Products',
       'Applications',
-      _hostAppBundleName ?? 'Runner.app',
+      _hostAppBundleName ?? 'Runner.app');
+
+  String get builtInfoPlistPathAfterArchive => globals.fs.path.join(builtAppBundlePathAfterArchive,
       'Info.plist');
 
   String get projectAppIconDirName => _projectImageAssetDirName(_appIconAsset);

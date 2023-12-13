@@ -316,6 +316,11 @@ class FakePlistParser implements PlistParser {
   }
 
   @override
+  T? getValueFromXml<T>(String xmlContent, String key) {
+    return _underlyingValues[key] as T?;
+  }
+
+  @override
   bool replaceKey(String plistFilePath, {required String key, String? value}) {
     if (value == null) {
       _underlyingValues.remove(key);

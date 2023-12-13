@@ -4,13 +4,16 @@
 
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/process.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'ios/application_package.dart';
 import 'ios/code_signing.dart';
+import 'ios/mac.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
@@ -327,6 +330,24 @@ class IosProject extends XcodeBasedProject {
     return null;
   }
 
+  BuildInfo _generateBuildInfoFrom(XcodeProjectBuildContext context) {
+    late BuildMode mode;
+    if (context.configuration == null) {
+      mode = BuildMode.release;
+    } else {
+      try {
+        mode = BuildMode.values.byName(context.configuration!);
+      } on ArgumentError {
+        mode = BuildMode.release;
+      }
+    }
+    return BuildInfo(
+      mode,
+      context.scheme,
+      treeShakeIcons: true,
+    );
+  }
+
   Future<String?> _getTeamIdentifier(XcodeProjectBuildContext buildContext) async {
     final Map<String, String>? buildSettings = await _buildSettingsForXcodeProjectBuildContext(buildContext);
     if (buildSettings != null) {
@@ -336,6 +357,39 @@ class IosProject extends XcodeBasedProject {
   }
 
   Future<List<String>> _getAssociatedDomains(XcodeProjectBuildContext buildContext) async {
+    final String? bundleIdentifier = await _productBundleIdentifierWithBuildContext(buildContext);
+    if (bundleIdentifier == null) {
+      return const <String>[];
+    }
+    final String hostAppBundleName = await _parseHostAppBundleName(
+      scheme: buildContext.scheme,
+      target: buildContext.target,
+      configuration: buildContext.configuration,
+    );
+    final BuildableIOSApp app = BuildableIOSApp(this, bundleIdentifier, hostAppBundleName);
+    final XcodeBuildResult result = await buildXcodeProject(
+      app: app,
+      buildInfo: _generateBuildInfoFrom(buildContext),
+      environmentType: buildContext.environmentType,
+      buildAction: XcodeBuildAction.archive,
+      deviceID: buildContext.deviceId,
+    );
+    if (result.success) {
+      final String absoluteAppBundlePath = globals.fs.path.join(parent.directory.path, app.builtAppBundlePathAfterArchive);
+      final List<String> command = <String>['codesign', '-d', '--entitlements', '-', '--xml' , absoluteAppBundlePath];
+      final RunResult result = await globals.processUtils.run(
+        command,
+      );
+      if (result.exitCode == 0) {
+        final List<String>? domains = globals.plistParser.getValueFromXml<List<Object>>(
+          result.stdout,
+          PlistParser.kAssociatedDomainsKey,
+        )?.cast<String>();
+        return _extractHostsFromAssociatedDomains(domains);
+      }
+    }
+
+    // Fallback to build settings.
     final Map<String, String>? buildSettings = await _buildSettingsForXcodeProjectBuildContext(buildContext);
     if (buildSettings != null) {
       final String? entitlementPath = buildSettings[kEntitlementFilePathKey];
@@ -347,20 +401,25 @@ class IosProject extends XcodeBasedProject {
             PlistParser.kAssociatedDomainsKey,
           )?.cast<String>();
 
-          if (domains != null) {
-            final List<String> result = <String>[];
-            for (final String domain in domains) {
-              final RegExpMatch? match = _associatedDomainPattern.firstMatch(domain);
-              if (match != null) {
-                result.add(match.group(1)!);
-              }
-            }
-            return result;
-          }
+          return _extractHostsFromAssociatedDomains(domains);
         }
       }
     }
     return const <String>[];
+  }
+
+  List<String> _extractHostsFromAssociatedDomains(List<String>? associatedDomains) {
+    if (associatedDomains?.isEmpty ?? true) {
+      return const <String>[];
+    }
+    final List<String> result = <String>[];
+    for (final String domain in associatedDomains!) {
+      final RegExpMatch? match = _associatedDomainPattern.firstMatch(domain);
+      if (match != null) {
+        result.add(match.group(1)!);
+      }
+    }
+    return result;
   }
 
   /// The bundle name of the host app, `My App.app`.
@@ -368,18 +427,23 @@ class IosProject extends XcodeBasedProject {
     if (!existsSync()) {
       return null;
     }
-    return _hostAppBundleName ??= await _parseHostAppBundleName(buildInfo);
+    return _hostAppBundleName ??= await _parseHostAppBundleName(buildInfo: buildInfo);
   }
   String? _hostAppBundleName;
 
-  Future<String> _parseHostAppBundleName(BuildInfo? buildInfo) async {
+  Future<String> _parseHostAppBundleName({
+    BuildInfo? buildInfo,
+    String? scheme,
+    String? configuration,
+    String? target,
+  }) async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
     // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
     // The only source of truth for the name is Xcode's interpretation of the build settings.
     String? productName;
     if (globals.xcodeProjectInterpreter?.isInstalled ?? false) {
-      final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
+      final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo, scheme: scheme, configuration: configuration, target: target);
       if (xcodeBuildSettings != null) {
         productName = xcodeBuildSettings[kHostAppBundleNameKey];
       }

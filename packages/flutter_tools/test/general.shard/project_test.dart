@@ -888,6 +888,7 @@ apply plugin: 'kotlin-android'
       group('product bundle identifier', () {
         testWithMocks('null, if no build settings or plist entries', () async {
           final FlutterProject project = await someProject();
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
           expect(await project.ios.productBundleIdentifier(null), isNull);
         });
 
@@ -918,6 +919,7 @@ apply plugin: 'kotlin-android'
           final FlutterProject project = await someProject();
           project.ios.defaultHostInfoPlist.createSync(recursive: true);
           testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
+          xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
           expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
         });
 
@@ -1035,6 +1037,7 @@ apply plugin: 'kotlin-android'
 
       testUsingContext('app product name defaults to Runner.app', () async {
         final FlutterProject project = await someProject();
+        mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
         expect(await project.ios.hostAppBundleName(null), 'Runner.app');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -1149,6 +1152,7 @@ apply plugin: 'kotlin-android'
     testUsingContext('cannot find bundle identifier', () async {
       final FlutterProject project = await someProject();
       final XcodeProjectInfo projectInfo = XcodeProjectInfo(<String>['WatchTarget'], <String>[], <String>[], logger);
+      mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
       expect(
         await project.ios.containsWatchCompanion(
           projectInfo: projectInfo,
@@ -1383,7 +1387,8 @@ Future<FlutterProject> someProject({
     ..createSync(recursive: true)
     ..writeAsStringSync(validPubspec);
   }
-  directory.childDirectory('ios').createSync(recursive: true);
+  directory.childDirectory('ios').childDirectory('Runner.xcodeproj').childFile('project.pbxproj').createSync(recursive: true);
+
   final Directory androidDirectory = directory
       .childDirectory('android')
       ..createSync(recursive: true);
@@ -1713,6 +1718,12 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
     return xcodeProjectInfo;
   }
+
+  @override
+  Version? get version => Version(1, 0, 0);
+
+  @override
+  String? get versionText => '1.0.0';
 
   @override
   bool get isInstalled => true;
