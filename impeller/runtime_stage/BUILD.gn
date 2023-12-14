@@ -7,13 +7,25 @@ import("../tools/impeller.gni")
 
 config("runtime_stage_config") {
   configs = [ "//flutter/impeller:impeller_public_config" ]
-  include_dirs = [ "$root_gen_dir/flutter" ]
+  include_dirs = [
+    "$root_gen_dir/flutter",
+    "$root_gen_dir/flutter/impeller/runtime_stage",
+  ]
+}
+
+flatbuffers("runtime_stage_types_flatbuffers") {
+  flatbuffers = [ "runtime_stage_types.fbs" ]
+  public_configs = [ ":runtime_stage_config" ]
+  public_deps = [ "//flutter/third_party/flatbuffers" ]
 }
 
 flatbuffers("runtime_stage_flatbuffers") {
   flatbuffers = [ "runtime_stage.fbs" ]
   public_configs = [ ":runtime_stage_config" ]
-  public_deps = [ "//flutter/third_party/flatbuffers" ]
+  public_deps = [
+    ":runtime_stage_types_flatbuffers",
+    "//flutter/third_party/flatbuffers",
+  ]
 }
 
 impeller_component("runtime_stage") {

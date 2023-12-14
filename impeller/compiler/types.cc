@@ -4,6 +4,7 @@
 
 #include "impeller/compiler/types.h"
 
+#include <cctype>
 #include <filesystem>
 #include <sstream>
 
@@ -40,6 +41,34 @@ SourceType SourceTypeFromFileName(const std::string& file_name) {
   }
 
   return SourceType::kUnknown;
+}
+
+SourceType SourceTypeFromString(std::string name) {
+  name = ToLowerCase(name);
+
+  if (name == "vertex") {
+    return SourceType::kVertexShader;
+  }
+
+  if (name == "fragment") {
+    return SourceType::kFragmentShader;
+  }
+
+  if (name == "compute") {
+    return SourceType::kComputeShader;
+  }
+
+  return SourceType::kUnknown;
+}
+
+SourceLanguage ToSourceLanguage(const std::string& source_language) {
+  if (source_language == "glsl") {
+    return SourceLanguage::kGLSL;
+  }
+  if (source_language == "hlsl") {
+    return SourceLanguage::kHLSL;
+  }
+  return SourceLanguage::kUnknown;
 }
 
 std::string TargetPlatformToString(TargetPlatform platform) {

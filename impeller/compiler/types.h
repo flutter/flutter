@@ -7,6 +7,7 @@
 
 #include <codecvt>
 #include <locale>
+#include <map>
 #include <string>
 
 #include "flutter/fml/macros.h"
@@ -43,6 +44,16 @@ enum class SourceLanguage {
   kHLSL,
 };
 
+/// A shader config parsed as part of a ShaderBundleConfig.
+struct ShaderConfig {
+  std::string source_file_name;
+  SourceType type;
+  SourceLanguage language;
+  std::string entry_point;
+};
+
+using ShaderBundleConfig = std::unordered_map<std::string, ShaderConfig>;
+
 bool TargetPlatformIsMetal(TargetPlatform platform);
 
 bool TargetPlatformIsOpenGL(TargetPlatform platform);
@@ -51,9 +62,13 @@ bool TargetPlatformIsVulkan(TargetPlatform platform);
 
 SourceType SourceTypeFromFileName(const std::string& file_name);
 
+SourceType SourceTypeFromString(std::string name);
+
 std::string SourceTypeToString(SourceType type);
 
 std::string TargetPlatformToString(TargetPlatform platform);
+
+SourceLanguage ToSourceLanguage(const std::string& source_language);
 
 std::string SourceLanguageToString(SourceLanguage source_language);
 

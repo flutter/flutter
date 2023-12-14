@@ -7,7 +7,6 @@
 
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
 #include "impeller/core/shader_types.h"
 
@@ -38,6 +37,9 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
     return SetStageInputs(inputs.data(), inputs.size(), layout.data(),
                           layout.size());
   }
+
+  void SetStageInputs(const std::vector<ShaderStageIOSlot>& inputs,
+                      const std::vector<ShaderStageBufferLayout>& layout);
 
   template <size_t Size>
   void RegisterDescriptorSetLayouts(

@@ -46,6 +46,8 @@ impeller_component("compiler_lib") {
     "reflector.h",
     "runtime_stage_data.cc",
     "runtime_stage_data.h",
+    "shader_bundle.cc",
+    "shader_bundle.h",
     "source_options.cc",
     "source_options.h",
     "spirv_compiler.cc",
@@ -66,6 +68,7 @@ impeller_component("compiler_lib") {
     "../geometry",
     "../runtime_stage",
     "//flutter/fml",
+    "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
 
     # All third_party deps must be included by the global license script.
     "//third_party/inja",
@@ -102,6 +105,7 @@ impeller_component("compiler_unittests") {
     "compiler_test.cc",
     "compiler_test.h",
     "compiler_unittests.cc",
+    "shader_bundle_unittests.cc",
     "switches_unittests.cc",
   ]
 

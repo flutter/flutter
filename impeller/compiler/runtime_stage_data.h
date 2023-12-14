@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/types.h"
+#include "runtime_stage_types_flatbuffers.h"
 #include "spirv_parser.hpp"
 
 namespace impeller {
@@ -26,6 +27,19 @@ struct UniformDescription {
   std::optional<size_t> array_elements = std::nullopt;
 };
 
+struct InputDescription {
+  std::string name;
+  size_t location;
+  size_t set;
+  size_t binding;
+  spirv_cross::SPIRType::BaseType type =
+      spirv_cross::SPIRType::BaseType::Unknown;
+  size_t bit_width;
+  size_t vec_size;
+  size_t columns;
+  size_t offset;
+};
+
 class RuntimeStageData {
  public:
   RuntimeStageData(std::string entrypoint,
@@ -36,9 +50,13 @@ class RuntimeStageData {
 
   void AddUniformDescription(UniformDescription uniform);
 
+  void AddInputDescription(InputDescription input);
+
   void SetShaderData(std::shared_ptr<fml::Mapping> shader);
 
   void SetSkSLData(std::shared_ptr<fml::Mapping> sksl);
+
+  std::unique_ptr<fb::RuntimeStageT> CreateFlatbuffer() const;
 
   std::shared_ptr<fml::Mapping> CreateMapping() const;
 
@@ -49,6 +67,7 @@ class RuntimeStageData {
   const spv::ExecutionModel stage_;
   const TargetPlatform target_platform_;
   std::vector<UniformDescription> uniforms_;
+  std::vector<InputDescription> inputs_;
   std::shared_ptr<fml::Mapping> shader_;
   std::shared_ptr<fml::Mapping> sksl_;
 
