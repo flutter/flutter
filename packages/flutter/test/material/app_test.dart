@@ -1602,6 +1602,19 @@ void main() {
     expect(find.byType(AnimatedTheme), findsNothing);
     expect(find.byType(Theme), findsOneWidget);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/137875.
+  testWidgets('MaterialApp works in an unconstrained environment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const UnconstrainedBox(
+        child: MaterialApp(
+          home: SizedBox(width: 123, height: 456),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(MaterialApp)), const Size(123, 456));
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
