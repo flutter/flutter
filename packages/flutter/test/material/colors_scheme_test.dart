@@ -8,10 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
 
   test('Generate a light scheme from a seed color', () {
-    final initColor=Colors.blue;
-    final ColorsScheme colorsScheme = ColorsScheme.fromSeed(seedColor: initColor);
-    expect(colorsScheme.seedColor, initColor);
-    expect(colorsScheme.color, const Color(0xff0061a4));
+    final ColorsScheme colorsScheme = ColorsScheme.fromSeed(
+      seedColor: const Color(0xff003258),
+    );
+    expect(colorsScheme.seedColor, const Color(0xff003258));
+    expect(colorsScheme.color, const Color(0xff0161a3));
     expect(colorsScheme.onColor, const Color(0xffffffff));
     expect(colorsScheme.container, const Color(0xffd1e4ff));
     expect(colorsScheme.onContainer, const Color(0xff001d36));
@@ -19,12 +20,11 @@ void main() {
   });
 
   test('Generate a dark scheme from a seed color', () {
-    final initColor=Colors.blue;
     final ColorsScheme colorsScheme = ColorsScheme.fromSeed(
-      seedColor: initColor,
+      seedColor: const Color(0xff003258),
       brightness:Brightness.dark,
     );
-    expect(colorsScheme.seedColor, initColor);
+    expect(colorsScheme.seedColor, const Color(0xff003258));
     expect(colorsScheme.color, const Color(0xff9ecaff));
     expect(colorsScheme.onColor, const Color(0xff003258));
     expect(colorsScheme.container, const Color(0xff00497d));
@@ -33,9 +33,8 @@ void main() {
   });
 
   test('Copy with overrides given colors', () {
-    final initColor=Colors.blue;
     final ColorsScheme colorsScheme = ColorsScheme.fromSeed(
-      seedColor: initColor,
+      seedColor: const Color(0xff003258),
     ).copyWith(
       seedColor : const Color(0x00000001),
       color : const Color(0x00000002),
