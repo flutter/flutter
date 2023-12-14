@@ -441,7 +441,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${getCompileSdkFromProject(pluginProject)}.")
+                project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${getCompileSdkFromProject(pluginProject)} or higher.")
                 project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
 
@@ -1057,6 +1057,7 @@ class FlutterPlugin implements Plugin<Project> {
             boolean isAndroidLibraryValue = isBuildingAar || isUsedAsSubproject
 
             String variantBuildMode = buildModeFor(variant.buildType)
+            String flavorValue = variant.getFlavorName()
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             // Be careful when configuring task below, Groovy has bizarre
             // scoping rules: writing `verbose isVerbose()` means calling
@@ -1094,6 +1095,7 @@ class FlutterPlugin implements Plugin<Project> {
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
                 isAndroidLibrary isAndroidLibraryValue
+                flavor flavorValue
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -1380,6 +1382,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean validateDeferredComponents
     @Optional @Input
     Boolean isAndroidLibrary
+    @Optional @Input
+    String flavor
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -1459,6 +1463,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"
+            }
+            if (flavor != null) {
+                args "-dFlavor=${flavor}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
