@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -169,17 +167,4 @@ void main() {
     expect(copy.minHeight, 11.0);
     expect(copy.maxHeight, 18.0);
   });
-
-  test('BoxConstraints.fromViewConstraints', () {
-    final BoxConstraints unconstrained = BoxConstraints.fromViewConstraints(
-      const ViewConstraints(),
-    );
-    expect(unconstrained, const BoxConstraints());
-
-    final BoxConstraints constraints = BoxConstraints.fromViewConstraints(
-      const ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
-    );
-    expect(constraints, const BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4));
-  });
-
 }

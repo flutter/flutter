@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show FlutterView, ViewConstraints;
+import 'dart:ui' show FlutterView;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -36,7 +36,7 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView({required super.view}) : super(
-    configuration: ViewConfiguration(constraints: ViewConstraints.tight(_kTestViewSize)),
+    configuration: const ViewConfiguration(size: _kTestViewSize),
   );
 
   @override

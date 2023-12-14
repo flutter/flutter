@@ -350,7 +350,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     final FlutterView view = renderView.flutterView;
     final double devicePixelRatio = view.devicePixelRatio;
     return ViewConfiguration(
-      constraints: view.physicalConstraints / devicePixelRatio,
+      size: view.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
