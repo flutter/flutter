@@ -2230,7 +2230,6 @@
 ../../../third_party/dart/.gn
 ../../../third_party/dart/.mailmap
 ../../../third_party/dart/.style.yapf
-../../../third_party/dart/.vpython
 ../../../third_party/dart/AUTHORS
 ../../../third_party/dart/CHANGELOG.md
 ../../../third_party/dart/CONTRIBUTING.md

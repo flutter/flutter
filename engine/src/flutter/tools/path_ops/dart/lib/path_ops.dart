@@ -203,7 +203,7 @@ class Path implements PathProxy {
     _updatePathData();
     final int count = _pathData!.ref.verb_count;
     return List<PathVerb>.generate(count, (int index) {
-      return PathVerb.values[_pathData!.ref.verbs.elementAt(index).value];
+      return PathVerb.values[_pathData!.ref.verbs[index]];
     }, growable: false);
   }
 
