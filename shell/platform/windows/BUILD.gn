@@ -42,11 +42,6 @@ source_set("flutter_windows_source") {
     "accessibility_bridge_windows.h",
     "angle_surface_manager.cc",
     "angle_surface_manager.h",
-    "compositor.h",
-    "compositor_opengl.cc",
-    "compositor_opengl.h",
-    "compositor_software.cc",
-    "compositor_software.h",
     "cursor_handler.cc",
     "cursor_handler.h",
     "direct_manipulation.cc",
@@ -139,7 +134,6 @@ source_set("flutter_windows_source") {
   deps = [
     ":flutter_windows_headers",
     "//flutter/fml:fml",
-    "//flutter/impeller/renderer/backend/gles",
     "//flutter/shell/platform/common:common_cpp",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
@@ -181,8 +175,6 @@ executable("flutter_windows_unittests") {
   # Common Windows test sources.
   sources = [
     "accessibility_bridge_windows_unittests.cc",
-    "compositor_opengl_unittests.cc",
-    "compositor_software_unittests.cc",
     "cursor_handler_unittests.cc",
     "direct_manipulation_unittests.cc",
     "dpi_utils_unittests.cc",
@@ -243,7 +235,6 @@ executable("flutter_windows_unittests") {
     ":flutter_windows_fixtures",
     ":flutter_windows_headers",
     ":flutter_windows_source",
-    "//flutter/impeller/renderer/backend/gles",
     "//flutter/shell/platform/common:common_cpp",
     "//flutter/shell/platform/common/client_wrapper:client_wrapper",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
