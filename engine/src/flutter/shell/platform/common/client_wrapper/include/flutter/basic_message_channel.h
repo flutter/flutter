@@ -14,6 +14,26 @@
 
 namespace flutter {
 
+namespace internal {
+// Internal helper functions used by BasicMessageChannel and MethodChannel.
+
+// Adjusts the number of messages that will get buffered when sending messages
+// to channels that aren't fully set up yet. For example, the engine isn't
+// running yet or the channel's message handler isn't set up on the Dart side
+// yet.
+void ResizeChannel(BinaryMessenger* messenger, std::string name, int new_size);
+
+// Defines whether the channel should show warning messages when discarding
+// messages due to overflow.
+//
+// When |warns| is false, the channel is expected to overflow and warning
+// messages will not be shown.
+void SetChannelWarnsOnOverflow(BinaryMessenger* messenger,
+                               std::string name,
+                               bool warns);
+
+}  // namespace internal
+
 class EncodableValue;
 
 // A message reply callback.
@@ -99,6 +119,23 @@ class BasicMessageChannel {
       handler(*message, std::move(unencoded_reply));
     };
     messenger_->SetMessageHandler(name_, std::move(binary_handler));
+  }
+
+  // Adjusts the number of messages that will get buffered when sending messages
+  // to channels that aren't fully set up yet. For example, the engine isn't
+  // running yet or the channel's message handler isn't set up on the Dart side
+  // yet.
+  void Resize(int new_size) {
+    internal::ResizeChannel(messenger_, name_, new_size);
+  }
+
+  // Defines whether the channel should show warning messages when discarding
+  // messages due to overflow.
+  //
+  // When |warns| is false, the channel is expected to overflow and warning
+  // messages will not be shown.
+  void SetWarnsOnOverflow(bool warns) {
+    internal::SetChannelWarnsOnOverflow(messenger_, name_, warns);
   }
 
  private:

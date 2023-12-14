@@ -19,6 +19,8 @@
 
 #include "binary_messenger_impl.h"
 #include "include/flutter/engine_method_result.h"
+#include "include/flutter/method_channel.h"
+#include "include/flutter/standard_method_codec.h"
 #include "texture_registrar_impl.h"
 
 namespace flutter {
@@ -160,6 +162,46 @@ void ReplyManager::SendResponseData(const std::vector<uint8_t>* data) {
   size_t message_size = data ? data->size() : 0;
   reply_handler_(message, message_size);
   reply_handler_ = nullptr;
+}
+
+}  // namespace internal
+
+// ========== method_channel.h ==========
+
+namespace {
+
+constexpr char kControlChannelName[] = "dev.flutter/channel-buffers";
+constexpr char kResizeMethod[] = "resize";
+constexpr char kOverflowMethod[] = "overflow";
+
+}  // namespace
+
+namespace internal {
+
+void ResizeChannel(BinaryMessenger* messenger, std::string name, int new_size) {
+  auto control_channel = std::make_unique<MethodChannel<EncodableValue>>(
+      messenger, kControlChannelName, &StandardMethodCodec::GetInstance());
+
+  // The deserialization logic handles only 32 bits values, see
+  // https://github.com/flutter/engine/blob/93e8901490e78c7ba7e319cce4470d9c6478c6dc/lib/ui/channel_buffers.dart#L495.
+  control_channel->InvokeMethod(
+      kResizeMethod, std::make_unique<EncodableValue>(EncodableList{
+                         EncodableValue(name),
+                         EncodableValue(static_cast<int32_t>(new_size)),
+                     }));
+}
+
+void SetChannelWarnsOnOverflow(BinaryMessenger* messenger,
+                               std::string name,
+                               bool warns) {
+  auto control_channel = std::make_unique<MethodChannel<EncodableValue>>(
+      messenger, kControlChannelName, &StandardMethodCodec::GetInstance());
+
+  control_channel->InvokeMethod(kOverflowMethod,
+                                std::make_unique<EncodableValue>(EncodableList{
+                                    EncodableValue(name),
+                                    EncodableValue(!warns),
+                                }));
 }
 
 }  // namespace internal
