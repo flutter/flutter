@@ -207,7 +207,7 @@ void main() {
   });
 
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'strawberry',
       treeShakeIcons: true,
       trackWidgetCreation: true,
       dartDefines: <String>['foo=2', 'bar=2'],
@@ -220,7 +220,7 @@ void main() {
       packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
-      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz'],
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -235,6 +235,7 @@ void main() {
       'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
       'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
+      'FLAVOR': 'strawberry',
     });
   });
 
