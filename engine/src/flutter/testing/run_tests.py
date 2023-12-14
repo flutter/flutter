@@ -39,7 +39,7 @@ FONTS_DIR = os.path.join(
     BUILDROOT_DIR, 'flutter', 'third_party', 'txt', 'third_party', 'fonts'
 )
 ROBOTO_FONT_PATH = os.path.join(FONTS_DIR, 'Roboto-Regular.ttf')
-FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font-subset')
+FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
 ENCODING = 'UTF-8'
 

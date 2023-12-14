@@ -103,7 +103,7 @@
                     "flutter/build/archives:embedder",
                     "flutter/build/archives:flutter_patched_sdk",
                     "flutter/build/dart:copy_dart_sdk",
-                    "flutter/tools/font-subset"
+                    "flutter/tools/font_subset"
                 ]
             },
             "tests": [

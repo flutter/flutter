@@ -21,7 +21,7 @@
             "ninja": {
                 "config": "host_debug_unopt",
                 "targets": [
-                    "flutter/tools/font-subset",
+                    "flutter/tools/font_subset",
                     "flutter:unittests",
                     "flutter/build/dart:copy_dart_sdk",
                     "flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",

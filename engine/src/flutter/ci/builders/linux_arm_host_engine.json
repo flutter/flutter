@@ -70,7 +70,7 @@
                 "targets": [
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:dart_sdk_archive",
-                    "flutter/tools/font-subset",
+                    "flutter/tools/font_subset",
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
             }

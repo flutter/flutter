@@ -35,7 +35,7 @@ generated_file("font_entitlement_config") {
   deps = [ ":_font-subset" ]
 }
 
-zip_bundle("font-subset") {
+zip_bundle("font_subset") {
   if (is_mac) {
     # Mac artifacts sometimes use mac and sometimes darwin. Standardizing the
     # names will require changes in the list of artifacts the tool is downloading.
