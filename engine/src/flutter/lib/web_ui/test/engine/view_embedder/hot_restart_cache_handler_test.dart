@@ -13,10 +13,10 @@ import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/view_embedder/hot_restart_cache_handler.dart';
 
 @JS('window.__flutterState')
-external JSArray? get _jsHotRestartStore;
+external JSArray<JSAny?>? get _jsHotRestartStore;
 
 @JS('window.__flutterState')
-external set _jsHotRestartStore(JSArray? nodes);
+external set _jsHotRestartStore(JSArray<JSAny?>? nodes);
 
 void main() {
   internalBootstrapBrowserTest(() => doTests);
