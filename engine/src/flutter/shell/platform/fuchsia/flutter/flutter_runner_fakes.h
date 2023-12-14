@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
-#define SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
 
 #include <fuchsia/accessibility/semantics/cpp/fidl.h>
 
@@ -137,4 +137,4 @@ class MockSemanticsManager
 
 }  // namespace flutter_runner_test
 
-#endif  // SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLUTTER_RUNNER_FAKES_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
-#define SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
 
 #include <memory>
 #include <string>
@@ -188,4 +188,4 @@ class PlatformViewAndroid final : public PlatformView {
 };
 }  // namespace flutter
 
-#endif  // SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_

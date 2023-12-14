@@ -7,8 +7,8 @@
 #include "flutter/common/settings.h"
 #include "flutter/fml/command_line.h"
 
-#ifndef SHELL_COMMON_SWITCHES_H_
-#define SHELL_COMMON_SWITCHES_H_
+#ifndef FLUTTER_SHELL_COMMON_SWITCHES_H_
+#define FLUTTER_SHELL_COMMON_SWITCHES_H_
 
 namespace flutter {
 
@@ -304,4 +304,4 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line);
 
 }  // namespace flutter
 
-#endif  // SHELL_COMMON_SWITCHES_H_
+#endif  // FLUTTER_SHELL_COMMON_SWITCHES_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_ENGINE_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_ENGINE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ENGINE_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ENGINE_H_
 
 #include <optional>
 
@@ -153,4 +153,4 @@ class Engine final : public fuchsia::memorypressure::Watcher {
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_ENGINE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_ENGINE_H_

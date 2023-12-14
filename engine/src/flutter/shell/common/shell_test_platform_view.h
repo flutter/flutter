@@ -66,4 +66,4 @@ class ShellTestPlatformViewBuilder {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_GL_H_
+#endif  // FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_H_

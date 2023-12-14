@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_VULKAN_SURFACE_PRODUCER_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_VULKAN_SURFACE_PRODUCER_H_
 
 #include <lib/async/cpp/time.h>
 #include <lib/async/default.h>
@@ -83,3 +84,5 @@ class VulkanSurfaceProducer final : public SurfaceProducer,
 };
 
 }  // namespace flutter_runner
+
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_VULKAN_SURFACE_PRODUCER_H_

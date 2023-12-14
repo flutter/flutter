@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_GPU_GPU_SURFACE_GL_SKIA_H_
-#define SHELL_GPU_GPU_SURFACE_GL_SKIA_H_
+#ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_GL_SKIA_H_
+#define FLUTTER_SHELL_GPU_GPU_SURFACE_GL_SKIA_H_
 
 #include <functional>
 #include <memory>
@@ -88,4 +88,4 @@ class GPUSurfaceGLSkia : public Surface {
 
 }  // namespace flutter
 
-#endif  // SHELL_GPU_GPU_SURFACE_GL_SKIA_H_
+#endif  // FLUTTER_SHELL_GPU_GPU_SURFACE_GL_SKIA_H_

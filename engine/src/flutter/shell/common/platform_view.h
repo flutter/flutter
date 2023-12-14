@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_PLATFORM_VIEW_H_
-#define COMMON_PLATFORM_VIEW_H_
+#ifndef FLUTTER_SHELL_COMMON_PLATFORM_VIEW_H_
+#define FLUTTER_SHELL_COMMON_PLATFORM_VIEW_H_
 
 #include <functional>
 #include <memory>
@@ -881,4 +881,4 @@ class PlatformView {
 
 }  // namespace flutter
 
-#endif  // COMMON_PLATFORM_VIEW_H_
+#endif  // FLUTTER_SHELL_COMMON_PLATFORM_VIEW_H_

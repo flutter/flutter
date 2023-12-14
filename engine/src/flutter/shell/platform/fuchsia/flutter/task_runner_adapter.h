@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_TASK_RUNNER_ADAPTER_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_TASK_RUNNER_ADAPTER_H_
 
 #include <lib/async/dispatcher.h>
 
@@ -14,3 +15,5 @@ fml::RefPtr<fml::TaskRunner> CreateFMLTaskRunner(
     async_dispatcher_t* dispatcher);
 
 }  // namespace flutter_runner
+
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_TASK_RUNNER_ADAPTER_H_

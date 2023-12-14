@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_KEY_CODE_MAP_INTERNAL_H_
-#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_KEY_CODE_MAP_INTERNAL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_KEYCODEMAP_INTERNAL_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_KEYCODEMAP_INTERNAL_H_
 
 #import <UIKit/UIKit.h>
 #include <map>
@@ -128,4 +128,4 @@ extern const std::map<ModifierFlag, ModifierFlag> anyModifierToLeft;
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern const std::set<uint32_t> functionKeyCodes;
 
-#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_KEY_CODE_MAP_INTERNAL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_KEYCODEMAP_INTERNAL_H_

@@ -104,5 +104,5 @@ kern_return_t IOServiceGetMatchingServices(mach_port_t master,
 #endif  // __cplusplus
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_IOKIT_H_
-#endif  // defined(FLUTTER_RUNTIME_MODE_DEBUG) ||
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_IOKIT_H_
         // defined(FLUTTER_RUNTIME_MODE_PROFILE)

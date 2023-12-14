@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_
-#define FLUTTER_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_
+#ifndef FLUTTER_SHELL_COMMON_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_
+#define FLUTTER_SHELL_COMMON_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/raster_thread_merger.h"
@@ -111,4 +111,4 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_
+#endif  // FLUTTER_SHELL_COMMON_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_

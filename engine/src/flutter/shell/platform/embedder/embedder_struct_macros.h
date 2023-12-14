@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SAFE_ACCESS_H_
-#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SAFE_ACCESS_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_STRUCT_MACROS_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_STRUCT_MACROS_H_
 
 #include <type_traits>
 
@@ -29,4 +29,4 @@
 #define SAFE_EXISTS_ONE_OF(pointer, member1, member2) \
   (SAFE_EXISTS(pointer, member1) != SAFE_EXISTS(pointer, member2))
 
-#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SAFE_ACCESS_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_STRUCT_MACROS_H_

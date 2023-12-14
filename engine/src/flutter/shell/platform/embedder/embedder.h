@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_EMBEDDER_H_
-#define FLUTTER_EMBEDDER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -3142,4 +3142,4 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
 }  // extern "C"
 #endif
 
-#endif  // FLUTTER_EMBEDDER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_H_

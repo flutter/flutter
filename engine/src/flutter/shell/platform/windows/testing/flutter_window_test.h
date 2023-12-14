@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_WIN32_FLUTTER_WINDOW_TEST_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_WIN32_FLUTTER_WINDOW_TEST_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_FLUTTER_WINDOW_TEST_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_FLUTTER_WINDOW_TEST_H_
 
 #include "flutter/shell/platform/windows/flutter_window.h"
 
@@ -25,4 +25,4 @@ class FlutterWindowTest : public FlutterWindow {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_WIN32_FLUTTER_WINDOW_TEST_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_FLUTTER_WINDOW_TEST_H_

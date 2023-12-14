@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SURFACE_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SURFACE_H_
 
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
@@ -43,3 +44,5 @@ class Surface final : public flutter::Surface {
 };
 
 }  // namespace flutter_runner
+
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_SURFACE_H_
