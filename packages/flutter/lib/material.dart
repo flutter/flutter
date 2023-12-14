@@ -54,6 +54,7 @@ export 'src/material/chip_theme.dart';
 export 'src/material/choice_chip.dart';
 export 'src/material/circle_avatar.dart';
 export 'src/material/color_scheme.dart';
+export 'src/material/colors_scheme.dart';
 export 'src/material/colors.dart';
 export 'src/material/constants.dart';
 export 'src/material/curves.dart';
