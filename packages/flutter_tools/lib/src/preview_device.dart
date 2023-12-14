@@ -106,7 +106,7 @@ class PreviewDevice extends Device {
        _fileSystem = fileSystem,
        _bundleBuilderFactory = builderFactory,
        _artifacts = artifacts,
-       super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.custom);
+       super('preview', ephemeral: false, category: Category.desktop, platformType: PlatformType.windows);
 
   final ProcessManager _processManager;
   final Logger _logger;
