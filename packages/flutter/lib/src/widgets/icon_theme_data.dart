@@ -246,7 +246,7 @@ class IconThemeData with Diagnosticable {
   }
 }
 
-/// A concrete [IconThemeData].
+/// An [IconThemeData] whose properties are always non-null.
 @immutable
 final class ConcreteIconThemeData with Diagnosticable implements IconThemeData {
   const ConcreteIconThemeData._({
@@ -335,9 +335,6 @@ final class ConcreteIconThemeData with Diagnosticable implements IconThemeData {
     );
   }
 
-  /// Returns a new icon theme that matches this icon theme but with some values
-  /// replaced by the non-null parameters of the given icon theme. If the given
-  /// icon theme is null, returns this icon theme.
   @override
   ConcreteIconThemeData merge(IconThemeData? other) {
     if (other == null) {
