@@ -60,11 +60,7 @@ plugins.each { name, path ->
       '--verbose',
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter build apk:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
 
     final String apkPath = fileSystem.path.join(
       workingDirectory, 'build', 'app', 'outputs', 'flutter-apk', 'app-debug.apk');
