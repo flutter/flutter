@@ -11851,11 +11851,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
-            child: Scaffold(
-              body: Center(
-                child: TextField(
-                  controller: controller,
-                ),
+            child: Center(
+              child: TextField(
+                controller: controller,
               ),
             ),
           ),
@@ -11999,12 +11997,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
-            child: Scaffold(
-              body: Center(
-                child: TextField(
-                  controller: controller,
-                  scrollController: scrollController,
-                ),
+            child: Center(
+              child: TextField(
+                controller: controller,
+                scrollController: scrollController,
               ),
             ),
           ),
