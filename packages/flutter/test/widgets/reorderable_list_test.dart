@@ -1408,6 +1408,7 @@ void main() {
   );
 
   testWidgetsWithLeakTracking('Tests the correctness of the drop animation in various scenarios', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138994
     late Size screenSize;
     final List<double> itemSizes = <double>[20, 50, 30, 80, 100, 30];
     Future<void> pumpFor(bool reverse, Axis scrollDirection) async {
