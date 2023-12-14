@@ -1199,6 +1199,30 @@ void main() {
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
     semantics.dispose();
   });
+
+  testWidgetsWithLeakTracking('Check SearchBar opacity when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchBar(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchBarFinder = find.byType(SearchBar);
+    expect(searchBarFinder, findsOneWidget);
+    final Finder opacityFinder = find.descendant(
+      of: searchBarFinder,
+      matching: find.byType(Opacity),
+    );
+    expect(opacityFinder, findsOneWidget);
+    final Opacity opacityWidget = tester.widget<Opacity>(opacityFinder);
+    expect(opacityWidget.opacity, 0.38);
+  });
 }
 
 class TestHomePage extends StatelessWidget {
