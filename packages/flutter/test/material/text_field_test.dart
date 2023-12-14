@@ -17527,7 +17527,7 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+  testWidgets('text selection toolbar is hidden on tap down on desktop platforms', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
@@ -17571,7 +17571,7 @@ void main() {
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
   },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
+    variant: TargetPlatformVariant.all(excluding: TargetPlatformVariant.mobile().values),
   );
 
   testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
