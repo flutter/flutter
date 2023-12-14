@@ -1094,15 +1094,6 @@ class FlutterPlugin implements Plugin<Project> {
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
                 isAndroidLibrary isAndroidLibraryValue
-                doLast {
-                    project.exec {
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
-                        } else {
-                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
-                        }
-                    }
-                }
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -1129,6 +1120,22 @@ class FlutterPlugin implements Plugin<Project> {
             ) {
                 dependsOn compileTask
                 with compileTask.assets
+                def currentGradleVersion = project.getGradle().getGradleVersion()
+
+                // See https://docs.gradle.org/current/javadoc/org/gradle/api/file/ConfigurableFilePermissions.html
+                // See https://github.com/flutter/flutter/pull/50047
+                if (compareVersionStrings(currentGradleVersion, '8.3') >= 0 ) {
+                    filePermissions {
+                        user {
+                            read = true
+                            write = true
+                        }
+                    }
+                } else {
+                    // See https://docs.gradle.org/8.2/dsl/org.gradle.api.tasks.Copy.html#org.gradle.api.tasks.Copy:fileMode
+                    // See https://github.com/flutter/flutter/pull/50047
+                    fileMode 0644
+                }
                 if (isUsedAsSubproject) {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
@@ -1271,6 +1278,28 @@ class FlutterPlugin implements Plugin<Project> {
         }
         configurePlugins()
         detectLowCompileSdkVersionOrNdkVersion()
+    }
+
+    // compareTo implementation of version strings in the format of ints and periods
+    // Requires non null objects.
+    static int compareVersionStrings(String firstString, String secondString) {
+        List firstVersion = firstString.tokenize('.')
+        List secondVersion = secondString.tokenize('.')
+
+        def commonIndices = Math.min(firstVersion.size(), secondVersion.size())
+
+        for (int i = 0; i < commonIndices; i++) {
+            def firstAtIndex = firstVersion[i].toInteger()
+            def secondAtIndex = secondVersion[i].toInteger()
+
+            if (firstAtIndex != secondAtIndex) {
+                // <=> in groovy delegates to compareTo
+                return firstAtIndex <=> secondAtIndex
+            }
+        }
+
+        // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
+        return firstVersion.size() <=> secondVersion.size()
     }
 }
 
