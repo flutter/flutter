@@ -1512,6 +1512,26 @@ void main() {
     expect(textFieldWidget.dragStartBehavior, dragStartBehavior);
   });
 
+  testWidgetsWithLeakTracking('Passes onTapAlwaysCalled to onTapAlwaysCalled TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onTapAlwaysCalled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.onTapAlwaysCalled, isTrue);
+  });
+
   testWidgetsWithLeakTracking('Error color for cursor while validating', (WidgetTester tester) async {
     const Color themeErrorColor = Color(0xff111111);
     const Color errorStyleColor = Color(0xff777777);
