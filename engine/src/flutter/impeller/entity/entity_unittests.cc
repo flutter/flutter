@@ -1088,7 +1088,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     switch (selected_pass_variation) {
       case 0:
         blur = std::make_shared<GaussianBlurFilterContents>(
-            blur_sigma_x.sigma, tile_modes[selected_tile_mode]);
+            blur_sigma_x.sigma, blur_sigma_y.sigma,
+            tile_modes[selected_tile_mode]);
         blur->SetInputs({FilterInput::Make(input)});
         break;
       case 1:
