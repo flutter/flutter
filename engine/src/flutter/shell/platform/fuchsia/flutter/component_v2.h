@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_V2_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_V2_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_COMPONENT_V2_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_COMPONENT_V2_H_
 
 #include <array>
 #include <memory>
@@ -143,4 +143,4 @@ class ComponentV2 final
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_COMPONENT_V2_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_COMPONENT_V2_H_

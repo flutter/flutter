@@ -98,4 +98,4 @@ class EmbedderTestCompositor {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_COMPOSITOR_GL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_COMPOSITOR_H_

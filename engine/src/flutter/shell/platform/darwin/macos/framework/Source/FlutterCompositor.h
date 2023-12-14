@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_COMPOSITOR_H_
-#define FLUTTER_COMPOSITOR_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERCOMPOSITOR_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERCOMPOSITOR_H_
 
 #include <functional>
 #include <list>
@@ -79,4 +79,4 @@ class FlutterCompositor {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_COMPOSITOR_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERCOMPOSITOR_H_

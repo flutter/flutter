@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_MOUSE_CURSOR_LINUX_FL_MOUSE_CURSOR_PLUGIN_H_
-#define FLUTTER_SHELL_MOUSE_CURSOR_LINUX_FL_MOUSE_CURSOR_PLUGIN_H_
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_MOUSE_CURSOR_PLUGIN_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_FL_MOUSE_CURSOR_PLUGIN_H_
 
 #include <gdk/gdk.h>
 
@@ -40,4 +40,4 @@ FlMouseCursorPlugin* fl_mouse_cursor_plugin_new(FlBinaryMessenger* messenger,
 
 G_END_DECLS
 
-#endif  // FLUTTER_SHELL_MOUSE_CURSOR_LINUX_FL_MOUSE_CURSOR_PLUGIN_H_
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_MOUSE_CURSOR_PLUGIN_H_

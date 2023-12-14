@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_IOS_PLATFORM_VIEW_IOS_H_
-#define SHELL_PLATFORM_IOS_PLATFORM_VIEW_IOS_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_PLATFORM_VIEW_IOS_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_PLATFORM_VIEW_IOS_H_
 
 #include <memory>
 
@@ -183,4 +183,4 @@ class PlatformViewIOS final : public PlatformView {
 
 }  // namespace flutter
 
-#endif  // SHELL_PLATFORM_IOS_PLATFORM_VIEW_IOS_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_PLATFORM_VIEW_IOS_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef APPS_DART_RUNNER_MAPPED_RESOURCE_H_
-#define APPS_DART_RUNNER_MAPPED_RESOURCE_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_MAPPED_RESOURCE_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_MAPPED_RESOURCE_H_
 
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/fdio/namespace.h>
@@ -105,4 +105,4 @@ class MappedResource {
 
 }  // namespace dart_utils
 
-#endif  // APPS_DART_RUNNER_MAPPED_RESOURCE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_RUNTIME_DART_UTILS_MAPPED_RESOURCE_H_

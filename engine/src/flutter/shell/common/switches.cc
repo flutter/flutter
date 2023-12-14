@@ -17,7 +17,7 @@
 // Include once for the default enum definition.
 #include "flutter/shell/common/switches.h"
 
-#undef SHELL_COMMON_SWITCHES_H_
+#undef FLUTTER_SHELL_COMMON_SWITCHES_H_
 
 struct SwitchDesc {
   flutter::Switch sw;

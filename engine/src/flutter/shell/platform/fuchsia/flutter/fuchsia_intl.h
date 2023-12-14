@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FUCHSIA_INTL_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FUCHSIA_INTL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FUCHSIA_INTL_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FUCHSIA_INTL_H_
 
 #include <fuchsia/intl/cpp/fidl.h>
 #include "flutter/fml/mapping.h"
@@ -21,4 +21,4 @@ fml::MallocMapping MakeLocalizationPlatformMessageData(
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FUCHSIA_INTL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FUCHSIA_INTL_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_TESTS_FAKES_FOCUSER_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_TESTS_FAKES_FOCUSER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_TESTS_FAKES_FOCUSER_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_TESTS_FAKES_FOCUSER_H_
 
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl_test_base.h>
@@ -48,4 +48,4 @@ class FakeFocuser : public fuchsia::ui::views::testing::Focuser_TestBase {
 
 }  // namespace flutter_runner::testing
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_TESTS_FAKES_FOCUSER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_TESTS_FAKES_FOCUSER_H_

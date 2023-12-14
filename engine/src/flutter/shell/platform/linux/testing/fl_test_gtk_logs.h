@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_TESTING_TEST_GTK_LOGS_H_
-#define FLUTTER_TESTING_TEST_GTK_LOGS_H_
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_TESTING_FL_TEST_GTK_LOGS_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_TESTING_FL_TEST_GTK_LOGS_H_
 
 #include <gtk/gtk.h>
 
@@ -46,4 +46,4 @@ GLogLevelFlags fl_get_received_gtk_log_levels();
 
 }  // namespace testing
 }  // namespace flutter
-#endif  // FLUTTER_TESTING_TEST_GTK_LOGS_H_
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_TESTING_FL_TEST_GTK_LOGS_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef BASE_WIN_WINDOWSX_SHIM_H_
-#define BASE_WIN_WINDOWSX_SHIM_H_
+#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOWSX_SHIM_H_
+#define FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOWSX_SHIM_H_
 
 // The Win32 platform header <windowsx.h> contains some macros for
 // common function names. To work around that, windowsx.h is not to be
@@ -25,4 +25,4 @@
                        // WS_MAXIMIZE is set in the GetWindowStyle return
                        // value.
 
-#endif  // BASE_WIN_WINDOWSX_SHIM_H_
+#endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOWSX_SHIM_H_
