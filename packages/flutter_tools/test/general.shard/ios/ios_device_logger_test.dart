@@ -1001,7 +1001,7 @@ class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
   Stream<String> logLines = const Stream<String>.empty();
 
   @override
-  void detach() {
+  Future<void> detach() async {
     detached = true;
   }
 }
