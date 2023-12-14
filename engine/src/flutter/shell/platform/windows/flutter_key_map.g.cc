@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_KEY_MAP_H_
-#define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_KEY_MAP_H_
-
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 
 #include <map>
@@ -335,5 +332,3 @@ const uint64_t KeyboardKeyEmbedderHandler::unicodePlane = 0x00000000000;
 const uint64_t KeyboardKeyEmbedderHandler::windowsPlane = 0x01600000000;
 
 }  // namespace flutter
-
-#endif
