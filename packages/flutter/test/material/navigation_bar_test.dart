@@ -1570,7 +1570,7 @@ class _CustomDestination extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon),
-          if(info.selectedIndex == info.index) Text('label ${info.index + 1}/${info.totalNumberOfDestinations}')
+          if (info.selectedIndex == info.index) Text('label ${info.index + 1}/${info.totalNumberOfDestinations}')
         ],
       ),
     );
