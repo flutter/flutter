@@ -23,9 +23,12 @@ struct Switches {
   std::vector<IncludeDir> include_directories = {};
   std::string source_file_name = "";
   SourceType input_type = SourceType::kUnknown;
+  /// The raw shader file output by the compiler. For --iplr and
+  /// --shader-bundle modes, this is used as the filename for the output
+  /// flatbuffer output.
   std::string sl_file_name = "";
   bool iplr = false;
-  std::string iplr_bundle = "";
+  std::string shader_bundle = "";
   std::string spirv_file_name = "";
   std::string reflection_json_name = "";
   std::string reflection_header_name = "";

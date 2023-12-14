@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -11,6 +12,7 @@
 #include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
+#include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 
 namespace flutter {
 namespace gpu {
@@ -28,6 +30,9 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
 
   static fml::RefPtr<ShaderLibrary> MakeFromShaders(ShaderMap shaders);
 
+  static fml::RefPtr<ShaderLibrary> MakeFromFlatbuffer(
+      std::shared_ptr<fml::Mapping> payload);
+
   /// Sets a return override for `MakeFromAsset` for testing purposes.
   static void SetOverride(fml::RefPtr<ShaderLibrary> override_shader_library);
 
@@ -42,9 +47,11 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
   /// this library.
   static fml::RefPtr<ShaderLibrary> override_shader_library_;
 
+  std::shared_ptr<fml::Mapping> payload_;
   ShaderMap shaders_;
 
-  explicit ShaderLibrary(ShaderMap shaders);
+  explicit ShaderLibrary(std::shared_ptr<fml::Mapping> payload,
+                         ShaderMap shaders);
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibrary);
 };

@@ -4933,6 +4933,8 @@ ORIGIN: ../../../flutter/impeller/compiler/reflector.cc + ../../../flutter/LICEN
 ORIGIN: ../../../flutter/impeller/compiler/reflector.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/runtime_stage_data.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/runtime_stage_data.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/shader_bundle.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/shader_bundle.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/shader_lib/flutter/runtime_effect.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/shader_lib/impeller/blending.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/shader_lib/impeller/branching.glsl + ../../../flutter/LICENSE
@@ -5475,6 +5477,7 @@ ORIGIN: ../../../flutter/impeller/runtime_stage/runtime_stage.fbs + ../../../flu
 ORIGIN: ../../../flutter/impeller/runtime_stage/runtime_stage.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/runtime_stage/runtime_stage_types.fbs + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/animation/animation.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/animation/animation.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/scene/animation/animation_clip.cc + ../../../flutter/LICENSE
@@ -5529,6 +5532,7 @@ ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_main.cc + ../../
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_types.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_writer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/shader_archive/shader_archive_writer.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/shader_bundle/shader_bundle.fbs + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/c/tessellator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart + ../../../flutter/LICENSE
@@ -7741,6 +7745,8 @@ FILE: ../../../flutter/impeller/compiler/reflector.cc
 FILE: ../../../flutter/impeller/compiler/reflector.h
 FILE: ../../../flutter/impeller/compiler/runtime_stage_data.cc
 FILE: ../../../flutter/impeller/compiler/runtime_stage_data.h
+FILE: ../../../flutter/impeller/compiler/shader_bundle.cc
+FILE: ../../../flutter/impeller/compiler/shader_bundle.h
 FILE: ../../../flutter/impeller/compiler/shader_lib/flutter/runtime_effect.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/blending.glsl
 FILE: ../../../flutter/impeller/compiler/shader_lib/impeller/branching.glsl
@@ -8284,6 +8290,7 @@ FILE: ../../../flutter/impeller/runtime_stage/runtime_stage.fbs
 FILE: ../../../flutter/impeller/runtime_stage/runtime_stage.h
 FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.cc
 FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_playground.h
+FILE: ../../../flutter/impeller/runtime_stage/runtime_stage_types.fbs
 FILE: ../../../flutter/impeller/scene/animation/animation.cc
 FILE: ../../../flutter/impeller/scene/animation/animation.h
 FILE: ../../../flutter/impeller/scene/animation/animation_clip.cc
@@ -8338,6 +8345,7 @@ FILE: ../../../flutter/impeller/shader_archive/shader_archive_main.cc
 FILE: ../../../flutter/impeller/shader_archive/shader_archive_types.h
 FILE: ../../../flutter/impeller/shader_archive/shader_archive_writer.cc
 FILE: ../../../flutter/impeller/shader_archive/shader_archive_writer.h
+FILE: ../../../flutter/impeller/shader_bundle/shader_bundle.fbs
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.cc
 FILE: ../../../flutter/impeller/tessellator/c/tessellator.h
 FILE: ../../../flutter/impeller/tessellator/dart/lib/tessellator.dart

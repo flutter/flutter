@@ -61,8 +61,10 @@ source_set("gpu") {
     ]
   }
   deps = [
+    "//flutter/assets",
     "//flutter/impeller",
     "//flutter/impeller/display_list:skia_conversions",
+    "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
     "//flutter/lib/ui",
     "//flutter/third_party/tonic",
   ]

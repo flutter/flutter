@@ -12,12 +12,15 @@
 #include "flutter/fml/mapping.h"
 
 #include "flutter/impeller/core/runtime_types.h"
+#include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
 
 class RuntimeStage {
  public:
   explicit RuntimeStage(std::shared_ptr<fml::Mapping> payload);
+
+  explicit RuntimeStage(const fb::RuntimeStage* runtime_stage);
 
   ~RuntimeStage();
   RuntimeStage(RuntimeStage&&);
@@ -50,6 +53,8 @@ class RuntimeStage {
   std::vector<RuntimeUniformDescription> uniforms_;
   bool is_valid_ = false;
   bool is_dirty_ = true;
+
+  void Setup(const fb::RuntimeStage* runtime_stage);
 
   RuntimeStage(const RuntimeStage&) = delete;
 
