@@ -1494,9 +1494,10 @@ class TextPainter {
       ? boxes
       : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
   }
+
   /// Returns the [GlyphInfo] of the glyph closest to the given `offset` in the
-  /// paragraph coordinate system, or null if if the text is empty, or is
-  /// entirely clipped or ellipsized away.
+  /// paragraph coordinate system, or null if the text is empty, or is entirely
+  /// clipped or ellipsized away.
   ///
   /// This method first finds the line closest to `offset.dy`, and then returns
   /// the [GlyphInfo] of the closest glyph(s) within that line.

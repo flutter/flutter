@@ -627,7 +627,6 @@ void hitsText(HitTestResult hitTestResult, String text) {
       expect(span, isA<TextSpan>());
       expect((span as TextSpan).text, text);
     case final HitTestTarget target:
-      // This expect always fails.
-      expect(target, anyOf(isA<TextSpan>(), isA<RenderParagraph>()));
+      fail('$target is not a TextSpan or a RenderParagraph.');
   }
 }

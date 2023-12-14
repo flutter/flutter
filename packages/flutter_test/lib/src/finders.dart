@@ -706,8 +706,8 @@ class CommonSemanticsFinders {
 final class CommonTextRangeFinders {
   const CommonTextRangeFinders._();
 
-  /// Finds all occurrances of the given `substring` in the static text widgets
-  /// and returns the [TextRange]s.
+  /// Finds all non-overlapping occurrances of the given `substring` in the
+  /// static text widgets and returns the [TextRange]s.
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// static text inside widgets that are [Offstage], or that are from inactive
@@ -715,7 +715,12 @@ final class CommonTextRangeFinders {
   ///
   /// If the `descendentOf` argument is non-null, this method only searches in
   /// the descendents of that parameter for the given substring.
-  FinderBase<TextRangeContext> ofSubstring(String substring, { bool skipOffstage = true, FinderBase<Element>? descendentOf, }) {
+  ///
+  /// This finder uses the [Pattern.allMatches] method to match the substring in
+  /// the text. After finding a matching substring in the text, the method
+  /// continues the search from the end of the match, thus skipping overlapping
+  /// occurrances of the substring.
+  FinderBase<TextRangeContext> ofSubstring(String substring, { bool skipOffstage = true, FinderBase<Element>? descendentOf }) {
     final Finder elementFinder = descendentOf == null
       ? _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage)
       : _DescendantWidgetFinder(descendentOf, _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage), matchRoot: true, skipOffstage: skipOffstage);
