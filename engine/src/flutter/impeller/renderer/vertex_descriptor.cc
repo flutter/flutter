@@ -25,6 +25,13 @@ void VertexDescriptor::SetStageInputs(
   }
 }
 
+void VertexDescriptor::SetStageInputs(
+    const std::vector<ShaderStageIOSlot>& inputs,
+    const std::vector<ShaderStageBufferLayout>& layout) {
+  inputs_.insert(inputs_.end(), inputs.begin(), inputs.end());
+  layouts_.insert(layouts_.end(), layout.begin(), layout.end());
+}
+
 void VertexDescriptor::RegisterDescriptorSetLayouts(
     const DescriptorSetLayout desc_set_layout[],
     size_t count) {

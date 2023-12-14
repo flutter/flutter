@@ -18,7 +18,6 @@
 #include "flutter/testing/testing.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/shader_types.h"
-#include "impeller/fixtures/flutter_gpu_unlit.vert.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_descriptor.h"
@@ -30,37 +29,11 @@
 namespace impeller {
 namespace testing {
 
-// This helper is for piggybacking on the RuntimeStage infrastructure for
-// testing shaders/pipelines before the full shader bundle importer is finished.
-static fml::RefPtr<flutter::gpu::Shader> OpenRuntimeStageAsShader(
-    const std::string& fixture_name,
-    std::shared_ptr<VertexDescriptor> vertex_desc) {
-  auto fixture = flutter::testing::OpenFixtureAsMapping(fixture_name);
-  assert(fixture);
-  RuntimeStage stage(std::move(fixture));
-  return flutter::gpu::Shader::Make(
-      stage.GetEntrypoint(), ToShaderStage(stage.GetShaderStage()),
-      stage.GetCodeMapping(), stage.GetUniforms(), std::move(vertex_desc));
-}
-
 static void InstantiateTestShaderLibrary() {
-  flutter::gpu::ShaderLibrary::ShaderMap shaders;
-  auto vertex_desc = std::make_shared<VertexDescriptor>();
-  vertex_desc->SetStageInputs(
-      // TODO(bdero): The stage inputs need to be packed into the flatbuffer.
-      FlutterGpuUnlitVertexShader::kAllShaderStageInputs,
-      // TODO(bdero): Make the vertex attribute layout fully configurable.
-      //              When encoding commands, allow for specifying a stride,
-      //              type, and vertex buffer slot for each attribute.
-      //              Provide a way to lookup vertex attribute slot locations by
-      //              name from the shader.
-      FlutterGpuUnlitVertexShader::kInterleavedBufferLayout);
-  shaders["UnlitVertex"] = OpenRuntimeStageAsShader(
-      "flutter_gpu_unlit.vert.iplr", std::move(vertex_desc));
-  shaders["UnlitFragment"] =
-      OpenRuntimeStageAsShader("flutter_gpu_unlit.frag.iplr", nullptr);
+  auto fixture =
+      flutter::testing::OpenFixtureAsMapping("playground.shaderbundle");
   auto library =
-      flutter::gpu::ShaderLibrary::MakeFromShaders(std::move(shaders));
+      flutter::gpu::ShaderLibrary::MakeFromFlatbuffer(std::move(fixture));
   flutter::gpu::ShaderLibrary::SetOverride(library);
 }
 

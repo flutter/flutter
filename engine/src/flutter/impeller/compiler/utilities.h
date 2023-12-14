@@ -12,6 +12,9 @@
 namespace impeller {
 namespace compiler {
 
+/// @brief  Sets the file access mode of the file at path 'p' to 0644.
+bool SetPermissiveAccess(const std::filesystem::path& p);
+
 /// @brief  Converts a native format path to a utf8 string.
 ///
 ///         This utility uses `path::u8string()` to convert native paths to
@@ -22,7 +25,9 @@ std::string Utf8FromPath(const std::filesystem::path& path);
 
 std::string InferShaderNameFromPath(std::string_view path);
 
-std::string ConvertToCamelCase(std::string_view string);
+std::string ToCamelCase(std::string_view string);
+
+std::string ToLowerCase(std::string_view string);
 
 /// @brief  Ensure that the entrypoint name is a valid identifier in the target
 ///         language.

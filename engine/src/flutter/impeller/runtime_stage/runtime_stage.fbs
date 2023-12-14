@@ -2,55 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+include "runtime_stage_types.fbs";
+
 namespace impeller.fb;
-
-enum Stage:byte {
-  kVertex,
-  kFragment,
-  kCompute,
-}
-
-enum TargetPlatform:byte {
-  kMetal,
-  kOpenGLES,
-  kSkSL,
-  kVulkan,
-}
-
-enum UniformDataType:uint32 {
-  kBoolean,
-  kSignedByte,
-  kUnsignedByte,
-  kSignedShort,
-  kUnsignedShort,
-  kSignedInt,
-  kUnsignedInt,
-  kSignedInt64,
-  kUnsignedInt64,
-  kHalfFloat,
-  kFloat,
-  kDouble,
-  kSampledImage,
-}
-
-table UniformDescription {
-  name: string;
-  location: uint64;
-  type: UniformDataType;
-  bit_width: uint64;
-  rows: uint64;
-  columns: uint64;
-  array_elements: uint64;
-}
-
-table RuntimeStage {
-  stage: Stage;
-  target_platform: TargetPlatform;
-  entrypoint: string;
-  uniforms: [UniformDescription];
-  shader: [ubyte];
-  sksl: [ubyte];
-}
 
 root_type RuntimeStage;
 file_identifier "IPLR";

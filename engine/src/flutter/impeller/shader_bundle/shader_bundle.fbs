@@ -1,0 +1,19 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+include "../runtime_stage/runtime_stage_types.fbs";
+
+namespace impeller.fb;
+
+table Shader {
+  name: string;
+  shader: RuntimeStage;
+}
+
+table ShaderBundle {
+  shaders: [Shader];
+}
+
+root_type ShaderBundle;
+file_identifier "IPSB";

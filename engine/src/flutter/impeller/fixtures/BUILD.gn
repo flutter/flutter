@@ -76,6 +76,10 @@ test_fixtures("file_fixtures") {
     "blue_noise.png",
     "boston.jpg",
     "embarcadero.jpg",
+    "flutter_gpu_texture.frag",
+    "flutter_gpu_texture.vert",
+    "flutter_gpu_unlit.frag",
+    "flutter_gpu_unlit.vert",
     "flutter_logo_baked.glb",
     "kalimba.jpg",
     "multiple_stages.hlsl",
@@ -121,17 +125,19 @@ impellerc("flutter_gpu_shaders") {
     "flutter_gpu_texture.frag",
     "flutter_gpu_texture.vert",
   ]
-  sl_file_extension = "iplr"
   shader_target_flag = "--runtime-stage-metal"
-  iplr = true
-  iplr_bundle = "temporary"
+  shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"../../flutter/impeller/fixtures/flutter_gpu_texture.vert\"}}"
+  shader_bundle_output = "playground.shaderbundle"
 }
 
 test_fixtures("flutter_gpu_fixtures") {
   dart_main = "dart_tests.dart"
 
-  fixtures =
-      filter_include(get_target_outputs(":flutter_gpu_shaders"), [ "*.iplr" ])
+  fixtures = filter_include(get_target_outputs(":flutter_gpu_shaders"),
+                            [
+                              "*.iplr",
+                              "*.shaderbundle",
+                            ])
 
   deps = [ ":flutter_gpu_shaders" ]
 }

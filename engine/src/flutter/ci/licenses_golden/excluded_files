@@ -133,6 +133,7 @@
 ../../../flutter/impeller/base/base_unittests.cc
 ../../../flutter/impeller/compiler/README.md
 ../../../flutter/impeller/compiler/compiler_unittests.cc
+../../../flutter/impeller/compiler/shader_bundle_unittests.cc
 ../../../flutter/impeller/compiler/switches_unittests.cc
 ../../../flutter/impeller/core/allocator_unittests.cc
 ../../../flutter/impeller/display_list/dl_unittests.cc

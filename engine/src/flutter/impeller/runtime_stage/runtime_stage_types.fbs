@@ -1,0 +1,84 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+namespace impeller.fb;
+
+enum Stage:byte {
+  kVertex,
+  kFragment,
+  kCompute,
+}
+
+enum TargetPlatform:byte {
+  kMetal,
+  kOpenGLES,
+  kSkSL,
+  kVulkan,
+}
+
+// The subset of impeller::ShaderType that may be used for uniform bindings.
+enum UniformDataType:uint32 {
+  kBoolean,
+  kSignedByte,
+  kUnsignedByte,
+  kSignedShort,
+  kUnsignedShort,
+  kSignedInt,
+  kUnsignedInt,
+  kSignedInt64,
+  kUnsignedInt64,
+  kHalfFloat,
+  kFloat,
+  kDouble,
+  kSampledImage,
+}
+
+table UniformDescription {
+  name: string;
+  location: uint64;
+  type: UniformDataType;
+  bit_width: uint64;
+  rows: uint64;
+  columns: uint64;
+  array_elements: uint64;
+}
+
+// The subset of impeller::ShaderType that may be used for vertex attributes.
+enum InputDataType:uint32 {
+  kBoolean,
+  kSignedByte,
+  kUnsignedByte,
+  kSignedShort,
+  kUnsignedShort,
+  kSignedInt,
+  kUnsignedInt,
+  kSignedInt64,
+  kUnsignedInt64,
+  kFloat,
+  kDouble,
+}
+
+// This contains the same attribute reflection data as
+// impeller::ShaderStageIOSlot.
+table StageInput {
+  name: string;
+  location: uint64;
+  set: uint64;
+  binding: uint64;
+  type: InputDataType;
+  bit_width: uint64;
+  vec_size: uint64;
+  columns: uint64;
+  offset: uint64;
+}
+
+table RuntimeStage {
+  stage: Stage;
+  target_platform: TargetPlatform;
+  entrypoint: string;
+  inputs: [StageInput];
+  uniforms: [UniformDescription];
+  shader: [ubyte];
+  sksl: [ubyte];
+}

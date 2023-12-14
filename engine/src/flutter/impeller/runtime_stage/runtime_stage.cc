@@ -63,7 +63,14 @@ RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
   if (!fb::RuntimeStageBufferHasIdentifier(payload_->GetMapping())) {
     return;
   }
-  auto runtime_stage = fb::GetRuntimeStage(payload_->GetMapping());
+  Setup(fb::GetRuntimeStage(payload_->GetMapping()));
+}
+
+RuntimeStage::RuntimeStage(const fb::RuntimeStage* runtime_stage) {
+  Setup(runtime_stage);
+}
+
+void RuntimeStage::Setup(const fb::RuntimeStage* runtime_stage) {
   if (!runtime_stage) {
     return;
   }
