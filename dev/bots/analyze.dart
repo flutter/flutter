@@ -19,6 +19,7 @@ import 'package:path/path.dart' as path;
 import 'allowlist.dart';
 import 'custom_rules/analyze.dart';
 import 'custom_rules/no_double_clamp.dart';
+import 'custom_rules/no_stop_watches.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
@@ -123,9 +124,6 @@ Future<void> run(List<String> arguments) async {
   printProgress('Goldens...');
   await verifyGoldenTags(flutterPackages);
 
-  printProgress('Prevent flakes from Stopwatches...');
-  await verifyNoStopwatches(flutterPackages);
-
   printProgress('Skip test comments...');
   await verifySkipTestComments(flutterRoot);
 
@@ -175,10 +173,19 @@ Future<void> run(List<String> arguments) async {
     // Only run the private lints when the code is free of type errors. The
     // lints are easier to write when they can assume, for example, there is no
     // inheritance cycles.
-    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp];
+    final List<AnalyzeRule> rules = <AnalyzeRule>[noDoubleClamp, noStopwatches];
     final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
     printProgress('Analyzing code in the framework with the following rules:$ruleNames');
-    await analyzeFrameworkWithRules(flutterRoot, rules);
+    await analyzeWithRules(flutterRoot, rules,
+      includePaths: <String>['packages/flutter/lib'],
+      excludePaths: <String>['packages/flutter/lib/fix_data'],
+    );
+    final List<AnalyzeRule> testRules = <AnalyzeRule>[noStopwatches];
+    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
+    await analyzeWithRules(flutterRoot, testRules,
+      includePaths: <String>['packages/flutter/test'],
+    );
   } else {
     printProgress('Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.');
   }
@@ -531,48 +538,6 @@ Future<void> verifyGoldenTags(String workingDirectory, { int minimumMatches = 20
     foundError(<String>[
       ...errors,
       '${bold}See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter$reset',
-    ]);
-  }
-}
-
-/// Use of Stopwatches can introduce test flakes as the logical time of a
-/// stopwatch can fall out of sync with the mocked time of FakeAsync in testing.
-/// The Clock object provides a safe stopwatch instead, which is paired with
-/// FakeAsync as part of the test binding.
-final RegExp _findStopwatchPattern = RegExp(r'Stopwatch\(\)');
-const String _ignoreStopwatch = '// flutter_ignore: stopwatch (see analyze.dart)';
-const String _ignoreStopwatchForFile = '// flutter_ignore_for_file: stopwatch (see analyze.dart)';
-
-Future<void> verifyNoStopwatches(String workingDirectory, { int minimumMatches = 2000 }) async {
-  final List<String> errors = <String>[];
-  await for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
-    if (file.path.contains('flutter_tool')) {
-      // Skip flutter_tool package.
-      continue;
-    }
-    int lineNumber = 1;
-    final List<String> lines = file.readAsLinesSync();
-    for (final String line in lines) {
-      // If the file is being ignored, skip parsing the rest of the lines.
-      if (line.contains(_ignoreStopwatchForFile)) {
-        break;
-      }
-
-      if (line.contains(_findStopwatchPattern)
-          && !line.contains(_leadingComment)
-          && !line.contains(_ignoreStopwatch)) {
-        // Stopwatch found
-        errors.add('\t${file.path}:$lineNumber');
-      }
-      lineNumber++;
-    }
-  }
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      'Stopwatch use was found in the following files:',
-      ...errors,
-      '${bold}Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.$reset',
-      'A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.'
     ]);
   }
 }
