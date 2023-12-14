@@ -75,5 +75,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/common/common.txt
+    - path: assets/paid/
+      flavors:
+        - paid
+    - path: assets/free/
+      flavors:
+        - free
 
 # PUBSPEC CHECKSUM: 6bd3

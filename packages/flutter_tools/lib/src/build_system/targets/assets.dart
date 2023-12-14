@@ -34,6 +34,7 @@ Future<Depfile> copyAssets(
   BuildMode? buildMode,
   required ShaderTarget shaderTarget,
   List<File> additionalInputs = const <File>[],
+  String? flavor,
 }) async {
   // Check for an SkSL bundle.
   final String? shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
@@ -58,6 +59,7 @@ Future<Depfile> copyAssets(
     packagesPath: environment.projectDir.childFile('.packages').path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
     targetPlatform: targetPlatform,
+    flavor: flavor,
   );
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
@@ -323,6 +325,7 @@ class CopyAssets extends Target {
       output,
       targetPlatform: TargetPlatform.android,
       shaderTarget: ShaderTarget.sksl,
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       depfile,
