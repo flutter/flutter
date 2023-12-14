@@ -765,7 +765,7 @@ class PageTransitionsTheme with Diagnosticable {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    TargetPlatform platform = Theme.of(context).platform;
+    final TargetPlatform platform = Theme.of(context).platform;
 
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? (platform == TargetPlatform.iOS ? const CupertinoPageTransitionsBuilder() : const ZoomPageTransitionsBuilder());
