@@ -54,7 +54,7 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
 const TextStyle _kActionSheetActionStyle = TextStyle(
   fontFamily: 'CupertinoSystemText',
   inherit: false,
-  fontSize: 20.0,
+  fontSize: 17.0,
   fontWeight: FontWeight.w400,
   textBaseline: TextBaseline.alphabetic,
 );
@@ -71,7 +71,7 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 // Generic constants shared between Dialog and ActionSheet.
 const double _kBlurAmount = 20.0;
 const double _kCornerRadius = 14.0;
-const double _kDividerThickness = 1.0;
+const double _kDividerThickness = 0.3;
 
 // Dialog specific constants.
 // iOS dialogs have a normal display width and another display width that is
@@ -87,8 +87,8 @@ const double _kDialogMinButtonFontSize = 10.0;
 const double _kActionSheetEdgeHorizontalPadding = 8.0;
 const double _kActionSheetCancelButtonPadding = 8.0;
 const double _kActionSheetEdgeVerticalPadding = 10.0;
-const double _kActionSheetContentHorizontalPadding = 40.0;
-const double _kActionSheetContentVerticalPadding = 14.0;
+const double _kActionSheetContentHorizontalPadding = 16.0;
+const double _kActionSheetContentVerticalPadding = 12.0;
 const double _kActionSheetButtonHeight = 56.0;
 
 // A translucent color that is painted on top of the blurred backdrop as the
@@ -559,16 +559,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         title: widget.title,
         message: widget.message,
         scrollController: _effectiveMessageScrollController,
-        titlePadding: const EdgeInsets.only(
+        titlePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: _kActionSheetContentVerticalPadding,
+          bottom: widget.message == null ? _kActionSheetContentVerticalPadding : 0.0,
           top: _kActionSheetContentVerticalPadding,
         ),
         messagePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: widget.title == null ? _kActionSheetContentVerticalPadding : 22.0,
+          bottom: _kActionSheetContentVerticalPadding,
           top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
         titleTextStyle: widget.message == null
@@ -577,7 +577,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         messageTextStyle: widget.title == null
             ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
             : _kActionSheetContentStyle,
-        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 8.0),
+        additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 4.0),
       );
       content.add(Flexible(child: titleSection));
     }
@@ -819,7 +819,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoDialog(
-      dividerThickness: _kDividerThickness / MediaQuery.devicePixelRatioOf(context),
+      dividerThickness: _kDividerThickness,
       isInAccessibilityMode: _isInAccessibilityMode(context) && !isActionSheet,
       dividerColor: CupertinoDynamicColor.resolve(dividerColor, context),
       isActionSheet: isActionSheet,
@@ -1483,7 +1483,6 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < children.length; i += 1) {
@@ -1500,7 +1499,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
         controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
           actionButtons: interactiveButtons,
-          dividerThickness: _kDividerThickness / devicePixelRatio,
+          dividerThickness: _kDividerThickness,
           hasCancelButton: hasCancelButton,
           isActionSheet: isActionSheet,
         ),
