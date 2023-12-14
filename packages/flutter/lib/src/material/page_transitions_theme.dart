@@ -774,7 +774,7 @@ class PageTransitionsTheme with Diagnosticable {
     }
 
     PageTransitionsBuilder getTransitionBuilder() {
-      if(cupertinoTransitionInProgress) {
+      if (cupertinoTransitionInProgress) {
         return const CupertinoPageTransitionsBuilder();
       }
       return builders[platform] ?? (platform == TargetPlatform.iOS ? const CupertinoPageTransitionsBuilder() : const ZoomPageTransitionsBuilder());
