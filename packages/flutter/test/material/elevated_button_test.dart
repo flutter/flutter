@@ -1189,6 +1189,37 @@ void main() {
     }
   });
 
+  testWidgetsWithLeakTracking('Override theme fontSize changes padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(
+          colorScheme: const ColorScheme.light(),
+          textTheme: const TextTheme(labelLarge: TextStyle(fontSize: 28.0)),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('text'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byType(ElevatedButton),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12));
+  });
+
   testWidgetsWithLeakTracking('Override ElevatedButton default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1782,6 +1813,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
@@ -1882,21 +1914,23 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgets('ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ElevatedButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgets('ElevatedButton.icon statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ElevatedButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgets('Disabled ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled ElevatedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

@@ -1060,6 +1060,7 @@ void main() {
 
   testWidgetsWithLeakTracking('MaterialApp does create HeroController with the MaterialRectArcTween', (WidgetTester tester) async {
     final HeroController controller = MaterialApp.createMaterialHeroController();
+    addTearDown(controller.dispose);
     final Tween<Rect?> tween = controller.createRectTween!(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
       const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
@@ -1114,12 +1115,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -1145,12 +1141,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -1236,12 +1227,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;
@@ -1539,6 +1525,96 @@ void main() {
         defaultBehavior.buildScrollbar(capturedContext, child, details);
     }
   }, variant: TargetPlatformVariant.all());
+
+  testWidgetsWithLeakTracking('Override theme animation using AnimationStyle', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData darkTheme = ThemeData.dark();
+
+    Widget buildWidget({ ThemeMode themeMode = ThemeMode.light, AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: themeMode,
+        themeAnimationStyle: animationStyle,
+        home: const Scaffold(body: Text('body')),
+      );
+    }
+
+    // Test the initial Scaffold background color.
+    await tester.pumpWidget(buildWidget());
+
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xfffffbfe));
+
+    // Test the Scaffold background color animation from light to dark theme.
+    await tester.pumpWidget(buildWidget(themeMode: ThemeMode.dark));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance animation by 50 milliseconds.
+
+    // Scaffold background color is slightly updated.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffc6c3c6));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xff1c1b1f));
+
+    // Reset to light theme to compare the Scaffold background color animation
+    // with the default animation curve.
+    await tester.pumpWidget(buildWidget());
+    await tester.pumpAndSettle();
+
+    // Switch to dark theme with overriden animation curve.
+    await tester.pumpWidget(buildWidget(
+      themeMode: ThemeMode.dark,
+      animationStyle: AnimationStyle(curve: Curves.easeIn,
+    )));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Scaffold background color is slightly updated but with a different
+    // color than the default animation curve.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xffe9e5e9));
+
+    // Let the animation finish.
+    await tester.pumpAndSettle();
+
+    // Scaffold background color is fully updated to dark theme.
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xff1c1b1f));
+
+    // Switch from dark to light theme with overriden animation duration.
+    await tester.pumpWidget(buildWidget(animationStyle: AnimationStyle.noAnimation));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(tester.widget<Material>(find.byType(Material)).color, isNot(const Color(0xff1c1b1f)));
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xfffffbfe));
+  });
+
+  testWidgetsWithLeakTracking('AnimationStyle.noAnimation removes AnimatedTheme from the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle()));
+
+    expect(find.byType(AnimatedTheme), findsOneWidget);
+    expect(find.byType(Theme), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(themeAnimationStyle: AnimationStyle.noAnimation));
+
+    expect(find.byType(AnimatedTheme), findsNothing);
+    expect(find.byType(Theme), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/137875.
+  testWidgets('MaterialApp works in an unconstrained environment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const UnconstrainedBox(
+        child: MaterialApp(
+          home: SizedBox(width: 123, height: 456),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(MaterialApp)), const Size(123, 456));
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {
@@ -1548,7 +1624,7 @@ class MockScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {

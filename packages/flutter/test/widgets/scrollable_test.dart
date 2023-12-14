@@ -861,12 +861,13 @@ void main() {
     expect(targetMidLeftPage1, findsOneWidget);
   });
 
-  testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ensureVisible does not move TabViews', (WidgetTester tester) async {
     final TickerProvider vsync = TestTickerProvider();
     final TabController controller = TabController(
       length: 3,
       vsync: vsync,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1038,7 +1039,7 @@ void main() {
 
     // Make the outer constraints larger that the scrollable widget is no longer able to scroll.
     await tester.pumpWidget(build(300.0));
-    expect(controller.position.pixels, 100.0);
+    expect(controller.position.pixels, 0.0);
     expect(controller.position.maxScrollExtent, 0.0);
 
     // Hover over the scroll view and create a zero offset pointer scroll.

@@ -57,6 +57,7 @@ void main() {
       expect(rootBucket!.read<int>('value1'), 10);
       expect(rootBucket!.read<String>('value2'), 'Hello');
       final RestorationBucket child = rootBucket!.claimChild('child1', debugOwner: null);
+      addTearDown(child.dispose);
       expect(child.read<int>('another value'), 22);
 
       // Accessing the root bucket again completes synchronously with same bucket.
@@ -157,6 +158,7 @@ void main() {
       expect(newRoot!.read<int>('foo'), 33);
       expect(newRoot!.read<int>('value1'), null);
       final RestorationBucket newChild = newRoot!.claimChild('childFoo', debugOwner: null);
+      addTearDown(newChild.dispose);
       expect(newChild.read<String>('bar'), 'Hello');
     });
 

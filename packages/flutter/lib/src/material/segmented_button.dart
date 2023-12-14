@@ -654,7 +654,6 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Canvas canvas = context.canvas;
     final Rect borderRect = offset & size;
     final Path borderClipPath = enabledBorder.getInnerPath(borderRect, textDirection: textDirection);
     RenderBox? child = firstChild;
@@ -663,14 +662,14 @@ class _RenderSegmentedButton<T> extends RenderBox with
     Path? enabledClipPath;
     Path? disabledClipPath;
 
-    canvas..save()..clipPath(borderClipPath);
+    context.canvas..save()..clipPath(borderClipPath);
     while (child != null) {
       final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final Rect childRect = childParentData.surroundingRect!.outerRect.shift(offset);
 
-      canvas..save()..clipRect(childRect);
+      context.canvas..save()..clipRect(childRect);
       context.paintChild(child, childParentData.offset + offset);
-      canvas.restore();
+      context.canvas.restore();
 
       // Compute a clip rect for the outer border of the child.
       late final double segmentLeft;
@@ -705,14 +704,14 @@ class _RenderSegmentedButton<T> extends RenderBox with
           : disabledBorder.side.copyWith(strokeAlign: 0.0);
         final Offset top = Offset(dividerPos, childRect.top);
         final Offset bottom = Offset(dividerPos, childRect.bottom);
-        canvas.drawLine(top, bottom, divider.toPaint());
+        context.canvas.drawLine(top, bottom, divider.toPaint());
       }
 
       previousChild = child;
       child = childAfter(child);
       index += 1;
     }
-    canvas.restore();
+    context.canvas.restore();
 
     // Paint the outer border for both disabled and enabled clip rect if needed.
     if (disabledClipPath == null) {
@@ -723,11 +722,11 @@ class _RenderSegmentedButton<T> extends RenderBox with
       disabledBorder.paint(context.canvas, borderRect, textDirection: textDirection);
     } else {
       // Paint both of them clipped appropriately for the children segments.
-      canvas..save()..clipPath(enabledClipPath);
+      context.canvas..save()..clipPath(enabledClipPath);
       enabledBorder.paint(context.canvas, borderRect, textDirection: textDirection);
-      canvas..restore()..save()..clipPath(disabledClipPath);
+      context.canvas..restore()..save()..clipPath(disabledClipPath);
       disabledBorder.paint(context.canvas, borderRect, textDirection: textDirection);
-      canvas.restore();
+      context.canvas.restore();
     }
   }
 

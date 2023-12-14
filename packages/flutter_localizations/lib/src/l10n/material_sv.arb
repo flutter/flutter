@@ -51,7 +51,6 @@
   "reorderItemRight": "Flytta åt höger",
   "expandedIconTapHint": "Dölj",
   "collapsedIconTapHint": "Utöka",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 tecken kvar",
   "remainingTextFieldCharacterCountOther": "$remainingCount tecken kvar",
   "refreshIndicatorSemanticLabel": "Uppdatera",
@@ -143,7 +142,7 @@
   "expandedHint": "Komprimerades",
   "collapsedHint": "Utökades",
   "menuDismissLabel": "Stäng menyn",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Titta upp",
+  "searchWebButtonLabel": "Sök på webben",
+  "shareButtonLabel": "Dela …"
 }

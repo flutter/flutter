@@ -12,7 +12,7 @@ class XcodeProjectObjectVersionMigration extends ProjectMigrator {
     XcodeBasedProject project,
     super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _xcodeProjectSchemeFile = project.xcodeProjectSchemeFile;
+        _xcodeProjectSchemeFile = project.xcodeProjectSchemeFile();
 
   final File _xcodeProjectInfoFile;
   final File _xcodeProjectSchemeFile;

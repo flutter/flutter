@@ -531,8 +531,8 @@ class _IndicatorPainter extends CustomPainter {
     final double index = controller.index.toDouble();
     final double value = controller.animation!.value;
     final bool ltr = index > value;
-    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex); // ignore_clamp_double_lint
-    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex); // ignore_clamp_double_lint
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex);
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex);
     final Rect fromRect = indicatorRect(size, from);
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
@@ -731,7 +731,7 @@ class _TabBarScrollController extends ScrollController {
 ///  * [TabBar.secondary], for a secondary tab bar.
 ///  * [TabBarView], which displays page views that correspond to each tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+///  * https://m3.material.io/components/tabs/overview, the Material 3
 ///     tab bar specification.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design primary tab bar.
@@ -797,7 +797,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [TabBar], for a primary tab bar.
   ///  * [TabBarView], which displays page views that correspond to each tab.
   ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-  ///  * https://m3.material.io/components/tab-bar/overview, the Material 3
+  ///  * https://m3.material.io/components/tabs/overview, the Material 3
   ///     tab bar specification.
   const TabBar.secondary({
     super.key,
@@ -1507,7 +1507,7 @@ class _TabBarState extends State<TabBar> {
         }
         return true;
       }());
-    });
+    }, debugLabel: 'TabBar.tabsCountCheck');
     _debugHasScheduledValidTabsCountCheck = true;
     return true;
   }
@@ -1867,6 +1867,13 @@ class _TabBarViewState extends State<TabBarView> {
       _currentIndex = _controller!.index;
       _jumpToPage(_currentIndex!);
     }
+    if (widget.viewportFraction != oldWidget.viewportFraction) {
+      _pageController?.dispose();
+      _pageController = PageController(
+        initialPage: _currentIndex!,
+        viewportFraction: widget.viewportFraction,
+      );
+    }
     // While a warp is under way, we stop updating the tab page contents.
     // This is tracked in https://github.com/flutter/flutter/issues/31269.
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0) {
@@ -2017,7 +2024,7 @@ class _TabBarViewState extends State<TabBarView> {
         }
         return true;
       }());
-    });
+    }, debugLabel: 'TabBarView.validChildrenCountCheck');
     _debugHasScheduledValidChildrenCountCheck = true;
     return true;
   }

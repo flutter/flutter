@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -876,7 +881,7 @@ void main() {
     expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
   });
 
-  testWidgets('Chip padding - LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
 
@@ -915,7 +920,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
   });
 
-  testWidgets('Chip padding - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip padding - RTL', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
 
@@ -1778,7 +1783,7 @@ void main() {
               labelStyle: TextStyle(height: 4), // inherit: true
             ),
           ),
-          child: const Chip(label: Text('Label')), // labeStyle: null
+          child: const Chip(label: Text('Label')), // labelStyle: null
         ),
       );
     }
@@ -1849,7 +1854,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
   });
 
-  testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -2596,7 +2601,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         useMaterial3: false,
@@ -2639,8 +2644,9 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
-  testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2727,8 +2733,9 @@ void main() {
     expect(textColor(), disabledColor);
   });
 
-  testWidgets('Chip uses stateful border side color in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2807,8 +2814,9 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgets('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2888,8 +2896,9 @@ void main() {
 
   });
 
-  testWidgets('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const Color pressedColor = Color(0x00000001);
     const Color hoverColor = Color(0x00000002);
@@ -2977,8 +2986,9 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful shape in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     OutlinedBorder? getShape(Set<MaterialState> states) {
 
       if (states.contains(MaterialState.disabled)) {
@@ -3320,8 +3330,9 @@ void main() {
     expect(decoration.shape, shape);
   });
 
-  testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawChip');
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color backgroundColor = Color(0xff00ff00);
 
@@ -3443,7 +3454,7 @@ void main() {
     expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
   });
 
-  testWidgets('Delete button tap target area does not include label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete button tap target area does not include label', (WidgetTester tester) async {
     bool calledDelete = false;
     await tester.pumpWidget(
       wrapForChip(
@@ -3486,7 +3497,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/pull/133615.
-  testWidgets('Material3 - Custom shape without provided side uses default side', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Custom shape without provided side uses default side', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -3510,7 +3521,7 @@ void main() {
     );
   });
 
-  testWidgets("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
     Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -3564,12 +3575,110 @@ void main() {
     );
   });
 
+  testWidgetsWithLeakTracking('Material3 - Chip.iconTheme respects default iconTheme.size', (WidgetTester tester) async {
+    Widget buildChip({ IconThemeData? iconTheme }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: RawChip(
+                iconTheme: iconTheme,
+                avatar: const Icon(Icons.add),
+                label: const SizedBox(width: 100, height: 100),
+                onSelected: (bool newValue) { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff332211))));
+
+    // Icon should have the default chip iconSize.
+    expect(getIconData(tester).size, 18.0);
+    expect(getIconData(tester).color, const Color(0xff332211));
+
+    // Icon should have the provided iconSize.
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff112233), size: 23.0)));
+    await tester.pumpAndSettle();
+
+    expect(getIconData(tester).size, 23.0);
+    expect(getIconData(tester).color, const Color(0xff112233));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/138287.
+  testWidgetsWithLeakTracking("Enabling and disabling Chip with Tooltip doesn't throw an exception", (WidgetTester tester) async {
+    bool isEnabled = true;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawChip(
+                    tooltip: 'tooltip',
+                    isEnabled: isEnabled,
+                    onPressed: isEnabled ? () {} : null,
+                    label: const Text('RawChip'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isEnabled = !isEnabled;
+                      });
+                    },
+                    child: Text('${isEnabled ? 'Disable' : 'Enable'} Chip'),
+                  )
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    // Tap the elevated button to disable the chip with a tooltip.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Disable Chip'));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+
+    // Tap the elevated button to enable the chip with a tooltip.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Enable Chip'));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgetsWithLeakTracking('Delete button is visible RawChip is disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: RawChip(
+          isEnabled: false,
+          label: const Text('Label'),
+          onDeleted: () { },
+        )
+      ),
+    );
+
+    // Delete button should be visible.
+    expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('M2 Chip defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('M2 Chip defaults', (WidgetTester tester) async {
       late TextTheme textTheme;
 
       Widget buildFrame(Brightness brightness) {
@@ -3646,7 +3755,7 @@ void main() {
       expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
     });
 
-    testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,

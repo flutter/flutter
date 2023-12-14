@@ -195,6 +195,7 @@ class BuildWebCommand extends BuildSubCommand {
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
     );
     await webBuilder.buildWeb(
       flutterProject,

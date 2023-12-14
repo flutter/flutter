@@ -19,7 +19,7 @@ class _ModifierCheck {
 void main() {
   group('RawKeyboard', () {
     testWidgetsWithLeakTracking('The correct character is produced', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         String character = '';
         void handleKey(RawKeyEvent event) {
           expect(event.character, equals(character), reason: 'on $platform');
@@ -34,7 +34,7 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('No character is produced for non-printables', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web', 'ios']) {
         void handleKey(RawKeyEvent event) {
           expect(event.character, isNull, reason: 'on $platform');
         }
@@ -1014,6 +1014,7 @@ void main() {
         false);
       expect(logs, <int>[1, 3, 2]);
       logs.clear();
+    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
@@ -2154,6 +2155,7 @@ void main() {
       expect(events, isEmpty);
       expect(lastHandled, true);
       expect(RawKeyboard.instance.keysPressed, isEmpty);
+    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
     test('data.toString', () {

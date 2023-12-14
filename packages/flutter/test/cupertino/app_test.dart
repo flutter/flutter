@@ -178,12 +178,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -209,12 +204,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('CupertinoApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -300,12 +290,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/134205
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    allowAllNotDisposed: true,
-  ));
+  });
 
   testWidgetsWithLeakTracking('CupertinoApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
@@ -505,7 +490,7 @@ class MockScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) => const NeverScrollableScrollPhysics();
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {

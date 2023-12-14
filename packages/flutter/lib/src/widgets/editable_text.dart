@@ -59,7 +59,7 @@ export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionCh
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
-typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
@@ -1882,6 +1882,10 @@ class EditableText extends StatefulWidget {
       // If the paste button is enabled, don't render anything until the state
       // of the clipboard is known, since it's used to determine if paste is
       // shown.
+
+      // On Android, the share button is before the select all button.
+      final bool showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
+
       resultButtonItem.addAll(<ContextMenuButtonItem>[
         if (onCut != null)
           ContextMenuButtonItem(
@@ -1898,6 +1902,11 @@ class EditableText extends StatefulWidget {
             onPressed: onPaste,
             type: ContextMenuButtonType.paste,
           ),
+        if (onShare != null && showShareBeforeSelectAll)
+          ContextMenuButtonItem(
+            onPressed: onShare,
+            type: ContextMenuButtonType.share,
+          ),
         if (onSelectAll != null)
           ContextMenuButtonItem(
             onPressed: onSelectAll,
@@ -1913,7 +1922,7 @@ class EditableText extends StatefulWidget {
             onPressed: onSearchWeb,
             type: ContextMenuButtonType.searchWeb,
           ),
-        if (onShare != null)
+        if (onShare != null && !showShareBeforeSelectAll)
           ContextMenuButtonItem(
             onPressed: onShare,
             type: ContextMenuButtonType.share,
@@ -2300,13 +2309,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get shareEnabled {
-    if (defaultTargetPlatform != TargetPlatform.iOS) {
-      return false;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+        return !widget.obscureText
+            && !textEditingValue.selection.isCollapsed
+            && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
     }
-
-    return !widget.obscureText
-        && !textEditingValue.selection.isCollapsed
-        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
   }
 
   @override
@@ -2390,7 +2404,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
     clipboardStatus.update();
@@ -2430,7 +2444,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (mounted) {
           bringIntoView(textEditingValue.selection.extent);
         }
-      });
+      }, debugLabel: 'EditableText.bringSelectionIntoView');
       hideToolbar();
     }
   }
@@ -2516,9 +2530,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Launch the share interface for the current selection,
-  /// as in the "Share" edit menu button on iOS.
+  /// as in the "Share..." edit menu button on iOS.
   ///
-  /// Currently this is only implemented for iOS.
+  /// Currently this is only implemented for iOS and Android.
   ///
   /// When 'obscureText' is true or the selection is empty,
   /// this function will not do anything
@@ -2818,7 +2832,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           _flagInternalFocus();
           FocusScope.of(context).autofocus(widget.focusNode);
         }
-      });
+      }, debugLabel: 'EditableText.autofocus');
     }
 
     // Restart or stop the blinking cursor when TickerMode changes.
@@ -2889,7 +2903,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // See https://github.com/flutter/flutter/issues/126312
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _openInputConnection();
-      });
+      }, debugLabel: 'EditableText.openInputConnection');
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -3488,11 +3502,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
-      if (kIsWeb) {
-        _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
-      } else {
-        widget.focusNode.unfocus();
-      }
+      widget.focusNode.unfocus();
     }
   }
 
@@ -3725,7 +3735,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           rect: caretPadding.inflateRect(rectToReveal),
         );
       }
-    });
+    }, debugLabel: 'EditableText.showCaret');
   }
 
   late double _lastBottomViewInset;
@@ -3739,7 +3749,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_lastBottomViewInset != view.viewInsets.bottom) {
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _selectionOverlay?.updateForScroll();
-      });
+      }, debugLabel: 'EditableText.updateForScroll');
       if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
@@ -4042,7 +4052,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateSelectionRects();
     _updateComposingRectIfNeeded();
     _updateCaretRectIfNeeded();
-    SchedulerBinding.instance.addPostFrameCallback(_schedulePeriodicPostFrameCallbacks);
+    SchedulerBinding.instance.addPostFrameCallback(
+      _schedulePeriodicPostFrameCallbacks,
+      debugLabel: 'EditableText.postFrameCallbacks'
+    );
   }
   _ScribbleCacheKey? _scribbleCacheKey;
 
@@ -4116,11 +4129,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setSelectionRects(rects);
   }
 
-  // Sends the current composing rect to the iOS text input plugin via the text
-  // input channel. We need to keep sending the information even if no text is
-  // currently marked, as the information usually lags behind. The text input
-  // plugin needs to estimate the composing rect based on the latest caret rect,
-  // when the composing rect info didn't arrive in time.
+  // Sends the current composing rect to the embedder's text input plugin.
+  //
+  // In cases where the composing rect hasn't been updated in the embedder due
+  // to the lag of asynchronous messages over the channel, the position of the
+  // current caret rect is used instead.
+  //
+  // See: [_updateCaretRectIfNeeded]
   void _updateComposingRectIfNeeded() {
     final TextRange composingRange = _value.composing;
     assert(mounted);
@@ -4134,12 +4149,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _textInputConnection!.setComposingRect(composingRect);
   }
 
+  // Sends the current caret rect to the embedder's text input plugin.
+  //
+  // The position of the caret rect is updated periodically such that if the
+  // user initiates composing input, the current cursor rect can be used for
+  // the first character until the composing rect can be sent.
+  //
+  // On selection changes, the start of the selection is used. This ensures
+  // that regardless of the direction the selection was created, the cursor is
+  // set to the position where next text input occurs. This position is used to
+  // position the IME's candidate selection menu.
+  //
+  // See: [_updateComposingRectIfNeeded]
   void _updateCaretRectIfNeeded() {
     final TextSelection? selection = renderEditable.selection;
-    if (selection == null || !selection.isValid || !selection.isCollapsed) {
+    if (selection == null || !selection.isValid) {
       return;
     }
-    final TextPosition currentTextPosition = TextPosition(offset: selection.baseOffset);
+    final TextPosition currentTextPosition = TextPosition(offset: selection.start);
     final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
     _textInputConnection!.setCaretRect(caretRect);
   }
@@ -4771,7 +4798,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
-        onTapOutside: widget.onTapOutside ?? _defaultOnTapOutside,
+        onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(
           cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -4809,6 +4836,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 }
 
                 return oldValue.text != newValue.text || oldValue.composing != newValue.composing;
+              },
+              undoStackModifier: (TextEditingValue value) {
+                // On Android we should discard the composing region when pushing
+                // a new entry to the undo stack. This prevents the TextInputPlugin
+                // from restarting the input on every undo/redo when the composing
+                // region is changed by the framework.
+                return defaultTargetPlatform == TargetPlatform.android ? value.copyWith(composing: TextRange.empty) : value;
               },
               focusNode: widget.focusNode,
               controller: widget.undoController,

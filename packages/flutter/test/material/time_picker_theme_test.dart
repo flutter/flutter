@@ -18,7 +18,7 @@ void main() {
     expect(identical(TimePickerThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  test('TimePickerThemeData null fields by default', () {
+  test('TimePickerThemeData has null fields by default', () {
     const TimePickerThemeData timePickerTheme = TimePickerThemeData();
     expect(timePickerTheme.backgroundColor, null);
     expect(timePickerTheme.cancelButtonStyle, null);
@@ -64,7 +64,7 @@ void main() {
       cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1))),
       confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff2))),
       dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3)),
-      dayPeriodColor: Color(0xfffffff4),
+      dayPeriodColor: Color(0x00000000),
       dayPeriodShape: RoundedRectangleBorder(
         side: BorderSide(color: Color(0xfffffff5)),
       ),
@@ -102,7 +102,7 @@ void main() {
       'cancelButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff1)))',
       'confirmButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xfffffff2)))',
       'dayPeriodBorderSide: BorderSide(color: Color(0xfffffff3))',
-      'dayPeriodColor: Color(0xfffffff4)',
+      'dayPeriodColor: Color(0x00000000)',
       'dayPeriodShape: RoundedRectangleBorder(BorderSide(color: Color(0xfffffff5)), BorderRadius.zero)',
       'dayPeriodTextColor: Color(0xfffffff6)',
       'dayPeriodTextStyle: TextStyle(inherit: true, color: Color(0xfffffff7))',
@@ -404,7 +404,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material2 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme, entryMode: TimePickerEntryMode.input));
     await tester.tap(find.text('X'));
@@ -446,7 +446,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material3 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme, entryMode: TimePickerEntryMode.input));
     await tester.tap(find.text('X'));
@@ -737,7 +737,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(timePickerTheme.confirmButtonStyle.toString()));
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
@@ -754,7 +754,7 @@ void main() {
     expect(hourDecoration.hintStyle, timePickerTheme.inputDecorationTheme!.hintStyle);
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
@@ -763,6 +763,41 @@ void main() {
 
     final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.fillColor?.value, timePickerTheme.hourMinuteColor?.value);
+  });
+
+  testWidgetsWithLeakTracking('Time picker dayPeriodColor does the right thing with non-MaterialStateColor', (WidgetTester tester) async {
+    final TimePickerThemeData timePickerTheme = _timePickerTheme().copyWith(dayPeriodColor: Colors.red);
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final Material amMaterial = _textMaterial(tester, 'AM');
+    expect(amMaterial.color, Colors.red);
+
+    final Material pmMaterial = _textMaterial(tester, 'PM');
+    expect(pmMaterial.color, Colors.transparent);
+  });
+
+  testWidgetsWithLeakTracking('Time picker dayPeriodColor does the right thing with MaterialStateColor', (WidgetTester tester) async {
+    final MaterialStateColor testColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.green;
+      }
+      return Colors.blue;
+    });
+
+    final TimePickerThemeData timePickerTheme = _timePickerTheme().copyWith(dayPeriodColor: testColor);
+    final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
+    await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final Material amMaterial = _textMaterial(tester, 'AM');
+    expect(amMaterial.color, Colors.green);
+
+    final Material pmMaterial = _textMaterial(tester, 'PM');
+    expect(pmMaterial.color, Colors.blue);
   });
 }
 
@@ -776,8 +811,8 @@ TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
   final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);
   return TimePickerThemeData(
     backgroundColor: Colors.orange,
-    cancelButtonStyle: TextButton.styleFrom(primary: Colors.red),
-    confirmButtonStyle: TextButton.styleFrom(primary: Colors.green),
+    cancelButtonStyle: TextButton.styleFrom(foregroundColor: Colors.red),
+    confirmButtonStyle: TextButton.styleFrom(foregroundColor: Colors.green),
     hourMinuteTextColor: materialStateColor,
     hourMinuteColor: materialStateColor,
     dayPeriodTextColor: materialStateColor,

@@ -97,7 +97,7 @@ void main() {
       ));
     });
 
-    testWidgetsWithLeakTracking('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
+    testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
@@ -137,7 +137,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
+    testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
@@ -177,7 +177,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('TickerProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
+    testWidgets('TickerProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
       final GlobalKey<_MultipleTickerTestState> key = GlobalKey<_MultipleTickerTestState>();
       final Widget widget = _MultipleTickerTest(key: key);
       await tester.pumpWidget(widget);
@@ -217,12 +217,12 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('SingleTickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
+  testWidgets('SingleTickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
     await tester.pumpWidget(const _SingleTickerTest());
     expect(tester.state<_SingleTickerTestState>(find.byType(_SingleTickerTest)).toStringCount, 0);
   });
 
-  testWidgetsWithLeakTracking('TickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
+  testWidgets('TickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
     await tester.pumpWidget(const _MultipleTickerTest());
     expect(tester.state<_MultipleTickerTestState>(find.byType(_MultipleTickerTest)).toStringCount, 0);
   });

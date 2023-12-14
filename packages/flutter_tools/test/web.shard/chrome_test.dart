@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,7 +18,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fakes.dart';
+import '../src/fakes.dart' hide FakeProcess;
 
 const List<String> kChromeArgs = <String>[
   '--disable-background-timer-throttling',
@@ -162,6 +164,116 @@ void main() {
         processManager,
         chromeLauncher,
       )
+    );
+  });
+
+  testWithoutContext('exits normally using SIGTERM', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeAsync fakeAsync = FakeAsync();
+
+    fakeAsync.run((_) {
+      () async {
+        final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
+        final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+          fileSystem: fileSystem,
+          platform: platform,
+          processManager: processManager,
+          operatingSystemUtils: operatingSystemUtils,
+          browserFinder: findChromeExecutable,
+          logger: logger,
+        );
+
+        final FakeProcess process = FakeProcess(
+          duration: const Duration(seconds: 3),
+        );
+
+        final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+
+        final Future<void> closeFuture = chrome.close();
+        fakeAsync.elapse(const Duration(seconds: 4));
+        await closeFuture;
+
+        expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+      }();
+    });
+
+    fakeAsync.flushTimers();
+    expect(logger.warningText, isEmpty);
+  });
+
+  testWithoutContext('falls back to SIGKILL if SIGTERM did not work', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeAsync fakeAsync = FakeAsync();
+
+    fakeAsync.run((_) {
+      () async {
+        final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
+        final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+          fileSystem: fileSystem,
+          platform: platform,
+          processManager: processManager,
+          operatingSystemUtils: operatingSystemUtils,
+          browserFinder: findChromeExecutable,
+          logger: logger,
+        );
+
+        final FakeProcess process = FakeProcess(
+          duration: const Duration(seconds: 6),
+        );
+
+        final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+
+        final Future<void> closeFuture = chrome.close();
+        fakeAsync.elapse(const Duration(seconds: 7));
+        await closeFuture;
+
+        expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm, io.ProcessSignal.sigkill]);
+      }();
+    });
+
+    fakeAsync.flushTimers();
+    expect(
+      logger.warningText,
+      'Failed to exit Chromium (pid: 1234) using SIGTERM. Will try sending SIGKILL instead.\n',
+    );
+  });
+
+  testWithoutContext('falls back to a warning if SIGKILL did not work', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FakeAsync fakeAsync = FakeAsync();
+
+    fakeAsync.run((_) {
+      () async {
+        final FakeChromeConnection chromeConnection = FakeChromeConnection(maxRetries: 4);
+        final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+          fileSystem: fileSystem,
+          platform: platform,
+          processManager: processManager,
+          operatingSystemUtils: operatingSystemUtils,
+          browserFinder: findChromeExecutable,
+          logger: logger,
+        );
+
+        final FakeProcess process = FakeProcess(
+          duration: const Duration(seconds: 20),
+        );
+
+        final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
+
+        final Future<void> closeFuture = chrome.close();
+        fakeAsync.elapse(const Duration(seconds: 30));
+        await closeFuture;
+        expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm, io.ProcessSignal.sigkill]);
+      }();
+    });
+
+    fakeAsync.flushTimers();
+    expect(
+      logger.warningText,
+      'Failed to exit Chromium (pid: 1234) using SIGTERM. Will try sending SIGKILL instead.\n'
+      'Failed to exit Chromium (pid: 1234) using SIGKILL. Giving up. Will continue, assuming '
+      'Chromium has exited successfully, but it is possible that this left a dangling Chromium '
+      'process running on the system.\n',
     );
   });
 
@@ -656,7 +768,8 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher);
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     expect(await chromiumLauncher.connect(chrome, false), equals(chrome));
     expect(logger.errorText, isEmpty);
   });
@@ -672,7 +785,8 @@ void main() {
       browserFinder: findChromeExecutable,
       logger: logger,
     );
-    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher);
+    final FakeProcess process = FakeProcess();
+    final Chromium chrome = Chromium(0, chromeConnection, chromiumLauncher: chromiumLauncher, process: process, logger: logger);
     await expectToolExitLater(
       chromiumLauncher.connect(chrome, false),
         allOf(

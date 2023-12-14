@@ -11,12 +11,6 @@ import 'list_section.dart';
 // iOS 14.2 SDK.
 const EdgeInsetsDirectional _kFormDefaultInsetGroupedRowsMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
 
-// Standard header margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultHeaderMargin = EdgeInsetsDirectional.fromSTEB(20.0, 16.0, 20.0, 10.0);
-
-// Standard footer margin, determined from SwiftUI's Forms in iOS 14.2 SDK.
-const EdgeInsetsDirectional _kFormDefaultFooterMargin = EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 10.0);
-
 /// An iOS-style form section.
 ///
 /// The base constructor for [CupertinoFormSection] constructs an
@@ -205,10 +199,7 @@ class CupertinoFormSection extends StatelessWidget {
               fontSize: 13.0,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-            child: Padding(
-              padding: _kFormDefaultHeaderMargin,
-              child: header,
-            ));
+            child: header!);
 
     final Widget? footerWidget = footer == null
         ? null
@@ -217,10 +208,7 @@ class CupertinoFormSection extends StatelessWidget {
               fontSize: 13.0,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-            child: Padding(
-              padding: _kFormDefaultFooterMargin,
-              child: footer,
-            ));
+            child: footer!);
 
     return _type == CupertinoListSectionType.base
         ? CupertinoListSection(

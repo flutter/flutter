@@ -561,6 +561,7 @@ void main() {
     addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
+    await tester.pumpAndSettle();
     expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
 
     final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
@@ -619,6 +620,7 @@ void main() {
     addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
+    await tester.pumpAndSettle();
     expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
 
     final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
@@ -674,6 +676,7 @@ void main() {
     addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 500));
     await gesture.up();
+    await tester.pumpAndSettle();
     expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
 
     final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);

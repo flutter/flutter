@@ -94,6 +94,7 @@ void main() {
       const String buildVariant = 'release';
       await runner.run(<String>['analyze', '--android', '--output-app-link-settings', '--build-variant=$buildVariant', tempDir.path]);
       expect(builder.outputVariant, buildVariant);
+      expect(logger.statusText, contains(builder.outputPath));
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => builder,
     });
@@ -116,6 +117,7 @@ void main() {
 class FakeAndroidBuilder extends Fake implements AndroidBuilder {
   List<String> variants = const <String>[];
   String? outputVariant;
+  final String outputPath = '/';
 
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {
@@ -123,7 +125,8 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
   }
 
   @override
-  Future<void> outputsAppLinkSettings(String buildVariant, {required FlutterProject project}) async {
+  Future<String> outputsAppLinkSettings(String buildVariant, {required FlutterProject project}) async {
     outputVariant = buildVariant;
+    return outputPath;
   }
 }
