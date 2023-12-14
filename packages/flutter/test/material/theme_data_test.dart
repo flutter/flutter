@@ -5,8 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('Theme data control test', () {
@@ -725,6 +724,7 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: const <Type, Adaptation<Object>>{},
       applyElevationOverlayColor: false,
       cupertinoOverrideTheme: null,
       extensions: const <Object, ThemeExtension<dynamic>>{},
@@ -810,9 +810,7 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
-      androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
       toggleableActiveColor: Colors.black,
-      selectedRowColor: Colors.black,
       errorColor: Colors.black,
       backgroundColor: Colors.black,
       bottomAppBarColor: Colors.black,
@@ -838,6 +836,9 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptationMap: const <Type, Adaptation<Object>>{
+        SwitchThemeData: SwitchThemeAdaptation(),
+      },
       applyElevationOverlayColor: true,
       cupertinoOverrideTheme: ThemeData.light().cupertinoOverrideTheme,
       extensions: const <Object, ThemeExtension<dynamic>>{
@@ -929,9 +930,7 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
 
       // DEPRECATED (newest deprecations at the bottom)
-      androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
       toggleableActiveColor: Colors.white,
-      selectedRowColor: Colors.white,
       errorColor: Colors.white,
       backgroundColor: Colors.white,
       bottomAppBarColor: Colors.white,
@@ -944,6 +943,7 @@ void main() {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
+      adaptations: otherTheme.adaptationMap.values,
       applyElevationOverlayColor: otherTheme.applyElevationOverlayColor,
       cupertinoOverrideTheme: otherTheme.cupertinoOverrideTheme,
       extensions: otherTheme.extensions.values,
@@ -1031,9 +1031,7 @@ void main() {
       tooltipTheme: otherTheme.tooltipTheme,
 
       // DEPRECATED (newest deprecations at the bottom)
-      androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
       toggleableActiveColor: otherTheme.toggleableActiveColor,
-      selectedRowColor: otherTheme.selectedRowColor,
       errorColor: otherTheme.errorColor,
       backgroundColor: otherTheme.backgroundColor,
       bottomAppBarColor: otherTheme.bottomAppBarColor,
@@ -1045,6 +1043,7 @@ void main() {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
+    expect(themeDataCopy.adaptationMap, equals(otherTheme.adaptationMap));
     expect(themeDataCopy.applyElevationOverlayColor, equals(otherTheme.applyElevationOverlayColor));
     expect(themeDataCopy.cupertinoOverrideTheme, equals(otherTheme.cupertinoOverrideTheme));
     expect(themeDataCopy.extensions, equals(otherTheme.extensions));
@@ -1134,9 +1133,7 @@ void main() {
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
 
     // DEPRECATED (newest deprecations at the bottom)
-    expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
     expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
-    expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
@@ -1183,6 +1180,7 @@ void main() {
     // List of properties must match the properties in ThemeData.hashCode()
     final Set<String> expectedPropertyNames = <String>{
       // GENERAL CONFIGURATION
+      'adaptations',
       'applyElevationOverlayColor',
       'cupertinoOverrideTheme',
       'extensions',
@@ -1268,9 +1266,7 @@ void main() {
       'toggleButtonsTheme',
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'androidOverscrollIndicator',
       'toggleableActiveColor',
-      'selectedRowColor',
       'errorColor',
       'backgroundColor',
       'bottomAppBarColor',
@@ -1289,6 +1285,141 @@ void main() {
 
     // Ensure they are all there.
     expect(propertyNames, expectedPropertyNames);
+  });
+
+  group('Theme adaptationMap', () {
+    const Key containerKey = Key('container');
+
+    testWidgetsWithLeakTracking('can be obtained', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            adaptations: const <Adaptation<Object>>[
+              StringAdaptation(),
+              SwitchThemeAdaptation()
+            ],
+          ),
+          home: Container(key: containerKey),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byKey(containerKey)),
+      );
+      final String adaptiveString = theme.getAdaptation<String>()!.adapt(theme, 'Default theme');
+      final SwitchThemeData adaptiveSwitchTheme = theme.getAdaptation<SwitchThemeData>()!
+        .adapt(theme, theme.switchTheme);
+
+      expect(adaptiveString, 'Adaptive theme.');
+      expect(adaptiveSwitchTheme.thumbColor?.resolve(<MaterialState>{}),
+        isSameColorAs(Colors.brown));
+    });
+
+    testWidgetsWithLeakTracking('should return null on extension not found', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        adaptations: const <Adaptation<Object>>[
+          StringAdaptation(),
+        ],
+      );
+
+      expect(theme.extension<SwitchThemeAdaptation>(), isNull);
+    });
+  });
+
+  testWidgetsWithLeakTracking(
+    'ThemeData.brightness not matching ColorScheme.brightness throws a helpful error message', (WidgetTester tester) async {
+    AssertionError? error;
+
+    // Test `ColorScheme.light()` and `ThemeData.brightness == Brightness.dark`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(),
+            brightness: Brightness.dark,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
+
+    // Test `ColorScheme.dark()` and `ThemeData.brightness == Brightness.light`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: const ColorScheme.dark(),
+            brightness: Brightness.light,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
+
+    // Test `ColorScheme.fromSeed()` and `ThemeData.brightness == Brightness.dark`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xffff0000)),
+            brightness: Brightness.dark,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
+
+    // Test `ColorScheme.fromSeed()` using `Brightness.dark` and `ThemeData.brightness == Brightness.light`.
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xffff0000),
+              brightness: Brightness.dark,
+            ),
+            brightness: Brightness.light,
+          ),
+          home: const Placeholder(),
+        ),
+      );
+    } on AssertionError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error?.message, contains(
+        'ThemeData.brightness does not match ColorScheme.brightness. '
+          'Either override ColorScheme.brightness or ThemeData.brightness to '
+          'match the other.'
+      ));
+    }
   });
 }
 
@@ -1346,4 +1477,20 @@ class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
       textStyle: TextStyle.lerp(textStyle, other.textStyle, t),
     );
   }
+}
+
+class SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
+  const SwitchThemeAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) => const SwitchThemeData(
+    thumbColor: MaterialStatePropertyAll<Color>(Colors.brown),
+  );
+}
+
+class StringAdaptation extends Adaptation<String> {
+  const StringAdaptation();
+
+  @override
+  String adapt(ThemeData theme, String defaultValue) => 'Adaptive theme.';
 }

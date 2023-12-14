@@ -4,9 +4,10 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'default search field has a border radius',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -33,7 +34,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'decoration overrides default background color',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -62,7 +63,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'decoration overrides default border radius',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -91,14 +92,16 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'text entries are padded by default',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'initial');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'initial'),
+              controller: controller,
             ),
           ),
         ),
@@ -112,7 +115,7 @@ void main() {
     },
   );
 
-  testWidgets('can change keyboard type', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can change keyboard type', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -128,10 +131,11 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'can control text content via controller',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -155,7 +159,7 @@ void main() {
     },
   );
 
-  testWidgets('placeholder color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('placeholder color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.dark),
@@ -183,7 +187,7 @@ void main() {
     expect(placeholder.style!.color!.value, CupertinoColors.systemGrey.color.value);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     "placeholderStyle modifies placeholder's style and doesn't affect text's style",
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -217,14 +221,17 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'input');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'input'),
+              controller: controller,
             ),
           ),
         ),
@@ -244,14 +251,17 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'suffix widget is after the text',
     (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'Hi');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoSearchTextField(
-              controller: TextEditingController(text: 'Hi'),
+              controller: controller,
             ),
           ),
         ),
@@ -273,7 +283,7 @@ void main() {
     },
   );
 
-  testWidgets('prefix widget visibility', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('prefix widget visibility', (WidgetTester tester) async {
       const Key prefixIcon = Key('prefix');
 
       await tester.pumpWidget(
@@ -302,7 +312,7 @@ void main() {
       expect(find.byKey(prefixIcon), findsOneWidget);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'suffix widget respects visibility mode',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -325,10 +335,11 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'clear button shows with right visibility mode',
     (WidgetTester tester) async {
       TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -349,7 +360,7 @@ void main() {
       expect(find.text('text input'), findsOneWidget);
 
       controller = TextEditingController();
-
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -370,10 +381,11 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'clear button removes text',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -397,11 +409,12 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'tapping clear button also calls onChanged when text not empty',
     (WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -426,7 +439,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'RTL puts attachments to the right places',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -454,7 +467,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Can modify prefix and suffix insets',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -481,10 +494,11 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'custom suffix onTap overrides default clearing behavior',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'Text');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -506,7 +520,7 @@ void main() {
     },
   );
 
-  testWidgets('onTap is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onTap is properly forwarded to the inner text field', (WidgetTester tester) async {
     int onTapCallCount = 0;
 
     // onTap can be null.
@@ -536,7 +550,7 @@ void main() {
     expect(onTapCallCount, 1);
   });
 
-  testWidgets('autocorrect is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autocorrect is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -551,7 +565,7 @@ void main() {
     expect(textField.autocorrect, false);
   });
 
-  testWidgets('enabled is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('enabled is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -566,7 +580,7 @@ void main() {
     expect(textField.enabled, false);
   });
 
-  testWidgets('textInputAction is set to TextInputAction.search by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textInputAction is set to TextInputAction.search by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -579,8 +593,9 @@ void main() {
     expect(textField.textInputAction, TextInputAction.search);
   });
 
-  testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autofocus:true gives focus to the widget', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -595,7 +610,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgets('smartQuotesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('smartQuotesType is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -610,7 +625,7 @@ void main() {
     expect(textField.smartQuotesType, SmartQuotesType.disabled);
   });
 
-  testWidgets('smartDashesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('smartDashesType is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -625,7 +640,8 @@ void main() {
     expect(textField.smartDashesType, SmartDashesType.disabled);
   });
 
-  testWidgets('enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking(
+      'enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

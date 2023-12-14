@@ -10,9 +10,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('InkSparkle in a Button compiles and does not crash', (WidgetTester tester) async {
@@ -181,7 +179,7 @@ Future<void> _runM3Test(WidgetTester tester, String positionName, double distanc
           key: repaintKey,
           child: ElevatedButton(
             key: buttonKey,
-            style: ElevatedButton.styleFrom(splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory),
+            style: ElevatedButton.styleFrom(),
             child: const Text('Sparkle!'),
             onPressed: () { },
           ),

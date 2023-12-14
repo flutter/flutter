@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
@@ -22,6 +23,22 @@ class TestAssetBundle extends CachingAssetBundle {
     if (key == 'AssetManifest.bin') {
       return const StandardMessageCodec()
           .encodeMessage(<String, Object>{'one': <Object>[]})!;
+    }
+
+    if (key == 'AssetManifest.bin.json') {
+      // Encode the manifest data that will be used by the app
+      final ByteData data = const StandardMessageCodec().encodeMessage(<String, Object> {'one': <Object>[]})!;
+      // Simulate the behavior of NetworkAssetBundle.load here, for web tests
+      return ByteData.sublistView(
+        utf8.encode(
+          json.encode(
+            base64.encode(
+              // Encode only the actual bytes of the buffer, and no more...
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)
+            )
+          )
+        )
+      );
     }
 
     if (key == 'counter') {
@@ -135,7 +152,7 @@ void main() {
       expect(await data, 1);
     });
 
-    testWidgets('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
       final TestAssetBundle bundle = TestAssetBundle();
       try {
         await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.error('what do they say?'));
@@ -145,7 +162,7 @@ void main() {
       }
     });
 
-    testWidgets('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
       final TestAssetBundle bundle = TestAssetBundle();
       try {
         await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.error('buy more crystals'));

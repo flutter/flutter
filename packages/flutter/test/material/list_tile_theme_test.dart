@@ -6,9 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({ super.key });
@@ -395,14 +393,30 @@ void main() {
   });
 
   testWidgetsWithLeakTracking(
-    "ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
+    "Material3 - ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
+      const TextStyle titleTextStyle = TextStyle(
+        fontSize: 23.0,
+        color: Color(0xffff0000),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle subtitleTextStyle = TextStyle(
+        fontSize: 20.0,
+        color: Color(0xff00ff00),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+        fontSize: 18.0,
+        color: Color(0xff0000ff),
+        fontStyle: FontStyle.italic,
+      );
+
     final ThemeData theme = ThemeData(
         useMaterial3: true,
         listTileTheme: const ListTileThemeData(
-        titleTextStyle: TextStyle(fontSize: 20.0),
-        subtitleTextStyle: TextStyle(fontSize: 17.5),
-        leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
+        titleTextStyle: titleTextStyle,
+        subtitleTextStyle: subtitleTextStyle,
+        leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
       ),
     );
 
@@ -428,30 +442,50 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.fontSize, 15.0);
+    expect(leading.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+    expect(leading.text.style!.color, leadingAndTrailingTextStyle.color);
+    expect(leading.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
     final RenderParagraph title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.fontSize, 20.0);
+    expect(title.text.style!.fontSize, titleTextStyle.fontSize);
+    expect(title.text.style!.color, titleTextStyle.color);
+    expect(title.text.style!.fontStyle, titleTextStyle.fontStyle);
     final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.fontSize, 17.5);
+    expect(subtitle.text.style!.fontSize, subtitleTextStyle.fontSize);
+    expect(subtitle.text.style!.color, subtitleTextStyle.color);
+    expect(subtitle.text.style!.fontStyle, subtitleTextStyle.fontStyle);
     final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.fontSize, 15.0);
+    expect(trailing.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+    expect(trailing.text.style!.color, leadingAndTrailingTextStyle.color);
+    expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
   });
 
   testWidgetsWithLeakTracking(
-    "ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
+    "Material2 - ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
     (WidgetTester tester) async {
+      const TextStyle titleTextStyle = TextStyle(
+        fontSize: 23.0,
+        color: Color(0xffff0000),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle subtitleTextStyle = TextStyle(
+        fontSize: 20.0,
+        color: Color(0xff00ff00),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+        fontSize: 18.0,
+        color: Color(0xff0000ff),
+        fontStyle: FontStyle.italic,
+      );
+
     final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      listTileTheme: const ListTileThemeData(
-        titleTextStyle: TextStyle(fontSize: 20.0),
-        subtitleTextStyle: TextStyle(fontSize: 17.5),
-        leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
+        useMaterial3: false,
+        listTileTheme: const ListTileThemeData(
+        titleTextStyle: titleTextStyle,
+        subtitleTextStyle: subtitleTextStyle,
+        leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
       ),
     );
-
-    const TextStyle titleTextStyle = TextStyle(fontSize: 23.0);
-    const TextStyle subtitleTextStyle = TextStyle(fontSize: 20.0);
-    const TextStyle leadingAndTrailingTextStyle = TextStyle(fontSize: 18.0);
 
     Widget buildFrame() {
       return MaterialApp(
@@ -461,9 +495,6 @@ void main() {
             child: Builder(
               builder: (BuildContext context) {
                 return const ListTile(
-                  titleTextStyle: titleTextStyle,
-                  subtitleTextStyle: subtitleTextStyle,
-                  leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
                   leading: TestText('leading'),
                   title: TestText('title'),
                   subtitle: TestText('subtitle'),
@@ -478,13 +509,159 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.fontSize, 18.0);
+    expect(leading.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+    expect(leading.text.style!.color, leadingAndTrailingTextStyle.color);
+    expect(leading.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
     final RenderParagraph title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.fontSize, 23.0);
+    expect(title.text.style!.fontSize, titleTextStyle.fontSize);
+    expect(title.text.style!.color, titleTextStyle.color);
+    expect(title.text.style!.fontStyle, titleTextStyle.fontStyle);
     final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.fontSize, 20.0);
+    expect(subtitle.text.style!.fontSize, subtitleTextStyle.fontSize);
+    expect(subtitle.text.style!.color, subtitleTextStyle.color);
+    expect(subtitle.text.style!.fontStyle, subtitleTextStyle.fontStyle);
     final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.fontSize, 18.0);
+    expect(trailing.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+    expect(trailing.text.style!.color, leadingAndTrailingTextStyle.color);
+    expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
+  });
+
+  testWidgetsWithLeakTracking(
+    "Material3 - ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
+    (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        useMaterial3: true,
+        listTileTheme: const ListTileThemeData(
+          titleTextStyle: TextStyle(fontSize: 20.0),
+          subtitleTextStyle: TextStyle(fontSize: 17.5),
+          leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
+        ),
+      );
+      const TextStyle titleTextStyle = TextStyle(
+        fontSize: 23.0,
+        color: Color(0xffff0000),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle subtitleTextStyle = TextStyle(
+        fontSize: 20.0,
+        color: Color(0xff00ff00),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+        fontSize: 18.0,
+        color: Color(0xff0000ff),
+        fontStyle: FontStyle.italic,
+      );
+
+      Widget buildFrame() {
+        return MaterialApp(
+          theme: theme,
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const ListTile(
+                    titleTextStyle: titleTextStyle,
+                    subtitleTextStyle: subtitleTextStyle,
+                    leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
+                    leading: TestText('leading'),
+                    title: TestText('title'),
+                    subtitle: TestText('subtitle'),
+                    trailing: TestText('trailing'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame());
+      final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+      expect(leading.text.style!.color, leadingAndTrailingTextStyle.color);
+      expect(leading.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
+      final RenderParagraph title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, titleTextStyle.fontSize);
+      expect(title.text.style!.color, titleTextStyle.color);
+      expect(title.text.style!.fontStyle, titleTextStyle.fontStyle);
+      final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, subtitleTextStyle.fontSize);
+      expect(subtitle.text.style!.color, subtitleTextStyle.color);
+      expect(subtitle.text.style!.fontStyle, subtitleTextStyle.fontStyle);
+      final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+      expect(trailing.text.style!.color, leadingAndTrailingTextStyle.color);
+      expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
+  });
+
+  testWidgetsWithLeakTracking(
+    "Material2 - ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
+    (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        useMaterial3: false,
+        listTileTheme: const ListTileThemeData(
+          titleTextStyle: TextStyle(fontSize: 20.0),
+          subtitleTextStyle: TextStyle(fontSize: 17.5),
+          leadingAndTrailingTextStyle: TextStyle(fontSize: 15.0),
+        ),
+      );
+      const TextStyle titleTextStyle = TextStyle(
+        fontSize: 23.0,
+        color: Color(0xffff0000),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle subtitleTextStyle = TextStyle(
+        fontSize: 20.0,
+        color: Color(0xff00ff00),
+        fontStyle: FontStyle.italic,
+      );
+      const TextStyle leadingAndTrailingTextStyle = TextStyle(
+        fontSize: 18.0,
+        color: Color(0xff0000ff),
+        fontStyle: FontStyle.italic,
+      );
+
+      Widget buildFrame() {
+        return MaterialApp(
+          theme: theme,
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const ListTile(
+                    titleTextStyle: titleTextStyle,
+                    subtitleTextStyle: subtitleTextStyle,
+                    leadingAndTrailingTextStyle: leadingAndTrailingTextStyle,
+                    leading: TestText('leading'),
+                    title: TestText('title'),
+                    subtitle: TestText('subtitle'),
+                    trailing: TestText('trailing'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame());
+      final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
+      expect(leading.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+      expect(leading.text.style!.color, leadingAndTrailingTextStyle.color);
+      expect(leading.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
+      final RenderParagraph title = _getTextRenderObject(tester, 'title');
+      expect(title.text.style!.fontSize, titleTextStyle.fontSize);
+      expect(title.text.style!.color, titleTextStyle.color);
+      expect(title.text.style!.fontStyle, titleTextStyle.fontStyle);
+      final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
+      expect(subtitle.text.style!.fontSize, subtitleTextStyle.fontSize);
+      expect(subtitle.text.style!.color, subtitleTextStyle.color);
+      expect(subtitle.text.style!.fontStyle, subtitleTextStyle.fontStyle);
+      final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
+      expect(trailing.text.style!.fontSize, leadingAndTrailingTextStyle.fontSize);
+      expect(trailing.text.style!.color, leadingAndTrailingTextStyle.color);
+      expect(trailing.text.style!.fontStyle, leadingAndTrailingTextStyle.fontStyle);
   });
 
   testWidgetsWithLeakTracking("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {

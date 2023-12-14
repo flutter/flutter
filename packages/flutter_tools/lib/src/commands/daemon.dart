@@ -156,6 +156,7 @@ class Daemon {
     this.connection, {
     this.notifyingLogger,
     this.logToStdout = false,
+    FileTransfer fileTransfer = const FileTransfer(),
   }) {
     // Set up domains.
     registerDomain(daemonDomain = DaemonDomain(this));
@@ -163,7 +164,7 @@ class Daemon {
     registerDomain(deviceDomain = DeviceDomain(this));
     registerDomain(emulatorDomain = EmulatorDomain(this));
     registerDomain(devToolsDomain = DevToolsDomain(this));
-    registerDomain(proxyDomain = ProxyDomain(this));
+    registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -335,6 +336,7 @@ class DaemonDomain extends Domain {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
+    registerHandler('setNotifyVerbose', setNotifyVerbose);
 
     sendEvent(
       'daemon.connected',
@@ -346,7 +348,7 @@ class DaemonDomain extends Domain {
 
     _subscription = daemon.notifyingLogger!.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
-        if (message.level == 'status') {
+        if (message.level == 'status' || message.level == 'trace') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
           // ignore: avoid_print
@@ -461,6 +463,11 @@ class DaemonDomain extends Domain {
       };
     }
   }
+
+  /// If notifyVerbose is set, the daemon will forward all verbose logs.
+  Future<void> setNotifyVerbose(Map<String, Object?> args) async {
+    daemon.notifyingLogger?.notifyVerbose = _getBoolArg(args, 'verbose') ?? true;
+  }
 }
 
 typedef RunOrAttach = Future<void> Function({
@@ -539,6 +546,7 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         systemClock: globals.systemClock,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -555,6 +563,7 @@ class AppDomain extends Domain {
         multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
+        analytics: globals.analytics,
       );
     } else {
       runner = ColdRunner(
@@ -1210,7 +1219,7 @@ Object? _toJsonable(Object? obj) {
 }
 
 class NotifyingLogger extends DelegatingLogger {
-  NotifyingLogger({ required this.verbose, required Logger parent }) : super(parent) {
+  NotifyingLogger({ required this.verbose, required Logger parent, this.notifyVerbose = false }) : super(parent) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
@@ -1219,6 +1228,8 @@ class NotifyingLogger extends DelegatingLogger {
   final bool verbose;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
+
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1277,6 +1288,10 @@ class NotifyingLogger extends DelegatingLogger {
 
   @override
   void printTrace(String message) {
+    if (notifyVerbose) {
+      _sendMessage(LogMessage('trace', message));
+      return;
+    }
     if (!verbose) {
       return;
     }
@@ -1398,7 +1413,10 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(Daemon daemon) : super(daemon, 'proxy') {
+  ProxyDomain(Daemon daemon, {
+    required FileTransfer fileTransfer,
+  }) : _fileTransfer = fileTransfer,
+    super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);
@@ -1406,6 +1424,8 @@ class ProxyDomain extends Domain {
     registerHandler('disconnect', disconnect);
     registerHandlerWithBinary('write', write);
   }
+
+  final FileTransfer _fileTransfer;
 
   final Map<String, Socket> _forwardedConnections = <String, Socket>{};
   int _id = 0;
@@ -1421,12 +1441,26 @@ class ProxyDomain extends Domain {
   /// Calculate rolling hashes for a file in the local temporary directory.
   Future<Map<String, Object?>?> calculateFileHashes(Map<String, Object?> args) async {
     final String path = _getStringArg(args, 'path', required: true)!;
+    final bool cacheResult = _getBoolArg(args, 'cacheResult') ?? false;
     final File file = tempDirectory.childFile(path);
     if (!await file.exists()) {
       return null;
     }
-    final BlockHashes result = await FileTransfer().calculateBlockHashesOfFile(file);
-    return result.toJson();
+    final File hashFile = file.parent.childFile('${file.basename}.hashes');
+    if (hashFile.existsSync() && hashFile.statSync().modified.isAfter(file.statSync().modified)) {
+      // If the cached hash file is newer than the file, assume that the cached
+      // is up to date. Return the cached result directly.
+      final String cachedJson = await hashFile.readAsString();
+      return json.decode(cachedJson) as Map<String, Object?>;
+    }
+    final BlockHashes result = await _fileTransfer.calculateBlockHashesOfFile(file);
+    final Map<String, Object?> resultObject = result.toJson();
+
+    if (cacheResult) {
+      await hashFile.writeAsString(json.encode(resultObject));
+    }
+
+    return resultObject;
   }
 
   Future<bool?> updateFile(Map<String, Object?> args, Stream<List<int>>? binary) async {
@@ -1437,7 +1471,7 @@ class ProxyDomain extends Domain {
     }
     final List<Map<String, Object?>> deltaJson = (args['delta']! as List<Object?>).cast<Map<String, Object?>>();
     final List<FileDeltaBlock> delta = FileDeltaBlock.fromJsonList(deltaJson);
-    final bool result = await FileTransfer().rebuildFile(file, delta, binary!);
+    final bool result = await _fileTransfer.rebuildFile(file, delta, binary!);
     return result;
   }
 

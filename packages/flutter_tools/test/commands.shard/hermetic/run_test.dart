@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../../src/common.dart';
@@ -192,6 +193,7 @@ void main() {
       late Artifacts artifacts;
       late TestUsage usage;
       late FakeAnsiTerminal fakeTerminal;
+      late analytics.FakeAnalytics fakeAnalytics;
 
       setUpAll(() {
         Cache.disableLocking();
@@ -211,6 +213,10 @@ void main() {
         libDir.createSync();
         final File mainFile = libDir.childFile('main.dart');
         mainFile.writeAsStringSync('void main() {}');
+        fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fs,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
       });
 
       testUsingContext('exits with a user message when no supported devices attached', () async {
@@ -478,6 +484,23 @@ void main() {
             'cd58': 'false',
           })
         )));
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            analytics.Event.commandUsageValues(
+              workflow: 'run',
+              commandHasTerminal: globals.stdio.hasTerminal,
+              runIsEmulator: false,
+              runTargetName: 'ios',
+              runTargetOsVersion: 'iOS 13',
+              runModeName: 'debug',
+              runProjectModule: false,
+              runProjectHostLanguage: 'swift',
+              runIOSInterfaceType: 'usb',
+              runIsTest: false,
+            ),
+          ),
+        );
       }, overrides: <Type, Generator>{
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
@@ -487,6 +510,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
         Usage: () => usage,
+        analytics.Analytics: () => fakeAnalytics,
       });
 
       testUsingContext('correctly reports tests to usage', () async {
@@ -513,6 +537,23 @@ void main() {
             'cd58': 'true',
           })),
         ));
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            analytics.Event.commandUsageValues(
+              workflow: 'run',
+              commandHasTerminal: globals.stdio.hasTerminal,
+              runIsEmulator: false,
+              runTargetName: 'ios',
+              runTargetOsVersion: 'iOS 13',
+              runModeName: 'debug',
+              runProjectModule: false,
+              runProjectHostLanguage: 'swift',
+              runIOSInterfaceType: 'usb',
+              runIsTest: true,
+            ),
+          ),
+        );
       }, overrides: <Type, Generator>{
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
@@ -522,6 +563,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         Stdio: () => FakeStdio(),
         Usage: () => usage,
+        analytics.Analytics: () => fakeAnalytics,
       });
 
       group('--machine', () {
@@ -919,6 +961,99 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
     });
+
+    group('--web-header', () {
+      setUp(() {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+        testDeviceManager.devices = <Device>[device];
+      });
+
+      testUsingContext('can accept simple, valid values', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header', 'foo = bar',
+          ]), throwsToolExit());
+
+        final DebuggingOptions options = await command.createDebuggingOptions(true);
+        expect(options.webHeaders, <String, String>{'foo': 'bar'});
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when no value is provided', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header',
+            'foo',
+          ]), throwsToolExit(message: 'Invalid web headers: foo'));
+
+        await expectLater(
+          () => command.createDebuggingOptions(true),
+          throwsToolExit(),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when value includes delimiter characters', () async {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header', 'hurray/headers=flutter',
+          ]), throwsToolExit());
+
+        await expectLater(
+          () => command.createDebuggingOptions(true),
+          throwsToolExit(message: 'Invalid web headers: hurray/headers=flutter'),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('accepts headers with commas in them', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub', '--no-hot',
+            '--web-header', 'hurray=flutter,flutter=hurray',
+          ]), throwsToolExit());
+
+        final DebuggingOptions options = await command.createDebuggingOptions(true);
+        expect(options.webHeaders, <String, String>{
+          'hurray': 'flutter,flutter=hurray'
+        });
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => BufferLogger.test(),
+        DeviceManager: () => testDeviceManager,
+      });
+    });
   });
 
   group('dart-defines and web-renderer options', () {
@@ -1086,6 +1221,7 @@ void main() {
       '--use-test-fonts',
       '--trace-skia',
       '--trace-systrace',
+      '--trace-to-file=path/to/trace.binpb',
       '--verbose-system-logs',
       '--null-assertions',
       '--native-null-assertions',
@@ -1106,6 +1242,7 @@ void main() {
     expect(options.useTestFonts, true);
     expect(options.traceSkia, true);
     expect(options.traceSystrace, true);
+    expect(options.traceToFile, 'path/to/trace.binpb');
     expect(options.verboseSystemLogs, true);
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
@@ -1335,13 +1472,10 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
 class TestRunCommandForUsageValues extends RunCommand {
   TestRunCommandForUsageValues({
-   this.devices,
-  });
-
-  @override
-  // devices is not set within usageValues, so we override the field
-  // ignore: overridden_fields
-  List<Device>? devices;
+    List<Device>? devices,
+  }) {
+    this.devices = devices;
+  }
 
   @override
   Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
@@ -1433,6 +1567,7 @@ class CapturingAppDomain extends AppDomain {
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
+    String? flavor,
   }) async {
     this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;

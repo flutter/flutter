@@ -9,8 +9,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../foundation/leak_tracking.dart';
 
 void main() {
   testWidgetsWithLeakTracking('Slider value indicator', (WidgetTester tester) async {
@@ -367,8 +367,14 @@ Future<void> _pressStartThumb(WidgetTester tester) async {
   final Offset topLeft = tester.getTopLeft(find.byType(Slider));
   final Offset left = (bottomLeft + topLeft) / 2;
   final Offset start = left + const Offset(24, 0);
-  await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
+
+  addTearDown(()async {
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Future<void> _pressMiddleThumb(WidgetTester tester) async {
@@ -381,8 +387,14 @@ Future<void> _pressEndThumb(WidgetTester tester) async {
   final Offset topRight = tester.getTopRight(find.byType(Slider));
   final Offset right = (bottomRight + topRight) / 2;
   final Offset start = right - const Offset(24, 0);
-  await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   await tester.pumpAndSettle();
+
+  addTearDown(()async {
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
 
 Future<void> _buildValueIndicatorStaticSlider(

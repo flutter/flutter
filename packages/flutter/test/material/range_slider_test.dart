@@ -8,9 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
@@ -1336,7 +1334,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
     RangeValues values = const RangeValues(0.5, 0.75);
@@ -1394,7 +1392,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.5, 0.75);
     const Color fillColor = Color(0xf55f5f5f);
 
@@ -2543,7 +2541,7 @@ void main() {
     );
   });
 
-   testWidgetsWithLeakTracking('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/128433
 
     int startFired = 0;
@@ -2582,5 +2580,35 @@ void main() {
 
     expect(startFired, equals(1));
     expect(endFired, equals(1));
+  });
+
+  testWidgetsWithLeakTracking('RangeSlider in a ListView does not throw an exception', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126648
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: ListView(
+              children: <Widget>[
+                const SizedBox(
+                  height: 600,
+                  child: Placeholder(),
+                ),
+                RangeSlider(
+                  values: const RangeValues(40, 80),
+                  max: 100,
+                  onChanged: (RangeValues newValue) { },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // No exception should be thrown.
+    expect(tester.takeException(), null);
   });
 }

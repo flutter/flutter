@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:process/process.dart';
@@ -61,6 +59,7 @@ import 'persistent_tool_state.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
+import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
@@ -83,16 +82,18 @@ Future<T> runInContext<T>(
     return runner();
   }
 
+  // TODO(ianh): We should split this into two, one for tests (which should be
+  // in test/), and one for production (which should be in executable.dart).
   return context.run<T>(
     name: 'global fallbacks',
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      Analytics: () => Analytics(
-        tool: DashTool.flutterTool,
-        flutterChannel: globals.flutterVersion.channel,
-        flutterVersion: globals.flutterVersion.frameworkVersion,
-        dartVersion: globals.flutterVersion.dartSdkVersion,
+      Analytics: () => getAnalytics(
+        runningOnBot: runningOnBot,
+        flutterVersion: globals.flutterVersion,
+        environment: globals.platform.environment,
+        clientIde: globals.platform.environment['FLUTTER_HOST'],
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
@@ -101,6 +102,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
         androidStudio: globals.androidStudio,
@@ -166,6 +168,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods!,
@@ -218,7 +221,10 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
-      Doctor: () => Doctor(logger: globals.logger),
+      Doctor: () => Doctor(
+        logger: globals.logger,
+        clock: globals.systemClock,
+      ),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
         java: globals.java,
@@ -295,6 +301,7 @@ Future<T> runInContext<T>(
       MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
@@ -359,6 +366,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
@@ -375,6 +383,8 @@ Future<T> runInContext<T>(
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
+        fileSystem: globals.fs,
+        analytics: globals.analytics,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
@@ -382,6 +392,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
       ),
     },
   );

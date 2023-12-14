@@ -95,6 +95,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onPaste,
     required VoidCallback? onSelectAll,
     required VoidCallback? onLookUp,
+    required VoidCallback? onSearchWeb,
+    required VoidCallback? onShare,
     required VoidCallback? onLiveTextInput,
     required this.anchors,
   }) : children = null,
@@ -105,6 +107,8 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
          onPaste: onPaste,
          onSelectAll: onSelectAll,
          onLookUp: onLookUp,
+         onSearchWeb: onSearchWeb,
+         onShare: onShare,
          onLiveTextInput: onLiveTextInput
        );
 

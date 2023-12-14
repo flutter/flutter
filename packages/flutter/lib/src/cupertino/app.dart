@@ -145,8 +145,6 @@ class CupertinoApp extends StatefulWidget {
   /// unsupported route.
   ///
   /// This class creates an instance of [WidgetsApp].
-  ///
-  /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   const CupertinoApp({
     super.key,
     this.navigatorKey,
@@ -157,7 +155,7 @@ class CupertinoApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
-    this.onNavigationNotification = WidgetsApp.defaultOnNavigationNotification,
+    this.onNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
     this.title = '',
@@ -203,7 +201,7 @@ class CupertinoApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
-    this.onNavigationNotification = WidgetsApp.defaultOnNavigationNotification,
+    this.onNavigationNotification,
     this.color,
     this.locale,
     this.localizationsDelegates,
@@ -504,6 +502,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
   void initState() {
     super.initState();
     _heroController = CupertinoApp.createCupertinoHeroController();
+  }
+
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
   }
 
   // Combine the default localization for Cupertino with the ones contributed

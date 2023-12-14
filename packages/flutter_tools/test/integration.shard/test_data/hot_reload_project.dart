@@ -12,7 +12,7 @@ class HotReloadProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=3.0.0-0 <4.0.0'
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:

@@ -401,7 +401,6 @@ class UpdateFSReport {
     bool success = false,
     int invalidatedSourcesCount = 0,
     int syncedBytes = 0,
-    this.fastReassembleClassName,
     int scannedSourcesCount = 0,
     Duration compileDuration = Duration.zero,
     Duration transferDuration = Duration.zero,
@@ -423,7 +422,6 @@ class UpdateFSReport {
   Duration get findInvalidatedDuration => _findInvalidatedDuration;
 
   bool _success;
-  String? fastReassembleClassName;
   int _invalidatedSourcesCount;
   int _syncedBytes;
   int _scannedSourcesCount;
@@ -435,7 +433,6 @@ class UpdateFSReport {
     if (!report._success) {
       _success = false;
     }
-    fastReassembleClassName ??= report.fastReassembleClassName;
     _invalidatedSourcesCount += report._invalidatedSourcesCount;
     _syncedBytes += report._syncedBytes;
     _scannedSourcesCount += report._scannedSourcesCount;
@@ -495,7 +492,6 @@ class DevFS {
   DateTime? lastCompiled;
   DateTime? _previousCompiled;
   PackageConfig? lastPackageConfig;
-  File? _widgetCacheOutputFile;
 
   Uri? _baseUri;
   Uri? get baseUri => _baseUri;
@@ -555,22 +551,6 @@ class DevFS {
     lastCompiled = _previousCompiled;
   }
 
-
-  /// If the build method of a single widget was modified, return the widget name.
-  ///
-  /// If any other changes were made, or there is an error scanning the file,
-  /// return `null`.
-  String? _checkIfSingleWidgetReloadApplied() {
-    final File? widgetCacheOutputFile = _widgetCacheOutputFile;
-    if (widgetCacheOutputFile != null && widgetCacheOutputFile.existsSync()) {
-      final String widget = widgetCacheOutputFile.readAsStringSync().trim();
-      if (widget.isNotEmpty) {
-        return widget;
-      }
-    }
-    return null;
-  }
-
   /// Updates files on the device.
   ///
   /// Returns the number of bytes synced.
@@ -596,7 +576,6 @@ class DevFS {
     final DateTime candidateCompileTime = DateTime.now();
     didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
-    _widgetCacheOutputFile = _fileSystem.file('$dillOutputPath.incremental.dill.widget_cache');
 
     // Update modified files
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
@@ -741,7 +720,6 @@ class DevFS {
       success: true,
       syncedBytes: syncedBytes,
       invalidatedSourcesCount: invalidatedFiles.length,
-      fastReassembleClassName: _checkIfSingleWidgetReloadApplied(),
       compileDuration: compileTimer.elapsed,
       transferDuration: transferTimer.elapsed,
     );

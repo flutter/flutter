@@ -251,21 +251,25 @@ class _TextEditingValueAccumulator {
 /// As an example, [FilteringTextInputFormatter] typically shouldn't be used
 /// with [RegExp]s that contain positional matchers (`^` or `$`) since these
 /// patterns are usually meant for matching the whole string.
+///
+/// ### Quote characters on iOS
+///
+/// When filtering single (`'`) or double (`"`) quote characters, be aware that
+/// the default iOS keyboard actually inserts special directional versions of
+/// these characters (`‘` and `’` for single quote, and `“` and `”` for double
+/// quote). Consider including all three variants in your regular expressions to
+/// support iOS.
 class FilteringTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that replaces banned patterns with the given
   /// [replacementString].
   ///
   /// If [allow] is true, then the filter pattern is an allow list,
   /// and characters must match the pattern to be accepted. See also
-  /// the `FilteringTextInputFormatter.allow` constructor.
-  // TODO(goderbauer): Cannot link to the constructor because of https://github.com/dart-lang/dartdoc/issues/2276.
+  /// the [FilteringTextInputFormatter.allow()] constructor.
   ///
   /// If [allow] is false, then the filter pattern is a deny list,
   /// and characters that match the pattern are rejected. See also
   /// the [FilteringTextInputFormatter.deny] constructor.
-  ///
-  /// The [filterPattern], [allow], and [replacementString] arguments
-  /// must not be null.
   FilteringTextInputFormatter(
     this.filterPattern, {
     required this.allow,
@@ -273,18 +277,12 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   });
 
   /// Creates a formatter that only allows characters matching a pattern.
-  ///
-  /// The [filterPattern] and [replacementString] arguments
-  /// must not be null.
   FilteringTextInputFormatter.allow(
     Pattern filterPattern, {
     String replacementString = '',
   }) : this(filterPattern, allow: true, replacementString: replacementString);
 
   /// Creates a formatter that blocks characters matching a pattern.
-  ///
-  /// The [filterPattern] and [replacementString] arguments
-  /// must not be null.
   FilteringTextInputFormatter.deny(
     Pattern filterPattern, {
     String replacementString = '',
@@ -421,7 +419,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
-      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart; // ignore_clamp_double_lint
+      final int removedLength = originalIndex.clamp(regionStart, regionEnd) - regionStart;
       return replacedLength - removedLength;
     }
 

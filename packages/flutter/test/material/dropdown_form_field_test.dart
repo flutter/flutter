@@ -4,11 +4,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
@@ -150,7 +149,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87102
-  testWidgets('label position test - show hint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show hint', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -289,7 +288,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show hint: enable + empty item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -444,7 +443,7 @@ void main() {
     expect(nonEmptyLabel, nullValueLabel);
   });
 
-  testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
     int validateCalled = 0;
 
@@ -859,7 +858,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     final Key buttonKeyOne = UniqueKey();
     final Key buttonKeyTwo = UniqueKey();
@@ -954,7 +953,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
     const List<String> items = <String>[
       'One',
       'Two',
@@ -998,7 +997,7 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String? value = 'one';
     void onChanged(String? newValue) {
@@ -1044,7 +1043,7 @@ void main() {
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 
-  testWidgets('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
     String currentValue = 'two';
 
     await tester.pumpWidget(
@@ -1134,5 +1133,150 @@ void main() {
       buttonBox.localToGlobal(Offset(buttonBox.size.width / 2.0, buttonBox.size.height / 2.0)),
       selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
     );
+  });
+
+  testWidgetsWithLeakTracking('InputDecoration borders are used for clipping', (WidgetTester tester) async {
+    const BorderRadius errorBorderRadius = BorderRadius.all(Radius.circular(5.0));
+    const BorderRadius focusedErrorBorderRadius = BorderRadius.all(Radius.circular(6.0));
+    const BorderRadius focusedBorder = BorderRadius.all(Radius.circular(7.0));
+    const BorderRadius enabledBorder = BorderRadius.all(Radius.circular(9.0));
+
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    const String errorText = 'This is an error';
+    bool showError = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            errorBorder: OutlineInputBorder(
+              borderRadius: errorBorderRadius,
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: focusedErrorBorderRadius,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: focusedBorder,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: enabledBorder,
+            ),
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButtonFormField<String>(
+                  value: 'two',
+                  onChanged:(String? value) {
+                    setState(() {
+                      if (value == 'three') {
+                        showError = true;
+                      } else {
+                        showError = false;
+                      }
+                    });
+                  },
+                  decoration: InputDecoration(
+                    errorText: showError ? errorText : null,
+                  ),
+                  focusNode: focusNode,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item, key: ValueKey<String>('${item}Text')),
+                    );
+                  }).toList(),
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test enabled border.
+    InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, enabledBorder);
+
+    // Test focused border.
+    focusNode.requestFocus();
+    await tester.pump();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, focusedBorder);
+
+    // Test focused error border.
+    await tester.tap(find.text('two'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, focusedErrorBorderRadius);
+
+    // Test error border with no focus.
+    focusNode.unfocus();
+    await tester.pump();
+
+    // Hovering over the widget should show the error border.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.text('three').last));
+    await tester.pumpAndSettle();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, errorBorderRadius);
+  });
+
+  testWidgetsWithLeakTracking('DropdownButtonFormField onChanged is called when the form is reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123009.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String? value;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Form(
+            key: formKey,
+            child: DropdownButtonFormField<String>(
+              key: stateKey,
+              value: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (String? newValue) {
+                value = newValue;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial value is 'One'.
+    expect(value, isNull);
+    expect(stateKey.currentState!.value, equals('One'));
+
+    // Select 'Two'.
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Two').last);
+    await tester.pumpAndSettle();
+    expect(value, equals('Two'));
+    expect(stateKey.currentState!.value, equals('Two'));
+
+    // Should be back to 'One' when the form is reset.
+    formKey.currentState!.reset();
+    expect(value, equals('One'));
+    expect(stateKey.currentState!.value, equals('One'));
   });
 }

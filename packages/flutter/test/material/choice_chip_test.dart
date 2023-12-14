@@ -4,9 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 RenderBox getMaterialBox(WidgetTester tester, Finder type) {
   return tester.firstRenderObject<RenderBox>(
@@ -24,6 +22,16 @@ Material getMaterial(WidgetTester tester) {
       matching: find.byType(Material),
     ),
   );
+}
+
+IconThemeData getIconData(WidgetTester tester) {
+  final IconTheme iconTheme = tester.firstWidget(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(IconTheme),
+    ),
+  );
+  return iconTheme.data;
 }
 
 DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
@@ -86,7 +94,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -218,7 +229,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -569,6 +583,32 @@ void main() {
     final RawChip rawChip = tester.widget(find.byType(RawChip));
     expect(rawChip.showCheckmark, showCheckmark);
     expect(rawChip.checkmarkColor, checkmarkColor);
+  });
+
+  testWidgetsWithLeakTracking('ChoiceChip uses provided iconTheme', (WidgetTester tester) async {
+    Widget buildChip({ IconThemeData? iconTheme }) {
+      return MaterialApp(
+        home: Material(
+          child: ChoiceChip(
+            iconTheme: iconTheme,
+            avatar: const Icon(Icons.add),
+            label: const Text('Test'),
+            selected: false,
+            onSelected: (bool _) {},
+          ),
+        ),
+      );
+    }
+
+    // Test default icon theme.
+    await tester.pumpWidget(buildChip());
+
+    expect(getIconData(tester).color, ThemeData().iconTheme.color);
+
+    // Test provided icon theme.
+    await tester.pumpWidget(buildChip(iconTheme: const IconThemeData(color: Color(0xff00ff00))));
+
+    expect(getIconData(tester).color, const Color(0xff00ff00));
   });
 
   group('Material 2', () {

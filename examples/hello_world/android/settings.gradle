@@ -19,14 +19,16 @@ pluginManagement {
     // Flutter Gradle Plugin ships together with the Flutter SDK
     includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
-    plugins {
-        // Flutter Gradle Plugin's ID is defined in /packages/flutter_tools/gradle/build.gradle.kts.
-        // We set `apply false`, because we don't want to apply the plugin to
-        // the `android` root project, but only to the `app` subproject.
-        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
-include ':app'
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "7.4.2" apply false
+}
 
-apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+include ':app'

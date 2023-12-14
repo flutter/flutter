@@ -12,8 +12,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
@@ -147,8 +146,8 @@ void main() {
     expect(paragraph.text.style!.color, equals(foregroundColor));
   });
 
-  testWidgetsWithLeakTracking('CircleAvatar default colors', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgetsWithLeakTracking('Material3 - CircleAvatar default colors', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       wrap(
         child: Theme(
@@ -287,7 +286,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('CircleAvatar default colors with light theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - CircleAvatar default colors with light theme', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade100);
       await tester.pumpWidget(
         wrap(
@@ -309,7 +308,7 @@ void main() {
       expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
     });
 
-    testWidgetsWithLeakTracking('CircleAvatar default colors with dark theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - CircleAvatar default colors with dark theme', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade800);
       await tester.pumpWidget(
         wrap(

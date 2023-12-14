@@ -134,8 +134,6 @@ const double _kTriangleHeight = _kStepSize * 0.866025; // Triangle height. sqrt(
 @immutable
 class Step {
   /// Creates a step for a [Stepper].
-  ///
-  /// The [title], [content], and [state] arguments must not be null.
   const Step({
     required this.title,
     this.subtitle,
@@ -197,8 +195,6 @@ class Stepper extends StatefulWidget {
   /// This widget is not meant to be rebuilt with a different list of steps
   /// unless a key is provided in order to distinguish the old stepper from the
   /// new one.
-  ///
-  /// The [steps], [type], and [currentStep] arguments must not be null.
   const Stepper({
     super.key,
     required this.steps,

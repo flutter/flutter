@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../widgets/clipboard_utils.dart';
 
 class TestMaterialLocalizations extends DefaultMaterialLocalizations {
@@ -51,6 +51,7 @@ void main() {
     ThemeData? theme,
     Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
     bool acceptEmptyDate = false,
+    FocusNode? focusNode,
   }) {
     return MaterialApp(
       theme: theme ?? ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -72,6 +73,7 @@ void main() {
             fieldLabelText: fieldLabelText,
             autofocus: autofocus,
             acceptEmptyDate: acceptEmptyDate,
+            focusNode: focusNode,
           ),
         ),
       ),
@@ -377,5 +379,21 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(errorFormatText), findsOneWidget);
     });
+  });
+
+  testWidgetsWithLeakTracking('FocusNode can request focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(inputDatePickerField(
+      focusNode: focusNode,
+    ));
+    expect((tester.widget(find.byType(TextField)) as TextField).focusNode, focusNode);
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
   });
 }

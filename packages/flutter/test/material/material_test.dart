@@ -10,9 +10,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
@@ -1080,7 +1078,7 @@ void main() {
     });
   });
 
-  testWidgets('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
     final GlobalKey sizedBoxKey = GlobalKey();
     final GlobalKey materialKey = GlobalKey();
     await tester.pumpWidget(Material(
@@ -1098,8 +1096,11 @@ void main() {
     controller.addInkFeature(tracker);
     expect(tracker.paintCount, 0);
 
+    final ContainerLayer layer1 = ContainerLayer();
+    addTearDown(layer1.dispose);
+
     // Force a repaint. Since it's offstage, the ink feature should not get painted.
-    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(layer1, Rect.largest), Offset.zero);
     expect(tracker.paintCount, 0);
 
     await tester.pumpWidget(Material(
@@ -1113,9 +1114,37 @@ void main() {
     // now onstage.
     expect(tracker.paintCount, 1);
 
+    final ContainerLayer layer2 = ContainerLayer();
+    addTearDown(layer2.dispose);
+
     // Force a repaint again. This time, it gets repainted because it is onstage.
-    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
+    materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(layer2, Rect.largest), Offset.zero);
     expect(tracker.paintCount, 2);
+
+    tracker.dispose();
+  });
+
+  testWidgetsWithLeakTracking('$InkFeature dispatches memory events', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Material(
+        child: SizedBox(width: 20, height: 20),
+      ),
+    );
+
+    final Element element = tester.element(find.byType(SizedBox));
+    final MaterialInkController controller = Material.of(element);
+    final RenderBox referenceBox = element.findRenderObject()! as RenderBox;
+
+    await expectLater(
+      await memoryEvents(
+        () => _InkFeature(
+          controller: controller,
+          referenceBox: referenceBox,
+        ).dispose(),
+        _InkFeature,
+      ),
+      areCreateAndDispose,
+    );
   });
 
   group('LookupBoundary', () {
@@ -1222,4 +1251,16 @@ class TrackPaintInkFeature extends InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     paintCount += 1;
   }
+}
+
+class _InkFeature extends InkFeature {
+  _InkFeature({
+    required super.controller,
+    required super.referenceBox,
+  }) {
+    controller.addInkFeature(this);
+  }
+
+  @override
+  void paintFeature(Canvas canvas, Matrix4 transform) {}
 }

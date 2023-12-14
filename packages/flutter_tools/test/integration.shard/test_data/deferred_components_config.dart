@@ -77,7 +77,7 @@ class DeferredComponentModule {
     apply plugin: "com.android.dynamic-feature"
 
     android {
-        compileSdkVersion 33
+        compileSdk 34
 
         sourceSets {
             applicationVariants.all { variant ->

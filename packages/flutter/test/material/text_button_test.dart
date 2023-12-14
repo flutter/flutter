@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -159,7 +155,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default TextButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default TextButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -201,11 +197,13 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    focusNode.dispose();
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('TextButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     Color getTextColor(Set<MaterialState> states) {
@@ -268,6 +266,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    focusNode.dispose();
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
@@ -323,6 +323,8 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('TextButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -390,6 +392,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('TextButton uses stateful color for icon color in different states', (WidgetTester tester) async {
@@ -457,6 +461,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('TextButton has no clip by default', (WidgetTester tester) async {
@@ -533,6 +539,8 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does TextButton contribute semantics', (WidgetTester tester) async {
@@ -621,12 +629,8 @@ void main() {
       ),
     );
 
-    final Size textButtonSize = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? const Size(68.5, 48.0)
-      : const Size(69.0, 48.0);
-    final Size textSize = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? const Size(52.5, 18.0)
-      : const Size(53.0, 18.0);
+    const Size textButtonSize = Size(68.5, 48.0);
+    const Size textSize = Size(52.5, 18.0);
     expect(tester.getSize(find.byType(TextButton)), textButtonSize);
     expect(tester.getSize(find.byType(Text)), textSize);
 
@@ -802,6 +806,8 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('disabled and hovered TextButton responds to mouse-exit', (WidgetTester tester) async {
@@ -893,6 +899,8 @@ void main() {
 
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('When TextButton disable, Can not set TextButton focus.', (WidgetTester tester) async {
@@ -916,6 +924,8 @@ void main() {
 
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('TextButton responds to density changes.', (WidgetTester tester) async {
@@ -1241,6 +1251,37 @@ void main() {
       ),
     );
     expect(paddingWidget.padding, const EdgeInsets.all(22));
+  });
+
+  testWidgetsWithLeakTracking('Override theme fontSize changes padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(
+          colorScheme: const ColorScheme.light(),
+          textTheme: const TextTheme(labelLarge: TextStyle(fontSize: 28.0)),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () {},
+                  child: const Text('text'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byType(TextButton),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 8));
   });
 
   testWidgetsWithLeakTracking('M3 TextButton has correct default padding', (WidgetTester tester) async {
@@ -1679,6 +1720,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
@@ -1793,6 +1835,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(

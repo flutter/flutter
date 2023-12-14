@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' as ui show ViewConstraints, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -152,6 +152,13 @@ class BoxConstraints extends Constraints {
        maxWidth = width ?? double.infinity,
        minHeight = height ?? double.infinity,
        maxHeight = height ?? double.infinity;
+
+  /// Creates box constraints that match the given view constraints.
+  BoxConstraints.fromViewConstraints(ui.ViewConstraints constraints)
+      : minWidth = constraints.minWidth,
+        maxWidth = constraints.maxWidth,
+        minHeight = constraints.minHeight,
+        maxHeight = constraints.maxHeight;
 
   /// The minimum width that satisfies the constraints.
   final double minWidth;
@@ -899,8 +906,6 @@ class BoxHitTestResult extends HitTestResult {
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry<RenderBox> {
   /// Creates a box hit test entry.
-  ///
-  /// The [localPosition] argument must not be null.
   BoxHitTestEntry(super.target, this.localPosition);
 
   /// The position of the hit test in the local coordinates of [target].
@@ -911,6 +916,15 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
+///
+/// {@tool dartpad}
+/// Parent data is used to communicate to a render object about its
+/// children. In this example, there are two render objects that perform
+/// text layout. They use parent data to identify the kind of child they
+/// are laying out, and space the children accordingly.
+///
+/// ** See code in examples/api/lib/rendering/box/parent_data.0.dart **
+/// {@end-tool}
 class BoxParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system.
   Offset offset = Offset.zero;
@@ -1899,7 +1913,7 @@ abstract class RenderBox extends RenderObject {
   /// [debugCannotComputeDryLayout] from within an assert and return a dummy
   /// value of `const Size(0, 0)`.
   @protected
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
       error: FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".'),

@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
   expect(boundaries.first, 0);
@@ -1192,9 +1193,9 @@ void main() {
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/87543
 
   test('TextPainter handles invalid UTF-16', () {
-    Object? exception;
+    FlutterErrorDetails? error;
     FlutterError.onError = (FlutterErrorDetails details) {
-      exception = details.exception;
+      error = details;
     };
 
     final TextPainter painter = TextPainter()
@@ -1206,7 +1207,8 @@ void main() {
     painter.layout();
     // The layout should include one replacement character.
     expect(painter.width, equals(fontSize));
-    expect(exception, isNotNull);
+    expect(error!.exception, isNotNull);
+    expect(error!.silent, isTrue);
     painter.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87544
 
@@ -1509,9 +1511,6 @@ void main() {
   });
 
   test('TextPainter line breaking does not round to integers', () {
-    if (!ui.ParagraphBuilder.shouldDisableRoundingHack) {
-      return;
-    }
     const double fontSize = 1.25;
     const String text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);
@@ -1528,6 +1527,13 @@ void main() {
         expect(metrics, hasLength(1));
     }
   }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
+
+  test('TextPainter dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(() => TextPainter().dispose(), TextPainter),
+      areCreateAndDispose,
+    );
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {

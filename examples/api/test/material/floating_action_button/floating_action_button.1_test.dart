@@ -17,7 +17,7 @@ void main() {
       const example.FloatingActionButtonExampleApp(),
     );
 
-    final ThemeData theme = ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true);
+    final ThemeData theme = ThemeData(useMaterial3: true);
 
     expect(find.byType(FloatingActionButton), findsNWidgets(4));
     expect(find.byIcon(Icons.add), findsNWidgets(4));
@@ -42,7 +42,7 @@ void main() {
 
     final Finder extendedFABMaterialButton = find.byType(RawMaterialButton).at(3);
     final RenderBox extendedFABRenderBox = tester.renderObject(extendedFABMaterialButton);
-    expect(extendedFABRenderBox.size, const Size(111.0, 56.0));
+    expect(extendedFABRenderBox.size, within(distance: 0.01, from: const Size(110.3, 56.0)));
     expect(getRawMaterialButtonWidget(extendedFABMaterialButton).fillColor, theme.colorScheme.primaryContainer);
     expect(getRawMaterialButtonWidget(extendedFABMaterialButton).shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(16.0)));
   });

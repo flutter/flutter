@@ -11,9 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 
@@ -28,10 +26,11 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -108,6 +107,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -248,15 +248,42 @@ void main() {
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130467
-    leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String, int?>{'ValueNotifier<_OverlayEntryWidgetState?>': 16}),
+  );
+
+  testWidgetsWithLeakTracking(
+    '$SelectionOverlay is not leaking',
+    (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset startBlah1 = textOffsetToPosition(tester, 0);
+    await tester.tapAt(startBlah1);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(startBlah1);
+    await tester.pumpAndSettle();
+    await tester.pump();
+  },
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
   testWidgetsWithLeakTracking('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -297,10 +324,11 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgets('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -500,7 +528,7 @@ void main() {
     expect(textFieldWidget.cursorColor, cursorColor);
   });
 
-  testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onFieldSubmit callbacks are called', (WidgetTester tester) async {
     bool called = false;
 
     await tester.pumpWidget(
@@ -666,7 +694,7 @@ void main() {
     expect(find.text('5 of 10'), findsOneWidget);
   });
 
-  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('readonly text form field will hide cursor by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -745,6 +773,7 @@ void main() {
               children: <Widget>[
                 const Text('Outside'),
                 TextFormField(
+                  autofocus: true,
                   onTapOutside: (PointerEvent event) {
                     tapOutsideCount += 1;
                   },
@@ -765,6 +794,37 @@ void main() {
     expect(tapOutsideCount, 3);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/134341.
+  testWidgetsWithLeakTracking('onTapOutside is not called upon tap outside when field is not focused', (WidgetTester tester) async {
+    int tapOutsideCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                TextFormField(
+                  onTapOutside: (PointerEvent event) {
+                    tapOutsideCount += 1;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tapOutsideCount, 0);
+    await tester.tap(find.byType(TextFormField));
+    await tester.tap(find.text('Outside'));
+    await tester.tap(find.text('Outside'));
+    await tester.tap(find.text('Outside'));
+    expect(tapOutsideCount, 0);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgetsWithLeakTracking('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -773,6 +833,31 @@ void main() {
           child: Center(
             child: TextFormField(
               initialValue: 'initialValue',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'changedValue');
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.reset();
+
+    expect(find.text('changedValue'), findsNothing);
+    expect(find.text('initialValue'), findsOneWidget);
+  });
+
+  testWidgetsWithLeakTracking('reset resets the text fields value to the controller initial value', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'initialValue');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              controller: controller,
             ),
           ),
         ),
@@ -987,6 +1072,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Passes scrollController to underlying TextField', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1071,10 +1157,11 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101587.
-  testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Right clicking menu behavior', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1205,6 +1292,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Passes undoController to undoController TextField', (WidgetTester tester) async {
     final UndoHistoryController undoController = UndoHistoryController(value: UndoHistoryValue.empty);
+    addTearDown(undoController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1337,7 +1425,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Passes onAppPrivateCommand to onAppPrivateCommand TextField', (WidgetTester tester) async {
-    void onAppPrivateCommand(String p0, Map<String, dynamic> p1) {}
+    void onAppPrivateCommand(String action, Map<String, dynamic> data) {}
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1425,26 +1513,100 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Error color for cursor while validating', (WidgetTester tester) async {
-    const Color errorColor = Color(0xff123456);
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        colorScheme: const ColorScheme.light(error: errorColor),
+    const Color themeErrorColor = Color(0xff111111);
+    const Color errorStyleColor = Color(0xff777777);
+    const Color cursorErrorColor = Color(0xffbbbbbb);
+
+    Widget buildWidget({Color? errorStyleColor, Color? cursorErrorColor}) {
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: const ColorScheme.light(error: themeErrorColor),
+        ),
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              enabled: true,
+              autovalidateMode: AutovalidateMode.always,
+              decoration: InputDecoration(
+                errorStyle: TextStyle(
+                  color: errorStyleColor,
+                ),
+              ),
+              cursorErrorColor: cursorErrorColor,
+              validator: (String? value) {
+                return 'Please enter value';
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<void> runTest(Widget widget, {required Color expectedColor}) async {
+      await tester.pumpWidget(widget);
+      await tester.enterText(find.byType(TextField), 'a');
+      final EditableText textField = tester.widget(
+        find.byType(EditableText).first,
+      );
+      await tester.pump();
+      expect(textField.cursorColor, expectedColor);
+    }
+
+    await runTest(
+      buildWidget(),
+      expectedColor: themeErrorColor,
+    );
+    await runTest(
+      buildWidget(errorStyleColor: errorStyleColor),
+      expectedColor: errorStyleColor,
+    );
+    await runTest(
+      buildWidget(cursorErrorColor: cursorErrorColor),
+      expectedColor: cursorErrorColor,
+    );
+    await runTest(
+      buildWidget(
+        errorStyleColor: errorStyleColor,
+        cursorErrorColor: cursorErrorColor,
       ),
-      home: Material(
-        child: Center(
+      expectedColor: cursorErrorColor,
+    );
+  });
+
+  testWidgetsWithLeakTracking('TextFormField onChanged is called when the form is reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123009.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String value = 'initialValue';
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Form(
+          key: formKey,
           child: TextFormField(
-            enabled: true,
-            autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
-              return 'Please enter value';
+            key: stateKey,
+            initialValue: value,
+            onChanged: (String newValue) {
+              value = newValue;
             },
           ),
         ),
       ),
     ));
-    await tester.enterText(find.byType(TextField), 'a');
-    final EditableText textField = tester.widget(find.byType(EditableText).first);
+
+    // Initial value is 'initialValue'.
+    expect(stateKey.currentState!.value, 'initialValue');
+    expect(value, 'initialValue');
+
+    // Change value to 'changedValue'.
+    await tester.enterText(find.byType(TextField), 'changedValue');
+    expect(stateKey.currentState!.value,'changedValue');
+    expect(value, 'changedValue');
+
+    // Should be back to 'initialValue' when the form is reset.
+    formKey.currentState!.reset();
     await tester.pump();
-    expect(textField.cursorColor, errorColor);
+    expect(stateKey.currentState!.value,'initialValue');
+    expect(value, 'initialValue');
   });
 }

@@ -170,6 +170,16 @@
     "description": "The label for the Look Up button and menu items on iOS."
   },
 
+  "searchWebButtonLabel": "Search Web",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items on iOS."
+  },
+
+  "shareButtonLabel": "Share...",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items on iOS."
+  },
+
   "noSpellCheckReplacementsLabel": "No Replacements Found",
   "@noSpellCheckReplacementsLabel": {
     "description": "The label shown in the text selection context menu on iOS when a misspelled word is tapped but the spell checker found no reasonable fixes for it."

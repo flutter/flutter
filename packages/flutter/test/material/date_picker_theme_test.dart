@@ -7,8 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   const DatePickerThemeData datePickerTheme = DatePickerThemeData(
@@ -48,7 +47,9 @@ void main() {
     inputDecorationTheme: InputDecorationTheme(
       fillColor: Color(0xffffff5f),
       border: UnderlineInputBorder(),
-    )
+    ),
+    cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff6f))),
+    confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f))),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -77,6 +78,10 @@ void main() {
       ).first,
     );
     return container.decoration as BoxDecoration?;
+  }
+
+  ButtonStyle actionButtonStyle(WidgetTester tester, String text) {
+    return tester.widget<TextButton>(find.widgetWithText(TextButton, text)).style!;
   }
 
   const Size wideWindowSize = Size(1920.0, 1080.0);
@@ -128,9 +133,11 @@ void main() {
     expect(theme.rangeSelectionOverlayColor, null);
     expect(theme.dividerColor, null);
     expect(theme.inputDecorationTheme, null);
+    expect(theme.cancelButtonStyle, null);
+    expect(theme.confirmButtonStyle, null);
   });
 
-  testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
     late final DatePickerThemeData m3; // M3 Defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -203,9 +210,11 @@ void main() {
     expect(m3.rangePickerHeaderHelpStyle, textTheme.titleSmall);
     expect(m3.dividerColor, null);
     expect(m3.inputDecorationTheme, null);
+    expect(m3.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m3.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
     late final DatePickerThemeData m2; // M2 defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -270,9 +279,11 @@ void main() {
     expect(m2.rangePickerHeaderHelpStyle, textTheme.labelSmall);
     expect(m2.dividerColor, null);
     expect(m2.inputDecorationTheme, null);
+    expect(m2.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m2.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DatePickerThemeData().debugFillProperties(builder);
 
@@ -284,7 +295,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     datePickerTheme.debugFillProperties(builder);
@@ -294,9 +305,7 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(
-      description,
-      equalsIgnoringHashCodes(<String>[
+    expect(description, equalsIgnoringHashCodes(<String>[
       'backgroundColor: Color(0xfffffff0)',
       'elevation: 6.0',
       'shadowColor: Color(0xfffffff1)',
@@ -330,12 +339,13 @@ void main() {
       'rangeSelectionBackgroundColor: Color(0xffffff2f)',
       'rangeSelectionOverlayColor: MaterialStatePropertyAll(Color(0xffffff3f))',
       'dividerColor: Color(0xffffff4f)',
-      'inputDecorationTheme: InputDecorationTheme#00000(fillColor: Color(0xffffff5f), border: UnderlineInputBorder())'
-      ]),
-    );
+      'inputDecorationTheme: InputDecorationTheme#00000(fillColor: Color(0xffffff5f), border: UnderlineInputBorder())',
+      'cancelButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xffffff6f)))',
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: MaterialStatePropertyAll(Color(0xffffff7f)))'
+    ]));
   });
 
-  testWidgets('DatePickerDialog uses ThemeData datePicker theme (calendar mode)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog uses ThemeData datePicker theme (calendar mode)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -428,9 +438,15 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.text('2024')));
     await tester.pumpAndSettle();
     expect(inkFeatures, paints..rect(color: datePickerTheme.yearOverlayColor?.resolve(<MaterialState>{})));
+
+    final ButtonStyle cancelButtonStyle = actionButtonStyle(tester, 'Cancel');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(datePickerTheme.cancelButtonStyle.toString()));
+
+    final ButtonStyle confirmButtonStyle = actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(datePickerTheme.confirmButtonStyle.toString()));
   });
 
-  testWidgets('DatePickerDialog uses ThemeData datePicker theme (input mode)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog uses ThemeData datePicker theme (input mode)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -469,9 +485,15 @@ void main() {
 
     final InputDecoration inputDecoration = tester.widget<TextField>(find.byType(TextField)).decoration!;
     expect(inputDecoration.fillColor, datePickerTheme.inputDecorationTheme?.fillColor);
+
+    final ButtonStyle cancelButtonStyle = actionButtonStyle(tester, 'Cancel');
+    expect(cancelButtonStyle.toString(), equalsIgnoringHashCodes(datePickerTheme.cancelButtonStyle.toString()));
+
+    final ButtonStyle confirmButtonStyle = actionButtonStyle(tester, 'OK');
+    expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(datePickerTheme.confirmButtonStyle.toString()));
   });
 
-  testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -532,7 +554,7 @@ void main() {
     expect(inkFeatures, paints..circle(color: datePickerTheme.rangeSelectionOverlayColor?.resolve(<MaterialState>{})));
   });
 
-  testWidgets('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dividers use DatePickerThemeData.dividerColor', (WidgetTester tester) async {
     Future<void> showPicker(WidgetTester tester, Size size) async {
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1.0;
@@ -573,7 +595,7 @@ void main() {
     expect(horizontalDivider.color, datePickerTheme.dividerColor);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'DatePicker uses ThemeData.inputDecorationTheme properties '
     'which are null in DatePickerThemeData.inputDecorationTheme',
     (WidgetTester tester) async {
@@ -629,7 +651,7 @@ void main() {
       expect(inputDecoration.border , const OutlineInputBorder());
   });
 
-  testWidgets('DatePickerDialog resolves DatePickerTheme.dayOverlayColor states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog resolves DatePickerTheme.dayOverlayColor states', (WidgetTester tester) async {
     final MaterialStateProperty<Color> dayOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return const Color(0xff00ff00);
@@ -721,7 +743,7 @@ void main() {
     );
   });
 
-  testWidgets('DatePickerDialog resolves DatePickerTheme.yearOverlayColor states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog resolves DatePickerTheme.yearOverlayColor states', (WidgetTester tester) async {
     final MaterialStateProperty<Color> yearOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return const Color(0xff00ff00);
@@ -803,7 +825,7 @@ void main() {
     );
   });
 
-  testWidgets('DateRangePickerDialog resolves DatePickerTheme.rangeSelectionOverlayColor states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DateRangePickerDialog resolves DatePickerTheme.rangeSelectionOverlayColor states', (WidgetTester tester) async {
     final MaterialStateProperty<Color> rangeSelectionOverlayColor = MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return const Color(0xff00ff00);

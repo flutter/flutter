@@ -33,7 +33,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// settings. It is used to implement features such as [MediaQuery].
 ///
 /// This class can be extended directly, or mixed in, to get default behaviors
-/// for all of the handlers. Alternatively it can can be used with the
+/// for all of the handlers. Alternatively it can be used with the
 /// `implements` keyword, in which case all the handlers must be implemented
 /// (and the analyzer will list those that have been omitted).
 ///
@@ -176,7 +176,7 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// See also:
   ///
-  ///  * [MediaQuery.of], which provides a similar service with less
+  ///  * [MediaQuery.sizeOf], which provides a similar service with less
   ///    boilerplate.
   void didChangeMetrics() { }
 
@@ -229,7 +229,7 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// See also:
   ///
-  ///  * [MediaQuery.of], which provides a similar service with less
+  ///  * [MediaQuery.textScaleFactorOf], which provides a similar service with less
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
 
@@ -237,6 +237,11 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
+  ///
+  /// See also:
+  ///
+  /// * [MediaQuery.platformBrightnessOf], which provides a similar service with
+  ///   less boilerplate.
   void didChangePlatformBrightness() { }
 
   /// Called when the system tells the app that the user's locale has
@@ -254,6 +259,11 @@ abstract mixin class WidgetsBindingObserver {
   /// documentation for the [WidgetsBindingObserver] class.
   ///
   /// This method exposes notifications from [SystemChannels.lifecycle].
+  ///
+  /// See also:
+  ///
+  ///  * [AppLifecycleListener], an alternative API for responding to
+  ///    application lifecycle changes.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   /// Called when a request is received from the system to exit the application.
@@ -506,23 +516,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      registerServiceExtension(
-        name: WidgetsServiceExtensions.fastReassemble.name,
-        callback: (Map<String, Object> params) async {
-          // This mirrors the implementation of the 'reassemble' callback registration
-          // in lib/src/foundation/binding.dart, but with the extra binding config used
-          // to skip some reassemble work.
-          final String? className = params['className'] as String?;
-          BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
-          try {
-            await reassembleApplication();
-          } finally {
-            BindingBase.debugReassembleConfig = null;
-          }
-          return <String, String>{'type': 'Success'};
-        },
-      );
-
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileWidgetBuilds.name,
@@ -561,7 +554,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!, null);
+      buildOwner!.reassemble(rootElement!);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -601,7 +594,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// For example, the [WidgetsApp] widget registers as a binding
   /// observer and passes the screen size to a [MediaQuery] widget
   /// each time it is built, which enables other widgets to use the
-  /// [MediaQuery.of] static method and (implicitly) the
+  /// [MediaQuery.sizeOf] static method and (implicitly) the
   /// [InheritedWidget] mechanism to be notified whenever the screen
   /// size changes (e.g. whenever the screen rotates).
   ///
@@ -737,10 +730,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// By default, the framework communicates when it would like to handle system
   /// back gestures using [SystemNavigator.setFrameworkHandlesBack] in
-  /// [WidgetsApp.defaultOnNavigationNotification]. This is done automatically
-  /// based on the status of the [Navigator] stack and the state of any
-  /// [PopScope] widgets present. Developers can manually set this by calling
-  /// the method directly or by using [NavigationNotification].
+  /// [WidgetsApp]. This is done automatically based on the status of the
+  /// [Navigator] stack and the state of any [PopScope] widgets present.
+  /// Developers can manually set this by calling the method directly or by
+  /// using [NavigationNotification].
   /// {@endtemplate}
   @protected
   @visibleForTesting
@@ -1112,7 +1105,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }());
 
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!, BindingBase.debugReassembleConfig);
+      buildOwner!.reassemble(rootElement!);
     }
     return super.performReassemble();
   }
@@ -1187,6 +1180,24 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///
 /// To artificially cause the entire widget tree to be disposed, consider
 /// calling [runApp] with a widget such as [SizedBox.shrink].
+///
+/// To listen for platform shutdown messages (and other lifecycle changes),
+/// consider the [AppLifecycleListener] API.
+///
+/// ## Dismissing Flutter UI via platform native methods
+///
+/// {@template flutter.widgets.runApp.dismissal}
+/// An application may have both Flutter and non-Flutter UI in it. If the
+/// application calls non-Flutter methods to remove Flutter based UI such as
+/// platform native API to manipulate the platform native navigation stack,
+/// the framework does not know if the developer intends to eagerly free
+/// resources or not. The widget tree remains mounted and ready to render
+/// as soon as it is displayed again.
+///
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
+/// the framework should dispose of the active widget tree.
+/// {@endtemplate}
 ///
 /// See also:
 ///

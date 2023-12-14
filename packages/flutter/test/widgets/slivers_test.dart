@@ -6,17 +6,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
+  final ViewportOffset viewportOffset = ViewportOffset.fixed(offset);
+  addTearDown(viewportOffset.dispose);
   return tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
       child: Viewport(
         anchor: anchor / 600.0,
-        offset: ViewportOffset.fixed(offset),
+        offset: viewportOffset,
         slivers: const <Widget>[
           SliverToBoxAdapter(child: SizedBox(height: 400.0)),
           SliverToBoxAdapter(child: SizedBox(height: 400.0)),
@@ -71,7 +73,7 @@ void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVi
 }
 
 void main() {
-  testWidgets('Viewport basic test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
@@ -110,7 +112,7 @@ void main() {
     ], <bool>[false, false, true, true, false]);
   });
 
-  testWidgets('Viewport anchor test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport anchor test', (WidgetTester tester) async {
     await test(tester, 0.0, anchor: 100.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
@@ -149,7 +151,7 @@ void main() {
     ], <bool>[false, false, true, true, false]);
   });
 
-  testWidgets('Multiple grids and lists', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Multiple grids and lists', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: SizedBox(
@@ -230,7 +232,70 @@ void main() {
     expect(find.text('BOTTOM'), findsOneWidget);
   });
 
-  testWidgets('SliverFixedExtentList correctly clears garbage', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver grid can replace intermediate items', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138749.
+    // The bug happens when items in between first and last item changed while
+    // the sliver layout only display a item in the middle of the list.
+    final List<int> items = <int>[0, 1, 2, 3, 4, 5];
+    final List<int> replacedItems = <int>[0, 2, 9, 10, 11, 12, 5];
+    Future<void> pumpSliverGrid(bool replace) async {
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverGrid(
+                    gridDelegate: TestGridDelegate(replace),
+                    delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                        final int item = replace
+                            ? replacedItems[index]
+                            : items[index];
+                        return Container(
+                          key: ValueKey<int>(item),
+                          alignment: Alignment.center,
+                          child: Text('item $item'),
+                        );
+                      },
+                      childCount: replace ? 7 : 6,
+                      findChildIndexCallback: (Key key) {
+                        final int item = (key as ValueKey<int>).value;
+                        final int index = replace
+                            ? replacedItems.indexOf(item)
+                            : items.indexOf(item);
+                        return index >= 0 ? index : null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpSliverGrid(false);
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsOneWidget);
+    expect(find.text('item 4'), findsOneWidget);
+
+    await pumpSliverGrid(true);
+    // The TestGridDelegate only show child at index 1 when not expand.
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsNothing);
+    expect(find.text('item 4'), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('SliverFixedExtentList correctly clears garbage', (WidgetTester tester) async {
     final List<String> items = <String>['1', '2', '3', '4', '5', '6'];
     await testSliverFixedExtentList(tester, items);
     // Keep alive widgets require 1 frame to notify their parents. Pumps in between
@@ -271,7 +336,7 @@ void main() {
     expect(find.text('4'), findsOneWidget);
   });
 
-  testWidgets('SliverFixedExtentList handles underflow when its children changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFixedExtentList handles underflow when its children changes', (WidgetTester tester) async {
     final List<String> items = <String>['1', '2', '3', '4', '5', '6'];
     final List<String> initializedChild = <String>[];
     List<Widget> children = <Widget>[];
@@ -283,6 +348,8 @@ void main() {
       );
     }
     final ScrollController controller = ScrollController(initialScrollOffset: 5400);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -336,7 +403,7 @@ void main() {
     expect(listEquals<String>(initializedChild, <String>['6']), isTrue);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'SliverGrid Correctly layout children after rearranging',
     (WidgetTester tester) async {
       await tester.pumpWidget(const TestSliverGrid(
@@ -369,7 +436,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'SliverGrid negative usableCrossAxisExtent',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -407,7 +474,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'SliverList can handle inaccurate scroll offset due to changes in children list',
       (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/59888.
@@ -511,7 +578,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'SliverFixedExtentList Correctly layout children after rearranging',
     (WidgetTester tester) async {
       await tester.pumpWidget(const TestSliverFixedExtentList(
@@ -549,7 +616,7 @@ void main() {
     },
   );
 
-  testWidgets('Can override ErrorWidget.build', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can override ErrorWidget.build', (WidgetTester tester) async {
     const Text errorText = Text('error');
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
     ErrorWidget.builder = (FlutterErrorDetails details) => errorText;
@@ -565,8 +632,10 @@ void main() {
     ErrorWidget.builder = oldBuilder;
   });
 
-  testWidgets('SliverFixedExtentList with SliverChildBuilderDelegate auto-correct scroll offset - super fast', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFixedExtentList with SliverChildBuilderDelegate auto-correct scroll offset - super fast', (WidgetTester tester) async {
     final ScrollController controller = ScrollController(initialScrollOffset: 600);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -612,8 +681,10 @@ void main() {
     expect(controller.offset, 800.0);
   });
 
-  testWidgets('SliverFixedExtentList with SliverChildBuilderDelegate auto-correct scroll offset - reasonable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFixedExtentList with SliverChildBuilderDelegate auto-correct scroll offset - reasonable', (WidgetTester tester) async {
     final ScrollController controller = ScrollController(initialScrollOffset: 600);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -662,7 +733,7 @@ void main() {
   }
 
   group('SliverOffstage - ', () {
-    testWidgets('offstage true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('offstage true', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(boilerPlate(
         const SliverOffstage(
@@ -681,7 +752,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('offstage false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('offstage false', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(boilerPlate(
         const SliverOffstage(
@@ -703,7 +774,7 @@ void main() {
   });
 
   group('SliverOpacity - ', () {
-    testWidgets('painting & semantics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('painting & semantics', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       // Opacity 1.0: Semantics and painting
@@ -825,7 +896,7 @@ void main() {
   });
 
   group('SliverIgnorePointer - ', () {
-    testWidgets('ignores pointer events', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ignores pointer events', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> events = <String>[];
       await tester.pumpWidget(boilerPlate(
@@ -847,7 +918,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores semantics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ignores semantics', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> events = <String>[];
       await tester.pumpWidget(boilerPlate(
@@ -870,7 +941,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignoring only block semantics actions', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ignoring only block semantics actions', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(boilerPlate(
         SliverIgnorePointer(
@@ -886,7 +957,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores pointer events & semantics', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ignores pointer events & semantics', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> events = <String>[];
       await tester.pumpWidget(boilerPlate(
@@ -908,7 +979,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores nothing', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ignores nothing', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> events = <String>[];
       await tester.pumpWidget(boilerPlate(
@@ -932,7 +1003,7 @@ void main() {
     });
   });
 
-  testWidgets('SliverList handles 0 scrollOffsetCorrection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverList handles 0 scrollOffsetCorrection', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62198
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -957,7 +1028,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SliverGrid children can be arbitrarily placed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverGrid children can be arbitrarily placed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/64006
     int firstTapped = 0;
     int secondTapped = 0;
@@ -1015,7 +1086,7 @@ void main() {
     expect(secondTapped, 1);
   });
 
-  testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverList.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
     final Key key = UniqueKey();
@@ -1053,7 +1124,7 @@ void main() {
     expect(secondTapped, 1);
   });
 
-  testWidgets('SliverList.builder can build children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverList.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
     final Key key = UniqueKey();
@@ -1091,7 +1162,7 @@ void main() {
     expect(secondTapped, 1);
   });
 
-  testWidgets('SliverList.separated can build children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverList.separated can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
     final Key key = UniqueKey();
@@ -1130,7 +1201,7 @@ void main() {
     expect(secondTapped, 1);
   });
 
-  testWidgets('SliverList.separated has correct number of children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverList.separated has correct number of children', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -1150,7 +1221,7 @@ void main() {
     expect(find.text('separator'), findsNWidgets(1));
   });
 
-  testWidgets('SliverList.list can build children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverList.list can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
     final Key key = UniqueKey();
@@ -1192,7 +1263,7 @@ void main() {
     expect(secondTapped, 1);
   });
 
-  testWidgets('SliverFixedExtentList.builder can build children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFixedExtentList.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
     final Key key = UniqueKey();
@@ -1230,7 +1301,7 @@ void main() {
     expect(secondTapped, 1);
   });
 
-    testWidgets('SliverList.list can build children', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverList.list can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
     final Key key = UniqueKey();
@@ -1273,7 +1344,7 @@ void main() {
     expect(secondTapped, 1);
   });
 
-  testWidgets('SliverGrid.builder can build children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverGrid.builder can build children', (WidgetTester tester) async {
     int firstTapped = 0;
     int secondTapped = 0;
     final Key key = UniqueKey();
@@ -1312,9 +1383,10 @@ void main() {
     expect(secondTapped, 1);
   });
 
-  testWidgets('SliverGridRegularTileLayout.computeMaxScrollOffset handles 0 children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverGridRegularTileLayout.computeMaxScrollOffset handles 0 children', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59663
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     // SliverGridDelegateWithFixedCrossAxisCount
     await tester.pumpWidget(MaterialApp(
@@ -1494,4 +1566,57 @@ class KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin
 class _NullBuildContext implements BuildContext {
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class TestGridDelegate implements SliverGridDelegate {
+  TestGridDelegate(this.replace);
+
+  final bool replace;
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    return TestGridLayout(replace);
+  }
+
+  @override
+  bool shouldRelayout(covariant TestGridDelegate oldDelegate) {
+    return true;
+  }
+}
+
+class TestGridLayout implements SliverGridLayout {
+  TestGridLayout(this.replace);
+
+  final bool replace;
+
+  @override
+  double computeMaxScrollOffset(int childCount) {
+    return 200;
+  }
+
+  @override
+  SliverGridGeometry getGeometryForChildIndex(int index) {
+    return SliverGridGeometry(
+      crossAxisOffset: 20.0 + 20 * index,
+      crossAxisExtent: 20,
+      mainAxisExtent: 20,
+      scrollOffset: 0,
+    );
+  }
+
+  @override
+  int getMaxChildIndexForScrollOffset(double scrollOffset) {
+    if (replace) {
+      return 1;
+    }
+    return 5;
+  }
+
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset) {
+    if (replace) {
+      return 1;
+    }
+    return 0;
+  }
 }

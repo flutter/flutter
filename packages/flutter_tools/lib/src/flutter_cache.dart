@@ -836,7 +836,11 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @visibleForTesting
-  Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
+  Uri get archiveUri => Uri.parse(
+    '${cache.realmlessStorageBaseUrl}/flutter_infra_release/'
+    'ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
+    '/$name/$version/$name.zip',
+  );
 }
 
 // TODO(zanderso): upload debug desktop artifacts to host-debug and

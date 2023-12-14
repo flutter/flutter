@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('widget moves scopes during restore', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('widget moves scopes during restore', (WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
       child: Directionality(
@@ -68,7 +69,7 @@ void main() {
     expect(tester.state<TestWidgetWithCounterChildState>(find.byType(TestWidgetWithCounterChild)).toggleCount, 0);
   });
 
-  testWidgets('restoration is turned on later', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('restoration is turned on later', (WidgetTester tester) async {
     tester.binding.restorationManager.disableRestoration();
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',

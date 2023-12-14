@@ -66,16 +66,11 @@ To run a test, use option `-t` (`--task`):
 
 ```sh
 # from the .../flutter/dev/devicelab directory
-../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST}
+../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t {NAME_OF_TEST}
 ```
 
-Where `NAME_OR_PATH_OF_TEST` can be either of:
-
-* the _name_ of a task, which is a file's basename in `bin/tasks`. Example:
-  `complex_layout__start_up`.
-* the path to a Dart _file_ corresponding to a task, which resides in
-  `bin/tasks`. Tip: most shells support path auto-completion using the Tab key.
-  Example: `bin/tasks/complex_layout__start_up.dart`.
+Where `NAME_OR_PATH_OF_TEST` is the name of a task, which is a file's
+basename in `bin/tasks`. Example: `complex_layout__start_up`.
 
 To run multiple tests, repeat option `-t` (`--task`) multiple times:
 
@@ -91,10 +86,12 @@ flags to `bin/run.dart`:
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart --task=[some_task] \
   --local-engine-src-path=[path_to_local]/engine/src \
-  --local-engine=[local_engine_architecture]
+  --local-engine=[local_engine_architecture] \
+  --local-engine-host=[local_engine_host_architecture]
 ```
 
-An example of a local engine architecture is `android_debug_unopt_x86`.
+An example of a local engine architecture is `android_debug_unopt_x86` and
+an example of a local engine host architecture is `host_debug_unopt`.
 
 ### Running an A/B test for engine changes
 
@@ -111,13 +108,16 @@ Example:
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart --ab=10 \
   --local-engine=host_debug_unopt \
+  --local-engine-host=host_debug_unopt \
   -t bin/tasks/web_benchmarks_canvaskit.dart
 ```
 
 The `--ab=10` tells the runner to run an A/B test 10 times.
 
 `--local-engine=host_debug_unopt` tells the A/B test to use the
-`host_debug_unopt` engine build. `--local-engine` is required for A/B test.
+`host_debug_unopt` engine build. `--local-engine-host=host_debug_unopt` uses
+the same engine build to run the `frontend_server` (in this example).
+`--local-engine` is required for A/B test.
 
 `--ab-result-file=filename` can be used to provide an alternate location to
 output the JSON results file (defaults to `ABresults#.json`). A single `#`

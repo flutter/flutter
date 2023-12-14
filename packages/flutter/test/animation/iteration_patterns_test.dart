@@ -4,8 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   setUp(() {
@@ -86,6 +85,7 @@ void main() {
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
     final List<String> log = <String>[];
 
     void listener1() { log.add('listener1'); }

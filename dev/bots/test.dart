@@ -83,6 +83,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
 final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
 
 String get platformFolderName {
@@ -212,13 +213,16 @@ String get shuffleSeed {
 ///
 /// Examples:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
+/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt
 Future<void> main(List<String> args) async {
   try {
     printProgress('STARTING ANALYSIS');
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+        flutterTestArgs.add(arg);
+      } else if (arg.startsWith('--local-engine-host=')) {
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_HOST'] = arg.substring('--local-engine-host='.length);
         flutterTestArgs.add(arg);
       } else if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
@@ -249,6 +253,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
@@ -258,6 +263,11 @@ Future<void> main(List<String> args) async {
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
+      'realm_checker': _runRealmCheckerTest,
+      'customer_testing': _runCustomerTesting,
+      'analyze': _runAnalyze,
+      'fuchsia_precache': _runFuchsiaPrecache,
+      'docs': _runDocs,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -459,6 +469,20 @@ Future<void> _runIntegrationToolTests() async {
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
+
+  await _runDartTest(
+    _toolsPath,
+    forceSingleCore: true,
+    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
+  );
+}
+
+Future<void> _runAndroidPreviewIntegrationToolTests() async {
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'android_preview_integration.shard'))
+      .listSync(recursive: true).whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .toList();
 
   await _runDartTest(
     _toolsPath,
@@ -837,9 +861,12 @@ Future<void> _runFrameworkTests() async {
         workingDirectory: path.join(flutterRoot, 'examples', 'api'),
       );
     }
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'api'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
+    for (final FileSystemEntity entity in Directory(path.join(flutterRoot, 'examples')).listSync()) {
+      if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
+        continue;
+      }
+      await _runFlutterTest(entity.path);
+    }
   }
 
   Future<void> runTracingTests() async {
@@ -990,6 +1017,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
@@ -1000,20 +1028,34 @@ Future<void> _runFrameworkTests() async {
       // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
       '--exclude-tags=web',
     ]);
+    // Run java unit tests for integration_test
+    //
+    // Generate Gradle wrapper if it doesn't exist.
+    Process.runSync(
+      flutter,
+      <String>['build', 'apk', '--config-only'],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
+    await runCommand(
+      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
+      <String>[
+        ':integration_test:testDebugUnitTest',
+        '--tests',
+        'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
+      ],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
     const String httpClientWarning =
-      'Warning: At least one test in this suite creates an HttpClient. When\n'
-      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-      'requests will return status code 400, and no network request will\n'
-      'actually be made. Any test expecting a real network connection and\n'
-      'status code will fail.\n'
-      'To test code that needs an HttpClient, provide your own HttpClient\n'
-      'implementation to the code under test, so that your test can\n'
-      'consistently provide a testable response to the code under test.';
+      'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
+      'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
+      'will actually be made. Any test expecting a real network connection and status code will fail.\n'
+      'To test code that needs an HttpClient, provide your own HttpClient implementation to the code under\n'
+      'test, so that your test can consistently provide a testable response to the code under test.';
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter_test'),
       script: path.join('test', 'bindings_test_failure.dart'),
@@ -1141,6 +1183,10 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
+  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
+  if (engineRealm.isNotEmpty) {
+    return;
+  }
   final List<ShardRunner> tests = <ShardRunner>[
     for (final String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
@@ -1158,6 +1204,8 @@ Future<void> _runWebLongRunningTests() async {
         driver: path.join('test_driver', 'integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
+        expectWriteResponseFile: true,
+        expectResponseFileContent: 'null',
       ),
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
@@ -1165,6 +1213,20 @@ Future<void> _runWebLongRunningTests() async {
         driver: path.join('test_driver', 'extended_integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
+        expectWriteResponseFile: true,
+        expectResponseFileContent: '''
+{
+  "screenshots": [
+    {
+      "screenshotName": "platform_name",
+      "bytes": []
+    },
+    {
+      "screenshotName": "platform_name_2",
+      "bytes": []
+    }
+  ]
+}''',
       ),
     ],
 
@@ -1220,6 +1282,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent),
     () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
+    () => runWebServiceWorkerTest(headless: true, testType: ServiceWorkerTestType.withFlutterJsNonceOn),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withoutFlutterJs),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJs),
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsShort),
@@ -1227,6 +1290,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
     () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
     () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
+    () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),
@@ -1297,6 +1361,8 @@ Future<void> _runFlutterDriverWebTest({
   String? driver,
   bool expectFailure = false,
   bool silenceBrowserOutput = false,
+  bool expectWriteResponseFile = false,
+  String expectResponseFileContent = '',
 }) async {
   printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
   await runCommand(
@@ -1304,6 +1370,11 @@ Future<void> _runFlutterDriverWebTest({
     <String>[ 'clean' ],
     workingDirectory: testAppDirectory,
   );
+  final String responseFile =
+      path.join(testAppDirectory, 'build', 'integration_response_data.json');
+  if (File(responseFile).existsSync()) {
+    File(responseFile).deleteSync();
+  }
   await runCommand(
     flutter,
     <String>[
@@ -1332,6 +1403,20 @@ Future<void> _runFlutterDriverWebTest({
       return false;
     },
   );
+  if (expectWriteResponseFile) {
+    if (!File(responseFile).existsSync()) {
+      foundError(<String>[
+        '$bold${red}Command did not write the response file but expected response file written.$reset',
+      ]);
+    } else {
+      final String response = File(responseFile).readAsStringSync();
+      if (response != expectResponseFileContent) {
+        foundError(<String>[
+          '$bold${red}Command write the response file with $response but expected response file with $expectResponseFileContent.$reset',
+        ]);
+      }
+    }
+  }
 }
 
 // Compiles a sample web app and checks that its JS doesn't contain certain
@@ -1481,6 +1566,100 @@ Future<void> _runFlutterPackagesTests() async {
   });
 }
 
+// Runs customer_testing.
+Future<void> _runCustomerTesting() async {
+  printProgress('${green}Running customer testing$reset');
+  await runCommand(
+    'git',
+    <String>[
+      'fetch',
+      'origin',
+      'master',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  await runCommand(
+    'git',
+    <String>[
+      'checkout',
+      'master',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  final Map<String, String> env = Platform.environment;
+  final String? revision = env['REVISION'];
+  if (revision != null) {
+    await runCommand(
+      'git',
+      <String>[
+        'checkout',
+        revision,
+      ],
+      workingDirectory: flutterRoot,
+    );
+  }
+  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
+  await runCommand(
+    Platform.isWindows? winScript: './ci.sh',
+    <String>[],
+    workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
+  );
+}
+
+// Runs analysis tests.
+Future<void> _runAnalyze() async {
+  printProgress('${green}Running analysis testing$reset');
+  await runCommand(
+    'dart',
+    <String>[
+      '--enable-asserts',
+      path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
+// Runs flutter_precache.
+Future<void> _runFuchsiaPrecache() async {
+  printProgress('${green}Running flutter precache tests$reset');
+  await runCommand(
+    'flutter',
+    <String>[
+      'config',
+      '--enable-fuchsia',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  await runCommand(
+    'flutter',
+    <String>[
+      'precache',
+      '--flutter_runner',
+      '--fuchsia',
+      '--no-android',
+      '--no-ios',
+      '--force',
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
+// Runs docs.
+Future<void> _runDocs() async {
+  printProgress('${green}Running flutter doc tests$reset');
+  await runCommand(
+    './dev/bots/docs.sh',
+    <String>[
+      '--output',
+      'dev/docs/api_docs.zip',
+      '--keep-staging',
+      '--staging-dir',
+      'dev/docs',
+    ],
+    workingDirectory: flutterRoot,
+  );
+}
+
 /// Runs the skp_generator from the flutter/tests repo.
 ///
 /// See also the customer_tests shard.
@@ -1505,6 +1684,13 @@ Future<void> _runSkpGeneratorTests() async {
     <String>[ ],
     workingDirectory: path.join(checkout.path, 'skp_generator'),
   );
+}
+
+Future<void> _runRealmCheckerTest() async {
+  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
+  if (engineRealm.isNotEmpty) {
+    foundError(<String>['The checked-in engine.realm file must be empty.']);
+  }
 }
 
 // The `chromedriver` process created by this test.

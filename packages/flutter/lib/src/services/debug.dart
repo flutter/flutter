@@ -13,19 +13,13 @@ export 'hardware_keyboard.dart' show KeyDataTransitMode;
 /// Setting [debugKeyEventSimulatorTransitModeOverride] is a good way to make
 /// certain tests simulate the behavior of different type of platforms in terms
 /// of their extent of support for keyboard API.
+///
+/// This value is deprecated and will be removed.
+@Deprecated(
+  'No longer supported. Transit mode is always key data only. '
+  'This feature was deprecated after v3.18.0-2.0.pre.',
+)
 KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
-
-/// Profile and print statistics on Platform Channel usage.
-///
-/// When this is true statistics about the usage of Platform Channels will be
-/// printed out periodically to the console and Timeline events will show the
-/// time between sending and receiving a message (encoding and decoding time
-/// excluded).
-///
-/// The statistics include the total bytes transmitted and the average number of
-/// bytes per invocation in the last quantum. "Up" means in the direction of
-/// Flutter to the host platform, "down" is the host platform to flutter.
-bool debugProfilePlatformChannels = false;
 
 /// Setting to true will cause extensive logging to occur when key events are
 /// received.
@@ -46,10 +40,24 @@ bool debugAssertAllServicesVarsUnset(String reason) {
     if (debugKeyEventSimulatorTransitModeOverride != null) {
       throw FlutterError(reason);
     }
-    if (debugProfilePlatformChannels || debugPrintKeyboardEvents) {
+    if (debugPrintKeyboardEvents) {
       throw FlutterError(reason);
     }
     return true;
   }());
   return true;
 }
+
+/// Controls whether platform channel usage can be debugged in non-release mode.
+///
+/// This value is modified by calls to the
+/// [ServicesServiceExtensions.profilePlatformChannels] service extension.
+///
+/// See also:
+///
+/// * [shouldProfilePlatformChannels], which checks both
+///   [kProfilePlatformChannels] and [debugProfilePlatformChannels] for the
+///   current run mode.
+/// * [kProfilePlatformChannels], which determines whether platform channel
+///   usage can be debugged in release mode.
+bool debugProfilePlatformChannels = false;

@@ -23,6 +23,38 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in TBD
+  - title: "Migrate to focusNode.enclosingScope!"
+    date: 2023-11-29
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      getter: 'focusScopeNode'
+      inClass: 'NavigatorState'
+    changes:
+      - kind: 'rename'
+        newName: 'focusNode.enclosingScope!'
+
+  # Changes made in https://github.com/flutter/flutter/pull/138509
+  - title: "Migrate to 'PlatformMenuBar.child'"
+    date: 2023-11-15
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'body'
+      inClass: 'PlatformMenuBar'
+    changes:
+      - kind: 'rename'
+        newName: 'child'
+  - title: "Migrate PlatformMenuBar(body:) to PlatformMenuBar(child:)"
+    date: 2023-11-15
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'PlatformMenuBar'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'body'
+        newName: 'child'
+
   # Changes made in https://github.com/flutter/flutter/pull/123352
   - title: "Migrate to 'rootElement'"
     date: 2023-03-13

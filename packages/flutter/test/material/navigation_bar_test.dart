@@ -12,10 +12,9 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
@@ -412,10 +411,8 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    if (kIsWeb && !isCanvasKit) {
-      expect(tester.getSize(find.text(label).last), const Size(15.0, 21.0));
-    } else {
-      expect(tester.getSize(find.text(label).last), const Size(15.0, 20.0));
+    if (!kIsWeb || isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(14.25, 20.0));
     }
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -424,10 +421,8 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
-    if (kIsWeb && !isCanvasKit) {
-      expect(tester.getSize(find.text(label).last), const Size(57.0, 81.0));
-    } else {
-      expect(tester.getSize(find.text(label).last), const Size(57.0, 80.0));
+    if (!kIsWeb || isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
     }
   });
 
@@ -832,7 +827,7 @@ void main() {
           color: const Color(0x0a000000),
         )
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgetsWithLeakTracking('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.
@@ -943,7 +938,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Material3 - Navigation destination updates indicator color and shape', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const Color color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
 
@@ -951,9 +946,112 @@ void main() {
       return MaterialApp(
         theme: theme,
         home: Scaffold(
-          bottomNavigationBar: NavigationBar(
-            indicatorColor: indicatorColor,
-            indicatorShape: indicatorShape,
+          bottomNavigationBar: RepaintBoundary(
+            child: NavigationBar(
+              indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
+              destinations: const <Widget>[
+                NavigationDestination(
+                  icon: Icon(Icons.ac_unit),
+                  label: 'AC',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+              onDestinationSelected: (int i) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
+    await tester.pumpAndSettle();
+
+    // Test default indicator color and shape with ripple.
+    await expectLater(find.byType(NavigationBar), matchesGoldenFile('m3.navigation_bar.default.indicator.inkwell.shape.png'));
+
+    await tester.pumpWidget(buildNavigationBar(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
+
+    // Test custom indicator color and shape with ripple.
+    await expectLater(find.byType(NavigationBar), matchesGoldenFile('m3.navigation_bar.custom.indicator.inkwell.shape.png'));
+  });
+
+  testWidgetsWithLeakTracking('Destinations respect their disabled state', (WidgetTester tester) async {
+    int selectedIndex = 0;
+
+    await tester.pumpWidget(
+      _buildWidget(
+        NavigationBar(
+          destinations: const <Widget>[
+            NavigationDestination(
+              icon: Icon(Icons.ac_unit),
+              label: 'AC',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.access_alarm),
+              label: 'Alarm',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bookmark),
+              label: 'Bookmark',
+              enabled: false,
+            ),
+          ],
+          onDestinationSelected: (int i) => selectedIndex = i,
+          selectedIndex: selectedIndex,
+        ),
+      )
+    );
+
+    await tester.tap(find.text('AC'));
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Alarm'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Bookmark'));
+    expect(selectedIndex, 1);
+  });
+
+  testWidgetsWithLeakTracking('NavigationBar respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoverColor = Color(0xff0000ff);
+    const Color focusColor = Color(0xff00ffff);
+    const Color pressedColor = Color(0xffff00ff);
+    final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color>(
+      (Set<MaterialState> states) {
+        if (states.contains(MaterialState.hovered)) {
+          return hoverColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return focusColor;
+        }
+        if (states.contains(MaterialState.pressed)) {
+          return pressedColor;
+        }
+        return Colors.transparent;
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        bottomNavigationBar: RepaintBoundary(
+          child: NavigationBar(
+            overlayColor: overlayColor,
             destinations: const <Widget>[
               NavigationDestination(
                 icon: Icon(Icons.ac_unit),
@@ -967,20 +1065,47 @@ void main() {
             onDestinationSelected: (int i) { },
           ),
         ),
-      );
-    }
+      ),
+    ));
 
-    await tester.pumpWidget(buildNavigationBar());
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(NavigationIndicator).last));
+    await tester.pumpAndSettle();
 
-    // Test default indicator color and shape.
-    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
-    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
 
-    await tester.pumpWidget(buildNavigationBar(indicatorColor: color, indicatorShape: shape));
+    // Test hovered state.
+    expect(
+      inkFeatures,
+      kIsWeb
+        ? (paints..rrect()..rrect()..circle(color: hoverColor))
+        : (paints..circle(color: hoverColor)),
+    );
 
-    // Test custom indicator color and shape.
-    expect(_getIndicatorDecoration(tester)?.color, color);
-    expect(_getIndicatorDecoration(tester)?.shape, shape);
+    await gesture.down(tester.getCenter(find.byType(NavigationIndicator).last));
+    await tester.pumpAndSettle();
+
+    // Test pressed state.
+    expect(
+      inkFeatures,
+      kIsWeb
+        ? (paints..circle()..circle()..circle(color: pressedColor))
+        : (paints..circle()..circle(color: pressedColor)),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Press tab to focus the navigation bar.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    // Test focused state.
+    expect(
+      inkFeatures,
+      kIsWeb ? (paints..circle()..circle(color: focusColor)) : (paints..circle()..circle(color: focusColor)),
+    );
   });
 
   group('Material 2', () {

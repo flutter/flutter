@@ -133,7 +133,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     int? minLines,
     bool expands = false,
     int? maxLength,
-    ValueChanged<String>? onChanged,
+    this.onChanged,
     GestureTapCallback? onTap,
     VoidCallback? onEditingComplete,
     ValueChanged<String>? onFieldSubmitted,
@@ -179,9 +179,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
 
             void onChangedHandler(String value) {
               field.didChange(value);
-              if (onChanged != null) {
-                onChanged(value);
-              }
+              onChanged?.call(value);
             }
 
             return CupertinoFormRow(
@@ -219,7 +217,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 onEditingComplete: onEditingComplete,
                 onSubmitted: onFieldSubmitted,
                 inputFormatters: inputFormatters,
-                enabled: enabled,
+                enabled: enabled ?? true,
                 cursorWidth: cursorWidth,
                 cursorHeight: cursorHeight,
                 cursorColor: cursorColor,
@@ -259,6 +257,9 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
+  /// {@macro flutter.material.TextFormField.onChanged}
+  final ValueChanged<String>? onChanged;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return CupertinoAdaptiveTextSelectionToolbar.editableText(
@@ -313,6 +314,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   @override
   void dispose() {
     _cupertinoTextFormFieldRow.controller?.removeListener(_handleControllerChanged);
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -327,13 +329,11 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
 
   @override
   void reset() {
+    // Set the controller value before calling super.reset() to let
+    // _handleControllerChanged suppress the change.
+    _effectiveController!.text = widget.initialValue!;
     super.reset();
-
-    if (widget.initialValue != null) {
-      setState(() {
-        _effectiveController!.text = widget.initialValue!;
-      });
-    }
+    _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController!.text);
   }
 
   void _handleControllerChanged() {

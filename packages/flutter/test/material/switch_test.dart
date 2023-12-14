@@ -17,9 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -436,6 +434,7 @@ void main() {
             color: const Color(0x52000000), // Black with 32% opacity
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -452,6 +451,7 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -474,6 +474,71 @@ void main() {
               return Material(
                 child: Center(
                   child: Switch(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..save()
+        ..rrect(
+          style: PaintingStyle.fill,
+          color: colors.surfaceVariant,
+          rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+        )
+        ..rrect(
+          style: PaintingStyle.stroke,
+          color: colors.outline,
+          rrect: RRect.fromLTRBR(5.0, 9.0, 55.0, 39.0, const Radius.circular(16.0)),
+        )
+        ..rrect(color: colors.outline), // thumb color
+      reason: 'Inactive enabled switch should match these colors',
+    );
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+    await tester.pump();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..save()
+        ..rrect(
+          style: PaintingStyle.fill,
+          color: colors.primary,
+          rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+        )
+        ..rrect()
+        ..rrect(color: colors.onPrimary), // thumb color
+      reason: 'Active enabled switch should match these colors',
+    );
+  });
+
+  testWidgetsWithLeakTracking('Switch.adaptive(Cupertino) has default colors when enabled', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ColorScheme colors = theme.colorScheme;
+    bool value = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
                     dragStartBehavior: DragStartBehavior.down,
                     value: value,
                     onChanged: (bool newValue) {
@@ -550,6 +615,7 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -581,6 +647,7 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -702,6 +769,8 @@ void main() {
     expect(getSwitchMaterial(tester),
       paints..circle(color: theme.hoverColor)
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch default overlayColor resolves hovered/focused state', (WidgetTester tester) async {
@@ -747,6 +816,8 @@ void main() {
     expect(getSwitchMaterial(tester),
       paints..circle(color: theme.colorScheme.primary.withOpacity(0.08))
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - Switch can be set color', (WidgetTester tester) async {
@@ -788,6 +859,7 @@ void main() {
             color: Colors.blue[500],
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -803,6 +875,7 @@ void main() {
             color: Colors.green[500],
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1135,12 +1208,13 @@ void main() {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
-      expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${platform.name}');
+      expect(find.byType(Switch), findsOneWidget, reason: 'on ${platform.name}');
+      expect(find.byType(CupertinoSwitch), findsNothing);
 
-      final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
+      final Switch adaptiveSwitch = tester.widget(find.byType(Switch));
       expect(adaptiveSwitch.activeColor, activeTrackColor, reason: 'on ${platform.name}');
-      expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${platform.name}');
-      expect(adaptiveSwitch.thumbColor, thumbColor, reason: 'on ${platform.name}');
+      expect(adaptiveSwitch.inactiveTrackColor, inactiveTrackColor, reason: 'on ${platform.name}');
+      expect(adaptiveSwitch.thumbColor?.resolve(<MaterialState>{}), thumbColor, reason: 'on ${platform.name}');
       expect(adaptiveSwitch.focusColor, focusColor, reason: 'on ${platform.name}');
 
       expect(value, isFalse, reason: 'on ${platform.name}');
@@ -1157,6 +1231,463 @@ void main() {
       await tester.tap(find.byType(Switch));
       expect(value, isTrue, reason: 'on ${platform.name}');
     }
+  });
+
+  testWidgetsWithLeakTracking('Switch.adaptive default mouse cursor(Cupertino)', (WidgetTester tester) async {
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildAdaptiveSwitch(
+        platform: platform,
+        value: false,
+      ));
+      final Size switchSize = tester.getSize(find.byType(Switch));
+      expect(switchSize, const Size(60.0, 48.0));
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: tester.getCenter(find.byType(Switch)));
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
+
+      await tester.pumpWidget(buildAdaptiveSwitch(platform: platform));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
+
+      // Test disabled switch.
+      await tester.pumpWidget(buildAdaptiveSwitch(platform: platform, enabled: false, value: false));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+      await gesture.removePointer(location: tester.getCenter(find.byType(Switch)));
+      await tester.pump();
+    }
+  });
+
+  testWidgetsWithLeakTracking('Switch.adaptive default thumb/track color and size(Cupertino)', (WidgetTester tester) async {
+    const Color thumbColor = Colors.white;
+    const Color inactiveTrackColor = Color.fromARGB(40, 120, 120, 128); // Default inactive track color.
+    const Color activeTrackColor = Color.fromARGB(255, 52, 199, 89); // Default active track color.
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      // Switches have same sizes on both platform but they are more compact on macOS.
+      final RRect trackRRect = platform == TargetPlatform.iOS
+        ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
+        : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
+      final RRect inactiveThumbRRect =  platform == TargetPlatform.iOS
+        ? RRect.fromLTRBR(6.0, 10.0, 34.0, 38.0, const Radius.circular(14.0))
+        : RRect.fromLTRBR(6.0, 6.0, 34.0, 34.0, const Radius.circular(14.0));
+      final RRect activeThumbRRect =  platform == TargetPlatform.iOS
+          ? RRect.fromLTRBR(26.0, 10.0, 54.0, 38.0, const Radius.circular(14.0))
+          : RRect.fromLTRBR(26.0, 6.0, 54.0, 34.0, const Radius.circular(14.0));
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveSwitch(
+        platform: platform,
+        value: false
+      ));
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: inactiveTrackColor,
+            rrect: trackRRect,
+          ) // Default cupertino inactive track color
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: thumbColor,
+            rrect: inactiveThumbRRect,
+          ),
+        reason: 'Inactive enabled switch should have default track and thumb color',
+      );
+      expect(find.byType(Opacity), findsOneWidget);
+      expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 1.0);
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveSwitch(platform: platform));
+      await tester.pump();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: activeTrackColor,
+            rrect: trackRRect,
+          ) // Default cupertino active track color
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: thumbColor,
+            rrect: activeThumbRRect,
+          ),
+        reason: 'Active enabled switch should have default track and thumb color',
+      );
+      expect(find.byType(Opacity), findsOneWidget);
+      expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 1.0);
+
+      // Test disabled switch.
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveSwitch(
+          platform: platform,
+          enabled: false,
+          value: false,
+      ));
+      await tester.pump();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: inactiveTrackColor,
+            rrect: trackRRect,
+          ) // Default cupertino inactive track color
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: thumbColor,
+            rrect: inactiveThumbRRect,
+          ),
+        reason: 'Inactive disabled switch should have default track and thumb color',
+      );
+      expect(find.byType(Opacity), findsOneWidget);
+      expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 0.5);
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveSwitch(
+        platform: platform,
+        enabled: false,
+      ));
+      await tester.pump();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: activeTrackColor,
+            rrect: trackRRect,
+          ) // Default cupertino active track color
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: thumbColor,
+            rrect: activeThumbRRect,
+          ),
+        reason: 'Active disabled switch should have default track and thumb color',
+      );
+      expect(find.byType(Opacity), findsOneWidget);
+      expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 0.5);
+    }
+  });
+
+  testWidgetsWithLeakTracking('Default Switch.adaptive are not affected by '
+    'ThemeData.switchThemeData on iOS/macOS', (WidgetTester tester) async {
+    const Color defaultThumbColor = Colors.white;
+    const Color defaultInactiveTrackColor = Color.fromARGB(40, 120, 120, 128);
+    const Color defaultActiveTrackColor = Color.fromARGB(255, 52, 199, 89);
+    const Color updatedThumbColor = Colors.red;
+    const Color updatedTrackColor = Colors.green;
+    const SwitchThemeData overallSwitchTheme = SwitchThemeData(
+      thumbColor: MaterialStatePropertyAll<Color>(updatedThumbColor),
+      trackColor: MaterialStatePropertyAll<Color>(updatedTrackColor),
+    );
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveSwitch(
+          platform: platform,
+          overallSwitchThemeData: overallSwitchTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: defaultActiveTrackColor,
+          )
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: defaultThumbColor,
+          ),
+        reason: 'Active enabled switch should still have default track and thumb color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+          buildAdaptiveSwitch(
+              platform: platform,
+              value: false,
+              overallSwitchThemeData: overallSwitchTheme
+          )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: defaultInactiveTrackColor,
+          )
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: defaultThumbColor,
+          ),
+        reason: 'Inactive enabled switch should have default track and thumb color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+          buildAdaptiveSwitch(
+              platform: platform,
+              enabled: false,
+              value: false,
+              overallSwitchThemeData: overallSwitchTheme
+          )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: defaultInactiveTrackColor,
+          )
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: defaultThumbColor,
+          ),
+        reason: 'Inactive disabled switch should have default track and thumb color',
+      );
+    }
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      buildAdaptiveSwitch(
+        platform: TargetPlatform.android,
+        overallSwitchThemeData: overallSwitchTheme
+      )
+    );
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+          color: Color(updatedTrackColor.value),
+        )
+        ..rrect()
+        ..rrect(
+          color: Color(updatedThumbColor.value),
+        ),
+      reason: 'Switch.adaptive is affected by SwitchTheme on other platforms',
+    );
+  });
+
+  testWidgetsWithLeakTracking('Default Switch.adaptive are not affected by '
+      'SwitchThemeData on iOS/macOS', (WidgetTester tester) async {
+    const Color defaultThumbColor = Colors.white;
+    const Color defaultInactiveTrackColor = Color.fromARGB(40, 120, 120, 128);
+    const Color defaultActiveTrackColor = Color.fromARGB(255, 52, 199, 89);
+    const Color updatedThumbColor = Colors.red;
+    const Color updatedTrackColor = Colors.green;
+    const SwitchThemeData switchTheme = SwitchThemeData(
+      thumbColor: MaterialStatePropertyAll<Color>(updatedThumbColor),
+      trackColor: MaterialStatePropertyAll<Color>(updatedTrackColor),
+    );
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveSwitch(
+          platform: platform,
+          switchThemeData: switchTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: defaultActiveTrackColor,
+          )
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: defaultThumbColor,
+          ),
+        reason: 'Active enabled switch should still have default track and thumb color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveSwitch(
+          platform: platform,
+          value: false,
+          switchThemeData: switchTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: defaultInactiveTrackColor,
+          )
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: defaultThumbColor,
+          ),
+        reason: 'Inactive enabled switch should have default track and thumb color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveSwitch(
+          platform: platform,
+          enabled: false,
+          value: false,
+          switchThemeData: switchTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: defaultInactiveTrackColor,
+          )
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000)) // Thumb border color(only cupertino)
+          ..rrect(
+            color: defaultThumbColor,
+          ),
+        reason: 'Inactive disabled switch should have default track and thumb color',
+      );
+    }
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      buildAdaptiveSwitch(
+        platform: TargetPlatform.android,
+        switchThemeData: switchTheme
+      )
+    );
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+          color: Color(updatedTrackColor.value),
+        )
+        ..rrect()
+        ..rrect(
+          color: Color(updatedThumbColor.value),
+        ),
+      reason: 'Switch.adaptive is affected by SwitchTheme on other platforms',
+    );
+  });
+
+  testWidgetsWithLeakTracking('Override default adaptive SwitchThemeData on iOS/macOS', (WidgetTester tester) async {
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveSwitch(
+          platform: platform,
+          switchThemeData: const SwitchThemeData(
+            thumbColor: MaterialStatePropertyAll<Color>(Colors.yellow),
+            trackColor: MaterialStatePropertyAll<Color>(Colors.brown),
+          ),
+          switchThemeAdaptation: const _SwitchThemeAdaptation(),
+        )
+      );
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: Color(Colors.deepPurple.value),
+          )..rrect()..rrect()..rrect()..rrect()
+          ..rrect(
+            color: Color(Colors.lightGreen.value),
+          ),
+      );
+    }
+
+    // Other platforms should not be affected by the adaptive switch theme.
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveSwitch(
+          platform: platform,
+          switchThemeData: const SwitchThemeData(
+            thumbColor: MaterialStatePropertyAll<Color>(Colors.yellow),
+            trackColor: MaterialStatePropertyAll<Color>(Colors.brown),
+          ),
+          switchThemeAdaptation: const _SwitchThemeAdaptation(),
+        )
+      );
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+            color: Color(Colors.brown.value),
+          )..rrect()
+          ..rrect(
+            color: Color(Colors.yellow.value),
+          ),
+      );
+    }
+  });
+
+  testWidgetsWithLeakTracking('Switch.adaptive default focus color(Cupertino)', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
+    await tester.pumpWidget(
+      buildAdaptiveSwitch(
+        platform: TargetPlatform.macOS,
+        autofocus: true,
+        focusNode: node,
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(node.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(color: const Color(0xff34c759)) // Track color
+        ..rrect()
+        ..rrect(color: const Color(0xcc6ef28f), strokeWidth: 3.5, style: PaintingStyle.stroke) // Focused outline
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: const Color(0xffffffff)), // Thumb color
+    );
+
+    await tester.pumpWidget(
+      buildAdaptiveSwitch(
+        platform: TargetPlatform.macOS,
+        autofocus: true,
+        focusNode: node,
+        focusColor: Colors.red,
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(node.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(color: const Color(0xff34c759)) // Track color
+        ..rrect()
+        ..rrect(color: Color(Colors.red.value), strokeWidth: 3.5, style: PaintingStyle.stroke) // Focused outline
+        ..rrect()..rrect()..rrect()
+        ..rrect(color: const Color(0xffffffff)), // Thumb color
+    );
   });
 
   testWidgetsWithLeakTracking('Material2 - Switch is focusable and has correct focus color', (WidgetTester tester) async {
@@ -1234,11 +1765,14 @@ void main() {
             color: const Color(0x1f000000),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
         ..rrect(color: const Color(0xffbdbdbd)),
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch is focusable and has correct focus color', (WidgetTester tester) async {
@@ -1326,6 +1860,8 @@ void main() {
         )
         ..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Switch with splash radius set', (WidgetTester tester) async {
@@ -1387,6 +1923,7 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1424,6 +1961,7 @@ void main() {
             color: const Color(0x1f000000),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1744,6 +2282,7 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1761,6 +2300,7 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1778,6 +2318,7 @@ void main() {
             color: const Color(0x52000000), // Black with 32% opacity,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1795,6 +2336,7 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1986,6 +2528,8 @@ void main() {
         ..rrect(color: hoveredThumbColor),
       reason: 'Inactive disabled switch should default track and custom thumb color',
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch thumb color resolves in hovered/focused states', (WidgetTester tester) async {
@@ -2062,6 +2606,8 @@ void main() {
         ..rrect(color: hoveredThumbColor),
       reason: 'active enabled switch should default track and custom thumb color',
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - Track color resolves in active/enabled states', (WidgetTester tester) async {
@@ -2313,6 +2859,8 @@ void main() {
           ),
       reason: 'Inactive enabled switch should match these colors',
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch track color resolves in hovered/focused states', (WidgetTester tester) async {
@@ -2383,6 +2931,8 @@ void main() {
         ),
       reason: 'Active enabled switch should match these colors',
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - Switch thumb color is blended against surface color', (WidgetTester tester) async {
@@ -2428,6 +2978,7 @@ void main() {
             color: Colors.black12,
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -2635,6 +3186,8 @@ void main() {
         ),
       reason: 'Hovered Switch should use overlay color $hoverOverlayColor over $hoverColor',
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
@@ -2972,7 +3525,7 @@ void main() {
       expect(state.position.value, greaterThan(1));
     });
 
-    testWidgets('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true);
       final ColorScheme colors = themeData.colorScheme;
       Widget buildApp({bool enabled = true, bool value = true}) {
@@ -3188,6 +3741,8 @@ void main() {
           ..rrect(color: hoveredTrackOutlineColor, style: PaintingStyle.stroke),
         reason: 'Active enabled switch track outline should match this color',
       );
+
+      focusNode.dispose();
     });
 
     testWidgetsWithLeakTracking('Track outline width resolves in active/enabled states', (WidgetTester tester) async {
@@ -3323,6 +3878,8 @@ void main() {
           ..rrect(strokeWidth: hoveredTrackOutlineWidth, style: PaintingStyle.stroke),
         reason: 'Active enabled switch track outline width should be 4.0',
       );
+
+      focusNode.dispose();
     });
 
     testWidgetsWithLeakTracking('Switch can set icon - M3', (WidgetTester tester) async {
@@ -3408,6 +3965,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Switch.adaptive(Cupertino) is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch.adaptive');
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;
     const Color focusColor = Color(0xffff0000);
@@ -3442,9 +4000,10 @@ void main() {
 
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
-      find.byType(CupertinoSwitch),
+      find.byType(Switch),
       paints
         ..rrect(color: const Color(0xff34c759))
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: focusColor)
         ..clipRRect()
         ..rrect(color: const Color(0x26000000))
@@ -3460,9 +4019,10 @@ void main() {
 
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
-      find.byType(CupertinoSwitch),
+      find.byType(Switch),
       paints
         ..rrect(color: const Color(0x28787880))
+        ..rrect(color: const Color(0x00000000))
         ..rrect(color: focusColor)
         ..clipRRect()
         ..rrect(color: const Color(0x26000000))
@@ -3478,7 +4038,7 @@ void main() {
 
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
-      find.byType(CupertinoSwitch),
+      find.byType(Switch),
       paints
         ..rrect(color: const Color(0x28787880))
         ..clipRRect()
@@ -3516,6 +4076,8 @@ void main() {
     await tester.pump();
     expect(focused, isFalse);
     expect(focusNode.hasFocus, isFalse);
+
+    focusNode.dispose();
   });
 }
 
@@ -3532,7 +4094,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(DelayedImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -3568,7 +4130,7 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }
@@ -3583,4 +4145,69 @@ class _TestImageProvider extends ImageProvider<Object> {
 
   @override
   String toString() => '${describeIdentity(this)}()';
+}
+
+Widget buildAdaptiveSwitch({
+  required TargetPlatform platform,
+  bool enabled = true,
+  bool value = true,
+  bool autofocus = false,
+  FocusNode? focusNode,
+  Color? focusColor,
+  SwitchThemeData? overallSwitchThemeData,
+  SwitchThemeData? switchThemeData,
+  Adaptation<SwitchThemeData>? switchThemeAdaptation,
+}) {
+  final Widget adaptiveSwitch = Switch.adaptive(
+    focusNode: focusNode,
+    autofocus: autofocus,
+    focusColor: focusColor,
+    value: value,
+    onChanged: enabled ? (_) {} : null,
+  );
+
+  return MaterialApp(
+    theme: ThemeData(
+      platform: platform,
+      switchTheme: overallSwitchThemeData,
+      adaptations: switchThemeAdaptation == null ? null : <Adaptation<Object>>[
+        switchThemeAdaptation
+      ],
+    ),
+    home: StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Material(
+          child: Center(
+            child: switchThemeData == null
+              ? adaptiveSwitch
+              : SwitchTheme(
+                data: switchThemeData,
+                child: adaptiveSwitch,
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
+class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
+  const _SwitchThemeAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) {
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+        return defaultValue;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return const SwitchThemeData(
+          thumbColor: MaterialStatePropertyAll<Color>(Colors.lightGreen),
+          trackColor: MaterialStatePropertyAll<Color>(Colors.deepPurple),
+        );
+    }
+  }
 }

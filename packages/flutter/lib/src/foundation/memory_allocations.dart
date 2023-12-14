@@ -52,7 +52,7 @@ abstract class ObjectEvent{
 }
 
 /// A listener of [ObjectEvent].
-typedef ObjectEventListener = void Function(ObjectEvent);
+typedef ObjectEventListener = void Function(ObjectEvent event);
 
 /// An event that describes creation of an object.
 class ObjectCreated extends ObjectEvent {
@@ -64,6 +64,9 @@ class ObjectCreated extends ObjectEvent {
   });
 
   /// Name of the instrumented library.
+  ///
+  /// The format of this parameter should be a library Uri.
+  /// For example: `'package:flutter/rendering.dart'`.
   final String library;
 
   /// Name of the instrumented class.

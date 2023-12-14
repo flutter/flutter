@@ -5,8 +5,7 @@
 import 'package:flutter/gestures.dart' show kPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 bool confirmCalled = false;
 bool cancelCalled = false;
@@ -78,7 +77,7 @@ void main() {
     cancelCalled = false;
   });
 
-  testWidgets('Tapping should never cause a splash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tapping should never cause a splash', (WidgetTester tester) async {
     final Key textField1 = UniqueKey();
     final Key textField2 = UniqueKey();
 

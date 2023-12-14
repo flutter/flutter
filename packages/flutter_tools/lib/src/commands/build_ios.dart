@@ -7,9 +7,11 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -20,13 +22,18 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({ required super.logger, required super.verboseHelp }) {
+  BuildIOSCommand({
+    required super.logger,
+    required bool verboseHelp,
+  }) : super(verboseHelp: verboseHelp) {
+    addPublishPort(verboseHelp: verboseHelp);
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -486,7 +493,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         ],
       );
     } finally {
-      generatedExportPlist?.deleteSync();
+      if (generatedExportPlist != null) {
+        ErrorHandlingFileSystem.deleteIfExists(generatedExportPlist);
+      }
       status?.stop();
     }
 
@@ -657,11 +666,14 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
+      disablePortPublication: usingCISystem &&
+          xcodeBuildAction == XcodeBuildAction.build &&
+          await disablePortPublication,
     );
     xcodeBuildResult = result;
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
+      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger, globals.analytics);
       final String presentParticiple = xcodeBuildAction == XcodeBuildAction.build ? 'building' : 'archiving';
       throwToolExit('Encountered error while $presentParticiple for $logTarget.');
     }
@@ -671,6 +683,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         fileSystem: globals.fs,
         logger: globals.logger,
         flutterUsage: globals.flutterUsage,
+        analytics: analytics,
         appFilenamePattern: 'App'
       );
       // Only support 64bit iOS code size analysis.
@@ -723,6 +736,27 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     if (result.output != null) {
       globals.printStatus('Built ${result.output}.');
+
+      // When an app is successfully built, record to analytics whether Impeller
+      // is enabled or disabled.
+      final BuildableIOSApp app = await buildableIOSApp;
+      final String plistPath = app.project.infoPlist.path;
+      final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+        plistPath, PlistParser.kFLTEnableImpellerKey,
+      );
+
+      final String buildLabel = impellerEnabled == false
+          ? 'plist-impeller-disabled'
+          : 'plist-impeller-enabled';
+      BuildEvent(
+        buildLabel,
+        type: 'ios',
+        flutterUsage: globals.flutterUsage,
+      ).send();
+      globals.analytics.send(Event.flutterBuildInfo(
+        label: buildLabel,
+        buildType: 'ios',
+      ));
 
       return FlutterCommandResult.success();
     }

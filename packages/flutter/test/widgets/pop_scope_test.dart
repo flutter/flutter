@@ -6,16 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 
 void main() {
   bool? lastFrameworkHandlesBack;
-  setUp(() {
-    // Initialize to false. Because this uses a static boolean internally, it
-    // is not reset between tests or calls to pumpWidget. Explicitly setting
-    // it to false before each test makes them behave deterministically.
-    SystemNavigator.setFrameworkHandlesBack(false);
+  setUp(() async {
     lastFrameworkHandlesBack = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -25,15 +22,20 @@ void main() {
         }
         return;
       });
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(
+          'flutter/lifecycle',
+          const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+          (ByteData? data) {},
+        );
   });
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, null);
-    SystemNavigator.setFrameworkHandlesBack(true);
   });
 
-  testWidgets('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
     bool canPop = false;
     late StateSetter setState;
     late BuildContext context;
@@ -78,7 +80,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     bool canPop = true;
     late StateSetter setState;
@@ -246,7 +248,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('removing PopScope from the tree removes its effect on navigation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('removing PopScope from the tree removes its effect on navigation', (WidgetTester tester) async {
     bool usePopScope = true;
     late StateSetter setState;
     late BuildContext context;
@@ -298,7 +300,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('identical PopScopes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('identical PopScopes', (WidgetTester tester) async {
     bool usePopScope1 = true;
     bool usePopScope2 = true;
     late StateSetter setState;

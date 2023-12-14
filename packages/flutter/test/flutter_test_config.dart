@@ -23,7 +23,19 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  LeakTrackerGlobalSettings.warnForNonSupportedPlatforms = false;
+  LeakTracking.warnForUnsupportedPlatforms = false;
+
+  // TODO(polina-c): clean up leaks and stop ignoring them.
+  // https://github.com/flutter/flutter/issues/137311
+  // Leak tracking is off by default. To temporary enable it add `.withTrackedAll()` after `settings`.
+  LeakTesting.settings = LeakTesting
+    .settings
+    .withIgnored(
+      allNotGCed: true,
+      notDisposed: <String, int?>{
+        'OverlayEntry': null,
+      },
+    );
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
