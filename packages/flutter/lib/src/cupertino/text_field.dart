@@ -514,7 +514,7 @@ class CupertinoTextField extends StatefulWidget {
   /// The semantic label for the clear button used by screen readers.
   ///
   /// This will be used by screen reading software to identify the clear button
-  /// widget. Defaults to "Text Field Clear".
+  /// widget. Defaults to "Clear".
   final String? clearButtonSemanticLabel;
 
   /// {@macro flutter.widgets.editableText.keyboardType}
@@ -1126,11 +1126,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   Widget _buildClearButton() {
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final String clearLabel = widget.clearButtonSemanticLabel ?? CupertinoLocalizations.of(context).clearButtonLabel;
 
     return Semantics(
       button: true,
-      label: widget.clearButtonSemanticLabel ?? localizations.clearButtonLabel,
+      label: clearLabel,
       child: GestureDetector(
         key: _clearGlobalKey,
         onTap: widget.enabled ? _onClearButtonTapped : null,

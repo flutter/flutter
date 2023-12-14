@@ -7930,7 +7930,7 @@ void main() {
       ),
     );
 
-    expect(find.bySemanticsLabel('Text Field Clear'), findsNothing);
+    expect(find.bySemanticsLabel('Clear'), findsNothing);
 
     expect(find.bySemanticsLabel('Delete Text'), findsOneWidget);
 
