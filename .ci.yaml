@@ -3158,7 +3158,7 @@ targets:
 
   - name: Mac flavors_test_macos
     bringup: true
-    presubmit: true
+    presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
