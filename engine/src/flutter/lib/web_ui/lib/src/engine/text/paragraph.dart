@@ -380,7 +380,7 @@ class ParagraphLine {
 
       final double? minDistance = closestFragment?.distance;
       if (minDistance == null || minDistance > distance) {
-          closestFragment = (fragment: fragment, distance: distance);
+        closestFragment = (fragment: fragment, distance: distance);
       }
     }
     return closestFragment?.fragment;

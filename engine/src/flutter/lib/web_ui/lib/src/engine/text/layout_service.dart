@@ -420,8 +420,11 @@ class TextLayoutService {
   }
 
   ui.GlyphInfo? getClosestGlyphInfo(ui.Offset offset) {
-    final LayoutFragment? fragment = _findLineForY(offset.dy)
-      ?.closestFragmentAtOffset(offset.dx);
+    final ParagraphLine? line = _findLineForY(offset.dy);
+    if (line == null) {
+      return null;
+    }
+    final LayoutFragment? fragment = line.closestFragmentAtOffset(offset.dx - line.left);
     if (fragment == null) {
       return null;
     }
@@ -431,8 +434,8 @@ class TextLayoutService {
                                              || fragment.line.left + fragment.line.width <= dx
                                              || switch (fragment.textDirection!) {
                                                // If dx is closer to the trailing edge, no need to check other fragments.
-                                               ui.TextDirection.ltr => dx >= (fragment.left + fragment.right) / 2,
-                                               ui.TextDirection.rtl => dx <= (fragment.left + fragment.right) / 2,
+                                               ui.TextDirection.ltr => dx >= line.left + (fragment.left + fragment.right) / 2,
+                                               ui.TextDirection.rtl => dx <= line.left + (fragment.left + fragment.right) / 2,
                                              };
     final ui.GlyphInfo candidate1 = fragment.getClosestCharacterBox(dx);
     if (closestGraphemeStartInFragment) {
