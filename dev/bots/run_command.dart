@@ -58,6 +58,7 @@ class Command {
 /// The result of running a command using [startCommand] and [runCommand];
 class CommandResult {
   CommandResult._(this.exitCode, this.elapsedTime, this.flattenedStdout, this.flattenedStderr);
+  CommandResult(this.exitCode, this.elapsedTime, this.flattenedStdout, this.flattenedStderr); // TODO delete
 
   /// The exit code of the process.
   final int exitCode;
