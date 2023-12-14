@@ -106,9 +106,7 @@ void main() {
         project: project, createAndroidPluginFolder: false);
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle.')));
-    expect(buildApkResult.exitCode, equals(0),
-        reason:
-            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+    expect(buildApkResult, const ProcessResultMatcher());
   });
 
   test(
@@ -119,9 +117,7 @@ void main() {
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle.')));
-    expect(buildApkResult.exitCode, equals(0),
-        reason:
-            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+    expect(buildApkResult, const ProcessResultMatcher());
   });
 
   // TODO(54566): Remove test when issue is resolved.
@@ -136,9 +132,7 @@ void main() {
         project: project, createAndroidPluginFolder: false);
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle.')));
-    expect(buildApkResult.exitCode, equals(0),
-        reason:
-            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+    expect(buildApkResult, const ProcessResultMatcher());
   });
 
   // TODO(54566): Remove test when issue is resolved.
@@ -154,9 +148,7 @@ void main() {
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
         isNot(contains('Please fix your settings.gradle.')));
-    expect(buildApkResult.exitCode, equals(0),
-        reason:
-            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+    expect(buildApkResult, const ProcessResultMatcher());
   });
 
   // TODO(54566): Remove test when issue is resolved.
@@ -174,9 +166,7 @@ void main() {
         project: project, createAndroidPluginFolder: true);
     expect(buildApkResult.stderr.toString(),
         contains('Please fix your settings.gradle.'));
-    expect(buildApkResult.exitCode, equals(0),
-        reason:
-            'flutter build apk exited with non 0 code: ${buildApkResult.stderr}');
+    expect(buildApkResult, const ProcessResultMatcher());
   });
 }
 
