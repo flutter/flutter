@@ -77,7 +77,7 @@ void main() {
     expect(
         result.stdout,
         contains(
-            'Warning: The plugin test_plugin requires Android SDK version 31.'));
+            'Warning: The plugin test_plugin requires Android SDK version 31 or higher.'));
     expect(
       result.stderr,
       contains('One or more plugins require a higher Android SDK version.'),
