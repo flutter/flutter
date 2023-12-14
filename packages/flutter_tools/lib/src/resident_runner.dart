@@ -271,7 +271,7 @@ class FlutterDevice {
       FlutterVmService? service;
       if (enableDds) {
         void handleError(Exception e, StackTrace st) {
-          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+          globals.printTrace('Fail to connect to service protocol 0001: $vmServiceUri: $e');
           if (!completer.isCompleted) {
             completer.completeError('failed to connect to $vmServiceUri', st);
           }
@@ -283,7 +283,7 @@ class FlutterDevice {
           service = await connectToVmService(vmServiceUri!, logger: globals.logger);
           await service.dispose();
         } on Exception catch (exception) {
-          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
+          globals.printTrace('Fail to connect to service protocol 0002: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
             completer.completeError('failed to connect to $vmServiceUri');
           }
@@ -340,7 +340,7 @@ class FlutterDevice {
           ]
         ) as FlutterVmService?;
       } on Exception catch (exception) {
-        globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
+        globals.printTrace('Fail to connect to service protocol 0003: $vmServiceUri: $exception');
         if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
           completer.completeError('failed to connect to $vmServiceUri');
         }
