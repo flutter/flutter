@@ -698,7 +698,7 @@ void main() {
     expect(find.text('disabled'), findsOneWidget);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'DropdownButtonFormField - hint displays when the items list is '
     'empty, items is null, and disabledHint is null',
     (WidgetTester tester) async {
@@ -1232,7 +1232,7 @@ void main() {
     expect(inkWell.borderRadius, errorBorderRadius);
   });
 
-  testWidgets('DropdownButtonFormField onChanged is called when the form is reset', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField onChanged is called when the form is reset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();

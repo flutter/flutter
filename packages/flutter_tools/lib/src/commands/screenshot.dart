@@ -78,7 +78,7 @@ class ScreenshotCommand extends FlutterCommand {
         if (vmServiceUrl != null) {
           throwToolExit('VM Service URI cannot be provided for screenshot type $screenshotType');
         }
-        device = await findTargetDevice();
+        device = await findTargetDevice(includeDevicesUnsupportedByProject: true);
         if (device == null) {
           throwToolExit('Must have a connected device for screenshot type $screenshotType');
         }

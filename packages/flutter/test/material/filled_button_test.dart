@@ -52,7 +52,7 @@ void main() {
     expect(align.alignment, Alignment.center);
 
     final Offset center = tester.getCenter(find.byType(FilledButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
 
@@ -122,6 +122,10 @@ void main() {
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('FilledButton.tonal, FilledButton.tonalIcon defaults', (WidgetTester tester) async {
@@ -165,7 +169,7 @@ void main() {
     expect(align.alignment, Alignment.center);
 
     final Offset center = tester.getCenter(find.byType(FilledButton));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start the splash animation
     await tester.pump(const Duration(milliseconds: 100)); // splash is underway
 
@@ -235,6 +239,10 @@ void main() {
     expect(material.textStyle!.fontSize, 14);
     expect(material.textStyle!.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgetsWithLeakTracking('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -1358,6 +1366,37 @@ void main() {
       ),
     );
     expect(paddingWidget.padding, const EdgeInsets.all(22));
+  });
+
+  testWidgetsWithLeakTracking('Override theme fontSize changes padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(
+          colorScheme: const ColorScheme.light(),
+          textTheme: const TextTheme(labelLarge: TextStyle(fontSize: 28.0)),
+        ),
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Center(
+                child: FilledButton(
+                  onPressed: () {},
+                  child: const Text('text'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(
+        of: find.byType(FilledButton),
+        matching: find.byType(Padding),
+      ),
+    );
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12));
   });
 
   testWidgetsWithLeakTracking('M3 FilledButton has correct padding', (WidgetTester tester) async {

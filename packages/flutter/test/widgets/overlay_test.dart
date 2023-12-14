@@ -10,6 +10,18 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
+  test('OverlayEntry dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => OverlayEntry(
+              builder: (BuildContext context) => Container(),
+            ).dispose(),
+        OverlayEntry,
+      ),
+      areCreateAndDispose,
+    );
+  });
+
   testWidgetsWithLeakTracking('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
     bool didBuild = false;
@@ -1548,6 +1560,209 @@ void main() {
         ),
       );
     });
+  });
+
+  testWidgets('Overlay.wrap', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay.wrap(
+          child: const Center(
+            child: Text('Hello World'),
+          ),
+        ),
+      ),
+    );
+
+    final State overlayState = tester.state(find.byType(Overlay));
+    expect(find.text('Hello World'), findsOneWidget);
+    expect(find.text('Bye, bye'), findsNothing);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay.wrap(
+          child: const Center(
+            child: Text('Bye, bye'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Hello World'), findsNothing);
+    expect(find.text('Bye, bye'), findsOneWidget);
+    expect(tester.state(find.byType(Overlay)), same(overlayState));
+  });
+
+  testWidgets('Overlay.wrap is sized by child in an unconstrained environment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: UnconstrainedBox(
+          child: Overlay.wrap(
+            child: const Center(
+              child: SizedBox(
+                width: 123,
+                height: 456,
+              )
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
+  });
+
+  testWidgets('Overlay is sized by child in an unconstrained environment', (WidgetTester tester) async {
+    final OverlayEntry initialEntry = OverlayEntry(
+      opaque: true,
+      canSizeOverlay: true,
+      builder: (BuildContext context) {
+        return const SizedBox(width: 123, height: 456);
+      }
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: UnconstrainedBox(
+          child: Overlay(
+            initialEntries: <OverlayEntry>[initialEntry]
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
+
+    final OverlayState overlay = tester.state<OverlayState>(find.byType(Overlay));
+
+    final OverlayEntry nonSizingEntry = OverlayEntry(
+      builder: (BuildContext context) {
+        return const SizedBox(
+          width: 600,
+          height: 600,
+          child: Center(child: Text('Hello')),
+        );
+      },
+    );
+
+    overlay.insert(nonSizingEntry);
+    await tester.pump();
+    expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
+    expect(find.text('Hello'), findsOneWidget);
+
+    final OverlayEntry sizingEntry = OverlayEntry(
+      canSizeOverlay: true,
+      builder: (BuildContext context) {
+        return const SizedBox(
+          width: 222,
+          height: 111,
+          child: Center(child: Text('World')),
+        );
+      },
+    );
+
+    overlay.insert(sizingEntry);
+    await tester.pump();
+    expect(tester.getSize(find.byType(Overlay)), const Size(222, 111));
+    expect(find.text('Hello'), findsOneWidget);
+    expect(find.text('World'), findsOneWidget);
+
+    nonSizingEntry.remove();
+    await tester.pump();
+    expect(tester.getSize(find.byType(Overlay)), const Size(222, 111));
+    expect(find.text('Hello'), findsNothing);
+    expect(find.text('World'), findsOneWidget);
+
+    sizingEntry.remove();
+    await tester.pump();
+    expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
+    expect(find.text('Hello'), findsNothing);
+    expect(find.text('World'), findsNothing);
+  });
+
+  testWidgets('Overlay throws if unconstrained and has no child', (WidgetTester tester) async {
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = errors.add;
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: UnconstrainedBox(
+          child: Overlay(),
+        ),
+      ),
+    );
+    FlutterError.onError = oldHandler;
+
+    expect(
+      errors.first.toString().replaceAll('\n', ' '),
+      contains('Overlay was given infinite constraints and cannot be sized by a suitable child.'),
+    );
+  });
+
+  testWidgets('Overlay throws if unconstrained and only positioned child', (WidgetTester tester) async {
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = errors.add;
+
+    final OverlayEntry entry = OverlayEntry(
+      canSizeOverlay: true,
+      builder: (BuildContext context) {
+        return const Positioned(
+          top: 100,
+          child: SizedBox(width: 600, height: 600),
+        );
+      },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: UnconstrainedBox(
+          child: Overlay(
+            initialEntries: <OverlayEntry>[entry],
+          ),
+        ),
+      ),
+    );
+    FlutterError.onError = oldHandler;
+
+    expect(
+      errors.first.toString().replaceAll('\n', ' '),
+      contains('Overlay was given infinite constraints and cannot be sized by a suitable child.'),
+    );
+  });
+
+  testWidgets('Overlay throws if unconstrained and no canSizeOverlay child', (WidgetTester tester) async {
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = errors.add;
+
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return const SizedBox(width: 600, height: 600);
+      },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: UnconstrainedBox(
+          child: Overlay(
+            initialEntries: <OverlayEntry>[entry],
+          ),
+        ),
+      ),
+    );
+    FlutterError.onError = oldHandler;
+
+    expect(
+      errors.first.toString().replaceAll('\n', ' '),
+      contains('Overlay was given infinite constraints and cannot be sized by a suitable child.'),
+    );
   });
 }
 

@@ -51,7 +51,6 @@
   "reorderItemRight": "Sposta a destra",
   "expandedIconTapHint": "Comprimi",
   "collapsedIconTapHint": "Espandi",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 carattere rimanente",
   "remainingTextFieldCharacterCountOther": "$remainingCount caratteri rimanenti",
   "refreshIndicatorSemanticLabel": "Aggiorna",

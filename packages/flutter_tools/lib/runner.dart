@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'src/base/async_guard.dart';
 import 'src/base/common.dart';
@@ -18,6 +19,7 @@ import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
+import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
 import 'src/reporting/reporting.dart';
@@ -44,6 +46,8 @@ Future<int> run(
   }
 
   return runInContext<int>(() async {
+    globals.terminal.applyFeatureFlags(featureFlags);
+
     reportCrashes ??= !await globals.isRunningOnBot;
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
     commands().forEach(runner.addCommand);
@@ -105,6 +109,9 @@ Future<int> run(
           globals.flutterUsage.enabled = true;
           globals.printStatus('Analytics reporting enabled.');
 
+          // TODO(eliasyishak): Set the telemetry for the unified_analytics
+          //  package as well, the above will be removed once we have
+          //  fully transitioned to using the new package
           await globals.analytics.setTelemetry(true);
         }
 
@@ -180,6 +187,7 @@ Future<int> _handleToolError(
 
     // Report to both [Usage] and [CrashReportSender].
     globals.flutterUsage.sendException(error);
+    globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
         usage: globals.flutterUsage,

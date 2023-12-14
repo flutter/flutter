@@ -51,7 +51,6 @@
   "reorderItemRight": "Flyt til højre",
   "expandedIconTapHint": "Skjul",
   "collapsedIconTapHint": "Udvid",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Ét tegn tilbage",
   "remainingTextFieldCharacterCountOther": "$remainingCount tegn tilbage",
   "refreshIndicatorSemanticLabel": "Opdater",

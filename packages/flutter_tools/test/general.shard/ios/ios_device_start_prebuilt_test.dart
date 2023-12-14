@@ -485,6 +485,7 @@ void main() {
             '--verify-entry-points',
             '--enable-software-rendering',
             '--trace-systrace',
+            '--trace-to-file="path/to/trace.binpb"',
             '--skia-deterministic-rendering',
             '--trace-skia',
             '--trace-allowlist="foo"',
@@ -541,6 +542,7 @@ void main() {
         traceAllowlist: 'foo',
         traceSkiaAllowlist: 'skia.a,skia.b',
         traceSystrace: true,
+        traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
         dumpSkpOnShaderCompilation: true,
         cacheSkSL: true,
@@ -902,6 +904,68 @@ void main() {
       }, overrides: <Type, Generator>{
         MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(),
       });
+
+      group('IOSDevice.startApp attaches in debug mode via device logging', () {
+        late FakeMDnsVmServiceDiscovery mdnsDiscovery;
+        setUp(() {
+          mdnsDiscovery = FakeMDnsVmServiceDiscovery(returnsNull: true);
+        });
+
+        testUsingContext('when mDNS fails', () async {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final FakeProcessManager processManager = FakeProcessManager.empty();
+
+          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_empty_xcode.rand0');
+          final Directory bundleLocation = fileSystem.currentDirectory;
+          final IOSDevice device = setUpIOSDevice(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            isCoreDevice: true,
+            coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcodeDebug: FakeXcodeDebug(
+              expectedProject: XcodeDebugProject(
+                scheme: 'Runner',
+                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
+                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+                hostAppProjectName: 'Runner',
+              ),
+              expectedDeviceId: '123',
+              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedBundlePath: bundleLocation.path,
+            )
+          );
+          final IOSApp iosApp = PrebuiltIOSApp(
+            projectBundleId: 'app',
+            bundleName: 'Runner',
+            uncompressedBundle: bundleLocation,
+            applicationPackage: bundleLocation,
+          );
+          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+          device.portForwarder = const NoOpDevicePortForwarder();
+          device.setLogReader(iosApp, deviceLogReader);
+
+          unawaited(mdnsDiscovery.completer.future.whenComplete(() {
+            // Start writing messages to the log reader.
+            Timer.run(() {
+              deviceLogReader.addLine('Foo');
+              deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+            });
+          }));
+
+          final LaunchResult launchResult = await device.startApp(iosApp,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+            platformArgs: <String, dynamic>{},
+          );
+
+          expect(launchResult.started, true);
+          expect(launchResult.hasVmService, true);
+          expect(await device.stopApp(iosApp), true);
+        }, overrides: <Type, Generator>{
+          MDnsVmServiceDiscovery: () => mdnsDiscovery,
+        });
+      });
     });
   });
 }
@@ -972,6 +1036,10 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 }
 
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
+  FakeMDnsVmServiceDiscovery({this.returnsNull = false});
+  bool returnsNull;
+
+  Completer<void> completer = Completer<void>();
   @override
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
@@ -982,6 +1050,11 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
   }) async {
+    completer.complete();
+    if (returnsNull) {
+      return null;
+    }
+
     return Uri.tryParse('http://0.0.0.0:1234');
   }
 }

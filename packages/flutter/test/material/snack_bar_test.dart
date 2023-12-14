@@ -265,6 +265,101 @@ void main() {
     );
   });
 
+  testWidgetsWithLeakTracking('SnackBar dismissDirection can be customised from SnackBarThemeData', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    late double width;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(
+          dismissDirection: DismissDirection.startToEnd,
+        )
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            width = MediaQuery.sizeOf(context).width;
+
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('swipe ltr'),
+                  duration: Duration(seconds: 2),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(find.text('swipe ltr'), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text('swipe ltr'), findsNothing);
+    await tester.pump(); // schedule animation for snack bar
+    expect(find.text('swipe ltr'), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text('swipe ltr'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.drag(find.text('swipe ltr'), Offset(width, 0.0));
+    await tester.pump(); // snack bar dismissed
+    expect(find.text('swipe ltr'), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('dismissDirection from SnackBar should be preferred over SnackBarThemeData', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    late double width;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+          snackBarTheme: const SnackBarThemeData(
+            dismissDirection: DismissDirection.startToEnd,
+          )
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            width = MediaQuery.sizeOf(context).width;
+
+            return GestureDetector(
+              key: tapTarget,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('swipe rtl'),
+                  duration: Duration(seconds: 2),
+                  dismissDirection: DismissDirection.endToStart,
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: const SizedBox(
+                height: 100.0,
+                width: 100.0,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(find.text('swipe rtl'), findsNothing);
+    await tester.tap(find.byKey(tapTarget));
+    expect(find.text('swipe rtl'), findsNothing);
+    await tester.pump(); // schedule animation for snack bar
+    expect(find.text('swipe rtl'), findsOneWidget);
+    await tester.pump(); // begin animation
+    expect(find.text('swipe rtl'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 750));
+    await tester.drag(find.text('swipe rtl'), Offset(-width, 0.0));
+    await tester.pump(); // snack bar dismissed
+    expect(find.text('swipe rtl'), findsNothing);
+  });
+
   testWidgetsWithLeakTracking('SnackBar cannot be tapped twice', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(MaterialApp(
@@ -1134,7 +1229,7 @@ void main() {
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 14.0 + 40.0); // margin + bottom padding
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Material2 - Custom padding between SnackBar and its contents when set to SnackBarBehavior.fixed',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
@@ -1191,7 +1286,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Material3 - Custom padding between SnackBar and its contents when set to SnackBarBehavior.fixed',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
@@ -1405,7 +1500,7 @@ void main() {
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 24.0); // margin (with no bottom padding)
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Material2 - Custom padding between SnackBar and its contents when set to SnackBarBehavior.floating',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
@@ -1465,7 +1560,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Material3 - Custom padding between SnackBar and its contents when set to SnackBarBehavior.floating',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
@@ -1873,7 +1968,7 @@ void main() {
         behavior: behavior,
       );
 
-      testWidgets(
+      testWidgetsWithLeakTracking(
         '$behavior should align SnackBar with the bottom of Scaffold '
         'when Scaffold has no other elements',
         (WidgetTester tester) async {
@@ -1902,7 +1997,7 @@ void main() {
         },
       );
 
-      testWidgets(
+      testWidgetsWithLeakTracking(
         '$behavior should align SnackBar with the top of BottomNavigationBar '
         'when Scaffold has no FloatingActionButton',
         (WidgetTester tester) async {
@@ -1934,7 +2029,7 @@ void main() {
       );
     }
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'Padding of ${SnackBarBehavior.fixed} is not consumed by viewInsets',
           (WidgetTester tester) async {
         final Widget child = MaterialApp(
@@ -1997,7 +2092,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       '${SnackBarBehavior.fixed} should align SnackBar with the bottom of Scaffold '
       'when Scaffold has a FloatingActionButton',
       (WidgetTester tester) async {
@@ -2032,7 +2127,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton when Scaffold has a FloatingActionButton',
       (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
@@ -2072,7 +2167,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       '${SnackBarBehavior.floating} should not align SnackBar with the top of FloatingActionButton '
       'when Scaffold has a FloatingActionButton and floatingActionButtonLocation is set to a top position',
       (WidgetTester tester) async {
@@ -2125,7 +2220,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton '
       'when Scaffold has a FloatingActionButton and floatingActionButtonLocation is not set to a top position',
       (WidgetTester tester) async {
@@ -2193,7 +2288,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       '${SnackBarBehavior.fixed} should align SnackBar with the top of BottomNavigationBar '
       'when Scaffold has a BottomNavigationBar and FloatingActionButton',
       (WidgetTester tester) async {
@@ -2230,7 +2325,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton '
       'when Scaffold has BottomNavigationBar and FloatingActionButton',
       (WidgetTester tester) async {
@@ -2259,6 +2354,44 @@ void main() {
         final Offset fabTopRight = tester.getTopRight(find.byType(FloatingActionButton));
 
         expect(snackBarBottomRight.dy, equals(fabTopRight.dy));
+      },
+    );
+
+    testWidgetsWithLeakTracking(
+      '${SnackBarBehavior.floating} should align SnackBar with the top of BottomNavigationBar '
+          'when Scaffold has both BottomNavigationBar and FloatingActionButton and '
+          'BottomNavigationBar.top is higher than FloatingActionButton.top',
+          (WidgetTester tester) async {
+        final UniqueKey boxKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Container(),
+              bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 200),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+              floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+            ),
+          ),
+        );
+
+        final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+        scaffoldMessengerState.showSnackBar(
+          const SnackBar(
+            content: Text('SnackBar text'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+        final Offset fabTopRight = tester.getTopRight(find.byType(FloatingActionButton));
+        final Offset navBarTopRight = tester.getTopRight(find.byKey(boxKey));
+
+        // Test the top of the navigation bar is higher than the top of the floating action button.
+        expect(fabTopRight.dy, greaterThan(navBarTopRight.dy));
+
+        expect(snackBarBottomRight.dy, equals(navBarTopRight.dy));
       },
     );
 
@@ -2400,7 +2533,7 @@ void main() {
       expect(errorMessages.contains(offScreenMessage), isTrue);
     });
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'SnackBar has correct end padding when it contains an action with fixed behavior',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -2437,7 +2570,7 @@ void main() {
       },
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'SnackBar has correct end padding when it contains an action with floating behavior',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -2608,7 +2741,7 @@ void main() {
     expect(find.text(snackBarText), findsOneWidget);
 
     // Start the gesture at the edge of the screen.
-    final TestGesture gesture =  await tester.startGesture(const Offset(5.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
     // Trigger the swipe.
     await gesture.moveBy(const Offset(100.0, 0.0));
 
@@ -3337,7 +3470,7 @@ void main() {
     );
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
       'ScaffoldMessenger will alert for snackbars that cannot be presented', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103004
     await tester.pumpWidget(const MaterialApp(
@@ -3723,7 +3856,7 @@ testWidgetsWithLeakTracking('SnackBarAction backgroundColor works as a Color', (
     expect(completer.isCompleted, true);
   });
 
-  testWidgets("Can't tap on button behind snack bar defined by margin and HitTestBehavior.opaque", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Can't tap on button behind snack bar defined by margin and HitTestBehavior.opaque", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/78537.
     tester.view.physicalSize = const Size.square(200);
     tester.view.devicePixelRatio = 1;

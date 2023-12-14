@@ -440,7 +440,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
           _floatingOptionsUpdateScheduled = false;
           _updateOverlay();
-        });
+        }, debugLabel: 'RawAutoComplete.updateOverlay');
       }
       return;
     }

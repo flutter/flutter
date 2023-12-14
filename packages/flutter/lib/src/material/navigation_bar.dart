@@ -62,12 +62,18 @@ const double _kIndicatorWidth = 64;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows a [NavigationBar] as it is used within a [Scaffold]
-/// widget when there are nested navigators that provide local navigation. The
-/// [NavigationBar] has four [NavigationDestination] widgets with different
-/// color schemes. The [onDestinationSelected] callback changes the selected
-/// item's index and displays a corresponding page with its own local navigator
-/// in the body of a [Scaffold].
+/// This example shows a [NavigationBar] within a main [Scaffold]
+/// widget that's used to control the visibility of destination pages.
+/// Each destination has its own scaffold and a nested navigator that
+/// provides local navigation. The example's [NavigationBar] has four
+/// [NavigationDestination] widgets with different color schemes. Its
+/// [onDestinationSelected] callback changes the selected
+/// destination's index and displays a corresponding page with its own
+/// local navigator and scaffold - all within the body of the main
+/// scaffold. The destination pages are organized in a [Stack] and
+/// switching destinations fades out the current page and
+/// fades in the new one. Destinations that aren't visible or animating
+/// are kept [Offstage].
 ///
 /// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.2.dart **
 /// {@end-tool}
@@ -98,6 +104,7 @@ class NavigationBar extends StatelessWidget {
     this.indicatorShape,
     this.height,
     this.labelBehavior,
+    this.overlayColor,
   }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
@@ -201,6 +208,10 @@ class NavigationBar extends StatelessWidget {
   /// [NavigationDestinationLabelBehavior.alwaysShow].
   final NavigationDestinationLabelBehavior? labelBehavior;
 
+  /// The highlight color that's typically used to indicate that
+  /// the [NavigationDestination] is focused, hovered, or pressed.
+  final MaterialStateProperty<Color?>? overlayColor;
+
   VoidCallback _handleTap(int index) {
     return onDestinationSelected != null
       ? () => onDestinationSelected!(index)
@@ -243,6 +254,7 @@ class NavigationBar extends StatelessWidget {
                         labelBehavior: effectiveLabelBehavior,
                         indicatorColor: indicatorColor,
                         indicatorShape: indicatorShape,
+                        overlayColor: overlayColor,
                         onTap: _handleTap(i),
                         child: destinations[i],
                       );
@@ -503,7 +515,8 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
         child: _IndicatorInkWell(
           iconKey: iconKey,
           labelBehavior: info.labelBehavior,
-          customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
+          customBorder: info.indicatorShape ?? navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
+          overlayColor: info.overlayColor ?? navigationBarTheme.overlayColor,
           onTap: widget.enabled ? info.onTap : null,
           child: Row(
             children: <Widget>[
@@ -526,6 +539,7 @@ class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
     required this.iconKey,
     required this.labelBehavior,
+    super.overlayColor,
     super.customBorder,
     super.onTap,
     super.child,
@@ -563,6 +577,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
     required this.labelBehavior,
     required this.indicatorColor,
     required this.indicatorShape,
+    required this.overlayColor,
     required this.onTap,
     required super.child,
   });
@@ -628,6 +643,12 @@ class _NavigationDestinationInfo extends InheritedWidget {
   ///
   /// This is used by destinations to override the indicator shape.
   final ShapeBorder? indicatorShape;
+
+  /// The highlight color that's typically used to indicate that
+  /// the [NavigationDestination] is focused, hovered, or pressed.
+  ///
+  /// This is used by destinations to override the overlay color.
+  final MaterialStateProperty<Color?>? overlayColor;
 
   /// The callback that should be called when this destination is tapped.
   ///
@@ -1364,9 +1385,10 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(color: states.contains(MaterialState.disabled)
-        ? _colors.onSurfaceVariant.withOpacity(0.38)
-        : states.contains(MaterialState.selected)
+      return style.apply(
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
             ? _colors.onSurface
             : _colors.onSurfaceVariant
       );

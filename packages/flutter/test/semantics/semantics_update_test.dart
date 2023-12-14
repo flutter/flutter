@@ -157,6 +157,7 @@ void main() {
       'Semantics('
         'container: false, '
         'properties: SemanticsProperties, '
+        'identifier: null, '// ignore: missing_whitespace_between_adjacent_strings
         'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
         'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
         'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
@@ -171,13 +172,16 @@ void main() {
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
-  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
+  // ignore: deprecated_member_use
+  ui.SemanticsUpdateBuilderNew createSemanticsUpdateBuilder() {
     return SemanticsUpdateBuilderSpy();
   }
 }
 
-class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
-  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
+// ignore: deprecated_member_use
+class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilderNew {
+  // ignore: deprecated_member_use
+  final SemanticsUpdateBuilderNew _builder = ui.SemanticsUpdateBuilderNew();
 
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
 
@@ -199,6 +203,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required double elevation,
     required double thickness,
     required Rect rect,
+    required String identifier,
     required String label,
     List<StringAttribute>? labelAttributes,
     required String value,

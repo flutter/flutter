@@ -96,6 +96,113 @@ void main() {
       expect(scope.hasFocus, isTrue);
     });
 
+    testWidgetsWithLeakTracking('focus traversal should work case 1', (WidgetTester tester) async {
+      final FocusNode outer1 = FocusNode(debugLabel: 'outer1', skipTraversal: true);
+      final FocusNode outer2 = FocusNode(debugLabel: 'outer2', skipTraversal: true);
+      final FocusNode inner1 = FocusNode(debugLabel: 'inner1', );
+      final FocusNode inner2 = FocusNode(debugLabel: 'inner2', );
+      addTearDown(() {
+        outer1.dispose();
+        outer2.dispose();
+        inner1.dispose();
+        inner2.dispose();
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            child: Row(
+              children: <Widget>[
+                FocusScope(
+                  child: Focus(
+                    focusNode: outer1,
+                    child: Focus(
+                      focusNode: inner1,
+                      child: const SizedBox(width: 10, height: 10),
+                    ),
+                  ),
+                ),
+                FocusScope(
+                  child: Focus(
+                    focusNode: outer2,
+                    // Add a padding to ensure both Focus widgets have different
+                    // sizes.
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Focus(
+                        focusNode: inner2,
+                        child: const SizedBox(width: 10, height: 10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(FocusManager.instance.primaryFocus, isNull);
+      inner1.requestFocus();
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, inner1);
+      outer2.nextFocus();
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, inner2);
+    });
+
+    testWidgetsWithLeakTracking('focus traversal should work case 2', (WidgetTester tester) async {
+      final FocusNode outer1 = FocusNode(debugLabel: 'outer1', skipTraversal: true);
+      final FocusNode outer2 = FocusNode(debugLabel: 'outer2', skipTraversal: true);
+      final FocusNode inner1 = FocusNode(debugLabel: 'inner1', );
+      final FocusNode inner2 = FocusNode(debugLabel: 'inner2', );
+      addTearDown(() {
+        outer1.dispose();
+        outer2.dispose();
+        inner1.dispose();
+        inner2.dispose();
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            child: Row(
+              children: <Widget>[
+                FocusScope(
+                  child: Focus(
+                    focusNode: outer1,
+                    child: Focus(
+                      focusNode: inner1,
+                      child: const SizedBox(width: 10, height: 10),
+                    ),
+                  ),
+                ),
+                FocusScope(
+                  child: Focus(
+                    focusNode: outer2,
+                    child: Focus(
+                      focusNode: inner2,
+                      child: const SizedBox(width: 10, height: 10),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(FocusManager.instance.primaryFocus, isNull);
+      inner1.requestFocus();
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, inner1);
+      outer2.nextFocus();
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, inner2);
+    });
+
     testWidgetsWithLeakTracking('Move focus to next node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -441,6 +548,96 @@ void main() {
 
   });
 
+  testWidgetsWithLeakTracking('Nested navigator does not trap focus', (WidgetTester tester) async {
+    final FocusNode node1 = FocusNode();
+    addTearDown(node1.dispose);
+    final FocusNode node2 = FocusNode();
+    addTearDown(node2.dispose);
+    final FocusNode node3 = FocusNode();
+    addTearDown(node3.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusTraversalGroup(
+          policy: ReadingOrderTraversalPolicy(),
+          child: FocusScope(
+            child: Column(
+              children: <Widget>[
+                Focus(
+                  focusNode: node1,
+                  child: const SizedBox(width: 100, height: 100),
+                ),
+                SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Navigator(
+                    pages: <Page<void>>[
+                      MaterialPage<void>(
+                        child: Focus(
+                          focusNode: node2,
+                          child: const SizedBox(width: 100, height: 100),
+                        ),
+                      ),
+                    ],
+                    onPopPage: (_, __) => false,
+                  ),
+                ),
+                Focus(
+                  focusNode: node3,
+                  child: const SizedBox(width: 100, height: 100),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    node1.requestFocus();
+    await tester.pump();
+
+    expect(node1.hasFocus, isTrue);
+    expect(node2.hasFocus, isFalse);
+    expect(node3.hasFocus, isFalse);
+
+    node1.nextFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isTrue);
+    expect(node3.hasFocus, isFalse);
+
+    node2.nextFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+    expect(node3.hasFocus, isTrue);
+
+    node3.nextFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isTrue);
+    expect(node2.hasFocus, isFalse);
+    expect(node3.hasFocus, isFalse);
+
+    node1.previousFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+    expect(node3.hasFocus, isTrue);
+
+    node3.previousFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isTrue);
+    expect(node3.hasFocus, isFalse);
+
+    node2.previousFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isTrue);
+    expect(node2.hasFocus, isFalse);
+    expect(node3.hasFocus, isFalse);
+  });
+
   group(ReadingOrderTraversalPolicy, () {
     testWidgetsWithLeakTracking('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -626,8 +823,13 @@ void main() {
         final bool didFindNode = node1.nextFocus();
         await tester.pump();
         expect(didFindNode, isTrue);
-        expect(node1.hasPrimaryFocus, isFalse);
-        expect(node2.hasPrimaryFocus, isTrue);
+        if (canRequestFocus) {
+          expect(node1.hasPrimaryFocus, isTrue);
+          expect(node2.hasPrimaryFocus, isFalse);
+        } else {
+          expect(node1.hasPrimaryFocus, isFalse);
+          expect(node2.hasPrimaryFocus, isTrue);
+        }
       }
     });
 
@@ -2201,6 +2403,7 @@ void main() {
       expect(Focus.of(lowerLeftKey.currentContext!).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext!).hasPrimaryFocus, isTrue);
+    // ignore: deprecated_member_use
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgetsWithLeakTracking('Focus traversal actions works when current focus skip traversal', (WidgetTester tester) async {
@@ -2256,6 +2459,7 @@ void main() {
       expect(Focus.of(key2.currentContext!).hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(key3.currentContext!).hasPrimaryFocus, isTrue);
+    // ignore: deprecated_member_use
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgetsWithLeakTracking('Focus traversal inside a vertical scrollable scrolls to stay visible.', (WidgetTester tester) async {
@@ -2362,6 +2566,7 @@ void main() {
       await tester.pump();
       expect(topNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
+    // ignore: deprecated_member_use
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgetsWithLeakTracking('Focus traversal inside a horizontal scrollable scrolls to stay visible.', (WidgetTester tester) async {
@@ -2469,6 +2674,7 @@ void main() {
       await tester.pump();
       expect(leftNode.hasPrimaryFocus, isTrue);
       expect(controller.offset, equals(0.0));
+    // ignore: deprecated_member_use
     }, skip: isBrowser, variant: KeySimulatorTransitModeVariant.all()); // https://github.com/flutter/flutter/issues/35347
 
     testWidgetsWithLeakTracking('Arrow focus traversal actions can be re-enabled for text fields.', (WidgetTester tester) async {
@@ -2600,6 +2806,7 @@ void main() {
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Focus traversal does not break when no focusable is available on a MaterialApp', (WidgetTester tester) async {
@@ -2607,8 +2814,9 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(home: Container()));
 
-      RawKeyboard.instance.addListener((RawKeyEvent event) {
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
         events.add(event);
+        return true;
       });
 
       await tester.idle();
@@ -2616,6 +2824,7 @@ void main() {
       await tester.idle();
 
       expect(events.length, 2);
+    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Focus traversal does not throw when no focusable is available in a group', (WidgetTester tester) async {
@@ -2627,7 +2836,7 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('Focus traversal does not break when no focusable is available on a WidgetsApp', (WidgetTester tester) async {
-      final List<RawKeyEvent> events = <RawKeyEvent>[];
+      final List<KeyEvent> events = <KeyEvent>[];
 
       await tester.pumpWidget(
         WidgetsApp(
@@ -2641,8 +2850,9 @@ void main() {
         ),
       );
 
-      RawKeyboard.instance.addListener((RawKeyEvent event) {
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
         events.add(event);
+        return true;
       });
 
       await tester.idle();
@@ -2650,6 +2860,7 @@ void main() {
       await tester.idle();
 
       expect(events.length, 2);
+    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Custom requestFocusCallback gets called on focusInDirection up/down/left/right.', (WidgetTester tester) async {

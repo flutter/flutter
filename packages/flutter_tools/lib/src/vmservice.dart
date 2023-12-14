@@ -964,7 +964,7 @@ class FlutterVmService {
       if (event.kind == vm_service.EventKind.kServiceExtensionAdded
           && event.extensionRPC == extensionName) {
         isolateEvents.cancel();
-        extensionAdded.complete(event.isolate);
+        extensionAdded.complete(event.isolate!);
       }
     });
 
