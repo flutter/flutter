@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_PLATFORM_VIEW_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_PLATFORM_VIEW_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_PLATFORM_VIEW_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_PLATFORM_VIEW_H_
 
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <fuchsia/ui/input/cpp/fidl.h>
@@ -256,4 +256,4 @@ class PlatformView : public flutter::PlatformView {
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_PLATFORM_VIEW_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_PLATFORM_VIEW_H_

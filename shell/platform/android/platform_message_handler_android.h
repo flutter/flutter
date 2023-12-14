@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_ANDROID_PLATFORM_MESSAGE_HANDLER_H_
-#define SHELL_PLATFORM_ANDROID_PLATFORM_MESSAGE_HANDLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_MESSAGE_HANDLER_ANDROID_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_MESSAGE_HANDLER_ANDROID_H_
 
 #include <jni.h>
 #include <memory>
@@ -38,4 +38,4 @@ class PlatformMessageHandlerAndroid : public PlatformMessageHandler {
 };
 }  // namespace flutter
 
-#endif
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_MESSAGE_HANDLER_ANDROID_H_

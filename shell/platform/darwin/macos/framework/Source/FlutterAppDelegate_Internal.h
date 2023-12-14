@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLUTTERAPPDELEGATE_INTERNAL_H_
-#define FLUTTER_FLUTTERAPPDELEGATE_INTERNAL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERAPPDELEGATE_INTERNAL_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERAPPDELEGATE_INTERNAL_H_
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
@@ -18,4 +18,4 @@
 
 @end
 
-#endif  // FLUTTER_FLUTTERAPPDELEGATE_INTERNAL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERAPPDELEGATE_INTERNAL_H_

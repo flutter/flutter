@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_UNIQUE_FDIO_NS_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_UNIQUE_FDIO_NS_H_
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/unique_object.h"
@@ -32,3 +33,5 @@ inline UniqueFDIONS UniqueFDIONSCreate() {
 }
 
 }  // namespace flutter_runner
+
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_UNIQUE_FDIO_NS_H_

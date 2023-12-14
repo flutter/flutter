@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_VULKAN_IMPELLER_H_
+#define FLUTTER_SHELL_GPU_GPU_SURFACE_VULKAN_IMPELLER_H_
 
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/flow/surface.h"
@@ -52,3 +53,5 @@ class GPUSurfaceVulkanImpeller final : public Surface {
 };
 
 }  // namespace flutter
+
+#endif  // FLUTTER_SHELL_GPU_GPU_SURFACE_VULKAN_IMPELLER_H_

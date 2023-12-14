@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef PLATFORM_COMMON_PLATFORM_PROVIDED_MENU_H_
-#define PLATFORM_COMMON_PLATFORM_PROVIDED_MENU_H_
+#ifndef FLUTTER_SHELL_PLATFORM_COMMON_PLATFORM_PROVIDED_MENU_H_
+#define FLUTTER_SHELL_PLATFORM_COMMON_PLATFORM_PROVIDED_MENU_H_
 
 namespace flutter {
 
@@ -49,4 +49,4 @@ enum class PlatformProvidedMenu {
 
 }  // namespace flutter
 
-#endif  // PLATFORM_COMMON_PLATFORM_provided_MENU_H_
+#endif  // FLUTTER_SHELL_PLATFORM_COMMON_PLATFORM_PROVIDED_MENU_H_

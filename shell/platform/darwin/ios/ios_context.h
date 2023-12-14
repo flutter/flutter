@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_RESOURCE_CONTEXT_H_
-#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_RESOURCE_CONTEXT_H_
+#ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_H_
+#define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_H_
 
 #include <memory>
 
@@ -157,4 +157,4 @@ class IOSContext {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_RESOURCE_CONTEXT_H_
+#endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_CONTEXT_H_

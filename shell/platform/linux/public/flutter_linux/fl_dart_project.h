@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_DART_PROJECT_H_
-#define FLUTTER_SHELL_PLATFORM_LINUX_FL_DART_PROJECT_H_
+#ifndef FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_DART_PROJECT_H_
+#define FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_DART_PROJECT_H_
 
 #include <glib-object.h>
 #include <gmodule.h>
@@ -130,4 +130,4 @@ gchar** fl_dart_project_get_dart_entrypoint_arguments(FlDartProject* project);
 
 G_END_DECLS
 
-#endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_DART_PROJECT_H_
+#endif  // FLUTTER_SHELL_PLATFORM_LINUX_PUBLIC_FLUTTER_LINUX_FL_DART_PROJECT_H_

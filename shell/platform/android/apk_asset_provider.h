@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_ASSETS_APK_ASSET_PROVIDER_H_
-#define FLUTTER_ASSETS_APK_ASSET_PROVIDER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_APK_ASSET_PROVIDER_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_APK_ASSET_PROVIDER_H_
 
 #include <android/asset_manager_jni.h>
 #include <jni.h>
@@ -64,4 +64,4 @@ class APKAssetProvider final : public AssetResolver {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_ASSETS_APK_ASSET_PROVIDER_H
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_APK_ASSET_PROVIDER_H_

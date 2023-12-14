@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef POINTER_DATA_DISPATCHER_H_
-#define POINTER_DATA_DISPATCHER_H_
+#ifndef FLUTTER_SHELL_COMMON_POINTER_DATA_DISPATCHER_H_
+#define FLUTTER_SHELL_COMMON_POINTER_DATA_DISPATCHER_H_
 
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/shell/common/animator.h"
@@ -174,4 +174,4 @@ using PointerDataDispatcherMaker =
 
 }  // namespace flutter
 
-#endif  // POINTER_DATA_DISPATCHER_H_
+#endif  // FLUTTER_SHELL_COMMON_POINTER_DATA_DISPATCHER_H_
