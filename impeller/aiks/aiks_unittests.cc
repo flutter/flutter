@@ -348,6 +348,18 @@ TEST_P(AiksTest, CanRenderSimpleClips) {
       canvas.DrawPaint(paint);
       canvas.Restore();
     }
+    {
+      canvas.Save();
+      canvas.ClipRRect(Rect::MakeLTRB(200, 230, 300, 270), {20, 20});
+      canvas.DrawPaint(paint);
+      canvas.Restore();
+    }
+    {
+      canvas.Save();
+      canvas.ClipRRect(Rect::MakeLTRB(230, 200, 270, 300), {20, 20});
+      canvas.DrawPaint(paint);
+      canvas.Restore();
+    }
     canvas.Restore();
   };
 
@@ -2355,6 +2367,10 @@ TEST_P(AiksTest, FilledRoundRectsRenderCorrectly) {
                        Size(i * 5 + 10, j * 5 + 10), paint);
     }
   }
+  paint.color = colors[(c_index++) % color_count];
+  canvas.DrawRRect(Rect::MakeXYWH(10, 420, 380, 80), Size(40, 40), paint);
+  paint.color = colors[(c_index++) % color_count];
+  canvas.DrawRRect(Rect::MakeXYWH(410, 20, 80, 380), Size(40, 40), paint);
 
   std::vector<Color> gradient_colors = {
       Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
@@ -2377,26 +2393,37 @@ TEST_P(AiksTest, FilledRoundRectsRenderCorrectly) {
                                          /*enable_mipmapping=*/true);
 
   paint.color = Color::White().WithAlpha(0.1);
-
   paint.color_source = ColorSource::MakeRadialGradient(
-      {500, 550}, 75, std::move(gradient_colors), std::move(stops),
-      Entity::TileMode::kMirror, {});
+      {550, 550}, 75, gradient_colors, stops, Entity::TileMode::kMirror, {});
   for (int i = 1; i <= 10; i++) {
     int j = 11 - i;
-    canvas.DrawRRect(Rect::MakeLTRB(500 - i * 20, 550 - j * 20,  //
-                                    500 + i * 20, 550 + j * 20),
+    canvas.DrawRRect(Rect::MakeLTRB(550 - i * 20, 550 - j * 20,  //
+                                    550 + i * 20, 550 + j * 20),
                      Size(i * 10, j * 10), paint);
   }
+  paint.color = Color::White().WithAlpha(0.5);
+  paint.color_source = ColorSource::MakeRadialGradient(
+      {200, 650}, 75, std::move(gradient_colors), std::move(stops),
+      Entity::TileMode::kMirror, {});
+  canvas.DrawRRect(Rect::MakeLTRB(100, 610, 300, 690), Size(40, 40), paint);
+  canvas.DrawRRect(Rect::MakeLTRB(160, 550, 240, 750), Size(40, 40), paint);
 
+  paint.color = Color::White().WithAlpha(0.1);
   paint.color_source = ColorSource::MakeImage(
       texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {},
-      Matrix::MakeTranslation({500, 20}));
+      Matrix::MakeTranslation({520, 20}));
   for (int i = 1; i <= 10; i++) {
     int j = 11 - i;
-    canvas.DrawRRect(Rect::MakeLTRB(700 - i * 20, 220 - j * 20,  //
-                                    700 + i * 20, 220 + j * 20),
+    canvas.DrawRRect(Rect::MakeLTRB(720 - i * 20, 220 - j * 20,  //
+                                    720 + i * 20, 220 + j * 20),
                      Size(i * 10, j * 10), paint);
   }
+  paint.color = Color::White().WithAlpha(0.5);
+  paint.color_source = ColorSource::MakeImage(
+      texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {},
+      Matrix::MakeTranslation({800, 300}));
+  canvas.DrawRRect(Rect::MakeLTRB(800, 410, 1000, 490), Size(40, 40), paint);
+  canvas.DrawRRect(Rect::MakeLTRB(860, 350, 940, 550), Size(40, 40), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }

@@ -397,18 +397,93 @@ TEST(TessellatorTest, FilledEllipseTessellationVertices) {
 
   // Square bounds should actually use the circle generator, but its
   // results should match the same math as the ellipse generator.
-  test({}, Rect::MakeLTRB(0, 0, 2, 2));
+  test({}, Rect::MakeXYWH(0, 0, 2, 2));
 
-  test({}, Rect::MakeLTRB(0, 0, 2, 3));
-  test({}, Rect::MakeLTRB(0, 0, 3, 2));
-  test({}, Rect::MakeLTRB(5, 10, 2, 3));
-  test({}, Rect::MakeLTRB(16, 7, 3, 2));
-  test(Matrix::MakeScale({500.0, 500.0, 0.0}), Rect::MakeLTRB(5, 10, 3, 2));
-  test(Matrix::MakeScale({500.0, 500.0, 0.0}), Rect::MakeLTRB(5, 10, 2, 3));
+  test({}, Rect::MakeXYWH(0, 0, 2, 3));
+  test({}, Rect::MakeXYWH(0, 0, 3, 2));
+  test({}, Rect::MakeXYWH(5, 10, 2, 3));
+  test({}, Rect::MakeXYWH(16, 7, 3, 2));
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), Rect::MakeXYWH(5, 10, 3, 2));
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), Rect::MakeXYWH(5, 10, 2, 3));
   test(Matrix::MakeScale({0.002, 0.002, 0.0}),
-       Rect::MakeLTRB(5000, 10000, 3000, 2000));
+       Rect::MakeXYWH(5000, 10000, 3000, 2000));
   test(Matrix::MakeScale({0.002, 0.002, 0.0}),
-       Rect::MakeLTRB(5000, 10000, 2000, 3000));
+       Rect::MakeXYWH(5000, 10000, 2000, 3000));
+}
+
+TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
+  auto tessellator = std::make_shared<Tessellator>();
+
+  auto test = [&tessellator](const Matrix& transform, const Rect& bounds,
+                             const Size& radii) {
+    FML_DCHECK(radii.width * 2 <= bounds.GetSize().width) << radii << bounds;
+    FML_DCHECK(radii.height * 2 <= bounds.GetSize().height) << radii << bounds;
+
+    Scalar middle_left = bounds.GetOrigin().x + radii.width;
+    Scalar middle_top = bounds.GetOrigin().y + radii.height;
+    Scalar middle_right =
+        bounds.GetOrigin().x + bounds.GetSize().width - radii.width;
+    Scalar middle_bottom =
+        bounds.GetOrigin().y + bounds.GetSize().height - radii.height;
+
+    auto generator = tessellator->FilledRoundRect(transform, bounds, radii);
+    EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);
+
+    auto vertex_count = generator.GetVertexCount();
+    auto vertices = std::vector<Point>();
+    generator.GenerateVertices([&vertices](const Point& p) {  //
+      vertices.push_back(p);
+    });
+    EXPECT_EQ(vertices.size(), vertex_count);
+    ASSERT_EQ(vertex_count % 4, 0u);
+
+    auto quadrant_count = vertex_count / 4;
+    for (size_t i = 0; i < quadrant_count; i++) {
+      double angle = kPiOver2 * i / (quadrant_count - 1);
+      double degrees = angle * 180.0 / kPi;
+      double rcos = cos(angle) * radii.width;
+      double rsin = sin(angle) * radii.height;
+      EXPECT_POINT_NEAR(vertices[i * 2],
+                        Point(middle_left - rcos, middle_bottom + rsin))
+          << "vertex " << i << ", angle = " << degrees << ", "  //
+          << "bounds = " << bounds << std::endl;
+      EXPECT_POINT_NEAR(vertices[i * 2 + 1],
+                        Point(middle_left - rcos, middle_top - rsin))
+          << "vertex " << i << ", angle = " << degrees << ", "  //
+          << "bounds = " << bounds << std::endl;
+      EXPECT_POINT_NEAR(vertices[vertex_count - i * 2 - 1],
+                        Point(middle_right + rcos, middle_top - rsin))
+          << "vertex " << i << ", angle = " << degrees << ", "  //
+          << "bounds = " << bounds << std::endl;
+      EXPECT_POINT_NEAR(vertices[vertex_count - i * 2 - 2],
+                        Point(middle_right + rcos, middle_bottom + rsin))
+          << "vertex " << i << ", angle = " << degrees << ", "  //
+          << "bounds = " << bounds << std::endl;
+    }
+  };
+
+  // Both radii spanning the bounds should actually use the circle/ellipse
+  // generator, but their results should match the same math as the round
+  // rect generator.
+  test({}, Rect::MakeXYWH(0, 0, 20, 20), {10, 10});
+
+  // One radius spanning the bounds, but not the other will not match the
+  // round rect math if the generator transfers to circle/ellipse
+  test({}, Rect::MakeXYWH(0, 0, 20, 20), {10, 5});
+  test({}, Rect::MakeXYWH(0, 0, 20, 20), {5, 10});
+
+  test({}, Rect::MakeXYWH(0, 0, 20, 30), {2, 2});
+  test({}, Rect::MakeXYWH(0, 0, 30, 20), {2, 2});
+  test({}, Rect::MakeXYWH(5, 10, 20, 30), {2, 3});
+  test({}, Rect::MakeXYWH(16, 7, 30, 20), {2, 3});
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), Rect::MakeXYWH(5, 10, 30, 20),
+       {2, 3});
+  test(Matrix::MakeScale({500.0, 500.0, 0.0}), Rect::MakeXYWH(5, 10, 20, 30),
+       {2, 3});
+  test(Matrix::MakeScale({0.002, 0.002, 0.0}),
+       Rect::MakeXYWH(5000, 10000, 3000, 2000), {50, 70});
+  test(Matrix::MakeScale({0.002, 0.002, 0.0}),
+       Rect::MakeXYWH(5000, 10000, 2000, 3000), {50, 70});
 }
 
 }  // namespace testing
