@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import '../analyze.dart';
 import '../custom_rules/analyze.dart';
 import '../custom_rules/no_double_clamp.dart';
+import '../custom_rules/no_stop_watches.dart';
 import '../utils.dart';
 import 'common.dart';
 
@@ -90,24 +91,6 @@ void main() {
     expect(result[0], '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════');
     expect(result.getRange(1, result.length - 3).toSet(), lines.toSet());
     expect(result[result.length - 3], '║ See: https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter');
-    expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
-    expect(result[result.length - 1], ''); // trailing newline
-  });
-
-  test('analyze.dart - verifyNoStopwatches', () async {
-    final List<String> result = (await capture(() => verifyNoStopwatches(testRootPath, minimumMatches: 6), shouldHaveErrors: true)).split('\n');
-    final List<String> lines = <String>[
-      '║ \ttest/analyze-test-input/root/packages/foo/stopwatch_fail.dart:8',
-      '║ \ttest/analyze-test-input/root/packages/foo/stopwatch_fail.dart:12',
-    ]
-        .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
-        .toList();
-    expect(result.length, 6 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
-    expect(result[0], '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════');
-    expect(result[1], '║ Stopwatch use was found in the following files:');
-    expect(result.getRange(2, result.length - 4).toSet(), lines.toSet());
-    expect(result[result.length - 4], '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.');
-    expect(result[result.length - 3], '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.');
     expect(result[result.length - 2], '╚═══════════════════════════════════════════════════════════════════════════════');
     expect(result[result.length - 1], ''); // trailing newline
   });
@@ -230,9 +213,10 @@ void main() {
   });
 
   test('analyze.dart - clampDouble', () async {
-    final String result = await capture(() => analyzeFrameworkWithRules(
+    final String result = await capture(() => analyzeWithRules(
       testRootPath,
       <AnalyzeRule>[noDoubleClamp],
+      includePaths: <String>['packages/flutter/lib'],
     ), shouldHaveErrors: true);
     final String lines = <String>[
         '║ packages/flutter/lib/bar.dart:37: input.clamp(0.0, 2)',
@@ -249,6 +233,37 @@ void main() {
       '$lines\n'
       '║ \n'
       '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
+  test('analyze.dart - stopwatch', () async {
+    final String result = await capture(() => analyzeWithRules(
+      testRootPath,
+      <AnalyzeRule>[noStopwatches],
+      includePaths: <String>['packages/flutter/lib'],
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+      '║ packages/flutter/lib/stopwatch.dart:18: Stopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:19: Stopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:24: StopwatchAtHome()',
+      '║ packages/flutter/lib/stopwatch.dart:27: StopwatchAtHome.new',
+      '║ packages/flutter/lib/stopwatch.dart:30: StopwatchAtHome.create',
+      '║ packages/flutter/lib/stopwatch.dart:36: externallib.MyStopwatch.create()',
+      '║ packages/flutter/lib/stopwatch.dart:40: externallib.MyStopwatch.new',
+      '║ packages/flutter/lib/stopwatch.dart:45: externallib.stopwatch',
+      '║ packages/flutter/lib/stopwatch.dart:46: externallib.createMyStopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:47: externallib.createStopwatch()',
+      '║ packages/flutter/lib/stopwatch.dart:48: externallib.createMyStopwatch'
+    ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ \n'
+      '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.\n'
+      '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
