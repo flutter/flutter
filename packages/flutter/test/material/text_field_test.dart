@@ -17131,7 +17131,7 @@ class _ObscureTextTestWidgetState extends State<_ObscureTextTestWidget> {
 }
 
 
-typedef FormatEditUpdateCallback = void Function(TextEditingValue, TextEditingValue);
+typedef FormatEditUpdateCallback = void Function(TextEditingValue oldValue, TextEditingValue newValue);
 
 // On web, key events in text fields are handled by the browser.
 const bool areKeyEventsHandledByPlatform = isBrowser;
