@@ -164,9 +164,11 @@ void main() {
     final Project project = PluginCompromisedEachWithPathAndroidProject();
     final ProcessResult buildApkResult = await testUnsupportedPlugin(
         project: project, createAndroidPluginFolder: true);
-    expect(buildApkResult.stderr.toString(),
-        contains('Please fix your settings.gradle.'));
-    expect(buildApkResult, const ProcessResultMatcher());
+    expect(
+      buildApkResult,
+      const ProcessResultMatcher(
+          stderrPattern: 'Please fix your settings.gradle.'),
+    );
   });
 }
 
