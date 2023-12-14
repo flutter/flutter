@@ -767,8 +767,20 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     final TargetPlatform platform = Theme.of(context).platform;
 
-    final PageTransitionsBuilder matchingBuilder =
-      builders[platform] ?? (platform == TargetPlatform.iOS ? const CupertinoPageTransitionsBuilder() : const ZoomPageTransitionsBuilder());
+    bool cupertinoTransitionInProgress = false;
+
+    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
+      cupertinoTransitionInProgress = true;
+    }
+
+    PageTransitionsBuilder getTransitionBuilder() {
+      if(cupertinoTransitionInProgress) {
+        return const CupertinoPageTransitionsBuilder();
+      }
+      return builders[platform] ?? (platform == TargetPlatform.iOS ? const CupertinoPageTransitionsBuilder() : const ZoomPageTransitionsBuilder());
+    }
+
+    final PageTransitionsBuilder matchingBuilder = getTransitionBuilder();
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
