@@ -41,7 +41,7 @@ HttpClientProvider? debugNetworkImageHttpClientProvider;
 /// output size.
 ///
 /// See: [debugOnPaintImage].
-typedef PaintImageCallback = void Function(ImageSizeInfo);
+typedef PaintImageCallback = void Function(ImageSizeInfo info);
 
 /// Tracks the bytes used by a [dart:ui.Image] compared to the bytes needed to
 /// paint that image without scaling it.
@@ -199,14 +199,14 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
 /// Used by tests to run assertions on the [Picture] created by
 /// [ShaderWarmUp.execute]. The return value indicates whether the assertions
 /// pass or not.
-typedef ShaderWarmUpPictureCallback = bool Function(Picture);
+typedef ShaderWarmUpPictureCallback = bool Function(Picture picture);
 
 /// The signature of [debugCaptureShaderWarmUpImage].
 ///
 /// Used by tests to run assertions on the [Image] created by
 /// [ShaderWarmUp.execute]. The return value indicates whether the assertions
 /// pass or not.
-typedef ShaderWarmUpImageCallback = bool Function(Image);
+typedef ShaderWarmUpImageCallback = bool Function(Image image);
 
 /// Called by [ShaderWarmUp.execute] immediately after it creates a [Picture].
 ///

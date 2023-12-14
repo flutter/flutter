@@ -59,7 +59,7 @@ export 'package:flutter/services.dart' show KeyboardInsertedContent, SelectionCh
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
-typedef AppPrivateCommandCallback = void Function(String, Map<String, dynamic>);
+typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
