@@ -3873,7 +3873,7 @@ targets:
 
   - name: Mac_arm64_android run_release_test
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     runIf:
       - .ci.yaml
       - dev/**
