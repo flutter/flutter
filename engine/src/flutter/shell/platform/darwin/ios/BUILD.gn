@@ -373,6 +373,15 @@ copy("copy_framework_module_map") {
   outputs = [ "$_flutter_framework_dir/Modules/module.modulemap" ]
 }
 
+# Copy privacy manifest. This file is required by Apple for third-party SDKs,
+# and documents engine and third_party usage of timestamps and boot time APIs.
+# See https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
+copy("copy_framework_privacy_manifest") {
+  visibility = [ ":*" ]
+  sources = [ "framework/PrivacyInfo.xcprivacy" ]
+  outputs = [ "$_flutter_framework_dir/PrivacyInfo.xcprivacy" ]
+}
+
 action("copy_framework_headers") {
   script = "//flutter/sky/tools/install_framework_headers.py"
   visibility = [ ":*" ]
@@ -415,6 +424,7 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_headers",
     ":copy_framework_info_plist",
     ":copy_framework_module_map",
+    ":copy_framework_privacy_manifest",
   ]
 
   if (darwin_extension_safe) {
@@ -437,6 +447,7 @@ group("universal_flutter_framework") {
     ":copy_framework_icu",
     ":copy_framework_info_plist",
     ":copy_framework_module_map",
+    ":copy_framework_privacy_manifest",
     ":copy_license",
   ]
 
