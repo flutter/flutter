@@ -19,7 +19,6 @@
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
-#include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/inline_pass_context.h"
@@ -340,9 +339,9 @@ bool EntityPass::Render(ContentContext& renderer,
   // and then blit the results onto the onscreen texture. If using this branch,
   // there's no need to set up a stencil attachment on the root render target.
   if (reads_from_onscreen_backdrop) {
-    auto offscreen_target =
-        CreateRenderTarget(renderer, root_render_target.GetRenderTargetSize(),
-                           GetClearColor(render_target.GetRenderTargetSize()));
+    auto offscreen_target = CreateRenderTarget(
+        renderer, root_render_target.GetRenderTargetSize(),
+        GetClearColorOrDefault(render_target.GetRenderTargetSize()));
 
     if (!OnRender(renderer,  // renderer
                   capture,   // capture
@@ -447,7 +446,8 @@ bool EntityPass::Render(ContentContext& renderer,
   }
 
   // Set up the clear color of the root pass.
-  color0.clear_color = GetClearColor(render_target.GetRenderTargetSize());
+  color0.clear_color =
+      GetClearColorOrDefault(render_target.GetRenderTargetSize());
   root_render_target.SetColorAttachment(color0, 0);
 
   EntityPassTarget pass_target(
@@ -600,9 +600,9 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     }
 
     auto subpass_target = CreateRenderTarget(
-        renderer,                               // renderer
-        subpass_size,                           // size
-        subpass->GetClearColor(subpass_size));  // clear_color
+        renderer,                                        // renderer
+        subpass_size,                                    // size
+        subpass->GetClearColorOrDefault(subpass_size));  // clear_color
 
     if (!subpass_target.IsValid()) {
       VALIDATION_LOG << "Subpass render target is invalid.";
@@ -845,8 +845,7 @@ bool EntityPass::OnRender(
   }
   auto clear_color_size = pass_target.GetRenderTarget().GetRenderTargetSize();
 
-  if (!collapsed_parent_pass &&
-      !GetClearColor(clear_color_size).IsTransparent()) {
+  if (!collapsed_parent_pass && GetClearColor(clear_color_size).has_value()) {
     // Force the pass context to create at least one new pass if the clear color
     // is present.
     pass_context.GetRenderPass(pass_depth);
@@ -958,7 +957,7 @@ bool EntityPass::OnRender(
           // If all previous elements were skipped due to clear color
           // optimization, then provide the clear color as the foreground of the
           // advanced blend.
-          foreground_color = GetClearColor(clear_color_size);
+          foreground_color = GetClearColorOrDefault(clear_color_size);
           coverage = Rect::MakeSize(clear_color_size);
         } else {
           coverage = result.entity.GetCoverage();
@@ -1139,21 +1138,29 @@ void EntityPass::SetBlendMode(BlendMode blend_mode) {
   flood_clip_ = Entity::IsBlendModeDestructive(blend_mode);
 }
 
-Color EntityPass::GetClearColor(ISize target_size) const {
-  Color result = Color::BlackTransparent();
+Color EntityPass::GetClearColorOrDefault(ISize size) const {
+  return GetClearColor(size).value_or(Color::BlackTransparent());
+}
+
+std::optional<Color> EntityPass::GetClearColor(ISize target_size) const {
   if (backdrop_filter_proc_) {
-    return result;
+    return std::nullopt;
   }
 
+  std::optional<Color> result = std::nullopt;
   for (const Element& element : elements_) {
     auto [entity_color, blend_mode] =
         ElementAsBackgroundColor(element, target_size);
     if (!entity_color.has_value()) {
       break;
     }
-    result = result.Blend(entity_color.value(), blend_mode);
+    result = result.value_or(Color::BlackTransparent())
+                 .Blend(entity_color.value(), blend_mode);
   }
-  return result.Premultiply();
+  if (result.has_value()) {
+    return result->Premultiply();
+  }
+  return result;
 }
 
 void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {
