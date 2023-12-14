@@ -3126,7 +3126,7 @@ void main() {
   testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow',(WidgetTester tester) async {
     //Regression test for https://github.com/flutter/flutter/issues/112163
 
-    tester.binding.window.physicalSizeTestValue = const Size(540, 340);
+    tester.view.physicalSize = const Size(540, 340);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3168,7 +3168,12 @@ void main() {
       ),
     );
 
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('bottom_navigation_bar.label_overflow.png'),
+    );
+
+    addTearDown(tester.view.resetPhysicalSize);
   });
 }
 
