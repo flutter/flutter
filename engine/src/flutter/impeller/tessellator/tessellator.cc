@@ -472,7 +472,7 @@ EllipticalVertexGenerator Tessellator::FilledRoundRect(
     const Matrix& view_transform,
     const Rect& bounds,
     const Size& radii) {
-  if (radii.width * 2 < bounds.GetSize().width &&
+  if (radii.width * 2 < bounds.GetSize().width ||
       radii.height * 2 < bounds.GetSize().height) {
     auto max_radius = radii.MaxDimension();
     auto divisions = ComputeQuadrantDivisions(
