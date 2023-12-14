@@ -32,7 +32,7 @@ void main() {
   });
 }
 
-typedef BuildCallback = void Function(BuildContext);
+typedef BuildCallback = void Function(BuildContext context);
 
 class TestStatelessWidget extends StatelessWidget {
   const TestStatelessWidget({super.key, required this.onBuild});

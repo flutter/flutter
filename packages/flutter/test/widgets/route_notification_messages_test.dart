@@ -319,7 +319,7 @@ void main() {
   });
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {

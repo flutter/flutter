@@ -52,7 +52,7 @@ abstract class ObjectEvent{
 }
 
 /// A listener of [ObjectEvent].
-typedef ObjectEventListener = void Function(ObjectEvent);
+typedef ObjectEventListener = void Function(ObjectEvent event);
 
 /// An event that describes creation of an object.
 class ObjectCreated extends ObjectEvent {

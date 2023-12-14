@@ -1708,11 +1708,11 @@ Widget buildBoilerPlate(Widget child) {
   );
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation?);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation? information);
 typedef SimpleRouterDelegatePopRoute = Future<bool> Function();
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result);
-typedef RouterReportRouterInformation = void Function(RouteInformation, RouteInformationReportingType);
-typedef CustomRouteInformationParserCallback = RouteInformation Function(RouteInformation, BuildContext);
+typedef RouterReportRouterInformation = void Function(RouteInformation information, RouteInformationReportingType type);
+typedef CustomRouteInformationParserCallback = RouteInformation Function(RouteInformation information, BuildContext context);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();

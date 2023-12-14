@@ -1425,7 +1425,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Passes onAppPrivateCommand to onAppPrivateCommand TextField', (WidgetTester tester) async {
-    void onAppPrivateCommand(String p0, Map<String, dynamic> p1) {}
+    void onAppPrivateCommand(String action, Map<String, dynamic> data) {}
 
     await tester.pumpWidget(
       MaterialApp(
