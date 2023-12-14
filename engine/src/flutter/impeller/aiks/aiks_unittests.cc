@@ -4551,7 +4551,21 @@ TEST_P(AiksTest, GaussianBlurWithoutDecalSupport) {
               Sigma(20.0), Sigma(20.0), FilterContents::BlurStyle::kNormal,
               Entity::TileMode::kDecal),
       });
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
 
+TEST_P(AiksTest, GaussianBlurOneDimension) {
+  Canvas canvas;
+
+  canvas.Scale(GetContentScale());
+  canvas.Scale({0.5, 0.5, 1.0});
+  std::shared_ptr<Texture> boston = CreateTextureForFixture("boston.jpg");
+  canvas.DrawImage(std::make_shared<Image>(boston), Point(100, 100), Paint{});
+  canvas.SaveLayer({.blend_mode = BlendMode::kSource}, std::nullopt,
+                   ImageFilter::MakeBlur(Sigma(50.0), Sigma(0.0),
+                                         FilterContents::BlurStyle::kNormal,
+                                         Entity::TileMode::kClamp));
+  canvas.Restore();
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
