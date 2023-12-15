@@ -2416,6 +2416,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.update();
   }
 
+  bool get _allowPaste {
+    return !widget.readOnly && textEditingValue.selection.isValid;
+  }
+
   /// Paste text from [Clipboard].
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
@@ -2431,12 +2435,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _pasteText(cause, data.text!);
   }
 
-  bool get _allowPaste {
-    return !widget.readOnly && textEditingValue.selection.isValid;
-  }
-
   void _pasteText(SelectionChangedCause cause, String text) {
-    assert(_allowPaste);
+    if (!_allowPaste) {
+      return;
+    }
 
     // After the paste, the cursor should be collapsed and located after the
     // pasted content.
