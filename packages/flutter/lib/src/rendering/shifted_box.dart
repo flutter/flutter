@@ -19,7 +19,7 @@ import 'stack.dart' show RelativeRect;
 /// Used by [RenderConstraintsTransformBox] and [ConstraintsTransformBox].
 /// Typically the caller requires the returned [BoxConstraints] to be
 /// [BoxConstraints.isNormalized].
-typedef BoxConstraintsTransform = BoxConstraints Function(BoxConstraints);
+typedef BoxConstraintsTransform = BoxConstraints Function(BoxConstraints constraints);
 
 /// Abstract class for one-child-layout render boxes that provide control over
 /// the child's position.

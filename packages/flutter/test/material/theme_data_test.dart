@@ -811,7 +811,6 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: Colors.black,
-      selectedRowColor: Colors.black,
       errorColor: Colors.black,
       backgroundColor: Colors.black,
       bottomAppBarColor: Colors.black,
@@ -932,7 +931,6 @@ void main() {
 
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: Colors.white,
-      selectedRowColor: Colors.white,
       errorColor: Colors.white,
       backgroundColor: Colors.white,
       bottomAppBarColor: Colors.white,
@@ -1034,7 +1032,6 @@ void main() {
 
       // DEPRECATED (newest deprecations at the bottom)
       toggleableActiveColor: otherTheme.toggleableActiveColor,
-      selectedRowColor: otherTheme.selectedRowColor,
       errorColor: otherTheme.errorColor,
       backgroundColor: otherTheme.backgroundColor,
       bottomAppBarColor: otherTheme.bottomAppBarColor,
@@ -1137,7 +1134,6 @@ void main() {
 
     // DEPRECATED (newest deprecations at the bottom)
     expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
-    expect(themeDataCopy.selectedRowColor, equals(otherTheme.selectedRowColor));
     expect(themeDataCopy.errorColor, equals(otherTheme.errorColor));
     expect(themeDataCopy.backgroundColor, equals(otherTheme.backgroundColor));
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
@@ -1271,7 +1267,6 @@ void main() {
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'toggleableActiveColor',
-      'selectedRowColor',
       'errorColor',
       'backgroundColor',
       'bottomAppBarColor',
