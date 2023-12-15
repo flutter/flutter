@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -73,7 +72,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ActionChip defaults', (WidgetTester tester) async {
+  testWidgets('ActionChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -147,7 +146,7 @@ void main() {
     expect(decoration.color, null);
   });
 
-  testWidgetsWithLeakTracking('ActionChip.elevated defaults', (WidgetTester tester) async {
+  testWidgets('ActionChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -221,7 +220,7 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgetsWithLeakTracking('ActionChip.color resolves material states', (WidgetTester tester) async {
+  testWidgets('ActionChip.color resolves material states', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -280,7 +279,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ActionChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgets('ActionChip uses provided state color properties', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     Widget buildApp({ required bool enabled, required bool selected }) {
@@ -335,7 +334,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ActionChip can be tapped', (WidgetTester tester) async {
+  testWidgets('ActionChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -351,7 +350,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, onPressed: () { })));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -360,7 +359,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgetsWithLeakTracking('ActionChip uses provided iconTheme', (WidgetTester tester) async {
+  testWidgets('ActionChip uses provided iconTheme', (WidgetTester tester) async {
     Widget buildChip({ IconThemeData? iconTheme }) {
       return MaterialApp(
         home: Material(

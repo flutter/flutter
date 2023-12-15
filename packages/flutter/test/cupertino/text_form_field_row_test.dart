@@ -5,10 +5,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
@@ -28,7 +27,7 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
-  testWidgetsWithLeakTracking('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
     const ScrollPhysics scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
@@ -48,7 +47,7 @@ void main() {
     expect(textFieldWidget.scrollPhysics, scrollPhysics);
   });
 
-  testWidgetsWithLeakTracking('Passes textAlignVertical to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlignVertical to underlying CupertinoTextField', (WidgetTester tester) async {
     const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
 
     await tester.pumpWidget(
@@ -68,7 +67,7 @@ void main() {
     expect(textFieldWidget.textAlignVertical, textAlignVertical);
   });
 
-  testWidgetsWithLeakTracking('Passes textInputAction to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textInputAction to underlying CupertinoTextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -86,7 +85,7 @@ void main() {
     expect(textFieldWidget.textInputAction, TextInputAction.next);
   });
 
-  testWidgetsWithLeakTracking('Passes onEditingComplete to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes onEditingComplete to underlying CupertinoTextField', (WidgetTester tester) async {
     void onEditingComplete() {}
 
     await tester.pumpWidget(
@@ -106,7 +105,7 @@ void main() {
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
   });
 
-  testWidgetsWithLeakTracking('Passes cursor attributes to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes cursor attributes to underlying CupertinoTextField', (WidgetTester tester) async {
     const double cursorWidth = 3.14;
     const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(2);
@@ -134,7 +133,7 @@ void main() {
     expect(textFieldWidget.cursorColor, cursorColor);
   });
 
-  testWidgetsWithLeakTracking('onFieldSubmit callbacks are called', (WidgetTester tester) async {
+  testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
     bool called = false;
 
     await tester.pumpWidget(
@@ -155,7 +154,7 @@ void main() {
     expect(called, true);
   });
 
-  testWidgetsWithLeakTracking('onChanged callbacks are called', (WidgetTester tester) async {
+  testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
     late String value;
 
     await tester.pumpWidget(
@@ -175,7 +174,7 @@ void main() {
     expect(value, 'Soup');
   });
 
-  testWidgetsWithLeakTracking('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -198,7 +197,7 @@ void main() {
     expect(validateCalled, 2);
   });
 
-  testWidgetsWithLeakTracking('validate is called if widget is enabled', (WidgetTester tester) async {
+  testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -222,7 +221,7 @@ void main() {
     expect(validateCalled, 2);
   });
 
-  testWidgetsWithLeakTracking('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -263,7 +262,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgetsWithLeakTracking('onTap is called upon tap', (WidgetTester tester) async {
+  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       CupertinoApp(
@@ -289,7 +288,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgetsWithLeakTracking('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
+  testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoTextFormFieldRow(
@@ -308,7 +307,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgetsWithLeakTracking('didChange changes text fields value', (WidgetTester tester) async {
+  testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoTextFormFieldRow(
@@ -327,7 +326,7 @@ void main() {
     expect(find.text('changedValue'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
     bool called = false;
 
     late FormFieldState<String> state;
@@ -353,7 +352,7 @@ void main() {
     expect(called, true);
   });
 
-  testWidgetsWithLeakTracking('autofillHints is passed to super', (WidgetTester tester) async {
+  testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -369,7 +368,7 @@ void main() {
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
   });
 
-  testWidgetsWithLeakTracking('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -392,7 +391,7 @@ void main() {
     expect(validateCalled, 1);
   });
 
-  testWidgetsWithLeakTracking('AutovalidateMode.always mode shows error from the start', (WidgetTester tester) async {
+  testWidgets('AutovalidateMode.always mode shows error from the start', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -412,7 +411,7 @@ void main() {
     expect(errorText.data, 'Error');
   });
 
-  testWidgetsWithLeakTracking('Shows error text upon invalid input', (WidgetTester tester) async {
+  testWidgets('Shows error text upon invalid input', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: '');
     addTearDown(controller.dispose);
     await tester.pumpWidget(
@@ -440,7 +439,7 @@ void main() {
     expect(errorText.data, 'Error');
   });
 
-  testWidgetsWithLeakTracking('Shows prefix', (WidgetTester tester) async {
+  testWidgets('Shows prefix', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -458,7 +457,7 @@ void main() {
     expect(errorText.data, 'Enter Value');
   });
 
-  testWidgetsWithLeakTracking('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -492,7 +491,7 @@ void main() {
     expect(rtlTextFieldWidget.textDirection, TextDirection.rtl);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
       'CupertinoTextFormFieldRow onChanged is called when the form is reset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();

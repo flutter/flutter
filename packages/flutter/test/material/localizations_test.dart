@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('English translations exist for all MaterialLocalizations properties', (WidgetTester tester) async {
+  testWidgets('English translations exist for all MaterialLocalizations properties', (WidgetTester tester) async {
     const MaterialLocalizations localizations = DefaultMaterialLocalizations();
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
@@ -170,7 +169,7 @@ void main() {
     expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
   });
 
-  testWidgetsWithLeakTracking('MaterialLocalizations.of throws', (WidgetTester tester) async {
+  testWidgets('MaterialLocalizations.of throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -194,7 +193,7 @@ void main() {
     expect(MaterialLocalizations.of(localizationsAvailable.currentContext!), isA<MaterialLocalizations>());
   });
 
-  testWidgetsWithLeakTracking("parseCompactDate doesn't throw an exception on invalid text", (WidgetTester tester) async {
+  testWidgets("parseCompactDate doesn't throw an exception on invalid text", (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/126397.
     final GlobalKey localizations = GlobalKey();
 
