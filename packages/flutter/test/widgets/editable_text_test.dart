@@ -9563,8 +9563,8 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isTrue);
-    expect(scrollController2.attached, isFalse);
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.scrollController, scrollController1);
 
     // Change scrollController to controller 2.
     await tester.pumpWidget(
@@ -9580,8 +9580,8 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isFalse);
-    expect(scrollController2.attached, isTrue);
+    expect(state.widget.scrollController, scrollController2);
+
 
     // Changing scrollController to null.
     await tester.pumpWidget(
@@ -9596,8 +9596,7 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isFalse);
-    expect(scrollController2.attached, isFalse);
+    expect(state.widget.scrollController, isNull);
 
     // Change scrollController to back controller 2.
     await tester.pumpWidget(
@@ -9613,8 +9612,7 @@ void main() {
       ),
     );
 
-    expect(scrollController1.attached, isFalse);
-    expect(scrollController2.attached, isTrue);
+    expect(state.widget.scrollController, scrollController2);
   });
 
   testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {

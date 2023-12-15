@@ -2853,7 +2853,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
-    _scrollController.addListener(_onEditableScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
     _initProcessTextActions();
@@ -2970,11 +2969,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
-    }
-
-    if (widget.scrollController != oldWidget.scrollController) {
-      (oldWidget.scrollController ?? _internalScrollController)?.removeListener(_onEditableScroll);
-      _scrollController.addListener(_onEditableScroll);
     }
 
     if (!_shouldCreateInputConnection) {
@@ -3659,13 +3653,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     TargetPlatform.windows => false,
   };
 
-  void _onEditableScroll() {
-    if (!_platformSupportsFadeOnScroll || _webContextMenuEnabled) {
-      _selectionOverlay?.updateForScroll();
-    }
-    _scribbleCacheKey = null;
-  }
-
   bool _isInternalScrollableNotification(BuildContext? notificationContext) {
     final ScrollableState? scrollableState = notificationContext?.findAncestorStateOfType<ScrollableState>();
     if (_scrollableKey.currentContext == scrollableState?.context) {
@@ -3711,6 +3698,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _handleContextMenuOnScroll(ScrollNotification notification) {
     if (!_platformSupportsFadeOnScroll || _webContextMenuEnabled) {
+      _selectionOverlay?.updateForScroll();
       return;
     }
     // When the scroll begins and the toolbar is visible, hide it
@@ -5067,6 +5055,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification notification) {
                     _handleContextMenuOnScroll(notification);
+                    _scribbleCacheKey = null;
                     return false;
                   },
                   child: Scrollable(
