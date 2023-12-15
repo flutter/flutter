@@ -84,6 +84,10 @@ class PluginTest {
           section('Test app');
           await app.runFlutterTest();
         }
+        // Validate local engine handling. Currently only implemented for macOS
+        if (!dartOnlyPlugin) {
+          await _testLocalEngineConfiguration(app);
+        }
       } finally {
         await plugin.delete();
         await app.delete();
@@ -93,6 +97,15 @@ class PluginTest {
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
+    }
+  }
+
+  Future<void> _testLocalEngineConfiguration(_FlutterProject app) async {
+    // Currently this test is only implemented for macOS; it can be extended to
+    // others as needed.
+    if (buildTarget == 'macos') {
+      await app.build(buildTarget, configOnly: true, localEngine: '/fake/path');
+
     }
   }
 }
@@ -369,13 +382,22 @@ s.dependency 'AppAuth', '1.6.0'
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
-  Future<void> build(String target, {bool validateNativeBuildProject = true}) async {
+  Future<void> build(
+    String target, {
+    bool validateNativeBuildProject = true,
+    bool configOnly = false,
+    String? localEngine,
+  }) async {
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput =  await evalFlutter('build', options: <String>[
         target,
         '-v',
         if (target == 'ios')
           '--no-codesign',
+        if (configOnly)
+          '--config-only',
+        if (localEngine != null)
+          '--local-engine=$localEngine',
       ]);
 
       if (target == 'ios' || target == 'macos') {
@@ -420,6 +442,13 @@ s.dependency 'AppAuth', '1.6.0'
             // Transitive dependency AppAuth targeting too-low 10.9 was not fixed.
             if (podsProjectContent.contains('MACOSX_DEPLOYMENT_TARGET = 10.9')) {
               throw TaskResult.failure('Transitive dependency build setting MACOSX_DEPLOYMENT_TARGET=10.9 not removed');
+            }
+          }
+
+          if (localEngine != null) {
+            final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s=[^;]*$localEngine', dotAll: true);
+            if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
+              throw TaskResult.failure('FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path');
             }
           }
         }
