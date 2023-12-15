@@ -375,7 +375,7 @@ void main() {
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
-    group('Get correct didExceedMaxLines', () {
+  group('Get correct didExceedMaxLines', () {
     RenderParagraph createRenderParagraph({int? maxLines, TextOverflow overflow = TextOverflow.clip}) {
       return RenderParagraph(
         const TextSpan(
