@@ -379,7 +379,7 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build reports exportMethodName from --export-Method when used', () async {
+  testUsingContext('ipa build reports method from --export-method when used', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
       androidSdk: FakeAndroidSdk(),
