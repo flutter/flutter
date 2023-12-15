@@ -687,6 +687,12 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///  * When the virtual keyboard pops up.
 /// {@endtemplate}
 ///
+/// ## Scrolling Considerations
+/// When [EditableText] is placed within a [Scrollable] or within nested
+/// [Scrollable]s, consider placing a [ScrollNotificationObserver] above the
+/// root [Scrollable] to ensure proper scroll coordination for [EditableText]
+/// and its components like [TextSelectionOverlay].
+///
 /// {@template flutter.widgets.editableText.accessibility}
 /// ## Troubleshooting Common Accessibility Issues
 ///
