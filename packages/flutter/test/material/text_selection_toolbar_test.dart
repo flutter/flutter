@@ -75,7 +75,7 @@ void main() {
 
   Finder findOverflowButton() => findPrivate('_TextSelectionToolbarOverflowButton');
 
-  testWidgetsWithLeakTracking('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
+  testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
 
@@ -123,7 +123,7 @@ void main() {
     expect(findOverflowButton(), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
     const double height = 44.0;
     const double anchorBelowY = 500.0;
@@ -172,7 +172,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   });
 
-  testWidgetsWithLeakTracking('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -205,7 +205,7 @@ void main() {
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
 
   for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
-    testWidgetsWithLeakTracking('default background color', (WidgetTester tester) async {
+    testWidgets('default background color', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -249,7 +249,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('custom background color', (WidgetTester tester) async {
+    testWidgets('custom background color', (WidgetTester tester) async {
       const Color customBackgroundColor = Colors.red;
 
       await tester.pumpWidget(

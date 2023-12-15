@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Semantics 1', (WidgetTester tester) async {
+  testWidgets('Semantics 1', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // smoketest

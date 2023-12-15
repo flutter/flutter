@@ -80,7 +80,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgetsWithLeakTracking('AnimationController with throwing listener', (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -104,7 +104,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('AnimationController with throwing status listener', (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing status listener', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),

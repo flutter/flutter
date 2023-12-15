@@ -42,7 +42,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
       LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
@@ -61,7 +61,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
 
     await tester.pumpWidget(

@@ -19,7 +19,7 @@ void main() {
     expect(identical(NavigationDrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationDrawerThemeData().debugFillProperties(builder);
 
@@ -31,7 +31,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('NavigationDrawerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('NavigationDrawerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationDrawerThemeData(
       tileHeight: 50,
@@ -67,7 +67,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'NavigationDrawerThemeData values are used when no NavigationDrawer properties are specified',
     (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -135,7 +135,7 @@ void main() {
       );
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'NavigationDrawer values take priority over NavigationDrawerThemeData values when both properties are specified',
     (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -197,7 +197,7 @@ void main() {
       expect(_getIndicatorDecoration(tester)?.shape, indicatorShape);
   });
 
-  testWidgetsWithLeakTracking('Local NavigationDrawerTheme takes priority over ThemeData.navigationDrawerTheme', (WidgetTester tester) async {
+  testWidgets('Local NavigationDrawerTheme takes priority over ThemeData.navigationDrawerTheme', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color backgroundColor = Color(0x00000009);
     const double elevation = 7.0;

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('debugCheckHasMaterial control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Chip(label: Text('label'))));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -48,7 +48,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: BackButton()));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -85,7 +85,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasScaffold control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffold control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -137,7 +137,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(

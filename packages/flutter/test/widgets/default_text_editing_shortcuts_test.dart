@@ -54,7 +54,7 @@ void main() {
     final FocusNode editable = FocusNode();
     final FocusNode spy = FocusNode();
 
-    testWidgetsWithLeakTracking('backspace with and without word modifier', (WidgetTester tester) async {
+    testWidgets('backspace with and without word modifier', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -78,7 +78,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: iOS);
 
-    testWidgetsWithLeakTracking('delete with and without word modifier', (WidgetTester tester) async {
+    testWidgets('delete with and without word modifier', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -102,7 +102,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: iOS);
 
-    testWidgetsWithLeakTracking('Exception: deleting to line boundary is handled by the framework', (WidgetTester tester) async {
+    testWidgets('Exception: deleting to line boundary is handled by the framework', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -132,7 +132,7 @@ void main() {
   group('macOS does not accept shortcuts if focus under EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -157,7 +157,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -182,7 +182,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -207,7 +207,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -232,7 +232,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -269,7 +269,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -309,7 +309,7 @@ void main() {
   group('macOS does accept shortcuts if focus above EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -334,7 +334,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -359,7 +359,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -384,7 +384,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -409,7 +409,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -448,7 +448,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('overflow indicator is not shown when not overflowing', (WidgetTester tester) async {
+  testWidgets('overflow indicator is not shown when not overflowing', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: UnconstrainedBox(
@@ -19,7 +19,7 @@ void main() {
     expect(find.byType(UnconstrainedBox), isNot(paints..rect()));
   });
 
-  testWidgetsWithLeakTracking('overflow indicator is shown when overflowing', (WidgetTester tester) async {
+  testWidgets('overflow indicator is shown when overflowing', (WidgetTester tester) async {
     const UnconstrainedBox box = UnconstrainedBox(
       child: SizedBox(width: 200.0, height: 200.0),
     );
@@ -55,7 +55,7 @@ void main() {
     expect(find.byType(UnconstrainedBox), paints..rect());
   });
 
-  testWidgetsWithLeakTracking('overflow indicator is not shown when constraint size is zero.', (WidgetTester tester) async {
+  testWidgets('overflow indicator is not shown when constraint size is zero.', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: SizedBox(

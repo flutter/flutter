@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Semantics 8 - Merging with reset', (WidgetTester tester) async {
+  testWidgets('Semantics 8 - Merging with reset', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

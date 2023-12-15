@@ -76,7 +76,7 @@ class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMi
 }
 
 void main() {
-  testWidgetsWithLeakTracking('RenderObjectWidget smoke test', (WidgetTester tester) async {
+  testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationA));
     SingleChildRenderObjectElement element =
         tester.element(find.byElementType(SingleChildRenderObjectElement));
@@ -95,7 +95,7 @@ void main() {
     expect(renderObject.position, equals(DecorationPosition.background));
   });
 
-  testWidgetsWithLeakTracking('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
+  testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
 
     void checkFullTree() {
       final SingleChildRenderObjectElement element =
@@ -179,7 +179,7 @@ void main() {
     childBareTree();
   });
 
-  testWidgetsWithLeakTracking('Detached render tree is intact', (WidgetTester tester) async {
+  testWidgets('Detached render tree is intact', (WidgetTester tester) async {
 
     await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
@@ -221,7 +221,7 @@ void main() {
     expect(grandChild.child, isNull);
   });
 
-  testWidgetsWithLeakTracking('Can watch inherited widgets', (WidgetTester tester) async {
+  testWidgets('Can watch inherited widgets', (WidgetTester tester) async {
     final Key boxKey = UniqueKey();
     final TestOrientedBox box = TestOrientedBox(key: boxKey);
 
@@ -243,7 +243,7 @@ void main() {
     expect(decoration.color, equals(const Color(0xFF0000FF)));
   });
 
-  testWidgetsWithLeakTracking('RenderObject not visiting children provides helpful error message', (WidgetTester tester) async {
+  testWidgets('RenderObject not visiting children provides helpful error message', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestNonVisitingWidget(
         child: Container(color: const Color(0xFFED1D7F)),

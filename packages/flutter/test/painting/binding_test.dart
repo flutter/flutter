@@ -15,7 +15,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 Future<void> main() async {
   final ui.Image image = await createTestImage();
 
-  testWidgetsWithLeakTracking('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
+  testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
     imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
         image: image,

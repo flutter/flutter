@@ -882,7 +882,7 @@ void main() {
 
     group('Gradients - 45 degrees', () {
       for (final Gradient gradient in gradients45) {
-        testWidgetsWithLeakTracking('$gradient', (WidgetTester tester) async {
+        testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 45);
         });
       }
@@ -890,7 +890,7 @@ void main() {
 
     group('Gradients - 90 degrees', () {
       for (final Gradient gradient in gradients90) {
-        testWidgetsWithLeakTracking('$gradient', (WidgetTester tester) async {
+        testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 90);
         });
       }

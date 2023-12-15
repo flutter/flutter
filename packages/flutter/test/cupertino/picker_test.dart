@@ -19,7 +19,7 @@ class SpyFixedExtentScrollController extends FixedExtentScrollController {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Picker respects theme styling', (WidgetTester tester) async {
+  testWidgets('Picker respects theme styling', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Align(
@@ -58,7 +58,7 @@ void main() {
 
   group('layout', () {
     // Regression test for https://github.com/flutter/flutter/issues/22999
-    testWidgetsWithLeakTracking('CupertinoPicker.builder test', (WidgetTester tester) async {
+    testWidgets('CupertinoPicker.builder test', (WidgetTester tester) async {
       Widget buildFrame(int childCount) {
         return Directionality(
           textDirection: TextDirection.ltr,
@@ -81,7 +81,7 @@ void main() {
       expect(tester.renderObject(find.text('1')).attached, true);
     });
 
-    testWidgetsWithLeakTracking('selected item is in the middle', (WidgetTester tester) async {
+    testWidgets('selected item is in the middle', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 1);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
@@ -128,7 +128,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('picker dark mode', (WidgetTester tester) async {
+  testWidgets('picker dark mode', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -180,7 +180,7 @@ void main() {
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
   });
 
-  testWidgetsWithLeakTracking('picker selectionOverlay', (WidgetTester tester) async {
+  testWidgets('picker selectionOverlay', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -203,7 +203,7 @@ void main() {
     expect(find.byType(CupertinoPicker), paints..rrect(color: const Color(0x12345678)));
   });
 
-  testWidgetsWithLeakTracking('CupertinoPicker.selectionOverlay is nullable', (WidgetTester tester) async {
+  testWidgets('CupertinoPicker.selectionOverlay is nullable', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -227,7 +227,7 @@ void main() {
   });
 
   group('scroll', () {
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
@@ -281,7 +281,7 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'do not trigger haptic effects on non-iOS devices',
       (WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
@@ -318,7 +318,7 @@ void main() {
       variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()),
     );
 
-    testWidgetsWithLeakTracking('a drag in between items settles back', (WidgetTester tester) async {
+    testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
       final List<int> selectedItems = <int>[];
@@ -373,7 +373,7 @@ void main() {
       expect(selectedItems, <int>[9]);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgetsWithLeakTracking('a big fling that overscrolls springs back', (WidgetTester tester) async {
+    testWidgets('a big fling that overscrolls springs back', (WidgetTester tester) async {
       final FixedExtentScrollController controller =
           FixedExtentScrollController(initialItem: 10);
       addTearDown(controller.dispose);
@@ -436,7 +436,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
-  testWidgetsWithLeakTracking('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
     Widget buildCupertinoPicker(Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
@@ -477,7 +477,7 @@ void main() {
   });
 
   group('CupertinoPickerDefaultSelectionOverlay', () {
-    testWidgetsWithLeakTracking('should be using directional decoration', (WidgetTester tester) async {
+    testWidgets('should be using directional decoration', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -500,7 +500,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Scroll controller is detached upon dispose', (WidgetTester tester) async {
+  testWidgets('Scroll controller is detached upon dispose', (WidgetTester tester) async {
     final SpyFixedExtentScrollController controller = SpyFixedExtentScrollController();
     addTearDown(controller.dispose);
     expect(controller.hasListeners, false);
@@ -532,7 +532,7 @@ void main() {
     expect(controller.positions.length, 0);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
       'Registers taps and does not crash with certain diameterRatio', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126491
 

@@ -33,7 +33,7 @@ Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController })
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ClampingScrollPhysics', (WidgetTester tester) async {
+  testWidgets('ClampingScrollPhysics', (WidgetTester tester) async {
 
     // Scroll the target text widget by offset and then return its origin
     // in global coordinates.
@@ -60,7 +60,7 @@ void main() {
     expect(origin.dy, equals(500.0));
   });
 
-  testWidgetsWithLeakTracking('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {
+  testWidgets('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {
 
     // BouncingScrollPhysics
 
@@ -92,7 +92,7 @@ void main() {
     expect(scrollable.position.pixels, equals(50.0));
   });
 
-  testWidgetsWithLeakTracking('ClampingScrollPhysics handles out of bounds ScrollPosition - initialScrollOffset', (WidgetTester tester) async {
+  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition - initialScrollOffset', (WidgetTester tester) async {
     Future<void> testOutOfBounds(ScrollPhysics physics, double initialOffset, double expectedOffset) async {
       final ScrollController scrollController = ScrollController(initialScrollOffset: initialOffset);
       addTearDown(scrollController.dispose);
@@ -107,7 +107,7 @@ void main() {
     await testOutOfBounds(const ClampingScrollPhysics(), 800.0, 50.0);
   });
 
-  testWidgetsWithLeakTracking('ClampingScrollPhysics handles out of bounds ScrollPosition - jumpTo', (WidgetTester tester) async {
+  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition - jumpTo', (WidgetTester tester) async {
     Future<void> testOutOfBounds(ScrollPhysics physics, double targetOffset, double endingOffset) async {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);

@@ -9,7 +9,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('LookupBoundary.dependOnInheritedWidgetOfExactType', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       InheritedWidget? containerThroughBoundary;
       InheritedWidget? containerStoppedAtBoundary;
 
@@ -33,7 +33,7 @@ void main() {
       expect(containerStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('ignores ancestor boundary', (WidgetTester tester) async {
+    testWidgets('ignores ancestor boundary', (WidgetTester tester) async {
       InheritedWidget? inheritedWidget;
 
       final Key inheritedKey = UniqueKey();
@@ -54,7 +54,7 @@ void main() {
       expect(inheritedWidget, equals(tester.widget(find.byKey(inheritedKey))));
     });
 
-    testWidgetsWithLeakTracking('finds widget before boundary', (WidgetTester tester) async {
+    testWidgets('finds widget before boundary', (WidgetTester tester) async {
       InheritedWidget? containerThroughBoundary;
       InheritedWidget? containerStoppedAtBoundary;
 
@@ -81,7 +81,7 @@ void main() {
       expect(containerStoppedAtBoundary, equals(tester.widget(find.byKey(inheritedKey))));
     });
 
-    testWidgetsWithLeakTracking('creates dependency', (WidgetTester tester) async {
+    testWidgets('creates dependency', (WidgetTester tester) async {
       MyInheritedWidget? inheritedWidget;
 
       final Widget widgetTree = DidChangeDependencySpy(
@@ -109,7 +109,7 @@ void main() {
       expect(tester.state<_DidChangeDependencySpyState>(find.byType(DidChangeDependencySpy)).didChangeDependenciesCount, 2);
     });
 
-    testWidgetsWithLeakTracking('causes didChangeDependencies to be called on move even if dependency was not fulfilled due to boundary', (WidgetTester tester) async {
+    testWidgets('causes didChangeDependencies to be called on move even if dependency was not fulfilled due to boundary', (WidgetTester tester) async {
       MyInheritedWidget? inheritedWidget;
       final Key globalKey = GlobalKey();
 
@@ -174,7 +174,7 @@ void main() {
       expect(tester.state<_DidChangeDependencySpyState>(find.byType(DidChangeDependencySpy)).didChangeDependenciesCount, 3);
     });
 
-    testWidgetsWithLeakTracking('causes didChangeDependencies to be called on move even if dependency was non-existant', (WidgetTester tester) async {
+    testWidgets('causes didChangeDependencies to be called on move even if dependency was non-existant', (WidgetTester tester) async {
       MyInheritedWidget? inheritedWidget;
       final Key globalKey = GlobalKey();
 
@@ -213,7 +213,7 @@ void main() {
   });
 
   group('LookupBoundary.getElementForInheritedWidgetOfExactType', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       InheritedElement? containerThroughBoundary;
       InheritedElement? containerStoppedAtBoundary;
 
@@ -237,7 +237,7 @@ void main() {
       expect(containerStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('ignores ancestor boundary', (WidgetTester tester) async {
+    testWidgets('ignores ancestor boundary', (WidgetTester tester) async {
       InheritedElement? inheritedWidget;
 
       final Key inheritedKey = UniqueKey();
@@ -258,7 +258,7 @@ void main() {
       expect(inheritedWidget, equals(tester.element(find.byKey(inheritedKey))));
     });
 
-    testWidgetsWithLeakTracking('finds widget before boundary', (WidgetTester tester) async {
+    testWidgets('finds widget before boundary', (WidgetTester tester) async {
       InheritedElement? containerThroughBoundary;
       InheritedElement? containerStoppedAtBoundary;
 
@@ -285,7 +285,7 @@ void main() {
       expect(containerStoppedAtBoundary, equals(tester.element(find.byKey(inheritedKey))));
     });
 
-    testWidgetsWithLeakTracking('does not creates dependency', (WidgetTester tester) async {
+    testWidgets('does not creates dependency', (WidgetTester tester) async {
 
       final Widget widgetTree = DidChangeDependencySpy(
         onDidChangeDependencies: (BuildContext context) {
@@ -310,7 +310,7 @@ void main() {
       expect(tester.state<_DidChangeDependencySpyState>(find.byType(DidChangeDependencySpy)).didChangeDependenciesCount, 1);
     });
 
-    testWidgetsWithLeakTracking('does not cause didChangeDependencies to be called on move when found', (WidgetTester tester) async {
+    testWidgets('does not cause didChangeDependencies to be called on move when found', (WidgetTester tester) async {
       final Key globalKey = GlobalKey();
 
       final Widget widgetTree = DidChangeDependencySpy(
@@ -370,7 +370,7 @@ void main() {
       expect(tester.state<_DidChangeDependencySpyState>(find.byType(DidChangeDependencySpy)).didChangeDependenciesCount, 1);
     });
 
-    testWidgetsWithLeakTracking('does not cause didChangeDependencies to be called on move when nothing was found', (WidgetTester tester) async {
+    testWidgets('does not cause didChangeDependencies to be called on move when nothing was found', (WidgetTester tester) async {
       final Key globalKey = GlobalKey();
 
       final Widget widgetTree = DidChangeDependencySpy(
@@ -405,7 +405,7 @@ void main() {
   });
 
   group('LookupBoundary.findAncestorWidgetOfExactType', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       Widget? containerThroughBoundary;
       Widget? containerStoppedAtBoundary;
       Widget? boundaryThroughBoundary;
@@ -436,7 +436,7 @@ void main() {
       expect(boundaryStoppedAtBoundary, equals(tester.widget(find.byKey(boundaryKey))));
     });
 
-    testWidgetsWithLeakTracking('finds right widget before boundary', (WidgetTester tester) async {
+    testWidgets('finds right widget before boundary', (WidgetTester tester) async {
       Widget? containerThroughBoundary;
       Widget? containerStoppedAtBoundary;
 
@@ -467,7 +467,7 @@ void main() {
       expect(containerStoppedAtBoundary, equals(tester.widget(find.byKey(innerContainerKey))));
     });
 
-    testWidgetsWithLeakTracking('works if nothing is found', (WidgetTester tester) async {
+    testWidgets('works if nothing is found', (WidgetTester tester) async {
       Widget? containerStoppedAtBoundary;
 
       await tester.pumpWidget(Builder(
@@ -480,7 +480,7 @@ void main() {
       expect(containerStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('does not establish a dependency', (WidgetTester tester) async {
+    testWidgets('does not establish a dependency', (WidgetTester tester) async {
       Widget? containerThroughBoundary;
       Widget? containerStoppedAtBoundary;
       Widget? containerStoppedAtBoundaryUnfulfilled;
@@ -521,7 +521,7 @@ void main() {
   });
 
   group('LookupBoundary.findAncestorStateOfType', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       State? containerThroughBoundary;
       State? containerStoppedAtBoundary;
 
@@ -544,7 +544,7 @@ void main() {
       expect(containerStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('finds right widget before boundary', (WidgetTester tester) async {
+    testWidgets('finds right widget before boundary', (WidgetTester tester) async {
       State? containerThroughBoundary;
       State? containerStoppedAtBoundary;
 
@@ -573,7 +573,7 @@ void main() {
       expect(containerStoppedAtBoundary, equals(tester.state(find.byKey(innerContainerKey))));
     });
 
-    testWidgetsWithLeakTracking('works if nothing is found', (WidgetTester tester) async {
+    testWidgets('works if nothing is found', (WidgetTester tester) async {
       State? containerStoppedAtBoundary;
 
       await tester.pumpWidget(Builder(
@@ -586,7 +586,7 @@ void main() {
       expect(containerStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('does not establish a dependency', (WidgetTester tester) async {
+    testWidgets('does not establish a dependency', (WidgetTester tester) async {
       State? containerThroughBoundary;
       State? containerStoppedAtBoundary;
       State? containerStoppedAtBoundaryUnfulfilled;
@@ -627,7 +627,7 @@ void main() {
   });
 
   group('LookupBoundary.findRootAncestorStateOfType', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       State? containerThroughBoundary;
       State? containerStoppedAtBoundary;
 
@@ -650,7 +650,7 @@ void main() {
       expect(containerStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('finds right widget before boundary', (WidgetTester tester) async {
+    testWidgets('finds right widget before boundary', (WidgetTester tester) async {
       State? containerThroughBoundary;
       State? containerStoppedAtBoundary;
 
@@ -679,7 +679,7 @@ void main() {
       expect(containerStoppedAtBoundary, equals(tester.state(find.byKey(innerContainerKey))));
     });
 
-    testWidgetsWithLeakTracking('works if nothing is found', (WidgetTester tester) async {
+    testWidgets('works if nothing is found', (WidgetTester tester) async {
       State? containerStoppedAtBoundary;
 
       await tester.pumpWidget(Builder(
@@ -692,7 +692,7 @@ void main() {
       expect(containerStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('does not establish a dependency', (WidgetTester tester) async {
+    testWidgets('does not establish a dependency', (WidgetTester tester) async {
       State? containerThroughBoundary;
       State? containerStoppedAtBoundary;
       State? containerStoppedAtBoundaryUnfulfilled;
@@ -733,7 +733,7 @@ void main() {
   });
 
   group('LookupBoundary.findAncestorRenderObjectOfType', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       RenderPadding? paddingThroughBoundary;
       RenderPadding? passingStoppedAtBoundary;
 
@@ -757,7 +757,7 @@ void main() {
       expect(passingStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('finds right widget before boundary', (WidgetTester tester) async {
+    testWidgets('finds right widget before boundary', (WidgetTester tester) async {
       RenderPadding? paddingThroughBoundary;
       RenderPadding? paddingStoppedAtBoundary;
 
@@ -789,7 +789,7 @@ void main() {
       expect(paddingStoppedAtBoundary, equals(tester.renderObject(find.byKey(innerPaddingKey))));
     });
 
-    testWidgetsWithLeakTracking('works if nothing is found', (WidgetTester tester) async {
+    testWidgets('works if nothing is found', (WidgetTester tester) async {
       RenderPadding? paddingStoppedAtBoundary;
 
       await tester.pumpWidget(Builder(
@@ -802,7 +802,7 @@ void main() {
       expect(paddingStoppedAtBoundary, isNull);
     });
 
-    testWidgetsWithLeakTracking('does not establish a dependency', (WidgetTester tester) async {
+    testWidgets('does not establish a dependency', (WidgetTester tester) async {
       RenderPadding? paddingThroughBoundary;
       RenderPadding? paddingStoppedAtBoundary;
       RenderWrap? wrapStoppedAtBoundaryUnfulfilled;
@@ -844,7 +844,7 @@ void main() {
   });
 
   group('LookupBoundary.visitAncestorElements', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       final List<Element> throughBoundary = <Element>[];
       final List<Element> stoppedAtBoundary = <Element>[];
       final List<Element> stoppedAtBoundaryTerminatedEarly = <Element>[];
@@ -910,7 +910,7 @@ void main() {
   });
 
   group('LookupBoundary.visitChildElements', () {
-    testWidgetsWithLeakTracking('respects boundary', (WidgetTester tester) async {
+    testWidgets('respects boundary', (WidgetTester tester) async {
       final Key root = UniqueKey();
       final Key child1 = UniqueKey();
       final Key child2 = UniqueKey();
@@ -962,7 +962,7 @@ void main() {
   });
 
   group('LookupBoundary.debugIsHidingAncestorWidgetOfExactType', () {
-    testWidgetsWithLeakTracking('is hiding', (WidgetTester tester) async {
+    testWidgets('is hiding', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Container(
         padding: const EdgeInsets.all(10),
@@ -979,7 +979,7 @@ void main() {
       expect(isHidden, isTrue);
     });
 
-    testWidgetsWithLeakTracking('is not hiding entity within boundary', (WidgetTester tester) async {
+    testWidgets('is not hiding entity within boundary', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Container(
         padding: const EdgeInsets.all(10),
@@ -1000,7 +1000,7 @@ void main() {
       expect(isHidden, isFalse);
     });
 
-    testWidgetsWithLeakTracking('is not hiding if no boundary exists', (WidgetTester tester) async {
+    testWidgets('is not hiding if no boundary exists', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Container(
         padding: const EdgeInsets.all(10),
@@ -1015,7 +1015,7 @@ void main() {
       expect(isHidden, isFalse);
     });
 
-    testWidgetsWithLeakTracking('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
+    testWidgets('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Builder(
         builder: (BuildContext context) {
@@ -1028,7 +1028,7 @@ void main() {
   });
 
   group('LookupBoundary.debugIsHidingAncestorStateOfType', () {
-    testWidgetsWithLeakTracking('is hiding', (WidgetTester tester) async {
+    testWidgets('is hiding', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(MyStatefulContainer(
         child: LookupBoundary(
@@ -1043,7 +1043,7 @@ void main() {
       expect(isHidden, isTrue);
     });
 
-    testWidgetsWithLeakTracking('is not hiding entity within boundary', (WidgetTester tester) async {
+    testWidgets('is not hiding entity within boundary', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(MyStatefulContainer(
         child: LookupBoundary(
@@ -1060,7 +1060,7 @@ void main() {
       expect(isHidden, isFalse);
     });
 
-    testWidgetsWithLeakTracking('is not hiding if no boundary exists', (WidgetTester tester) async {
+    testWidgets('is not hiding if no boundary exists', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(MyStatefulContainer(
         child: Builder(
@@ -1073,7 +1073,7 @@ void main() {
       expect(isHidden, isFalse);
     });
 
-    testWidgetsWithLeakTracking('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
+    testWidgets('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Builder(
         builder: (BuildContext context) {
@@ -1086,7 +1086,7 @@ void main() {
   });
 
   group('LookupBoundary.debugIsHidingAncestorRenderObjectOfType', () {
-    testWidgetsWithLeakTracking('is hiding', (WidgetTester tester) async {
+    testWidgets('is hiding', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Padding(
         padding: EdgeInsets.zero,
@@ -1102,7 +1102,7 @@ void main() {
       expect(isHidden, isTrue);
     });
 
-    testWidgetsWithLeakTracking('is not hiding entity within boundary', (WidgetTester tester) async {
+    testWidgets('is not hiding entity within boundary', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Padding(
         padding: EdgeInsets.zero,
@@ -1121,7 +1121,7 @@ void main() {
       expect(isHidden, isFalse);
     });
 
-    testWidgetsWithLeakTracking('is not hiding if no boundary exists', (WidgetTester tester) async {
+    testWidgets('is not hiding if no boundary exists', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Padding(
         padding: EdgeInsets.zero,
@@ -1135,7 +1135,7 @@ void main() {
       expect(isHidden, isFalse);
     });
 
-    testWidgetsWithLeakTracking('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
+    testWidgets('is not hiding if no boundary and no entity exists', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Builder(
         builder: (BuildContext context) {

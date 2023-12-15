@@ -28,7 +28,7 @@ class BadWidgetState extends State<BadWidget> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('setState() catches being used inside a constructor', (WidgetTester tester) async {
+  testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
     await tester.pumpWidget(const BadWidget());
     expect(tester.takeException(), isFlutterError);
   });

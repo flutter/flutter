@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('runs animations', (WidgetTester tester) async {
+  testWidgets('runs animations', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
@@ -76,7 +76,7 @@ void main() {
     expect(_getOpacity(tester), 1.0);
   });
 
-  testWidgetsWithLeakTracking('keeps state', (WidgetTester tester) async {
+  testWidgets('keeps state', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
@@ -141,7 +141,7 @@ void main() {
     expect(state, same(tester.state(find.byType(_StatefulTestWidget))));
   });
 
-  testWidgetsWithLeakTracking('does not jump when interrupted - forward', (WidgetTester tester) async {
+  testWidgets('does not jump when interrupted - forward', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
@@ -207,7 +207,7 @@ void main() {
     expect(_getOpacity(tester), 1.0);
   });
 
-  testWidgetsWithLeakTracking('does not jump when interrupted - reverse', (WidgetTester tester) async {
+  testWidgets('does not jump when interrupted - reverse', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       value: 1.0,
       vsync: const TestVSync(),

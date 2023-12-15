@@ -65,7 +65,7 @@ void main() {
     expect(theme.data.dataRowCursor, null);
   });
 
-  testWidgetsWithLeakTracking('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DataTableThemeData().debugFillProperties(builder);
 
@@ -77,7 +77,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('DataTableThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('DataTableThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     DataTableThemeData(
       decoration: const BoxDecoration(color: Color(0xfffffff0)),
@@ -121,7 +121,7 @@ void main() {
     expect(description[13], 'dataRowCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))');
   });
 
-  testWidgetsWithLeakTracking('DataTable is themeable', (WidgetTester tester) async {
+  testWidgets('DataTable is themeable', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const double minMaxDataRowHeight = 41.0;
@@ -208,7 +208,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
-  testWidgetsWithLeakTracking('DataTable is themeable - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('DataTable is themeable - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
     const double dataRowHeight = 51.0;
 
     await tester.pumpWidget(
@@ -242,7 +242,7 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
   });
 
-  testWidgetsWithLeakTracking('DataTable properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
     const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
     const MaterialStateProperty<Color> themeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
     const double minMaxThemeDataRowHeight = 50.0;
@@ -355,7 +355,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), dataRowCursor.resolve(<MaterialState>{}));
   });
 
-  testWidgetsWithLeakTracking('DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
     const double themeDataRowHeight = 50.0;
     const double dataRowHeight = 51.0;
 
@@ -391,7 +391,7 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
   });
 
-  testWidgetsWithLeakTracking('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
+  testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
     const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
     const MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
     const double minMaxGlobalThemeDataRowHeight = 50.0;
@@ -508,7 +508,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localDataRowCursor.resolve(<MaterialState>{}));
   });
 
-  testWidgetsWithLeakTracking('Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
     const double globalThemeDataRowHeight = 50.0;
     const double localThemeDataRowHeight = 51.0;
 

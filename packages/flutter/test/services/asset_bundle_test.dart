@@ -152,7 +152,7 @@ void main() {
       expect(await data, 1);
     });
 
-    testWidgetsWithLeakTracking('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
+    testWidgets('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
       final TestAssetBundle bundle = TestAssetBundle();
       try {
         await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.error('what do they say?'));
@@ -162,7 +162,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
+    testWidgets('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
       final TestAssetBundle bundle = TestAssetBundle();
       try {
         await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.error('buy more crystals'));

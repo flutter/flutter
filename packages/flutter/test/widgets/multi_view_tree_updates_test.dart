@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'multi_view_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Widgets in view update as expected', (WidgetTester tester) async {
+  testWidgets('Widgets in view update as expected', (WidgetTester tester) async {
     final Widget widget = View(
       view: tester.view,
       child: const TestWidget(),
@@ -50,7 +50,7 @@ void main() {
     expect(tester.renderObject<RenderParagraph>(find.byType(Text)).text.toPlainText(), 'FooBar');
   });
 
-  testWidgetsWithLeakTracking('Views in ViewCollection update as expected', (WidgetTester tester) async {
+  testWidgets('Views in ViewCollection update as expected', (WidgetTester tester) async {
     Iterable<String> renderParagraphTexts() {
       return tester.renderObjectList<RenderParagraph>(find.byType(Text)).map((RenderParagraph r) => r.text.toPlainText());
     }
@@ -104,7 +104,7 @@ void main() {
     expect(renderParagraphTexts(), <String>['Guten', 'Morgen']);
   });
 
-  testWidgetsWithLeakTracking('Views in ViewAnchor update as expected', (WidgetTester tester) async {
+  testWidgets('Views in ViewAnchor update as expected', (WidgetTester tester) async {
     Iterable<String> renderParagraphTexts() {
       return tester.renderObjectList<RenderParagraph>(find.byType(Text)).map((RenderParagraph r) => r.text.toPlainText());
     }

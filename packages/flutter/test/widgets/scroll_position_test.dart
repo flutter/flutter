@@ -141,7 +141,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
-  testWidgetsWithLeakTracking("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
+  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
@@ -160,12 +160,12 @@ void main() {
     expect(count, 1);
   });
 
-  testWidgetsWithLeakTracking('whether we remember our scroll position', (WidgetTester tester) async {
+  testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
     await performTest(tester, true);
     await performTest(tester, false);
   });
 
-  testWidgetsWithLeakTracking('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
+  testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
     final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
     addTearDown(() {
@@ -234,7 +234,7 @@ void main() {
     expect(controller.position.pixels, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('jumpTo recommends deferred loading', (WidgetTester tester) async {
+  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
     int loadedWithDeferral = 0;
     int buildCount = 0;
     const double height = 500;

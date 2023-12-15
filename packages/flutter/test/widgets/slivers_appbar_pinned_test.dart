@@ -24,7 +24,7 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Sliver appbars - pinned', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - pinned', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -60,7 +60,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 50.0), true);
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - toStringDeep of maxExtent that throws', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - toStringDeep of maxExtent that throws', (WidgetTester tester) async {
     final TestDelegateThatCanThrow delegateThatCanThrow = TestDelegateThatCanThrow();
     GlobalKey key;
     await tester.pumpWidget(
@@ -122,7 +122,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -215,7 +215,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 550.0), true);
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
     const double bigHeight = 650.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -251,7 +251,7 @@ void main() {
     verifyPaintPosition(key5, Offset.zero, true);
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

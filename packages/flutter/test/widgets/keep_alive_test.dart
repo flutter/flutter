@@ -55,7 +55,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+  testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -103,7 +103,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -150,7 +150,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('KeepAlive with GridView', (WidgetTester tester) async {
+  testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -199,7 +199,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('KeepAlive render tree description', (WidgetTester tester) async {
+  testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

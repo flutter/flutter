@@ -33,7 +33,7 @@ class OnTapPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Push and Pop should send platform messages', (WidgetTester tester) async {
+  testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -108,7 +108,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Navigator does not report route name by default', (WidgetTester tester) async {
+  testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -142,7 +142,7 @@ void main() {
     expect(log, hasLength(0));
   });
 
-  testWidgetsWithLeakTracking('Replace should send platform messages', (WidgetTester tester) async {
+  testWidgets('Replace should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -218,7 +218,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Nameless routes should send platform messages', (WidgetTester tester) async {
+  testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -262,7 +262,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
+  testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
       log.add(methodCall);

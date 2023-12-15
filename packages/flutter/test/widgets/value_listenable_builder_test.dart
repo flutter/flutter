@@ -37,13 +37,13 @@ void main() {
     valueListenable.dispose();
   });
 
-  testWidgetsWithLeakTracking('Null value is ok', (WidgetTester tester) async {
+  testWidgets('Null value is ok', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     expect(find.byType(Placeholder), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Widget builds with initial value', (WidgetTester tester) async {
+  testWidgets('Widget builds with initial value', (WidgetTester tester) async {
     final SpyStringValueNotifier valueListenable = SpyStringValueNotifier('Bachman');
     addTearDown(valueListenable.dispose);
 
@@ -52,7 +52,7 @@ void main() {
     expect(find.text('Bachman'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Widget updates when value changes', (WidgetTester tester) async {
+  testWidgets('Widget updates when value changes', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
@@ -65,7 +65,7 @@ void main() {
     expect(find.text('Dinesh'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can change listenable', (WidgetTester tester) async {
+  testWidgets('Can change listenable', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
@@ -81,7 +81,7 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Stops listening to old listenable after changing listenable', (WidgetTester tester) async {
+  testWidgets('Stops listening to old listenable after changing listenable', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
@@ -104,7 +104,7 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Self-cleans when removed', (WidgetTester tester) async {
+  testWidgets('Self-cleans when removed', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';

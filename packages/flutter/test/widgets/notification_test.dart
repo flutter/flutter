@@ -9,11 +9,11 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 class MyNotification extends Notification { }
 
 void main() {
-  testWidgetsWithLeakTracking('Notification basics - toString', (WidgetTester tester) async {
+  testWidgets('Notification basics - toString', (WidgetTester tester) async {
     expect(MyNotification(), hasOneLineDescription);
   });
 
-  testWidgetsWithLeakTracking('Notification basics - dispatch', (WidgetTester tester) async {
+  testWidgets('Notification basics - dispatch', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
@@ -37,7 +37,7 @@ void main() {
     expect(log, <dynamic>['b', notification, 'a', notification]);
   });
 
-  testWidgetsWithLeakTracking('Notification basics - cancel', (WidgetTester tester) async {
+  testWidgets('Notification basics - cancel', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
@@ -61,7 +61,7 @@ void main() {
     expect(log, <dynamic>['b', notification]);
   });
 
-  testWidgetsWithLeakTracking('Notification basics - listener null return value', (WidgetTester tester) async {
+  testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
     final List<Type> log = <Type>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
@@ -78,7 +78,7 @@ void main() {
     expect(log, <Type>[MyNotification]);
   });
 
-  testWidgetsWithLeakTracking('Notification basics - listener null return value', (WidgetTester tester) async {
+  testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     final ScrollMetricsNotification n1 = ScrollMetricsNotification(
       metrics: FixedScrollMetrics(

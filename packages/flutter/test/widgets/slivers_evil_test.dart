@@ -58,7 +58,7 @@ class TestScrollPhysics extends ClampingScrollPhysics {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Evil test of sliver features - 1', (WidgetTester tester) async {
+  testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
     await tester.pumpWidget(
       MediaQuery(
@@ -185,7 +185,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
+  testWidgets('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         cacheExtent: 0.0,

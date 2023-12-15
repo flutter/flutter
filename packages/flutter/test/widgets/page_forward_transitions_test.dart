@@ -58,7 +58,7 @@ void main() {
   const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
   const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
-  testWidgetsWithLeakTracking('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
 
     final GlobalKey insideKey = GlobalKey();
 
@@ -197,7 +197,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Check onstage/offstage handling of barriers around transitions', (WidgetTester tester) async {
+  testWidgets('Check onstage/offstage handling of barriers around transitions', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {

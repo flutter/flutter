@@ -74,7 +74,7 @@ class _ShowABCFieldState extends State<ShowABCField> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('InheritedModel basics', (WidgetTester tester) async {
+  testWidgets('InheritedModel basics', (WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;
@@ -190,7 +190,7 @@ void main() {
     expect(find.text('a: 2 b: 2 c: 3'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Looking up an non existent InheritedModel ancestor returns null', (WidgetTester tester) async {
+  testWidgets('Looking up an non existent InheritedModel ancestor returns null', (WidgetTester tester) async {
     ABCModel? inheritedModel;
 
     await tester.pumpWidget(
@@ -206,7 +206,7 @@ void main() {
     expect(inheritedModel, null);
   });
 
-  testWidgetsWithLeakTracking('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
+  testWidgets('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;
@@ -324,7 +324,7 @@ void main() {
     expect(find.text('a: 102 b: 102 c: null'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('InheritedModel inner models supported aspect change', (WidgetTester tester) async {
+  testWidgets('InheritedModel inner models supported aspect change', (WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;

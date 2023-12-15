@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {
@@ -36,7 +36,7 @@ void main() {
     expect(find.text('item 3'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {

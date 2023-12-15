@@ -19,7 +19,7 @@ void main() {
     expect(identical(SliderThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('Default SliderThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SliderThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SliderThemeData().debugFillProperties(builder);
 
@@ -31,7 +31,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('SliderThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('SliderThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SliderThemeData(
       trackHeight: 7.0,
@@ -105,7 +105,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Slider defaults', (WidgetTester tester) async {
+  testWidgets('Slider defaults', (WidgetTester tester) async {
     debugDisableShadows = false;
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -236,7 +236,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       const Color customColor1 = Color(0xcafefeed);
@@ -503,7 +503,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Slider parameters overrides theme properties', (WidgetTester tester) async {
+  testWidgets('Slider parameters overrides theme properties', (WidgetTester tester) async {
     debugDisableShadows = false;
     const Color activeTrackColor = Color(0xffff0001);
     const Color inactiveTrackColor = Color(0xffff0002);
@@ -557,7 +557,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
+  testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
@@ -581,7 +581,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
+  testWidgets('Slider overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
@@ -605,7 +605,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('SliderThemeData generates correct opacities for fromPrimaryColors', (WidgetTester tester) async {
+  testWidgets('SliderThemeData generates correct opacities for fromPrimaryColors', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
     const Color customColor3 = Color(0xdecaface);
@@ -636,7 +636,7 @@ void main() {
     expect(sliderTheme.valueIndicatorTextStyle!.color, equals(customColor4));
   });
 
-  testWidgetsWithLeakTracking('SliderThemeData generates correct shapes for fromPrimaryColors', (WidgetTester tester) async {
+  testWidgets('SliderThemeData generates correct shapes for fromPrimaryColors', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
     const Color customColor3 = Color(0xdecaface);
@@ -660,7 +660,7 @@ void main() {
     expect(sliderTheme.rangeValueIndicatorShape, const PaddleRangeSliderValueIndicatorShape());
   });
 
-  testWidgetsWithLeakTracking('SliderThemeData lerps correctly', (WidgetTester tester) async {
+  testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
     final SliderThemeData sliderThemeBlack = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
@@ -695,7 +695,7 @@ void main() {
     expect(lerp.valueIndicatorTextStyle!.color, equals(middleGrey.withAlpha(0xff)));
   });
 
-  testWidgetsWithLeakTracking('Default slider track draws correctly', (WidgetTester tester) async {
+  testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -731,7 +731,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Default slider overlay draws correctly', (WidgetTester tester) async {
+  testWidgets('Default slider overlay draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -792,7 +792,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider can use theme overlay with material states', (WidgetTester tester) async {
+  testWidgets('Slider can use theme overlay with material states', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -852,7 +852,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Default slider ticker and thumb shape draw correctly', (WidgetTester tester) async {
+  testWidgets('Default slider ticker and thumb shape draw correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -896,7 +896,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
+  testWidgets('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
@@ -1080,7 +1080,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
+  testWidgets('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
@@ -1264,7 +1264,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('The slider track height can be overridden', (WidgetTester tester) async {
+  testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
     const Radius radius = Radius.circular(8);
     const Radius activatedRadius = Radius.circular(9);
@@ -1294,7 +1294,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('The default slider thumb shape sizes can be overridden', (WidgetTester tester) async {
+  testWidgets('The default slider thumb shape sizes can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       thumbShape: const RoundSliderThumbShape(
         enabledThumbRadius: 7,
@@ -1319,7 +1319,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('The default slider thumb shape disabled size can be inferred from the enabled size', (WidgetTester tester) async {
+  testWidgets('The default slider thumb shape disabled size can be inferred from the enabled size', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       thumbShape: const RoundSliderThumbShape(
         enabledThumbRadius: 9,
@@ -1342,7 +1342,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('The default slider tick mark shape size can be overridden', (WidgetTester tester) async {
+  testWidgets('The default slider tick mark shape size can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 5),
       activeTickMarkColor: const Color(0xfadedead),
@@ -1375,7 +1375,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('The default slider overlay shape size can be overridden', (WidgetTester tester) async {
+  testWidgets('The default slider overlay shape size can be overridden', (WidgetTester tester) async {
     const double uniqueOverlayRadius = 23;
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       overlayShape: const RoundSliderOverlayShape(
@@ -1406,7 +1406,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/74503
-  testWidgetsWithLeakTracking('The slider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
+  testWidgets('The slider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       overlayShape: SliderComponentShape.noOverlay,
     );
@@ -1447,7 +1447,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/125467
-  testWidgetsWithLeakTracking('The RangeSlider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
+  testWidgets('The RangeSlider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       overlayShape: SliderComponentShape.noOverlay,
     );
@@ -1498,7 +1498,7 @@ void main() {
   //
   // The value indicator can be skipped by passing the appropriate
   // [ShowValueIndicator].
-  testWidgetsWithLeakTracking('The slider can skip all of its component painting', (WidgetTester tester) async {
+  testWidgets('The slider can skip all of its component painting', (WidgetTester tester) async {
     // Pump a slider with all shapes skipped.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -1519,7 +1519,7 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
-  testWidgetsWithLeakTracking('The slider can skip all component painting except the track', (WidgetTester tester) async {
+  testWidgets('The slider can skip all component painting except the track', (WidgetTester tester) async {
     // Pump a slider with just a track.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -1540,7 +1540,7 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
-  testWidgetsWithLeakTracking('The slider can skip all component painting except the tick marks', (WidgetTester tester) async {
+  testWidgets('The slider can skip all component painting except the tick marks', (WidgetTester tester) async {
     // Pump a slider with just tick marks.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -1564,7 +1564,7 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
-  testWidgetsWithLeakTracking('The slider can skip all component painting except the thumb', (WidgetTester tester) async {
+  testWidgets('The slider can skip all component painting except the thumb', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       // Pump a slider with just a thumb.
@@ -1590,7 +1590,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('The slider can skip all component painting except the overlay', (WidgetTester tester) async {
+  testWidgets('The slider can skip all component painting except the overlay', (WidgetTester tester) async {
     // Pump a slider with just an overlay.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -1618,7 +1618,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('The slider can skip all component painting except the value indicator', (WidgetTester tester) async {
+  testWidgets('The slider can skip all component painting except the value indicator', (WidgetTester tester) async {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -1648,7 +1648,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('PaddleSliderValueIndicatorShape skips all painting at zero scale', (WidgetTester tester) async {
+  testWidgets('PaddleSliderValueIndicatorShape skips all painting at zero scale', (WidgetTester tester) async {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -1683,7 +1683,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Default slider value indicator shape skips all painting at zero scale', (WidgetTester tester) async {
+  testWidgets('Default slider value indicator shape skips all painting at zero scale', (WidgetTester tester) async {
     // Pump a slider with just a value indicator.
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
@@ -1715,7 +1715,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('Default paddle range slider value indicator shape draws correctly', (WidgetTester tester) async {
+  testWidgets('Default paddle range slider value indicator shape draws correctly', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
@@ -1765,7 +1765,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Default paddle range slider value indicator shape draws correctly with debugDisableShadows', (WidgetTester tester) async {
+  testWidgets('Default paddle range slider value indicator shape draws correctly with debugDisableShadows', (WidgetTester tester) async {
     debugDisableShadows = true;
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
@@ -1811,7 +1811,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape skips all painting at zero scale', (WidgetTester tester) async {
+  testWidgets('PaddleRangeSliderValueIndicatorShape skips all painting at zero scale', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       // Pump a slider with just a value indicator.
@@ -1845,7 +1845,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Default range indicator shape skips all painting at zero scale', (WidgetTester tester) async {
+  testWidgets('Default range indicator shape skips all painting at zero scale', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       // Pump a slider with just a value indicator.
@@ -1881,7 +1881,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('activeTrackRadius is taken into account when painting the border of the active track', (WidgetTester tester) async {
+  testWidgets('activeTrackRadius is taken into account when painting the border of the active track', (WidgetTester tester) async {
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
         trackShape: const RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight(
@@ -1912,7 +1912,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('The mouse cursor is themeable', (WidgetTester tester) async {
+  testWidgets('The mouse cursor is themeable', (WidgetTester tester) async {
     await tester.pumpWidget(_buildApp(
       ThemeData().sliderTheme.copyWith(
         mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.text),
@@ -1927,7 +1927,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgetsWithLeakTracking('SliderTheme.allowedInteraction is themeable', (WidgetTester tester) async {
+  testWidgets('SliderTheme.allowedInteraction is themeable', (WidgetTester tester) async {
     double value = 0.0;
 
     Widget buildApp({
@@ -2034,7 +2034,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Default value indicator color', (WidgetTester tester) async {
+  testWidgets('Default value indicator color', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       final ThemeData theme = ThemeData(
@@ -2092,7 +2092,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('RectangularSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+  testWidgets('RectangularSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2135,7 +2135,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PaddleSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+  testWidgets('PaddleSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2178,7 +2178,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('DropSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+  testWidgets('DropSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2221,7 +2221,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+  testWidgets('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2274,7 +2274,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
+  testWidgets('RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2328,7 +2328,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
+  testWidgets('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2381,7 +2381,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
+  testWidgets('PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
@@ -2440,7 +2440,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Slider defaults', (WidgetTester tester) async {
+    testWidgets('Slider defaults', (WidgetTester tester) async {
       debugDisableShadows = false;
       final ThemeData theme  = ThemeData(useMaterial3: false);
       const double trackHeight = 4.0;
@@ -2590,7 +2590,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('Default value indicator color', (WidgetTester tester) async {
+    testWidgets('Default value indicator color', (WidgetTester tester) async {
       debugDisableShadows = false;
       try {
         final ThemeData theme = ThemeData(

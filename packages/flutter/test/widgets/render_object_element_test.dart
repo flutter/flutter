@@ -240,7 +240,7 @@ class RenderSwapper extends RenderBox {
 BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
 
 void main() {
-  testWidgetsWithLeakTracking('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
+  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {

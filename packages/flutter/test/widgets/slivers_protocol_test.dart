@@ -18,7 +18,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Sliver protocol', (WidgetTester tester) async {
+  testWidgets('Sliver protocol', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
       Directionality(

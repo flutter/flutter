@@ -12,7 +12,7 @@ import 'semantics_tester.dart';
 
 void main() {
   group('BlockSemantics', () {
-    testWidgetsWithLeakTracking('hides semantic nodes of siblings', (WidgetTester tester) async {
+    testWidgets('hides semantic nodes of siblings', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(Stack(
@@ -50,7 +50,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('does not hides semantic nodes of siblings outside the current semantic boundary', (WidgetTester tester) async {
+    testWidgets('does not hides semantic nodes of siblings outside the current semantic boundary', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: Stack(
@@ -104,7 +104,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('node is semantic boundary and blocking previously painted nodes', (WidgetTester tester) async {
+    testWidgets('node is semantic boundary and blocking previously painted nodes', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final GlobalKey stackKey = GlobalKey();
 

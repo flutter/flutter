@@ -317,7 +317,7 @@ void main() {
     expect(nonUniformBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20));
   });
 
-  testWidgetsWithLeakTracking('Non-Uniform Border variations', (WidgetTester tester) async {
+  testWidgets('Non-Uniform Border variations', (WidgetTester tester) async {
 
     Widget buildWidget({ required BoxBorder border, BorderRadius? borderRadius, BoxShape boxShape = BoxShape.rectangle}) {
       return Directionality(

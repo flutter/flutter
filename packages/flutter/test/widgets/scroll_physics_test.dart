@@ -340,7 +340,7 @@ FlutterError
     }
   });
 
-  testWidgetsWithLeakTracking('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
+  testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(Material(
       child: Directionality(

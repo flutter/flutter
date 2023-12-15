@@ -17,7 +17,7 @@ void runTests() {
     debugRestoreHttpRequestFactory();
   });
 
-  testWidgetsWithLeakTracking('loads an image from the network with headers',
+  testWidgets('loads an image from the network with headers',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
@@ -43,7 +43,7 @@ void runTests() {
     assert(mapEquals(testHttpRequest.responseHeaders, headers), true);
   });
 
-  testWidgetsWithLeakTracking('loads an image from the network with unsuccessful HTTP code',
+  testWidgets('loads an image from the network with unsuccessful HTTP code',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
@@ -68,7 +68,7 @@ void runTests() {
     expect((tester.takeException() as web.ProgressEvent).type, 'test error');
   });
 
-  testWidgetsWithLeakTracking('loads an image from the network with empty response',
+  testWidgets('loads an image from the network with empty response',
       (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200

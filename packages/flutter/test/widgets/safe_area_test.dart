@@ -9,7 +9,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('SafeArea', () {
-    testWidgetsWithLeakTracking('SafeArea - basic', (WidgetTester tester) async {
+    testWidgets('SafeArea - basic', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -23,7 +23,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 580.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - with minimums', (WidgetTester tester) async {
+    testWidgets('SafeArea - with minimums', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -38,7 +38,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 570.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - nested', (WidgetTester tester) async {
+    testWidgets('SafeArea - nested', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -55,7 +55,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 580.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - changing', (WidgetTester tester) async {
+    testWidgets('SafeArea - changing', (WidgetTester tester) async {
       const Widget child = SafeArea(
         bottom: false,
         child: SafeArea(
@@ -86,7 +86,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('SafeArea - properties', (WidgetTester tester) async {
+    testWidgets('SafeArea - properties', (WidgetTester tester) async {
       final SafeArea child = SafeArea(
         right: false,
         bottom: false,
@@ -113,7 +113,7 @@ void main() {
         );
       }
 
-      testWidgetsWithLeakTracking('SafeArea alone.', (WidgetTester tester) async {
+      testWidgets('SafeArea alone.', (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
@@ -148,7 +148,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgetsWithLeakTracking('SafeArea alone - partial ViewInsets consume Padding', (WidgetTester tester) async {
+      testWidgets('SafeArea alone - partial ViewInsets consume Padding', (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
@@ -181,7 +181,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgetsWithLeakTracking('SafeArea with nested Scaffold', (WidgetTester tester) async {
+      testWidgets('SafeArea with nested Scaffold', (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
@@ -219,7 +219,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgetsWithLeakTracking('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (WidgetTester tester) async {
+      testWidgets('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
@@ -289,7 +289,7 @@ void main() {
       expect(testAnswers, equals(expectedRects));
     }
 
-    testWidgetsWithLeakTracking('SliverSafeArea - basic', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - basic', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
@@ -306,7 +306,7 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('SliverSafeArea - basic', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - basic', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
@@ -324,7 +324,7 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('SliverSafeArea - nested', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - nested', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
@@ -344,7 +344,7 @@ void main() {
       ]);
     });
 
-    testWidgetsWithLeakTracking('SliverSafeArea - changing', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - changing', (WidgetTester tester) async {
       const Widget sliver = SliverSafeArea(
         bottom: false,
         sliver: SliverSafeArea(
@@ -383,7 +383,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('SliverSafeArea - properties', (WidgetTester tester) async {
+  testWidgets('SliverSafeArea - properties', (WidgetTester tester) async {
     const SliverSafeArea child = SliverSafeArea(
       right: false,
       bottom: false,

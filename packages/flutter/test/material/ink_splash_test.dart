@@ -41,7 +41,7 @@ class _PageState extends State<Page> {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/21506.
-  testWidgetsWithLeakTracking('InkSplash receives textDirection', (WidgetTester tester) async {
+  testWidgets('InkSplash receives textDirection', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Button Border Test')),
@@ -59,7 +59,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+  testWidgets('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
     Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -101,7 +101,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/136441.
-  testWidgetsWithLeakTracking('PageView item can dispose when widget with NoSplash.splashFactory is tapped', (WidgetTester tester) async {
+  testWidgets('PageView item can dispose when widget with NoSplash.splashFactory is tapped', (WidgetTester tester) async {
     final PageController controller = PageController();
     final List<int> disposedPageIndexes = <int>[];
     await tester.pumpWidget(MaterialApp(

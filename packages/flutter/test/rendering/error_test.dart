@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   const String errorMessage = 'Some error message';
 
-  testWidgetsWithLeakTracking('test draw error paragraph', (WidgetTester tester) async {
+  testWidgets('test draw error paragraph', (WidgetTester tester) async {
     await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));
     expect(
       find.byType(ErrorWidget),

@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Traversal Order of SliverList', (WidgetTester tester) async {
+  testWidgets('Traversal Order of SliverList', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
@@ -186,7 +186,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Traversal Order of SliverFixedExtentList', (WidgetTester tester) async {
+  testWidgets('Traversal Order of SliverFixedExtentList', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
@@ -328,7 +328,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Traversal Order of SliverGrid', (WidgetTester tester) async {
+  testWidgets('Traversal Order of SliverGrid', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 1600.0);
@@ -459,7 +459,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Traversal Order of List of individual slivers', (WidgetTester tester) async {
+  testWidgets('Traversal Order of List of individual slivers', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
@@ -598,7 +598,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Traversal Order of in a SingleChildScrollView', (WidgetTester tester) async {
+  testWidgets('Traversal Order of in a SingleChildScrollView', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 3000.0);
@@ -687,7 +687,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Traversal Order with center child', (WidgetTester tester) async {
+  testWidgets('Traversal Order with center child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(Semantics(

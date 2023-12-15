@@ -14,7 +14,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 // is fixed, these tests should be updated to use a real font (not Ahem).
 
 void main() {
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Material2 - RichText TextSpan styles with different locales',
     (WidgetTester tester) async {
 
@@ -60,7 +60,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Material3 - RichText TextSpan styles with different locales',
     (WidgetTester tester) async {
 
@@ -106,7 +106,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Material2 - Text with locale-specific glyphs, ambient locale',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -158,7 +158,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Material3 - Text with locale-specific glyphs, ambient locale',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -210,7 +210,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Material2 - Text with locale-specific glyphs, explicit locale',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -254,7 +254,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Material3 - Text with locale-specific glyphs, explicit locale',
     (WidgetTester tester) async {
       await tester.pumpWidget(

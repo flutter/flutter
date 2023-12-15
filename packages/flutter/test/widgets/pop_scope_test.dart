@@ -35,7 +35,7 @@ void main() {
         .setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgetsWithLeakTracking('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
+  testWidgets('toggling canPop on root route allows/prevents backs', (WidgetTester tester) async {
     bool canPop = false;
     late StateSetter setState;
     late BuildContext context;
@@ -80,7 +80,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
+  testWidgets('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     bool canPop = true;
     late StateSetter setState;
@@ -248,7 +248,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('removing PopScope from the tree removes its effect on navigation', (WidgetTester tester) async {
+  testWidgets('removing PopScope from the tree removes its effect on navigation', (WidgetTester tester) async {
     bool usePopScope = true;
     late StateSetter setState;
     late BuildContext context;
@@ -300,7 +300,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('identical PopScopes', (WidgetTester tester) async {
+  testWidgets('identical PopScopes', (WidgetTester tester) async {
     bool usePopScope1 = true;
     bool usePopScope2 = true;
     late StateSetter setState;

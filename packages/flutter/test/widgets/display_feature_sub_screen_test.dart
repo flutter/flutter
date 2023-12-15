@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('DisplayFeatureSubScreen', () {
-    testWidgetsWithLeakTracking('without Directionality or anchor', (WidgetTester tester) async {
+    testWidgets('without Directionality or anchor', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
           displayFeatures: <DisplayFeature>[
@@ -38,7 +38,7 @@ void main() {
       expect(message, contains('Directionality'));
     });
 
-    testWidgetsWithLeakTracking('with anchorPoint', (WidgetTester tester) async {
+    testWidgets('with anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
           displayFeatures: <DisplayFeature>[
@@ -69,7 +69,7 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,0)));
     });
 
-    testWidgetsWithLeakTracking('with infinity anchorpoint', (WidgetTester tester) async {
+    testWidgets('with infinity anchorpoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
           displayFeatures: <DisplayFeature>[
@@ -100,7 +100,7 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,0)));
     });
 
-    testWidgetsWithLeakTracking('with horizontal hinge and anchorPoint', (WidgetTester tester) async {
+    testWidgets('with horizontal hinge and anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
           displayFeatures: <DisplayFeature>[
@@ -130,7 +130,7 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(0,310)));
     });
 
-    testWidgetsWithLeakTracking('with multiple display features and anchorPoint', (WidgetTester tester) async {
+    testWidgets('with multiple display features and anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
           displayFeatures: <DisplayFeature>[
@@ -165,7 +165,7 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(410,310)));
     });
 
-    testWidgetsWithLeakTracking('with non-splitting display features and anchorPoint', (WidgetTester tester) async {
+    testWidgets('with non-splitting display features and anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
           displayFeatures: <DisplayFeature>[
@@ -210,7 +210,7 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(Offset.zero));
     });
 
-    testWidgetsWithLeakTracking('with size 0 display feature in half-opened posture and anchorPoint', (WidgetTester tester) async {
+    testWidgets('with size 0 display feature in half-opened posture and anchorPoint', (WidgetTester tester) async {
       const Key childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
           displayFeatures: <DisplayFeature>[

@@ -12,7 +12,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Radio control test', (WidgetTester tester) async {
+  testWidgets('Radio control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -64,7 +64,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
+  testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -119,7 +119,7 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
-  testWidgetsWithLeakTracking('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
+  testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(CupertinoApp(
@@ -154,7 +154,7 @@ void main() {
     semantics.dispose();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Radio semantics', (WidgetTester tester) async {
+  testWidgets('Radio semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(CupertinoApp(
@@ -242,7 +242,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('has semantic events', (WidgetTester tester) async {
+  testWidgets('has semantic events', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
@@ -279,7 +279,7 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgetsWithLeakTracking('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 1;
     const Key radioKey0 = Key('radio0');
@@ -352,7 +352,7 @@ void main() {
     expect(groupValue, equals(2));
   });
 
-  testWidgetsWithLeakTracking('Show a checkmark when useCheckmarkStyle is true', (WidgetTester tester) async {
+  testWidgets('Show a checkmark when useCheckmarkStyle is true', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoRadio<int>(
@@ -407,7 +407,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
+  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
     final Key key = UniqueKey();
 
     Widget buildRadio(bool show) {

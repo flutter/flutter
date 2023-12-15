@@ -38,7 +38,7 @@ void main() {
     testImage.dispose();
   });
 
-  testWidgetsWithLeakTracking('DecorationImage RTL with alignment topEnd and match', (WidgetTester tester) async {
+  testWidgets('DecorationImage RTL with alignment topEnd and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -77,7 +77,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..scale()..scale()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage LTR with alignment topEnd (and pointless match)', (WidgetTester tester) async {
+  testWidgets('DecorationImage LTR with alignment topEnd (and pointless match)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -113,7 +113,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage RTL with alignment topEnd', (WidgetTester tester) async {
+  testWidgets('DecorationImage RTL with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -148,7 +148,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage LTR with alignment topEnd', (WidgetTester tester) async {
+  testWidgets('DecorationImage LTR with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -183,7 +183,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage RTL with alignment center-right and match', (WidgetTester tester) async {
+  testWidgets('DecorationImage RTL with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -215,7 +215,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage RTL with alignment center-right and no match', (WidgetTester tester) async {
+  testWidgets('DecorationImage RTL with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -242,7 +242,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage LTR with alignment center-right and match', (WidgetTester tester) async {
+  testWidgets('DecorationImage LTR with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -270,7 +270,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('DecorationImage LTR with alignment center-right and no match', (WidgetTester tester) async {
+  testWidgets('DecorationImage LTR with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -298,7 +298,7 @@ void main() {
     expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image RTL with alignment topEnd and match', (WidgetTester tester) async {
+  testWidgets('Image RTL with alignment topEnd and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -335,7 +335,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..scale()..scale()));
   });
 
-  testWidgetsWithLeakTracking('Image LTR with alignment topEnd (and pointless match)', (WidgetTester tester) async {
+  testWidgets('Image LTR with alignment topEnd (and pointless match)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -369,7 +369,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('Image RTL with alignment topEnd', (WidgetTester tester) async {
+  testWidgets('Image RTL with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -402,7 +402,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('Image LTR with alignment topEnd', (WidgetTester tester) async {
+  testWidgets('Image LTR with alignment topEnd', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -435,7 +435,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..scale()));
   });
 
-  testWidgetsWithLeakTracking('Image RTL with alignment center-right and match', (WidgetTester tester) async {
+  testWidgets('Image RTL with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -463,7 +463,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image RTL with alignment center-right and no match', (WidgetTester tester) async {
+  testWidgets('Image RTL with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -488,7 +488,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image LTR with alignment center-right and match', (WidgetTester tester) async {
+  testWidgets('Image LTR with alignment center-right and match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -514,7 +514,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image LTR with alignment center-right and no match', (WidgetTester tester) async {
+  testWidgets('Image LTR with alignment center-right and no match', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -540,7 +540,7 @@ void main() {
     expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
-  testWidgetsWithLeakTracking('Image - Switch needing direction', (WidgetTester tester) async {
+  testWidgets('Image - Switch needing direction', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

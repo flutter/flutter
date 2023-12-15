@@ -93,7 +93,7 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
+  testWidgets('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
 
     // This is a bit of a weird test so let's try to explain it a bit.
     //

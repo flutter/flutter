@@ -56,7 +56,7 @@ Widget builder() {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
+  testWidgets('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(builder());
     final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
     leaf.markNeedsBuild();

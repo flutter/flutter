@@ -94,7 +94,7 @@ class ModalPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+  testWidgets('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(const TestPage(useMaterial3: false));
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
@@ -104,7 +104,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+  testWidgets('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(const TestPage(useMaterial3: true));
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();

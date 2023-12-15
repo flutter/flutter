@@ -32,7 +32,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
+  testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
 
     await tester.pumpWidget(
@@ -73,7 +73,7 @@ void main() {
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
-  testWidgetsWithLeakTracking('Can build children directly as well', (WidgetTester tester) async {
+  testWidgets('Can build children directly as well', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -96,7 +96,7 @@ void main() {
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
-  testWidgetsWithLeakTracking('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -159,7 +159,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('Can build for editable text from raw parameters', (WidgetTester tester) async {
+  testWidgets('Can build for editable text from raw parameters', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(CupertinoApp(
       home: Center(
@@ -237,7 +237,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('Builds the correct button per-platform', (WidgetTester tester) async {
+  testWidgets('Builds the correct button per-platform', (WidgetTester tester) async {
     const String buttonText = 'Click me';
 
     await tester.pumpWidget(

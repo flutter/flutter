@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Intrinsic stepWidth, stepHeight', (WidgetTester tester) async {
+  testWidgets('Intrinsic stepWidth, stepHeight', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25224
     Widget buildFrame(double? stepWidth, double? stepHeight) {
       return Center(

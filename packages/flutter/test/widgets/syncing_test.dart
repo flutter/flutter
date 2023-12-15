@@ -49,7 +49,7 @@ class TestWidgetState extends State<TestWidget> {
 
 void main() {
 
-  testWidgetsWithLeakTracking('no change', (WidgetTester tester) async {
+  testWidgets('no change', (WidgetTester tester) async {
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.blue,
@@ -89,7 +89,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgetsWithLeakTracking('remove one', (WidgetTester tester) async {
+  testWidgets('remove one', (WidgetTester tester) async {
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.blue,
@@ -128,7 +128,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgetsWithLeakTracking('swap instances around', (WidgetTester tester) async {
+  testWidgets('swap instances around', (WidgetTester tester) async {
     const Widget a = TestWidget(persistentState: 0x61, syncedState: 0x41, child: Text('apple', textDirection: TextDirection.ltr));
     const Widget b = TestWidget(persistentState: 0x62, syncedState: 0x42, child: Text('banana', textDirection: TextDirection.ltr));
     await tester.pumpWidget(const Column());

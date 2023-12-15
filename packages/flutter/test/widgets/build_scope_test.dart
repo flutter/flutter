@@ -134,7 +134,7 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Legal times for setState', (WidgetTester tester) async {
+  testWidgets('Legal times for setState', (WidgetTester tester) async {
     final GlobalKey flipKey = GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
     await tester.pumpWidget(const ProbeWidget(key: Key('a')));
@@ -172,7 +172,7 @@ void main() {
     expect(tester.takeException(), isNotNull);
   });
 
-  testWidgetsWithLeakTracking('Dirty element list sort order', (WidgetTester tester) async {
+  testWidgets('Dirty element list sort order', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
     final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 

@@ -15,7 +15,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgetsWithLeakTracking('MergeSemantics', (WidgetTester tester) async {
+  testWidgets('MergeSemantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // not merged
@@ -121,7 +121,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('MergeSemantics works if other nodes are implicitly merged into its node', (WidgetTester tester) async {
+  testWidgets('MergeSemantics works if other nodes are implicitly merged into its node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

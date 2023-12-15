@@ -16,7 +16,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Sliver appbars - scrolling', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - scrolling', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
       Directionality(
@@ -51,7 +51,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 50.0));
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - scrolling off screen', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - scrolling off screen', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestDelegate delegate = TestDelegate();
     await tester.pumpWidget(
@@ -75,7 +75,7 @@ void main() {
     expect(rect, equals(const Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars - scrolling - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - scrolling - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -107,7 +107,7 @@ void main() {
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
 
-  testWidgetsWithLeakTracking('Sliver appbars const child delegate - scrolling - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgets('Sliver appbars const child delegate - scrolling - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

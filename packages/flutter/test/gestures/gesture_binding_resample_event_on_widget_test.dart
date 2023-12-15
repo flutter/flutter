@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('PointerEvent resampling on a widget', (WidgetTester tester) async {
+  testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
     Duration currentTestFrameTime() => Duration(
       milliseconds: TestWidgetsFlutterBinding.instance.clock.now().millisecondsSinceEpoch,
     );
@@ -115,7 +115,7 @@ void main() {
     expect(events[3], isA<PointerUpEvent>());
   });
 
-  testWidgetsWithLeakTracking('Timer should be canceled when resampling stopped', (WidgetTester tester) async {
+  testWidgets('Timer should be canceled when resampling stopped', (WidgetTester tester) async {
     // A timer will be started when event's timeStamp is larger than sampleTime.
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[

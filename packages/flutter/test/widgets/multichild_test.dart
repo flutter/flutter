@@ -33,7 +33,7 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
+  testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
 
     await tester.pumpWidget(
       const Stack(
@@ -118,7 +118,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) async {
+  testWidgets('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) async {
 
     await tester.pumpWidget(
       const Stack(
@@ -244,7 +244,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[]);
   });
 
-  testWidgetsWithLeakTracking('MultiChildRenderObjectElement with stateful widgets', (WidgetTester tester) async {
+  testWidgets('MultiChildRenderObjectElement with stateful widgets', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,

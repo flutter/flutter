@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   final TestAutomatedTestWidgetsFlutterBinding binding = TestAutomatedTestWidgetsFlutterBinding();
 
-  testWidgetsWithLeakTracking('Locale is available when Localizations widget stops deferring frames', (WidgetTester tester) async {
+  testWidgets('Locale is available when Localizations widget stops deferring frames', (WidgetTester tester) async {
     final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
     await tester.pumpWidget(Localizations(
       locale: const Locale('fo'),
@@ -38,7 +38,7 @@ void main() {
     expect(find.text('loaded'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Localizations.localeOf throws when no localizations exist', (WidgetTester tester) async {
+  testWidgets('Localizations.localeOf throws when no localizations exist', (WidgetTester tester) async {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
 
@@ -49,7 +49,7 @@ void main() {
     )));
   });
 
-  testWidgetsWithLeakTracking('Localizations.maybeLocaleOf returns null when no localizations exist', (WidgetTester tester) async {
+  testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (WidgetTester tester) async {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
 

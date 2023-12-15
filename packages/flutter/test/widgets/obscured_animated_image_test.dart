@@ -18,7 +18,7 @@ Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
   final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
 
-  testWidgetsWithLeakTracking('Obscured image does not animate', (WidgetTester tester) async {
+  testWidgets('Obscured image does not animate', (WidgetTester tester) async {
     final GlobalKey imageKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(

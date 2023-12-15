@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Semantics tester visits last child', (WidgetTester tester) async {
+  testWidgets('Semantics tester visits last child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     final TapGestureRecognizer recognizer = TapGestureRecognizer();

@@ -29,7 +29,7 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('initState() is called when we are in the tree', (WidgetTester tester) async {
+  testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
     await tester.pumpWidget(const Parent(child: TestWidget()));
     expect(ancestors, containsAllInOrder(<String>['Parent', 'View', 'RootWidget']));
   });

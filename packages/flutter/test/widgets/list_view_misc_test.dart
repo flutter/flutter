@@ -9,7 +9,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 const Key blockKey = Key('test');
 
 void main() {
-  testWidgetsWithLeakTracking('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
+  testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -37,7 +37,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Can scroll an overflowing block', (WidgetTester tester) async {
+  testWidgets('Can scroll an overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -68,7 +68,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('ListView reverse', (WidgetTester tester) async {
+  testWidgets('ListView reverse', (WidgetTester tester) async {
     int first = 0;
     int second = 0;
 
@@ -112,7 +112,7 @@ void main() {
     expect(second, equals(1));
   });
 
-  testWidgetsWithLeakTracking('ListView controller', (WidgetTester tester) async {
+  testWidgets('ListView controller', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
 
@@ -129,7 +129,7 @@ void main() {
     expect(controller.offset, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('SliverBlockChildListDelegate.estimateMaxScrollOffset hits end', (WidgetTester tester) async {
+  testWidgets('SliverBlockChildListDelegate.estimateMaxScrollOffset hits end', (WidgetTester tester) async {
     final SliverChildListDelegate delegate = SliverChildListDelegate(<Widget>[
       Container(),
       Container(),
@@ -163,7 +163,7 @@ void main() {
     expect(maxScrollOffset, equals(26.0));
   });
 
-  testWidgetsWithLeakTracking('Resizing a ListView child restores scroll offset', (WidgetTester tester) async {
+  testWidgets('Resizing a ListView child restores scroll offset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9221
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),

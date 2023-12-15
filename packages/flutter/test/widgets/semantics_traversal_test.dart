@@ -22,7 +22,7 @@ void main() {
   });
 
   void testTraversal(String description, TraversalTestFunction testFunction) {
-    testWidgetsWithLeakTracking(description, (WidgetTester tester) async {
+    testWidgets(description, (WidgetTester tester) async {
       final TraversalTester traversalTester = TraversalTester(tester);
       await testFunction(traversalTester);
       traversalTester.dispose();

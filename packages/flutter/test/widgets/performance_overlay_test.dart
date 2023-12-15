@@ -8,12 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Performance overlay smoke test', (WidgetTester tester) async {
+  testWidgets('Performance overlay smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const PerformanceOverlay());
     await tester.pumpWidget(PerformanceOverlay.allEnabled());
   });
 
-  testWidgetsWithLeakTracking('update widget field checkerboardRasterCacheImages',
+  testWidgets('update widget field checkerboardRasterCacheImages',
       (WidgetTester tester) async {
     await tester.pumpWidget(const PerformanceOverlay());
     await tester.pumpWidget(
@@ -26,7 +26,7 @@ void main() {
         true);
   });
 
-  testWidgetsWithLeakTracking('update widget field checkerboardOffscreenLayers',
+  testWidgets('update widget field checkerboardOffscreenLayers',
       (WidgetTester tester) async {
     await tester.pumpWidget(const PerformanceOverlay());
     await tester.pumpWidget(

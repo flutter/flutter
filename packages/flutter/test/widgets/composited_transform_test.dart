@@ -12,7 +12,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   final LayerLink link = LayerLink();
 
-  testWidgetsWithLeakTracking('Change link during layout', (WidgetTester tester) async {
+  testWidgets('Change link during layout', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     Widget build({ LayerLink? linkToUse }) {
       return Directionality(
@@ -57,7 +57,7 @@ void main() {
     expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
   });
 
-  testWidgetsWithLeakTracking('LeaderLayer should not cause error', (WidgetTester tester) async {
+  testWidgets('LeaderLayer should not cause error', (WidgetTester tester) async {
     final LayerLink link = LayerLink();
 
     Widget buildWidget({
@@ -117,19 +117,19 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('topLeft', (WidgetTester tester) async {
+    testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
       final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
     });
 
-    testWidgetsWithLeakTracking('center', (WidgetTester tester) async {
+    testWidgets('center', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
       final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
     });
 
-    testWidgetsWithLeakTracking('bottomRight - topRight', (WidgetTester tester) async {
+    testWidgets('bottomRight - topRight', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
       final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(113.0, 466.0));
@@ -173,7 +173,7 @@ void main() {
         ),
       );
     }
-    testWidgetsWithLeakTracking('topLeft', (WidgetTester tester) async {
+    testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
       final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
@@ -182,7 +182,7 @@ void main() {
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
-    testWidgetsWithLeakTracking('center', (WidgetTester tester) async {
+    testWidgets('center', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
       final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
@@ -191,7 +191,7 @@ void main() {
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
-    testWidgetsWithLeakTracking('bottomRight - topRight', (WidgetTester tester) async {
+    testWidgets('bottomRight - topRight', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
       final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
@@ -250,7 +250,7 @@ void main() {
         ),
       );
     }
-    testWidgetsWithLeakTracking('topLeft', (WidgetTester tester) async {
+    testWidgets('topLeft', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
       final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
@@ -259,7 +259,7 @@ void main() {
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
-    testWidgetsWithLeakTracking('center', (WidgetTester tester) async {
+    testWidgets('center', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.center, followerAlignment: Alignment.center));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
       final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
@@ -268,7 +268,7 @@ void main() {
       expect(position1, offsetMoreOrLessEquals(position2));
     });
 
-    testWidgetsWithLeakTracking('bottomRight - topRight', (WidgetTester tester) async {
+    testWidgets('bottomRight - topRight', (WidgetTester tester) async {
       await tester.pumpWidget(build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight));
       final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
       final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
@@ -322,7 +322,7 @@ void main() {
 
     for (final Alignment targetAlignment in alignments) {
       for (final Alignment followerAlignment in alignments) {
-        testWidgetsWithLeakTracking('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
+        testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async{
           await tester.pumpWidget(build(targetAlignment: targetAlignment, followerAlignment: followerAlignment));
           final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));
@@ -334,7 +334,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Leader after Follower asserts', (WidgetTester tester) async {
+  testWidgets('Leader after Follower asserts', (WidgetTester tester) async {
     final LayerLink link = LayerLink();
     await tester.pumpWidget(
       CompositedTransformFollower(
@@ -352,7 +352,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
       '`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
       (WidgetTester tester) async {
     final LayerLink link = LayerLink();

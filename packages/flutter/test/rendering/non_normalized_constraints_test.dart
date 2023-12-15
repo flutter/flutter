@@ -32,7 +32,7 @@ class Foo extends SingleChildRenderObjectWidget {
 // END OF SENSITIVE SECTION
 
 void main() {
-  testWidgetsWithLeakTracking('Stack parsing in non-normalized constraints error', (WidgetTester tester) async {
+  testWidgets('Stack parsing in non-normalized constraints error', (WidgetTester tester) async {
     await tester.pumpWidget(const Foo(child: Placeholder()), Duration.zero, EnginePhase.layout);
     final Object? exception = tester.takeException();
     final String text = exception.toString();

@@ -90,7 +90,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Typography implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,

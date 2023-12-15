@@ -18,7 +18,7 @@ class _ModifierCheck {
 
 void main() {
   group('RawKeyboard', () {
-    testWidgetsWithLeakTracking('The correct character is produced', (WidgetTester tester) async {
+    testWidgets('The correct character is produced', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         String character = '';
         void handleKey(RawKeyEvent event) {
@@ -33,7 +33,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('No character is produced for non-printables', (WidgetTester tester) async {
+    testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web', 'ios']) {
         void handleKey(RawKeyEvent event) {
           expect(event.character, isNull, reason: 'on $platform');
@@ -44,7 +44,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('keysPressed is maintained', (WidgetTester tester) async {
+    testWidgets('keysPressed is maintained', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         RawKeyboard.instance.clearKeysPressed();
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
@@ -150,7 +150,7 @@ void main() {
       }
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
-    testWidgetsWithLeakTracking('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
+    testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         RawKeyboard.instance.clearKeysPressed();
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
@@ -201,7 +201,7 @@ void main() {
       }
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/76741
 
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -225,7 +225,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a macOS-specific test.
 
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on iOS', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on iOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -249,7 +249,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an iOS-specific test.
 
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on Windows', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -273,7 +273,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a Windows-specific test.
 
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -297,7 +297,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an Android-specific test.
 
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -321,7 +321,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on Linux GLFW', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on Linux GLFW', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -383,7 +383,7 @@ void main() {
     //
     // GTK has some weird behavior where the tested key event sequence will
     // result in a AltRight down event without Alt bitmask.
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
 
       await simulateGTKKeyEvent(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
@@ -403,7 +403,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
     //
     // On Linux, CapsLock can be remapped to a non-modifier key.
-    testWidgetsWithLeakTracking('CapsLock should not be release when remapped on Linux', (WidgetTester tester) async {
+    testWidgets('CapsLock should not be release when remapped on Linux', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
 
       await simulateGTKKeyEvent(true,  0x42/*CapsLock*/,  0xff08/*Backspace*/,  0x2000000);
@@ -420,7 +420,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
     //
     // On Web, CapsLock can be remapped to a non-modifier key.
-    testWidgetsWithLeakTracking('CapsLock should not be release when remapped on Web', (WidgetTester _) async {
+    testWidgets('CapsLock should not be release when remapped on Web', (WidgetTester _) async {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
       addTearDown(() {
@@ -450,7 +450,7 @@ void main() {
       );
     }, skip: !isBrowser); // [intended] This is a Browser-specific test.
 
-    testWidgetsWithLeakTracking('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event. Change the modifiers so
       // that they show the shift key as already down when this event is
@@ -538,7 +538,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('sided modifiers without a side set return all sides on Android', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on Android', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -575,7 +575,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an Android-specific test.
 
-    testWidgetsWithLeakTracking('sided modifiers without a side set return all sides on macOS', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on macOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -612,7 +612,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a macOS-specific test.
 
-    testWidgetsWithLeakTracking('sided modifiers without a side set return all sides on iOS', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on iOS', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -649,7 +649,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an iOS-specific test.
 
-    testWidgetsWithLeakTracking('repeat events', (WidgetTester tester) async {
+    testWidgets('repeat events', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       late RawKeyEvent receivedEvent;
       RawKeyboard.instance.keyEventHandler = (RawKeyEvent event) {
@@ -692,7 +692,7 @@ void main() {
       RawKeyboard.instance.keyEventHandler = null;
     }, skip: isBrowser); // [intended] This is a Windows-specific test.
 
-    testWidgetsWithLeakTracking('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -727,7 +727,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a Windows-specific test.
 
-    testWidgetsWithLeakTracking('sided modifiers without a side set return all sides on Linux GLFW', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on Linux GLFW', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -765,7 +765,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a GLFW-specific test.
 
-    testWidgetsWithLeakTracking('sided modifiers without a side set return left sides on web', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return left sides on web', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -798,7 +798,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('RawKeyboard asserts if no keys are in keysPressed after receiving a key down event', (WidgetTester tester) async {
+    testWidgets('RawKeyboard asserts if no keys are in keysPressed after receiving a key down event', (WidgetTester tester) async {
       final Map<String, dynamic> keyEventMessage;
       if (kIsWeb) {
         keyEventMessage = const <String, dynamic>{
@@ -834,7 +834,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Allows inconsistent modifier for iOS', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for iOS', (WidgetTester _) async {
       // Use `testWidgets` for clean-ups.
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -862,7 +862,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
     }, skip: isBrowser); // [intended] This is an iOS-specific group.
 
-    testWidgetsWithLeakTracking('Allows inconsistent modifier for Android', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for Android', (WidgetTester _) async {
       // Use `testWidgets` for clean-ups.
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -893,7 +893,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
     }, skip: isBrowser); // [intended] This is an Android-specific group.
 
-    testWidgetsWithLeakTracking('Allows inconsistent modifier for Web - Alt graph', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for Web - Alt graph', (WidgetTester _) async {
       // Regression test for https://github.com/flutter/flutter/issues/113836
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -922,7 +922,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altGraph));
     }, skip: !isBrowser); // [intended] This is a Browser-specific test.
 
-    testWidgetsWithLeakTracking('Allows inconsistent modifier for Web - Alt right', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for Web - Alt right', (WidgetTester _) async {
       // Regression test for https://github.com/flutter/flutter/issues/113836
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -951,7 +951,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altRight));
     }, skip: !isBrowser); // [intended] This is a Browser-specific test.
 
-    testWidgetsWithLeakTracking('Dispatch events to all handlers', (WidgetTester tester) async {
+    testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       final List<int> logs = <int>[];
@@ -1017,7 +1017,7 @@ void main() {
     // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
+    testWidgets('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
       void throwingListener(RawKeyEvent event) {
         throw 1;
       }
@@ -1291,7 +1291,7 @@ void main() {
       expect(data.repeatCount, equals(42));
     });
 
-    testWidgetsWithLeakTracking('Key events are responded to correctly.', (WidgetTester tester) async {
+    testWidgets('Key events are responded to correctly.', (WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -2102,7 +2102,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
     });
 
-    testWidgetsWithLeakTracking('Win32 VK_PROCESSKEY events are skipped', (WidgetTester tester) async {
+    testWidgets('Win32 VK_PROCESSKEY events are skipped', (WidgetTester tester) async {
       const  String platform = 'windows';
       bool lastHandled = true;
       final List<RawKeyEvent> events = <RawKeyEvent>[];

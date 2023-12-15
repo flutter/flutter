@@ -14,7 +14,7 @@ Route<void> generateRoute(RouteSettings settings) => PageRouteBuilder<void>(
 );
 
 void main() {
-  testWidgetsWithLeakTracking('WidgetsApp.navigatorKey', (WidgetTester tester) async {
+  testWidgets('WidgetsApp.navigatorKey', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(WidgetsApp(
       navigatorKey: key,

@@ -62,7 +62,7 @@ void main() {
     expect(foundStyle, isTrue);
   });
 
-  testWidgetsWithLeakTracking('right click can trigger select word', (WidgetTester tester) async {
+  testWidgets('right click can trigger select word', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();

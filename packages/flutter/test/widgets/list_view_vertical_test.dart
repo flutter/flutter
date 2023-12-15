@@ -21,7 +21,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Drag vertically', (WidgetTester tester) async {
+  testWidgets('Drag vertically', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
 
     await tester.pump();
@@ -64,7 +64,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Drag vertically', (WidgetTester tester) async {
+  testWidgets('Drag vertically', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

@@ -9,7 +9,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgetsWithLeakTracking('SliverAnimatedList.builder respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgets('SliverAnimatedList.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -48,7 +48,7 @@ void main() {
     expect(finderCalled, true);
   });
 
-  testWidgetsWithLeakTracking('AnimatedList', (WidgetTester tester) async {
+  testWidgets('AnimatedList', (WidgetTester tester) async {
     Widget builder(BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
         height: 100.0,
@@ -127,7 +127,7 @@ void main() {
   });
 
   group('SliverAnimatedList', () {
-    testWidgetsWithLeakTracking('initialItemCount', (WidgetTester tester) async {
+    testWidgets('initialItemCount', (WidgetTester tester) async {
       final Map<int, Animation<double>> animations = <int, Animation<double>>{};
 
       await tester.pumpWidget(
@@ -160,7 +160,7 @@ void main() {
       expect(animations[1]!.value, 1.0);
     });
 
-    testWidgetsWithLeakTracking('insert', (WidgetTester tester) async {
+    testWidgets('insert', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
@@ -246,7 +246,7 @@ void main() {
     });
 
     // Test for insertAllItems with SliverAnimatedList
-    testWidgetsWithLeakTracking('insertAll', (WidgetTester tester) async {
+    testWidgets('insertAll', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
@@ -303,7 +303,7 @@ void main() {
     });
 
     // Test for removeAllItems with SliverAnimatedList
-    testWidgetsWithLeakTracking('remove', (WidgetTester tester) async {
+    testWidgets('remove', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
       final List<int> items = <int>[0, 1, 2];
 
@@ -380,7 +380,7 @@ void main() {
     });
 
     // Test for removeAllItems with SliverAnimatedList
-    testWidgetsWithLeakTracking('removeAll', (WidgetTester tester) async {
+    testWidgets('removeAll', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
       final List<int> items = <int>[0, 1, 2];
 
@@ -430,7 +430,7 @@ void main() {
       expect(find.text('item 2'), findsNothing);
     });
 
-    testWidgetsWithLeakTracking('works in combination with other slivers', (WidgetTester tester) async {
+    testWidgets('works in combination with other slivers', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
       await tester.pumpWidget(
@@ -495,7 +495,7 @@ void main() {
       expect(tester.getTopLeft(find.text('item 0')).dy, 200);
     });
 
-    testWidgetsWithLeakTracking('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
+    testWidgets('passes correctly derived index of findChildIndexCallback to the inner SliverChildBuilderDelegate', (WidgetTester tester) async {
       final List<int> items = <int>[0, 1, 2, 3];
       final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
 
@@ -557,7 +557,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'AnimatedList.of() and maybeOf called with a context that does not contain AnimatedList',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
@@ -602,7 +602,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+  testWidgets('AnimatedList.clipBehavior is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
     const Clip clipBehavior = Clip.none;
 
     await tester.pumpWidget(
@@ -626,7 +626,7 @@ void main() {
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
 
-  testWidgetsWithLeakTracking('AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
+  testWidgets('AnimatedList.shrinkwrap is forwarded to its inner CustomScrollView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/115040
     final ScrollController controller = ScrollController();
 
@@ -654,7 +654,7 @@ void main() {
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).shrinkWrap, true);
   });
 
-  testWidgetsWithLeakTracking('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
+  testWidgets('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.all(30.0);
     EdgeInsets? innerMediaQueryPadding;
     await tester.pumpWidget(

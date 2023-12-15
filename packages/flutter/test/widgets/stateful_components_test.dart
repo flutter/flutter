@@ -45,7 +45,7 @@ class OuterContainerState extends State<OuterContainer> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('resync stateful widget', (WidgetTester tester) async {
+  testWidgets('resync stateful widget', (WidgetTester tester) async {
     const Key innerKey = Key('inner');
     const Key outerKey = Key('outer');
 

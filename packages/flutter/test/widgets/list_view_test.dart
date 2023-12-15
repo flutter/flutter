@@ -78,7 +78,7 @@ class _StatefulListViewState extends State<_StatefulListView> {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgetsWithLeakTracking('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgets('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -114,7 +114,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgetsWithLeakTracking('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgets('ListView.separator respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -150,7 +150,7 @@ void main() {
     expect(finderCalled, true);
   });
 
-  testWidgetsWithLeakTracking('ListView default control', (WidgetTester tester) async {
+  testWidgets('ListView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -161,7 +161,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('ListView itemExtent control test', (WidgetTester tester) async {
+  testWidgets('ListView itemExtent control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -208,7 +208,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('ListView large scroll jump', (WidgetTester tester) async {
+  testWidgets('ListView large scroll jump', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     await tester.pumpWidget(
@@ -250,7 +250,7 @@ void main() {
     log.clear();
   });
 
-  testWidgetsWithLeakTracking('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
+  testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
     Future<void> checkAndScroll([ String zero = '0:false' ]) async {
       expect(find.text(zero), findsOneWidget);
       expect(find.text('1:false'), findsOneWidget);
@@ -287,7 +287,7 @@ void main() {
     await checkAndScroll('0:true');
   });
 
-  testWidgetsWithLeakTracking('ListView can build out of underflow', (WidgetTester tester) async {
+  testWidgets('ListView can build out of underflow', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -343,7 +343,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('ListView can build out of overflow padding', (WidgetTester tester) async {
+  testWidgets('ListView can build out of overflow padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -362,7 +362,7 @@ void main() {
     expect(find.text('padded', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
+  testWidgets('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -382,7 +382,7 @@ void main() {
     expect(find.text('19'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('ListView with shrink wrap in bounded context correctly uses cache extent', (WidgetTester tester) async {
+  testWidgets('ListView with shrink wrap in bounded context correctly uses cache extent', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
@@ -406,7 +406,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('ListView hidden items should stay hidden if their semantics are updated', (WidgetTester tester) async {
+  testWidgets('ListView hidden items should stay hidden if their semantics are updated', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
@@ -441,7 +441,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('didFinishLayout has correct indices', (WidgetTester tester) async {
+  testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
     final TestSliverChildListDelegate delegate = TestSliverChildListDelegate(
       List<Widget>.generate(
         20,
@@ -487,7 +487,7 @@ void main() {
     delegate.log.clear();
   });
 
-  testWidgetsWithLeakTracking('ListView automatically pad MediaQuery on axis', (WidgetTester tester) async {
+  testWidgets('ListView automatically pad MediaQuery on axis', (WidgetTester tester) async {
     EdgeInsets? innerMediaQueryPadding;
 
     await tester.pumpWidget(
@@ -515,7 +515,7 @@ void main() {
     expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
   });
 
-  testWidgetsWithLeakTracking('ListView clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+  testWidgets('ListView clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17426.
 
     await tester.pumpWidget(
@@ -546,7 +546,7 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgetsWithLeakTracking('ListView does not clips if no overflow', (WidgetTester tester) async {
+  testWidgets('ListView does not clips if no overflow', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -569,7 +569,7 @@ void main() {
     expect(find.byType(Viewport), isNot(paints..clipRect()));
   });
 
-  testWidgetsWithLeakTracking('ListView (fixed extent) clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
+  testWidgets('ListView (fixed extent) clips if overflow is smaller than cacheExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17426.
 
     await tester.pumpWidget(
@@ -601,7 +601,7 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgetsWithLeakTracking('ListView (fixed extent) does not clips if no overflow', (WidgetTester tester) async {
+  testWidgets('ListView (fixed extent) does not clips if no overflow', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -625,7 +625,7 @@ void main() {
     expect(find.byType(Viewport), isNot(paints..clipRect()));
   });
 
-  testWidgetsWithLeakTracking('ListView.horizontal has implicit scrolling by default', (WidgetTester tester) async {
+  testWidgets('ListView.horizontal has implicit scrolling by default', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
@@ -658,7 +658,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
+  testWidgets('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -696,7 +696,7 @@ void main() {
     expect(controller.position.viewportDimension, 100.0);
   });
 
-  testWidgetsWithLeakTracking('ListView respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ListView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -733,7 +733,7 @@ void main() {
     context.dispose();
   });
 
-  testWidgetsWithLeakTracking('ListView.builder respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ListView.builder respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -748,7 +748,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgetsWithLeakTracking('ListView.custom respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ListView.custom respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -765,7 +765,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgetsWithLeakTracking('ListView.separated respects clipBehavior', (WidgetTester tester) async {
+  testWidgets('ListView.separated respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -782,7 +782,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/131393
-  testWidgetsWithLeakTracking('itemExtentBuilder test', (WidgetTester tester) async {
+  testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     final List<int> buildLog = <int>[];
@@ -913,7 +913,7 @@ void main() {
     expect(buildLog.max, 61);
   });
 
-  testWidgetsWithLeakTracking('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (WidgetTester tester) async {
+  testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (WidgetTester tester) async {
     Object? error;
     try {
       await tester.pumpWidget(

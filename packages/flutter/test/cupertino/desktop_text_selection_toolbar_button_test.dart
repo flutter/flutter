@@ -10,7 +10,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('can press', (WidgetTester tester) async {
+  testWidgets('can press', (WidgetTester tester) async {
     bool pressed = false;
     await tester.pumpWidget(
       CupertinoApp(
@@ -31,7 +31,7 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgetsWithLeakTracking('keeps contrast with background on hover',
+  testWidgets('keeps contrast with background on hover',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -71,7 +71,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
+  testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -115,7 +115,7 @@ void main() {
     expect(opacity.opacity.value, 1.0);
   });
 
-  testWidgetsWithLeakTracking('passing null to onPressed disables the button', (WidgetTester tester) async {
+  testWidgets('passing null to onPressed disables the button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

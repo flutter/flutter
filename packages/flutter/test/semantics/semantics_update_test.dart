@@ -13,7 +13,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   SemanticsUpdateTestBinding();
 
-  testWidgetsWithLeakTracking('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
+  testWidgets('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -86,7 +86,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Semantics update receives attributed text', (WidgetTester tester) async {
+  testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(

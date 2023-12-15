@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Vertical gesture detector has up/down actions', (WidgetTester tester) async {
+  testWidgets('Vertical gesture detector has up/down actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     int callCount = 0;
@@ -45,7 +45,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Horizontal gesture detector has up/down actions', (WidgetTester tester) async {
+  testWidgets('Horizontal gesture detector has up/down actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     int callCount = 0;
@@ -79,7 +79,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('All registered handlers for the gesture kind are called', (WidgetTester tester) async {
+  testWidgets('All registered handlers for the gesture kind are called', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final Set<String> logs = <String>{};
@@ -103,7 +103,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Replacing recognizers should update semantic handlers', (WidgetTester tester) async {
+  testWidgets('Replacing recognizers should update semantic handlers', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // How the test is set up:
@@ -174,7 +174,7 @@ void main() {
   });
 
   group("RawGestureDetector's custom semantics delegate", () {
-    testWidgetsWithLeakTracking('should update semantics notations when switching from the default delegate', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when switching from the default delegate', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
         _buildGestureMap(() => LongPressGestureRecognizer(), null)
@@ -209,7 +209,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('should update semantics notations when switching to the default delegate', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when switching to the default delegate', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
         _buildGestureMap(() => LongPressGestureRecognizer(), null)
@@ -244,7 +244,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('should update semantics notations when switching from a different custom delegate', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when switching from a different custom delegate', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
         _buildGestureMap(() => LongPressGestureRecognizer(), null)
@@ -280,7 +280,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('should correctly call callbacks', (WidgetTester tester) async {
+    testWidgets('should correctly call callbacks', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> logs = <String>[];
       final GlobalKey<RawGestureDetectorState> detectorKey = GlobalKey();
@@ -322,7 +322,7 @@ void main() {
 
   group("RawGestureDetector's default semantics delegate", () {
     group('should map onTap to', () {
-      testWidgetsWithLeakTracking('null when there is no TapGR', (WidgetTester tester) async {
+      testWidgets('null when there is no TapGR', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -340,7 +340,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('non-null when there is TapGR with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is TapGR with no callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -361,7 +361,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
@@ -395,7 +395,7 @@ void main() {
     });
 
     group('should map onLongPress to', () {
-      testWidgetsWithLeakTracking('null when there is no LongPressGR ', (WidgetTester tester) async {
+      testWidgets('null when there is no LongPressGR ', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -413,7 +413,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('non-null when there is LongPressGR with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is LongPressGR with no callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -434,7 +434,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
@@ -467,7 +467,7 @@ void main() {
     });
 
     group('should map onHorizontalDragUpdate to', () {
-      testWidgetsWithLeakTracking('null when there is no matching recognizers ', (WidgetTester tester) async {
+      testWidgets('null when there is no matching recognizers ', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -485,7 +485,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -527,7 +527,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
@@ -577,7 +577,7 @@ void main() {
     });
 
     group('should map onVerticalDragUpdate to', () {
-      testWidgetsWithLeakTracking('null when there is no matching recognizers ', (WidgetTester tester) async {
+      testWidgets('null when there is no matching recognizers ', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -595,7 +595,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -618,7 +618,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgetsWithLeakTracking('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
@@ -667,7 +667,7 @@ void main() {
       });
     });
 
-    testWidgetsWithLeakTracking('should update semantics notations when receiving new gestures', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when receiving new gestures', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(
         Center(

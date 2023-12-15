@@ -65,7 +65,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
+    testWidgets('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -104,7 +104,7 @@ void main() {
       expect(insideTextScaler, const TextScaler.linear(4.0));
     });
 
-    testWidgetsWithLeakTracking('textScaleFactor overriding backward compatibility', (WidgetTester tester) async {
+    testWidgets('textScaleFactor overriding backward compatibility', (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -184,7 +184,7 @@ void main() {
   });
 
   group('Widgets backward compatibility', () {
-    testWidgetsWithLeakTracking('RichText', (WidgetTester tester) async {
+    testWidgets('RichText', (WidgetTester tester) async {
       await tester.pumpWidget(
         RichText(
           textDirection: TextDirection.ltr,
@@ -200,7 +200,7 @@ void main() {
       expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).textScaleFactor, 2.0);
     });
 
-    testWidgetsWithLeakTracking('Text', (WidgetTester tester) async {
+    testWidgets('Text', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Text(
           'text',
@@ -215,7 +215,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('EditableText', (WidgetTester tester) async {
+    testWidgets('EditableText', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');

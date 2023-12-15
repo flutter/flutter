@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('FadeTransition', (WidgetTester tester) async {
+  testWidgets('FadeTransition', (WidgetTester tester) async {
     final DebugPrintCallback oldPrint = debugPrint;
     final List<String> log = <String>[];
     debugPrint = (String? message, { int? wrapWidth }) {

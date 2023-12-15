@@ -16,7 +16,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgetsWithLeakTracking('CupertinoCheckbox semantics', (WidgetTester tester) async {
+  testWidgets('CupertinoCheckbox semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -156,7 +156,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Can wrap CupertinoCheckbox with Semantics', (WidgetTester tester) async {
+  testWidgets('Can wrap CupertinoCheckbox with Semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -184,7 +184,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('CupertinoCheckbox tristate: true', (WidgetTester tester) async {
+  testWidgets('CupertinoCheckbox tristate: true', (WidgetTester tester) async {
     bool? checkBoxValue;
 
     await tester.pumpWidget(
@@ -228,7 +228,7 @@ void main() {
     expect(checkBoxValue, null);
   });
 
-  testWidgetsWithLeakTracking('has semantics for tristate', (WidgetTester tester) async {
+  testWidgets('has semantics for tristate', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       CupertinoApp(
@@ -295,7 +295,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('has semantic events', (WidgetTester tester) async {
+  testWidgets('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool? checkboxValue = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
@@ -335,7 +335,7 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool enabled = true}) {
@@ -372,7 +372,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Checkbox respects shape and side', (WidgetTester tester) async {
+  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder =
         RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
 

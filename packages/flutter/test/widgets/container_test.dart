@@ -38,7 +38,7 @@ void main() {
       ),
     );
 
-    testWidgetsWithLeakTracking('paints as expected', (WidgetTester tester) async {
+    testWidgets('paints as expected', (WidgetTester tester) async {
       await tester.pumpWidget(Align(
         alignment: Alignment.topLeft,
         child: container,
@@ -55,7 +55,7 @@ void main() {
     });
 
     group('diagnostics', () {
-      testWidgetsWithLeakTracking('has reasonable default diagnostics', (WidgetTester tester) async {
+      testWidgets('has reasonable default diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -67,7 +67,7 @@ void main() {
         expect(box, hasAGoodToStringDeep);
       });
 
-      testWidgetsWithLeakTracking('has expected info diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected info diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -139,7 +139,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('has expected debug diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected debug diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -244,7 +244,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('has expected fine diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected fine diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -377,7 +377,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('has expected hidden diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected hidden diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -534,7 +534,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('painting error has expected diagnostics', (WidgetTester tester) async {
+      testWidgets('painting error has expected diagnostics', (WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -565,7 +565,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Can be placed in an infinite box', (WidgetTester tester) async {
+  testWidgets('Can be placed in an infinite box', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -574,7 +574,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Container transformAlignment', (WidgetTester tester) async {
+  testWidgets('Container transformAlignment', (WidgetTester tester) async {
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -621,7 +621,7 @@ void main() {
     expect(tester.getBottomRight(finder), equals(const Offset(200, 200)));
   });
 
-  testWidgetsWithLeakTracking('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
+  testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
         decoration: const BoxDecoration(
@@ -636,7 +636,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
+  testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
@@ -653,7 +653,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
+  testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
     Future<void> test(Decoration decoration) async {
       await tester.pumpWidget(
         Directionality(
@@ -683,7 +683,7 @@ void main() {
     await test(const FlutterLogoDecoration());
   });
 
-  testWidgetsWithLeakTracking('Container is hittable only when having decorations', (WidgetTester tester) async {
+  testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(GestureDetector(
       onTap: () { tapped = true; },
@@ -737,7 +737,7 @@ void main() {
     expect(tapped, false);
   });
 
-  testWidgetsWithLeakTracking('Container discards alignment when the child parameter is null and constraints is not Tight', (WidgetTester tester) async {
+  testWidgets('Container discards alignment when the child parameter is null and constraints is not Tight', (WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
         decoration: const BoxDecoration(
@@ -752,7 +752,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
+  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(

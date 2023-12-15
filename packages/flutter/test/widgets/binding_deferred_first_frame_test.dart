@@ -14,7 +14,7 @@ const String _actualContent = 'Actual Content';
 const String _loading = 'Loading...';
 
 void main() {
-  testWidgetsWithLeakTracking('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
+  testWidgets('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     final Completer<void> completer = Completer<void>();
@@ -51,7 +51,7 @@ void main() {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Two widgets can defer frames', (WidgetTester tester) async {
+  testWidgets('Two widgets can defer frames', (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
     final Completer<void> completer1 = Completer<void>();

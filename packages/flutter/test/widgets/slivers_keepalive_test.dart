@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Sliver with keep alive without key - should dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive without key - should dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0', keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
@@ -30,7 +30,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgetsWithLeakTracking('Sliver without keep alive without key - should dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver without keep alive without key - should dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0'),
       const WidgetTest1(text: 'child 1'),
@@ -53,7 +53,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgetsWithLeakTracking('Sliver without keep alive with key - should dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver without keep alive with key - should dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey()),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
@@ -76,7 +76,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgetsWithLeakTracking('Sliver with keep alive with key - should not dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with key - should not dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
@@ -98,7 +98,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgetsWithLeakTracking('Sliver with keep alive with Unique key - should not dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with Unique key - should not dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey(), keepAlive: true),
@@ -120,7 +120,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgetsWithLeakTracking('Sliver with keep alive with Value key - should not dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with Value key - should not dispose after reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0', key: ValueKey<int>(0), keepAlive: true),
       const WidgetTest1(text: 'child 1', key: ValueKey<int>(1), keepAlive: true),
@@ -142,7 +142,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgetsWithLeakTracking('Sliver complex case 1', (WidgetTester tester) async {
+  testWidgets('Sliver complex case 1', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
@@ -186,7 +186,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgetsWithLeakTracking('Sliver complex case 2', (WidgetTester tester) async {
+  testWidgets('Sliver complex case 2', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
@@ -229,7 +229,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgetsWithLeakTracking('Sliver with SliverChildBuilderDelegate', (WidgetTester tester) async {
+  testWidgets('Sliver with SliverChildBuilderDelegate', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
@@ -272,7 +272,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgetsWithLeakTracking('SliverFillViewport should not dispose widget with key during in screen reordering', (WidgetTester tester) async {
+  testWidgets('SliverFillViewport should not dispose widget with key during in screen reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
@@ -313,7 +313,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgetsWithLeakTracking('SliverList should not dispose widget with key during in screen reordering', (WidgetTester tester) async {
+  testWidgets('SliverList should not dispose widget with key during in screen reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
@@ -363,7 +363,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgetsWithLeakTracking('SliverList remove child from child list', (WidgetTester tester) async {
+  testWidgets('SliverList remove child from child list', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),

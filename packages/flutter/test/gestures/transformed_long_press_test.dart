@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('gets local coordinates', (WidgetTester tester) async {
+  testWidgets('gets local coordinates', (WidgetTester tester) async {
     int longPressCount = 0;
     int longPressUpCount = 0;
     final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
@@ -54,7 +54,7 @@ void main() {
     expect(endDetails.single.globalPosition, const Offset(400, 300));
   });
 
-  testWidgetsWithLeakTracking('scaled up', (WidgetTester tester) async {
+  testWidgets('scaled up', (WidgetTester tester) async {
     int longPressCount = 0;
     int longPressUpCount = 0;
     final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
@@ -129,7 +129,7 @@ void main() {
     expect(moveDetails.single.localOffsetFromOrigin, const Offset(0, 100.0 / 2.0));
   });
 
-  testWidgetsWithLeakTracking('scaled down', (WidgetTester tester) async {
+  testWidgets('scaled down', (WidgetTester tester) async {
     int longPressCount = 0;
     int longPressUpCount = 0;
     final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];

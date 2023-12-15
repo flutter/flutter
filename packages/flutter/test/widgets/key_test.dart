@@ -20,7 +20,7 @@ class NotEquals {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Keys', (WidgetTester tester) async {
+  testWidgets('Keys', (WidgetTester tester) async {
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(3)), isTrue);
     expect(ValueKey<num>(nonconst(3)) == ValueKey<int>(nonconst(3)), isFalse);
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(2)), isFalse);

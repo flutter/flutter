@@ -23,7 +23,7 @@ void main() {
     navigatorObserver = MockNavigatorObserver();
   });
 
-  testWidgetsWithLeakTracking('Middle auto-populates with title', (WidgetTester tester) async {
+  testWidgets('Middle auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -53,7 +53,7 @@ void main() {
     expect(tester.getCenter(find.text('An iPod')).dx, 400.0);
   });
 
-  testWidgetsWithLeakTracking('Large title auto-populates with title', (WidgetTester tester) async {
+  testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -118,7 +118,7 @@ void main() {
     expect(tester.getCenter(find.byWidget(titles[0].widget)).dx, 400.0);
   });
 
-  testWidgetsWithLeakTracking('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
+  testWidgets('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -165,7 +165,7 @@ void main() {
     expect(tester.getTopLeft(find.text('An iPod')).dx, moreOrLessEquals(8.0 + 4.0 + 34.0 + 6.0, epsilon: 0.5));
   });
 
-  testWidgetsWithLeakTracking('Previous title is correct on first transition frame', (WidgetTester tester) async {
+  testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -208,7 +208,7 @@ void main() {
     expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Previous title stays up to date with changing routes', (WidgetTester tester) async {
+  testWidgets('Previous title stays up to date with changing routes', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -272,7 +272,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Back')).dx, moreOrLessEquals(8.0 + 4.0 + 34.0 + 6.0, epsilon: 0.5));
   });
 
-  testWidgetsWithLeakTracking('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+  testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28728
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -378,7 +378,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
+  testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -563,11 +563,11 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
   }
 
-  testWidgetsWithLeakTracking('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgetsWithLeakTracking('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: true);
   });
 
@@ -652,15 +652,15 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
   }
 
-  testWidgetsWithLeakTracking('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgetsWithLeakTracking('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: true);
   });
 
-  testWidgetsWithLeakTracking('Animated push/pop is not linear', (WidgetTester tester) async {
+  testWidgets('Animated push/pop is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -712,7 +712,7 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(607, epsilon: 1));
   });
 
-  testWidgetsWithLeakTracking('Dragged pop gesture is linear', (WidgetTester tester) async {
+  testWidgets('Dragged pop gesture is linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -759,7 +759,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/137033.
-  testWidgetsWithLeakTracking('Update pages during a drag gesture will not stuck', (WidgetTester tester) async {
+  testWidgets('Update pages during a drag gesture will not stuck', (WidgetTester tester) async {
 
     await tester.pumpWidget(const _TestPageUpdate());
 
@@ -792,7 +792,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Pop gesture snapping is not linear', (WidgetTester tester) async {
+  testWidgets('Pop gesture snapping is not linear', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -839,7 +839,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Snapped drags forwards and backwards should signal didStart/StopUserGesture', (WidgetTester tester) async {
+  testWidgets('Snapped drags forwards and backwards should signal didStart/StopUserGesture', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -893,7 +893,7 @@ void main() {
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/29596.
-  testWidgetsWithLeakTracking('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
+  testWidgets('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         navigatorObservers: <NavigatorObserver>[navigatorObserver],
@@ -930,7 +930,7 @@ void main() {
     expect(navigatorObserver.invocations.removeLast(), NavigatorInvocation.didPop);
   });
 
-  testWidgetsWithLeakTracking('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
+  testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         navigatorObservers: <NavigatorObserver>[navigatorObserver],
@@ -987,7 +987,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('when route is not fullscreenDialog, it has a barrierColor', (WidgetTester tester) async {
+    testWidgets('when route is not fullscreenDialog, it has a barrierColor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: SizedBox.expand(),
@@ -1002,7 +1002,7 @@ void main() {
       expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, const Color(0x18000000));
     });
 
-    testWidgetsWithLeakTracking('when route is a fullscreenDialog, it has no barrierColor', (WidgetTester tester) async {
+    testWidgets('when route is a fullscreenDialog, it has no barrierColor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: SizedBox.expand(),
@@ -1017,7 +1017,7 @@ void main() {
       expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, isNull);
     });
 
-    testWidgetsWithLeakTracking('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
+    testWidgets('when route is not fullscreenDialog, it has a _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsShadowRect({required double dx, required Color color}) {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
           if (methodName != #drawRect) {
@@ -1107,7 +1107,7 @@ void main() {
       expect(box, paintsShadowRect(dx: 754, color: const Color(0x00000000)));
     });
 
-    testWidgetsWithLeakTracking('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
+    testWidgets('when route is fullscreenDialog, it has no visible _CupertinoEdgeShadowDecoration', (WidgetTester tester) async {
       PaintPattern paintsNoShadows() {
         return paints..everything((Symbol methodName, List<dynamic> arguments) {
           if (methodName != #drawRect) {
@@ -1149,7 +1149,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('ModalPopup overlay dark mode', (WidgetTester tester) async {
+  testWidgets('ModalPopup overlay dark mode', (WidgetTester tester) async {
     late StateSetter stateSetter;
     Brightness brightness = Brightness.light;
 
@@ -1222,7 +1222,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('During back swipe the route ignores input', (WidgetTester tester) async {
+  testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39989
 
     final GlobalKey homeScaffoldKey = GlobalKey();
@@ -1285,7 +1285,7 @@ void main() {
     expect(pageTapCount, 1);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup uses root navigator by default', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup uses root navigator by default', (WidgetTester tester) async {
     final PopupObserver rootObserver = PopupObserver();
     final PopupObserver nestedObserver = PopupObserver();
 
@@ -1318,7 +1318,7 @@ void main() {
     expect(nestedObserver.popupCount, 0);
   });
 
-  testWidgetsWithLeakTracking('back swipe to screen edges does not dismiss the hero animation', (WidgetTester tester) async {
+  testWidgets('back swipe to screen edges does not dismiss the hero animation', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     final UniqueKey container = UniqueKey();
     await tester.pumpWidget(CupertinoApp(
@@ -1388,7 +1388,7 @@ void main() {
     expect(firstPosition, greaterThan(thirdPosition));
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final PopupObserver rootObserver = PopupObserver();
     final PopupObserver nestedObserver = PopupObserver();
 
@@ -1422,7 +1422,7 @@ void main() {
     expect(nestedObserver.popupCount, 1);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoDialog uses root navigator by default', (WidgetTester tester) async {
+  testWidgets('showCupertinoDialog uses root navigator by default', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     final DialogObserver nestedObserver = DialogObserver();
 
@@ -1455,7 +1455,7 @@ void main() {
     expect(nestedObserver.dialogCount, 0);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+  testWidgets('showCupertinoDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     final DialogObserver nestedObserver = DialogObserver();
 
@@ -1489,7 +1489,7 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup does not allow for semantics dismiss by default', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup does not allow for semantics dismiss by default', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(CupertinoApp(
@@ -1524,7 +1524,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup allows for semantics dismiss when set', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(CupertinoApp(
@@ -1560,7 +1560,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (WidgetTester tester) async {
     final RouteSettingsObserver routeSettingsObserver = RouteSettingsObserver();
 
     await tester.pumpWidget(CupertinoApp(
@@ -1591,7 +1591,7 @@ void main() {
     expect(routeSettingsObserver.routeName, '/modal');
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup transparent barrier color is transparent', (WidgetTester tester) async {
     const Color kTransparentColor = Color(0x00000000);
 
     await tester.pumpWidget(CupertinoApp(
@@ -1617,7 +1617,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, null);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup null barrier color must be default gray barrier color', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup null barrier color must be default gray barrier color', (WidgetTester tester) async {
     // Barrier color for a Cupertino modal barrier.
     // Extracted from https://developer.apple.com/design/resources/.
     const Color kModalBarrierColor = CupertinoDynamicColor.withBrightness(
@@ -1647,7 +1647,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, kModalBarrierColor);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup custom barrier color', (WidgetTester tester) async {
     const Color customColor = Color(0x11223344);
 
     await tester.pumpWidget(CupertinoApp(
@@ -1673,7 +1673,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, customColor);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1698,7 +1698,7 @@ void main() {
     expect(find.text('Visible'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
+  testWidgets('showCupertinoModalPopup barrier not dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: CupertinoPageScaffold(
         child: Builder(builder: (BuildContext context) {
@@ -1724,7 +1724,7 @@ void main() {
     expect(find.text('Visible'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('CupertinoPage works', (WidgetTester tester) async {
+  testWidgets('CupertinoPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
     List<Page<void>> myPages = <Page<void>>[
@@ -1785,7 +1785,7 @@ void main() {
     expect(find.widgetWithText(CupertinoNavigationBar, 'title two'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('CupertinoPage can toggle MaintainState', (WidgetTester tester) async {
+  testWidgets('CupertinoPage can toggle MaintainState', (WidgetTester tester) async {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
@@ -1834,7 +1834,7 @@ void main() {
     expect(find.text('second'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Popping routes should cancel down events', (WidgetTester tester) async {
+  testWidgets('Popping routes should cancel down events', (WidgetTester tester) async {
     await tester.pumpWidget(const _TestPostRouteCancel());
 
     final TestGesture gesture = await tester.createGesture();
@@ -1853,7 +1853,7 @@ void main() {
     expect(find.text('PointerCancelEvents: 1'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Popping routes during back swipe should not crash', (WidgetTester tester) async {
+  testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
 
     final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(builder: (BuildContext context) {
@@ -1903,7 +1903,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
+  testWidgets('CupertinoModalPopupRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'app',
@@ -1934,7 +1934,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
   group('showCupertinoDialog avoids overlapping display features', () {
-    testWidgetsWithLeakTracking('positioning with anchorPoint', (WidgetTester tester) async {
+    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -1972,7 +1972,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning with Directionality', (WidgetTester tester) async {
+    testWidgets('positioning with Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2012,7 +2012,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning by default', (WidgetTester tester) async {
+    testWidgets('positioning by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2051,7 +2051,7 @@ void main() {
   });
 
   group('showCupertinoModalPopup avoids overlapping display features', () {
-    testWidgetsWithLeakTracking('positioning using anchorPoint', (WidgetTester tester) async {
+    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2089,7 +2089,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
     });
 
-    testWidgetsWithLeakTracking('positioning using Directionality', (WidgetTester tester) async {
+    testWidgets('positioning using Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {
@@ -2129,7 +2129,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
     });
 
-    testWidgetsWithLeakTracking('default positioning', (WidgetTester tester) async {
+    testWidgets('default positioning', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? child) {

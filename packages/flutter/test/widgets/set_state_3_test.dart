@@ -53,7 +53,7 @@ class LeafState extends State<Leaf> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('three-way setState() smoke test', (WidgetTester tester) async {
+  testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const Changer(Wrapper(Leaf())));
     await tester.pumpWidget(const Changer(Wrapper(Leaf())));
     changer.test();

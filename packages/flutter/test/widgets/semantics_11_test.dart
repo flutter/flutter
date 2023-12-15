@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent', (WidgetTester tester) async {
+  testWidgets('markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

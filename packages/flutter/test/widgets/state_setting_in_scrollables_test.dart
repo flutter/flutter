@@ -88,7 +88,7 @@ class FooScrollBehavior extends ScrollBehavior {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Can animate scroll after setState', (WidgetTester tester) async {
+  testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

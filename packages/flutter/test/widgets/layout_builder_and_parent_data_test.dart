@@ -43,7 +43,7 @@ class SizeChangerState extends State<SizeChanger> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
     int frame = 1;
     await tester.pumpWidget(SizeChanger( // when this is triggered, the child LayoutBuilder will build again
       child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {

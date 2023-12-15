@@ -30,7 +30,7 @@ class _TestStateState extends State<TestState> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('SliverVisibility', (WidgetTester tester) async {
+  testWidgets('SliverVisibility', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<String> log = <String>[];
     const Key anchor = Key('drag');

@@ -18,7 +18,7 @@ import '../widgets/semantics_tester.dart';
 int count = 0;
 
 void main() {
-  testWidgetsWithLeakTracking('Middle still in center with asymmetrical actions', (WidgetTester tester) async {
+  testWidgets('Middle still in center with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -35,7 +35,7 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
-  testWidgetsWithLeakTracking('Middle still in center with back button', (WidgetTester tester) async {
+  testWidgets('Middle still in center with back button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -59,7 +59,7 @@ void main() {
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
   });
 
-  testWidgetsWithLeakTracking('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
+  testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
     const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
       color: Color(0xFFE5E5E5),
       darkColor: Color(0xF3E5E5E5),
@@ -90,7 +90,7 @@ void main() {
     expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
   });
 
-  testWidgetsWithLeakTracking('Non-opaque background adds blur effects', (WidgetTester tester) async {
+  testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -101,7 +101,7 @@ void main() {
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Nav bar displays correctly', (WidgetTester tester) async {
+  testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
@@ -131,7 +131,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('Can specify custom padding', (WidgetTester tester) async {
+  testWidgets('Can specify custom padding', (WidgetTester tester) async {
     final Key middleBox = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
@@ -188,7 +188,7 @@ void main() {
   }
 
   // Regression test for https://github.com/flutter/flutter/issues/119270
-  testWidgetsWithLeakTracking('System navigation bar properties are not overridden', (WidgetTester tester) async {
+  testWidgets('System navigation bar properties are not overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -199,7 +199,7 @@ void main() {
     expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
   });
 
-  testWidgetsWithLeakTracking('Can specify custom brightness', (WidgetTester tester) async {
+  testWidgets('Can specify custom brightness', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -251,7 +251,7 @@ void main() {
     expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
   });
 
-  testWidgetsWithLeakTracking('Padding works in RTL', (WidgetTester tester) async {
+  testWidgets('Padding works in RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Directionality(
@@ -281,7 +281,7 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
-  testWidgetsWithLeakTracking('Nav bar uses theme defaults', (WidgetTester tester) async {
+  testWidgets('Nav bar uses theme defaults', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
@@ -301,7 +301,7 @@ void main() {
     expect(count, 0x010101);
   });
 
-  testWidgetsWithLeakTracking('Nav bar respects themes', (WidgetTester tester) async {
+  testWidgets('Nav bar respects themes', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
@@ -322,7 +322,7 @@ void main() {
     expect(count, 0x010101);
   });
 
-  testWidgetsWithLeakTracking('Theme active color can be overridden', (WidgetTester tester) async {
+  testWidgets('Theme active color can be overridden', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
@@ -343,7 +343,7 @@ void main() {
     expect(count, 0x010101);
   });
 
-  testWidgetsWithLeakTracking('No slivers with no large titles', (WidgetTester tester) async {
+  testWidgets('No slivers with no large titles', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -358,7 +358,7 @@ void main() {
     expect(find.byType(SliverPersistentHeader), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Media padding is applied to CupertinoSliverNavigationBar', (WidgetTester tester) async {
+  testWidgets('Media padding is applied to CupertinoSliverNavigationBar', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     final Key leadingKey = GlobalKey();
@@ -407,7 +407,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 54.0 + 10.0));
   });
 
-  testWidgetsWithLeakTracking('Large title nav bar scrolls', (WidgetTester tester) async {
+  testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -488,7 +488,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(ClipRect, 'Title').first).height, 0.0);
   });
 
-  testWidgetsWithLeakTracking('User specified middle is always visible in sliver', (WidgetTester tester) async {
+  testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     final Key segmentedControlsKey = UniqueKey();
@@ -546,7 +546,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('User specified middle is only visible when sliver is collapsed if alwaysShowMiddle is false', (WidgetTester tester) async {
+  testWidgets('User specified middle is only visible when sliver is collapsed if alwaysShowMiddle is false', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -593,7 +593,7 @@ void main() {
     expect(middleOpacity.opacity.value, 0.0);
   });
 
-  testWidgetsWithLeakTracking('Small title can be overridden', (WidgetTester tester) async {
+  testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -658,7 +658,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('Title')).dy, 44.0); // Extension gone.
   });
 
-  testWidgetsWithLeakTracking('Auto back/close button', (WidgetTester tester) async {
+  testWidgets('Auto back/close button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -713,7 +713,7 @@ void main() {
     expect(find.text('Home page'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Long back label turns into "back"', (WidgetTester tester) async {
+  testWidgets('Long back label turns into "back"', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -756,7 +756,7 @@ void main() {
     expect(find.widgetWithText(CupertinoButton, 'Back'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Border should be displayed by default', (WidgetTester tester) async {
+  testWidgets('Border should be displayed by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -778,7 +778,7 @@ void main() {
     expect(side, isNotNull);
   });
 
-  testWidgetsWithLeakTracking('Overrides border color', (WidgetTester tester) async {
+  testWidgets('Overrides border color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -807,7 +807,7 @@ void main() {
     expect(side.color, const Color(0xFFAABBCC));
   });
 
-  testWidgetsWithLeakTracking('Border should not be displayed when null', (WidgetTester tester) async {
+  testWidgets('Border should not be displayed when null', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -827,7 +827,7 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgetsWithLeakTracking('Border is displayed by default in sliver nav bar', (WidgetTester tester) async {
+  testWidgets('Border is displayed by default in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -855,7 +855,7 @@ void main() {
     expect(bottom, isNotNull);
   });
 
-  testWidgetsWithLeakTracking('Border is not displayed when null in sliver nav bar', (WidgetTester tester) async {
+  testWidgets('Border is not displayed when null in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -881,7 +881,7 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgetsWithLeakTracking('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
+  testWidgets('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const CupertinoApp(
@@ -906,7 +906,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
+  testWidgets('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(CupertinoApp(
@@ -927,7 +927,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Border can be overridden in sliver nav bar', (WidgetTester tester) async {
+  testWidgets('Border can be overridden in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -965,7 +965,7 @@ void main() {
     expect(bottom.color, const Color(0xFFAABBCC));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Standard title golden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -988,7 +988,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Large title golden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1019,7 +1019,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
+  testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFFFFFFFF),
@@ -1039,7 +1039,7 @@ void main() {
     expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.light);
   });
 
-  testWidgetsWithLeakTracking('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
+  testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFFFFFFFF),
@@ -1059,7 +1059,7 @@ void main() {
     expectSameStatusBarStyle(SystemChrome.latestStyle!, SystemUiOverlayStyle.dark);
   });
 
-  testWidgetsWithLeakTracking('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
+  testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoNavigationBarBackButton());
 
     final dynamic exception = tester.takeException();
@@ -1067,7 +1067,7 @@ void main() {
     expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
   });
 
-  testWidgetsWithLeakTracking('CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped', (WidgetTester tester) async {
+  testWidgets('CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBarBackButton(),
@@ -1079,7 +1079,7 @@ void main() {
     expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
   });
 
-  testWidgetsWithLeakTracking('CupertinoNavigationBarBackButton with a custom onPressed callback can be placed anywhere', (WidgetTester tester) async {
+  testWidgets('CupertinoNavigationBarBackButton with a custom onPressed callback can be placed anywhere', (WidgetTester tester) async {
     bool backPressed = false;
 
     await tester.pumpWidget(
@@ -1098,7 +1098,7 @@ void main() {
     expect(backPressed, true);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Manually inserted CupertinoNavigationBarBackButton still automatically '
         'show previous page title when possible',
     (WidgetTester tester) async {
@@ -1139,7 +1139,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'CupertinoNavigationBarBackButton onPressed overrides default pop behavior',
     (WidgetTester tester) async {
       bool backPressed = false;
@@ -1194,7 +1194,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
@@ -1273,7 +1273,7 @@ void main() {
     expect(barItems2.any((RichText t) => t.textScaleFactor != 1), isFalse);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'CupertinoSliverNavigationBar stretches upon over-scroll and bounces back once over-scroll ends',
     (WidgetTester tester) async {
       const Text trailingText = Text('Bar Button');
@@ -1328,7 +1328,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'CupertinoSliverNavigationBar does not stretch upon over-scroll if stretch parameter is false',
     (WidgetTester tester) async {
       const Text trailingText = Text('Bar Button');
@@ -1382,7 +1382,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Null NavigationBar border transition', (WidgetTester tester) async {
+  testWidgets('Null NavigationBar border transition', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/71389
     await tester.pumpWidget(
       const CupertinoApp(
@@ -1422,7 +1422,7 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'CupertinoSliverNavigationBar magnifies upon over-scroll and shrinks back once over-scroll ends',
     (WidgetTester tester) async {
       const Text titleText = Text('Large Title');
@@ -1480,7 +1480,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'CupertinoSliverNavigationBar large title text does not get clipped when magnified',
     (WidgetTester tester) async {
       const Text titleText = Text('Very very very long large title');
@@ -1527,7 +1527,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'CupertinoSliverNavigationBar large title can be hit tested when magnified',
     (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();

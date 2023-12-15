@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('runApp uses deprecated pipelineOwner and renderView', (WidgetTester tester) async {
+  testWidgets('runApp uses deprecated pipelineOwner and renderView', (WidgetTester tester) async {
     runApp(const SizedBox());
     final RenderObject renderObject = tester.renderObject(find.byType(SizedBox));
 
@@ -22,7 +22,7 @@ void main() {
     expect(renderObject.owner, equals(tester.binding.pipelineOwner));
   });
 
-  testWidgetsWithLeakTracking('can manually attach RootWidget to build owner', (WidgetTester tester) async {
+  testWidgets('can manually attach RootWidget to build owner', (WidgetTester tester) async {
     expect(find.byType(ColoredBox), findsNothing);
 
     final RootWidget rootWidget = RootWidget(

@@ -22,7 +22,7 @@ class ChangerState extends State<Changer> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('setState() catches being used with an async callback', (WidgetTester tester) async {
+  testWidgets('setState() catches being used with an async callback', (WidgetTester tester) async {
     await tester.pumpWidget(const Changer());
     final ChangerState s = tester.state(find.byType(Changer));
     expect(s.test0, isNot(throwsFlutterError));
