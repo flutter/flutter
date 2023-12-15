@@ -2067,7 +2067,7 @@ abstract class RenderBox extends RenderObject {
     return null;
   }
 
-  static bool _dryLayoutCalculationValid = true;
+  static bool _debugDryLayoutCalculationValid = true;
 
   /// Called from [computeDryLayout] and [computeDryBaseline] within an assert if
   /// the given [RenderBox] subclass does not support calculating a dry layout.
@@ -2097,7 +2097,7 @@ abstract class RenderBox extends RenderObject {
         assert(error != null);
         throw error!;
       }
-      _dryLayoutCalculationValid = false;
+      _debugDryLayoutCalculationValid = false;
       return true;
     }());
     return true;
@@ -2491,7 +2491,7 @@ abstract class RenderBox extends RenderObject {
         }
 
         // Checking that getDryLayout computes the same size.
-        _dryLayoutCalculationValid = true;
+        _debugDryLayoutCalculationValid = true;
         RenderObject.debugCheckingIntrinsics = true;
         final Size dryLayoutSize;
         try {
@@ -2499,7 +2499,7 @@ abstract class RenderBox extends RenderObject {
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
-        if (_dryLayoutCalculationValid && dryLayoutSize != size) {
+        if (_debugDryLayoutCalculationValid && dryLayoutSize != size) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The size given to the ${objectRuntimeType(this, 'RenderBox')} class differs from the size computed by computeDryLayout.'),
             ErrorDescription(
@@ -2539,7 +2539,7 @@ abstract class RenderBox extends RenderObject {
       // performResize, and it's not safe to access the baseline location in
       // those two places since it may depend on the child layout.
       for (final TextBaseline baseline in TextBaseline.values) {
-        _dryLayoutCalculationValid = true;
+        _debugDryLayoutCalculationValid = true;
         RenderObject.debugCheckingIntrinsics = true;
         final double? dryBaseline;
         final double? realBaseline;
@@ -2549,7 +2549,7 @@ abstract class RenderBox extends RenderObject {
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
-        if (dryBaseline == realBaseline || !_dryLayoutCalculationValid) {
+        if (dryBaseline == realBaseline || !_debugDryLayoutCalculationValid) {
           continue;
         }
         if ((dryBaseline == null) != (realBaseline == null)) {

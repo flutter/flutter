@@ -328,7 +328,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
     assert(debugCannotComputeDryLayout(reason:
-      'Calculating the dry layout would require running the layout callback '
+      'Calculating the dry baseline would require running the layout callback '
       'speculatively, which might mutate the live render object tree.',
     ));
     return null;
