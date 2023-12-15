@@ -474,7 +474,6 @@ void main() {
       expect(iosApp.deviceBundlePath, 'build/ios/iphoneos/Name.With.Dots.app');
       expect(iosApp.simulatorBundlePath, 'build/ios/iphonesimulator/Name.With.Dots.app');
       expect(iosApp.builtInfoPlistPathAfterArchive, 'build/ios/archive/Name.With.Dots.xcarchive/Products/Applications/Name.With.Dots.app/Info.plist');
-
     }, overrides: overrides);
 
     testUsingContext('returns project app icon dirname', () async {
