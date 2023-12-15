@@ -340,7 +340,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         '\n\n'
         'dev_dependencies:\n'
         '  flutter_test:\n'
-        '    sdk: flutter\n',
+        '    sdk: flutter\n\n'
+        'Reference for more information: https://docs.flutter.dev/testing/overview'
       );
     }
 
