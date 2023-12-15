@@ -633,7 +633,7 @@ void main() {
       // Distance between the first and the last column should be the same.
       expect(
         tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx,
-        distance,
+        moreOrLessEquals(distance),
       );
     });
 

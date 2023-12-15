@@ -2339,12 +2339,9 @@ void main() {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
     Widget runTest() {
       int currentIndex = 0;
-      const bool useInkSparkle = !kIsWeb;
 
       return MaterialApp(
-        // Because this test relies on golden, fo a constant seed for the ink sparkle animation.
-        theme: ThemeData(splashFactory: useInkSparkle ? InkSparkle.constantTurbulenceSeedSplashFactory : null),
-          home: StatefulBuilder(
+        home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Scaffold(
               bottomNavigationBar: RepaintBoundary(
@@ -3125,6 +3122,59 @@ void main() {
     expect(tester.getRect(find.byKey(icon0)), Rect.fromLTRB(firstItemLeft, iconTop, firstItemLeft + iconWidth, iconTop + iconHeight));
     expect(tester.getRect(find.byKey(icon1)), Rect.fromLTRB(secondItemLeft, iconTop, secondItemLeft + iconWidth, iconTop + iconHeight));
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow',(WidgetTester tester) async {
+    //Regression test for https://github.com/flutter/flutter/issues/112163
+
+    tester.view.physicalSize = const Size(540, 340);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home_rounded),
+                    label: 'Home Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.date_range_rounded),
+                    label: 'Daily Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.wind_power),
+                    label: 'Awards Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.bar_chart_rounded),
+                    label: 'Statistics Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
+                ),
+              ],
+            ));
+          },
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('bottom_navigation_bar.label_overflow.png'),
+    );
+
+    addTearDown(tester.view.resetPhysicalSize);
+  });
 }
 
 Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection, bool? useMaterial3 }) {

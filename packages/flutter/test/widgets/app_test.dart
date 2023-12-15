@@ -147,6 +147,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
     await tester.pumpAndSettle();
     expect(checked, isTrue);
+  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   group('error control test', () {
@@ -783,7 +784,7 @@ void main() {
   });
 }
 
-typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
+typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext context, RouteInformation information);
 typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
 
 class SelectAllSpy extends Action<SelectAllTextIntent> {

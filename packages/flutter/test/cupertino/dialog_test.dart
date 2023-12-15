@@ -87,7 +87,7 @@ void main() {
 
   });
 
- testWidgetsWithLeakTracking('Dialog configurable to be barrier dismissible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dialog configurable to be barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(createAppWithCenteredButton(const Text('Go')));
 
     final BuildContext context = tester.element(find.text('Go'));
@@ -129,12 +129,12 @@ void main() {
   testWidgetsWithLeakTracking('Dialog default action style', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoTheme(
-      data: const CupertinoThemeData(
-        primaryColor: CupertinoColors.systemGreen,
-      ),
-      child: boilerplate(const CupertinoDialogAction(
-        child: Text('Ok'),
-      )),
+        data: const CupertinoThemeData(
+          primaryColor: CupertinoColors.systemGreen,
+        ),
+        child: boilerplate(const CupertinoDialogAction(
+          child: Text('Ok'),
+        )),
       ),
     );
 
@@ -164,7 +164,7 @@ void main() {
       ),
     );
 
-    final RichText cancelText =  tester.widget<RichText>(
+    final RichText cancelText = tester.widget<RichText>(
       find.descendant(of: find.text('Cancel'), matching: find.byType(RichText)),
     );
 
@@ -594,7 +594,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerWidth = 1.0 / MediaQuery.devicePixelRatioOf(context);
+          dividerWidth = 0.3;
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -636,11 +636,10 @@ void main() {
   testWidgetsWithLeakTracking('Actions section height for 2 stacked buttons with enough room is height of both buttons.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    const double dividerThickness = 0.3;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -707,7 +706,7 @@ void main() {
 
     expect(
       actionsSectionBox.size.height,
-      67.83333333333337,
+      67.80000000000001,
     );
   });
 
@@ -789,8 +788,8 @@ void main() {
     expect(option1ButtonBox.size.width, option2ButtonBox.size.width);
     expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
 
-    // Expected Height = button 1 + divider + 1/2 button 2 = 67.83333333333334
-    const double expectedHeight = 67.83333333333334;
+    // Expected Height = button 1 + divider + 1/2 button 2 = 67.80000000000001
+    const double expectedHeight = 67.80000000000001;
     expect(
       actionsSectionBox.size.height,
       moreOrLessEquals(expectedHeight),
@@ -849,11 +848,10 @@ void main() {
   testWidgetsWithLeakTracking('Pressed button changes appearance and dividers disappear.', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    late double dividerThickness; // Will be set when the dialog builder runs. Needs a BuildContext.
+    const double dividerThickness = 0.3;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          dividerThickness = 1.0 / MediaQuery.devicePixelRatioOf(context);
           return CupertinoAlertDialog(
             title: const Text('The Title'),
             content: const Text('The message'),
@@ -893,10 +891,10 @@ void main() {
     );
     final Offset bottomDividerCenter = Offset(
       secondButtonBox.size.width / 2.0,
-      firstButtonBox.size.height
-        + dividerThickness
-        + secondButtonBox.size.height
-        + (0.5 * dividerThickness),
+      firstButtonBox.size.height +
+          dividerThickness +
+          secondButtonBox.size.height +
+          (0.5 * dividerThickness),
     );
 
     // Before pressing the button, verify following expectations:
