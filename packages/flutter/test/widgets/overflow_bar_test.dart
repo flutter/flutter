@@ -60,9 +60,9 @@ void main() {
           child: OverflowBar(
             spacing: spacing,
             children: <Widget>[
-              SizedBox(width: 48, height: 48, key: child1Key, child: const ColoredBox(color: Color(0xFFFFFFF1))),
-              SizedBox(width: 64, height: 64, key: child2Key, child: const ColoredBox(color: Color(0xFFFFFFF2))),
-              SizedBox(width: 32, height: 32, key: child3Key, child: const ColoredBox(color: Color(0xFFFFFFF3))),
+              SizedBox(width: 48, height: 48, key: child1Key),
+              SizedBox(width: 64, height: 64, key: child2Key),
+              SizedBox(width: 32, height: 32, key: child3Key),
             ],
           ),
         ),
@@ -116,9 +116,9 @@ void main() {
               overflowAlignment: overflowAlignment,
               overflowDirection: overflowDirection,
               children: <Widget>[
-                SizedBox(width: 48, height: 48, key: child1Key, child: const ColoredBox(color: Color(0xFFFFFFF1))),
-                SizedBox(width: 64, height: 64, key: child2Key, child: const ColoredBox(color: Color(0xFFFFFFF2))),
-                SizedBox(width: 32, height: 32, key: child3Key, child: const ColoredBox(color: Color(0xFFFFFFF3))),
+                SizedBox(width: 48, height: 48, key: child1Key),
+                SizedBox(width: 64, height: 64, key: child2Key),
+                SizedBox(width: 32, height: 32, key: child3Key),
               ],
             ),
           ),
@@ -282,9 +282,9 @@ void main() {
     // This list of children appears in a Row and an OverflowBar, so each
     // find.byKey() for key0, key1, key2 returns two widgets.
     final List<Widget> children = <Widget>[
-      SizedBox(key: key0, width: 50, height: 50, child: const ColoredBox(color: Color(0xFFFFFFF1))),
-      SizedBox(key: key1, width: 70, height: 50, child: const ColoredBox(color: Color(0xFFFFFFF2))),
-      SizedBox(key: key2, width: 80, height: 50, child: const ColoredBox(color: Color(0xFFFFFFF3))),
+      SizedBox(key: key0, width: 50, height: 50),
+      SizedBox(key: key1, width: 70, height: 50),
+      SizedBox(key: key2, width: 80, height: 50),
     ];
 
     const List<MainAxisAlignment> allAlignments = <MainAxisAlignment>[
