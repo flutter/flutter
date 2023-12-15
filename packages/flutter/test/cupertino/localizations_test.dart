@@ -35,6 +35,7 @@ void main() {
     expect(localizations.modalBarrierDismissLabel, isNotNull);
     expect(localizations.searchTextFieldPlaceholderLabel, isNotNull);
     expect(localizations.noSpellCheckReplacementsLabel, isNotNull);
+    expect(localizations.clearButtonLabel, isNotNull);
   });
 
   testWidgetsWithLeakTracking('CupertinoLocalizations.of throws', (WidgetTester tester) async {
