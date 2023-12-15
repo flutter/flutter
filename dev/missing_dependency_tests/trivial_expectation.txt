@@ -6,3 +6,5 @@ Error: cannot run without a dependency on "package:flutter_test". Ensure the fol
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+Reference for more information: https://docs.flutter.dev/testing/overview
