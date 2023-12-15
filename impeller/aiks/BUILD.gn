@@ -67,28 +67,60 @@ impeller_component("aiks_playground") {
   ]
 }
 
-impeller_component("aiks_unittests") {
+impeller_component("context_spy") {
   testonly = true
 
   sources = [
-    "aiks_unittests.cc",
-    "canvas_recorder_unittests.cc",
-    "canvas_unittests.cc",
     "testing/context_mock.h",
     "testing/context_spy.cc",
     "testing/context_spy.h",
-    "trace_serializer_unittests.cc",
   ]
   deps = [
-    ":aiks",
-    ":aiks_playground",
-    "//flutter/impeller/geometry:geometry_asserts",
-    "//flutter/impeller/golden_tests:golden_playground_test",
-    "//flutter/impeller/playground:playground_test",
-    "//flutter/impeller/scene",
-    "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
+    "//flutter/impeller/renderer",
     "//flutter/testing:testing_lib",
-    "//flutter/third_party/txt",
+  ]
+}
+
+template("aiks_unittests_component") {
+  target_name = invoker.target_name
+  predefined_sources = [
+    "aiks_gradient_unittests.cc",
+    "aiks_unittests.cc",
+    "aiks_unittests.h",
+  ]
+  additional_sources = []
+  if (defined(invoker.sources)) {
+    additional_sources = invoker.sources
+  }
+  impeller_component(target_name) {
+    testonly = true
+    if (defined(invoker.defines)) {
+      defines = invoker.defines
+    }
+    sources = predefined_sources + additional_sources
+    deps = [
+      ":aiks",
+      ":aiks_playground",
+      ":context_spy",
+      "//flutter/impeller/geometry:geometry_asserts",
+      "//flutter/impeller/golden_tests:golden_playground_test",
+      "//flutter/impeller/playground:playground_test",
+      "//flutter/impeller/scene",
+      "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
+      "//flutter/testing:testing_lib",
+      "//flutter/third_party/txt",
+    ]
+    if (defined(invoker.public_configs)) {
+      public_configs = invoker.public_configs
+    }
+  }
+}
+
+aiks_unittests_component("aiks_unittests") {
+  sources = [
+    "canvas_recorder_unittests.cc",
+    "canvas_unittests.cc",
+    "trace_serializer_unittests.cc",
   ]
 
   if (!impeller_trace_canvas) {
@@ -97,30 +129,10 @@ impeller_component("aiks_unittests") {
   }
 }
 
-impeller_component("aiks_unittests_golden") {
-  testonly = true
-
+aiks_unittests_component("aiks_unittests_golden") {
   defines = [
     "IMPELLER_GOLDEN_TESTS",
     "IMPELLER_ENABLE_VALIDATION=1",
-  ]
-
-  sources = [
-    "aiks_unittests.cc",
-    "testing/context_mock.h",
-    "testing/context_spy.cc",
-    "testing/context_spy.h",
-  ]
-  deps = [
-    ":aiks",
-    ":aiks_playground",
-    "//flutter/impeller/geometry:geometry_asserts",
-    "//flutter/impeller/golden_tests:golden_playground_test",
-    "//flutter/impeller/playground:playground_test",
-    "//flutter/impeller/scene",
-    "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
-    "//flutter/testing:testing_lib",
-    "//flutter/third_party/txt",
   ]
 }
 
