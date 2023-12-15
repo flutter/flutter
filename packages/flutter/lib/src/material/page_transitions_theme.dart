@@ -777,7 +777,18 @@ class PageTransitionsTheme with Diagnosticable {
       if (cupertinoTransitionInProgress) {
         return const CupertinoPageTransitionsBuilder();
       }
-      return builders[platform] ?? (platform == TargetPlatform.iOS ? const CupertinoPageTransitionsBuilder() : const ZoomPageTransitionsBuilder());
+      late PageTransitionsBuilder defaultBuilder;
+      switch (platform) {
+        case TargetPlatform.iOS:
+          defaultBuilder = CupertinoPageTransitionsBuilder();
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.windows:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+          defaultBuilder = ZoomPageTransitionsBuilder();
+      }
+      return builders[platform] ?? defaultBuilder;
     }
 
     final PageTransitionsBuilder matchingBuilder = getTransitionBuilder();
