@@ -26,5 +26,6 @@
   "menuDismissLabel": "メニューを閉じる",
   "lookUpButtonLabel": "調べる",
   "searchWebButtonLabel": "ウェブを検索",
-  "shareButtonLabel": "共有..."
+  "shareButtonLabel": "共有...",
+  "clearButtonLabel": "Clear"
 }

@@ -2112,7 +2112,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 }
 
 /// Signature for when the time picker entry mode is changed.
-typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
+typedef EntryModeChangeCallback = void Function(TimePickerEntryMode mode);
 
 /// A Material Design time picker designed to appear inside a popup dialog.
 ///

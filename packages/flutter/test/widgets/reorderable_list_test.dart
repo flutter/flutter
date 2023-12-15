@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1405,6 +1406,84 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
+
+  testWidgetsWithLeakTracking('Tests the correctness of the drop animation in various scenarios', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/138994
+    late Size screenSize;
+    final List<double> itemSizes = <double>[20, 50, 30, 80, 100, 30];
+    Future<void> pumpFor(bool reverse, Axis scrollDirection) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              screenSize = MediaQuery.sizeOf(context);
+              return Scaffold(
+                body: CustomScrollView(
+                  reverse: reverse,
+                  scrollDirection: scrollDirection,
+                  slivers: <Widget>[
+                    SliverReorderableList(
+                      itemBuilder: (BuildContext context, int index) {
+                        return ReorderableDragStartListener(
+                          key: ValueKey<int>(index),
+                          index: index,
+                          child: Builder(
+                            builder: (BuildContext context) {
+                              return SizedBox(
+                                height: scrollDirection == Axis.vertical ? itemSizes[index] : double.infinity,
+                                width: scrollDirection == Axis.horizontal ? itemSizes[index] : double.infinity,
+                                child: Text('$index'),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      itemCount: itemSizes.length,
+                      onReorder: (int fromIndex, int toIndex) {},
+                    ),
+                  ],
+                ),
+              );
+            }
+          ),
+        ),
+      );
+    }
+
+    Future<void> testMove(int from, int to, {bool reverse = false, Axis scrollDirection = Axis.vertical}) async {
+      await pumpFor(reverse, scrollDirection);
+      final double targetOffset = (List<double>.of(itemSizes)..removeAt(from)).sublist(0, to).sum;
+      final Offset targetPosition = reverse
+        ? (scrollDirection == Axis.vertical
+            ? Offset(0, screenSize.height - targetOffset - itemSizes[from])
+            : Offset(screenSize.width - targetOffset - itemSizes[from], 0))
+        : (scrollDirection == Axis.vertical ? Offset(0, targetOffset) : Offset(targetOffset, 0));
+      final Offset moveOffset = targetPosition - tester.getTopLeft(find.text('$from'));
+      await tester.timedDrag(find.text('$from'), moveOffset, const Duration(seconds: 1));
+      // Before the drop animation starts
+      final Offset animationBeginOffset = tester.getTopLeft(find.text('$from'));
+      // Halfway through the animation
+      await tester.pump(const Duration(milliseconds: 125));
+      expect(tester.getTopLeft(find.text('$from')), Offset.lerp(animationBeginOffset, targetPosition, 0.5));
+      // Animation ends
+      await tester.pump(const Duration(milliseconds: 125));
+      expect(tester.getTopLeft(find.text('$from')), targetPosition);
+      await tester.pumpAndSettle();
+    }
+    final List<(int,int)> testCases = <(int,int)>[
+      (3, 1),
+      (3, 3),
+      (3, 5),
+      (0, 5),
+      (5, 0),
+    ];
+    for (final (int, int) element in testCases) {
+      await testMove(element.$1, element.$2);
+      await testMove(element.$1, element.$2, reverse: true);
+      await testMove(element.$1, element.$2, scrollDirection: Axis.horizontal);
+      await testMove(element.$1, element.$2, reverse: true, scrollDirection: Axis.horizontal);
+    }
+  });
 }
 
 class TestList extends StatelessWidget {
