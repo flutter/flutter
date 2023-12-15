@@ -3689,114 +3689,99 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
   );
 
-  // testWidgetsWithLeakTracking('long press drag can edge scroll when inside a scrollable', (WidgetTester tester) async {
-  //   // This is a regression test for https://github.com/flutter/flutter/issues/129590.
-  //   await tester.pumpWidget(
-  //     const MaterialApp(
-  //       home: Material(
-  //         child: Center(
-  //           child: SizedBox(
-  //             width: 300.0,
-  //             child: SingleChildScrollView(
-  //               scrollDirection: Axis.horizontal,
-  //               child: SelectableText(
-  //                 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
+  testWidgetsWithLeakTracking('long press drag can edge scroll when inside a scrollable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 300.0,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SelectableText(
+                  'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges ' * 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
 
-  //   final RenderEditable renderEditable = findRenderEditable(tester);
+    final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
-  //   List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
-  //     const TextSelection.collapsed(offset: 66), // Last character's position.
-  //   );
+    final TestGesture gesture =
+        await tester.startGesture(selectableTextStart + const Offset(200.0, 0.0));
+    await tester.pump(const Duration(milliseconds: 500));
 
-  //   expect(lastCharEndpoint.length, 1);
-  //   // Just testing the test and making sure that the last character is off
-  //   // the right side of the screen.
-  //   expect(lastCharEndpoint[0].point.dx, 940.5);
+    final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
+    final TextEditingController controller = editableTextWidget.controller;
 
-  //   final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 13, extentOffset: 23),
+    );
 
-  //   final TestGesture gesture =
-  //       await tester.startGesture(const Offset(300, 5));
-  //   await tester.pump(const Duration(milliseconds: 500));
+    await gesture.moveBy(const Offset(100, 0));
+    // To the edge of the screen basically.
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 23,
+      ),
+    );
+    // Keep moving out.
+    await gesture.moveBy(const Offset(100, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 35,
+      ),
+    );
+    await gesture.moveBy(const Offset(1300, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 122,
+      ),
+    );
 
-  //   final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
-  //   final TextEditingController controller = editableTextWidget.controller;
+    await gesture.up();
+    await tester.pumpAndSettle();
 
-  //   expect(
-  //     controller.selection,
-  //     const TextSelection(baseOffset: 13, extentOffset: 23),
-  //   );
-  //   expect(find.byType(CupertinoButton), findsNothing);
+    // The selection isn't affected by the gesture lift.
+    expect(
+      controller.selection,
+      const TextSelection(
+        baseOffset: 13,
+        extentOffset: 122,
+      ),
+    );
+    // The toolbar shows up.
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      expectCupertinoSelectionToolbar();
+    } else {
+      expectMaterialSelectionToolbar();
+    }
 
-  //   await gesture.moveBy(const Offset(600, 0));
-  //   // To the edge of the screen basically.
-  //   await tester.pump();
-  //   expect(
-  //     controller.selection,
-  //     const TextSelection(
-  //       baseOffset: 13,
-  //       extentOffset: 66,
-  //     ),
-  //   );
-  //   // Keep moving out.
-  //   await gesture.moveBy(const Offset(1, 0));
-  //   await tester.pump();
-  //   expect(
-  //     controller.selection,
-  //     const TextSelection(
-  //       baseOffset: 13,
-  //       extentOffset: 66,
-  //     ),
-  //   );
-  //   await gesture.moveBy(const Offset(1, 0));
-  //   await tester.pump();
-  //   expect(
-  //     controller.selection,
-  //     const TextSelection(
-  //       baseOffset: 13,
-  //       extentOffset: 66,
-  //     ),
-  //   );
-  //   expect(find.byType(CupertinoButton), findsNothing);
-
-  //   await gesture.up();
-  //   await tester.pump();
-
-  //   // The selection isn't affected by the gesture lift.
-  //   expect(
-  //     controller.selection,
-  //     const TextSelection(
-  //       baseOffset: 13,
-  //       extentOffset: 66,
-  //     ),
-  //   );
-  //   // The toolbar shows up with one button (copy).
-  //   expect(find.byType(CupertinoButton), findsNWidgets(1));
-
-  //   lastCharEndpoint = renderEditable.getEndpointsForSelection(
-  //     const TextSelection.collapsed(offset: 66), // Last character's position.
-  //   );
-
-  //   expect(lastCharEndpoint.length, 1);
-  //   // The last character is now on screen near the right edge.
-  //   expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
-
-  //   final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
-  //     const TextSelection.collapsed(offset: 0), // First character's position.
-  //   );
-  //   expect(firstCharEndpoint.length, 1);
-  //   // The first character is now offscreen to the left.
-  //   expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-125, epsilon: 1));
-  // },
-  //   variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.android }),
-  // );
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.isNotEmpty, isTrue);
+    expect(endpoints.length, 2);
+    expect(endpoints[0].point.dx, isNegative);
+    expect(endpoints[1].point.dx, isPositive);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.android }),
+  );
 
   testWidgetsWithLeakTracking('long press drag can edge scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3812,7 +3797,6 @@ void main() {
       ),
     );
 
-    final RenderEditable renderEditable = findRenderEditable(tester);
     final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
     final TestGesture gesture =
