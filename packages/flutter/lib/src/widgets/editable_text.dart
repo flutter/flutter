@@ -3697,7 +3697,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleContextMenuOnScroll(ScrollNotification notification) {
-    if (!_platformSupportsFadeOnScroll || _webContextMenuEnabled) {
+    if (_webContextMenuEnabled) {
+      return;
+    }
+    if (!_platformSupportsFadeOnScroll) {
       _selectionOverlay?.updateForScroll();
       return;
     }
