@@ -11,7 +11,7 @@
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
 
 #if IMPELLER_ENABLE_3D
-#include "flutter/impeller/scene/shaders/vk/scene_shaders_vk.h"
+#include "flutter/impeller/scene/shaders/vk/scene_shaders_vk.h"  // nogncheck
 #endif  // IMPELLER_ENABLE_3D
 
 namespace flutter {
