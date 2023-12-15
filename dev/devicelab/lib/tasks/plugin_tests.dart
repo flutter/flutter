@@ -84,9 +84,11 @@ class PluginTest {
           section('Test app');
           await app.runFlutterTest();
         }
-        // Validate local engine handling. Currently only implemented for macOS
+        // Validate local engine handling. Currently only implemented for macOS.
         if (!dartOnlyPlugin) {
-          await _testLocalEngineConfiguration(app);
+          section('Validate local engine configuration');
+          final String fakeEngineSourcePath = path.join(tempDir.path, 'engine');
+          await _testLocalEngineConfiguration(app, fakeEngineSourcePath);
         }
       } finally {
         await plugin.delete();
@@ -100,12 +102,15 @@ class PluginTest {
     }
   }
 
-  Future<void> _testLocalEngineConfiguration(_FlutterProject app) async {
+  Future<void> _testLocalEngineConfiguration(_FlutterProject app, String fakeEngineSourcePath) async {
+    // The tool requires that a directory that looks like an engine build
+    // actually exists when passing --local-engine, so create a fake skeleton.
+    final Directory buildDir = Directory(path.join(fakeEngineSourcePath, 'out', 'foo'));
+    buildDir.createSync(recursive: true);
     // Currently this test is only implemented for macOS; it can be extended to
     // others as needed.
     if (buildTarget == 'macos') {
-      await app.build(buildTarget, configOnly: true, localEngine: '/fake/path');
-
+      await app.build(buildTarget, configOnly: true, localEngine: buildDir);
     }
   }
 }
@@ -386,7 +391,7 @@ s.dependency 'AppAuth', '1.6.0'
     String target, {
     bool validateNativeBuildProject = true,
     bool configOnly = false,
-    String? localEngine,
+    Directory? localEngine,
   }) async {
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput =  await evalFlutter('build', options: <String>[
@@ -397,7 +402,13 @@ s.dependency 'AppAuth', '1.6.0'
         if (configOnly)
           '--config-only',
         if (localEngine != null)
-          '--local-engine=$localEngine',
+          // The engine directory is of the form <fake-source-path>/out/<fakename>,
+          // which has to be broken up into the component flags.
+          ...<String>[
+            '--local-engine-src-path=${localEngine.parent.parent.path}',
+            '--local-engine=${path.basename(localEngine.path)}',
+            '--local-engine-host=${path.basename(localEngine.path)}',
+          ]
       ]);
 
       if (target == 'ios' || target == 'macos') {
@@ -446,7 +457,7 @@ s.dependency 'AppAuth', '1.6.0'
           }
 
           if (localEngine != null) {
-            final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s=[^;]*$localEngine', dotAll: true);
+            final RegExp localEngineSearchPath = RegExp('FRAMEWORK_SEARCH_PATHS\\s*=[^;]*${localEngine.path}');
             if (!localEngineSearchPath.hasMatch(podsProjectContent)) {
               throw TaskResult.failure('FRAMEWORK_SEARCH_PATHS does not contain the --local-engine path');
             }
