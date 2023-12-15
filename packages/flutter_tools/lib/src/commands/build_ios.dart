@@ -517,7 +517,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
       globals.printError('Encountered error while creating the IPA:');
       globals.printError(errorMessage.toString());
-      globals.printError('Try distributing the app in Xcode: "open $absoluteArchivePath"');
+
+      final FileSystemEntityType type = globals.fs.typeSync(absoluteArchivePath);
+      if (type != FileSystemEntityType.notFound) {
+        globals.printError('Try distributing the app in Xcode: "open $absoluteArchivePath"');
+      }
 
       // Even though the IPA step didn't succeed, the xcarchive did.
       // Still count this as success since the user has been instructed about how to
