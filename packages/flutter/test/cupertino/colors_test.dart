@@ -5,7 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class DependentWidget extends StatelessWidget {
   const DependentWidget({
@@ -201,7 +200,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Dynamic colors that are not actually dynamic should not claim dependencies',
     (WidgetTester tester) async {
       await tester.pumpWidget(const DependentWidget(color: notSoDynamicColor1));
@@ -211,7 +210,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Dynamic colors that are only dependent on vibrancy should not claim unnecessary dependencies, '
     'and its resolved color should change when its dependency changes',
     (WidgetTester tester) async {
@@ -255,7 +254,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Dynamic colors that are only dependent on accessibility contrast should not claim unnecessary dependencies, '
     'and its resolved color should change when its dependency changes',
     (WidgetTester tester) async {
@@ -284,7 +283,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Dynamic colors that are only dependent on elevation level should not claim unnecessary dependencies, '
     'and its resolved color should change when its dependency changes',
     (WidgetTester tester) async {
@@ -313,7 +312,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Dynamic color with all 3 dependencies works', (WidgetTester tester) async {
+  testWidgets('Dynamic color with all 3 dependencies works', (WidgetTester tester) async {
     const Color dynamicRainbowColor1 = CupertinoDynamicColor(
       color: color0,
       darkColor: color1,
@@ -414,7 +413,7 @@ void main() {
     expect(find.byType(DependentWidget), paints..rect(color: color7));
   });
 
-  testWidgetsWithLeakTracking('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
+  testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
     late CupertinoDynamicColor color;
     await tester.pumpWidget(
       CupertinoApp(
@@ -499,7 +498,7 @@ void main() {
     Color? color;
     setUp(() { color = null; });
 
-    testWidgetsWithLeakTracking('dynamic color works in cupertino override theme', (WidgetTester tester) async {
+    testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
       CupertinoDynamicColor typedColor() => color! as CupertinoDynamicColor;
 
       await tester.pumpWidget(
@@ -556,7 +555,7 @@ void main() {
       expect(typedColor().value, dynamicColor.darkHighContrastElevatedColor.value);
     });
 
-    testWidgetsWithLeakTracking('dynamic color does not work in a material theme', (WidgetTester tester) async {
+    testWidgets('dynamic color does not work in a material theme', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           // This will create a MaterialBasedCupertinoThemeData with primaryColor set to `dynamicColor`.
