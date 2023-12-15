@@ -780,13 +780,13 @@ class PageTransitionsTheme with Diagnosticable {
       late PageTransitionsBuilder defaultBuilder;
       switch (platform) {
         case TargetPlatform.iOS:
-          defaultBuilder = CupertinoPageTransitionsBuilder();
+          defaultBuilder = const CupertinoPageTransitionsBuilder();
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
-          defaultBuilder = ZoomPageTransitionsBuilder();
+          defaultBuilder = const ZoomPageTransitionsBuilder();
       }
       return builders[platform] ?? defaultBuilder;
     }
