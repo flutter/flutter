@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_RENDER_PASS_H_
+#define FLUTTER_LIB_GPU_RENDER_PASS_H_
 
 #include <map>
 #include <memory>
@@ -225,3 +226,5 @@ extern bool InternalFlutterGpu_RenderPass_Draw(
     flutter::gpu::RenderPass* wrapper);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_RENDER_PASS_H_

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_TESTING_TEST_ARGS_H_
+#define FLUTTER_TESTING_TEST_ARGS_H_
 
 #include "flutter/fml/command_line.h"
 
@@ -15,3 +16,5 @@ void SetArgsForProcess(int argc, char** argv);
 
 }  // namespace testing
 }  // namespace flutter
+
+#endif  // FLUTTER_TESTING_TEST_ARGS_H_

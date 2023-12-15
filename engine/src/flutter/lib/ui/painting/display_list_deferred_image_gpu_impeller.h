@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_IMPELLER_H_
+#define FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_IMPELLER_H_
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/image/dl_image.h"
@@ -124,3 +125,5 @@ class DlDeferredImageGPUImpeller final : public DlImage {
 };
 
 }  // namespace flutter
+
+#endif  // FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_IMPELLER_H_

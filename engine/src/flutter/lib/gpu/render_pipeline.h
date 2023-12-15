@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
+#define FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
@@ -50,3 +51,5 @@ extern Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     flutter::gpu::Shader* fragment_shader);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_RENDER_PIPELINE_H_

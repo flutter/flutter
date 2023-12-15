@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DART_PLUGIN_REGISTRANT_H_
-#define FLUTTER_DART_PLUGIN_REGISTRANT_H_
+#ifndef FLUTTER_RUNTIME_DART_PLUGIN_REGISTRANT_H_
+#define FLUTTER_RUNTIME_DART_PLUGIN_REGISTRANT_H_
 
 #include "third_party/dart/runtime/include/dart_api.h"
 
@@ -23,4 +23,4 @@ bool FindAndInvokeDartPluginRegistrant();
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DART_PLUGIN_REGISTRANT_H_
+#endif  // FLUTTER_RUNTIME_DART_PLUGIN_REGISTRANT_H_

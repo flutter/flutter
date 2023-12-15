@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_SMOKETEST_H_
+#define FLUTTER_LIB_GPU_SMOKETEST_H_
 
 #include <cstdint>
 
@@ -51,3 +52,5 @@ extern void InternalFlutterGpuTestClass_Method(
     int something);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_SMOKETEST_H_

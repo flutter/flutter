@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_COMMAND_BUFFER_H_
+#define FLUTTER_LIB_GPU_COMMAND_BUFFER_H_
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
@@ -57,3 +58,5 @@ extern Dart_Handle InternalFlutterGpu_CommandBuffer_Submit(
     Dart_Handle completion_callback);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_COMMAND_BUFFER_H_

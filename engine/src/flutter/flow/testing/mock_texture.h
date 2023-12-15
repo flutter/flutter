@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_TESTING_MOCK_TEXTURE_H_
-#define FLOW_TESTING_MOCK_TEXTURE_H_
+#ifndef FLUTTER_FLOW_TESTING_MOCK_TEXTURE_H_
+#define FLUTTER_FLOW_TESTING_MOCK_TEXTURE_H_
 
 #include <ostream>
 #include <vector>
@@ -49,4 +49,4 @@ class MockTexture : public Texture {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLOW_TESTING_MOCK_TEXTURE_H_
+#endif  // FLUTTER_FLOW_TESTING_MOCK_TEXTURE_H_

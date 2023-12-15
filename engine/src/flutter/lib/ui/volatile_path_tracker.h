@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_VOLATILE_PATH_TRACKER_H_
-#define FLUTTER_LIB_VOLATILE_PATH_TRACKER_H_
+#ifndef FLUTTER_LIB_UI_VOLATILE_PATH_TRACKER_H_
+#define FLUTTER_LIB_UI_VOLATILE_PATH_TRACKER_H_
 
 #include <deque>
 #include <memory>
@@ -76,4 +76,4 @@ class VolatilePathTracker {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_VOLATILE_PATH_TRACKER_H_
+#endif  // FLUTTER_LIB_UI_VOLATILE_PATH_TRACKER_H_

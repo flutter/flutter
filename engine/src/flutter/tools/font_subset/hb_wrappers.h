@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef HB_WRAPPERS_H_
-#define HB_WRAPPERS_H_
+#ifndef FLUTTER_TOOLS_FONT_SUBSET_HB_WRAPPERS_H_
+#define FLUTTER_TOOLS_FONT_SUBSET_HB_WRAPPERS_H_
 
 #include <hb-subset.h>
 
@@ -34,4 +34,4 @@ using HbSetPtr = std::unique_ptr<hb_set_t, hb_set_deleter>;
 
 };  // namespace HarfbuzzWrappers
 
-#endif  // HB_WRAPPERS_H_s
+#endif  // FLUTTER_TOOLS_FONT_SUBSET_HB_WRAPPERS_H_

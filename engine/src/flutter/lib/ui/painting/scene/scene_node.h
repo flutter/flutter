@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_PAINTING_SCENE_NODE_H_
-#define FLUTTER_LIB_UI_PAINTING_SCENE_NODE_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_SCENE_SCENE_NODE_H_
+#define FLUTTER_LIB_UI_PAINTING_SCENE_SCENE_NODE_H_
 
 #include <memory>
 #include <string>
@@ -65,4 +65,4 @@ class SceneNode : public RefCountedDartWrappable<SceneNode> {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_PAINTING_SCENE_NODE_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_SCENE_SCENE_NODE_H_

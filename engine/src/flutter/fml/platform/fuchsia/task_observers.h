@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_TASK_OBSERVERS_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_TASK_OBSERVERS_H_
+#ifndef FLUTTER_FML_PLATFORM_FUCHSIA_TASK_OBSERVERS_H_
+#define FLUTTER_FML_PLATFORM_FUCHSIA_TASK_OBSERVERS_H_
 
 #include <lib/fit/function.h>
 
@@ -37,4 +37,4 @@ void CurrentMessageLoopRemoveAfterTaskObserver(intptr_t key);
 
 }  // namespace fml
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_TASK_OBSERVERS_H_
+#endif  // FLUTTER_FML_PLATFORM_FUCHSIA_TASK_OBSERVERS_H_

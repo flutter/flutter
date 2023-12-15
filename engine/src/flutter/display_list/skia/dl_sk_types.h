@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_TYPES_H_
-#define FLUTTER_DISPLAY_LIST_TYPES_H_
+#ifndef FLUTTER_DISPLAY_LIST_SKIA_DL_SK_TYPES_H_
+#define FLUTTER_DISPLAY_LIST_SKIA_DL_SK_TYPES_H_
 
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -33,4 +33,4 @@
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkDiscretePathEffect.h"
 #include "third_party/skia/include/gpu/GrTypes.h"
-#endif  // FLUTTER_DISPLAY_LIST_TYPES_H_
+#endif  // FLUTTER_DISPLAY_LIST_SKIA_DL_SK_TYPES_H_
