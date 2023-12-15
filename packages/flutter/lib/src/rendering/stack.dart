@@ -575,10 +575,8 @@ class RenderStack extends RenderBox
       final StackParentData childParentData = child.parentData! as StackParentData;
       final double? childBaseline;
       if (!childParentData.isPositioned) {
-        childBaseline = switch (child.getDryBaseline(nonPositionedChildConstraints, baseline)) {
-          null => null,
-          final double baseline => baseline + alignment.alongOffset(size - child.getDryLayout(nonPositionedChildConstraints) as Offset).dy,
-        };
+        final double? baselineInChild = child.getDryBaseline(nonPositionedChildConstraints, baseline);
+        childBaseline = baselineInChild == null ? null : baselineInChild + alignment.alongOffset(size - child.getDryLayout(nonPositionedChildConstraints) as Offset).dy;
       } else {
         childBaseline = RenderStack.baselineForPositionedChild(child, childParentData, size, alignment, baseline);
       }

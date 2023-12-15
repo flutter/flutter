@@ -631,14 +631,12 @@ class _RenderSegmentedControl<T> extends RenderBox
     final Size childSize = _calculateChildSize(constraints);
     final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
 
-    RenderBox? child = firstChild;
     double? baselineOffset;
-    while (child != null) {
-      baselineOffset = switch (child.getDryBaseline(childConstraints, baseline)) {
-        final double value? when baselineOffset == null || value < baselineOffset => value,
-        _ => baselineOffset,
-      };
-      child = childAfter(child);
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+      if (childBaseline != null && (baselineOffset == null || childBaseline < baselineOffset)) {
+        baselineOffset = childBaseline;
+      }
     }
     return baselineOffset;
   }
