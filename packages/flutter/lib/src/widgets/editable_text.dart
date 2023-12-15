@@ -691,7 +691,9 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// When [EditableText] is placed within a [Scrollable] or within nested
 /// [Scrollable]s, consider placing a [ScrollNotificationObserver] above the
 /// root [Scrollable] to ensure proper scroll coordination for [EditableText]
-/// and its components like [TextSelectionOverlay].
+/// and its components like [TextSelectionOverlay]. Note that if there is a
+/// [Scaffold] above the [Scrollable]s in the widget tree then it will create
+/// its own [ScrollNotificationObserver] already.
 ///
 /// {@template flutter.widgets.editableText.accessibility}
 /// ## Troubleshooting Common Accessibility Issues

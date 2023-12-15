@@ -163,6 +163,14 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///
 /// {@macro flutter.widgets.editableText.showCaretOnScreen}
 ///
+/// ## Scrolling Considerations
+/// When [CupertinoTextField] is placed within a [Scrollable] or within nested
+/// [Scrollable]s, consider placing a [ScrollNotificationObserver] above the
+/// root [Scrollable] to ensure proper scroll coordination for [CupertinoTextField]
+/// and its components like [TextSelectionOverlay]. Note that if there is a
+/// [Scaffold] above the [Scrollable]s in the widget tree then it will create
+/// its own [ScrollNotificationObserver] already.
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/documentation/uikit/uitextfield>
