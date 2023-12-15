@@ -168,19 +168,19 @@ void main() {
 
     testWithoutContext('detects below recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.10.5');
+      pretendPodVersionIs('1.12.5');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
     });
 
     testWithoutContext('detects at recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.11.0');
+      pretendPodVersionIs('1.13.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     });
 
     testWithoutContext('detects above recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.11.1');
+      pretendPodVersionIs('1.13.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     });
   });
