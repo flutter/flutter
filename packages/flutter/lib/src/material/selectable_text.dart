@@ -102,7 +102,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (!delegate.selectionEnabled) {
       return;
     }
-    debugPrint('long press start');
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     Feedback.forLongPress(_state.context);
     _dragStartViewportOffset = renderEditable.offset.pixels;

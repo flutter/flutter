@@ -3879,12 +3879,11 @@ void main() {
       ),
     );
     // The toolbar shows up.
-    // expect(find.byType(CupertinoButton), findsNWidgets(1));
-    // if (defaultTargetPlatform == TargetPlatform.iOS) {
-    //   expectCupertinoSelectionToolbar();
-    // } else {
-    //   expectMaterialSelectionToolbar();
-    // }
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      expectCupertinoSelectionToolbar();
+    } else {
+      expectMaterialSelectionToolbar();
+    }
 
     // Find the selection handle fade transition after the start handle has been
     // hidden because it is out of view.
