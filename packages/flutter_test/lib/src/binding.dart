@@ -560,7 +560,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     final FlutterView view = renderView.flutterView;
     if (_surfaceSize != null && view == platformDispatcher.implicitView) {
       return ViewConfiguration(
-        constraints: ui.ViewConstraints.tight(_surfaceSize!),
+        size: _surfaceSize!,
         devicePixelRatio: view.devicePixelRatio,
       );
     }
@@ -1159,17 +1159,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     _announcements = <CapturedAccessibilityAnnouncement>[];
 
+  // ignore: deprecated_member_use
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
 
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
@@ -1831,7 +1832,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     final Map<int, _LiveTestPointerRecord>? pointerIdToRecord = _renderViewToPointerIdToPointerRecord[renderView];
     if (pointerIdToRecord != null && pointerIdToRecord.isNotEmpty) {
-      final double radius = renderView.size.shortestSide * 0.05;
+      final double radius = renderView.configuration.size.shortestSide * 0.05;
       final Path path = Path()
         ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
         ..moveTo(0.0, -radius * 2.0)
@@ -2115,10 +2116,9 @@ class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size and view.
   ///
   /// The [size] defaults to 800x600.
-  TestViewConfiguration.fromView({required ui.FlutterView view, Size size = _kDefaultTestViewportSize})
+  TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
-        _physicalSize = view.physicalSize,
-        super(devicePixelRatio: view.devicePixelRatio, constraints: ui.ViewConstraints.tight(size));
+        super(devicePixelRatio: view.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
@@ -2148,11 +2148,6 @@ class TestViewConfiguration extends ViewConfiguration {
 
   @override
   Matrix4 toMatrix() => _paintMatrix.clone();
-
-  final Size _physicalSize;
-
-  @override
-  Size toPhysicalSize(Size logicalSize) => _physicalSize;
 
   @override
   String toString() => 'TestViewConfiguration';
