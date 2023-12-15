@@ -1266,6 +1266,11 @@ class Hash256 {
 
   @override
   int get hashCode => Object.hash(a, b, c, d);
+
+  static String _formatHex(int i) => '0x${BigInt.from(i).toUnsigned(64).toRadixString(16).padLeft(16, '0').toUpperCase()}';
+
+  @override
+  String toString() => 'Hash256(${_formatHex(a)}, ${_formatHex(b)}, ${_formatHex(c)}, ${_formatHex(d)})';
 }
 
 // DO NOT ADD ANY ENTRIES TO THIS LIST.
@@ -1585,29 +1590,9 @@ final Set<Hash256> _legacyBinaries = <Hash256>{
   // dev/automated_tests/icon/test.png
   const Hash256(0xE214B4A0FEEEC6FA, 0x8E7AA8CC9BFBEC40, 0xBCDAC2F2DEBC950F, 0x75AF8EBF02BCE459),
 
-  // dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink/android/app/src/main/res/drawable-land-xxhdpi/flutter_splash_screen.png
-  // dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink/android/app/src/main/res/mipmap-land-xxhdpi/flutter_splash_screen.png
-  const Hash256(0x2D4F8D7A3DFEF9D3, 0xA0C66938E169AB58, 0x8C6BBBBD1973E34E, 0x03C428416D010182),
-
-  // dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink/android/app/src/main/res/drawable-xxhdpi/flutter_splash_screen.png
-  // dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink/android/app/src/main/res/mipmap-xxhdpi/flutter_splash_screen.png
-  const Hash256(0xCD46C01BAFA3B243, 0xA6AA1645EEDDE481, 0x143AC8ABAB1A0996, 0x22CAA9D41F74649A),
-
-  // dev/integration_tests/flutter_driver_screenshot_test/assets/red_square.png
-  const Hash256(0x40054377E1E084F4, 0x4F4410CE8F44C210, 0xABA945DFC55ED0EF, 0x23BDF9469E32F8D3),
-
-  // dev/integration_tests/flutter_driver_screenshot_test/test_driver/goldens/red_square_image/iPhone7,2.png
-  const Hash256(0x7F9D27C7BC418284, 0x01214E21CA886B2F, 0x40D9DA2B31AE7754, 0x71D68375F9C8A824),
-
   // examples/flutter_view/assets/flutter-mark-square-64.png
   // examples/platform_view/assets/flutter-mark-square-64.png
   const Hash256(0xF416B0D8AC552EC8, 0x819D1F492D1AB5E6, 0xD4F20CF45DB47C22, 0x7BB431FEFB5B67B2),
-
-  // packages/flutter_tools/test/data/intellij/plugins/Dart/lib/Dart.jar
-  const Hash256(0x576E489D788A13DB, 0xBF40E4A39A3DAB37, 0x15CCF0002032E79C, 0xD260C69B29E06646),
-
-  // packages/flutter_tools/test/data/intellij/plugins/flutter-intellij.jar
-  const Hash256(0x4C67221E25626CB2, 0x3F94E1F49D34E4CF, 0x3A9787A514924FC5, 0x9EF1E143E5BC5690),
 
 
   // MISCELLANEOUS
@@ -1617,12 +1602,6 @@ final Set<Hash256> _legacyBinaries = <Hash256>{
 
   // dev/docs/favicon.ico
   const Hash256(0x67368CA1733E933A, 0xCA3BC56EF0695012, 0xE862C371AD4412F0, 0x3EC396039C609965),
-
-  // dev/snippets/assets/code_sample.png
-  const Hash256(0xAB2211A47BDA001D, 0x173A52FD9C75EBC7, 0xE158942FFA8243AD, 0x2A148871990D4297),
-
-  // dev/snippets/assets/code_snippet.png
-  const Hash256(0xDEC70574DA46DFBB, 0xFA657A771F3E1FBD, 0xB265CFC6B2AA5FE3, 0x93BA4F325D1520BA),
 
   // packages/flutter_tools/static/Ahem.ttf
   const Hash256(0x63D2ABD0041C3E3B, 0x4B52AD8D382353B5, 0x3C51C6785E76CE56, 0xED9DACAD2D2E31C4),
@@ -1637,9 +1616,10 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
   assert(
     _legacyBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
-      .reduce((int value, int element) => value ^ element) == 0x606B51C908B40BFA // Please do not modify this line.
+      .reduce((int value, int element) => value ^ element) == 0x7D89D197D2DC25D1 // Please do not modify this line.
   );
   legacyBinaries ??= _legacyBinaries;
+  final Set<Hash256> unusedHashes = legacyBinaries.toSet();
   if (!Platform.isWindows) { // TODO(ianh): Port this to Windows
     final List<File> files = await _gitFiles(workingDirectory);
     final List<String> problems = <String>[];
@@ -1648,9 +1628,11 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
       try {
         utf8.decode(bytes);
       } on FormatException catch (error) {
-        final Digest digest = sha256.convert(bytes);
-        if (!legacyBinaries.contains(Hash256.fromDigest(digest))) {
+        final Hash256 hash = Hash256.fromDigest(sha256.convert(bytes));
+        if (!legacyBinaries.contains(hash)) {
           problems.add('${file.path}:${error.offset}: file is not valid UTF-8');
+        } else {
+          unusedHashes.remove(hash);
         }
       }
     }
@@ -1664,6 +1646,13 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256>? legacyBin
         'for example, the "assets-for-api-docs" repository is used for images in API docs.',
         'To add assets to flutter_tools templates, see the instructions in the wiki:',
         'https://github.com/flutter/flutter/wiki/Managing-template-image-assets',
+      ]);
+    } else if (unusedHashes.isNotEmpty) {
+      foundError(<String>[
+        'Congratulations! You have removed legacy binaries from the repository.',
+        'Please also remove their hash entries from _legacyBinaries in dev/bots/analyze.dart.',
+        'Unused hash entries to remove:',
+        ...unusedHashes.map((Hash256 hash) => ' * $hash'),
       ]);
     }
   }
