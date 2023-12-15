@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
-#define FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
+#ifndef FLUTTER_FLOW_TESTING_GL_CONTEXT_SWITCH_TEST_H_
+#define FLUTTER_FLOW_TESTING_GL_CONTEXT_SWITCH_TEST_H_
 
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "gtest/gtest.h"
@@ -42,4 +42,4 @@ class TestSwitchableGLContext : public SwitchableGLContext {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_RENDERER_CONTEXT_TEST_H_
+#endif  // FLUTTER_FLOW_TESTING_GL_CONTEXT_SWITCH_TEST_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_CALLBACK_CACHE_H_
-#define FLUTTER_LIB_UI_CALLBACK_CACHE_H_
+#ifndef FLUTTER_LIB_UI_PLUGINS_CALLBACK_CACHE_H_
+#define FLUTTER_LIB_UI_PLUGINS_CALLBACK_CACHE_H_
 
 #include <map>
 #include <memory>
@@ -54,4 +54,4 @@ class DartCallbackCache {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_CALLBACK_CACHE_H_
+#endif  // FLUTTER_LIB_UI_PLUGINS_CALLBACK_CACHE_H_

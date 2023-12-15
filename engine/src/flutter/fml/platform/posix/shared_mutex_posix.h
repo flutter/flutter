@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FML_SYNCHRONIZATION_SHARED_MUTEX_POSIX_H_
-#define FLUTTER_FML_SYNCHRONIZATION_SHARED_MUTEX_POSIX_H_
+#ifndef FLUTTER_FML_PLATFORM_POSIX_SHARED_MUTEX_POSIX_H_
+#define FLUTTER_FML_PLATFORM_POSIX_SHARED_MUTEX_POSIX_H_
 
 #include <shared_mutex>
 
@@ -27,4 +27,4 @@ class SharedMutexPosix : public SharedMutex {
 
 }  // namespace fml
 
-#endif  // FLUTTER_FML_SYNCHRONIZATION_SHARED_MUTEX_POSIX_H_
+#endif  // FLUTTER_FML_PLATFORM_POSIX_SHARED_MUTEX_POSIX_H_

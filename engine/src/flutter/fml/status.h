@@ -78,4 +78,4 @@ inline std::string_view Status::message() const {
 
 }  // namespace fml
 
-#endif  // FLUTTER_FML_SIZE_H_
+#endif  // FLUTTER_FML_STATUS_H_

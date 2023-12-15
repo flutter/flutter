@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_MATRIX_CLIP_TRACKER_H_
-#define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_MATRIX_CLIP_TRACKER_H_
+#ifndef FLUTTER_DISPLAY_LIST_UTILS_DL_MATRIX_CLIP_TRACKER_H_
+#define FLUTTER_DISPLAY_LIST_UTILS_DL_MATRIX_CLIP_TRACKER_H_
 
 #include <vector>
 
@@ -140,4 +140,4 @@ class DisplayListMatrixClipTracker {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_MATRIX_CLIP_TRACKER_H_
+#endif  // FLUTTER_DISPLAY_LIST_UTILS_DL_MATRIX_CLIP_TRACKER_H_

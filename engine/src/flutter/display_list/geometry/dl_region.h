@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_GEOMETRY_REGION_H_
-#define FLUTTER_DISPLAY_LIST_GEOMETRY_REGION_H_
+#ifndef FLUTTER_DISPLAY_LIST_GEOMETRY_DL_REGION_H_
+#define FLUTTER_DISPLAY_LIST_GEOMETRY_DL_REGION_H_
 
 #include "third_party/skia/include/core/SkRect.h"
 
@@ -170,4 +170,4 @@ class DlRegion {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_GEOMETRY_REGION_H_
+#endif  // FLUTTER_DISPLAY_LIST_GEOMETRY_DL_REGION_H_

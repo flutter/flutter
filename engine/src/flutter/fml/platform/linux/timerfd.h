@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FML_PLATFORM_LINUX_TIMER_FD_H_
-#define FLUTTER_FML_PLATFORM_LINUX_TIMER_FD_H_
+#ifndef FLUTTER_FML_PLATFORM_LINUX_TIMERFD_H_
+#define FLUTTER_FML_PLATFORM_LINUX_TIMERFD_H_
 
 #include "flutter/fml/time/time_point.h"
 
@@ -53,4 +53,4 @@ bool TimerDrain(int fd);
 
 }  // namespace fml
 
-#endif  // FLUTTER_FML_PLATFORM_LINUX_TIMER_FD_H_
+#endif  // FLUTTER_FML_PLATFORM_LINUX_TIMERFD_H_

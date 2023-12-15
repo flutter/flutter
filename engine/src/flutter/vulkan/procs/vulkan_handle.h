@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_VULKAN_PROCS_VULKAN_HANDLE_H_
+#define FLUTTER_VULKAN_PROCS_VULKAN_HANDLE_H_
 
 #include <functional>
 
@@ -76,3 +77,5 @@ class VulkanHandle {
 };
 
 }  // namespace vulkan
+
+#endif  // FLUTTER_VULKAN_PROCS_VULKAN_HANDLE_H_

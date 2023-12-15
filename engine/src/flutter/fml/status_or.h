@@ -95,4 +95,4 @@ class StatusOr {
 
 }  // namespace fml
 
-#endif
+#endif  // FLUTTER_FML_STATUS_OR_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TESTING_CANVAS_TEST_H_
-#define TESTING_CANVAS_TEST_H_
+#ifndef FLUTTER_TESTING_CANVAS_TEST_H_
+#define FLUTTER_TESTING_CANVAS_TEST_H_
 
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
@@ -33,4 +33,4 @@ using CanvasTest = CanvasTestBase<::testing::Test>;
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // TESTING_CANVAS_TEST_H_
+#endif  // FLUTTER_TESTING_CANVAS_TEST_H_

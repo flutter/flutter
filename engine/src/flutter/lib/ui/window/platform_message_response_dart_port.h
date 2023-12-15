@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_PLATFORM_PLATFORM_MESSAGE_RESPONSE_DART_PORT_H_
-#define FLUTTER_LIB_UI_PLATFORM_PLATFORM_MESSAGE_RESPONSE_DART_PORT_H_
+#ifndef FLUTTER_LIB_UI_WINDOW_PLATFORM_MESSAGE_RESPONSE_DART_PORT_H_
+#define FLUTTER_LIB_UI_WINDOW_PLATFORM_MESSAGE_RESPONSE_DART_PORT_H_
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
@@ -32,4 +32,4 @@ class PlatformMessageResponseDartPort : public PlatformMessageResponse {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_PLATFORM_PLATFORM_MESSAGE_RESPONSE_DART_PORT_H_
+#endif  // FLUTTER_LIB_UI_WINDOW_PLATFORM_MESSAGE_RESPONSE_DART_PORT_H_

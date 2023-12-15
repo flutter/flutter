@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_TOOLS_PATH_OPS_PATH_OPS_H_
+#define FLUTTER_TOOLS_PATH_OPS_PATH_OPS_H_
 
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPathBuilder.h"
@@ -58,3 +59,5 @@ API void DestroyData(PathData* data);
 
 }  // namespace flutter
 }
+
+#endif  // FLUTTER_TOOLS_PATH_OPS_PATH_OPS_H_

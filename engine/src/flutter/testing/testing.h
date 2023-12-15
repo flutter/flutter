@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TESTING_TESTING_H_
-#define TESTING_TESTING_H_
+#ifndef FLUTTER_TESTING_TESTING_H_
+#define FLUTTER_TESTING_TESTING_H_
 
 #include <string>
 #include <vector>
@@ -118,4 +118,4 @@ bool MemsetPatternSetOrCheck(std::vector<uint8_t>& buffer, MemsetPatternOp op);
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // TESTING_TESTING_H_
+#endif  // FLUTTER_TESTING_TESTING_H_

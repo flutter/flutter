@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_HOST_BUFFER_H_
+#define FLUTTER_LIB_GPU_HOST_BUFFER_H_
 
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -49,3 +50,5 @@ extern size_t InternalFlutterGpu_HostBuffer_EmplaceBytes(
     Dart_Handle byte_data);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_HOST_BUFFER_H_

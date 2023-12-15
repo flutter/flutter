@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_DISPATCHER_H_
-#define FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_DISPATCHER_H_
+#ifndef FLUTTER_DISPLAY_LIST_SKIA_DL_SK_DISPATCHER_H_
+#define FLUTTER_DISPLAY_LIST_SKIA_DL_SK_DISPATCHER_H_
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_op_receiver.h"
@@ -122,4 +122,4 @@ class DlSkCanvasDispatcher : public virtual DlOpReceiver,
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_DISPATCHER_H_
+#endif  // FLUTTER_DISPLAY_LIST_SKIA_DL_SK_DISPATCHER_H_

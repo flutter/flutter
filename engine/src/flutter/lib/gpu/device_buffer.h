@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_DEVICE_BUFFER_H_
+#define FLUTTER_LIB_GPU_DEVICE_BUFFER_H_
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
@@ -62,3 +63,5 @@ extern bool InternalFlutterGpu_DeviceBuffer_Overwrite(
     int destination_offset_in_bytes);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_DEVICE_BUFFER_H_

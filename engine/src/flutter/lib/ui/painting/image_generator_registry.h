@@ -90,4 +90,4 @@ class ImageGeneratorRegistry {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_DECODER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_REGISTRY_H_

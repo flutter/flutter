@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKING_DL_COMPLEXITY_METAL_H_
-#define FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKING_DL_COMPLEXITY_METAL_H_
+#ifndef FLUTTER_DISPLAY_LIST_BENCHMARKING_DL_COMPLEXITY_METAL_H_
+#define FLUTTER_DISPLAY_LIST_BENCHMARKING_DL_COMPLEXITY_METAL_H_
 
 #include "flutter/display_list/benchmarking/dl_complexity_helper.h"
 
@@ -99,4 +99,4 @@ class DisplayListMetalComplexityCalculator
 
 }  // namespace flutter
 
-#endif  // FLUTTER_FLOW_DISPLAY_LIST_BENCHMARKING_DL_COMPLEXITY_METAL_H_
+#endif  // FLUTTER_DISPLAY_LIST_BENCHMARKING_DL_COMPLEXITY_METAL_H_

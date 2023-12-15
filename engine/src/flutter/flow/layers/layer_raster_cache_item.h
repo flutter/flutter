@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLOW_LAYER_RASTER_CACHE_ITEM_H_
-#define FLUTTER_FLOW_LAYER_RASTER_CACHE_ITEM_H_
+#ifndef FLUTTER_FLOW_LAYERS_LAYER_RASTER_CACHE_ITEM_H_
+#define FLUTTER_FLOW_LAYERS_LAYER_RASTER_CACHE_ITEM_H_
 
 #include <memory>
 #include <optional>
@@ -69,4 +69,4 @@ class LayerRasterCacheItem : public RasterCacheItem {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_FLOW_LAYER_RASTER_CACHE_ITEM_H_
+#endif  // FLUTTER_FLOW_LAYERS_LAYER_RASTER_CACHE_ITEM_H_

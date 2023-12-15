@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_VULKAN_PROCS_VULKAN_PROC_TABLE_H_
+#define FLUTTER_VULKAN_PROCS_VULKAN_PROC_TABLE_H_
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
@@ -178,3 +179,5 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
 };
 
 }  // namespace vulkan
+
+#endif  // FLUTTER_VULKAN_PROCS_VULKAN_PROC_TABLE_H_

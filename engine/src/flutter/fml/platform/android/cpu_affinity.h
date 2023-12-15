@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_FML_PLATFORM_ANDROID_CPU_AFFINITY_H_
+#define FLUTTER_FML_PLATFORM_ANDROID_CPU_AFFINITY_H_
 
 #include "flutter/fml/cpu_affinity.h"
 
@@ -15,3 +16,5 @@ std::optional<size_t> AndroidEfficiencyCoreCount();
 bool AndroidRequestAffinity(CpuAffinity affinity);
 
 }  // namespace fml
+
+#endif  // FLUTTER_FML_PLATFORM_ANDROID_CPU_AFFINITY_H_

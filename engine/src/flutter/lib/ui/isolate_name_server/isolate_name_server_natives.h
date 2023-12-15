@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_NATIVES_H_
-#define FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_NATIVES_H_
+#ifndef FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_ISOLATE_NAME_SERVER_NATIVES_H_
+#define FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_ISOLATE_NAME_SERVER_NATIVES_H_
 
 #include <string>
 
@@ -21,4 +21,4 @@ class IsolateNameServerNatives {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_NATIVES_H_
+#endif  // FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_ISOLATE_NAME_SERVER_NATIVES_H_
