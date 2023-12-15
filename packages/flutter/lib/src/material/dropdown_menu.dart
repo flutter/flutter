@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -437,9 +438,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   void refreshLeadingPadding() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if(!mounted)
+      if(!mounted) {
         return;
-      
+      }
+
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
