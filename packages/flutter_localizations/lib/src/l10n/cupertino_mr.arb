@@ -26,5 +26,6 @@
   "menuDismissLabel": "मेनू डिसमिस करा",
   "lookUpButtonLabel": "शोध घ्या",
   "searchWebButtonLabel": "वेबवर शोधा",
-  "shareButtonLabel": "शेअर करा..."
+  "shareButtonLabel": "शेअर करा...",
+  "clearButtonLabel": "Clear"
 }
