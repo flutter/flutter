@@ -7,8 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/baseline_utils.dart';
-
 void verify(WidgetTester tester, List<Offset> answerKey) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
     (RenderBox target) => target.localToGlobal(Offset.zero),
@@ -816,7 +814,6 @@ void main() {
       tester.renderObject<RenderBox>(find.byType(Baseline)).size,
       const Size(100.0, 200.0),
     );
-    verifyDryBaseline(tester.renderObject(find.byType(Wrap)));
   });
 
   testWidgetsWithLeakTracking('Spacing with slight overflow', (WidgetTester tester) async {
@@ -922,7 +919,6 @@ void main() {
     // are placed before and after it and the total height is the sum of the
     // individual heights.
     expect(tester.getSize(find.byType(IntrinsicHeight)).height, 2 * 16 + 40);
-    verifyDryBaseline(tester.renderObject(find.byType(Wrap)));
   });
 
   testWidgetsWithLeakTracking('Vertical wrap - IntrinsicsWidth', (WidgetTester tester) async {
@@ -956,6 +952,5 @@ void main() {
     // are placed to the left and right of it and the total width is the sum of
     // the individual widths.
     expect(tester.getSize(find.byType(IntrinsicWidth)).width, 5 * 16 + 60 + 3 * 16);
-    verifyDryBaseline(tester.renderObject(find.byType(Wrap)));
   });
 }

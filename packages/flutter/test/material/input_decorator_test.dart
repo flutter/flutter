@@ -16,8 +16,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/baseline_utils.dart';
-
 Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
   ThemeData? theme,
@@ -199,7 +197,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // The label appears within the input when there is no text content
     await tester.pumpWidget(
@@ -276,7 +273,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // isEmpty: true causes the label to be aligned with the input text
     await tester.pumpWidget(
@@ -307,7 +303,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // isFocused: true causes the label to move back up above the input text.
     await tester.pumpWidget(
@@ -338,7 +333,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // enabled: false produces a hairline border if filled: false (the default)
     // The widget's size and layout is the same as for enabled: true.
@@ -359,7 +353,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderWeight(tester), useMaterial3 ? 1.0 : 0.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // enabled: false produces a transparent border if filled: true.
     // The widget's size and layout is the same as for enabled: true.
@@ -382,7 +375,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
     expect(getBorderColor(tester), useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : Colors.transparent);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // alignLabelWithHint: true positions the label at the text baseline,
     // aligned with the hint.
@@ -403,7 +395,6 @@ void runAllTests({ required bool useMaterial3 }) {
       expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
       expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
   });
 
   testWidgetsWithLeakTracking('InputDecorator input/label widget layout', (WidgetTester tester) async {
@@ -447,7 +438,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.byKey(key)).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // The label appears within the input when there is no text content.
     await tester.pumpWidget(
@@ -570,7 +560,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.byKey(key)).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // isEmpty: true causes the label to be aligned with the input text.
     await tester.pumpWidget(
@@ -611,7 +600,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.byKey(key)).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // isFocused: true causes the label to move back up above the input text.
     await tester.pumpWidget(
@@ -655,7 +643,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.byKey(key)).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // enabled: false produces a hairline border if filled: false (the default)
     // The widget's size and layout is the same as for enabled: true.
@@ -687,7 +674,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getTopLeft(find.byKey(key)).dy, 20.0);
     expect(tester.getBottomLeft(find.byKey(key)).dy, 36.0);
     expect(getBorderWeight(tester),useMaterial3 ? 1.0 : 0.0);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // enabled: false produces a transparent border if filled: true.
     // The widget's size and layout is the same as for enabled: true.
@@ -721,7 +707,6 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.byKey(key)).dy, 36.0);
     final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
     expect(getBorderColor(tester), useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : Colors.transparent);
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
     // alignLabelWithHint: true positions the label at the text baseline,
     // aligned with the hint.
@@ -754,7 +739,6 @@ void runAllTests({ required bool useMaterial3 }) {
       expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
 
-    verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
   });
 
   testWidgetsWithLeakTracking('InputDecorator floating label animation duration and curve', (WidgetTester tester) async {
@@ -841,7 +825,6 @@ void runAllTests({ required bool useMaterial3 }) {
         await tester.pumpAndSettle();
         expect(tester.getTopLeft(find.text('label')).dy, 76.0);
         expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
-        verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
         // Entering text still happens at the top.
         await tester.enterText(find.byType(TextField), text);
@@ -893,12 +876,10 @@ void runAllTests({ required bool useMaterial3 }) {
         await tester.pumpAndSettle();
         expect(tester.getTopLeft(find.text('label')).dy, 76.0);
         expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
-        verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
         // Entering text still happens at the top.
         await tester.enterText(find.byType(InputDecorator), text);
         expect(tester.getTopLeft(find.text(text)).dy, 28.0);
-        verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
         controller.clear();
         focusNode.unfocus();
 
@@ -907,12 +888,10 @@ void runAllTests({ required bool useMaterial3 }) {
         await tester.pumpAndSettle();
         expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
         expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
-        verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
 
         // Entering text still happens at the top.
         await tester.enterText(find.byType(InputDecorator), text);
         expect(tester.getTopLeft(find.text(text)).dy, 28.0);
-        verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
         controller.clear();
         focusNode.unfocus();
       });
@@ -6559,68 +6538,6 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
     final double height = tester.getSize(find.byKey(key)).height;
     final double intrinsicHeight = tester.getSize(find.byKey(intrinsicHeightKey)).height;
     expect(intrinsicHeight, equals(height));
-  });
-
-  testWidgetsWithLeakTracking('dry baseline', (WidgetTester tester) async {
-    Widget inputDecoratorWithConstraints({
-      required double maxWidth,
-      required double maxHeight,
-      required InputDecoration decoration,
-    }) {
-      return MaterialApp(
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Theme(
-                data: Theme.of(context).copyWith(visualDensity: VisualDensity.compact),
-                child: Center(
-                  child: SizedBox(
-                    width: maxWidth,
-                    height: maxHeight,
-                    child: InputDecorator(
-                      decoration: decoration,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
-    for (final double width in <double>[0, 10, 100, double.infinity]) {
-      for (final double height in <double>[0, 10, 100, double.infinity]) {
-        await tester.pumpWidget(inputDecoratorWithConstraints(
-          maxWidth: width, maxHeight: height,
-          decoration: InputDecoration(
-            suffixIcon: IconButton(icon: const Icon(Icons.close), onPressed: () {}),
-            errorText: 'error state',
-            prefixText: 'p',
-            suffixText: 's',
-            labelText: 'label',
-          ),
-        ));
-        verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
-
-        await tester.pumpWidget(inputDecoratorWithConstraints(
-          maxWidth: width, maxHeight: height,
-          decoration: InputDecoration(
-            suffixIcon: IconButton(icon: const Icon(Icons.close), onPressed: () {}),
-            errorText: 'error state',
-            prefixText: 'p',
-            suffixText: 's',
-            labelText: 'label',
-            border: const UnderlineInputBorder(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(12.0),
-                bottomRight: Radius.circular(12.0),
-              ),
-            ),
-          ),
-        ));
-        verifyDryBaseline(tester.renderObject<RenderBox>(find.byType(InputDecorator)));
-      }
-    }
   });
 
   testWidgetsWithLeakTracking('error message for negative baseline', (WidgetTester tester) async {

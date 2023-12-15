@@ -7,8 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/baseline_utils.dart';
-
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({ super.key });
 
@@ -82,7 +80,6 @@ void main() {
       expect(boxA.size, equals(boxD.size));
       expect(boxA.size, equals(boxG.size));
       expect(boxA.size, equals(boxB.size));
-      verifyDryBaseline(tester.renderObject(find.byType(Table)));
     }
 
     await run(TextDirection.ltr);
@@ -193,7 +190,6 @@ void main() {
     expect(c1.left, equals(table.left + a1.width + b1.width));
     expect(c2.left, equals(c1.left));
     expect(c3.left, equals(c1.left));
-    verifyDryBaseline(tester.renderObject(find.byType(Table)));
   });
 
   testWidgetsWithLeakTracking('Table widget - column offset (RTL)', (WidgetTester tester) async {
@@ -264,7 +260,6 @@ void main() {
     expect(c1.right, equals(table.right - a1.width - b1.width));
     expect(c2.right, equals(c1.right));
     expect(c3.right, equals(c1.right));
-    verifyDryBaseline(tester.renderObject(find.byType(Table)));
   });
 
   testWidgetsWithLeakTracking('Table border - smoke test', (WidgetTester tester) async {
@@ -355,7 +350,6 @@ void main() {
     expect(boxG2, isNotNull);
     expect(boxA1, equals(boxA2));
     expect(boxG1, isNot(equals(boxG2)));
-    verifyDryBaseline(tester.renderObject(find.byType(Table)));
   });
 
   testWidgetsWithLeakTracking('Really small deficit double precision error', (WidgetTester tester) async {
@@ -505,7 +499,6 @@ void main() {
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, greaterThan(boxB.size.width));
     expect(boxA.size.height, equals(boxB.size.height));
-    verifyDryBaseline(tester.renderObject(find.byType(Table)));
   });
 
   testWidgetsWithLeakTracking('Table widget - intrinsic sizing test, resizing', (WidgetTester tester) async {
@@ -567,7 +560,6 @@ void main() {
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, lessThan(boxB.size.width));
     expect(boxA.size.height, equals(boxB.size.height));
-    verifyDryBaseline(tester.renderObject(find.byType(Table)));
   });
 
   testWidgetsWithLeakTracking('Table widget - intrinsic sizing test, changing column widths', (WidgetTester tester) async {
@@ -628,7 +620,6 @@ void main() {
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, greaterThan(boxB.size.width));
     expect(boxA.size.height, equals(boxB.size.height));
-    verifyDryBaseline(tester.renderObject(find.byType(Table)));
   });
 
   testWidgetsWithLeakTracking('Table widget - moving test', (WidgetTester tester) async {

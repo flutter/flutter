@@ -2359,6 +2359,12 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     }
   }
 
+  @override
+  void performResize() {
+    assert(constraints.biggest.isFinite);
+    size = constraints.biggest;
+  }
+
   bool _debugMutationsLocked = false;
   @override
   void performLayout() {
