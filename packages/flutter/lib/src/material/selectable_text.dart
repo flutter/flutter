@@ -206,9 +206,9 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// When [SelectableText] is placed within a [Scrollable] or within nested
 /// [Scrollable]s, consider placing a [ScrollNotificationObserver] above the
 /// root [Scrollable] to ensure proper scroll coordination for [SelectableText]
-/// and its components like [TextSelectionOverlay]. Note that if there is a
-/// [Scaffold] above the [Scrollable]s in the widget tree then it will create
-/// its own [ScrollNotificationObserver] already.
+/// and its components like [TextSelectionOverlay]. If a [Scaffold] is present
+/// above the [Scrollable]s in the widget hierarchy, it automatically creates
+/// its own [ScrollNotificationObserver].
 ///
 /// See also:
 ///
