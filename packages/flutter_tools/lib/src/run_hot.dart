@@ -244,7 +244,7 @@ class HotRunner extends ResidentRunner {
       if (error is! Exception && error is! String) {
         rethrow;
       }
-      globals.printError('Error connecting to the service protocol: $error');
+      globals.printError('Error connecting to the service protocol 002: $error');
       return 2;
     }
 

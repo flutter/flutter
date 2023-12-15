@@ -154,7 +154,7 @@ class ColdRunner extends ResidentRunner {
         allowExistingDdsInstance: allowExistingDdsInstance,
       );
     } on Exception catch (error) {
-      globals.printError('Error connecting to the service protocol: $error');
+      globals.printError('Error connecting to the service protocol 001: $error');
       return 2;
     }
 

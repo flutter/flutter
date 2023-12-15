@@ -273,7 +273,7 @@ class FlutterDevice {
         void handleError(Exception e, StackTrace st) {
           globals.printTrace('Fail to connect to service protocol 0001: $vmServiceUri: $e');
           if (!completer.isCompleted) {
-            completer.completeError('failed to connect to $vmServiceUri', st);
+            completer.completeError('failed to connect to $vmServiceUri 0001', st);
           }
         }
         // First check if the VM service is actually listening on vmServiceUri as
@@ -285,7 +285,7 @@ class FlutterDevice {
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol 0002: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
-            completer.completeError('failed to connect to $vmServiceUri');
+            completer.completeError('failed to connect to $vmServiceUri 0002');
           }
           return;
         }
@@ -342,7 +342,7 @@ class FlutterDevice {
       } on Exception catch (exception) {
         globals.printTrace('Fail to connect to service protocol 0003: $vmServiceUri: $exception');
         if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
-          completer.completeError('failed to connect to $vmServiceUri');
+          completer.completeError('failed to connect to $vmServiceUri 0003');
         }
         return;
       }
