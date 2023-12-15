@@ -767,12 +767,7 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     final TargetPlatform platform = Theme.of(context).platform;
 
-    final bool cupertinoTransitionInProgress = CupertinoRouteTransitionMixin.isPopGestureInProgress(route);
-
     PageTransitionsBuilder getTransitionBuilder() {
-      if (cupertinoTransitionInProgress) {
-        return const CupertinoPageTransitionsBuilder();
-      }
       late PageTransitionsBuilder defaultBuilder;
       switch (platform) {
         case TargetPlatform.iOS:
