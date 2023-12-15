@@ -392,13 +392,13 @@ void main() {
       final RenderParagraph paragraph = createRenderParagraph();
       layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
       expect(paragraph.didExceedMaxLines, false);
-    }, skip: isBrowser);
+    });
 
     test('limited by maxLines', () {
       final RenderParagraph paragraph = createRenderParagraph(maxLines: 1);
       layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
       expect(paragraph.didExceedMaxLines, true);
-    }, skip: isBrowser);
+    });
 
     // If [maxLins] is null, this only return true when [ellipsis] not the
     // empty String and there was a line that overflowed the maxWidth.
@@ -406,7 +406,7 @@ void main() {
       final RenderParagraph paragraph = createRenderParagraph(overflow: TextOverflow.ellipsis);
       layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
       expect(paragraph.didExceedMaxLines, true);
-    }, skip: isBrowser);
+    });
   });
 
   test('changing color does not do layout', () {
