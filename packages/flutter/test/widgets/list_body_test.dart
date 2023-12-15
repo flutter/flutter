@@ -5,7 +5,6 @@
 import 'package:flutter/src/foundation/assertions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const List<Widget> children = <Widget>[
   SizedBox(width: 200.0, height: 150.0),

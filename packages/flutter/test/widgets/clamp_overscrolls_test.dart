@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // Assuming that the test container is 800x600. The height of the
 // viewport's contents is 650.0, the top and bottom text children

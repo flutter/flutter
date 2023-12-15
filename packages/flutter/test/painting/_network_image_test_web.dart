@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/painting/_network_image_web.dart';
 import 'package:flutter/src/web.dart' as web_shim;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
 import '../image_data.dart';

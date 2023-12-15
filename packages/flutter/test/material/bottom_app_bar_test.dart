@@ -10,7 +10,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   testWidgets('Material3 - Shadow effect is not doubled', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123064

@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
 const String _expText = 'Éxp'; // renders in the test font as:

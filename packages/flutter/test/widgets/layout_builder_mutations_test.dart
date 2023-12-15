@@ -11,7 +11,6 @@ import 'package:flutter/src/widgets/media_query.dart';
 import 'package:flutter/src/widgets/scroll_view.dart';
 import 'package:flutter/src/widgets/sliver_layout_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({

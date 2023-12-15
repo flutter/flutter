@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;

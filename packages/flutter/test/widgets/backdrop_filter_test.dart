@@ -11,7 +11,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets("Material2 - BackdropFilter's cull rect does not shrink", (WidgetTester tester) async {

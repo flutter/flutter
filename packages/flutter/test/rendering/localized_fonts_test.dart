@@ -9,7 +9,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 // TODO(hansmuller): when https://github.com/flutter/flutter/issues/17700
 // is fixed, these tests should be updated to use a real font (not Ahem).
 
