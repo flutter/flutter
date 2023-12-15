@@ -33,9 +33,12 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'material_color_utilities': '0.8.0', // Keep pinned to latest until 1.0.0.
   'archive': '3.3.2', // https://github.com/flutter/flutter/issues/115660
-  'leak_tracker': '9.0.16', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_testing': '1.0.5', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_flutter_testing': '1.0.10', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker': '9.0.17', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker_testing': '1.0.6', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker_flutter_testing': '1.0.12', // https://github.com/flutter/devtools/issues/3951
+  'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
+  'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
+  'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

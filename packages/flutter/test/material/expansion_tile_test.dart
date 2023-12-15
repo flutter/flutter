@@ -1049,6 +1049,107 @@ void main() {
     expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
   });
 
+  testWidgetsWithLeakTracking('Override ExpansionTile animation using AnimationStyle', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+
+    Widget buildExpansionTile({ AnimationStyle? animationStyle }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: ExpansionTile(
+              key: expansionTileKey,
+              expansionAnimationStyle: animationStyle,
+              title: const TestText('title'),
+              children: const <Widget>[
+                SizedBox(height: 100, width: 100),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildExpansionTile());
+
+    double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
+
+    // Test initial ExpansionTile height.
+    expect(getHeight(expansionTileKey), 58.0);
+
+    // Test the default expansion animation.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation duration.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800))));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation duration.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(67.4, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 200)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(89.6, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    // Override the animation curve.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpAndSettle();
+
+    // Test the overridden animation curve.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(141.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(153, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 158.0);
+
+    // Tap to collapse the ExpansionTile.
+    await tester.tap(find.text('title'));
+
+    // Test no animation.
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));
+
+    // Tap to expand the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pump();
+
+    expect(getHeight(expansionTileKey), 158.0);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
@@ -1231,5 +1332,37 @@ void main() {
     expect(tileWidget.dense, dense);
     expect(tileWidget.enableFeedback, enableFeedback);
     expect(tileWidget.visualDensity, visualDensity);
+  });
+
+  testWidgetsWithLeakTracking('ExpansionTileController should not toggle if disabled', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          controller: controller,
+          title: const Text('Title'),
+          children: const <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    controller.expand();
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Title'));
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
   });
 }

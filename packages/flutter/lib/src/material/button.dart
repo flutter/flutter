@@ -358,7 +358,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         right: densityAdjustment.dx,
         bottom: densityAdjustment.dy,
       ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
 
 
     final Widget result = ConstrainedBox(

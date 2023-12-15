@@ -7076,8 +7076,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///  * [SemanticsNode], the object used by the rendering library to represent
 ///    semantics in the semantics tree.
 ///  * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
-///    be enabled using [WidgetsApp.showSemanticsDebugger] or
-///    [MaterialApp.showSemanticsDebugger].
+///    be enabled using [WidgetsApp.showSemanticsDebugger],
+///    [MaterialApp.showSemanticsDebugger], or [CupertinoApp.showSemanticsDebugger].
 @immutable
 class Semantics extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
@@ -7123,6 +7123,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? expanded,
     int? maxValueLength,
     int? currentValueLength,
+    String? identifier,
     String? label,
     AttributedString? attributedLabel,
     String? value,
@@ -7191,6 +7192,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       liveRegion: liveRegion,
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
+      identifier: identifier,
       label: label,
       attributedLabel: attributedLabel,
       value: value,

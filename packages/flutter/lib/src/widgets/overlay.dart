@@ -82,6 +82,7 @@ class OverlayEntry implements Listenable {
     required this.builder,
     bool opaque = false,
     bool maintainState = false,
+    this.canSizeOverlay = false,
   }) : _opaque = opaque,
        _maintainState = maintainState {
     if (kFlutterMemoryAllocationsEnabled) {
@@ -137,6 +138,25 @@ class OverlayEntry implements Listenable {
     assert(_overlay != null);
     _overlay!._didChangeEntryOpacity();
   }
+
+  /// Whether the content of this [OverlayEntry] can be used to size the
+  /// [Overlay].
+  ///
+  /// In most situations the overlay sizes itself based on its incoming
+  /// constraints to be as large as possible. However, if that would result in
+  /// an infinite size, it has to rely on one of its children to size itself. In
+  /// this situation, the overlay will consult the topmost non-[Positioned]
+  /// overlay entry that has this property set to true, lay it out with the
+  /// incoming [BoxConstraints] of the overlay, and force all other
+  /// non-[Positioned] overlay entries to have the same size. The [Positioned]
+  /// entries are laid out as usual based on the calculated size of the overlay.
+  ///
+  /// Overlay entries that set this to true must be able to handle unconstrained
+  /// [BoxConstraints].
+  ///
+  /// Setting this to true has no effect if the overlay entry uses a [Positioned]
+  /// widget to position itself in the overlay.
+  final bool canSizeOverlay;
 
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
@@ -439,6 +459,20 @@ class Overlay extends StatefulWidget {
     this.initialEntries = const <OverlayEntry>[],
     this.clipBehavior = Clip.hardEdge,
   });
+
+  /// Wrap the provided `child` in an [Overlay] to allow other visual elements
+  /// (packed in [OverlayEntry]s) to float on top of the child.
+  ///
+  /// This is a convenience method over the regular [Overlay] constructor: It
+  /// creates an [Overlay] and puts the provided `child` in an [OverlayEntry]
+  /// at the bottom of that newly created Overlay.
+  static Widget wrap({
+    Key? key,
+    Clip clipBehavior = Clip.hardEdge,
+    required Widget child,
+  }) {
+    return _WrappingOverlay(key: key, clipBehavior: clipBehavior, child: child);
+  }
 
   /// The entries to include in the overlay initially.
   ///
@@ -804,6 +838,40 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   }
 }
 
+class _WrappingOverlay extends StatefulWidget {
+  const _WrappingOverlay({super.key, this.clipBehavior = Clip.hardEdge, required this.child});
+
+  final Clip clipBehavior;
+  final Widget child;
+
+  @override
+  State<_WrappingOverlay> createState() => _WrappingOverlayState();
+}
+
+class _WrappingOverlayState extends State<_WrappingOverlay> {
+  late final OverlayEntry _entry = OverlayEntry(
+    canSizeOverlay: true,
+    opaque: true,
+    builder: (BuildContext context) {
+      return widget.child;
+    }
+  );
+
+  @override
+  void didUpdateWidget(_WrappingOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _entry.markNeedsBuild();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Overlay(
+      clipBehavior: widget.clipBehavior,
+      initialEntries: <OverlayEntry>[_entry],
+    );
+  }
+}
+
 /// Special version of a [Stack], that doesn't layout and render the first
 /// [skipCount] children.
 ///
@@ -894,12 +962,6 @@ mixin _RenderTheaterMixin on RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    assert(constraints.biggest.isFinite);
-    return constraints.biggest;
-  }
-
-  @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
     double? result;
@@ -921,54 +983,17 @@ mixin _RenderTheaterMixin on RenderBox {
     return result;
   }
 
-  @override
-  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    double? baselineOffset;
-    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+  void layoutChild(RenderBox child, BoxConstraints nonPositionedChildConstraints) {
+    final StackParentData childParentData = child.parentData! as StackParentData;
     final Alignment alignment = theater._resolvedAlignment;
-    final Size size = computeDryLayout(constraints);
-    final Iterator<RenderBox> childIterator = _childrenInPaintOrder().iterator;
-    while (childIterator.moveNext()) {
-      final RenderBox child = childIterator.current;
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      final double? childBaseline;
-      if (!childParentData.isPositioned) {
-        childBaseline = switch (child.getDryBaseline(nonPositionedChildConstraints, baseline)) {
-          null => null,
-          final double baseline => baseline + alignment.alongOffset(size - child.getDryLayout(nonPositionedChildConstraints) as Offset).dy,
-        };
-      } else {
-        childBaseline = RenderStack.baselineForPositionedChild(child, childParentData, size, alignment, baseline);
-      }
-      if (childBaseline != null && (baselineOffset == null || baselineOffset > childBaseline)) {
-        baselineOffset = childBaseline;
-      }
+    if (!childParentData.isPositioned) {
+      child.layout(nonPositionedChildConstraints, parentUsesSize: true);
+      childParentData.offset = Offset.zero;
+    } else {
+      assert(child is! _RenderDeferredLayoutBox, 'all _RenderDeferredLayoutBoxes must be non-positioned children.');
+      RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
     }
-    return baselineOffset;
-  }
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performLayout() {
-    final Iterator<RenderBox> iterator = _childrenInPaintOrder().iterator;
-    // Same BoxConstraints as used by RenderStack for StackFit.expand.
-    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
-    final Alignment alignment = theater._resolvedAlignment;
-
-    while (iterator.moveNext()) {
-      final RenderBox child = iterator.current;
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      if (!childParentData.isPositioned) {
-        child.layout(nonPositionedChildConstraints, parentUsesSize: true);
-        childParentData.offset = alignment.alongOffset(size - child.size as Offset);
-      } else {
-        assert(child is! _RenderDeferredLayoutBox, 'all _RenderDeferredLayoutBoxes must be non-positioned children.');
-        RenderStack.layoutPositionedChild(child, childParentData, size, alignment);
-      }
-      assert(child.parentData == childParentData);
-    }
+    assert(child.parentData == childParentData);
   }
 
   @override
@@ -1216,9 +1241,11 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
     double? baselineOffset;
-    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(constraints.biggest);
+    final Size size = constraints.biggest.isFinite
+      ? constraints.biggest
+      : _findSizeDeterminingChild().getDryLayout(constraints);
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
-    final Size size = computeDryLayout(constraints);
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
       final StackParentData childParentData = child.parentData! as StackParentData;
@@ -1241,8 +1268,10 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(constraints.biggest.isFinite);
-    return constraints.biggest;
+    if (constraints.biggest.isFinite) {
+      return constraints.biggest;
+    }
+    return _findSizeDeterminingChild().getDryLayout(constraints);
   }
 
   @override
@@ -1280,6 +1309,53 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       childLeft -= 1;
       child = childLeft <= 0 ? null : childParentData.previousSibling;
     }
+  }
+
+  @override
+  bool get sizedByParent => false;
+
+  @override
+  void performLayout() {
+    RenderBox? sizeDeterminingChild;
+    if (constraints.biggest.isFinite) {
+      size = constraints.biggest;
+    } else {
+      sizeDeterminingChild = _findSizeDeterminingChild();
+      layoutChild(sizeDeterminingChild, constraints);
+      size = sizeDeterminingChild.size;
+    }
+
+    // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      if (child != sizeDeterminingChild) {
+        layoutChild(child, nonPositionedChildConstraints);
+      }
+    }
+  }
+
+  RenderBox _findSizeDeterminingChild() {
+    RenderBox? child = _lastOnstageChild;
+    while (child != null) {
+      final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
+      if ((childParentData.overlayEntry?.canSizeOverlay ?? false) && !childParentData.isPositioned) {
+        return child;
+      }
+      child = childParentData.previousSibling;
+    }
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('Overlay was given infinite constraints and cannot be sized by a suitable child.'),
+      ErrorDescription(
+        'The constraints given to the overlay ($constraints) would result in an illegal '
+        'infinite size (${constraints.biggest}). To avoid that, the Overlay tried to size '
+        'itself to one of its children, but no suitable non-positioned child that belongs to an '
+        'OverlayEntry with canSizeOverlay set to true could be found.',
+      ),
+      ErrorHint(
+        'Try wrapping the Overlay in a SizedBox to give it a finite size or '
+        'use an OverlayEntry with canSizeOverlay set to true.',
+      ),
+    ]);
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
@@ -2205,6 +2281,24 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     super.redepthChildren();
   }
 
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final Size size = constraints.biggest;
+    final Alignment alignment = theater._resolvedAlignment;
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    if (!childParentData.isPositioned) {
+      final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
+      final double? childBaseline = child.getDryBaseline(nonPositionedChildConstraints, baseline);
+      return childBaseline == null ? null : childBaseline + alignment.alongOffset(size - child.getDryLayout(nonPositionedChildConstraints) as Offset).dy;
+    } else {
+      return RenderStack.baselineForPositionedChild(child, childParentData, size, alignment, baseline);
+    }
+  }
+
   bool _callingMarkParentNeedsLayout = false;
   @override
   void markParentNeedsLayout() {
@@ -2217,6 +2311,9 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
     _layoutSurrogate.markNeedsLayout();
     _callingMarkParentNeedsLayout = false;
   }
+
+  @override
+  bool get sizedByParent => true;
 
   bool _needsLayout = true;
   @override
@@ -2282,7 +2379,8 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
       _needsLayout = false;
       return;
     }
-    super.performLayout();
+    assert(constraints.isTight);
+    layoutChild(child, constraints);
     assert(() {
       _debugMutationsLocked = false;
       return true;
