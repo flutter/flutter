@@ -272,7 +272,7 @@ deps = {
   'src': 'https://github.com/flutter/buildroot.git' + '@' + '0141e94b34cbd3db77f28796587334857fa985da',
 
   'src/flutter/third_party/rapidjson':
-   Var('fuchsia_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
+   Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
 
   'src/third_party/harfbuzz':
    Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'b61761f36e93c3f1e36c9bed0755acfa7f4e3d4f',
@@ -284,7 +284,7 @@ deps = {
    Var('llvm_git') + '/llvm-project/libcxxabi' + '@' + '2ce528fb5e0f92e57c97ec3ff53b75359d33af12',
 
   'src/flutter/third_party/glfw':
-   Var('fuchsia_git') + '/third_party/glfw' + '@' + 'dd8a678a66f1967372e5a5e3deac41ebf65ee127',
+   Var('flutter_git') + '/third_party/glfw' + '@' + 'dd8a678a66f1967372e5a5e3deac41ebf65ee127',
 
   'src/flutter/third_party/shaderc':
    Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + '37e25539ce199ecaf19fb7f7d27818716d36686d',
@@ -633,7 +633,7 @@ deps = {
    Var('ocmock_git') + '@' +  Var('ocmock_rev'),
 
   'src/flutter/third_party/libjpeg-turbo/src':
-   Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
+   Var('flutter_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
 
   'src/third_party/libpng':
    Var('flutter_git') + '/third_party/libpng' + '@' + '9187b6e12756317f6d44fc669ac11dfc262bd192',
@@ -657,7 +657,7 @@ deps = {
    Var('flutter_git') + '/third_party/sqlite' + '@' + '0f61bd2023ba94423b4e4c8cfb1a23de1fe6a21c',
 
   'src/flutter/third_party/pyyaml':
-   Var('fuchsia_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
+   Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
 
    'src/flutter/third_party/swiftshader':
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + '5b6f768198ce6a6485da31e1be06b5a17a2bf0a0',
