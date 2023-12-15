@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_SHADER_H_
+#define FLUTTER_LIB_GPU_SHADER_H_
 
 #include <memory>
 #include <string>
@@ -77,3 +78,5 @@ extern int InternalFlutterGpu_Shader_GetUniformSlot(
     Dart_Handle name_handle);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_SHADER_H_

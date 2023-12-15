@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_TILE_MODE_H_
-#define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_TILE_MODE_H_
+#ifndef FLUTTER_DISPLAY_LIST_DL_TILE_MODE_H_
+#define FLUTTER_DISPLAY_LIST_DL_TILE_MODE_H_
 
 namespace flutter {
 
@@ -30,4 +30,4 @@ enum class DlTileMode {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_TILE_MODE_H_
+#endif  // FLUTTER_DISPLAY_LIST_DL_TILE_MODE_H_

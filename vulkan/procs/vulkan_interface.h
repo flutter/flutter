@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_VULKAN_PROCS_VULKAN_INTERFACE_H_
+#define FLUTTER_VULKAN_PROCS_VULKAN_INTERFACE_H_
 
 #include <string>
 
@@ -46,3 +47,5 @@ namespace vulkan {
 std::string VulkanResultToString(VkResult result);
 
 }  // namespace vulkan
+
+#endif  // FLUTTER_VULKAN_PROCS_VULKAN_INTERFACE_H_

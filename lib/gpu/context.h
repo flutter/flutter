@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_LIB_GPU_CONTEXT_H_
+#define FLUTTER_LIB_GPU_CONTEXT_H_
 
 #include "dart_api.h"
 #include "flutter/lib/gpu/export.h"
@@ -67,3 +68,5 @@ extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
     flutter::gpu::Context* wrapper);
 
 }  // extern "C"
+
+#endif  // FLUTTER_LIB_GPU_CONTEXT_H_

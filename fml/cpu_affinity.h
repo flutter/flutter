@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_FML_CPU_AFFINITY_H_
+#define FLUTTER_FML_CPU_AFFINITY_H_
 
 #include <optional>
 #include <string>
@@ -84,3 +85,5 @@ class CPUSpeedTracker {
 std::optional<int64_t> ReadIntFromFile(const std::string& path);
 
 }  // namespace fml
+
+#endif  // FLUTTER_FML_CPU_AFFINITY_H_

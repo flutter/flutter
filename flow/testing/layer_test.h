@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_TESTING_LAYER_TEST_H_
-#define FLOW_TESTING_LAYER_TEST_H_
+#ifndef FLUTTER_FLOW_TESTING_LAYER_TEST_H_
+#define FLUTTER_FLOW_TESTING_LAYER_TEST_H_
 
 #include "display_list/dl_color.h"
 #include "flutter/flow/layer_snapshot_store.h"
@@ -241,4 +241,4 @@ using LayerTest = LayerTestBase<::testing::Test>;
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLOW_TESTING_LAYER_TEST_H_
+#endif  // FLUTTER_FLOW_TESTING_LAYER_TEST_H_

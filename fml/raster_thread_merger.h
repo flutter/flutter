@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FML_SHELL_COMMON_TASK_RUNNER_MERGER_H_
-#define FML_SHELL_COMMON_TASK_RUNNER_MERGER_H_
+#ifndef FLUTTER_FML_RASTER_THREAD_MERGER_H_
+#define FLUTTER_FML_RASTER_THREAD_MERGER_H_
 
 #include <condition_variable>
 #include <mutex>
@@ -143,4 +143,4 @@ class RasterThreadMerger
 
 }  // namespace fml
 
-#endif  // FML_SHELL_COMMON_TASK_RUNNER_MERGER_H_
+#endif  // FLUTTER_FML_RASTER_THREAD_MERGER_H_

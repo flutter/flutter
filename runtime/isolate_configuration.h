@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_RUNTIME_ISOLATE_CONFIGURATION_H_
-#define FLUTTER_SHELL_RUNTIME_ISOLATE_CONFIGURATION_H_
+#ifndef FLUTTER_RUNTIME_ISOLATE_CONFIGURATION_H_
+#define FLUTTER_RUNTIME_ISOLATE_CONFIGURATION_H_
 
 #include <future>
 #include <memory>
@@ -184,4 +184,4 @@ class IsolateConfiguration {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_RUNTIME_ISOLATE_CONFIGURATION_H_
+#endif  // FLUTTER_RUNTIME_ISOLATE_CONFIGURATION_H_

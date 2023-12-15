@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_PAINTING_SCENE_SHADER_H_
-#define FLUTTER_LIB_UI_PAINTING_SCENE_SHADER_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_SCENE_SCENE_SHADER_H_
+#define FLUTTER_LIB_UI_PAINTING_SCENE_SCENE_SHADER_H_
 
 #include <string>
 #include <vector>
@@ -42,4 +42,4 @@ class SceneShader : public Shader {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_PAINTING_SCENE_SHADER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_SCENE_SCENE_SHADER_H_

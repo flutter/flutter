@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLOW_TESTING_MOCK_LAYER_H_
-#define FLOW_TESTING_MOCK_LAYER_H_
+#ifndef FLUTTER_FLOW_TESTING_MOCK_LAYER_H_
+#define FLUTTER_FLOW_TESTING_MOCK_LAYER_H_
 
 #include <functional>
 #include <memory>
@@ -174,4 +174,4 @@ class MockCacheableLayer : public MockLayer {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLOW_TESTING_MOCK_LAYER_H_
+#endif  // FLUTTER_FLOW_TESTING_MOCK_LAYER_H_

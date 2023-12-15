@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_FLUTTER_VMA_FLUTTER_SKIA_VMA_H_
+#define FLUTTER_FLUTTER_VMA_FLUTTER_SKIA_VMA_H_
 
 #include "flutter/flutter_vma/flutter_vma.h"
 
@@ -67,3 +68,5 @@ class FlutterSkiaVulkanMemoryAllocator : public skgpu::VulkanMemoryAllocator {
 };
 
 }  // namespace flutter
+
+#endif  // FLUTTER_FLUTTER_VMA_FLUTTER_SKIA_VMA_H_

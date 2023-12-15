@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_UI_PAINTNIG_IMMUTABLE_BUFER_H_
-#define FLUTTER_LIB_UI_PAINTNIG_IMMUTABLE_BUFER_H_
+#ifndef FLUTTER_LIB_UI_PAINTING_IMMUTABLE_BUFFER_H_
+#define FLUTTER_LIB_UI_PAINTING_IMMUTABLE_BUFFER_H_
 
 #include <cstdint>
 
@@ -103,4 +103,4 @@ class ImmutableBuffer : public RefCountedDartWrappable<ImmutableBuffer> {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_LIB_UI_PAINTNIG_IMMUTABLE_BUFER_H_
+#endif  // FLUTTER_LIB_UI_PAINTING_IMMUTABLE_BUFFER_H_

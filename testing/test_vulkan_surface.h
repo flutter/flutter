@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_TESTING_TEST_VULKAN_SURFACE_IMPL_H_
-#define FLUTTER_TESTING_TEST_VULKAN_SURFACE_IMPL_H_
+#ifndef FLUTTER_TESTING_TEST_VULKAN_SURFACE_H_
+#define FLUTTER_TESTING_TEST_VULKAN_SURFACE_H_
 
 #include <memory>
 #include "flutter/testing/test_vulkan_context.h"
@@ -39,4 +39,4 @@ class TestVulkanSurface {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_TESTING_TEST_VULKAN_SURFACE_IMPL_H_
+#endif  // FLUTTER_TESTING_TEST_VULKAN_SURFACE_H_

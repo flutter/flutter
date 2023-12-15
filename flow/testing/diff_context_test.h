@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_DIFF_CONTEXT_TEST_H_
-#define FLUTTER_SHELL_DIFF_CONTEXT_TEST_H_
+#ifndef FLUTTER_FLOW_TESTING_DIFF_CONTEXT_TEST_H_
+#define FLUTTER_FLOW_TESTING_DIFF_CONTEXT_TEST_H_
 
 #include <utility>
 
@@ -72,4 +72,4 @@ class DiffContextTest : public LayerTest {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_DIFF_CONTEXT_TEST_H_
+#endif  // FLUTTER_FLOW_TESTING_DIFF_CONTEXT_TEST_H_
