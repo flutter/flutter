@@ -21,7 +21,7 @@ unset CDPATH
 function follow_links() (
   cd -P "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
-  while [[ -h "$file" ]]; do
+  while [[ -L "$file" ]]; do
     cd -P "$(dirname -- "$file")"
     file="$(readlink -- "$file")"
     cd -P "$(dirname -- "$file")"
@@ -31,7 +31,10 @@ function follow_links() (
 )
 
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
-SRC_DIR="$(cd "$SCRIPT_DIR/../.."; pwd -P)"
+SRC_DIR="$(
+  cd "$SCRIPT_DIR/../.."
+  pwd -P
+)"
 DART_BIN="$SRC_DIR/third_party/dart/tools/sdks/dart-sdk/bin"
 PATH="$DART_BIN:$PATH"
 
@@ -50,7 +53,10 @@ fi
 echo "Verifying license script is still happy..."
 echo "Using dart from: $(command -v dart)"
 
-untracked_files="$(cd "$SRC_DIR/flutter"; git status --ignored --short | grep -E "^!" | awk "{print\$2}")"
+untracked_files="$(
+  cd "$SRC_DIR/flutter"
+  git status --ignored --short | grep -E "^!" | awk "{print\$2}"
+)"
 untracked_count="$(echo "$untracked_files" | wc -l)"
 if [[ $untracked_count -gt 0 ]]; then
   echo ""
@@ -80,9 +86,9 @@ function collect_licenses() (
   # interpreter is faster than using unoptimized machine code, which has
   # no chance of being optimized(due to its size).
   dart --enable-asserts --interpret_irregexp lib/main.dart \
-    --src ../../..                                         \
-    --out ../../../out/license_script_output               \
-    --golden ../../ci/licenses_golden                      \
+    --src ../../.. \
+    --out ../../../out/license_script_output \
+    --golden ../../ci/licenses_golden \
     "${QUIET}"
 )
 
@@ -98,80 +104,80 @@ function verify_licenses() (
   collect_licenses
 
   for f in out/license_script_output/licenses_*; do
-      if ! cmp -s "flutter/ci/licenses_golden/$(basename "$f")" "$f"; then
-          echo "============================= ERROR ============================="
-          echo "License script got different results than expected for $f."
-          echo "Please rerun the licenses script locally to verify that it is"
-          echo "correctly catching any new licenses for anything you may have"
-          echo "changed, and then update this file:"
-          echo "  flutter/sky/packages/sky_engine/LICENSE"
-          echo "For more information, see the script in:"
-          echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
-          echo ""
-          diff -U 6 "flutter/ci/licenses_golden/$(basename "$f")" "$f"
-          echo "================================================================="
-          echo ""
-          exitStatus=1
-      fi
+    if ! cmp -s "flutter/ci/licenses_golden/$(basename "$f")" "$f"; then
+      echo "============================= ERROR ============================="
+      echo "License script got different results than expected for $f."
+      echo "Please rerun the licenses script locally to verify that it is"
+      echo "correctly catching any new licenses for anything you may have"
+      echo "changed, and then update this file:"
+      echo "  flutter/sky/packages/sky_engine/LICENSE"
+      echo "For more information, see the script in:"
+      echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
+      echo ""
+      diff -U 6 "flutter/ci/licenses_golden/$(basename "$f")" "$f"
+      echo "================================================================="
+      echo ""
+      exitStatus=1
+    fi
   done
 
   echo "Verifying license tool signature..."
   if ! cmp -s "flutter/ci/licenses_golden/tool_signature" "out/license_script_output/tool_signature"; then
-      echo "============================= ERROR ============================="
-      echo "The license tool signature has changed. This is expected when"
-      echo "there have been changes to the license tool itself. Licenses have"
-      echo "been re-computed for all components. If only the license script has"
-      echo "changed, no diffs are typically expected in the output of the"
-      echo "script. Verify the output, and if it looks correct, update the"
-      echo "license tool signature golden file:"
-      echo "  ci/licenses_golden/tool_signature"
-      echo "For more information, see the script in:"
-      echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
-      echo ""
-      diff -U 6 "flutter/ci/licenses_golden/tool_signature" "out/license_script_output/tool_signature"
-      echo "================================================================="
-      echo ""
-      exitStatus=1
+    echo "============================= ERROR ============================="
+    echo "The license tool signature has changed. This is expected when"
+    echo "there have been changes to the license tool itself. Licenses have"
+    echo "been re-computed for all components. If only the license script has"
+    echo "changed, no diffs are typically expected in the output of the"
+    echo "script. Verify the output, and if it looks correct, update the"
+    echo "license tool signature golden file:"
+    echo "  ci/licenses_golden/tool_signature"
+    echo "For more information, see the script in:"
+    echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
+    echo ""
+    diff -U 6 "flutter/ci/licenses_golden/tool_signature" "out/license_script_output/tool_signature"
+    echo "================================================================="
+    echo ""
+    exitStatus=1
   fi
 
   echo "Verifying excluded files list..."
   if ! cmp -s "flutter/ci/licenses_golden/excluded_files" "out/license_script_output/excluded_files"; then
-      echo "============================= ERROR ============================="
-      echo "The license is excluding a different number of files than previously."
-      echo "This is only expected when new non-source files have been introduced."
-      echo "Verify that all the newly ignored files are definitely not shipped with"
-      echo "any binaries that we compile (including impellerc and Wasm)."
-      echo "If the changes look correct, update this file:"
-      echo "  ci/licenses_golden/excluded_files"
-      echo "For more information, see the script in:"
-      echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
-      echo ""
-      diff -U 6 "flutter/ci/licenses_golden/excluded_files" "out/license_script_output/excluded_files"
-      echo "================================================================="
-      echo ""
-      exitStatus=1
+    echo "============================= ERROR ============================="
+    echo "The license is excluding a different number of files than previously."
+    echo "This is only expected when new non-source files have been introduced."
+    echo "Verify that all the newly ignored files are definitely not shipped with"
+    echo "any binaries that we compile (including impellerc and Wasm)."
+    echo "If the changes look correct, update this file:"
+    echo "  ci/licenses_golden/excluded_files"
+    echo "For more information, see the script in:"
+    echo "  https://github.com/flutter/engine/tree/main/tools/licenses"
+    echo ""
+    diff -U 6 "flutter/ci/licenses_golden/excluded_files" "out/license_script_output/excluded_files"
+    echo "================================================================="
+    echo ""
+    exitStatus=1
   fi
 
   echo "Checking license count in licenses_flutter..."
 
   local actualLicenseCount
   actualLicenseCount="$(tail -n 1 flutter/ci/licenses_golden/licenses_flutter | tr -dc '0-9')"
-  local expectedLicenseCount=112 # When changing this number: Update the error message below as well describing the newly expected license types.
+  local expectedLicenseCount=113 # When changing this number: Update the error message below as well describing the newly expected license types.
 
   if [[ $actualLicenseCount -ne $expectedLicenseCount ]]; then
-      echo "=============================== ERROR ==============================="
-      echo "The total license count in flutter/ci/licenses_golden/licenses_flutter"
-      echo "changed from $expectedLicenseCount to $actualLicenseCount."
-      echo "It's very likely that this is an unintentional change. Please"
-      echo "double-check that all newly added files have a BSD-style license"
-      echo "header with the following copyright:"
-      echo "    Copyright 2013 The Flutter Authors. All rights reserved."
-      echo "Files in 'third_party/txt' may have an Apache license header instead."
-      echo "If you're absolutely sure that the change in license count is"
-      echo "intentional, update 'flutter/ci/licenses.sh' with the new count."
-      echo "================================================================="
-      echo ""
-      exitStatus=1
+    echo "=============================== ERROR ==============================="
+    echo "The total license count in flutter/ci/licenses_golden/licenses_flutter"
+    echo "changed from $expectedLicenseCount to $actualLicenseCount."
+    echo "It's very likely that this is an unintentional change. Please"
+    echo "double-check that all newly added files have a BSD-style license"
+    echo "header with the following copyright:"
+    echo "    Copyright 2013 The Flutter Authors. All rights reserved."
+    echo "Files in 'third_party/txt' may have an Apache license header instead."
+    echo "If you're absolutely sure that the change in license count is"
+    echo "intentional, update 'flutter/ci/licenses.sh' with the new count."
+    echo "================================================================="
+    echo ""
+    exitStatus=1
   fi
 
   if [[ $exitStatus -eq 0 ]]; then

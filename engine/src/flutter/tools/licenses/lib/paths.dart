@@ -48,6 +48,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/inja/doc', // documentation
   r'flutter/third_party/inja/third_party/amalgamate', // only used at build time
   r'flutter/third_party/inja/third_party/include/doctest', // seems to be a unit test library
+  r'flutter/third_party/json/docs',
   r'flutter/third_party/libtess2/Contrib/nanosvg.c', // only used by the ../Example
   r'flutter/third_party/libtess2/Contrib/nanosvg.h', // only used by the ../Example
   r'flutter/third_party/libtess2/Example',
@@ -161,7 +162,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/icu/source/data/brkitr/dictionaries/laodict.txt', // explicitly handled by ICU license
   r'third_party/icu/source/data/dtd',
   r'third_party/java', // only used for Android builds
-  r'third_party/json/docs',
   r'third_party/libcxx/benchmarks',
   r'third_party/libcxx/docs',
   r'third_party/libcxx/src/support/solaris',

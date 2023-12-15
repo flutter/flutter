@@ -39,5 +39,5 @@ source_set("inja") {
     "$source_root/include/inja/utils.hpp",
   ]
 
-  public_deps = [ "//third_party/json" ]
+  public_deps = [ "//flutter/third_party/json" ]
 }

@@ -3657,6 +3657,87 @@ SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: json
+ORIGIN: ../../../flutter/third_party/json/LICENSE.MIT
+TYPE: LicenseType.mit
+FILE: ../../../flutter/third_party/json/include/nlohmann/adl_serializer.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/byte_container_with_subtype.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/abi_macros.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/conversions/from_json.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/conversions/to_chars.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/conversions/to_json.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/exceptions.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/hash.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/input/binary_reader.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/input/input_adapters.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/input/json_sax.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/input/lexer.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/input/parser.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/input/position_t.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/iterators/internal_iterator.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/iterators/iter_impl.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/iterators/iteration_proxy.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/iterators/iterator_traits.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/iterators/json_reverse_iterator.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/iterators/primitive_iterator.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/json_custom_base_class.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/json_pointer.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/json_ref.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/macro_scope.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/macro_unscope.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/call_std/begin.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/call_std/end.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/cpp_future.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/detected.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/identity_tag.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/is_sax.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/std_fs.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/type_traits.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/meta/void_t.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/output/binary_writer.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/output/output_adapters.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/output/serializer.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/string_concat.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/string_escape.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/detail/value_t.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/json.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/json_fwd.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/ordered_map.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/thirdparty/hedley/hedley.hpp
+FILE: ../../../flutter/third_party/json/include/nlohmann/thirdparty/hedley/hedley_undef.hpp
+FILE: ../../../flutter/third_party/json/nlohmann_json.natvis
+FILE: ../../../flutter/third_party/json/single_include/nlohmann/json.hpp
+FILE: ../../../flutter/third_party/json/single_include/nlohmann/json_fwd.hpp
+FILE: ../../../flutter/third_party/json/tools/amalgamate/config_json.json
+FILE: ../../../flutter/third_party/json/tools/amalgamate/config_json_fwd.json
+FILE: ../../../flutter/third_party/json/tools/generate_natvis/nlohmann_json.natvis.j2
+FILE: ../../../flutter/third_party/json/tools/macro_builder/main.cpp
+FILE: ../../../flutter/third_party/json/tools/serve_header/demo.png
+FILE: ../../../flutter/third_party/json/tools/serve_header/serve_header.yml.example
+FILE: ../../../flutter/third_party/json/wsjcpp.yml
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2013-2022 Niels Lohmann
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: glfw
 ORIGIN: ../../../flutter/third_party/glfw/src/linux_joystick.h
 ORIGIN: ../../../flutter/third_party/glfw/src/wl_init.c
@@ -11778,4 +11859,4 @@ TO DO
 Please send bug reports, offers of help, etc. to jpeg-info@jpegclub.org.
 ====================================================================================================
 
-Total license count: 112
+Total license count: 113

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_root = "//third_party/json"
+source_root = "//flutter/third_party/json"
 
 config("json_public_config") {
   include_dirs = [ "$source_root/include" ]
