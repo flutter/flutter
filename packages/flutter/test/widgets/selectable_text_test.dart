@@ -3689,7 +3689,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking('long press drag can edge scroll when inside a scrollable', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll when inside a scrollable', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/129590.
     await tester.pumpWidget(
       MaterialApp(
@@ -3785,7 +3785,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.android }),
   );
 
-  testWidgetsWithLeakTracking('long press drag can edge scroll', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
