@@ -23,7 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
@@ -82,7 +81,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Live Text button shows and hides correctly when LiveTextStatus changes',
     (WidgetTester tester) async {
       final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
@@ -123,7 +122,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('text field selection toolbar should hide when the user starts typing', (WidgetTester tester) async {
+  testWidgets('text field selection toolbar should hide when the user starts typing', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -174,7 +173,7 @@ void main() {
     expect(state.selectionOverlay!.toolbarIsVisible, isFalse);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('Composing change does not hide selection handle caret', (WidgetTester tester) async {
+  testWidgets('Composing change does not hide selection handle caret', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/108673
     final TextEditingController controller = _textEditingController();
 
@@ -264,7 +263,7 @@ void main() {
     expect(identical(handleRenderObjectBegin, handleRenderObjectEnd), true);
   });
 
-  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
@@ -339,7 +338,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
+  testWidgets('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
@@ -483,7 +482,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('Look Up shows up on iOS only', (WidgetTester tester) async {
+  testWidgets('Look Up shows up on iOS only', (WidgetTester tester) async {
     String? lastLookUp;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -532,7 +531,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('Search Web shows up on iOS only', (WidgetTester tester) async {
+  testWidgets('Search Web shows up on iOS only', (WidgetTester tester) async {
     String? lastSearch;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -581,7 +580,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('Share shows up on iOS and Android', (WidgetTester tester) async {
+  testWidgets('Share shows up on iOS and Android', (WidgetTester tester) async {
     String? lastShare;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -633,7 +632,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
+  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
     const Color selectionColor = Colors.orange;
     const Color cursorColor = Colors.red;
 
@@ -654,7 +653,7 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
-  testWidgetsWithLeakTracking('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
+  testWidgets('Use error cursor color when an InputDecoration with an errorText or error widget is provided', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -690,7 +689,7 @@ void main() {
     expect(state.widget.cursorColor, Colors.teal);
   });
 
-  testWidgetsWithLeakTracking('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
+  testWidgets('sets cursorOpacityAnimates on EditableText correctly', (WidgetTester tester) async {
 
     // True
 
@@ -719,7 +718,7 @@ void main() {
     expect(editableText.cursorOpacityAnimates, false);
   });
 
-  testWidgetsWithLeakTracking('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
+  testWidgets('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = _focusNode();
@@ -777,7 +776,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
 
-  testWidgetsWithLeakTracking('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
+  testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
     void onEditingComplete() { }
 
     await tester.pumpWidget(
@@ -797,7 +796,7 @@ void main() {
     expect(editableTextWidget.onEditingComplete, onEditingComplete);
   });
 
-  testWidgetsWithLeakTracking('TextField has consistent size', (WidgetTester tester) async {
+  testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
     String? textFieldValue;
 
@@ -840,7 +839,7 @@ void main() {
     expect(inputBox.size, equals(emptyInputSize));
   });
 
-  testWidgetsWithLeakTracking('Cursor blinks', (WidgetTester tester) async {
+  testWidgets('Cursor blinks', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
@@ -883,7 +882,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/78918.
-  testWidgetsWithLeakTracking('RenderEditable sets correct text editing value', (WidgetTester tester) async {
+  testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'how are you');
     final UniqueKey icon = UniqueKey();
     await tester.pumpWidget(
@@ -909,7 +908,7 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: 0));
   });
 
-  testWidgetsWithLeakTracking('Cursor radius is 2.0', (WidgetTester tester) async {
+  testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -924,7 +923,7 @@ void main() {
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('cursor has expected defaults', (WidgetTester tester) async {
+  testWidgets('cursor has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(),
@@ -937,7 +936,7 @@ void main() {
     expect(textField.cursorRadius, null);
   });
 
-  testWidgetsWithLeakTracking('cursor has expected radius value', (WidgetTester tester) async {
+  testWidgets('cursor has expected radius value', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
@@ -951,7 +950,7 @@ void main() {
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
 
-  testWidgetsWithLeakTracking('clipBehavior has expected defaults', (WidgetTester tester) async {
+  testWidgets('clipBehavior has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(),
@@ -962,7 +961,7 @@ void main() {
     expect(textField.clipBehavior, Clip.hardEdge);
   });
 
-  testWidgetsWithLeakTracking('Overflow clipBehavior none golden', (WidgetTester tester) async {
+  testWidgets('Overflow clipBehavior none golden', (WidgetTester tester) async {
     final OverflowWidgetTextEditingController controller = OverflowWidgetTextEditingController();
     addTearDown(controller.dispose);
     final Widget widget = Theme(
@@ -1001,7 +1000,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material cursor android golden', (WidgetTester tester) async {
+  testWidgets('Material cursor android golden', (WidgetTester tester) async {
     final Widget widget = Theme(
       data: ThemeData(useMaterial3: false),
       child: overlay(
@@ -1030,7 +1029,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material cursor golden', (WidgetTester tester) async {
+  testWidgets('Material cursor golden', (WidgetTester tester) async {
     final Widget widget = Theme(
       data: ThemeData(useMaterial3: false),
       child: overlay(
@@ -1061,7 +1060,7 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('TextInputFormatter gets correct selection value', (WidgetTester tester) async {
+  testWidgets('TextInputFormatter gets correct selection value', (WidgetTester tester) async {
     late TextEditingValue actualOldValue;
     late TextEditingValue actualNewValue;
     void callBack(TextEditingValue oldValue, TextEditingValue newValue) {
@@ -1102,7 +1101,7 @@ void main() {
     );
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
-  testWidgetsWithLeakTracking('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
+  testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1154,7 +1153,7 @@ void main() {
     );
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('text field toolbar options correctly changes options',
+  testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1205,7 +1204,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('text selection style 1', (WidgetTester tester) async {
+  testWidgets('text selection style 1', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwasssup!',
     );
@@ -1254,7 +1253,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('text selection style 2', (WidgetTester tester) async {
+  testWidgets('text selection style 2', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwasssup!',
     );
@@ -1319,7 +1318,7 @@ void main() {
     // Text selection styles are not fully supported on web.
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/93723
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'text field toolbar options correctly changes options',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -1361,7 +1360,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('cursor layout has correct width', (WidgetTester tester) async {
+  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
@@ -1392,7 +1391,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgetsWithLeakTracking('cursor layout has correct radius', (WidgetTester tester) async {
+  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
@@ -1424,7 +1423,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgetsWithLeakTracking('cursor layout has correct height', (WidgetTester tester) async {
+  testWidgets('cursor layout has correct height', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
@@ -1457,7 +1456,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgetsWithLeakTracking('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
+  testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -1533,7 +1532,7 @@ void main() {
     expect(cursorOffsetSpaces.dx, inputWidth - kCaretGap);
   });
 
-  testWidgetsWithLeakTracking('Overflowing a line with spaces stops the cursor at the end (rtl direction)', (WidgetTester tester) async {
+  testWidgets('Overflowing a line with spaces stops the cursor at the end (rtl direction)', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
@@ -1560,7 +1559,7 @@ void main() {
     expect(cursorOffsetSpaces.dx >= 0, isTrue);
   });
 
-  testWidgetsWithLeakTracking('mobile obscureText control test', (WidgetTester tester) async {
+  testWidgets('mobile obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
@@ -1600,7 +1599,7 @@ void main() {
     expect(editText.substring(editText.length - 1), '\u2022');
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  testWidgetsWithLeakTracking('desktop obscureText control test', (WidgetTester tester) async {
+  testWidgets('desktop obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
@@ -1639,7 +1638,7 @@ void main() {
       TargetPlatform.windows,
   }));
 
-  testWidgetsWithLeakTracking('Caret position is updated on tap', (WidgetTester tester) async {
+  testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -1666,7 +1665,7 @@ void main() {
     expect(controller.selection.extentOffset, tapIndex);
   });
 
-  testWidgetsWithLeakTracking('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
+  testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -1694,7 +1693,7 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Can long press to select', (WidgetTester tester) async {
+  testWidgets('Can long press to select', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -1729,7 +1728,7 @@ void main() {
     expect(controller.selection.baseOffset, testValue.indexOf('h'));
   });
 
-  testWidgetsWithLeakTracking("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
+  testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -1768,7 +1767,7 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
-  testWidgetsWithLeakTracking('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
+  testWidgets('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
     late final TextEditingController controller;
     addTearDown(() => controller.dispose());
 
@@ -1789,7 +1788,7 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('Entering text hides selection handle caret', (WidgetTester tester) async {
+  testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -1831,7 +1830,7 @@ void main() {
     expect(handle.opacity.value, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('selection handles are excluded from the semantics', (WidgetTester tester) async {
+  testWidgets('selection handles are excluded from the semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
 
@@ -1877,7 +1876,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Mouse long press is just like a tap', (WidgetTester tester) async {
+  testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -1908,7 +1907,7 @@ void main() {
     expect(controller.selection.extentOffset, eIndex);
   });
 
-  testWidgetsWithLeakTracking('Read only text field basic', (WidgetTester tester) async {
+  testWidgets('Read only text field basic', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'readonly');
 
     await tester.pumpWidget(
@@ -1946,7 +1945,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('does not paint toolbar when no options available', (WidgetTester tester) async {
+  testWidgets('does not paint toolbar when no options available', (WidgetTester tester) async {
     await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -1967,7 +1966,7 @@ void main() {
     expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('text field build empty toolbar when no options available', (WidgetTester tester) async {
+  testWidgets('text field build empty toolbar when no options available', (WidgetTester tester) async {
     await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -1991,7 +1990,7 @@ void main() {
     expect(container.size, Size.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('Swapping controllers should update selection', (WidgetTester tester) async {
+  testWidgets('Swapping controllers should update selection', (WidgetTester tester) async {
     TextEditingController controller = _textEditingController(text: 'readonly');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
@@ -2035,7 +2034,7 @@ void main() {
     expect(currentOverlaySelection.extentOffset, 7);
   });
 
-  testWidgetsWithLeakTracking('Read only text should not compose', (WidgetTester tester) async {
+  testWidgets('Read only text should not compose', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
         const TextEditingValue(
             text: 'readonly',
@@ -2058,7 +2057,7 @@ void main() {
     expect(renderEditable.text, TextSpan(text:'readonly', style: renderEditable.text!.style));
   });
 
-  testWidgetsWithLeakTracking('Dynamically switching between read only and not read only should hide or show collapse cursor', (WidgetTester tester) async {
+  testWidgets('Dynamically switching between read only and not read only should hide or show collapse cursor', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'readonly');
     bool readOnly = true;
     final OverlayEntry entry = OverlayEntry(
@@ -2094,7 +2093,7 @@ void main() {
     expect(editableText.selectionOverlay!.handlesAreVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Dynamically switching to read only should close input connection', (WidgetTester tester) async {
+  testWidgets('Dynamically switching to read only should close input connection', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'readonly');
     bool readOnly = false;
     final OverlayEntry entry = OverlayEntry(
@@ -2123,7 +2122,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, isBrowser ? isTrue : isFalse);
   });
 
-  testWidgetsWithLeakTracking('Dynamically switching to non read only should open input connection', (WidgetTester tester) async {
+  testWidgets('Dynamically switching to non read only should open input connection', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'readonly');
     bool readOnly = true;
     final OverlayEntry entry = OverlayEntry(
@@ -2152,7 +2151,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, true);
   });
 
-  testWidgetsWithLeakTracking('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
+  testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2180,7 +2179,7 @@ void main() {
     expect(controller.selection.baseOffset, testValue.length);
   });
 
-  testWidgetsWithLeakTracking('Selection updates on tap down (Desktop platforms)', (WidgetTester tester) async {
+  testWidgets('Selection updates on tap down (Desktop platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2219,7 +2218,7 @@ void main() {
       variant: TargetPlatformVariant.desktop(),
   );
 
-  testWidgetsWithLeakTracking('Selection updates on tap up (Mobile platforms)', (WidgetTester tester) async {
+  testWidgets('Selection updates on tap up (Mobile platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
     final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
@@ -2273,7 +2272,7 @@ void main() {
       variant: TargetPlatformVariant.mobile(),
   );
 
-  testWidgetsWithLeakTracking('Can select text with a mouse when wrapped in a GestureDetector with tap/double tap callbacks', (WidgetTester tester) async {
+  testWidgets('Can select text with a mouse when wrapped in a GestureDetector with tap/double tap callbacks', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/129161.
     final TextEditingController controller = _textEditingController();
 
@@ -2319,7 +2318,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('Can select text by dragging with a mouse', (WidgetTester tester) async {
+  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2351,7 +2350,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2403,7 +2402,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Cursor should not move on a quick touch drag when touch does not begin on previous selection (iOS)', (WidgetTester tester) async {
+  testWidgets('Cursor should not move on a quick touch drag when touch does not begin on previous selection (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2448,7 +2447,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2501,7 +2500,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/122519
     final TextEditingController controller = _textEditingController();
@@ -2583,7 +2582,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging (Android)', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging (Android)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2627,7 +2626,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging (Android) - multiline', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging (Android) - multiline', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2672,7 +2671,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
   );
 
-  testWidgetsWithLeakTracking('Can move cursor when dragging (Android) - ListView', (WidgetTester tester) async {
+  testWidgets('Can move cursor when dragging (Android) - ListView', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/122519
     final TextEditingController controller = _textEditingController();
@@ -2743,7 +2742,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
   );
 
-  testWidgetsWithLeakTracking('Continuous dragging does not cause flickering', (WidgetTester tester) async {
+  testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
     int selectionChangedCount = 0;
     const String testValue = 'abc def ghi';
     final TextEditingController controller = _textEditingController(text: testValue);
@@ -2795,7 +2794,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
   });
 
-  testWidgetsWithLeakTracking('Dragging in opposite direction also works', (WidgetTester tester) async {
+  testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2827,7 +2826,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('e'));
   });
 
-  testWidgetsWithLeakTracking('Slow mouse dragging also selects text', (WidgetTester tester) async {
+  testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2858,7 +2857,7 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
-  testWidgetsWithLeakTracking('Can drag handles to change selection on Apple platforms', (WidgetTester tester) async {
+  testWidgets('Can drag handles to change selection on Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -2970,7 +2969,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking('Can drag handles to change selection on non-Apple platforms', (WidgetTester tester) async {
+  testWidgets('Can drag handles to change selection on non-Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -3075,7 +3074,7 @@ void main() {
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Can drag the left handle while the right handle remains off-screen',
     (WidgetTester tester) async {
       // Text is longer than textfield width.
@@ -3163,7 +3162,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Can drag the right handle while the left handle remains off-screen',
     (WidgetTester tester) async {
       // Text is longer than textfield width.
@@ -3240,7 +3239,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Drag handles trigger feedback', (WidgetTester tester) async {
+  testWidgets('Drag handles trigger feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
     final TextEditingController controller = _textEditingController();
@@ -3295,7 +3294,7 @@ void main() {
     expect(feedback.hapticCount, 2);
   });
 
-  testWidgetsWithLeakTracking('Dragging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
+  testWidgets('Dragging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
     final TextEditingController controller = _textEditingController();
@@ -3350,7 +3349,7 @@ void main() {
     expect(feedback.hapticCount, 1);
   });
 
-  testWidgetsWithLeakTracking('Cannot drag one handle past the other', (WidgetTester tester) async {
+  testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -3410,7 +3409,7 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
-  testWidgetsWithLeakTracking('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
+  testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       // 11 first line, 19 second line, 17 third line = length 49
       text: 'a big house\njumped over a mouse\nOne more line yay',
@@ -3598,7 +3597,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
   );
 
-  testWidgetsWithLeakTracking('Dragging between multiple lines keeps the contact point at the same place on the handle on iOS', (WidgetTester tester) async {
+  testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on iOS', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       // 11 first line, 19 second line, 17 third line = length 49
       text: 'a big house\njumped over a mouse\nOne more line yay',
@@ -3796,7 +3795,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking("dragging caret within a word doesn't affect composing region", (WidgetTester tester) async {
+  testWidgets("dragging caret within a word doesn't affect composing region", (WidgetTester tester) async {
     const String testValue = 'abc def ghi';
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(
@@ -3867,7 +3866,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS })
   );
 
-  testWidgetsWithLeakTracking('Can use selection toolbar', (WidgetTester tester) async {
+  testWidgets('Can use selection toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -3961,7 +3960,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
   }
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Check the toolbar appears below the TextField when there is not enough space above the TextField to show it',
     (WidgetTester tester) async {
       // This is a regression test for
@@ -4015,7 +4014,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'the toolbar adjusts its position above/below when bottom inset changes',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
@@ -4083,7 +4082,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Toolbar appears in the right places in multiline inputs',
     (WidgetTester tester) async {
       // This is a regression test for
@@ -4140,7 +4139,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('Selection toolbar fades in', (WidgetTester tester) async {
+  testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -4186,7 +4185,7 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('An obscured TextField is selectable by default', (WidgetTester tester) async {
+  testWidgets('An obscured TextField is selectable by default', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/32845
 
@@ -4213,7 +4212,7 @@ void main() {
     expect(controller.selection.isCollapsed, false);
   });
 
-  testWidgetsWithLeakTracking('An obscured TextField is not selectable when disabled', (WidgetTester tester) async {
+  testWidgets('An obscured TextField is not selectable when disabled', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/32845
 
@@ -4241,7 +4240,7 @@ void main() {
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgetsWithLeakTracking('An obscured TextField is not selectable when read-only', (WidgetTester tester) async {
+  testWidgets('An obscured TextField is not selectable when read-only', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/32845
 
@@ -4269,7 +4268,7 @@ void main() {
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgetsWithLeakTracking('An obscured TextField is selected as one word', (WidgetTester tester) async {
+  testWidgets('An obscured TextField is selected as one word', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(overlay(
@@ -4291,7 +4290,7 @@ void main() {
     expect(selection.extentOffset, 10);
   });
 
-  testWidgetsWithLeakTracking('An obscured TextField has correct default context menu', (WidgetTester tester) async {
+  testWidgets('An obscured TextField has correct default context menu', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(overlay(
@@ -4327,7 +4326,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('create selection overlay if none exists when toggleToolbar is called', (WidgetTester tester) async {
+  testWidgets('create selection overlay if none exists when toggleToolbar is called', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111660
     final Widget testWidget = MaterialApp(
       home: Scaffold(
@@ -4376,7 +4375,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-  testWidgetsWithLeakTracking('TextField height with minLines unset', (WidgetTester tester) async {
+  testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBuilder());
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
@@ -4440,7 +4439,7 @@ void main() {
     expect(inputBox.size.width, fourLineInputSize.width);
   });
 
-  testWidgetsWithLeakTracking('TextField height with minLines and maxLines', (WidgetTester tester) async {
+  testWidgets('TextField height with minLines and maxLines', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBuilder());
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
@@ -4491,7 +4490,7 @@ void main() {
     }, throwsAssertionError);
   });
 
-  testWidgetsWithLeakTracking('Multiline text when wrapped in Expanded', (WidgetTester tester) async {
+  testWidgets('Multiline text when wrapped in Expanded', (WidgetTester tester) async {
     Widget expandedTextFieldBuilder({
       int? maxLines = 1,
       int? minLines,
@@ -4548,7 +4547,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/29093
-  testWidgetsWithLeakTracking('Multiline text when wrapped in IntrinsicHeight', (WidgetTester tester) async {
+  testWidgets('Multiline text when wrapped in IntrinsicHeight', (WidgetTester tester) async {
     final Key intrinsicHeightKey = UniqueKey();
     Widget intrinsicTextFieldBuilder(bool wrapInIntrinsic) {
       final TextFormField textField = TextFormField(
@@ -4585,7 +4584,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/29093
-  testWidgetsWithLeakTracking('errorText empty string', (WidgetTester tester) async {
+  testWidgets('errorText empty string', (WidgetTester tester) async {
     Widget textFormFieldBuilder(String? errorText) {
       return boilerplate(
         child: Column(
@@ -4630,7 +4629,7 @@ void main() {
     expect(inputBox.size.width, errorNullInputSize.width);
   });
 
-  testWidgetsWithLeakTracking('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
+  testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
     const double height = 200.0;
     const double padding = 24.0;
 
@@ -4739,7 +4738,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
+  testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
     Widget builder(int? maxLines, final String hintMsg) {
@@ -4776,7 +4775,7 @@ void main() {
     expect(findHintText(multipleLineText).size.height, greaterThanOrEqualTo(oneLineHintSize.height));
   });
 
-  testWidgetsWithLeakTracking('Can drag handles to change selection in multiline', (WidgetTester tester) async {
+  testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -4875,7 +4874,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Can scroll multiline input', (WidgetTester tester) async {
+  testWidgets('Can scroll multiline input', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
     final TextEditingController controller = _textEditingController(
       text: kMoreThanFourLines,
@@ -4971,7 +4970,7 @@ void main() {
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
 
-  testWidgetsWithLeakTracking('TextField smoke test', (WidgetTester tester) async {
+  testWidgets('TextField smoke test', (WidgetTester tester) async {
     late String textFieldValue;
 
     await tester.pumpWidget(
@@ -4999,7 +4998,7 @@ void main() {
     await checkText('Hello World');
   });
 
-  testWidgetsWithLeakTracking('TextField with global key', (WidgetTester tester) async {
+  testWidgets('TextField with global key', (WidgetTester tester) async {
     final GlobalKey textFieldKey = GlobalKey(debugLabel: 'textFieldKey');
     late String textFieldValue;
 
@@ -5029,7 +5028,7 @@ void main() {
     await checkText('Hello World');
   });
 
-  testWidgetsWithLeakTracking('TextField errorText trumps helperText', (WidgetTester tester) async {
+  testWidgets('TextField errorText trumps helperText', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -5047,7 +5046,7 @@ void main() {
     expect(find.text('error text'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('TextField with default helperStyle', (WidgetTester tester) async {
+  testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(hintColor: Colors.blue[500], useMaterial3: false);
     await tester.pumpWidget(
       overlay(
@@ -5066,7 +5065,7 @@ void main() {
     expect(helperText.style!.fontSize, Typography.englishLike2014.bodySmall!.fontSize);
   });
 
-  testWidgetsWithLeakTracking('TextField with specified helperStyle', (WidgetTester tester) async {
+  testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
     final TextStyle style = TextStyle(
       inherit: false,
       color: Colors.pink[500],
@@ -5087,7 +5086,7 @@ void main() {
     expect(helperText.style, style);
   });
 
-  testWidgetsWithLeakTracking('TextField with default hintStyle', (WidgetTester tester) async {
+  testWidgets('TextField with default hintStyle', (WidgetTester tester) async {
     final TextStyle style = TextStyle(
       color: Colors.pink[500],
       fontSize: 10.0,
@@ -5115,7 +5114,7 @@ void main() {
     expect(hintText.style!.fontSize, style.fontSize);
   });
 
-  testWidgetsWithLeakTracking('TextField with specified hintStyle', (WidgetTester tester) async {
+  testWidgets('TextField with specified hintStyle', (WidgetTester tester) async {
     final TextStyle hintStyle = TextStyle(
       inherit: false,
       color: Colors.pink[500],
@@ -5137,7 +5136,7 @@ void main() {
     expect(hintText.style, hintStyle);
   });
 
-  testWidgetsWithLeakTracking('TextField with specified prefixStyle', (WidgetTester tester) async {
+  testWidgets('TextField with specified prefixStyle', (WidgetTester tester) async {
     final TextStyle prefixStyle = TextStyle(
       inherit: false,
       color: Colors.pink[500],
@@ -5159,7 +5158,7 @@ void main() {
     expect(prefixText.style, prefixStyle);
   });
 
-  testWidgetsWithLeakTracking('TextField prefix and suffix create a sibling node', (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix create a sibling node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       overlay(
@@ -5201,7 +5200,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField with specified suffixStyle', (WidgetTester tester) async {
+  testWidgets('TextField with specified suffixStyle', (WidgetTester tester) async {
     final TextStyle suffixStyle = TextStyle(
       color: Colors.pink[500],
       fontSize: 10.0,
@@ -5222,7 +5221,7 @@ void main() {
     expect(suffixText.style, suffixStyle);
   });
 
-  testWidgetsWithLeakTracking('TextField prefix and suffix appear correctly with no hint or label', (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with no hint or label', (WidgetTester tester) async {
     final Key secondKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -5265,7 +5264,7 @@ void main() {
     expect(find.text('Suffix'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('TextField prefix and suffix appear correctly with hint text', (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with hint text', (WidgetTester tester) async {
     final TextStyle hintStyle = TextStyle(
       inherit: false,
       color: Colors.pink[500],
@@ -5325,7 +5324,7 @@ void main() {
     expect(suffixText.style, hintStyle);
   });
 
-  testWidgetsWithLeakTracking('TextField prefix and suffix appear correctly with label text', (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with label text', (WidgetTester tester) async {
     final TextStyle prefixStyle = TextStyle(
       color: Colors.pink[500],
       fontSize: 10.0,
@@ -5388,7 +5387,7 @@ void main() {
     expect(suffixText.style, suffixStyle);
   });
 
-  testWidgetsWithLeakTracking('TextField label text animates', (WidgetTester tester) async {
+  testWidgets('TextField label text animates', (WidgetTester tester) async {
     final Key secondKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -5429,7 +5428,7 @@ void main() {
     expect(newPos.dy, lessThan(pos.dy));
   });
 
-  testWidgetsWithLeakTracking('Icon is separated from input/label by 16+12', (WidgetTester tester) async {
+  testWidgets('Icon is separated from input/label by 16+12', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const TextField(
@@ -5450,7 +5449,7 @@ void main() {
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
   });
 
-  testWidgetsWithLeakTracking('Collapsed hint text placement', (WidgetTester tester) async {
+  testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -5468,7 +5467,7 @@ void main() {
     expect(tester.getTopLeft(find.text('hint')), equals(tester.getTopLeft(find.byType(EditableText))));
   });
 
-  testWidgetsWithLeakTracking('Can align to center', (WidgetTester tester) async {
+  testWidgets('Can align to center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -5503,7 +5502,7 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgetsWithLeakTracking('Can align to center within center', (WidgetTester tester) async {
+  testWidgets('Can align to center within center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -5539,7 +5538,7 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgetsWithLeakTracking('Controller can update server', (WidgetTester tester) async {
+  testWidgets('Controller can update server', (WidgetTester tester) async {
     final TextEditingController controller1 = _textEditingController(
       text: 'Initial Text',
     );
@@ -5622,7 +5621,7 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals('The Final Cut'));
   });
 
-  testWidgetsWithLeakTracking('Cannot enter new lines onto single line TextField', (WidgetTester tester) async {
+  testWidgets('Cannot enter new lines onto single line TextField', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -5634,7 +5633,7 @@ void main() {
     expect(textController.text, 'abcdef');
   });
 
-  testWidgetsWithLeakTracking('Injected formatters are chained', (WidgetTester tester) async {
+  testWidgets('Injected formatters are chained', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -5655,7 +5654,7 @@ void main() {
     expect(textController.text, '#一#二#三#四#五#六');
   });
 
-  testWidgetsWithLeakTracking('Injected formatters are chained (deprecated names)', (WidgetTester tester) async {
+  testWidgets('Injected formatters are chained (deprecated names)', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -5676,7 +5675,7 @@ void main() {
     expect(textController.text, '#一#二#三#四#五#六');
   });
 
-  testWidgetsWithLeakTracking('Chained formatters are in sequence', (WidgetTester tester) async {
+  testWidgets('Chained formatters are in sequence', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -5703,7 +5702,7 @@ void main() {
     expect(textController.text, '\n1\n2\n3');
   });
 
-  testWidgetsWithLeakTracking('Chained formatters are in sequence (deprecated names)', (WidgetTester tester) async {
+  testWidgets('Chained formatters are in sequence (deprecated names)', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -5730,7 +5729,7 @@ void main() {
     expect(textController.text, '\n1\n2\n3');
   });
 
-  testWidgetsWithLeakTracking('Pasted values are formatted', (WidgetTester tester) async {
+  testWidgets('Pasted values are formatted', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(
@@ -5768,7 +5767,7 @@ void main() {
     expect(textController.text, '145623');
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('Pasted values are formatted (deprecated names)', (WidgetTester tester) async {
+  testWidgets('Pasted values are formatted (deprecated names)', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(
@@ -5806,7 +5805,7 @@ void main() {
     expect(textController.text, '145623');
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
+  testWidgets('Do not add LengthLimiting formatter to the user supplied list', (WidgetTester tester) async {
     final List<TextInputFormatter> formatters = <TextInputFormatter>[];
 
     await tester.pumpWidget(
@@ -5822,7 +5821,7 @@ void main() {
     expect(formatters.isEmpty, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Text field scrolls the caret into view', (WidgetTester tester) async {
+  testWidgets('Text field scrolls the caret into view', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -5865,7 +5864,7 @@ void main() {
     expect(scrollableState.position.pixels, equals(222.0));
   });
 
-  testWidgetsWithLeakTracking('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
+  testWidgets('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -5903,7 +5902,7 @@ void main() {
     expect(scrollableState.position.pixels, moreOrLessEquals(lineHeight, epsilon: 0.1));
   });
 
-  testWidgetsWithLeakTracking('haptic feedback', (WidgetTester tester) async {
+  testWidgets('haptic feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
     final TextEditingController controller = _textEditingController();
@@ -5930,7 +5929,7 @@ void main() {
     expect(feedback.hapticCount, 1);
   });
 
-  testWidgetsWithLeakTracking('Text field drops selection color when losing focus', (WidgetTester tester) async {
+  testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103341.
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -5985,7 +5984,7 @@ void main() {
     expect(state2.widget.selectionColor, selectionColor);
   });
 
-  testWidgetsWithLeakTracking('Selection is consistent with text length', (WidgetTester tester) async {
+  testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     controller.text = 'abcde';
@@ -6014,7 +6013,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/35848
-  testWidgetsWithLeakTracking('Clearing text field with suffixIcon does not cause text selection exception', (WidgetTester tester) async {
+  testWidgets('Clearing text field with suffixIcon does not cause text selection exception', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Prefilled text.',
     );
@@ -6037,7 +6036,7 @@ void main() {
     expect(controller.text, '');
   });
 
-  testWidgetsWithLeakTracking('maxLength limits input.', (WidgetTester tester) async {
+  testWidgets('maxLength limits input.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6051,7 +6050,7 @@ void main() {
     expect(textController.text, '0123456789');
   });
 
-  testWidgetsWithLeakTracking('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
+  testWidgets('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6066,7 +6065,7 @@ void main() {
     expect(textController.text, '${surrogatePair}012345678');
   });
 
-  testWidgetsWithLeakTracking('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
+  testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6081,7 +6080,7 @@ void main() {
     expect(textController.text, '${graphemeCluster}012345678');
   });
 
-  testWidgetsWithLeakTracking('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
+  testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/37420.
     final TextEditingController textController = _textEditingController();
     const String testValue = '0123456789';
@@ -6106,7 +6105,7 @@ void main() {
     expect(textController.text, testValue);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'maxLength limits input in the center of a maxed-out field, with collapsed selection',
     (WidgetTester tester) async {
       final TextEditingController textController = _textEditingController();
@@ -6151,7 +6150,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'maxLength limits input in the center of a maxed-out field, with non-collapsed selection',
     (WidgetTester tester) async {
       final TextEditingController textController = _textEditingController();
@@ -6186,7 +6185,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
+  testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6201,7 +6200,7 @@ void main() {
     expect(textController.text, '0123456789');
   });
 
-  testWidgetsWithLeakTracking('maxLength still works with other formatters', (WidgetTester tester) async {
+  testWidgets('maxLength still works with other formatters', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6222,7 +6221,7 @@ void main() {
     expect(textController.text, '#一#二#三#四#五');
   });
 
-  testWidgetsWithLeakTracking('maxLength still works with other formatters (deprecated names)', (WidgetTester tester) async {
+  testWidgets('maxLength still works with other formatters (deprecated names)', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6243,7 +6242,7 @@ void main() {
     expect(textController.text, '#一#二#三#四#五');
   });
 
-  testWidgetsWithLeakTracking("maxLength isn't enforced when maxLengthEnforcement.none.", (WidgetTester tester) async {
+  testWidgets("maxLength isn't enforced when maxLengthEnforcement.none.", (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6258,7 +6257,7 @@ void main() {
     expect(textController.text, '0123456789101112');
   });
 
-  testWidgetsWithLeakTracking('maxLength shows warning when maxLengthEnforcement.none.', (WidgetTester tester) async {
+  testWidgets('maxLength shows warning when maxLengthEnforcement.none.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
@@ -6288,7 +6287,7 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
-  testWidgetsWithLeakTracking('maxLength shows warning in Material 3', (WidgetTester tester) async {
+  testWidgets('maxLength shows warning in Material 3', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
     final ThemeData theme = ThemeData.from(
       colorScheme: const ColorScheme.light().copyWith(error: Colors.deepPurpleAccent),
@@ -6320,7 +6319,7 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
-  testWidgetsWithLeakTracking('maxLength shows warning when maxLengthEnforcement.none with surrogate pairs.', (WidgetTester tester) async {
+  testWidgets('maxLength shows warning when maxLengthEnforcement.none with surrogate pairs.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
@@ -6350,7 +6349,7 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
-  testWidgetsWithLeakTracking('maxLength shows warning when maxLengthEnforcement.none with grapheme clusters.', (WidgetTester tester) async {
+  testWidgets('maxLength shows warning when maxLengthEnforcement.none with grapheme clusters.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
@@ -6380,7 +6379,7 @@ void main() {
     expect(counterTextWidget.style!.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
-  testWidgetsWithLeakTracking('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
+  testWidgets('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6395,7 +6394,7 @@ void main() {
     expect(textController.text, '${surrogatePair}012345678');
   });
 
-  testWidgetsWithLeakTracking('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
+  testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
     final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
@@ -6410,7 +6409,7 @@ void main() {
     expect(textController.text, '${graphemeCluster}012345678');
   });
 
-  testWidgetsWithLeakTracking('setting maxLength shows counter', (WidgetTester tester) async {
+  testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -6430,7 +6429,7 @@ void main() {
     expect(find.text('5/10'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('maxLength counter measures surrogate pairs as one character', (WidgetTester tester) async {
+  testWidgets('maxLength counter measures surrogate pairs as one character', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -6451,7 +6450,7 @@ void main() {
     expect(find.text('1/10'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('maxLength counter measures grapheme clusters as one character', (WidgetTester tester) async {
+  testWidgets('maxLength counter measures grapheme clusters as one character', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -6472,7 +6471,7 @@ void main() {
     expect(find.text('1/10'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('setting maxLength to TextField.noMaxLength shows only entered length', (WidgetTester tester) async {
+  testWidgets('setting maxLength to TextField.noMaxLength shows only entered length', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -6492,7 +6491,7 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('passing a buildCounter shows returned widget', (WidgetTester tester) async {
+  testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -6515,7 +6514,7 @@ void main() {
     expect(find.text('5 of 10'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('TextField identifies as text field in semantics', (WidgetTester tester) async {
+  testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -6535,7 +6534,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Disabled text field does not have tap action', (WidgetTester tester) async {
+  testWidgets('Disabled text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const MaterialApp(
@@ -6554,7 +6553,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Disabled text field semantics node still contains value', (WidgetTester tester) async {
+  testWidgets('Disabled text field semantics node still contains value', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -6575,7 +6574,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Readonly text field does not have tap action', (WidgetTester tester) async {
+  testWidgets('Readonly text field does not have tap action', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -6596,7 +6595,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Disabled text field hides helper and counter', (WidgetTester tester) async {
+  testWidgets('Disabled text field hides helper and counter', (WidgetTester tester) async {
     const String helperText = 'helper text';
     const String counterText = 'counter text';
     const String errorText = 'error text';
@@ -6643,7 +6642,7 @@ void main() {
     expect(errorWidget.style!.color, equals(Colors.transparent));
   });
 
-  testWidgetsWithLeakTracking('Disabled text field has default M2 disabled text style for the input text', (WidgetTester tester) async {
+  testWidgets('Disabled text field has default M2 disabled text style for the input text', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -6665,7 +6664,7 @@ void main() {
     expect(editableText.style.color, Colors.black38); // Colors.black38 is the default disabled color for ThemeData.light().
   });
 
-  testWidgetsWithLeakTracking('Disabled text field has default M3 disabled text style for the input text', (WidgetTester tester) async {
+  testWidgets('Disabled text field has default M3 disabled text style for the input text', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -6837,7 +6836,7 @@ void main() {
     expect(count, 1);
   });
 
-  testWidgetsWithLeakTracking('Provided style correctly resolves for material states', (WidgetTester tester) async {
+  testWidgets('Provided style correctly resolves for material states', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -6872,7 +6871,7 @@ void main() {
     expect(editableText.style.color, Colors.blue);
   });
 
-  testWidgetsWithLeakTracking('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
+  testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
 
@@ -6913,7 +6912,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Read only TextField identifies as read only text field in semantics', (WidgetTester tester) async {
+  testWidgets('Read only TextField identifies as read only text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -6937,7 +6936,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking("Disabled TextField can't be traversed to.", (WidgetTester tester) async {
+  testWidgets("Disabled TextField can't be traversed to.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
     addTearDown(focusNode1.dispose);
     final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
@@ -7007,7 +7006,7 @@ void main() {
       await tester.pump();
     }
 
-    testWidgetsWithLeakTracking('Shift test 1', (WidgetTester tester) async {
+    testWidgets('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
@@ -7027,7 +7026,7 @@ void main() {
       // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('Shift test 2', (WidgetTester tester) async {
+    testWidgets('Shift test 2', (WidgetTester tester) async {
       await setupWidget(tester);
 
       const String testValue = 'abcdefghi';
@@ -7048,7 +7047,7 @@ void main() {
       // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('Control Shift test', (WidgetTester tester) async {
+    testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester);
       const String testValue = 'their big house';
       await tester.enterText(find.byType(TextField), testValue);
@@ -7068,7 +7067,7 @@ void main() {
       // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('Down and up test', (WidgetTester tester) async {
+    testWidgets('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
@@ -7098,7 +7097,7 @@ void main() {
       // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('Down and up test 2', (WidgetTester tester) async {
+    testWidgets('Down and up test 2', (WidgetTester tester) async {
       await setupWidget(tester);
       const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
       await tester.enterText(find.byType(TextField), testValue);
@@ -7157,7 +7156,7 @@ void main() {
       // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgetsWithLeakTracking('Read only keyboard selection test', (WidgetTester tester) async {
+    testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(text: 'readonly');
       await tester.pumpWidget(
           overlay(
@@ -7181,7 +7180,7 @@ void main() {
     }, variant: KeySimulatorTransitModeVariant.all());
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
-  testWidgetsWithLeakTracking('Copy paste test', (WidgetTester tester) async {
+  testWidgets('Copy paste test', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     final TextEditingController controller = _textEditingController();
     final TextField textField =
@@ -7262,7 +7261,7 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/78219
-  testWidgetsWithLeakTracking('Paste does not crash after calling TextController.text setter', (WidgetTester tester) async {
+  testWidgets('Paste does not crash after calling TextController.text setter', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     final TextEditingController controller = _textEditingController();
     final TextField textField = TextField(
@@ -7317,7 +7316,7 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('Cut test', (WidgetTester tester) async {
+  testWidgets('Cut test', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     final TextEditingController controller = _textEditingController();
     final TextField textField =
@@ -7399,7 +7398,7 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all()
   );
 
-  testWidgetsWithLeakTracking('Select all test', (WidgetTester tester) async {
+  testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     final TextEditingController controller = _textEditingController();
     final TextField textField =
@@ -7453,7 +7452,7 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all()
   );
 
-  testWidgetsWithLeakTracking('Delete test', (WidgetTester tester) async {
+  testWidgets('Delete test', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     final TextEditingController controller = _textEditingController();
     final TextField textField =
@@ -7510,7 +7509,7 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('Changing positions of text fields', (WidgetTester tester) async {
+  testWidgets('Changing positions of text fields', (WidgetTester tester) async {
 
     final FocusNode focusNode = _focusNode();
     final List<KeyEvent> events = <KeyEvent>[];
@@ -7608,7 +7607,7 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all()
   );
 
-  testWidgetsWithLeakTracking('Changing focus test', (WidgetTester tester) async {
+  testWidgets('Changing focus test', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     final List<KeyEvent> events = <KeyEvent>[];
 
@@ -7688,7 +7687,7 @@ void main() {
     variant: KeySimulatorTransitModeVariant.all()
   );
 
-  testWidgetsWithLeakTracking('Caret works when maxLines is null', (WidgetTester tester) async {
+  testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
@@ -7715,7 +7714,7 @@ void main() {
     expect(controller.selection.baseOffset, 0);
   });
 
-  testWidgetsWithLeakTracking('TextField baseline alignment no-strut', (WidgetTester tester) async {
+  testWidgets('TextField baseline alignment no-strut', (WidgetTester tester) async {
     final TextEditingController controllerA = _textEditingController(text: 'A');
     final TextEditingController controllerB = _textEditingController(text: 'B');
     final Key keyA = UniqueKey();
@@ -7777,7 +7776,7 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
-  testWidgetsWithLeakTracking('TextField baseline alignment', (WidgetTester tester) async {
+  testWidgets('TextField baseline alignment', (WidgetTester tester) async {
     final TextEditingController controllerA = _textEditingController(text: 'A');
     final TextEditingController controllerB = _textEditingController(text: 'B');
     final Key keyA = UniqueKey();
@@ -7838,7 +7837,7 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
-  testWidgetsWithLeakTracking('TextField semantics include label when unfocused and label/hint when focused if input is empty', (WidgetTester tester) async {
+  testWidgets('TextField semantics include label when unfocused and label/hint when focused if input is empty', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
@@ -7870,7 +7869,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField semantics alway include label and not hint when input value is not empty', (WidgetTester tester) async {
+  testWidgets('TextField semantics alway include label and not hint when input value is not empty', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController(text: 'value');
     final Key key = UniqueKey();
@@ -7902,7 +7901,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField semantics always include label when no hint is given', (WidgetTester tester) async {
+  testWidgets('TextField semantics always include label when no hint is given', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController(text: 'value');
     final Key key = UniqueKey();
@@ -7933,7 +7932,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField semantics only include hint when it is visible', (WidgetTester tester) async {
+  testWidgets('TextField semantics only include hint when it is visible', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController(text: 'value');
     final Key key = UniqueKey();
@@ -7972,7 +7971,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField semantics', (WidgetTester tester) async {
+  testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
@@ -8105,7 +8104,7 @@ void main() {
   });
 
   // Regressing test for https://github.com/flutter/flutter/issues/99763
-  testWidgetsWithLeakTracking('Update textField semantics when obscureText changes', (WidgetTester tester) async {
+  testWidgets('Update textField semantics when obscureText changes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(_ObscureTextTestWidget(controller: controller));
@@ -8158,7 +8157,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
+  testWidgets('TextField semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
@@ -8201,7 +8200,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField semantics for selections', (WidgetTester tester) async {
+  testWidgets('TextField semantics for selections', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController()
       ..text = 'Hello';
@@ -8292,7 +8291,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('TextField change selection with semantics', (WidgetTester tester) async {
+  testWidgets('TextField change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final TextEditingController controller = _textEditingController()
@@ -8389,7 +8388,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Can activate TextField with explicit controller via semantics ', (WidgetTester tester) async {
+  testWidgets('Can activate TextField with explicit controller via semantics ', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17801
 
     const String textInTextField = 'Hello';
@@ -8461,7 +8460,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('When clipboard empty, no semantics paste option', (WidgetTester tester) async {
+  testWidgets('When clipboard empty, no semantics paste option', (WidgetTester tester) async {
     const String textInTextField = 'Hello';
 
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -8538,7 +8537,7 @@ void main() {
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
   }, skip: isBrowser); // [intended] see above.
 
-  testWidgetsWithLeakTracking('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
+  testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
     const Widget textField = TextField();
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
@@ -8546,7 +8545,7 @@ void main() {
     expect(exception.toString(), startsWith('No Material widget found.'));
   });
 
-  testWidgetsWithLeakTracking('TextField loses focus when disabled', (WidgetTester tester) async {
+  testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'TextField Focus Node');
     addTearDown(focusNode.dispose);
 
@@ -8614,7 +8613,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('TextField displays text with text direction', (WidgetTester tester) async {
+  testWidgets('TextField displays text with text direction', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -8658,7 +8657,7 @@ void main() {
     expect(topLeft.dx, equals(160.0));
   });
 
-  testWidgetsWithLeakTracking('TextField semantics', (WidgetTester tester) async {
+  testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
@@ -8750,7 +8749,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('InputDecoration counterText can have a semanticCounterText', (WidgetTester tester) async {
+  testWidgets('InputDecoration counterText can have a semanticCounterText', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
@@ -8799,7 +8798,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('InputDecoration errorText semantics', (WidgetTester tester) async {
+  testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
@@ -8842,7 +8841,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('floating label does not overlap with value at large textScaleFactors', (WidgetTester tester) async {
+  testWidgets('floating label does not overlap with value at large textScaleFactors', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(text: 'Just some text');
     await tester.pumpWidget(
       MaterialApp(
@@ -8867,7 +8866,7 @@ void main() {
     expect(labelRect.bottom, lessThanOrEqualTo(fieldRect.top));
   });
 
-  testWidgetsWithLeakTracking('TextField scrolls into view but does not bounce (SingleChildScrollView)', (WidgetTester tester) async {
+  testWidgets('TextField scrolls into view but does not bounce (SingleChildScrollView)', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/20485
 
     final Key textField1 = UniqueKey();
@@ -8941,7 +8940,7 @@ void main() {
     expect(maxOffset, 200.0);
   });
 
-  testWidgetsWithLeakTracking('TextField scrolls into view but does not bounce (ListView)', (WidgetTester tester) async {
+  testWidgets('TextField scrolls into view but does not bounce (ListView)', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/20485
 
     final Key textField1 = UniqueKey();
@@ -9013,7 +9012,7 @@ void main() {
     expect(maxOffset, 50.0);
   });
 
-  testWidgetsWithLeakTracking('onTap is called upon tap', (WidgetTester tester) async {
+  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       overlay(
@@ -9036,7 +9035,7 @@ void main() {
     expect(tapCount, 3);
   });
 
-  testWidgetsWithLeakTracking('onTap is not called, field is disabled', (WidgetTester tester) async {
+  testWidgets('onTap is not called, field is disabled', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       overlay(
@@ -9056,7 +9055,7 @@ void main() {
     expect(tapCount, 0);
   });
 
-  testWidgetsWithLeakTracking('Includes cursor for TextField', (WidgetTester tester) async {
+  testWidgets('Includes cursor for TextField', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/24612
 
     Widget buildFrame({
@@ -9132,7 +9131,7 @@ void main() {
     expect(tester.getSize(find.byType(TextField)).width, WIDTH_OF_CHAR * text.length + 18.0 + CARET_GAP);
   });
 
-  testWidgetsWithLeakTracking('TextField style is merged with theme', (WidgetTester tester) async {
+  testWidgets('TextField style is merged with theme', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/23994
 
     final ThemeData themeData = ThemeData(
@@ -9183,7 +9182,7 @@ void main() {
     expect(editableText.style.color, isNull);
   });
 
-  testWidgetsWithLeakTracking('TextField style is merged with theme in Material 3', (WidgetTester tester) async {
+  testWidgets('TextField style is merged with theme in Material 3', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/23994
 
     final ThemeData themeData = ThemeData(
@@ -9238,7 +9237,7 @@ void main() {
     expect(editableText.style.color, isNull);
   });
 
-  testWidgetsWithLeakTracking('style enforces required fields', (WidgetTester tester) async {
+  testWidgets('style enforces required fields', (WidgetTester tester) async {
     Widget buildFrame(TextStyle style) {
       return MaterialApp(
         home: Material(
@@ -9269,7 +9268,7 @@ void main() {
     expect(tester.takeException(), isNotNull);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'tap moves cursor to the edge of the word it tapped',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9304,7 +9303,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'tap with a mouse does not move cursor to the edge of the word',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9340,7 +9339,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking('tap moves cursor to the position tapped', (WidgetTester tester) async {
+  testWidgets('tap moves cursor to the position tapped', (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
@@ -9371,7 +9370,7 @@ void main() {
       expectNoMaterialToolbar();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'two slow taps do not trigger a word selection',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9414,7 +9413,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Tapping on a collapsed selection toggles the toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9501,7 +9500,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Tapping on a non-collapsed selection toggles the toolbar and retains the selection',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9577,7 +9576,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double tap selects word and first tap of double tap moves cursor (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9625,7 +9624,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('iOS selectWordEdge works correctly', (WidgetTester tester) async {
+  testWidgets('iOS selectWordEdge works correctly', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
@@ -9656,7 +9655,7 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: 0));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double tap does not select word on read-only obscured field',
         (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9705,7 +9704,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9752,7 +9751,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Custom toolbar test - Android text selection controls',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9790,7 +9789,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Custom toolbar test - Cupertino text selection controls',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -9824,7 +9823,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
-  testWidgetsWithLeakTracking('selectionControls is passed to EditableText', (WidgetTester tester) async {
+  testWidgets('selectionControls is passed to EditableText', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -9841,7 +9840,7 @@ void main() {
     expect(widget.selectionControls, equals(materialTextSelectionControls));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Can double click + drag with a mouse to select word by word',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
@@ -9890,7 +9889,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Can double tap + drag to select word by word',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
@@ -9956,7 +9955,7 @@ void main() {
         'all good people\n'                         // 22 + 16 => 38
         'to come to the aid\n'                      // 38 + 19 => 57
         'of their country.';                        // 57 + 17 => 74
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple tap to select a paragraph on mobile platforms when tapping at a word edge',
       (WidgetTester tester) async {
         // TODO(Renzo-Olivares): Enable for iOS, currently broken because selection overlay blocks the TextSelectionGestureDetector https://github.com/flutter/flutter/issues/123415.
@@ -10014,7 +10013,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple tap to select a paragraph on mobile platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController();
@@ -10070,7 +10069,7 @@ void main() {
       variant: TargetPlatformVariant.mobile(),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Triple click at the beginning of a line should not select the previous paragraph',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/132126
@@ -10125,7 +10124,7 @@ void main() {
       variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.linux }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Triple click at the end of text should select the previous paragraph',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/132126.
@@ -10181,7 +10180,7 @@ void main() {
       variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.linux }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'triple tap chains work on Non-Apple mobile platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -10272,7 +10271,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'triple tap chains work on Apple platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -10368,7 +10367,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'triple click chains work',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -10489,7 +10488,7 @@ void main() {
       variant: TargetPlatformVariant.desktop(),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'triple click after a click on desktop platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -10557,7 +10556,7 @@ void main() {
       variant: TargetPlatformVariant.desktop(),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple tap to select all on a single-line textfield on mobile platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -10612,7 +10611,7 @@ void main() {
       variant: TargetPlatformVariant.mobile(),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple click to select all on a single-line textfield on desktop platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -10668,7 +10667,7 @@ void main() {
       variant: TargetPlatformVariant.desktop(),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple click to select a line on Linux',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController();
@@ -10727,7 +10726,7 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple click to select a paragraph',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController();
@@ -10786,7 +10785,7 @@ void main() {
       variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.linux }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple click + drag to select line by line on Linux',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController();
@@ -10887,7 +10886,7 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Can triple click + drag to select paragraph by paragraph',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController();
@@ -10988,7 +10987,7 @@ void main() {
       variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.linux }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Going past triple click retains the selection on Apple platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -11075,7 +11074,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Tap count resets when going past a triple tap on Android, Fuchsia, and Linux',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -11189,7 +11188,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Double click and triple click alternate on Windows',
       (WidgetTester tester) async {
         final TextEditingController controller = _textEditingController(
@@ -11307,7 +11306,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double tap on top of cursor also selects word',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11358,7 +11357,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double double tap just shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11393,7 +11392,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double long press just shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11424,7 +11423,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'A single tap hides the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11455,7 +11454,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
-  testWidgetsWithLeakTracking('Drag selection hides the selection menu', (WidgetTester tester) async {
+  testWidgets('Drag selection hides the selection menu', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
@@ -11505,7 +11504,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Long press on an autofocused field shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11536,7 +11535,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.,
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double tap hold selects word',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11586,7 +11585,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'tap after a double tap select is not affected',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11636,7 +11635,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar when the field is focused',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11675,7 +11674,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long press that starts on an unfocused TextField selects the word at the exact long press position and shows toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11710,7 +11709,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long press selects word and shows toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11744,7 +11743,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11790,7 +11789,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long press drag extends the selection to the word under the drag and shows toolbar on lift on non-Apple platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11868,7 +11867,7 @@ void main() {
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long press drag on a focused TextField moves the cursor under the drag and shows toolbar on lift',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -11940,7 +11939,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long press drag on an unfocused TextField selects word-by-word and shows toolbar on lift',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -12008,7 +12007,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking('long press drag can edge scroll on non-Apple platforms', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll on non-Apple platforms', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12097,7 +12096,7 @@ void main() {
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('long press drag can edge scroll on Apple platforms - unfocused TextField', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll on Apple platforms - unfocused TextField', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12186,7 +12185,7 @@ void main() {
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('long press drag can edge scroll on Apple platforms - focused TextField', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll on Apple platforms - focused TextField', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12279,7 +12278,7 @@ void main() {
     expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257.0, epsilon: 1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('mouse click and drag can edge scroll', (WidgetTester tester) async {
+  testWidgets('mouse click and drag can edge scroll', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12348,7 +12347,7 @@ void main() {
     expect(textOffsetToPosition(tester, 0).dx, lessThan(-100.0));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('keyboard selection change scrolls the field', (WidgetTester tester) async {
+  testWidgets('keyboard selection change scrolls the field', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12419,7 +12418,7 @@ void main() {
      skip: isBrowser, // [intended] Browser handles arrow keys differently.
   );
 
-  testWidgetsWithLeakTracking('long press drag can edge scroll vertically', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll vertically', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12503,7 +12502,7 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('keyboard selection change scrolls the field vertically', (WidgetTester tester) async {
+  testWidgets('keyboard selection change scrolls the field vertically', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12577,7 +12576,7 @@ void main() {
      skip: isBrowser, // [intended] Browser handles arrow keys differently.
   );
 
-  testWidgetsWithLeakTracking('mouse click and drag can edge scroll vertically', (WidgetTester tester) async {
+  testWidgets('mouse click and drag can edge scroll vertically', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
@@ -12656,7 +12655,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'long tap after a double tap select is not affected',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -12705,7 +12704,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double tap after a long tap is not affected',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -12763,7 +12762,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double click after a click on desktop platforms',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -12822,7 +12821,7 @@ void main() {
     variant: TargetPlatformVariant.desktop(),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double tap chains work',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -12897,7 +12896,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'double click chains work',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -12989,7 +12988,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }),
   );
 
-  testWidgetsWithLeakTracking('double tapping a space selects the previous word on iOS', (WidgetTester tester) async {
+  testWidgets('double tapping a space selects the previous word on iOS', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: ' blah blah  \n  blah',
     );
@@ -13060,7 +13059,7 @@ void main() {
     expect(controller.value.selection.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('selecting a space selects the space on non-iOS platforms', (WidgetTester tester) async {
+  testWidgets('selecting a space selects the space on non-iOS platforms', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: ' blah blah',
     );
@@ -13115,7 +13114,7 @@ void main() {
     expect(controller.value.selection.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
 
-  testWidgetsWithLeakTracking('selecting a space selects the space on Desktop platforms', (WidgetTester tester) async {
+  testWidgets('selecting a space selects the space on Desktop platforms', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: ' blah blah',
     );
@@ -13187,7 +13186,7 @@ void main() {
     expect(controller.value.selection.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
 
-  testWidgetsWithLeakTracking('Force press does not set selection on Android or Fuchsia touch devices', (WidgetTester tester) async {
+  testWidgets('Force press does not set selection on Android or Fuchsia touch devices', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -13230,7 +13229,7 @@ void main() {
     expectNoMaterialToolbar();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
-  testWidgetsWithLeakTracking('Force press sets selection on desktop platforms that do not support it', (WidgetTester tester) async {
+  testWidgets('Force press sets selection on desktop platforms that do not support it', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -13273,7 +13272,7 @@ void main() {
     expectNoMaterialToolbar();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('force press selects word', (WidgetTester tester) async {
+  testWidgets('force press selects word', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -13322,7 +13321,7 @@ void main() {
     expectCupertinoToolbarForPartialSelection();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('tap on non-force-press-supported devices work', (WidgetTester tester) async {
+  testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -13378,7 +13377,7 @@ void main() {
     // https://github.com/flutter/flutter/issues/43445
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgetsWithLeakTracking('default TextField debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default TextField debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const TextField().debugFillProperties(builder);
@@ -13390,7 +13389,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('TextField implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('TextField implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
@@ -13448,7 +13447,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'strut basic single line',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13473,7 +13472,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'strut TextStyle increases height',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13518,7 +13517,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'strut basic multi line',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13542,7 +13541,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'strut no force small strut',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13573,7 +13572,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'strut no force large strut',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13602,7 +13601,7 @@ void main() {
     skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'strut height override',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13631,7 +13630,7 @@ void main() {
     skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'strut forces field taller',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -13662,7 +13661,7 @@ void main() {
     skip: isBrowser, // TODO(mdebbar): https://github.com/flutter/flutter/issues/32243
   );
 
-  testWidgetsWithLeakTracking('Caret center position', (WidgetTester tester) async {
+  testWidgets('Caret center position', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: Theme(
@@ -13705,7 +13704,7 @@ void main() {
     expect(topLeft.dx, equals(383));
   });
 
-  testWidgetsWithLeakTracking('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
+  testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: Theme(
@@ -13757,7 +13756,7 @@ void main() {
     expect(topLeft.dx, equals(383)); // Should be same as equivalent in 'Caret center position'
   });
 
-  testWidgetsWithLeakTracking('selection handles are rendered and not faded away', (WidgetTester tester) async {
+  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     final TextEditingController controller = _textEditingController(text: testText);
 
@@ -13790,7 +13789,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   });
 
-  testWidgetsWithLeakTracking('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
+  testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     final TextEditingController controller = _textEditingController(text: testText);
 
@@ -13821,7 +13820,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('iPad Scribble selection change shows selection handles', (WidgetTester tester) async {
+  testWidgets('iPad Scribble selection change shows selection handles', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     final TextEditingController controller = _textEditingController(text: testText);
 
@@ -13853,7 +13852,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('Tap shows handles but not toolbar', (WidgetTester tester) async {
+  testWidgets('Tap shows handles but not toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
@@ -13875,7 +13874,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Tap in empty text field does not show handles nor toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
@@ -13898,7 +13897,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Long press shows handles and toolbar', (WidgetTester tester) async {
+  testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
@@ -13920,7 +13919,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isContextMenuProvidedByPlatform ? isFalse : isTrue);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Long press in empty text field shows handles and toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
@@ -13943,7 +13942,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Double tap shows handles and toolbar', (WidgetTester tester) async {
+  testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
@@ -13967,7 +13966,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isContextMenuProvidedByPlatform ? isFalse : isTrue);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Double tap in empty text field shows toolbar but not handles',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
@@ -13992,7 +13991,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Mouse tap does not show handles nor toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -14024,7 +14023,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Mouse long press does not show handles nor toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -14056,7 +14055,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Mouse double tap does not show handles nor toolbar',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
@@ -14092,7 +14091,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Does not show handles when updated from the web engine', (WidgetTester tester) async {
+  testWidgets('Does not show handles when updated from the web engine', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
@@ -14134,7 +14133,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Tapping selection handles toggles the toolbar', (WidgetTester tester) async {
+  testWidgets('Tapping selection handles toggles the toolbar', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
@@ -14175,7 +14174,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('when TextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
+  testWidgets('when TextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -14206,7 +14205,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/74566
-  testWidgetsWithLeakTracking('TextField and last input character are visible on the screen when the cursor is not shown', (WidgetTester tester) async {
+  testWidgets('TextField and last input character are visible on the screen when the cursor is not shown', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     final ScrollController textFieldScrollController = ScrollController();
     addTearDown(() { scrollController.dispose(); textFieldScrollController.dispose(); });
@@ -14252,7 +14251,7 @@ void main() {
   });
 
   group('height', () {
-    testWidgetsWithLeakTracking('By default, TextField is at least kMinInteractiveDimension high', (WidgetTester tester) async {
+    testWidgets('By default, TextField is at least kMinInteractiveDimension high', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(),
         home: const Scaffold(
@@ -14266,7 +14265,7 @@ void main() {
       expect(renderBox.size.height, greaterThanOrEqualTo(kMinInteractiveDimension));
     });
 
-    testWidgetsWithLeakTracking("When text is very small, TextField still doesn't go below kMinInteractiveDimension height", (WidgetTester tester) async {
+    testWidgets("When text is very small, TextField still doesn't go below kMinInteractiveDimension height", (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(),
         home: const Scaffold(
@@ -14282,7 +14281,7 @@ void main() {
       expect(renderBox.size.height, kMinInteractiveDimension);
     });
 
-    testWidgetsWithLeakTracking('When isDense, TextField can go below kMinInteractiveDimension height', (WidgetTester tester) async {
+    testWidgets('When isDense, TextField can go below kMinInteractiveDimension height', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(),
         home: const Scaffold(
@@ -14327,14 +14326,14 @@ void main() {
         );
       }
 
-      testWidgetsWithLeakTracking('By default, intrinsic height is at least kMinInteractiveDimension high', (WidgetTester tester) async {
+      testWidgets('By default, intrinsic height is at least kMinInteractiveDimension high', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
         await tester.pumpWidget(buildTest(isDense: false));
       });
 
-      testWidgetsWithLeakTracking('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
+      testWidgets('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/54729
         // If the intrinsic height does not match that of the height after
         // performLayout, this will fail.
@@ -14342,7 +14341,7 @@ void main() {
       });
     });
   });
-  testWidgetsWithLeakTracking("Arrow keys don't move input focus", (WidgetTester tester) async {
+  testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
     final TextEditingController controller1 = _textEditingController();
     final TextEditingController controller2 = _textEditingController();
     final TextEditingController controller3 = _textEditingController();
@@ -14439,7 +14438,7 @@ void main() {
     expect(focusNode3.hasPrimaryFocus, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
+  testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
     bool scrollInvoked = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -14475,7 +14474,7 @@ void main() {
     expect(scrollInvoked, isFalse);
   });
 
-  testWidgetsWithLeakTracking("A buildCounter that returns null doesn't affect the size of the TextField", (WidgetTester tester) async {
+  testWidgets("A buildCounter that returns null doesn't affect the size of the TextField", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44909
 
     final GlobalKey textField1Key = GlobalKey();
@@ -14505,7 +14504,7 @@ void main() {
     expect(textFieldSize1, equals(textFieldSize2));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'The selection menu displays in an Overlay without error',
     (WidgetTester tester) async {
       // This is a regression test for
@@ -14549,7 +14548,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('clipboard status is checked via hasStrings without getting the full clipboard contents', (WidgetTester tester) async {
+  testWidgets('clipboard status is checked via hasStrings without getting the full clipboard contents', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -14597,7 +14596,7 @@ void main() {
     skip: kIsWeb, // [intended] web doesn't call hasStrings.
   );
 
-  testWidgetsWithLeakTracking('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -14671,7 +14670,7 @@ void main() {
     await gesture.moveTo(center);
   });
 
-    testWidgetsWithLeakTracking('TextField icons change mouse cursor when hovered', (WidgetTester tester) async {
+    testWidgets('TextField icons change mouse cursor when hovered', (WidgetTester tester) async {
     // Test default cursor in icons area.
     await tester.pumpWidget(
       const MaterialApp(
@@ -14759,7 +14758,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgetsWithLeakTracking('Text selection menu does not change mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('Text selection menu does not change mouse cursor when hovered', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -14797,7 +14796,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('Caret rtl with changing width', (WidgetTester tester) async {
+  testWidgets('Caret rtl with changing width', (WidgetTester tester) async {
     late StateSetter setState;
     bool isWide = false;
     const double wideWidth = 300.0;
@@ -14856,7 +14855,7 @@ void main() {
     expect(cursorRight, inputWidth - kCaretGap);
   });
 
-  testWidgetsWithLeakTracking('Text selection menu hides after select all on desktop', (WidgetTester tester) async {
+  testWidgets('Text selection menu hides after select all on desktop', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -14907,7 +14906,7 @@ void main() {
   );
 
   // Regressing test for https://github.com/flutter/flutter/issues/70625
-  testWidgetsWithLeakTracking('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
+  testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     Widget textFieldBuilder({ FloatingLabelBehavior behavior = FloatingLabelBehavior.auto }) {
       return MaterialApp(
@@ -14981,7 +14980,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgetsWithLeakTracking('using none enforcement.', (WidgetTester tester) async {
+    testWidgets('using none enforcement.', (WidgetTester tester) async {
       const MaxLengthEnforcement enforcement = MaxLengthEnforcement.none;
 
       await setupWidget(tester, enforcement);
@@ -15001,7 +15000,7 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
-    testWidgetsWithLeakTracking('using enforced.', (WidgetTester tester) async {
+    testWidgets('using enforced.', (WidgetTester tester) async {
       const MaxLengthEnforcement enforcement = MaxLengthEnforcement.enforced;
 
       await setupWidget(tester, enforcement);
@@ -15025,7 +15024,7 @@ void main() {
       expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 5));
     });
 
-    testWidgetsWithLeakTracking('using truncateAfterCompositionEnds.', (WidgetTester tester) async {
+    testWidgets('using truncateAfterCompositionEnds.', (WidgetTester tester) async {
       const MaxLengthEnforcement enforcement = MaxLengthEnforcement.truncateAfterCompositionEnds;
 
       await setupWidget(tester, enforcement);
@@ -15049,7 +15048,7 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
-    testWidgetsWithLeakTracking('using default behavior for different platforms.', (WidgetTester tester) async {
+    testWidgets('using default behavior for different platforms.', (WidgetTester tester) async {
       await setupWidget(tester, null);
 
       final EditableTextState state = tester.state(find.byType(EditableText));
@@ -15082,7 +15081,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('TextField does not leak touch events when deadline has exceeded', (WidgetTester tester) async {
+  testWidgets('TextField does not leak touch events when deadline has exceeded', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/118340.
     int textFieldTapCount = 0;
     int prefixTapCount = 0;
@@ -15133,7 +15132,7 @@ void main() {
     expect(suffixTapCount, 1);
   });
 
-  testWidgetsWithLeakTracking('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
+  testWidgets('prefix/suffix buttons do not leak touch events', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/39376.
 
     int textFieldTapCount = 0;
@@ -15172,7 +15171,7 @@ void main() {
     expect(suffixTapCount, 1);
   });
 
-  testWidgetsWithLeakTracking('autofill info has hint text', (WidgetTester tester) async {
+  testWidgets('autofill info has hint text', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -15195,7 +15194,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('TextField at rest does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
+  testWidgets('TextField at rest does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home:  Material(
@@ -15209,7 +15208,7 @@ void main() {
     expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   });
 
-  testWidgetsWithLeakTracking('Focused TextField does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
+  testWidgets('Focused TextField does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
@@ -15226,7 +15225,7 @@ void main() {
     expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   });
 
-  testWidgetsWithLeakTracking('TextField does not push any layers with alwaysNeedsAddToScene after toolbar is dismissed', (WidgetTester tester) async {
+  testWidgets('TextField does not push any layers with alwaysNeedsAddToScene after toolbar is dismissed', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
@@ -15264,7 +15263,7 @@ void main() {
     expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
-  testWidgetsWithLeakTracking('cursor blinking respects TickerMode', (WidgetTester tester) async {
+  testWidgets('cursor blinking respects TickerMode', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
     Widget builder({required bool tickerMode}) {
       return MaterialApp(
@@ -15344,7 +15343,7 @@ void main() {
     expect(editable.showCursor.value, isTrue);
   });
 
-  testWidgetsWithLeakTracking('can shift + tap to select with a keyboard (Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap to select with a keyboard (Apple platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -15387,7 +15386,7 @@ void main() {
     expect(controller.selection.extentOffset, 4);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('can shift + tap to select with a keyboard (non-Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap to select with a keyboard (non-Apple platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -15432,7 +15431,7 @@ void main() {
     expect(controller.selection.extentOffset, 4);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('shift tapping an unfocused field', (WidgetTester tester) async {
+  testWidgets('shift tapping an unfocused field', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -15487,7 +15486,7 @@ void main() {
     expect(controller.selection.extentOffset, 20);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('can shift + tap + drag to select with a keyboard (Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap + drag to select with a keyboard (Apple platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -15592,7 +15591,7 @@ void main() {
     expect(controller.selection.extentOffset, 26);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('can shift + tap + drag to select with a keyboard (non-Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap + drag to select with a keyboard (non-Apple platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -15700,7 +15699,7 @@ void main() {
     expect(controller.selection.extentOffset, 26);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
 
-  testWidgetsWithLeakTracking('can shift + tap + drag to select with a keyboard, reversed (Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap + drag to select with a keyboard, reversed (Apple platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -15804,7 +15803,7 @@ void main() {
     expect(controller.selection.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('can shift + tap + drag to select with a keyboard, reversed (non-Apple platforms)', (WidgetTester tester) async {
+  testWidgets('can shift + tap + drag to select with a keyboard, reversed (non-Apple platforms)', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
@@ -15913,7 +15912,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
 
   // Regression test for https://github.com/flutter/flutter/issues/101587.
-  testWidgetsWithLeakTracking('Right clicking menu behavior', (WidgetTester tester) async {
+  testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
@@ -15992,7 +15991,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
+  testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
     final FocusNode focusNode = _focusNode();
 
     // Default test. The canRequestFocus is true by default and the text field can be focused
@@ -16035,7 +16034,7 @@ void main() {
   });
 
   group('Right click focus', () {
-    testWidgetsWithLeakTracking('Can right click to focus multiple times', (WidgetTester tester) async {
+    testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/103228
       final FocusNode focusNode1 = _focusNode();
       final FocusNode focusNode2 = _focusNode();
@@ -16090,7 +16089,7 @@ void main() {
       expect(focusNode2.hasFocus, isFalse);
     });
 
-    testWidgetsWithLeakTracking('Can right click to focus on previously selected word on Apple platforms', (WidgetTester tester) async {
+    testWidgets('Can right click to focus on previously selected word on Apple platforms', (WidgetTester tester) async {
       final FocusNode focusNode1 = _focusNode();
       final FocusNode focusNode2 = _focusNode();
       final TextEditingController controller = _textEditingController(
@@ -16189,7 +16188,7 @@ void main() {
       expect(controller.selection.extentOffset, 5);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    testWidgetsWithLeakTracking('Right clicking cannot request focus if canRequestFocus is false', (WidgetTester tester) async {
+    testWidgets('Right clicking cannot request focus if canRequestFocus is false', (WidgetTester tester) async {
       final FocusNode focusNode = _focusNode();
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
@@ -16219,7 +16218,7 @@ void main() {
   });
 
   group('context menu', () {
-    testWidgetsWithLeakTracking('builds AdaptiveTextSelectionToolbar by default', (WidgetTester tester) async {
+    testWidgets('builds AdaptiveTextSelectionToolbar by default', (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
         MaterialApp(
@@ -16250,7 +16249,7 @@ void main() {
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );
 
-    testWidgetsWithLeakTracking('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
+    testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
@@ -16288,7 +16287,7 @@ void main() {
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );
 
-    testWidgetsWithLeakTracking('contextMenuBuilder changes from default to null', (WidgetTester tester) async {
+    testWidgets('contextMenuBuilder changes from default to null', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(MaterialApp(home: Material(child: TextField(key: key, controller: controller))));
@@ -16333,7 +16332,7 @@ void main() {
   });
 
   group('magnifier builder', () {
-    testWidgetsWithLeakTracking('should build custom magnifier if given',
+    testWidgets('should build custom magnifier if given',
         (WidgetTester tester) async {
       final Widget customMagnifier = Container(
         key: UniqueKey(),
@@ -16365,7 +16364,7 @@ void main() {
     });
 
     group('defaults', () {
-      testWidgetsWithLeakTracking('should build Magnifier on Android', (WidgetTester tester) async {
+      testWidgets('should build Magnifier on Android', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
         );
@@ -16384,7 +16383,7 @@ void main() {
             isA<TextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-      testWidgetsWithLeakTracking('should build CupertinoMagnifier on iOS',
+      testWidgets('should build CupertinoMagnifier on iOS',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
@@ -16404,7 +16403,7 @@ void main() {
             isA<CupertinoTextMagnifier>());
       }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-      testWidgetsWithLeakTracking('should build nothing on Android and iOS',
+      testWidgets('should build nothing on Android and iOS',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Scaffold(body: TextField()))
@@ -16434,7 +16433,7 @@ void main() {
     late ValueNotifier<MagnifierInfo> magnifierInfo;
     final Widget fakeMagnifier = Container(key: UniqueKey());
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
         'Can drag handles to show, unshow, and update magnifier',
         (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
@@ -16498,7 +16497,7 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
 
-    testWidgetsWithLeakTracking('Can drag to show, unshow, and update magnifier', (WidgetTester tester) async {
+    testWidgets('Can drag to show, unshow, and update magnifier', (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
         MaterialApp(
@@ -16599,7 +16598,7 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-    testWidgetsWithLeakTracking('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
+    testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
       await tester.pumpWidget(
@@ -16663,7 +16662,7 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-    testWidgetsWithLeakTracking('magnifier does not show when tapping outside field', (WidgetTester tester) async {
+    testWidgets('magnifier does not show when tapping outside field', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/128321
       await tester.pumpWidget(
         MaterialApp(
@@ -16713,7 +16712,7 @@ void main() {
   });
 
   group('TapRegion integration', () {
-    testWidgetsWithLeakTracking('Tapping outside loses focus on desktop', (WidgetTester tester) async {
+    testWidgets('Tapping outside loses focus on desktop', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
@@ -16748,7 +16747,7 @@ void main() {
       expect(focusNode.hasPrimaryFocus, isFalse);
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgetsWithLeakTracking("Tapping outside doesn't lose focus on mobile", (WidgetTester tester) async {
+    testWidgets("Tapping outside doesn't lose focus on mobile", (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
@@ -16784,7 +16783,7 @@ void main() {
       expect(focusNode.hasPrimaryFocus, kIsWeb ? isFalse : isTrue);
     }, variant: TargetPlatformVariant.mobile());
 
-    testWidgetsWithLeakTracking("Tapping on toolbar doesn't lose focus", (WidgetTester tester) async {
+    testWidgets("Tapping on toolbar doesn't lose focus", (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       final TextEditingController controller  = _textEditingController(text: 'A B C');
       addTearDown(focusNode.dispose);
@@ -16839,7 +16838,7 @@ void main() {
       skip: isBrowser, // [intended] On the web, the toolbar isn't rendered by Flutter.
     );
 
-    testWidgetsWithLeakTracking("Tapping on input decorator doesn't lose focus", (WidgetTester tester) async {
+    testWidgets("Tapping on input decorator doesn't lose focus", (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
@@ -16879,7 +16878,7 @@ void main() {
 
     // PointerDownEvents can't be trackpad events, apparently, so we skip that one.
     for (final PointerDeviceKind pointerDeviceKind in PointerDeviceKind.values.toSet()..remove(PointerDeviceKind.trackpad)) {
-      testWidgetsWithLeakTracking('Default TextField handling of onTapOutside follows platform conventions for ${pointerDeviceKind.name}', (WidgetTester tester) async {
+      testWidgets('Default TextField handling of onTapOutside follows platform conventions for ${pointerDeviceKind.name}', (WidgetTester tester) async {
         final FocusNode focusNode = FocusNode(debugLabel: 'Test');
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
@@ -16935,7 +16934,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Builds the corresponding default spell check toolbar by platform', (WidgetTester tester) async {
+  testWidgets('Builds the corresponding default spell check toolbar by platform', (WidgetTester tester) async {
     tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
       true;
     late final BuildContext builderContext;
@@ -16987,7 +16986,7 @@ void main() {
     }
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('Builds the corresponding default spell check configuration by platform', (WidgetTester tester) async {
+  testWidgets('Builds the corresponding default spell check configuration by platform', (WidgetTester tester) async {
     tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
       true;
 
@@ -17045,7 +17044,7 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );

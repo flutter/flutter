@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('SearchViewThemeData copyWith, ==, hashCode basics', () {
@@ -45,7 +44,7 @@ void main() {
     expect(theme.data.dividerColor, null);
   });
 
-  testWidgetsWithLeakTracking('Default SearchViewThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SearchViewThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData().debugFillProperties(builder);
 
@@ -57,7 +56,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('SearchViewThemeData implements debugFillProperties', (
+  testWidgets('SearchViewThemeData implements debugFillProperties', (
       WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData(
@@ -196,21 +195,21 @@ void main() {
       expect(inputText.style.fontSize, headerTextStyle.fontSize);
     }
 
-    testWidgetsWithLeakTracking('SearchView properties overrides defaults', (WidgetTester tester) async {
+    testWidgets('SearchView properties overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchViewProperties: true));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchView(tester);
     });
 
-    testWidgetsWithLeakTracking('SearchView theme data overrides defaults', (WidgetTester tester) async {
+    testWidgets('SearchView theme data overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchViewThemeData: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
       checkSearchView(tester);
     });
 
-    testWidgetsWithLeakTracking('Overall Theme SearchView theme overrides defaults', (WidgetTester tester) async {
+    testWidgets('Overall Theme SearchView theme overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -219,7 +218,7 @@ void main() {
 
     // Same as the previous tests with empty SearchViewThemeData's instead of null.
 
-    testWidgetsWithLeakTracking('SearchView properties overrides defaults, empty theme and overall theme', (WidgetTester tester) async {
+    testWidgets('SearchView properties overrides defaults, empty theme and overall theme', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchViewProperties: true,
         searchViewThemeData: const SearchViewThemeData(),
         overallTheme: const SearchViewThemeData()));
@@ -228,7 +227,7 @@ void main() {
       checkSearchView(tester);
     });
 
-    testWidgetsWithLeakTracking('SearchView theme overrides defaults and overall theme', (WidgetTester tester) async {
+    testWidgets('SearchView theme overrides defaults and overall theme', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchViewThemeData: searchViewTheme,
           overallTheme: const SearchViewThemeData()));
       await tester.tap(find.byIcon(Icons.search));
@@ -236,7 +235,7 @@ void main() {
       checkSearchView(tester);
     });
 
-    testWidgetsWithLeakTracking('Overall Theme SearchView theme overrides defaults and null theme', (WidgetTester tester) async {
+    testWidgets('Overall Theme SearchView theme overrides defaults and null theme', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish

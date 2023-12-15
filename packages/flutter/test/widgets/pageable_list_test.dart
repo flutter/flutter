@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Size pageSize = const Size(600.0, 300.0);
 const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
@@ -60,7 +59,7 @@ Future<void> pageRight(WidgetTester tester) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('PageView default control', (WidgetTester tester) async {
+  testWidgets('PageView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -71,7 +70,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('PageView control test (LTR)', (WidgetTester tester) async {
+  testWidgets('PageView control test (LTR)', (WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr));
     expect(currentPage, isNull);
@@ -99,7 +98,7 @@ void main() {
     expect(currentPage, equals(0));
   });
 
-  testWidgetsWithLeakTracking('PageView with reverse (LTR)', (WidgetTester tester) async {
+  testWidgets('PageView with reverse (LTR)', (WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.ltr));
     await pageRight(tester);
@@ -133,7 +132,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('PageView control test (RTL)', (WidgetTester tester) async {
+  testWidgets('PageView control test (RTL)', (WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
     await pageRight(tester);
@@ -167,7 +166,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('PageView with reverse (RTL)', (WidgetTester tester) async {
+  testWidgets('PageView with reverse (RTL)', (WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl));
     expect(currentPage, isNull);

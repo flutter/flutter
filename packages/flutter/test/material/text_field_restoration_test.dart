@@ -4,13 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';
 
 void main() {
-  testWidgetsWithLeakTracking('TextField restoration', (WidgetTester tester) async {
+  testWidgets('TextField restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -21,7 +20,7 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('TextField restoration with external controller', (WidgetTester tester) async {
+  testWidgets('TextField restoration with external controller', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'root',

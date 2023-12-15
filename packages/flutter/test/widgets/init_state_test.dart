@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 List<String> ancestors = <String>[];
 
@@ -29,7 +28,7 @@ class TestWidgetState extends State<TestWidget> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('initState() is called when we are in the tree', (WidgetTester tester) async {
+  testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
     await tester.pumpWidget(const Parent(child: TestWidget()));
     expect(ancestors, containsAllInOrder(<String>['Parent', 'View', 'RootWidget']));
   });

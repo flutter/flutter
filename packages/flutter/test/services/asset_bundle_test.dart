@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
@@ -152,7 +151,7 @@ void main() {
       expect(await data, 1);
     });
 
-    testWidgetsWithLeakTracking('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
+    testWidgets('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
       final TestAssetBundle bundle = TestAssetBundle();
       try {
         await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.error('what do they say?'));
@@ -162,7 +161,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
+    testWidgets('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
       final TestAssetBundle bundle = TestAssetBundle();
       try {
         await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.error('buy more crystals'));

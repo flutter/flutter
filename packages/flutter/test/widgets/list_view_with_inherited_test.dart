@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 List<String> items = <String>[
   'one',
@@ -41,7 +40,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ListView is a build function (smoketest)', (WidgetTester tester) async {
+  testWidgets('ListView is a build function (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
     expect(find.text('one'), findsOneWidget);
     expect(find.text('two'), findsOneWidget);

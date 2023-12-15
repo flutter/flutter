@@ -4,12 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_widgets.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('simultaneously dispose a widget and end the scroll animation', (WidgetTester tester) async {
+  testWidgets('simultaneously dispose a widget and end the scroll animation', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -27,7 +26,7 @@ void main() {
     await tester.pump(const Duration(hours: 5));
   });
 
-  testWidgetsWithLeakTracking('Disposing a (nested) Scrollable while holding in overscroll does not crash', (WidgetTester tester) async {
+  testWidgets('Disposing a (nested) Scrollable while holding in overscroll does not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27707.
 
     final ScrollController controller = ScrollController();

@@ -10,7 +10,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -53,7 +52,7 @@ void _tests() {
   // also update this code to reflect the new output.
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
-  testWidgetsWithLeakTracking('generates code', (WidgetTester tester) async {
+  testWidgets('generates code', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
@@ -92,7 +91,7 @@ void _tests() {
     expect('$code,', expectedCode);
   });
 
-  testWidgetsWithLeakTracking('generated code is correct', (WidgetTester tester) async {
+  testWidgets('generated code is correct', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     expect(

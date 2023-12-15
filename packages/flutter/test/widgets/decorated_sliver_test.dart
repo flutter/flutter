@@ -9,10 +9,9 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('DecoratedSliver creates, paints, and disposes BoxPainter', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver creates, paints, and disposes BoxPainter', (WidgetTester tester) async {
     final TestDecoration decoration = TestDecoration();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -40,7 +39,7 @@ void main() {
     expect(decoration.painters.last.disposed, true);
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver can update box painter', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver can update box painter', (WidgetTester tester) async {
     final TestDecoration decorationA = TestDecoration();
     final TestDecoration decorationB = TestDecoration();
 
@@ -80,7 +79,7 @@ void main() {
     expect(decorationB.painters.last.paintCount, 1);
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver can update DecorationPosition', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver can update DecorationPosition', (WidgetTester tester) async {
     final TestDecoration decoration = TestDecoration();
 
     DecorationPosition activePosition = DecorationPosition.foreground;
@@ -118,7 +117,7 @@ void main() {
     expect(decoration.painters.last.paintCount, 2);
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver golden test', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver golden test', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(
       color: Colors.blue,
     );
@@ -199,7 +198,7 @@ void main() {
     await expectLater(find.byKey(foregroundKey), matchesGoldenFile('decorated_sliver.moon.foreground.png'));
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver paints its border correctly vertically', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver paints its border correctly vertically', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
@@ -236,7 +235,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver paints its border correctly vertically reverse', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver paints its border correctly vertically reverse', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
@@ -276,7 +275,7 @@ void main() {
 
 
 
-  testWidgetsWithLeakTracking('DecoratedSliver paints its border correctly horizontally', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver paints its border correctly horizontally', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
@@ -314,7 +313,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver paints its border correctly horizontally reverse', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver paints its border correctly horizontally reverse', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
@@ -354,7 +353,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('DecoratedSliver works with SliverMainAxisGroup', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver works with SliverMainAxisGroup', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
@@ -393,7 +392,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver works with SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver works with SliverCrossAxisGroup', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
@@ -432,7 +431,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('DecoratedSliver draws only up to the bottom cache when sliver has infinite scroll extent', (WidgetTester tester) async {
+  testWidgets('DecoratedSliver draws only up to the bottom cache when sliver has infinite scroll extent', (WidgetTester tester) async {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();

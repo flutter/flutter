@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('SliverList reverse children (with keys)', (WidgetTester tester) async {
+  testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
@@ -55,7 +54,7 @@ void main() {
     expect(find.text('Tile 0'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SliverList replace children (with keys)', (WidgetTester tester) async {
+  testWidgets('SliverList replace children (with keys)', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
@@ -108,7 +107,7 @@ void main() {
     expect(find.text('Tile 119'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SliverList replace with shorter children list (with keys)', (WidgetTester tester) async {
+  testWidgets('SliverList replace with shorter children list (with keys)', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
@@ -149,7 +148,7 @@ void main() {
     expect(find.text('Tile 19'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SliverList should layout first child in case of child reordering', (WidgetTester tester) async {
+  testWidgets('SliverList should layout first child in case of child reordering', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35904.
     List<String> items = <String>['1', '2'];
     final ScrollController controller1 = ScrollController();
@@ -170,7 +169,7 @@ void main() {
     expect(find.text('Tile 2'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('SliverList should recalculate inaccurate layout offset case 1', (WidgetTester tester) async {
+  testWidgets('SliverList should recalculate inaccurate layout offset case 1', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
@@ -232,7 +231,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('SliverList should recalculate inaccurate layout offset case 2', (WidgetTester tester) async {
+  testWidgets('SliverList should recalculate inaccurate layout offset case 2', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
@@ -286,7 +285,7 @@ void main() {
     expect(find.text('Tile 3'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('SliverList should start to perform layout from the initial child when there is no valid offset', (WidgetTester tester) async {
+  testWidgets('SliverList should start to perform layout from the initial child when there is no valid offset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66198.
     bool isShow = true;
     final ScrollController controller = ScrollController();
