@@ -75,6 +75,7 @@ def flutter_additional_ios_build_settings(target)
     build_configuration.build_settings['ENABLE_BITCODE'] = 'NO'
 
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
+    # TODO(stuartmorgan): Handle local engines here; see https://github.com/flutter/flutter/issues/132228
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     Dir.new(configuration_engine_dir).each_child do |xcframework_file|
       next if xcframework_file.start_with?('.') # Hidden file, possibly on external disk.
