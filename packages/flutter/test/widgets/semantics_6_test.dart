@@ -5,12 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('can change semantics in a branch blocked by BlockSemantics', (WidgetTester tester) async {
+  testWidgets('can change semantics in a branch blocked by BlockSemantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(

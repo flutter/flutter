@@ -4,12 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'observer_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Back during pushReplacement', (WidgetTester tester) async {
+  testWidgets('Back during pushReplacement', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: const Material(child: Text('home')),
       routes: <String, WidgetBuilder>{
@@ -43,7 +42,7 @@ void main() {
   });
 
   group('pushAndRemoveUntil', () {
-    testWidgetsWithLeakTracking('notifies appropriately', (WidgetTester tester) async {
+    testWidgets('notifies appropriately', (WidgetTester tester) async {
       final TestObserver observer = TestObserver();
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
@@ -111,7 +110,7 @@ void main() {
       ]));
     });
 
-    testWidgetsWithLeakTracking('triggers page transition animation for pushed route', (WidgetTester tester) async {
+    testWidgets('triggers page transition animation for pushed route', (WidgetTester tester) async {
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
         routes: <String, WidgetBuilder>{
@@ -140,7 +139,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('Hero transition triggers when preceding route contains hero, and predicate route does not', (WidgetTester tester) async {
+    testWidgets('Hero transition triggers when preceding route contains hero, and predicate route does not', (WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         initialRoute: '/',
@@ -185,7 +184,7 @@ void main() {
       expect(find.text('b'), isOnstage);
     });
 
-    testWidgetsWithLeakTracking('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (WidgetTester tester) async {
+    testWidgets('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         theme: ThemeData(
