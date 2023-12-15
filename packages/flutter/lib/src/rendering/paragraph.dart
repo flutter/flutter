@@ -117,7 +117,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
     }
   }
 
-  static PlaceholderDimensions _layoutChild(RenderBox child, BoxConstraints constraints, ChildLayouter layoutChild, bool isDryLayout) {
+  static PlaceholderDimensions _layoutChild(RenderBox child, BoxConstraints constraints, ChildLayouter layoutChild, ChildBaselineGetter getChildBaseline) {
     final TextParentData parentData = child.parentData! as TextParentData;
     final PlaceholderSpan span = parentData.span!;
     return PlaceholderDimensions(
@@ -130,8 +130,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
             ui.PlaceholderAlignment.bottom ||
             ui.PlaceholderAlignment.middle ||
             ui.PlaceholderAlignment.top => null,
-            ui.PlaceholderAlignment.baseline when isDryLayout => child.getDryBaseline(constraints, span.baseline!),
-            ui.PlaceholderAlignment.baseline => child.getDistanceToBaseline(span.baseline!),
+            ui.PlaceholderAlignment.baseline => getChildBaseline(child, constraints, span.baseline!),
           },
         );
   }
@@ -141,7 +140,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
   /// Returns a list of [PlaceholderDimensions], representing the layout results
   /// for each child managed by the [ContainerRenderObjectMixin] mixin.
   ///
-  /// The `isDryLayout` parameter and the `layoutChild` parameter must be
+  /// The `getChildBaseline` parameter and the `layoutChild` parameter must be
   /// consistent: `isDryLayout` must be set to true, if `layoutChild` computes
   /// the size of the child without modifying the actuai layout of that child,
   /// and vice versa.
@@ -154,11 +153,11 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
   ///  * [TextPainter.setPlaceholderDimensions], the method that usually takes
   ///    the layout results from this method as the input.
   @protected
-  List<PlaceholderDimensions> layoutInlineChildren(double maxWidth, ChildLayouter layoutChild, { bool isDryLayout = false }) {
+  List<PlaceholderDimensions> layoutInlineChildren(double maxWidth, ChildLayouter layoutChild, ChildBaselineGetter getChildBaseline) {
     final BoxConstraints constraints = BoxConstraints(maxWidth: maxWidth);
     return <PlaceholderDimensions>[
       for (RenderBox? child = firstChild; child != null; child = childAfter(child))
-        _layoutChild(child, constraints, layoutChild, isDryLayout),
+        _layoutChild(child, constraints, layoutChild, getChildBaseline),
     ];
   }
 
@@ -633,7 +632,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _textPainter.setPlaceholderDimensions(layoutInlineChildren(
       double.infinity,
       (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
-      isDryLayout: true,
+      ChildLayoutHelper.getDryBaseline,
     ));
     _layoutText(); // layout with infinite width.
     return _textPainter.minIntrinsicWidth;
@@ -646,14 +645,14 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line. Therefore, using 0.0 as a dummy for the height.
       (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
-      isDryLayout: true,
+      ChildLayoutHelper.getDryBaseline,
     ));
     _layoutText(); // layout with infinite width.
     return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, isDryLayout: true));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline));
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
@@ -691,7 +690,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     // out with the correct constraints. These methods should typically call
     // _layoutTextWithConstraints before querying the TextPainter, to make sure
     // the TextPainter is laid out using the right constraints.
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, isDryLayout: true));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
@@ -750,7 +749,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @override
   @protected
   Size computeDryLayout(BoxConstraints constraints) {
-    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, isDryLayout: true));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     return constraints.constrain(_textPainter.size);
   }
@@ -758,7 +757,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
