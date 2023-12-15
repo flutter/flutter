@@ -8,7 +8,6 @@ library;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final Offset basicOffset = Offset(CupertinoMagnifier.kDefaultSize.width / 2,
@@ -49,7 +48,7 @@ void main() {
             animatedPositioned.left ?? 0, animatedPositioned.top ?? 0);
       }
 
-      testWidgetsWithLeakTracking('should be at gesture position if does not violate any positioning rules', (WidgetTester tester) async {
+      testWidgets('should be at gesture position if does not violate any positioning rules', (WidgetTester tester) async {
         final Key fakeTextFieldKey = UniqueKey();
         final Key outerKey = UniqueKey();
 
@@ -100,7 +99,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('should never horizontally be outside of Screen Padding', (WidgetTester tester) async {
+      testWidgets('should never horizontally be outside of Screen Padding', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -132,7 +131,7 @@ void main() {
             lessThan(MediaQuery.sizeOf(context).width));
       });
 
-      testWidgetsWithLeakTracking('should have some vertical drag', (WidgetTester tester) async {
+      testWidgets('should have some vertical drag', (WidgetTester tester) async {
         final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
@@ -173,7 +172,7 @@ void main() {
     });
 
     group('status', () {
-      testWidgetsWithLeakTracking('should hide if gesture is far below the text field', (WidgetTester tester) async {
+      testWidgets('should hide if gesture is far below the text field', (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -213,7 +212,7 @@ void main() {
         expect(magnifierController.overlayEntry, isNotNull);
       });
 
-      testWidgetsWithLeakTracking('should re-show if gesture moves back up',
+      testWidgets('should re-show if gesture moves back up',
           (WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
