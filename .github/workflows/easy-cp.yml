@@ -60,7 +60,7 @@ jobs:
           base: ${{ env.RELEASE_BRANCH }}
           branch: cp-${{ env.CHANNEL }}-${{ env.COMMIT_SHA }}
           path: flutter
-          token: ${{ github.token}}
+          token: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN}}
           labels: |
             cp: review
           title: '[${{ env.CHANNEL }}-cherrypick] cherrypicks commit ${{ env.COMMIT_SHA }} from PR ${{ github.event.pull_request.title }}'
@@ -72,4 +72,4 @@ jobs:
           FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for more info."
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN }}
