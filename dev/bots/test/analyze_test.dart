@@ -145,6 +145,21 @@ void main() {
     );
   });
 
+  test('analyze.dart - verifyInternationalizations - comparison fails', () async {
+    final String result = await capture(() => verifyInternationalizations(testRootPath, dartPath), shouldHaveErrors: true);
+    final String genLocalizationsScript = path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart');
+    expect(result,
+        contains('$dartName $genLocalizationsScript --cupertino'));
+    expect(result,
+        contains('$dartName $genLocalizationsScript --material'));
+    final String generatedFile = path.join(testRootPath, 'packages', 'flutter_localizations',
+        'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+    expect(result,
+        contains('The contents of $generatedFile are different from that produced by gen_localizations.'));
+    expect(result,
+        contains(r'Did you forget to run gen_localizations.dart after updating a .arb file?'));
+  });
+
   test('analyze.dart - verifyNoBinaries - positive', () async {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
@@ -166,29 +181,33 @@ void main() {
     }
   });
 
-  test('analyze.dart - verifyInternationalizations - comparison fails', () async {
-    final String result = await capture(() => verifyInternationalizations(testRootPath, dartPath), shouldHaveErrors: true);
-    final String genLocalizationsScript = path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart');
-    expect(result,
-        contains('$dartName $genLocalizationsScript --cupertino'));
-    expect(result,
-        contains('$dartName $genLocalizationsScript --material'));
-    final String generatedFile = path.join(testRootPath, 'packages', 'flutter_localizations',
-        'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-    expect(result,
-        contains('The contents of $generatedFile are different from that produced by gen_localizations.'));
-    expect(result,
-        contains(r'Did you forget to run gen_localizations.dart after updating a .arb file?'));
-  });
-
   test('analyze.dart - verifyNoBinaries - negative', () async {
     await capture(() => verifyNoBinaries(
       testRootPath,
       legacyBinaries: <Hash256>{
         const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
-        const Hash256(0x155644D3F13D98BF, 0, 0, 0),
       },
     ));
+  });
+
+  test('analyze.dart - verifyNoBinaries - unused hash', () async {
+    final String result = await capture(() => verifyNoBinaries(
+      testRootPath,
+      legacyBinaries: <Hash256>{
+        const Hash256(0xA8100AE6AA1940D0, 0xB663BB31CD466142, 0xEBBDBD5187131B92, 0xD93818987832EB89), // sha256("\xff")
+        const Hash256(0x155644D3F13D98BF, 0, 0, 0),
+      },
+    ), shouldHaveErrors: !Platform.isWindows);
+    if (!Platform.isWindows) {
+      expect(result,
+        '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+        '║ Congratulations! You have removed legacy binaries from the repository.\n'
+        '║ Please also remove their hash entries from _legacyBinaries in dev/bots/analyze.dart.\n'
+        '║ Unused hash entries to remove:\n'
+        '║  * Hash256(0x155644D3F13D98BF, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000)\n'
+        '╚═══════════════════════════════════════════════════════════════════════════════\n'
+      );
+    }
   });
 
   test('analyze.dart - verifyNullInitializedDebugExpensiveFields', () async {
