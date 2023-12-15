@@ -329,9 +329,6 @@ std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
       options_.target_platform              //
   );
   data->SetShaderData(shader_data_);
-  if (sksl_data_) {
-    data->SetSkSLData(sksl_data_);
-  }
 
   // Sort the IR so that the uniforms are in declaration order.
   std::vector<spirv_cross::ID> uniforms =
