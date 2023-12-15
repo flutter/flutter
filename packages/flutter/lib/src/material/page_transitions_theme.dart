@@ -767,11 +767,7 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     final TargetPlatform platform = Theme.of(context).platform;
 
-    bool cupertinoTransitionInProgress = false;
-
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
-      cupertinoTransitionInProgress = true;
-    }
+    final bool cupertinoTransitionInProgress = CupertinoRouteTransitionMixin.isPopGestureInProgress(route);
 
     PageTransitionsBuilder getTransitionBuilder() {
       if (cupertinoTransitionInProgress) {
