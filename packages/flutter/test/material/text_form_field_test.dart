@@ -1425,7 +1425,7 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Passes onAppPrivateCommand to onAppPrivateCommand TextField', (WidgetTester tester) async {
-    void onAppPrivateCommand(String p0, Map<String, dynamic> p1) {}
+    void onAppPrivateCommand(String action, Map<String, dynamic> data) {}
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1510,6 +1510,26 @@ void main() {
 
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.dragStartBehavior, dragStartBehavior);
+  });
+
+  testWidgetsWithLeakTracking('Passes onTapAlwaysCalled to onTapAlwaysCalled TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onTapAlwaysCalled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.onTapAlwaysCalled, isTrue);
   });
 
   testWidgetsWithLeakTracking('Error color for cursor while validating', (WidgetTester tester) async {

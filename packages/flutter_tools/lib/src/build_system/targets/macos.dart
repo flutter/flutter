@@ -393,6 +393,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
+
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment
         .outputDir
@@ -439,6 +440,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       assetDirectory,
       targetPlatform: TargetPlatform.darwin,
       shaderTarget: ShaderTarget.sksl,
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,
