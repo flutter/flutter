@@ -2162,7 +2162,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSelectionOverlay? _selectionOverlay;
   ScrollNotificationObserverState? _scrollNotificationObserver;
   TextEditingValue? _valueWhenToolbarShowScheduled;
-  bool _internalScrolling = false;
 
   bool get _webContextMenuEnabled => kIsWeb && BrowserContextMenu.enabled;
 
@@ -3667,8 +3666,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scribbleCacheKey = null;
   }
 
+  bool _isInternalScrollableNotification(BuildContext? notificationContext) {
+    final ScrollableState? scrollableState = notificationContext?.findAncestorStateOfType<ScrollableState>();
+    if (_scrollableKey.currentContext == scrollableState?.context) {
+      return true;
+    }
+    return false;
+  }
+
   void _handleContextMenuOnParentScroll(ScrollNotification notification) {
-    if (_internalScrolling) {
+    if (_isInternalScrollableNotification(notification.context)) {
       return;
     }
     if (!_scrollableNotificationIsFromSameSubtree(notification.context)) {
@@ -3725,7 +3732,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
       }
     } else if (notification is ScrollEndNotification) {
-      _internalScrolling = false;
       if (_valueWhenToolbarShowScheduled == null) {
         return;
       }
@@ -5060,7 +5066,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                 debugLabel: kReleaseMode ? null : 'EditableText',
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification notification) {
-                    _internalScrolling = true;
                     _handleContextMenuOnScroll(notification);
                     return false;
                   },
