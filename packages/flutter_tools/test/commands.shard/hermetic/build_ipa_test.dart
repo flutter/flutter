@@ -664,7 +664,8 @@ void main() {
     expect(logger.statusText, contains('Building App Store IPA'));
     expect(logger.errorText, contains('Encountered error while creating the IPA:'));
     expect(logger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
-    expect(logger.errorText, contains('Try distributing the app in Xcode: "open '));
+    expect(logger.errorText, contains('Try distributing the app in Xcode:'));
+    expect(logger.errorText, contains('open /build/ios/archive/Runner.xcarchive'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
