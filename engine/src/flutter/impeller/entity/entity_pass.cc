@@ -877,7 +877,6 @@ bool EntityPass::OnRender(
                                     !backdrop_filter_proc_;
   for (const auto& element : elements_) {
     // Skip elements that are incorporated into the clear color.
-    bool was_collapsing_clear_colors = is_collapsing_clear_colors;
     if (is_collapsing_clear_colors) {
       auto [entity_color, _] =
           ElementAsBackgroundColor(element, clear_color_size);
@@ -951,20 +950,9 @@ bool EntityPass::OnRender(
         FilterInput::Vector inputs = {
             FilterInput::Make(texture, result.entity.GetTransform().Invert()),
             FilterInput::Make(result.entity.GetContents())};
-        std::optional<Color> foreground_color;
-        std::optional<Rect> coverage;
-        if (was_collapsing_clear_colors) {
-          // If all previous elements were skipped due to clear color
-          // optimization, then provide the clear color as the foreground of the
-          // advanced blend.
-          foreground_color = GetClearColorOrDefault(clear_color_size);
-          coverage = Rect::MakeSize(clear_color_size);
-        } else {
-          coverage = result.entity.GetCoverage();
-        }
         auto contents = ColorFilterContents::MakeBlend(
-            result.entity.GetBlendMode(), inputs, foreground_color);
-        contents->SetCoverageHint(coverage);
+            result.entity.GetBlendMode(), inputs);
+        contents->SetCoverageHint(result.entity.GetCoverage());
         result.entity.SetContents(std::move(contents));
         result.entity.SetBlendMode(BlendMode::kSource);
       }
