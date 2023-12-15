@@ -3701,6 +3701,7 @@ void main() {
                 scrollDirection: Axis.horizontal,
                 child: SelectableText(
                   'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges ' * 2,
+                  maxLines: 1,
                 ),
               ),
             ),
@@ -3743,13 +3744,13 @@ void main() {
         extentOffset: 35,
       ),
     );
-    await gesture.moveBy(const Offset(1300, 0));
+    await gesture.moveBy(const Offset(1600, 0));
     await tester.pump();
     expect(
       controller.selection,
       const TextSelection(
         baseOffset: 13,
-        extentOffset: 122,
+        extentOffset: 134,
       ),
     );
 
@@ -3761,7 +3762,7 @@ void main() {
       controller.selection,
       const TextSelection(
         baseOffset: 13,
-        extentOffset: 122,
+        extentOffset: 134,
       ),
     );
     // The toolbar shows up.
