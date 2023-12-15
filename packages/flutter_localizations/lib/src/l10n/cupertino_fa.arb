@@ -26,5 +26,6 @@
   "menuDismissLabel": "بستن منو",
   "lookUpButtonLabel": "جستجو",
   "searchWebButtonLabel": "جستجو در وب",
-  "shareButtonLabel": "هم‌رسانی…"
+  "shareButtonLabel": "هم‌رسانی…",
+  "clearButtonLabel": "Clear"
 }

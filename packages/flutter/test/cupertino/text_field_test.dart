@@ -7887,6 +7887,65 @@ void main() {
     );
   });
 
+  testWidgetsWithLeakTracking('Cupertino text field clear button semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(
+              clearButtonMode: OverlayVisibilityMode.always,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.bySemanticsLabel('Clear'), findsOneWidget);
+
+    expect(
+      tester.getSemantics(
+        find.bySemanticsLabel('Clear').first,
+      ),
+      matchesSemantics(
+        isButton: true,
+        hasTapAction: true,
+        label: 'Clear'
+      ),
+    );
+  });
+
+  testWidgetsWithLeakTracking('Cupertino text field clear semantic label', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(
+              clearButtonMode: OverlayVisibilityMode.always,
+              clearButtonSemanticLabel: 'Delete Text'
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.bySemanticsLabel('Clear'), findsNothing);
+
+    expect(find.bySemanticsLabel('Delete Text'), findsOneWidget);
+
+    expect(
+      tester.getSemantics(
+        find.bySemanticsLabel('Delete Text').first,
+      ),
+      matchesSemantics(
+        isButton: true,
+        hasTapAction: true,
+        label: 'Delete Text'
+      ),
+    );
+  });
+
   testWidgetsWithLeakTracking('text selection style 1', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',

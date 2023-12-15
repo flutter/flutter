@@ -31,5 +31,6 @@
   "menuDismissLabel": "Respingeți meniul",
   "lookUpButtonLabel": "Privire în sus",
   "searchWebButtonLabel": "Căutați pe web",
-  "shareButtonLabel": "Trimiteți…"
+  "shareButtonLabel": "Trimiteți…",
+  "clearButtonLabel": "Clear"
 }

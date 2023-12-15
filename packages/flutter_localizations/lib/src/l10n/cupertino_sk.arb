@@ -36,5 +36,6 @@
   "menuDismissLabel": "Zavrieť ponuku",
   "lookUpButtonLabel": "Pohľad nahor",
   "searchWebButtonLabel": "Hľadať na webe",
-  "shareButtonLabel": "Zdieľať…"
+  "shareButtonLabel": "Zdieľať…",
+  "clearButtonLabel": "Clear"
 }
