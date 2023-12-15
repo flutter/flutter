@@ -734,9 +734,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(position);
-    // This works even with large letter-spacing and text justification, as
-    // graphemeClusterLayoutBounds.width is the x layout advance to the next
-    // character.
+    // The hit-test can't fall through the horizontal gaps between visually
+    // adjacent characters on the same line, even with a large letter-spacing or
+    // text justification, as graphemeClusterLayoutBounds.width is the advance
+    // width to the next character, so there's no gap between their
+    // graphemeClusterLayoutBounds rects.
     final InlineSpan? spanHit = glyph != null && glyph.graphemeClusterLayoutBounds.contains(position)
       ? _textPainter.text!.getSpanForPosition(TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start))
       : null;
