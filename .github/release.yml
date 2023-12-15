@@ -17,12 +17,13 @@ changelog:
         - "f: scrolling"
         - "f: routes"
         - "f: selection"
+        - "f: gestures"
       exclude:
         labels:
-          - "f: material"
+          - "f: material design"
     - title: Material
       labels:
-        - "f: material"
+        - "f: material design"
     # Mobile
     - title: iOS
       labels:
@@ -32,7 +33,7 @@ changelog:
       labels:
         - platform-android
     # Desktop
-    - title: MacOS
+    - title: macOS
       labels:
         - platform-mac
     - title: Windows
@@ -57,6 +58,8 @@ changelog:
       labels:
         - "d: devtools"
         - "d: intellij"
+        - "d: tools_metadata"
+        - "f: inspector"
     - title: Documentation
       labels:
         - "d: examples"
