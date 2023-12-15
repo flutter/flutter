@@ -39,7 +39,7 @@ void main() {
       ..bottom = 0.0
       ..left = 0.0;
 
-    layout(stack, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints());
+    layout(stack, constraints: const BoxConstraints());
 
     expect(stack.size.width, equals(100.0));
     expect(stack.size.height, equals(100.0));

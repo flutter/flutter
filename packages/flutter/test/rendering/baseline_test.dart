@@ -70,7 +70,7 @@ void main() {
         ),
       ],
     );
-    layout(root, phase: EnginePhase.sendSemanticsUpdate);
+    layout(root);
 
     final Offset aPos = a.localToGlobal(Offset.zero);
     final Offset bPos = b.localToGlobal(Offset.zero);
@@ -97,7 +97,7 @@ void main() {
         ),
       ],
     );
-    layout(root, phase: EnginePhase.sendSemanticsUpdate);
+    layout(root);
 
     final Offset aPos = a.localToGlobal(Offset.zero);
     final Offset bPos = b.localToGlobal(Offset.zero);

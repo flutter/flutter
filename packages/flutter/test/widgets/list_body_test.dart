@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const List<Widget> children = <Widget>[
-  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF1))),
-  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF2))),
-  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF3))),
-  SizedBox(width: 200.0, height: 150.0, child: ColoredBox(color: Color(0xFFFFFFF4))),
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
 ];
 
 void expectRects(WidgetTester tester, List<Rect> expected) {

@@ -226,7 +226,7 @@ void main() {
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceEvenly);
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints(
+    layout(flex, constraints: const BoxConstraints(
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
@@ -257,7 +257,7 @@ void main() {
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, mainAxisAlignment: MainAxisAlignment.spaceBetween);
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints(
+    layout(flex, constraints: const BoxConstraints(
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
@@ -310,7 +310,7 @@ void main() {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex, phase: EnginePhase.sendSemanticsUpdate, constraints: const BoxConstraints(
+    layout(flex, constraints: const BoxConstraints(
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
@@ -375,7 +375,7 @@ void main() {
       child: flex,
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(parent, phase: EnginePhase.sendSemanticsUpdate);
+    layout(parent);
     expect(flex.size, const Size(300.0, 100.0));
     final FlexParentData box2ParentData = box2.parentData! as FlexParentData;
     box2ParentData.flex = 1;
@@ -463,7 +463,7 @@ void main() {
       mainAxisSize: MainAxisSize.min,
     );
     flex.addAll(<RenderBox>[box1, box2, box3]);
-    layout(flex, phase: EnginePhase.sendSemanticsUpdate);
+    layout(flex);
     expect(flex.constraints.hasTightWidth, isTrue);
     expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 250.0));
     expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 250.0));
@@ -479,7 +479,7 @@ void main() {
     final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: square);
     final RenderFlex flex = RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[box1, box2, box3]);
-    layout(flex, phase: EnginePhase.sendSemanticsUpdate);
+    layout(flex);
     expect(box1.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
     expect(box2.localToGlobal(Offset.zero), const Offset(100.0, 250.0));
     expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 250.0));
@@ -528,6 +528,15 @@ void main() {
     expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 500.0));
     expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 500.0));
     expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 500.0));
+    expect(box1.size, const Size(100.0, 100.0));
+    expect(box2.size, const Size(100.0, 100.0));
+    expect(box3.size, const Size(100.0, 100.0));
+
+    flex.verticalDirection = VerticalDirection.up;
+    pumpFrame();
+    expect(box1.localToGlobal(Offset.zero), const Offset(700.0, 0.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(600.0, 0.0));
+    expect(box3.localToGlobal(Offset.zero), const Offset(500.0, 0.0));
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
