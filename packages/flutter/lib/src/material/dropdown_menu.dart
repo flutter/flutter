@@ -441,7 +441,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       if(!mounted) {
         return;
       }
-
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
