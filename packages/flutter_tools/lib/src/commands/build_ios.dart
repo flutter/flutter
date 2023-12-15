@@ -464,10 +464,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
     final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
     String? exportOptions = exportOptionsPlist;
-    final String exportMethod = exportOptions != null
-          ? globals.plistParser.getValueFromFile(exportOptions, 'method') ?? 'unknown'
-          : stringArg('export-method')!;
-    final bool isAppStoreUpload = exportMethod  == 'app-store';
+    String? exportMethod = exportOptions != null ?
+        globals.plistParser.getValueFromFile<String?>(exportOptions, 'method') : null;
+    exportMethod ??= stringArg('export-method')!;
+    final bool isAppStoreUpload = exportMethod == 'app-store';
     File? generatedExportPlist;
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
