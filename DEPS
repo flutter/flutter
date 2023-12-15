@@ -660,7 +660,7 @@ deps = {
    Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '25e97546488eee166b1abb229a27856cecd8b7ac',
 
    'src/flutter/third_party/swiftshader':
-   Var('swiftshader_git') + '/SwiftShader.git' + '@' + '5b6f768198ce6a6485da31e1be06b5a17a2bf0a0',
+   Var('swiftshader_git') + '/SwiftShader.git' + '@' + '2fa7e9b99ae4e70ea5ae2cc9c8d3afb43391384f',
 
    'src/third_party/angle':
    Var('chromium_git') + '/angle/angle.git' + '@' + '6a09e41ce6ea8c93524faae1a925eb01562f53b1',
