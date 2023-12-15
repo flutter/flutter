@@ -4,6 +4,7 @@
 
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/canvas.h"
+#include "impeller/aiks/image_filter.h"
 #include "impeller/geometry/path_builder.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -334,6 +335,23 @@ TEST(AiksCanvasTest, PathClipDiffAgainstFullyCoveredCullRect) {
 
   ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
   ASSERT_EQ(canvas.GetCurrentLocalCullingBounds().value(), result_cull);
+}
+
+TEST(AiksCanvasTest, DisableLocalBoundsRectForFilteredSaveLayers) {
+  Rect initial_cull = Rect::MakeXYWH(0, 0, 10, 10);
+
+  Canvas canvas(initial_cull);
+  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
+
+  canvas.Save();
+  canvas.SaveLayer(
+      Paint{.image_filter = ImageFilter::MakeBlur(
+                Sigma(10), Sigma(10), FilterContents::BlurStyle::kNormal,
+                Entity::TileMode::kDecal)});
+  ASSERT_FALSE(canvas.GetCurrentLocalCullingBounds().has_value());
+
+  canvas.Restore();
+  ASSERT_TRUE(canvas.GetCurrentLocalCullingBounds().has_value());
 }
 
 }  // namespace testing
