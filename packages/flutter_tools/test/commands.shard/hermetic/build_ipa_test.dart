@@ -409,7 +409,7 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
   });
 
-  testUsingContext('ipa build reports exportMethodName from --export-options-plist when used', () async {
+  testUsingContext('ipa build reports method from --export-options-plist when used', () async {
     final File exportOptions = fileSystem.file('/ExportOptions.plist')
       ..createSync();
     createMinimalMockProjectFiles();
