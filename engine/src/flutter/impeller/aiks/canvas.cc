@@ -681,6 +681,14 @@ void Canvas::SaveLayer(const Paint& paint,
   TRACE_EVENT0("flutter", "Canvas::saveLayer");
   Save(true, paint.blend_mode, backdrop_filter);
 
+  // The DisplayList bounds/rtree doesn't account for filters applied to parent
+  // layers, and so sub-DisplayLists are getting culled as if no filters are
+  // applied.
+  // See also: https://github.com/flutter/flutter/issues/139294
+  if (paint.image_filter) {
+    transform_stack_.back().cull_rect = std::nullopt;
+  }
+
   auto& new_layer_pass = GetCurrentPass();
   new_layer_pass.SetBoundsLimit(bounds);
 
