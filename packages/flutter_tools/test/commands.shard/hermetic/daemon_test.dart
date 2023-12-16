@@ -22,8 +22,10 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/preview_device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -121,10 +123,15 @@ void main() {
 
       expect(response.data['id'], 0);
       expect(response.data['result'], isNotEmpty);
-      expect((response.data['result']! as Map<String, Object?>)['platforms'], <String>{'macos'});
+      expect((response.data['result']! as Map<String, Object?>)['platforms'], const <String>{'macos', 'preview'});
     }, overrides: <Type, Generator>{
       // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
-      FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false, isIOSEnabled: false, isMacOSEnabled: true),
+      FeatureFlags: () => TestFeatureFlags(
+        isAndroidEnabled: false,
+        isIOSEnabled: false,
+        isMacOSEnabled: true,
+        isPreviewDeviceEnabled: true,
+      ),
     });
 
     testUsingContext('printError should send daemon.logMessage event', () async {
@@ -342,18 +349,23 @@ void main() {
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
+      discoverer.addDevice(FakePreviewDevice());
 
-      return daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).first.then<void>((DaemonMessage response) async {
+      final List<String> names = <String>[];
+      await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(2).forEach((DaemonMessage response) async {
         expect(response.data['event'], 'device.added');
         expect(response.data['params'], isMap);
 
         final Map<String, Object?> params = castStringKeyedMap(response.data['params'])!;
-        expect(params['platform'], isNotEmpty); // the fake device has a platform of 'android-arm'
+        names.add(params['name']! as String);
       });
+      await daemonStreams.outputs.close();
+      expect(names, containsAll(const <String>['android device', 'preview']));
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => FakeAndroidWorkflow(),
       IOSWorkflow: () => FakeIOSWorkflow(),
       FuchsiaWorkflow: () => FakeFuchsiaWorkflow(),
+      WindowsWorkflow: () => FakeWindowsWorkflow(),
     });
 
     testUsingContext('device.discoverDevices should respond with list', () async {
@@ -930,6 +942,13 @@ bool _notEvent(DaemonMessage message) => message.data['event'] == null;
 
 bool _isConnectedEvent(DaemonMessage message) => message.data['event'] == 'daemon.connected';
 
+class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {
+  FakeWindowsWorkflow({ this.canListDevices = true });
+
+  @override
+  final bool canListDevices;
+}
+
 class FakeFuchsiaWorkflow extends Fake implements FuchsiaWorkflow {
   FakeFuchsiaWorkflow({ this.canListDevices = true });
 
@@ -951,6 +970,59 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
   final bool canListDevices;
 }
 
+class FakePreviewDevice extends Fake implements PreviewDevice {
+  @override
+  final String id = 'preview-device-id';
+
+  @override
+  final String name = 'preview';
+
+  @override
+  Future<String> get emulatorId async => 'preview-device';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
+
+  @override
+  Future<bool> get isLocalEmulator async => false;
+
+  @override
+  final Category category = Category.desktop;
+
+  @override
+  final PlatformType platformType = PlatformType.windows;
+
+  @override
+  final bool ephemeral = false;
+
+  @override
+  final bool isConnected = true;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'preview';
+
+  @override
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsScreenshot => true;
+
+  @override
+  bool get supportsFastStart => true;
+
+  @override
+  bool get supportsFlutterExit => true;
+
+  @override
+  Future<bool> get supportsHardwareRendering async => true;
+
+  @override
+  bool get supportsStartPaused => true;
+}
+
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
@@ -959,7 +1031,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final String id = 'device';
 
   @override
-  final String name = 'device';
+  final String name = 'android device';
 
   @override
   Future<String> get emulatorId async => 'device';
