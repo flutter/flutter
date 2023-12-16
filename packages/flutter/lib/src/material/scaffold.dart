@@ -1183,7 +1183,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
           : contentBottom;
       }
 
-      final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
+      double xOffset = 0.0;
+      if (hasCustomWidth) {
+        xOffset = switch (textDirection) {
+          TextDirection.rtl => (snackBarWidth! - size.width) / 2,
+          TextDirection.ltr => (size.width - snackBarWidth!) / 2,
+        };
+      }
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
 
       assert((){
