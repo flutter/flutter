@@ -1031,7 +1031,7 @@ A problem occurred evaluating project ':app'.
           "│     + classpath 'com.android.tools.build:gradle:7.3.0'                           │\n"
           '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
           '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-          '│     + https://services.gradle.org/distributions/gradle-7.5-all.zip               │\n'
+          '│     + https://services.gradle.org/distributions/gradle-7.6.3-all.zip             │\n'
           '└──────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
@@ -1081,13 +1081,13 @@ Execution failed for task ':app:checkDebugAarMetadata'.
         testLogger.statusText,
         contains(
           '\n'
-          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Your project requires a higher compileSdkVersion.                         │\n'
-          '│ Fix this issue by bumping the compileSdkVersion in /android/app/build.gradle: │\n'
-          '│ android {                                                                     │\n'
-          '│   compileSdkVersion 31                                                        │\n'
-          '│ }                                                                             │\n'
-          '└───────────────────────────────────────────────────────────────────────────────┘\n'
+          '┌─ Flutter Fix ──────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdk version.                         │\n'
+          '│ Fix this issue by bumping the compileSdk version in /android/app/build.gradle: │\n'
+          '│ android {                                                                      │\n'
+          '│   compileSdk 31                                                                │\n'
+          '│ }                                                                              │\n'
+          '└────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
     }, overrides: <Type, Generator>{

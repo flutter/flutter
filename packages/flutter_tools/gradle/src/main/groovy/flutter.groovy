@@ -41,7 +41,7 @@ import org.gradle.internal.os.OperatingSystem
 */
 class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    static int compileSdkVersion = 33
+    static int compileSdkVersion = 34
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 19
@@ -441,7 +441,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${pluginProject.android.compileSdkVersion.substring(8)}.")
+                project.logger.quiet("Warning: The plugin ${pluginName} requires Android SDK version ${getCompileSdkFromProject(pluginProject)} or higher.")
                 project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
 
@@ -483,9 +483,11 @@ class FlutterPlugin implements Plugin<Project> {
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
-            int projectCompileSdkVersion = Integer.MAX_VALUE // Default to int max if using a preview version to skip the sdk check.
-            if (project.android.compileSdkVersion.substring(8).isInteger()) { // Stable versions use ints, legacy preview uses string.
-                projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
+            // Default to int max if using a preview version to skip the sdk check.
+            int projectCompileSdkVersion = Integer.MAX_VALUE
+            // Stable versions use ints, legacy preview uses string.
+            if (getCompileSdkFromProject(project).isInteger()) {
+                projectCompileSdkVersion = getCompileSdkFromProject(project) as int
             }
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
@@ -496,7 +498,12 @@ class FlutterPlugin implements Plugin<Project> {
             getPluginList().each { plugin ->
                 Project pluginProject = project.rootProject.findProject(plugin.key)
                 pluginProject.afterEvaluate {
-                    int pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int
+                    // Default to int min if using a preview version to skip the sdk check.
+                    int pluginCompileSdkVersion = Integer.MIN_VALUE;
+                    // Stable versions use ints, legacy preview uses string.
+                    if (getCompileSdkFromProject(pluginProject).isInteger()) {
+                        pluginCompileSdkVersion = getCompileSdkFromProject(pluginProject) as int;
+                    }
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
                     String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
@@ -513,6 +520,14 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
+     * or string version.
+     */
+    private String getCompileSdkFromProject(Project gradleProject) {
+        return gradleProject.android.compileSdkVersion.substring(8);
     }
 
     /**
@@ -752,7 +767,7 @@ class FlutterPlugin implements Plugin<Project> {
     //
     // See https://developer.android.com/training/app-links/ for more information about app link.
     //
-    // The json will be stored in <project>/build/app/app-link-settings-<variant>.json
+    // The json will be saved in path stored in outputPath parameter.
     //
     // An example json:
     // {
@@ -830,7 +845,7 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                     def generator = new JsonGenerator.Options().build()
-                    new File(project.buildDir, "app-link-settings-${variant.name}.json").write(generator.toJson(appLinkSettings))
+                    new File(project.getProperty("outputPath")).write(generator.toJson(appLinkSettings))
                 }
             }
         }
@@ -1032,7 +1047,17 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
+            // Build an AAR when this property is defined.
+            boolean isBuildingAar = project.hasProperty('is-plugin')
+            // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
+            // `:flutter` is used as a subproject when these tasks exists and the build isn't building an AAR.
+            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
+            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
+            boolean isAndroidLibraryValue = isBuildingAar || isUsedAsSubproject
+
             String variantBuildMode = buildModeFor(variant.buildType)
+            String flavorValue = variant.getFlavorName()
             String taskName = toCamelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name])
             // Be careful when configuring task below, Groovy has bizarre
             // scoping rules: writing `verbose isVerbose()` means calling
@@ -1044,6 +1069,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
                 buildMode variantBuildMode
+                minSdkVersion variant.mergedFlavor.minSdkVersion.apiLevel
                 localEngine this.localEngine
                 localEngineHost this.localEngineHost
                 localEngineSrcPath this.localEngineSrcPath
@@ -1068,15 +1094,8 @@ class FlutterPlugin implements Plugin<Project> {
                 codeSizeDirectory codeSizeDirectoryValue
                 deferredComponents deferredComponentsValue
                 validateDeferredComponents validateDeferredComponentsValue
-                doLast {
-                    project.exec {
-                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
-                        } else {
-                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
-                        }
-                    }
-                }
+                isAndroidLibrary isAndroidLibraryValue
+                flavor flavorValue
             }
             File libJar = project.file("${project.buildDir}/$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -1097,19 +1116,28 @@ class FlutterPlugin implements Plugin<Project> {
             addApiDependencies(project, variant.name, project.files {
                 packFlutterAppAotTask
             })
-            // We build an AAR when this property is defined.
-            boolean isBuildingAar = project.hasProperty('is-plugin')
-            // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
-            // We know that `:flutter` is used as a subproject when these tasks exists and we aren't building an AAR.
-            Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
-            Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
-            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
             Task copyFlutterAssetsTask = project.tasks.create(
                 name: "copyFlutterAssets${variant.name.capitalize()}",
                 type: Copy,
             ) {
                 dependsOn compileTask
                 with compileTask.assets
+                def currentGradleVersion = project.getGradle().getGradleVersion()
+
+                // See https://docs.gradle.org/current/javadoc/org/gradle/api/file/ConfigurableFilePermissions.html
+                // See https://github.com/flutter/flutter/pull/50047
+                if (compareVersionStrings(currentGradleVersion, '8.3') >= 0 ) {
+                    filePermissions {
+                        user {
+                            read = true
+                            write = true
+                        }
+                    }
+                } else {
+                    // See https://docs.gradle.org/8.2/dsl/org.gradle.api.tasks.Copy.html#org.gradle.api.tasks.Copy:fileMode
+                    // See https://github.com/flutter/flutter/pull/50047
+                    fileMode 0644
+                }
                 if (isUsedAsSubproject) {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
@@ -1194,6 +1222,9 @@ class FlutterPlugin implements Plugin<Project> {
                         }
                     }
                 }
+                // Copy the native assets created by build.dart and placed here by flutter assemble.
+                def nativeAssetsDir = "${project.buildDir}/../native_assets/android/jniLibs/lib/"
+                project.android.sourceSets.main.jniLibs.srcDir nativeAssetsDir
             }
             configurePlugins()
             detectLowCompileSdkVersionOrNdkVersion()
@@ -1219,7 +1250,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // | ----------------- | ----------------------------- |
                     // |   Build Variant   |   Flutter Equivalent Variant  |
                     // | ----------------- | ----------------------------- |
-                    // |   freeRelease     |   release                      |
+                    // |   freeRelease     |   release                     |
                     // |   freeDebug       |   debug                       |
                     // |   freeDevelop     |   debug                       |
                     // |   profile         |   profile                     |
@@ -1250,6 +1281,28 @@ class FlutterPlugin implements Plugin<Project> {
         configurePlugins()
         detectLowCompileSdkVersionOrNdkVersion()
     }
+
+    // compareTo implementation of version strings in the format of ints and periods
+    // Requires non null objects.
+    static int compareVersionStrings(String firstString, String secondString) {
+        List firstVersion = firstString.tokenize('.')
+        List secondVersion = secondString.tokenize('.')
+
+        def commonIndices = Math.min(firstVersion.size(), secondVersion.size())
+
+        for (int i = 0; i < commonIndices; i++) {
+            def firstAtIndex = firstVersion[i].toInteger()
+            def secondAtIndex = secondVersion[i].toInteger()
+
+            if (firstAtIndex != secondAtIndex) {
+                // <=> in groovy delegates to compareTo
+                return firstAtIndex <=> secondAtIndex
+            }
+        }
+
+        // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
+        return firstVersion.size() <=> secondVersion.size()
+    }
 }
 
 class AppLinkSettings {
@@ -1277,6 +1330,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     File flutterExecutable
     @Input
     String buildMode
+    @Input
+    int minSdkVersion
     @Optional @Input
     String localEngine
     @Optional @Input
@@ -1325,6 +1380,10 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean deferredComponents
     @Optional @Input
     Boolean validateDeferredComponents
+    @Optional @Input
+    Boolean isAndroidLibrary
+    @Optional @Input
+    String flavor
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -1405,6 +1464,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (codeSizeDirectory != null) {
                 args "-dCodeSizeDirectory=${codeSizeDirectory}"
             }
+            if (flavor != null) {
+                args "-dFlavor=${flavor}"
+            }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
@@ -1413,6 +1475,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (extraFrontEndOptions != null) {
                 args "--ExtraFrontEndOptions=${extraFrontEndOptions}"
+            }
+            args "-dAndroidArchs=${targetPlatformValues.join(' ')}"
+            args "-dMinSdkVersion=${minSdkVersion}"
+            if (isAndroidLibrary != null) {
+                args "-dIsAndroidLibrary=${isAndroidLibrary ? "true" : "false"}"
             }
             args ruleNames
         }
