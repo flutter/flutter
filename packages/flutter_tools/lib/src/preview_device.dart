@@ -153,7 +153,7 @@ class PreviewDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  String get name => 'preview';
+  String get name => 'Preview';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
