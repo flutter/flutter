@@ -349,22 +349,21 @@ template("impellerc") {
 
     shader_target_flag = invoker.shader_target_flag
 
-    depfile_path = "$generated_dir/{{source_file_part}}.d"
-    depfile_intermediate_path = rebase_path(depfile_path, root_build_dir)
-    depfile = depfile_path
-
     shader_lib_dir = rebase_path("//flutter/impeller/compiler/shader_lib")
     args = [
       "--include=$shader_lib_dir",
-      "--depfile=$depfile_intermediate_path",
       "$shader_target_flag",
     ]
 
     # When we're in single invocation mode, we can't use source enumeration.
     if (!single_invocation) {
+      depfile_path = "$generated_dir/{{source_file_part}}.d"
+      depfile_intermediate_path = rebase_path(depfile_path, root_build_dir)
+      depfile = depfile_path
       args += [
         "--input={{source}}",
         "--include={{source_dir}}",
+        "--depfile=$depfile_intermediate_path",
       ]
     }
 
