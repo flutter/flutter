@@ -294,7 +294,7 @@ class FormState extends State<Form> {
   ///
   /// See also:
   ///  * [validateGranularly], which also validates descendant [FormField]s,
-  /// but instead returns a [Set] of fields with errors
+  /// but instead returns a [Set] of fields with errors.
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
@@ -312,7 +312,7 @@ class FormState extends State<Form> {
   ///
   /// See also:
   ///  * [validate], which also validates descendant [FormField]s,
-  /// and return true if there are no errors
+  /// and return true if there are no errors.
   Set<FormFieldState<Object?>> validateGranularly() {
     final Set<FormFieldState<Object?>> invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
