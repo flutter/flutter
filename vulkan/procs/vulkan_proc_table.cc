@@ -76,13 +76,9 @@ PFN_vkGetInstanceProcAddr VulkanProcTable::NativeGetInstanceProcAddr() const {
     return GetInstanceProcAddr;
   }
 
-#if VULKAN_LINK_STATICALLY
-  return &vkGetInstanceProcAddr;
-#else   // VULKAN_LINK_STATICALLY
   auto instance_proc =
       const_cast<uint8_t*>(handle_->ResolveSymbol("vkGetInstanceProcAddr"));
   return reinterpret_cast<PFN_vkGetInstanceProcAddr>(instance_proc);
-#endif  // VULKAN_LINK_STATICALLY
 }
 
 bool VulkanProcTable::SetupLoaderProcAddresses() {
@@ -200,11 +196,7 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
 }
 
 bool VulkanProcTable::OpenLibraryHandle(const char* path) {
-#if VULKAN_LINK_STATICALLY
-  handle_ = fml::NativeLibrary::CreateForCurrentProcess();
-#else   // VULKAN_LINK_STATICALLY
   handle_ = fml::NativeLibrary::Create(path);
-#endif  // VULKAN_LINK_STATICALLY
   if (!handle_) {
     FML_DLOG(ERROR) << "Could not open Vulkan library handle: " << path;
     return false;

@@ -35,7 +35,6 @@
 #if ALLOW_IMPELLER
 #include <vulkan/vulkan.h>                                        // nogncheck
 #include "flutter/vulkan/procs/vulkan_proc_table.h"               // nogncheck
-#include "flutter/vulkan/swiftshader_path.h"                      // nogncheck
 #include "impeller/entity/vk/entity_shaders_vk.h"                 // nogncheck
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"      // nogncheck
 #include "impeller/entity/vk/modern_shaders_vk.h"                 // nogncheck
@@ -78,7 +77,7 @@ struct ImpellerVulkanContextHolder {
 
 bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
   vulkan_proc_table =
-      fml::MakeRefCounted<vulkan::VulkanProcTable>(VULKAN_SO_PATH);
+      fml::MakeRefCounted<vulkan::VulkanProcTable>(&vkGetInstanceProcAddr);
   if (!vulkan_proc_table->NativeGetInstanceProcAddr()) {
     FML_LOG(ERROR) << "Could not load Swiftshader library.";
     return false;
