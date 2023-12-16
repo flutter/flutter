@@ -2605,7 +2605,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking('Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
+    testWidgets('Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/140125.
       const double customWidth = 400.0;
       await tester.pumpWidget(
