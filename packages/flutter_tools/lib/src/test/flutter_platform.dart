@@ -503,7 +503,7 @@ class FlutterPlatform extends PlatformPlugin {
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
-        mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
+        mainDart = createListenerDart(testPath);
 
         // Integration test device takes care of the compilation.
         if (integrationTestDevice == null) {
@@ -615,20 +615,16 @@ class FlutterPlatform extends PlatformPlugin {
     return outOfBandError;
   }
 
-  String _createListenerDart(
-    List<Finalizer> finalizers,
-    int ourTestCount,
+  @visibleForTesting
+  String createListenerDart(
     String testPath,
   ) {
-    // Prepare a temporary directory to store the Dart file that will talk to us.
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_test_listener.');
-    finalizers.add(() async {
-      globals.printTrace('test $ourTestCount: deleting temporary directory');
-      tempDir.deleteSync(recursive: true);
-    });
+    // Prepare a directory to store the Dart file that will talk to us.
+    final Directory? flutterTestListenerDirectory = flutterProject?.buildDirectory.childDirectory('flutter_test_listener');
+    flutterTestListenerDirectory?.createSync();
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = globals.fs.file('${tempDir.path}/listener.dart');
+    final File listenerFile = globals.fs.file('${flutterTestListenerDirectory?.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath)),
