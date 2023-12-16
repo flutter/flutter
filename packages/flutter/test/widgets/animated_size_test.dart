@@ -87,7 +87,7 @@ void main() {
       expect(box.size.height, equals(100.0));
     });
 
-    testWidgetsWithLeakTracking('calls onEnd when animation is completed', (WidgetTester tester) async {
+    testWidgets('calls onEnd when animation is completed', (WidgetTester tester) async {
       int callCount = 0;
       void handleEnd() {
         callCount++;
