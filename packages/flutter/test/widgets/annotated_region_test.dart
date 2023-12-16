@@ -5,10 +5,9 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('provides a value to the layer tree', (WidgetTester tester) async {
+  testWidgets('provides a value to the layer tree', (WidgetTester tester) async {
     await tester.pumpWidget(
       const AnnotatedRegion<int>(
         value: 1,
@@ -20,7 +19,7 @@ void main() {
     expect(layer.value, 1);
   });
 
-  testWidgetsWithLeakTracking('provides a value to the layer tree in a particular region', (WidgetTester tester) async {
+  testWidgets('provides a value to the layer tree in a particular region', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(25.0, 25.0),

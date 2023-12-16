@@ -75,7 +75,7 @@ enum CocoaPodsStatus {
 }
 
 const Version cocoaPodsMinimumVersion = Version.withText(1, 10, 0, '1.10.0');
-const Version cocoaPodsRecommendedVersion = Version.withText(1, 11, 0, '1.11.0');
+const Version cocoaPodsRecommendedVersion = Version.withText(1, 13, 0, '1.13.0');
 
 /// Cocoapods is a dependency management solution for iOS and macOS applications.
 ///
