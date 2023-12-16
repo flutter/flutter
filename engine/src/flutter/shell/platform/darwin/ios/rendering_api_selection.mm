@@ -14,6 +14,8 @@
 
 #include "flutter/fml/logging.h"
 
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
+
 namespace flutter {
 
 #if SHELL_ENABLE_METAL
@@ -64,7 +66,11 @@ Class GetCoreAnimationLayerClassForRenderingAPI(IOSRenderingAPI rendering_api) {
       return [CALayer class];
     case IOSRenderingAPI::kMetal:
       if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
-        return [CAMetalLayer class];
+        if ([FlutterMetalLayer enabled]) {
+          return [FlutterMetalLayer class];
+        } else {
+          return [CAMetalLayer class];
+        }
       }
       FML_CHECK(false) << "Metal availability should already have been checked";
       break;

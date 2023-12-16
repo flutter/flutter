@@ -58,12 +58,17 @@ source_set("flutter_framework_source_arc") {
   public_configs = [ "//flutter:config" ]
 
   sources = [
+    "framework/Source/FlutterMetalLayer.h",
+    "framework/Source/FlutterMetalLayer.mm",
     "framework/Source/FlutterTextInputDelegate.h",
     "framework/Source/FlutterTextInputPlugin.h",
     "framework/Source/FlutterTextInputPlugin.mm",
   ]
 
-  frameworks = [ "UIKit.framework" ]
+  frameworks = [
+    "UIKit.framework",
+    "IOSurface.framework",
+  ]
 }
 
 source_set("flutter_framework_source") {
@@ -257,6 +262,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterFakeKeyEvents.h",
     "framework/Source/FlutterFakeKeyEvents.mm",
     "framework/Source/FlutterKeyboardManagerTest.mm",
+    "framework/Source/FlutterMetalLayerTest.mm",
     "framework/Source/FlutterPlatformPluginTest.mm",
     "framework/Source/FlutterPlatformViewsTest.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
