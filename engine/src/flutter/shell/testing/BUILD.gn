@@ -50,7 +50,7 @@ executable("testing") {
     deps += [
       ":tester_gpu_configuration",
       "//flutter/impeller",
-      "//flutter/third_party/swiftshader",
+      "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
     ]
   }
 
