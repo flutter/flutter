@@ -6,15 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
-
-class MockOnEndFunction {
-  int called = 0;
-
-  void handler() {
-    called++;
-  }
-}
-
 class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
@@ -25,12 +16,6 @@ class TestPaintingContext implements PaintingContext {
 }
 
 void main() {
-  late MockOnEndFunction mockOnEndFunction;
-
-  setUp(() {
-    mockOnEndFunction = MockOnEndFunction();
-  });
-
   group('AnimatedSize', () {
     testWidgetsWithLeakTracking('animates forwards then backwards with stable-sized children', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -103,10 +88,15 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('calls onEnd when animation is completed', (WidgetTester tester) async {
+      int callCount = 0;
+      void handleEnd() {
+        callCount++;
+      }
+
       await tester.pumpWidget(
         Center(
           child: AnimatedSize(
-            onEnd: mockOnEndFunction.handler,
+            onEnd: handleEnd,
             duration: const Duration(milliseconds: 200),
             child: const SizedBox(
               width: 100.0,
@@ -116,12 +106,12 @@ void main() {
         ),
       );
 
-      expect(mockOnEndFunction.called, equals(0));
+      expect(callCount, equals(0));
 
       await tester.pumpWidget(
         Center(
           child: AnimatedSize(
-            onEnd: mockOnEndFunction.handler,
+            onEnd: handleEnd,
             duration: const Duration(milliseconds: 200),
             child: const SizedBox(
               width: 200.0,
@@ -131,15 +121,14 @@ void main() {
         ),
       );
 
-
-      expect(mockOnEndFunction.called, equals(0));
+      expect(callCount, equals(0));
       await tester.pumpAndSettle();
-      expect(mockOnEndFunction.called, equals(1));
+      expect(callCount, equals(1));
 
       await tester.pumpWidget(
         Center(
           child: AnimatedSize(
-            onEnd: mockOnEndFunction.handler,
+            onEnd: handleEnd,
             duration: const Duration(milliseconds: 200),
             child: const SizedBox(
               width: 100.0,
@@ -150,7 +139,7 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      expect(mockOnEndFunction.called, equals(2));
+      expect(callCount, equals(2));
     });
 
     testWidgetsWithLeakTracking('clamps animated size to constraints', (WidgetTester tester) async {
