@@ -3604,6 +3604,176 @@ void main() {
     expect(inkFeatures, paints..circle(color: Colors.transparent));
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
+  testWidgets('NavigationRail renders only one icon and all label - [labelType]=all, [iconType]=selected', (WidgetTester tester) async {
+    int selectedIndex = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: NavigationRail(
+              destinations: _destinations(),
+              selectedIndex: selectedIndex,
+              labelType: NavigationRailLabelType.all,
+              iconType: NavigationRailIconType.selected,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(find.text('Abc'), findsOneWidget);
+    expect(find.text('Def'), findsOneWidget);
+    expect(find.text('Ghi'), findsOneWidget);
+    expect(find.text('Jkl'), findsOneWidget);
+
+    //By default first NavigationRailIcon is selected
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    expect(find.byIcon(Icons.bookmark_border), findsNothing);
+    expect(find.byIcon(Icons.star_border), findsNothing);
+    expect(find.byIcon(Icons.hotel), findsNothing);
+
+    await tester.tap(find.text('Def'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.favorite_border), findsNothing);
+    expect(find.byIcon(Icons.bookmark), findsOneWidget);
+    expect(find.byIcon(Icons.star_border), findsNothing);
+    expect(find.byIcon(Icons.hotel), findsNothing);
+
+
+    await tester.tap(find.text('Ghi'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.favorite_border), findsNothing);
+    expect(find.byIcon(Icons.bookmark_border), findsNothing);
+    expect(find.byIcon(Icons.star), findsOneWidget);
+    expect(find.byIcon(Icons.hotel), findsNothing);
+
+    await tester.tap(find.text('Jkl'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.favorite_border), findsNothing);
+    expect(find.byIcon(Icons.bookmark_border), findsNothing);
+    expect(find.byIcon(Icons.star_border), findsNothing);
+    expect(find.byIcon(Icons.home), findsOneWidget);
+  });
+
+  testWidgets('NavigationRail renders all label and no icons - [labelType]=all, [iconType]=none', (WidgetTester tester) async {
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: NavigationRail(
+              destinations: _destinations(),
+              selectedIndex: 0,
+              labelType: NavigationRailLabelType.all,
+              iconType: NavigationRailIconType.none,
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(find.text('Abc'), findsOneWidget);
+    expect(find.text('Def'), findsOneWidget);
+    expect(find.text('Ghi'), findsOneWidget);
+    expect(find.text('Jkl'), findsOneWidget);
+
+    // unselected icon
+    expect(find.byIcon(Icons.favorite_border), findsNothing);
+    expect(find.byIcon(Icons.bookmark_border), findsNothing);
+    expect(find.byIcon(Icons.star_border), findsNothing);
+    expect(find.byIcon(Icons.hotel), findsNothing);
+
+    //selected icon
+    expect(find.byIcon(Icons.favorite), findsNothing);
+    expect(find.byIcon(Icons.bookmark), findsNothing);
+    expect(find.byIcon(Icons.star), findsNothing);
+    expect(find.byIcon(Icons.home), findsNothing);
+
+  });
+
+  testWidgets('NavigationRail Denied Combination - [labelType]=selected, [iconType]=selected', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: NavigationRail(
+              destinations: _destinations(),
+              selectedIndex: 0,
+              labelType: NavigationRailLabelType.selected,
+              iconType: NavigationRailIconType.selected,
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(tester.takeException(), isInstanceOf<AssertionError>());
+  });
+
+  testWidgets('NavigationRail Denied Combination - [labelType]=none, [iconType]=selected', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: NavigationRail(
+              destinations: _destinations(),
+              selectedIndex: 0,
+              labelType: NavigationRailLabelType.none,
+              iconType: NavigationRailIconType.selected,
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(tester.takeException(), isInstanceOf<AssertionError>());
+  });
+
+  testWidgets('NavigationRail Denied Combination - [labelType]=selected, [iconType]=none', (WidgetTester tester) async {
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: NavigationRail(
+              destinations: _destinations(),
+              selectedIndex: 0,
+              labelType: NavigationRailLabelType.selected,
+              iconType: NavigationRailIconType.none,
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(tester.takeException(), isInstanceOf<AssertionError>());
+  });
+
+  testWidgets('NavigationRail Denied Combination - [labelType]=none, [iconType]=none', (WidgetTester tester) async {
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: NavigationRail(
+              destinations: _destinations(),
+              selectedIndex: 0,
+              labelType: NavigationRailLabelType.none,
+              iconType: NavigationRailIconType.none,
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(tester.takeException(), isInstanceOf<AssertionError>());
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

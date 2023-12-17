@@ -233,7 +233,7 @@ class NavigationRail extends StatefulWidget {
   /// `All Icon + No Label,`
   /// `Selected Icon + All Label,`
   /// `No Icon + All Label`
-  /// 
+  ///
   /// See also:
   ///
   ///   * [NavigationRailLabelType] for information on the meaning of different
