@@ -59,7 +59,7 @@ enum RefreshIndicatorTriggerMode {
   onEdge,
 }
 
-enum _IndicatorType { material, adaptive , noSpinner}
+enum _IndicatorType { material, adaptive, noSpinner}
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
@@ -236,7 +236,6 @@ class RefreshIndicator extends StatefulWidget {
   /// as required while using [RefreshIndicator.noSpinner].
   ///
   /// Returns value of these enums as string: [_RefreshIndicatorMode]
-  ///
   final void Function(String? mode)? onModeChange;
 
   /// The progress indicator's foreground color. The current theme's
@@ -652,9 +651,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                             return cupertinoIndicator;
                         }
                       }
-                      case _IndicatorType.noSpinner: {
+                      case _IndicatorType.noSpinner:
                         return Container();
-                      }
                     }
                   },
                 ),

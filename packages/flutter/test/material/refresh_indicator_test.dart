@@ -1071,7 +1071,7 @@ void main() {
   });
 
   group('RefreshIndicator.noSpinner', () {
-    testWidgetsWithLeakTracking('onModeChange and onRefresh Trigger',
+    testWidgets('onModeChange and onRefresh Trigger',
             (WidgetTester tester) async {
           refreshCalled = false;
           bool modeSnap = false;
