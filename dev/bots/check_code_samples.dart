@@ -97,6 +97,19 @@ void main(List<String> args) {
   reportSuccessAndExit('All examples are linked and have tests.');
 }
 
+class LinkInfo {
+  const LinkInfo(this.link, this.file, this.line);
+
+  final String link;
+  final File file;
+  final int line;
+
+  @override
+  String toString() {
+    return '${file.path}:$line: $link';
+  }
+}
+
 class SampleChecker {
   SampleChecker({
     required this.examples,
@@ -119,10 +132,12 @@ class SampleChecker {
     final List<File> exampleFilenames = getExampleFilenames(examples);
 
     // Get a list of all the example link paths that appear in the source files.
-    final Set<String> exampleLinks = getExampleLinks(packages);
-
+    final (Set<String> exampleLinks, Set<LinkInfo> malformedLinks) = getExampleLinks(packages);
     // Also add in any that might be found in the dart:ui directory.
-    exampleLinks.addAll(getExampleLinks(dartUIPath));
+    final (Set<String> uiExampleLinks, Set<LinkInfo> uiMalformedLinks) = getExampleLinks(dartUIPath);
+
+    exampleLinks.addAll(uiExampleLinks);
+    malformedLinks.addAll(uiMalformedLinks);
 
     // Get a list of the filenames that were not found in the source files.
     final List<String> missingFilenames = checkForMissingLinks(exampleFilenames, exampleLinks);
@@ -136,7 +151,7 @@ class SampleChecker {
     // generate new examples.
     missingFilenames.removeWhere((String file) => _knownUnlinkedExamples.contains(file));
 
-    if (missingFilenames.isEmpty && missingTests.isEmpty && noLongerMissing.isEmpty) {
+    if (missingFilenames.isEmpty && missingTests.isEmpty && noLongerMissing.isEmpty && malformedLinks.isEmpty) {
       return true;
     }
 
@@ -165,6 +180,19 @@ class SampleChecker {
         buffer.writeln('  $name');
       }
       buffer.write('Either link them to a source file API doc comment, or remove them.');
+      foundError(buffer.toString().split('\n'));
+    }
+
+    if (malformedLinks.isNotEmpty) {
+      final StringBuffer buffer =
+          StringBuffer('The following malformed links were found in API doc comments:\n');
+      for (final LinkInfo link in malformedLinks) {
+        buffer.writeln('  $link');
+      }
+      buffer.write(
+        'Correct the formatting of these links so that they match the exact pattern:\n'
+        r"  r'\*\* See code in (?<path>.+) \*\*'"
+      );
       foundError(buffer.toString().split('\n'));
     }
     return false;
@@ -199,21 +227,34 @@ class SampleChecker {
     );
   }
 
-  Set<String> getExampleLinks(Directory searchDirectory) {
+  (Set<String>, Set<LinkInfo>) getExampleLinks(Directory searchDirectory) {
     final List<File> files = getFiles(searchDirectory, RegExp(r'\.dart$'));
     final Set<String> searchStrings = <String>{};
-    final RegExp exampleRe = RegExp(r'\*\* See code in (?<path>.*) \*\*');
+    final Set<LinkInfo> malformedStrings = <LinkInfo>{};
+    final RegExp validExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
+    // Looks for some common broken versions of example links. This looks for
+    // something that is at minimum "///*seecode<something>*" to indicate that it
+    // looks like an example link. It should be narrowed if we start gettting false
+    // positives.
+    final RegExp malformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)');
     for (final File file in files) {
       final String contents = file.readAsStringSync();
-      searchStrings.addAll(
-        contents.split('\n').where((String s) => s.contains(exampleRe)).map<String>(
-          (String e) {
-            return exampleRe.firstMatch(e)!.namedGroup('path')!;
-          },
-        ),
-      );
+      final List<String> lines = contents.split('\n');
+      int count = 0;
+      for (final String line in lines) {
+        count += 1;
+        final RegExpMatch? validMatch = validExampleRe.firstMatch(line);
+        if (validMatch != null) {
+          searchStrings.add(validMatch.namedGroup('path')!);
+        }
+        final RegExpMatch? malformedMatch = malformedLinkRe.firstMatch(line);
+        // It's only malformed if it doesn't match the valid RegExp.
+        if (malformedMatch != null && validMatch == null) {
+          malformedStrings.add(LinkInfo(malformedMatch.namedGroup('malformed')!, file, count));
+        }
+      }
     }
-    return searchStrings;
+    return (searchStrings, malformedStrings);
   }
 
   List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {
@@ -261,18 +302,16 @@ class SampleChecker {
   }
 }
 
-// These tests are known to be missing.  They should all eventually be
+// These tests are known to be missing. They should all eventually be
 // implemented, but until they are we allow them, so that we can catch any new
 // examples that are added without tests.
 //
 // TODO(gspencergoog): implement the missing tests.
 // See https://github.com/flutter/flutter/issues/130459
 final Set<String> _knownMissingTests = <String>{
-  'examples/api/test/cupertino/text_field/cupertino_text_field.0_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.2_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.1_test.dart',
   'examples/api/test/material/theme/theme_extension.1_test.dart',
-  'examples/api/test/material/elevated_button/elevated_button.0_test.dart',
   'examples/api/test/material/material_state/material_state_border_side.0_test.dart',
   'examples/api/test/material/material_state/material_state_mouse_cursor.0_test.dart',
   'examples/api/test/material/material_state/material_state_outlined_border.0_test.dart',
@@ -282,29 +321,18 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/text_field/text_field.1_test.dart',
   'examples/api/test/material/button_style/button_style.0_test.dart',
   'examples/api/test/material/range_slider/range_slider.0_test.dart',
-  'examples/api/test/material/card/card.2_test.dart',
-  'examples/api/test/material/card/card.0_test.dart',
   'examples/api/test/material/selection_container/selection_container_disabled.0_test.dart',
   'examples/api/test/material/selection_container/selection_container.0_test.dart',
   'examples/api/test/material/color_scheme/dynamic_content_color.0_test.dart',
   'examples/api/test/material/platform_menu_bar/platform_menu_bar.0_test.dart',
   'examples/api/test/material/menu_anchor/menu_anchor.2_test.dart',
   'examples/api/test/material/stepper/stepper.controls_builder.0_test.dart',
-  'examples/api/test/material/stepper/stepper.0_test.dart',
   'examples/api/test/material/flexible_space_bar/flexible_space_bar.0_test.dart',
-  'examples/api/test/material/data_table/data_table.0_test.dart',
   'examples/api/test/material/floating_action_button_location/standard_fab_location.0_test.dart',
   'examples/api/test/material/chip/deletable_chip_attributes.on_deleted.0_test.dart',
-  'examples/api/test/material/snack_bar/snack_bar.0_test.dart',
   'examples/api/test/material/snack_bar/snack_bar.2_test.dart',
   'examples/api/test/material/snack_bar/snack_bar.1_test.dart',
-  'examples/api/test/material/bottom_navigation_bar/bottom_navigation_bar.0_test.dart',
-  'examples/api/test/material/bottom_navigation_bar/bottom_navigation_bar.1_test.dart',
-  'examples/api/test/material/outlined_button/outlined_button.0_test.dart',
-  'examples/api/test/material/icon_button/icon_button.2_test.dart',
   'examples/api/test/material/icon_button/icon_button.3_test.dart',
-  'examples/api/test/material/icon_button/icon_button.0_test.dart',
-  'examples/api/test/material/icon_button/icon_button.1_test.dart',
   'examples/api/test/material/expansion_panel/expansion_panel_list.expansion_panel_list_radio.0_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.1_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.prefix_icon_constraints.0_test.dart',
@@ -315,12 +343,10 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/input_decorator/input_decoration.suffix_icon_constraints.0_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.3_test.dart',
   'examples/api/test/material/input_decorator/input_decoration.material_state.1_test.dart',
-  'examples/api/test/material/filled_button/filled_button.0_test.dart',
   'examples/api/test/material/text_form_field/text_form_field.1_test.dart',
   'examples/api/test/material/scrollbar/scrollbar.1_test.dart',
   'examples/api/test/material/dropdown_menu/dropdown_menu.1_test.dart',
   'examples/api/test/material/radio/radio.toggleable.0_test.dart',
-  'examples/api/test/material/radio/radio.0_test.dart',
   'examples/api/test/material/search_anchor/search_anchor.0_test.dart',
   'examples/api/test/material/search_anchor/search_anchor.1_test.dart',
   'examples/api/test/material/search_anchor/search_anchor.2_test.dart',
@@ -341,15 +367,8 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/scaffold/scaffold_messenger.of.1_test.dart',
   'examples/api/test/material/scaffold/scaffold_messenger_state.show_snack_bar.0_test.dart',
   'examples/api/test/material/segmented_button/segmented_button.0_test.dart',
-  'examples/api/test/material/app_bar/app_bar.2_test.dart',
-  'examples/api/test/material/app_bar/sliver_app_bar.1_test.dart',
   'examples/api/test/material/app_bar/sliver_app_bar.2_test.dart',
   'examples/api/test/material/app_bar/sliver_app_bar.3_test.dart',
-  'examples/api/test/material/app_bar/app_bar.1_test.dart',
-  'examples/api/test/material/app_bar/sliver_app_bar.4_test.dart',
-  'examples/api/test/material/app_bar/app_bar.3_test.dart',
-  'examples/api/test/material/app_bar/app_bar.0_test.dart',
-  'examples/api/test/material/ink_well/ink_well.0_test.dart',
   'examples/api/test/material/banner/material_banner.1_test.dart',
   'examples/api/test/material/banner/material_banner.0_test.dart',
   'examples/api/test/material/checkbox/checkbox.1_test.dart',
@@ -392,7 +411,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.2_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.1_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.0_test.dart',
-  'examples/api/test/widgets/page_view/page_view.0_test.dart',
   'examples/api/test/widgets/scroll_position/scroll_metrics_notification.0_test.dart',
   'examples/api/test/widgets/media_query/media_query_data.system_gesture_insets.0_test.dart',
   'examples/api/test/widgets/async/stream_builder.0_test.dart',

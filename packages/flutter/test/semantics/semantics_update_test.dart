@@ -8,12 +8,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   SemanticsUpdateTestBinding();
 
-  testWidgetsWithLeakTracking('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
+  testWidgets('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -86,7 +85,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Semantics update receives attributed text', (WidgetTester tester) async {
+  testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -157,6 +156,7 @@ void main() {
       'Semantics('
         'container: false, '
         'properties: SemanticsProperties, '
+        'identifier: null, '// ignore: missing_whitespace_between_adjacent_strings
         'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
         'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
         'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
@@ -199,6 +199,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required double elevation,
     required double thickness,
     required Rect rect,
+    required String identifier,
     required String label,
     List<StringAttribute>? labelAttributes,
     required String value,

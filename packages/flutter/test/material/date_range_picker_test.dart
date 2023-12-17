@@ -1667,6 +1667,14 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
   );
 
   @override
+  void dispose() {
+    _startDate.dispose();
+    _endDate.dispose();
+    _restorableDateRangePickerRouteFuture.dispose();
+    super.dispose();
+  }
+
+  @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_startDate, 'start_date');
     registerForRestoration(_endDate, 'end_date');

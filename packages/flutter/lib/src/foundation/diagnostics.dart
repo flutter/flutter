@@ -2948,7 +2948,7 @@ String describeIdentity(Object? object) => '${objectRuntimeType(object, '<optimi
 /// {@end-tool}
 @Deprecated(
   'Use the `name` getter on enums instead. '
-  'This feature was deprecated after v3.10.0-1.1.pre.'
+  'This feature was deprecated after v3.14.0-2.0.pre.'
 )
 String describeEnum(Object enumEntry) {
   if (enumEntry is Enum) {

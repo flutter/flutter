@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class ScrollPositionListener extends StatefulWidget {
   const ScrollPositionListener({ super.key, required this.child, required this.log});
@@ -124,7 +123,7 @@ class TestChildState extends State<TestChild> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
+  testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
     late String logValue;
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
@@ -165,7 +164,7 @@ void main() {
     expect(logValue, 'listener 400.0');
   });
 
-  testWidgetsWithLeakTracking('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
+  testWidgets('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
     late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
@@ -178,14 +177,18 @@ void main() {
       ),
     ));
 
-    await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
     final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
     expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Static Scrollable methods can target a specific axis', (WidgetTester tester) async {
+  testWidgets('Static Scrollable methods can target a specific axis', (WidgetTester tester) async {
     final TestScrollController horizontalController = TestScrollController(deferLoading: true);
     addTearDown(horizontalController.dispose);
     final TestScrollController verticalController = TestScrollController(deferLoading: false);
@@ -222,7 +225,7 @@ void main() {
     expect(foundRecommendation, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Axis targeting scrollables establishes the correct dependencies', (WidgetTester tester) async {
+  testWidgets('Axis targeting scrollables establishes the correct dependencies', (WidgetTester tester) async {
     final GlobalKey<TestScrollableState> verticalKey = GlobalKey<TestScrollableState>();
     final GlobalKey<TestChildState> childKey = GlobalKey<TestChildState>();
 

@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
@@ -125,7 +124,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Tapping the Live Text button calls onLiveTextInput',
     (WidgetTester tester) async {
       bool invokedLiveTextInputSuccessfully = false;
@@ -194,7 +193,7 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/126312.
-  testWidgetsWithLeakTracking('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
+  testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
     final Key key = GlobalKey();
 
     final TextEditingController controller1 = TextEditingController(text: 'blah blah');
@@ -240,7 +239,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
+  testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628
     addTearDown(tester.view.reset);
 
@@ -287,7 +286,7 @@ void main() {
   });
 
   // Related issue: https://github.com/flutter/flutter/issues/98115
-  testWidgetsWithLeakTracking('ScheduleShowCaretOnScreen with no animation when the view changes metrics', (WidgetTester tester) async {
+  testWidgets('ScheduleShowCaretOnScreen with no animation when the view changes metrics', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     final ScrollController scrollController = ScrollController();
@@ -335,7 +334,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34538.
-  testWidgetsWithLeakTracking('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
+  testWidgets('RTL arabic correct caret placement after trailing whitespace', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -388,7 +387,7 @@ void main() {
     expect(state.currentTextEditingValue.text, equals('گیگ '));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/78550.
 
-  testWidgetsWithLeakTracking('has expected defaults', (WidgetTester tester) async {
+  testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -418,7 +417,7 @@ void main() {
     expect(editableText.textHeightBehavior, isNull);
   });
 
-  testWidgetsWithLeakTracking('when backgroundCursorColor is updated, RenderEditable should be updated', (WidgetTester tester) async {
+  testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (WidgetTester tester) async {
     Widget buildWidget(Color backgroundCursorColor) {
       return MediaQuery(
         data: const MediaQueryData(),
@@ -442,7 +441,7 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
-  testWidgetsWithLeakTracking('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
+  testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -474,7 +473,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.unspecified,
@@ -482,7 +481,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "none" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "none" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.none,
@@ -490,7 +489,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "done" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "done" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.done,
@@ -498,7 +497,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "send" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "send" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.send,
@@ -506,7 +505,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "go" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "go" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.go,
@@ -514,7 +513,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "search" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "search" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.search,
@@ -522,7 +521,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "send" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "send" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.send,
@@ -530,7 +529,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "next" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "next" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.next,
@@ -538,7 +537,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "previous" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "previous" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.previous,
@@ -546,7 +545,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "continue" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "continue" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.continueAction,
@@ -554,7 +553,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "join" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "join" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.join,
@@ -562,7 +561,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "route" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "route" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.route,
@@ -570,7 +569,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Keyboard is configured for "emergencyCall" action when explicitly requested', (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "emergencyCall" action when explicitly requested', (WidgetTester tester) async {
     await desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.emergencyCall,
@@ -578,7 +577,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('insertContent does not throw and parses data correctly', (WidgetTester tester) async {
+  testWidgets('insertContent does not throw and parses data correctly', (WidgetTester tester) async {
     String? latestUri;
     await tester.pumpWidget(
       MediaQuery(
@@ -634,7 +633,7 @@ void main() {
     expect(latestUri, equals(uri));
   });
 
-  testWidgetsWithLeakTracking('onAppPrivateCommand does not throw', (WidgetTester tester) async {
+  testWidgets('onAppPrivateCommand does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -682,7 +681,7 @@ void main() {
   });
 
   group('Infer keyboardType from autofillHints', () {
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'infer keyboard types from autofillHints: ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -721,7 +720,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'infer keyboard types from autofillHints: non-ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -754,7 +753,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'inferred keyboard types can be overridden: ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -789,7 +788,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'inferred keyboard types can be overridden: non-ios',
       (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -824,7 +823,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
+  testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -855,7 +854,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
-  testWidgetsWithLeakTracking('EditableText sends enableInteractiveSelection to config', (WidgetTester tester) async {
+  testWidgets('EditableText sends enableInteractiveSelection to config', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -907,7 +906,7 @@ void main() {
     expect(state.textInputConfiguration.enableInteractiveSelection, isFalse);
   });
 
-  testWidgetsWithLeakTracking('selection persists when unfocused', (WidgetTester tester) async {
+  testWidgets('selection persists when unfocused', (WidgetTester tester) async {
     const TextEditingValue value = TextEditingValue(
       text: 'test test',
       selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 5, extentOffset: 7),
@@ -961,7 +960,7 @@ void main() {
     expect(focusNode.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('selection rects re-sent when refocused', (WidgetTester tester) async {
+  testWidgets('selection rects re-sent when refocused', (WidgetTester tester) async {
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       if (methodCall.method == 'TextInput.setSelectionRects') {
@@ -1043,7 +1042,7 @@ void main() {
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('EditableText does not derive selection color from DefaultSelectionStyle', (WidgetTester tester) async {
+  testWidgets('EditableText does not derive selection color from DefaultSelectionStyle', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103341.
     const TextEditingValue value = TextEditingValue(
       text: 'test test',
@@ -1074,7 +1073,7 @@ void main() {
     expect(state.renderEditable.selectionColor, null);
   });
 
-  testWidgetsWithLeakTracking('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
+  testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1105,7 +1104,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  testWidgetsWithLeakTracking('enableSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
+  testWidgets('enableSuggestions flag is sent to the engine properly', (WidgetTester tester) async {
     const bool enableSuggestions = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -1134,7 +1133,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['enableSuggestions'], enableSuggestions);
   });
 
-  testWidgetsWithLeakTracking('enableIMEPersonalizedLearning flag is sent to the engine properly', (WidgetTester tester) async {
+  testWidgets('enableIMEPersonalizedLearning flag is sent to the engine properly', (WidgetTester tester) async {
     const bool enableIMEPersonalizedLearning = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -1164,7 +1163,7 @@ void main() {
   });
 
   group('smartDashesType and smartQuotesType', () {
-    testWidgetsWithLeakTracking('sent to the engine properly', (WidgetTester tester) async {
+    testWidgets('sent to the engine properly', (WidgetTester tester) async {
       const SmartDashesType smartDashesType = SmartDashesType.disabled;
       const SmartQuotesType smartQuotesType = SmartQuotesType.disabled;
       await tester.pumpWidget(
@@ -1196,7 +1195,7 @@ void main() {
       expect(tester.testTextInput.setClientArgs!['smartQuotesType'], smartQuotesType.index.toString());
     });
 
-    testWidgetsWithLeakTracking('default to true when obscureText is false', (WidgetTester tester) async {
+    testWidgets('default to true when obscureText is false', (WidgetTester tester) async {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -1224,7 +1223,7 @@ void main() {
       expect(tester.testTextInput.setClientArgs!['smartQuotesType'], '1');
     });
 
-    testWidgetsWithLeakTracking('default to false when obscureText is true', (WidgetTester tester) async {
+    testWidgets('default to false when obscureText is true', (WidgetTester tester) async {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -1254,7 +1253,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('selection overlay will update when text grow bigger', (WidgetTester tester) async {
+  testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
     controller.value = const TextEditingValue(text: 'initial value');
 
     Future<void> pumpEditableTextWithTextStyle(TextStyle style) async {
@@ -1311,7 +1310,7 @@ void main() {
     expect(handles[1].localToGlobal(Offset.zero), const Offset(197.0, 17.0));
   });
 
-  testWidgetsWithLeakTracking('can update style of previous activated EditableText', (WidgetTester tester) async {
+  testWidgets('can update style of previous activated EditableText', (WidgetTester tester) async {
     final TextEditingController controller1 = TextEditingController();
     addTearDown(controller1.dispose);
     final TextEditingController controller2 = TextEditingController();
@@ -1403,7 +1402,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
+  testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1434,7 +1433,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
-  testWidgetsWithLeakTracking('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
+  testWidgets('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1466,7 +1465,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  testWidgetsWithLeakTracking('Correct keyboard is requested when set explicitly and maxLines > 1', (WidgetTester tester) async {
+  testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1498,7 +1497,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
-  testWidgetsWithLeakTracking('multiline keyboard is requested when set implicitly', (WidgetTester tester) async {
+  testWidgets('multiline keyboard is requested when set implicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1529,7 +1528,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.newline'));
   });
 
-  testWidgetsWithLeakTracking('single line inputs have correct default keyboard', (WidgetTester tester) async {
+  testWidgets('single line inputs have correct default keyboard', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1562,7 +1561,7 @@ void main() {
   // Test case for
   // https://github.com/flutter/flutter/issues/123523
   // https://github.com/flutter/flutter/issues/134846 .
-  testWidgetsWithLeakTracking(
+  testWidgets(
       'The focus and callback behavior are correct when TextInputClient.onConnectionClosed message received',
       (WidgetTester tester) async {
     bool onSubmittedInvoked = false;
@@ -1604,7 +1603,7 @@ void main() {
     expect(onSubmittedInvoked, isFalse);
   });
 
-  testWidgetsWithLeakTracking('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
+  testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1647,7 +1646,7 @@ void main() {
     expect(tester.testTextInput.log, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('closed connection reopened when user focused', (WidgetTester tester) async {
+  testWidgets('closed connection reopened when user focused', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -1698,7 +1697,7 @@ void main() {
     expect(state.wantKeepAlive, true);
   });
 
-  testWidgetsWithLeakTracking('closed connection reopened when user focused on another field', (WidgetTester tester) async {
+  testWidgets('closed connection reopened when user focused on another field', (WidgetTester tester) async {
     final EditableText testNameField =
       EditableText(
         backgroundCursorColor: Colors.grey,
@@ -1773,7 +1772,7 @@ void main() {
     expect(state.wantKeepAlive, true);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'kept-alive EditableText does not crash when layout is skipped',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84896.
@@ -1851,7 +1850,7 @@ void main() {
   // cut. It might also provide additional functionality depending on the
   // browser (such as translation). Due to this, in browsers, we should not
   // show a Flutter toolbar for the editable text elements.
-  testWidgetsWithLeakTracking('can show toolbar when there is text and a selection', (WidgetTester tester) async {
+  testWidgets('can show toolbar when there is text and a selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -1916,7 +1915,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
     });
 
-    testWidgetsWithLeakTracking('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
+    testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -1964,7 +1963,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('can hide toolbar with DismissIntent', (WidgetTester tester) async {
+  testWidgets('can hide toolbar with DismissIntent', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -1999,7 +1998,7 @@ void main() {
     expect(find.text('Paste'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('toolbar hidden on mobile when orientation changes', (WidgetTester tester) async {
+  testWidgets('toolbar hidden on mobile when orientation changes', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
@@ -2047,7 +2046,7 @@ void main() {
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android })); // [intended]
 
-  testWidgetsWithLeakTracking('Paste is shown only when there is something to paste', (WidgetTester tester) async {
+  testWidgets('Paste is shown only when there is something to paste', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -2097,7 +2096,7 @@ void main() {
     expect(find.text('Paste'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Copy selection does not collapse selection on desktop and iOS', (WidgetTester tester) async {
+  testWidgets('Copy selection does not collapse selection on desktop and iOS', (WidgetTester tester) async {
     final TextEditingController localController = TextEditingController(text: 'Hello world');
     addTearDown(localController.dispose);
 
@@ -2137,7 +2136,7 @@ void main() {
     expect(find.text('Copy'), findsNothing);
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows })); // [intended]
 
-  testWidgetsWithLeakTracking('Copy selection collapses selection and hides the toolbar on Android and Fuchsia', (WidgetTester tester) async {
+  testWidgets('Copy selection collapses selection and hides the toolbar on Android and Fuchsia', (WidgetTester tester) async {
     final TextEditingController localController = TextEditingController(text: 'Hello world');
     addTearDown(localController.dispose);
 
@@ -2179,7 +2178,7 @@ void main() {
     expect(find.text('Copy'), findsNothing);
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia })); // [intended]
 
-  testWidgetsWithLeakTracking('can show the toolbar after clearing all text', (WidgetTester tester) async {
+  testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35998.
     await tester.pumpWidget(
       MaterialApp(
@@ -2218,7 +2217,7 @@ void main() {
     expect(find.text('Paste'), kIsWeb ? findsNothing : findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('can dynamically disable options in toolbar', (WidgetTester tester) async {
+  testWidgets('can dynamically disable options in toolbar', (WidgetTester tester) async {
     controller.text = 'blah blah';
 
     await tester.pumpWidget(
@@ -2256,7 +2255,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('can dynamically disable select all option in toolbar - cupertino', (WidgetTester tester) async {
+  testWidgets('can dynamically disable select all option in toolbar - cupertino', (WidgetTester tester) async {
     // Regression test: https://github.com/flutter/flutter/issues/40711
     controller.text = 'blah blah';
 
@@ -2287,7 +2286,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('can dynamically disable select all option in toolbar - material', (WidgetTester tester) async {
+  testWidgets('can dynamically disable select all option in toolbar - material', (WidgetTester tester) async {
     // Regression test: https://github.com/flutter/flutter/issues/40711
     controller.text = 'blah blah';
 
@@ -2325,7 +2324,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('cut and paste are disabled in read only mode even if explicitly set', (WidgetTester tester) async {
+  testWidgets('cut and paste are disabled in read only mode even if explicitly set', (WidgetTester tester) async {
     controller.text = 'blah blah';
 
     await tester.pumpWidget(
@@ -2366,7 +2365,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('cut and copy are disabled in obscured mode even if explicitly set', (WidgetTester tester) async {
+  testWidgets('cut and copy are disabled in obscured mode even if explicitly set', (WidgetTester tester) async {
     controller.text = 'blah blah';
 
     await tester.pumpWidget(
@@ -2410,7 +2409,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('cut and copy do nothing in obscured mode even if explicitly called', (WidgetTester tester) async {
+  testWidgets('cut and copy do nothing in obscured mode even if explicitly called', (WidgetTester tester) async {
     controller.text = 'blah blah';
 
     await tester.pumpWidget(
@@ -2452,7 +2451,7 @@ void main() {
     expect(data!.text, isEmpty);
   });
 
-  testWidgetsWithLeakTracking('select all does nothing if obscured and read-only, even if explicitly called', (WidgetTester tester) async {
+  testWidgets('select all does nothing if obscured and read-only, even if explicitly called', (WidgetTester tester) async {
     controller.text = 'blah blah';
 
     await tester.pumpWidget(
@@ -2480,7 +2479,7 @@ void main() {
   });
 
   group('buttonItemsForToolbarOptions', () {
-    testWidgetsWithLeakTracking('returns null when toolbarOptions are empty', (WidgetTester tester) async {
+    testWidgets('returns null when toolbarOptions are empty', (WidgetTester tester) async {
       controller.text = 'TEXT';
 
       await tester.pumpWidget(
@@ -2503,7 +2502,7 @@ void main() {
       expect(state.buttonItemsForToolbarOptions(), isNull);
     });
 
-    testWidgetsWithLeakTracking('returns empty array when only cut is selected in toolbarOptions but cut is not enabled', (WidgetTester tester) async {
+    testWidgets('returns empty array when only cut is selected in toolbarOptions but cut is not enabled', (WidgetTester tester) async {
       controller.text = 'TEXT';
 
       await tester.pumpWidget(
@@ -2528,7 +2527,7 @@ void main() {
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
 
-    testWidgetsWithLeakTracking('returns only cut button when only cut is selected in toolbarOptions and cut is enabled', (WidgetTester tester) async {
+    testWidgets('returns only cut button when only cut is selected in toolbarOptions and cut is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
       controller.text = text;
 
@@ -2573,7 +2572,7 @@ void main() {
       expect(data!.text, equals(text));
     });
 
-    testWidgetsWithLeakTracking('returns empty array when only copy is selected in toolbarOptions but copy is not enabled', (WidgetTester tester) async {
+    testWidgets('returns empty array when only copy is selected in toolbarOptions but copy is not enabled', (WidgetTester tester) async {
       controller.text = 'TEXT';
 
       await tester.pumpWidget(
@@ -2598,7 +2597,7 @@ void main() {
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
 
-    testWidgetsWithLeakTracking('returns only copy button when only copy is selected in toolbarOptions and copy is enabled', (WidgetTester tester) async {
+    testWidgets('returns only copy button when only copy is selected in toolbarOptions and copy is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
       controller.text = text;
 
@@ -2643,7 +2642,7 @@ void main() {
       expect(data!.text, equals(text));
     });
 
-    testWidgetsWithLeakTracking('returns empty array when only paste is selected in toolbarOptions but paste is not enabled', (WidgetTester tester) async {
+    testWidgets('returns empty array when only paste is selected in toolbarOptions but paste is not enabled', (WidgetTester tester) async {
       controller.text = 'TEXT';
 
       await tester.pumpWidget(
@@ -2668,7 +2667,7 @@ void main() {
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
 
-    testWidgetsWithLeakTracking('returns only paste button when only paste is selected in toolbarOptions and paste is enabled', (WidgetTester tester) async {
+    testWidgets('returns only paste button when only paste is selected in toolbarOptions and paste is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
       controller.text = text;
 
@@ -2710,7 +2709,7 @@ void main() {
       expect(controller.text, equals(text + text));
     });
 
-    testWidgetsWithLeakTracking('returns empty array when only selectAll is selected in toolbarOptions but selectAll is not enabled', (WidgetTester tester) async {
+    testWidgets('returns empty array when only selectAll is selected in toolbarOptions but selectAll is not enabled', (WidgetTester tester) async {
       controller.text = 'TEXT';
 
       await tester.pumpWidget(
@@ -2736,7 +2735,7 @@ void main() {
       expect(state.buttonItemsForToolbarOptions(), isEmpty);
     });
 
-    testWidgetsWithLeakTracking('returns only selectAll button when only selectAll is selected in toolbarOptions and selectAll is enabled', (WidgetTester tester) async {
+    testWidgets('returns only selectAll button when only selectAll is selected in toolbarOptions and selectAll is enabled', (WidgetTester tester) async {
       const String text = 'TEXT';
       controller.text = text;
 
@@ -2773,7 +2772,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Handles the read-only flag correctly', (WidgetTester tester) async {
+  testWidgets('Handles the read-only flag correctly', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
@@ -2815,7 +2814,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Does not accept updates when read-only', (WidgetTester tester) async {
+  testWidgets('Does not accept updates when read-only', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
@@ -2856,7 +2855,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Read-only fields do not format text', (WidgetTester tester) async {
+  testWidgets('Read-only fields do not format text', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
     late SelectionChangedCause selectionCause;
 
@@ -2894,7 +2893,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Selection changes during Scribble interaction should have the scribble cause', (WidgetTester tester) async {
+  testWidgets('Selection changes during Scribble interaction should have the scribble cause', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
     late SelectionChangedCause selectionCause;
 
@@ -2940,7 +2939,7 @@ void main() {
     await tester.testTextInput.finishScribbleInteraction();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgetsWithLeakTracking('Requests focus and changes the selection when onScribbleFocus is called', (WidgetTester tester) async {
+  testWidgets('Requests focus and changes the selection when onScribbleFocus is called', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
     late SelectionChangedCause selectionCause;
 
@@ -2971,7 +2970,7 @@ void main() {
     // will never be SelectionChangedCause.scribble.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('Declares itself for Scribble interaction if the bounds overlap the scribble rect and the widget is touchable', (WidgetTester tester) async {
+  testWidgets('Declares itself for Scribble interaction if the bounds overlap the scribble rect and the widget is touchable', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
@@ -3064,7 +3063,7 @@ void main() {
     // never request the scribble elements.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('single line Scribble fields can show a horizontal placeholder', (WidgetTester tester) async {
+  testWidgets('single line Scribble fields can show a horizontal placeholder', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
@@ -3138,7 +3137,7 @@ void main() {
     // will not handle placeholders.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('multiline Scribble fields can show a vertical placeholder', (WidgetTester tester) async {
+  testWidgets('multiline Scribble fields can show a vertical placeholder', (WidgetTester tester) async {
     controller.text = 'Lorem ipsum dolor sit amet';
 
     await tester.pumpWidget(
@@ -3215,7 +3214,7 @@ void main() {
     // will not handle placeholders.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
+  testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;
     controller.text = 'Lorem ipsum dolor sit amet';
@@ -3253,7 +3252,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['readOnly'], isFalse);
   });
 
-  testWidgetsWithLeakTracking('Sends "updateConfig" when obscureText is flipped', (WidgetTester tester) async {
+  testWidgets('Sends "updateConfig" when obscureText is flipped', (WidgetTester tester) async {
     bool obscureText = true;
     late StateSetter setState;
     controller.text = 'Lorem';
@@ -3289,7 +3288,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
   });
 
-  testWidgetsWithLeakTracking('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
+  testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     late String changedValue;
     final Widget widget = MaterialApp(
       home: EditableText(
@@ -3332,7 +3331,7 @@ void main() {
     TextInputAction.values.toSet(),
   );
 
-  testWidgetsWithLeakTracking('Handles focus correctly when action is invoked', (WidgetTester tester) async {
+  testWidgets('Handles focus correctly when action is invoked', (WidgetTester tester) async {
     // The expectations for each of the types of TextInputAction.
     const Map<TextInputAction, bool> actionShouldLoseFocus = <TextInputAction, bool>{
       TextInputAction.none: false,
@@ -3411,7 +3410,7 @@ void main() {
     }
   }, variant: focusVariants);
 
-  testWidgetsWithLeakTracking('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
+  testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
@@ -3443,7 +3442,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgetsWithLeakTracking('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
+  testWidgets('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
@@ -3481,7 +3480,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgetsWithLeakTracking('When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
+  testWidgets('When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
@@ -3519,7 +3518,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgetsWithLeakTracking('When "newline" action is called on a Editable text with maxLines == 1 callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
+  testWidgets('When "newline" action is called on a Editable text with maxLines == 1 callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
@@ -3556,7 +3555,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgetsWithLeakTracking('When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.', (WidgetTester tester) async {
+  testWidgets('When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.', (WidgetTester tester) async {
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
@@ -3594,7 +3593,7 @@ void main() {
     assert(!onEditingCompleteCalled);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'finalizeEditing should reset the input connection when shouldUnfocus is true but the unfocus is cancelled',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84240 .
@@ -3659,7 +3658,7 @@ void main() {
       ])));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'requesting focus in the onSubmitted callback should keep the onscreen keyboard visible',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/95154 .
@@ -3702,7 +3701,7 @@ void main() {
       ])));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'iOS autocorrection rectangle should appear on demand and dismiss when the text changes or when focus is lost',
     (WidgetTester tester) async {
       const Color rectColor = Color(0xFFFF0000);
@@ -3780,14 +3779,9 @@ void main() {
 
       verifyAutocorrectionRectVisibility(expectVisible: false);
     },
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      // TODO(ksokolovskyi): remove after fixing
-      // https://github.com/flutter/flutter/issues/134386
-      notDisposedAllowList: <String, int?> {'LeaderLayer': 5},
-    ),
   );
 
-  testWidgetsWithLeakTracking('Changing controller updates EditableText', (WidgetTester tester) async {
+  testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
     final TextEditingController controller1 =
         TextEditingController(text: 'Wibble');
     addTearDown(controller1.dispose);
@@ -3875,7 +3869,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
+  testWidgets('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -3915,7 +3909,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('EditableText sets multi-line flag in semantics', (WidgetTester tester) async {
+  testWidgets('EditableText sets multi-line flag in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -3975,7 +3969,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('EditableText includes text as value in semantics', (WidgetTester tester) async {
+  testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const String value1 = 'EditableText content';
@@ -4024,7 +4018,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('exposes correct cursor movement semantics', (WidgetTester tester) async {
+  testWidgets('exposes correct cursor movement semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     controller.text = 'test';
@@ -4107,7 +4101,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('can move cursor with a11y means - character', (WidgetTester tester) async {
+  testWidgets('can move cursor with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const bool doNotExtendSelection = false;
 
@@ -4212,7 +4206,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('can move cursor with a11y means - word', (WidgetTester tester) async {
+  testWidgets('can move cursor with a11y means - word', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const bool doNotExtendSelection = false;
 
@@ -4325,7 +4319,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('can extend selection with a11y means - character', (WidgetTester tester) async {
+  testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const bool extendSelection = true;
     const bool doNotExtendSelection = false;
@@ -4441,7 +4435,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('can extend selection with a11y means - word', (WidgetTester tester) async {
+  testWidgets('can extend selection with a11y means - word', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const bool extendSelection = true;
     const bool doNotExtendSelection = false;
@@ -4555,7 +4549,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('password fields have correct semantics', (WidgetTester tester) async {
+  testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     controller.text = 'super-secret-password!!1';
@@ -4610,7 +4604,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('password fields become obscured with the right semantics when set', (WidgetTester tester) async {
+  testWidgets('password fields become obscured with the right semantics when set', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const String originalText = 'super-secret-password!!1';
@@ -4725,7 +4719,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('password fields can have their obscuring character customized', (WidgetTester tester) async {
+  testWidgets('password fields can have their obscuring character customized', (WidgetTester tester) async {
     const String originalText = 'super-secret-password!!1';
     controller.text = originalText;
 
@@ -4746,7 +4740,7 @@ void main() {
     expect((findRenderEditable(tester).text! as TextSpan).text, expectedValue);
   });
 
-  testWidgetsWithLeakTracking('password briefly shows last character when entered on mobile', (WidgetTester tester) async {
+  testWidgets('password briefly shows last character when entered on mobile', (WidgetTester tester) async {
     final bool debugDeterministicCursor = EditableText.debugDeterministicCursor;
     EditableText.debugDeterministicCursor = false;
     addTearDown(() {
@@ -4800,7 +4794,7 @@ void main() {
       controls = MockTextSelectionControls();
     });
 
-    testWidgetsWithLeakTracking('are exposed', (WidgetTester tester) async {
+    testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       controls.testCanCopy = false;
@@ -4897,7 +4891,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('can copy/cut/paste with a11y', (WidgetTester tester) async {
+    testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       controls.testCanCopy = true;
@@ -4970,7 +4964,7 @@ void main() {
     });
 
     // Regression test for b/201218542.
-    testWidgetsWithLeakTracking('copying with a11y works even when toolbar is hidden', (WidgetTester tester) async {
+    testWidgets('copying with a11y works even when toolbar is hidden', (WidgetTester tester) async {
       Future<void> testByControls(TextSelectionControls controls) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
@@ -5016,7 +5010,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('can set text with a11y', (WidgetTester tester) async {
+  testWidgets('can set text with a11y', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
@@ -5081,7 +5075,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('allows customizing text style in subclasses', (WidgetTester tester) async {
+  testWidgets('allows customizing text style in subclasses', (WidgetTester tester) async {
     controller.text = 'Hello World';
 
     await tester.pumpWidget(MaterialApp(
@@ -5098,7 +5092,7 @@ void main() {
     expect(render.text!.style!.fontStyle, FontStyle.italic);
   });
 
-  testWidgetsWithLeakTracking('onChanged callback only invoked on text changes', (WidgetTester tester) async {
+  testWidgets('onChanged callback only invoked on text changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111651 .
     int onChangedCount = 0;
     bool preventInput = false;
@@ -5143,7 +5137,7 @@ void main() {
     expect(onChangedCount , 2);
   });
 
-  testWidgetsWithLeakTracking('Formatters are skipped if text has not changed', (WidgetTester tester) async {
+  testWidgets('Formatters are skipped if text has not changed', (WidgetTester tester) async {
     int called = 0;
     final TextInputFormatter formatter = TextInputFormatter.withFunction((TextEditingValue oldValue, TextEditingValue newValue) {
       called += 1;
@@ -5186,7 +5180,7 @@ void main() {
     expect(called, 2);
   });
 
-  testWidgetsWithLeakTracking('default keyboardAppearance is respected', (WidgetTester tester) async {
+  testWidgets('default keyboardAppearance is respected', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/22212.
 
     final List<MethodCall> log = <MethodCall>[];
@@ -5217,7 +5211,7 @@ void main() {
     expect(((setClient.arguments as Iterable<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.light');
   });
 
-  testWidgetsWithLeakTracking('location of widget is sent on show keyboard', (WidgetTester tester) async {
+  testWidgets('location of widget is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -5252,7 +5246,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('transform and size is reset when text connection opens', (WidgetTester tester) async {
+  testWidgets('transform and size is reset when text connection opens', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -5344,7 +5338,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('size and transform are sent when they change', (WidgetTester tester) async {
+  testWidgets('size and transform are sent when they change', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -5387,7 +5381,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('selection rects are sent when they change', (WidgetTester tester) async {
+  testWidgets('selection rects are sent when they change', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
     // Ensure selection rects are sent on iPhone (using SE 3rd gen size)
     tester.view.physicalSize = const Size(750.0, 1334.0);
@@ -5527,7 +5521,7 @@ void main() {
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('selection rects are not sent if scribbleEnabled is false', (WidgetTester tester) async {
+  testWidgets('selection rects are not sent if scribbleEnabled is false', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -5566,7 +5560,7 @@ void main() {
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('selection rects sent even when character corners are outside of paintBounds', (WidgetTester tester) async {
+  testWidgets('selection rects sent even when character corners are outside of paintBounds', (WidgetTester tester) async {
     final List<List<SelectionRect>> log = <List<SelectionRect>>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) {
       if (methodCall.method == 'TextInput.setSelectionRects') {
@@ -5642,7 +5636,7 @@ void main() {
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
-  testWidgetsWithLeakTracking('text styling info is sent on show keyboard', (WidgetTester tester) async {
+  testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -5681,7 +5675,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('text styling info is sent on show keyboard (bold override)', (WidgetTester tester) async {
+  testWidgets('text styling info is sent on show keyboard (bold override)', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
       log.add(methodCall);
@@ -5720,7 +5714,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('text styling info is sent on style update', (WidgetTester tester) async {
+  testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
     late StateSetter setState;
     const TextStyle textStyle1 = TextStyle(
@@ -5819,7 +5813,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'called with proper coordinates',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 50);
@@ -5861,7 +5855,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'only send updates when necessary',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 100);
@@ -5879,17 +5873,49 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
-      'not sent with selection',
+    testWidgets(
+      'set to selection start on forward selection',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(
           text: 'a' * 100,
-          selection: const TextSelection(baseOffset: 0, extentOffset: 10),
+          selection: const TextSelection(baseOffset: 10, extentOffset: 30),
         );
         await tester.pumpWidget(builder());
         await tester.showKeyboard(find.byType(EditableText));
 
-        expect(tester.testTextInput.log, isNot(contains(matchesMethodCall('TextInput.setCaretRect'))));
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
+      },
+    );
+
+    testWidgets(
+      'set to selection start on reversed selection',
+      (WidgetTester tester) async {
+        controller.value = TextEditingValue(
+          text: 'a' * 100,
+          selection: const TextSelection(baseOffset: 30, extentOffset: 10),
+        );
+        await tester.pumpWidget(builder());
+        await tester.showKeyboard(find.byType(EditableText));
+
+        expect(tester.testTextInput.log, contains(
+          matchesMethodCall(
+            'TextInput.setCaretRect',
+            // Now the composing range is not empty.
+            args: allOf(
+              containsPair('x', equals(140)),
+              containsPair('y', equals(0)),
+            ),
+          ),
+        ));
       },
     );
   });
@@ -5920,7 +5946,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'called when the composing range changes',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 100);
@@ -5954,7 +5980,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'only send updates when necessary',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
@@ -5972,7 +5998,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'zero matrix paint transform',
       (WidgetTester tester) async {
         controller.value = TextEditingValue(text: 'a' * 100, composing: const TextRange(start: 0, end: 10));
@@ -5994,7 +6020,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('custom keyboardAppearance is respected', (WidgetTester tester) async {
+  testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/22212.
 
     final List<MethodCall> log = <MethodCall>[];
@@ -6026,7 +6052,7 @@ void main() {
     expect(((setClient.arguments as Iterable<dynamic>).last as Map<String, dynamic>)['keyboardAppearance'], 'Brightness.dark');
   });
 
-  testWidgetsWithLeakTracking('Composing text is underlined and underline is cleared when losing focus', (WidgetTester tester) async {
+  testWidgets('Composing text is underlined and underline is cleared when losing focus', (WidgetTester tester) async {
     controller.value = const TextEditingValue(
       text: 'text composing text',
       selection: TextSelection.collapsed(offset: 14),
@@ -6071,7 +6097,7 @@ void main() {
     expect(renderEditable.text!.style!.decoration, isNull);
   });
 
-  testWidgetsWithLeakTracking('text selection toolbar visibility', (WidgetTester tester) async {
+  testWidgets('text selection toolbar visibility', (WidgetTester tester) async {
     controller.text = 'hello \n world \n this \n is \n text';
 
     await tester.pumpWidget(MaterialApp(
@@ -6139,7 +6165,7 @@ void main() {
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking('text selection handle visibility', (WidgetTester tester) async {
+  testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
     controller.text = 'XXXXX          XXXXX';
 
@@ -6310,7 +6336,7 @@ void main() {
     // toolbar. Until we change that, this test should remain skipped.
   }, skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking('text selection handle visibility RTL', (WidgetTester tester) async {
+  testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
     controller.text = 'XXXXX          XXXXX';
 
@@ -7378,7 +7404,7 @@ void main() {
     }
   }
 
-  testWidgetsWithLeakTracking('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
+  testWidgets('keyboard text selection works (RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
@@ -7388,7 +7414,7 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
+  testWidgets('keyboard text selection works (ui.KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
     await testTextEditing(tester, targetPlatform: defaultTargetPlatform);
@@ -7398,7 +7424,7 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'keyboard shortcuts respect read-only',
     (WidgetTester tester) async {
       final String platform = defaultTargetPlatform.name.toLowerCase();
@@ -7577,7 +7603,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('home/end keys', (WidgetTester tester) async {
+  testWidgets('home/end keys', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     controller.text = testText;
@@ -7723,7 +7749,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('home keys and wordwraps', (WidgetTester tester) async {
+  testWidgets('home keys and wordwraps', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
@@ -7879,7 +7905,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('end keys and wordwraps', (WidgetTester tester) async {
+  testWidgets('end keys and wordwraps', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
@@ -8037,7 +8063,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('shift + home/end keys', (WidgetTester tester) async {
+  testWidgets('shift + home/end keys', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     controller.text = testText;
@@ -8231,7 +8257,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('shift + home/end keys (Windows only)', (WidgetTester tester) async {
+  testWidgets('shift + home/end keys (Windows only)', (WidgetTester tester) async {
     controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -8342,7 +8368,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
-  testWidgetsWithLeakTracking('home/end keys scrolling (Mac only)', (WidgetTester tester) async {
+  testWidgets('home/end keys scrolling (Mac only)', (WidgetTester tester) async {
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
     controller.text = testText;
     controller.selection = const TextSelection(
@@ -8403,7 +8429,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgetsWithLeakTracking('shift + home keys and wordwraps', (WidgetTester tester) async {
+  testWidgets('shift + home keys and wordwraps', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
@@ -8588,7 +8614,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('shift + end keys and wordwraps', (WidgetTester tester) async {
+  testWidgets('shift + end keys and wordwraps', (WidgetTester tester) async {
     final String targetPlatformString = defaultTargetPlatform.toString();
     final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
@@ -8775,7 +8801,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgetsWithLeakTracking('shift + home/end keys to document boundary (Mac only)', (WidgetTester tester) async {
+  testWidgets('shift + home/end keys to document boundary (Mac only)', (WidgetTester tester) async {
     const String testText = 'Now is the time for all good people to come to the aid of their country. Now is the time for all good people to come to the aid of their country.';
     controller.text = testText;
     controller.selection = const TextSelection(
@@ -8879,7 +8905,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgetsWithLeakTracking('control + home/end keys (Windows only)', (WidgetTester tester) async {
+  testWidgets('control + home/end keys (Windows only)', (WidgetTester tester) async {
     controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -8944,7 +8970,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
-  testWidgetsWithLeakTracking('control + shift + home/end keys (Windows only)', (WidgetTester tester) async {
+  testWidgets('control + shift + home/end keys (Windows only)', (WidgetTester tester) async {
     controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -9031,7 +9057,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows })
   );
 
-  testWidgetsWithLeakTracking('pageup/pagedown keys on Apple platforms', (WidgetTester tester) async {
+  testWidgets('pageup/pagedown keys on Apple platforms', (WidgetTester tester) async {
     controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -9127,7 +9153,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
   );
 
-  testWidgetsWithLeakTracking('pageup/pagedown keys in a one line field on Apple platforms', (WidgetTester tester) async {
+  testWidgets('pageup/pagedown keys in a one line field on Apple platforms', (WidgetTester tester) async {
     controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -9206,7 +9232,7 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
-  testWidgetsWithLeakTracking('text selection handle visibility', (WidgetTester tester) async {
+  testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
     controller.text = 'XXXXX          XXXXX';
 
@@ -9377,7 +9403,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS })
   );
 
-  testWidgetsWithLeakTracking("scrolling doesn't bounce", (WidgetTester tester) async {
+  testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
     controller.text = 'XXXXX\nXXXXX\nXXXXX';
 
@@ -9426,7 +9452,7 @@ void main() {
     expect(scrollable.controller!.position.pixels, equals(renderEditable.maxScrollExtent));
   });
 
-  testWidgetsWithLeakTracking('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
+  testWidgets('bringIntoView brings the caret into view when in a viewport', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/55547.
     controller.text = testText * 20;
     final ScrollController editableScrollController = ScrollController();
@@ -9470,7 +9496,7 @@ void main() {
     expect(editableScrollController.offset, 0);
   });
 
-  testWidgetsWithLeakTracking('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
+  testWidgets('bringIntoView does nothing if the physics prohibits implicit scrolling', (WidgetTester tester) async {
     controller.text = testText * 20;
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -9518,7 +9544,7 @@ void main() {
     expect(scrollController.offset, 0);
   });
 
-  testWidgetsWithLeakTracking('can change scroll controller', (WidgetTester tester) async {
+  testWidgets('can change scroll controller', (WidgetTester tester) async {
     controller.text = 'A' * 1000;
     final _TestScrollController scrollController1 = _TestScrollController();
     addTearDown(scrollController1.dispose);
@@ -9592,7 +9618,7 @@ void main() {
     expect(scrollController2.attached, isTrue);
   });
 
-  testWidgetsWithLeakTracking('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
+  testWidgets('getLocalRectForCaret does not throw when it sees an infinite point', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SkipPainting(
@@ -9616,7 +9642,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('obscured multiline fields throw an exception', (WidgetTester tester) async {
+  testWidgets('obscured multiline fields throw an exception', (WidgetTester tester) async {
     expect(
       () {
         EditableText(
@@ -9666,7 +9692,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('batch editing works', (WidgetTester tester) async {
+    testWidgets('batch editing works', (WidgetTester tester) async {
       await tester.pumpWidget(buildWidget());
 
       // Connect.
@@ -9705,7 +9731,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('batch edits need to be nested properly', (WidgetTester tester) async {
+    testWidgets('batch edits need to be nested properly', (WidgetTester tester) async {
       await tester.pumpWidget(buildWidget());
 
       // Connect.
@@ -9725,7 +9751,7 @@ void main() {
       expect(errorString, contains('Unbalanced call to endBatchEdit'));
     });
 
-     testWidgetsWithLeakTracking('catch unfinished batch edits on disposal', (WidgetTester tester) async {
+     testWidgets('catch unfinished batch edits on disposal', (WidgetTester tester) async {
       await tester.pumpWidget(buildWidget());
 
       // Connect.
@@ -9775,7 +9801,7 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('input from text input plugin', (WidgetTester tester) async {
+    testWidgets('input from text input plugin', (WidgetTester tester) async {
       controller.text = testText;
       await tester.pumpWidget(boilerplate());
 
@@ -9805,7 +9831,7 @@ void main() {
       expect(tester.testTextInput.log, isEmpty);
     });
 
-    testWidgetsWithLeakTracking('input from text selection menu', (WidgetTester tester) async {
+    testWidgets('input from text selection menu', (WidgetTester tester) async {
       controller.text = testText;
       await tester.pumpWidget(boilerplate());
 
@@ -9830,7 +9856,7 @@ void main() {
       tester.testTextInput.log.clear();
     });
 
-    testWidgetsWithLeakTracking('input from controller', (WidgetTester tester) async {
+    testWidgets('input from controller', (WidgetTester tester) async {
       controller.text = testText;
       await tester.pumpWidget(boilerplate());
 
@@ -9847,7 +9873,7 @@ void main() {
       expect(updates, <TextEditingValue>[collapsedAtEnd('remoteremoteremote listener')]);
     });
 
-    testWidgetsWithLeakTracking('input from changing controller', (WidgetTester tester) async {
+    testWidgets('input from changing controller', (WidgetTester tester) async {
       Widget build({ TextEditingController? textEditingController }) {
         return MediaQuery(
           data: const MediaQueryData(),
@@ -9898,7 +9924,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('input imm channel calls are ordered correctly', (WidgetTester tester) async {
+  testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
     controller.text = 'flutter is the best!';
     final EditableText et = EditableText(
       showSelectionHandles: true,
@@ -9945,7 +9971,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'keyboard is requested after setEditingState after switching to a new text field',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/68571.
@@ -10015,7 +10041,7 @@ void main() {
       );
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Autofill does not request focus',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91354 .
@@ -10072,7 +10098,7 @@ void main() {
       expect(focusNode2.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('setEditingState is not called when text changes', (WidgetTester tester) async {
+  testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
     // We shouldn't get a message here because this change is owned by the platform side.
     controller.text = 'flutter is the best!';
     final EditableText et = EditableText(
@@ -10120,7 +10146,7 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], 'flutter is the best!');
   });
 
-  testWidgetsWithLeakTracking('setEditingState is called when text changes on controller', (WidgetTester tester) async {
+  testWidgets('setEditingState is called when text changes on controller', (WidgetTester tester) async {
     // We should get a message here because this change is owned by the framework side.
     controller.text = 'flutter is the best!';
     final EditableText et = EditableText(
@@ -10169,7 +10195,7 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], 'flutter is the best!...');
   });
 
-  testWidgetsWithLeakTracking('Synchronous test of local and remote editing values', (WidgetTester tester) async {
+  testWidgets('Synchronous test of local and remote editing values', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/65059
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
@@ -10298,7 +10324,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Send text input state to engine when the input formatter rejects user input', (WidgetTester tester) async {
+  testWidgets('Send text input state to engine when the input formatter rejects user input', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67828
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
@@ -10371,7 +10397,7 @@ void main() {
     )));
   });
 
-  testWidgetsWithLeakTracking('Repeatedly receiving [TextEditingValue] will not trigger a keyboard request', (WidgetTester tester) async {
+  testWidgets('Repeatedly receiving [TextEditingValue] will not trigger a keyboard request', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66036
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
@@ -10456,7 +10482,7 @@ void main() {
   });
 
   group('TextEditingController', () {
-    testWidgetsWithLeakTracking('TextEditingController.text set to empty string clears field', (WidgetTester tester) async {
+    testWidgets('TextEditingController.text set to empty string clears field', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
@@ -10490,7 +10516,7 @@ void main() {
       expect(find.text('...'), findsNothing);
     });
 
-    testWidgetsWithLeakTracking('TextEditingController.clear() behavior test', (WidgetTester tester) async {
+    testWidgets('TextEditingController.clear() behavior test', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/66316
       final List<MethodCall> log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
@@ -10563,7 +10589,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
+    testWidgets('TextEditingController.buildTextSpan receives build context', (WidgetTester tester) async {
       final _AccentColorTextEditingController controller = _AccentColorTextEditingController('a');
       addTearDown(controller.dispose);
       const Color color = Color.fromARGB(255, 1, 2, 3);
@@ -10586,7 +10612,7 @@ void main() {
       expect(textSpan.style!.color, color);
     });
 
-    testWidgetsWithLeakTracking('controller listener changes value', (WidgetTester tester) async {
+    testWidgets('controller listener changes value', (WidgetTester tester) async {
       const double maxValue = 5.5555;
 
       controller.addListener(() {
@@ -10621,7 +10647,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('autofocus:true on first frame does not throw', (WidgetTester tester) async {
+  testWidgets('autofocus:true on first frame does not throw', (WidgetTester tester) async {
     controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -10652,7 +10678,7 @@ void main() {
     expect(exception, isNull);
   });
 
-  testWidgetsWithLeakTracking('updateEditingValue filters multiple calls from formatter', (WidgetTester tester) async {
+  testWidgets('updateEditingValue filters multiple calls from formatter', (WidgetTester tester) async {
     final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
       MediaQuery(
@@ -10724,7 +10750,7 @@ void main() {
     expect(formatter.log, referenceLog);
   });
 
-  testWidgetsWithLeakTracking('formatter logic handles repeat filtering', (WidgetTester tester) async {
+  testWidgets('formatter logic handles repeat filtering', (WidgetTester tester) async {
     final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
       MediaQuery(
@@ -10805,7 +10831,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/53612
-  testWidgetsWithLeakTracking('formatter logic handles initial repeat edge case', (WidgetTester tester) async {
+  testWidgets('formatter logic handles initial repeat edge case', (WidgetTester tester) async {
     final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
       MediaQuery(
@@ -10847,7 +10873,7 @@ void main() {
     expect(formatter.lastOldValue.text, 'test');
   });
 
-  testWidgetsWithLeakTracking('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('EditableText changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -10904,7 +10930,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgetsWithLeakTracking('Can access characters on editing string', (WidgetTester tester) async {
+  testWidgets('Can access characters on editing string', (WidgetTester tester) async {
     late int charactersLength;
     final Widget widget = MaterialApp(
       home: EditableText(
@@ -10930,7 +10956,7 @@ void main() {
     expect(charactersLength, 1);
   });
 
-  testWidgetsWithLeakTracking('EditableText can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgets('EditableText can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(),
       child: Directionality(
@@ -10972,7 +10998,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgetsWithLeakTracking('EditableText inherits DefaultTextHeightBehavior', (WidgetTester tester) async {
+  testWidgets('EditableText inherits DefaultTextHeightBehavior', (WidgetTester tester) async {
     const TextHeightBehavior customTextHeightBehavior = TextHeightBehavior(
       applyHeightToFirstAscent: false,
     );
@@ -11000,7 +11026,7 @@ void main() {
     expect(renderObject.textHeightBehavior, equals(customTextHeightBehavior));
   });
 
-  testWidgetsWithLeakTracking('EditableText defaultTextHeightBehavior is used over inherited widget', (WidgetTester tester) async {
+  testWidgets('EditableText defaultTextHeightBehavior is used over inherited widget', (WidgetTester tester) async {
     const TextHeightBehavior inheritedTextHeightBehavior = TextHeightBehavior(
       applyHeightToFirstAscent: false,
     );
@@ -11065,7 +11091,7 @@ void main() {
     expectToAssert(const TextEditingValue(text: 'test', composing: TextRange(start: -1, end: 9)), false);
   });
 
-  testWidgetsWithLeakTracking('Preserves composing range if cursor moves within that range', (WidgetTester tester) async {
+  testWidgets('Preserves composing range if cursor moves within that range', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
@@ -11087,7 +11113,7 @@ void main() {
     expect(state.currentTextEditingValue.composing, const TextRange(start: 4, end: 12));
   });
 
-  testWidgetsWithLeakTracking('Clears composing range if cursor moves outside that range', (WidgetTester tester) async {
+  testWidgets('Clears composing range if cursor moves outside that range', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
@@ -11128,7 +11154,7 @@ void main() {
     expect(state.currentTextEditingValue.composing, TextRange.empty);
   });
 
-  testWidgetsWithLeakTracking('Clears composing range if cursor moves outside that range - case two', (WidgetTester tester) async {
+  testWidgets('Clears composing range if cursor moves outside that range - case two', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
@@ -11210,7 +11236,7 @@ void main() {
     }
 
     // Regression test for https://github.com/flutter/flutter/issues/65374.
-    testWidgetsWithLeakTracking('will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
+    testWidgets('will not cause crash while the TextEditingValue is composing', (WidgetTester tester) async {
       await setupWidget(
         tester,
         LengthLimitingTextInputFormatter(
@@ -11236,7 +11262,7 @@ void main() {
       expect(state.currentTextEditingValue.composing, TextRange.empty);
     });
 
-    testWidgetsWithLeakTracking('handles composing text correctly, continued', (WidgetTester tester) async {
+    testWidgets('handles composing text correctly, continued', (WidgetTester tester) async {
       await setupWidget(
         tester,
         LengthLimitingTextInputFormatter(
@@ -11268,7 +11294,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgetsWithLeakTracking('enforced composing truncated', (WidgetTester tester) async {
+    testWidgets('enforced composing truncated', (WidgetTester tester) async {
       await setupWidget(
         tester,
         LengthLimitingTextInputFormatter(
@@ -11306,7 +11332,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgetsWithLeakTracking('default truncate behaviors with different platforms', (WidgetTester tester) async {
+    testWidgets('default truncate behaviors with different platforms', (WidgetTester tester) async {
       await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
 
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
@@ -11346,7 +11372,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgetsWithLeakTracking("composing range removed if it's overflowed the truncated value's length", (WidgetTester tester) async {
+    testWidgets("composing range removed if it's overflowed the truncated value's length", (WidgetTester tester) async {
       await setupWidget(
         tester,
         LengthLimitingTextInputFormatter(
@@ -11375,7 +11401,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgetsWithLeakTracking('composing range removed with different platforms', (WidgetTester tester) async {
+    testWidgets('composing range removed with different platforms', (WidgetTester tester) async {
       await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
 
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
@@ -11406,7 +11432,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking("composing range handled correctly when it's overflowed", (WidgetTester tester) async {
+    testWidgets("composing range handled correctly when it's overflowed", (WidgetTester tester) async {
       const String string = '👨‍👩‍👦0123456';
 
       await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
@@ -11427,7 +11453,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgetsWithLeakTracking('typing in the middle with different platforms.', (WidgetTester tester) async {
+    testWidgets('typing in the middle with different platforms.', (WidgetTester tester) async {
       await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
 
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
@@ -11469,7 +11495,7 @@ void main() {
   group('callback errors', () {
     const String errorText = 'Test EditableText callback error';
 
-    testWidgetsWithLeakTracking('onSelectionChanged can throw errors', (WidgetTester tester) async {
+    testWidgets('onSelectionChanged can throw errors', (WidgetTester tester) async {
       controller.text = 'flutter is the best!';
 
       await tester.pumpWidget(MaterialApp(
@@ -11496,7 +11522,7 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
 
-    testWidgetsWithLeakTracking('onChanged can throw errors', (WidgetTester tester) async {
+    testWidgets('onChanged can throw errors', (WidgetTester tester) async {
       controller.text = 'flutter is the best!';
 
       await tester.pumpWidget(MaterialApp(
@@ -11522,7 +11548,7 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
 
-    testWidgetsWithLeakTracking('onEditingComplete can throw errors', (WidgetTester tester) async {
+    testWidgets('onEditingComplete can throw errors', (WidgetTester tester) async {
       controller.text = 'flutter is the best!';
 
       await tester.pumpWidget(MaterialApp(
@@ -11553,7 +11579,7 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
 
-    testWidgetsWithLeakTracking('onSubmitted can throw errors', (WidgetTester tester) async {
+    testWidgets('onSubmitted can throw errors', (WidgetTester tester) async {
       controller.text = 'flutter is the best!';
 
       await tester.pumpWidget(MaterialApp(
@@ -11584,7 +11610,7 @@ void main() {
       expect(error.toString(), contains(errorText));
     });
 
-    testWidgetsWithLeakTracking('input formatters can throw errors', (WidgetTester tester) async {
+    testWidgets('input formatters can throw errors', (WidgetTester tester) async {
       final TextInputFormatter badFormatter = TextInputFormatter.withFunction(
         (TextEditingValue oldValue, TextEditingValue newValue) => throw FlutterError(errorText),
       );
@@ -11618,7 +11644,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/72400.
-  testWidgetsWithLeakTracking("delete doesn't cause crash when selection is -1,-1", (WidgetTester tester) async {
+  testWidgets("delete doesn't cause crash when selection is -1,-1", (WidgetTester tester) async {
     final UnsettableController unsettableController = UnsettableController();
     addTearDown(unsettableController.dispose);
 
@@ -11653,7 +11679,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('can change behavior by overriding text editing shortcuts', (WidgetTester tester) async {
+  testWidgets('can change behavior by overriding text editing shortcuts', (WidgetTester tester) async {
     const  Map<SingleActivator, Intent> testShortcuts = <SingleActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
       SingleActivator(LogicalKeyboardKey.keyX, control: true): ExtendSelectionByCharacterIntent(forward: true, collapseSelection: true),
@@ -11718,7 +11744,7 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking('navigating by word', (WidgetTester tester) async {
+  testWidgets('navigating by word', (WidgetTester tester) async {
     controller.text = 'word word word';
     // word wo|rd| word
     controller.selection = const TextSelection(
@@ -11855,7 +11881,7 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking('navigating multiline text', (WidgetTester tester) async {
+  testWidgets('navigating multiline text', (WidgetTester tester) async {
     controller.text = 'word word word\nword word\nword'; // 15 + 10 + 4;
     // wo|rd wo|rd
     controller.selection = const TextSelection(
@@ -12013,7 +12039,7 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking("Mac's expand by line behavior on multiple lines", (WidgetTester tester) async {
+  testWidgets("Mac's expand by line behavior on multiple lines", (WidgetTester tester) async {
     controller.text = 'word word word\nword word\nword'; // 15 + 10 + 4;
     // word word word
     // wo|rd word
@@ -12114,7 +12140,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgetsWithLeakTracking("Mac's expand extent position", (WidgetTester tester) async {
+  testWidgets("Mac's expand extent position", (WidgetTester tester) async {
     controller.text = 'Now is the time for all good people to come to the aid of their country';
     // Start the selection in the middle somewhere.
     controller.selection = const TextSelection.collapsed(offset: 10);
@@ -12347,7 +12373,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgetsWithLeakTracking('expanding selection to start/end single line', (WidgetTester tester) async {
+  testWidgets('expanding selection to start/end single line', (WidgetTester tester) async {
     controller.text = 'word word word';
     // word wo|rd| word
     controller.selection = const TextSelection(
@@ -12434,7 +12460,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS })
   );
 
-  testWidgetsWithLeakTracking('can change text editing behavior by overriding actions', (WidgetTester tester) async {
+  testWidgets('can change text editing behavior by overriding actions', (WidgetTester tester) async {
     controller.text = testText;
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -12480,7 +12506,7 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking('ignore key event from web platform', (WidgetTester tester) async {
+  testWidgets('ignore key event from web platform', (WidgetTester tester) async {
     controller.text = 'test\ntest';
     controller.selection = const TextSelection(
       baseOffset: 0,
@@ -12532,9 +12558,10 @@ void main() {
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 0);
     }
+    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgetsWithLeakTracking('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
+  testWidgets('the toolbar is disposed when selection changes and there is no selectionControls', (WidgetTester tester) async {
     late StateSetter setState;
     bool enableInteractiveSelection = true;
     await tester.pumpWidget(
@@ -12600,7 +12627,7 @@ void main() {
     // On web, using keyboard for selection is handled by the browser.
   }, skip: kIsWeb); // [intended]
 
-  testWidgetsWithLeakTracking('EditableText does not leak animation controllers', (WidgetTester tester) async {
+  testWidgets('EditableText does not leak animation controllers', (WidgetTester tester) async {
     controller.text = 'A';
 
     await tester.pumpWidget(
@@ -12637,7 +12664,7 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Floating cursor affinity', (WidgetTester tester) async {
+  testWidgets('Floating cursor affinity', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey key = GlobalKey();
     // Set it up so that there will be word-wrap.
@@ -12699,14 +12726,9 @@ void main() {
     ));
 
     EditableText.debugDeterministicCursor = false;
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 2},
-  ));
+  });
 
-  testWidgetsWithLeakTracking('Floating cursor ending with selection', (WidgetTester tester) async {
+  testWidgets('Floating cursor ending with selection', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey key = GlobalKey();
     SelectionChangedCause? lastSelectionChangedCause;
@@ -12884,12 +12906,7 @@ void main() {
     lastSelectionChangedCause = null;
 
     EditableText.debugDeterministicCursor = false;
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    // https://github.com/flutter/flutter/issues/134386
-    notDisposedAllowList: <String, int?> {'LeaderLayer': 8},
-  ));
+  });
 
   group('Selection changed scroll into view', () {
     final String text = List<int>.generate(64, (int index) => index).join('\n');
@@ -12945,7 +12962,7 @@ void main() {
       return key.currentState!;
     }
 
-    testWidgetsWithLeakTracking('SelectAll toolbar action will not set max scroll on designated platforms', (WidgetTester tester) async {
+    testWidgets('SelectAll toolbar action will not set max scroll on designated platforms', (WidgetTester tester) async {
       final TextSelectionDelegate textSelectionDelegate = await pumpLongScrollableText(tester);
 
       await resetSelectionAndScrollOffset(tester, setMaxScrollExtent: false);
@@ -12954,7 +12971,7 @@ void main() {
       expect(scrollController.offset, 0.0);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    testWidgetsWithLeakTracking('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
+    testWidgets('Selection will be scrolled into view with SelectionChangedCause', (WidgetTester tester) async {
       final TextSelectionDelegate textSelectionDelegate = await pumpLongScrollableText(tester);
 
       // Cut
@@ -13003,7 +13020,7 @@ void main() {
     }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
-  testWidgetsWithLeakTracking('Should not scroll on paste if caret already visible', (WidgetTester tester) async {
+  testWidgets('Should not scroll on paste if caret already visible', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96658.
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
@@ -13045,7 +13062,7 @@ void main() {
     expect(scrollController.offset, 0.0);
   });
 
-  testWidgetsWithLeakTracking('Autofill enabled by default', (WidgetTester tester) async {
+  testWidgets('Autofill enabled by default', (WidgetTester tester) async {
     controller.text = 'A';
 
     await tester.pumpWidget(
@@ -13069,7 +13086,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Autofill can be disabled', (WidgetTester tester) async {
+  testWidgets('Autofill can be disabled', (WidgetTester tester) async {
     controller.text = 'A';
 
     await tester.pumpWidget(
@@ -13109,6 +13126,13 @@ void main() {
 
     Future<void> sendUndo(WidgetTester tester) => sendUndoRedo(tester);
     Future<void> sendRedo(WidgetTester tester) => sendUndoRedo(tester, true);
+
+    TextEditingValue emptyComposingOnAndroid(TextEditingValue value) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        return value.copyWith(composing: TextRange.empty);
+      }
+      return value;
+    }
 
     Widget boilerplate() {
       return MaterialApp(
@@ -13154,7 +13178,7 @@ void main() {
       selection: TextSelection.collapsed(offset: textAC.length),
     );
 
-    testWidgetsWithLeakTracking('Should have no effect on an empty and non-focused field', (WidgetTester tester) async {
+    testWidgets('Should have no effect on an empty and non-focused field', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
       expect(controller.value, TextEditingValue.empty);
 
@@ -13169,7 +13193,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('Should have no effect on an empty and focused field', (WidgetTester tester) async {
+    testWidgets('Should have no effect on an empty and focused field', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
       await waitForThrottling(tester);
       expect(controller.value, TextEditingValue.empty);
@@ -13192,7 +13216,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('Can undo/redo a single insertion', (WidgetTester tester) async {
+    testWidgets('Can undo/redo a single insertion', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
@@ -13230,7 +13254,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('Can undo/redo multiple insertions', (WidgetTester tester) async {
+    testWidgets('Can undo/redo multiple insertions', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
@@ -13272,7 +13296,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/120794.
     // This is only reproducible on Android platform because it is the only
     // platform where composing changes are saved in the editing history.
-    testWidgetsWithLeakTracking('Can undo as intented when adding a delay between undos', (WidgetTester tester) async {
+    testWidgets('Can undo as intented when adding a delay between undos', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
@@ -13313,20 +13337,20 @@ void main() {
 
       // Undo first insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep2);
+      expect(controller.value, emptyComposingOnAndroid(composingStep2));
 
       // Waiting for the throttling between undos should have no effect.
       await tester.pump(const Duration(milliseconds: 500));
 
       // Undo second insertion.
       await sendUndo(tester);
-      expect(controller.value, composingStep1);
+      expect(controller.value, emptyComposingOnAndroid(composingStep1));
 
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
     // Regression test for https://github.com/flutter/flutter/issues/120194.
-    testWidgetsWithLeakTracking('Cursor does not jump after undo', (WidgetTester tester) async {
+    testWidgets('Cursor does not jump after undo', (WidgetTester tester) async {
       // Initialize the controller with a non empty text.
       controller.text = textA;
       await tester.pumpWidget(boilerplate());
@@ -13350,7 +13374,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
+    testWidgets('Initial value is recorded when an undo is received just after getting the focus', (WidgetTester tester) async {
       // Initialize the controller with a non empty text.
       controller.text = textA;
       await tester.pumpWidget(boilerplate());
@@ -13375,7 +13399,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('Can make changes in the middle of the history', (WidgetTester tester) async {
+    testWidgets('Can make changes in the middle of the history', (WidgetTester tester) async {
       await tester.pumpWidget(boilerplate());
 
       // Focus the field and wait for throttling delay to get the initial
@@ -13427,7 +13451,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('inside EditableText, duplicate changes', (WidgetTester tester) async {
+    testWidgets('inside EditableText, duplicate changes', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -13556,7 +13580,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('inside EditableText, autofocus', (WidgetTester tester) async {
+    testWidgets('inside EditableText, autofocus', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -13628,7 +13652,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('does not save composing changes (except Android)', (WidgetTester tester) async {
+    testWidgets('does not save composing changes (except Android)', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -13787,7 +13811,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.android }), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('does save composing changes on Android', (WidgetTester tester) async {
+    testWidgets('does save composing changes on Android', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -13882,7 +13906,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13892,7 +13915,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13910,7 +13932,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13919,7 +13940,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13945,7 +13965,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -13954,7 +13973,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -13994,7 +14012,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 ni',
-          composing: TextRange(start: 2, end: 4),
           selection: TextSelection.collapsed(offset: 4),
         ),
       );
@@ -14003,7 +14020,6 @@ void main() {
         controller.value,
         const TextEditingValue(
           text: '1 nihao',
-          composing: TextRange(start: 2, end: 7),
           selection: TextSelection.collapsed(offset: 7),
         ),
       );
@@ -14019,7 +14035,7 @@ void main() {
     // On web, these keyboard shortcuts are handled by the browser.
     }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended]
 
-    testWidgetsWithLeakTracking('saves right up to composing change even when throttled', (WidgetTester tester) async {
+    testWidgets('saves right up to composing change even when throttled', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -14121,10 +14137,12 @@ void main() {
         case TargetPlatform.android:
           expect(
             controller.value,
-            const TextEditingValue(
-              text: '1 2 ni',
-              composing: TextRange(start: 4, end: 6),
-              selection: TextSelection.collapsed(offset: 6),
+            emptyComposingOnAndroid(
+              const TextEditingValue(
+                text: '1 2 ni',
+                composing: TextRange(start: 4, end: 6),
+                selection: TextSelection.collapsed(offset: 6),
+              ),
             ),
           );
         // Composing changes are ignored on all other platforms.
@@ -14178,10 +14196,12 @@ void main() {
         case TargetPlatform.android:
           expect(
             controller.value,
-            const TextEditingValue(
-              text: '1 2 ni',
-              composing: TextRange(start: 4, end: 6),
-              selection: TextSelection.collapsed(offset: 6),
+            emptyComposingOnAndroid(
+              const TextEditingValue(
+                text: '1 2 ni',
+                composing: TextRange(start: 4, end: 6),
+                selection: TextSelection.collapsed(offset: 6),
+              ),
             ),
           );
         // Composing changes are ignored on all other platforms.
@@ -14219,7 +14239,7 @@ void main() {
     }, variant: TargetPlatformVariant.all(), skip: kIsWeb); // [intended]
   });
 
-  testWidgetsWithLeakTracking('pasting with the keyboard collapses the selection and places it after the pasted content', (WidgetTester tester) async {
+  testWidgets('pasting with the keyboard collapses the selection and places it after the pasted content', (WidgetTester tester) async {
     Future<void> testPasteSelection(WidgetTester tester, _VoidFutureCallback paste) async {
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
@@ -14356,7 +14376,7 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   // Regression test for https://github.com/flutter/flutter/issues/98322.
-  testWidgetsWithLeakTracking('EditableText consumes ActivateIntent and ButtonActivateIntent', (WidgetTester tester) async {
+  testWidgets('EditableText consumes ActivateIntent and ButtonActivateIntent', (WidgetTester tester) async {
     bool receivedIntent = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -14398,7 +14418,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100585.
-  testWidgetsWithLeakTracking('can paste and remove field', (WidgetTester tester) async {
+  testWidgets('can paste and remove field', (WidgetTester tester) async {
     controller.text = 'text';
     late StateSetter setState;
     bool showField = true;
@@ -14448,7 +14468,7 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   // Regression test for https://github.com/flutter/flutter/issues/100585.
-  testWidgetsWithLeakTracking('can cut and remove field', (WidgetTester tester) async {
+  testWidgets('can cut and remove field', (WidgetTester tester) async {
     controller.text = 'text';
     late StateSetter setState;
     bool showField = true;
@@ -14499,7 +14519,7 @@ void main() {
   }, skip: kIsWeb); // [intended]
 
   group('Mac document shortcuts', () {
-    testWidgetsWithLeakTracking('ctrl-A/E', (WidgetTester tester) async {
+    testWidgets('ctrl-A/E', (WidgetTester tester) async {
       final String targetPlatformString = defaultTargetPlatform.toString();
       final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
       controller.text = testText;
@@ -14580,7 +14600,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
-    testWidgetsWithLeakTracking('ctrl-F/B', (WidgetTester tester) async {
+    testWidgets('ctrl-F/B', (WidgetTester tester) async {
       final String targetPlatformString = defaultTargetPlatform.toString();
       final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
       controller.text = testText;
@@ -14646,7 +14666,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
-    testWidgetsWithLeakTracking('ctrl-N/P', (WidgetTester tester) async {
+    testWidgets('ctrl-N/P', (WidgetTester tester) async {
       final String targetPlatformString = defaultTargetPlatform.toString();
       final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
       controller.text = testText;
@@ -14725,7 +14745,7 @@ void main() {
         await tester.pump();
       }
 
-      testWidgetsWithLeakTracking('with normal characters', (WidgetTester tester) async {
+      testWidgets('with normal characters', (WidgetTester tester) async {
         final String targetPlatformString = defaultTargetPlatform.toString();
         final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
 
@@ -14820,7 +14840,7 @@ void main() {
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
       );
 
-      testWidgetsWithLeakTracking('with extended grapheme clusters', (WidgetTester tester) async {
+      testWidgets('with extended grapheme clusters', (WidgetTester tester) async {
         final String targetPlatformString = defaultTargetPlatform.toString();
         final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
 
@@ -14902,7 +14922,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('macOS selectors work', (WidgetTester tester) async {
+    testWidgets('macOS selectors work', (WidgetTester tester) async {
       controller.text = 'test\nline2';
       controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
@@ -14960,7 +14980,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
+  testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Align(
@@ -15010,7 +15030,7 @@ void main() {
   );
 
   group('Spell check', () {
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Spell check configured properly when spell check disabled by default',
         (WidgetTester tester) async {
       controller.text = 'A';
@@ -15034,7 +15054,7 @@ void main() {
       expect(state.spellCheckEnabled, isFalse);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Spell check configured properly when spell check disabled manually',
         (WidgetTester tester) async {
       controller.text = 'A';
@@ -15059,7 +15079,7 @@ void main() {
       expect(state.spellCheckEnabled, isFalse);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Error thrown when spell check configuration defined without specifying misspelled text style',
         (WidgetTester tester) async {
       controller.text = 'A';
@@ -15081,7 +15101,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Spell check configured properly when spell check enabled without specified spell check service and native spell check service defined',
           (WidgetTester tester) async {
         tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
@@ -15116,7 +15136,7 @@ void main() {
         tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Spell check configured properly with specified spell check service',
         (WidgetTester tester) async {
       final FakeSpellCheckService fakeSpellCheckService = FakeSpellCheckService();
@@ -15149,7 +15169,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'Spell check disabled when spell check configuration specified but no default spell check service available',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
@@ -15181,7 +15201,7 @@ void main() {
       tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'findSuggestionSpanAtCursorIndex finds correct span with cursor in middle of a word',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
@@ -15226,7 +15246,7 @@ void main() {
       expect(suggestionSpan, equals(expectedSpan));
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
         'findSuggestionSpanAtCursorIndex finds correct span with cursor on edge of a word',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
@@ -15270,7 +15290,7 @@ void main() {
       expect(suggestionSpan, equals(expectedSpan));
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
         'findSuggestionSpanAtCursorIndex finds no span when cursor out of range of spans',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
@@ -15314,7 +15334,7 @@ void main() {
       expect(suggestionSpan, isNull);
     });
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
         'findSuggestionSpanAtCursorIndex finds no span when word correctly spelled',
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
@@ -15358,7 +15378,7 @@ void main() {
       expect(suggestionSpan, isNull);
     });
 
-    testWidgetsWithLeakTracking('can show spell check suggestions toolbar when there are spell check results', (WidgetTester tester) async {
+    testWidgets('can show spell check suggestions toolbar when there are spell check results', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(
@@ -15419,7 +15439,7 @@ void main() {
       expect(find.text('DELETE'), matcher);
     });
 
-    testWidgetsWithLeakTracking('can show spell check suggestions toolbar when there are no spell check results on iOS', (WidgetTester tester) async {
+    testWidgets('can show spell check suggestions toolbar when there are no spell check results on iOS', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(
@@ -15481,7 +15501,7 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
-    testWidgetsWithLeakTracking('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+    testWidgets('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(
@@ -15542,7 +15562,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('material spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
+    testWidgets('material spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       const TextEditingValue value = TextEditingValue(
@@ -15607,7 +15627,7 @@ void main() {
       }
     });
 
-    testWidgetsWithLeakTracking('replacing puts cursor at the end of the word', (WidgetTester tester) async {
+    testWidgets('replacing puts cursor at the end of the word', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       controller.value = const TextEditingValue(
@@ -15719,7 +15739,7 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
-    testWidgetsWithLeakTracking('tapping on a misspelled word hides the handles', (WidgetTester tester) async {
+    testWidgets('tapping on a misspelled word hides the handles', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
       controller.value = const TextEditingValue(
@@ -15782,7 +15802,7 @@ void main() {
   });
 
   group('magnifier', () {
-    testWidgetsWithLeakTracking('should build nothing by default', (WidgetTester tester) async {
+    testWidgets('should build nothing by default', (WidgetTester tester) async {
       final EditableText editableText = EditableText(
             controller: controller,
             showSelectionHandles: true,
@@ -15818,7 +15838,7 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/117418.
-  testWidgetsWithLeakTracking('can handle the partial selection of a multi-code-unit glyph', (WidgetTester tester) async {
+  testWidgets('can handle the partial selection of a multi-code-unit glyph', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -15861,7 +15881,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('does not crash when didChangeMetrics is called after unmounting', (WidgetTester tester) async {
+  testWidgets('does not crash when didChangeMetrics is called after unmounting', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -15883,7 +15903,7 @@ void main() {
     state.didChangeMetrics();
   });
 
-  testWidgetsWithLeakTracking('_CompositionCallback widget does not skip frames', (WidgetTester tester) async {
+  testWidgets('_CompositionCallback widget does not skip frames', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     controller.value = const TextEditingValue(selection: TextSelection.collapsed(offset: 0));
     Offset offset = Offset.zero;
@@ -15940,7 +15960,7 @@ void main() {
   });
 
   group('selection behavior when receiving focus', () {
-    testWidgetsWithLeakTracking('tabbing between fields', (WidgetTester tester) async {
+    testWidgets('tabbing between fields', (WidgetTester tester) async {
       final TextEditingController controller1 = TextEditingController();
       addTearDown(controller1.dispose);
       final TextEditingController controller2 = TextEditingController();
@@ -16080,7 +16100,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Selection is updated when the field has focus and the new selection is invalid', (WidgetTester tester) async {
+    testWidgets('Selection is updated when the field has focus and the new selection is invalid', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/120631.
       controller.text = 'Text';
 
@@ -16137,7 +16157,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('when having focus stolen between frames on web', (WidgetTester tester) async {
+    testWidgets('when having focus stolen between frames on web', (WidgetTester tester) async {
       controller.text = 'Text1';
       final FocusNode focusNode1 = FocusNode();
       addTearDown(focusNode1.dispose);
@@ -16212,7 +16232,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
+  testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -16233,7 +16253,7 @@ void main() {
     expect(state.buildTextSpan().style!.fontWeight, FontWeight.bold);
   });
 
-  testWidgetsWithLeakTracking('code points are treated as single characters in obscure mode', (WidgetTester tester) async {
+  testWidgets('code points are treated as single characters in obscure mode', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -16369,7 +16389,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('when manually placing the cursor in the middle of a code point', (WidgetTester tester) async {
+  testWidgets('when manually placing the cursor in the middle of a code point', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -16453,7 +16473,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('when inserting a malformed string', (WidgetTester tester) async {
+  testWidgets('when inserting a malformed string', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -16515,7 +16535,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('when inserting a malformed string that is a sequence of dangling high surrogates', (WidgetTester tester) async {
+  testWidgets('when inserting a malformed string that is a sequence of dangling high surrogates', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -16575,7 +16595,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('when inserting a malformed string that is a sequence of dangling low surrogates', (WidgetTester tester) async {
+  testWidgets('when inserting a malformed string that is a sequence of dangling low surrogates', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -16652,7 +16672,7 @@ void main() {
         .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
-    testWidgetsWithLeakTracking('web avoids the paste permissions prompt by not calling hasStrings', (WidgetTester tester) async {
+    testWidgets('web avoids the paste permissions prompt by not calling hasStrings', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -16685,7 +16705,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Cursor color with an opacity is respected', (WidgetTester tester) async {
+  testWidgets('Cursor color with an opacity is respected', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double opacity = 0.55;
     controller.text = 'blah blah';

@@ -277,6 +277,7 @@ class SliderThemeData with Diagnosticable {
     this.disabledThumbColor,
     this.overlayColor,
     this.valueIndicatorColor,
+    this.valueIndicatorStrokeColor,
     this.overlayShape,
     this.tickMarkShape,
     this.thumbShape,
@@ -344,6 +345,7 @@ class SliderThemeData with Diagnosticable {
       disabledThumbColor: primaryColorDark.withAlpha(disabledThumbAlpha),
       overlayColor: primaryColor.withAlpha(overlayAlpha),
       valueIndicatorColor: primaryColor.withAlpha(valueIndicatorAlpha),
+      valueIndicatorStrokeColor: primaryColor.withAlpha(valueIndicatorAlpha),
       overlayShape: const RoundSliderOverlayShape(),
       tickMarkShape: const RoundSliderTickMarkShape(),
       thumbShape: const RoundSliderThumbShape(),
@@ -423,6 +425,8 @@ class SliderThemeData with Diagnosticable {
   /// The color given to the [valueIndicatorShape] to draw itself with.
   final Color? valueIndicatorColor;
 
+  /// The color given to the [valueIndicatorShape] stroke.
+  final Color? valueIndicatorStrokeColor;
 
   /// The shape that will be used to draw the [Slider]'s overlay.
   ///
@@ -600,6 +604,7 @@ class SliderThemeData with Diagnosticable {
     Color? disabledThumbColor,
     Color? overlayColor,
     Color? valueIndicatorColor,
+    Color? valueIndicatorStrokeColor,
     SliderComponentShape? overlayShape,
     SliderTickMarkShape? tickMarkShape,
     SliderComponentShape? thumbShape,
@@ -633,6 +638,7 @@ class SliderThemeData with Diagnosticable {
       disabledThumbColor: disabledThumbColor ?? this.disabledThumbColor,
       overlayColor: overlayColor ?? this.overlayColor,
       valueIndicatorColor: valueIndicatorColor ?? this.valueIndicatorColor,
+      valueIndicatorStrokeColor: valueIndicatorStrokeColor ?? this.valueIndicatorStrokeColor,
       overlayShape: overlayShape ?? this.overlayShape,
       tickMarkShape: tickMarkShape ?? this.tickMarkShape,
       thumbShape: thumbShape ?? this.thumbShape,
@@ -675,6 +681,7 @@ class SliderThemeData with Diagnosticable {
       disabledThumbColor: Color.lerp(a.disabledThumbColor, b.disabledThumbColor, t),
       overlayColor: Color.lerp(a.overlayColor, b.overlayColor, t),
       valueIndicatorColor: Color.lerp(a.valueIndicatorColor, b.valueIndicatorColor, t),
+      valueIndicatorStrokeColor: Color.lerp(a.valueIndicatorStrokeColor, b.valueIndicatorStrokeColor, t),
       overlayShape: t < 0.5 ? a.overlayShape : b.overlayShape,
       tickMarkShape: t < 0.5 ? a.tickMarkShape : b.tickMarkShape,
       thumbShape: t < 0.5 ? a.thumbShape : b.thumbShape,
@@ -755,6 +762,7 @@ class SliderThemeData with Diagnosticable {
         && other.disabledThumbColor == disabledThumbColor
         && other.overlayColor == overlayColor
         && other.valueIndicatorColor == valueIndicatorColor
+        && other.valueIndicatorStrokeColor == valueIndicatorStrokeColor
         && other.overlayShape == overlayShape
         && other.tickMarkShape == tickMarkShape
         && other.thumbShape == thumbShape
@@ -792,6 +800,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(ColorProperty('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor));
     properties.add(ColorProperty('overlayColor', overlayColor, defaultValue: defaultData.overlayColor));
     properties.add(ColorProperty('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
+    properties.add(ColorProperty('valueIndicatorStrokeColor', valueIndicatorStrokeColor, defaultValue: defaultData.valueIndicatorStrokeColor));
     properties.add(DiagnosticsProperty<SliderComponentShape>('overlayShape', overlayShape, defaultValue: defaultData.overlayShape));
     properties.add(DiagnosticsProperty<SliderTickMarkShape>('tickMarkShape', tickMarkShape, defaultValue: defaultData.tickMarkShape));
     properties.add(DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape));
@@ -2625,6 +2634,7 @@ class RectangularSliderValueIndicatorShape extends SliderComponentShape {
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+      strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2704,7 +2714,7 @@ class RectangularRangeSliderValueIndicatorShape
       textScaleFactor: textScaleFactor!,
       sizeWithOverflow: sizeWithOverflow!,
       backgroundPaintColor: sliderTheme!.valueIndicatorColor!,
-      strokePaintColor: isOnTop! ? sliderTheme.overlappingShapeStrokeColor : null,
+      strokePaintColor: isOnTop! ? sliderTheme.overlappingShapeStrokeColor : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2892,7 +2902,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       labelPainter,
       textScaleFactor,
       sizeWithOverflow,
-      null,
+      sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -2974,7 +2984,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
       labelPainter,
       textScaleFactor!,
       sizeWithOverflow!,
-      isOnTop ? sliderTheme.overlappingShapeStrokeColor : null,
+      isOnTop ? sliderTheme.overlappingShapeStrokeColor : sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -3422,6 +3432,7 @@ class DropSliderValueIndicatorShape extends SliderComponentShape {
       textScaleFactor: textScaleFactor,
       sizeWithOverflow: sizeWithOverflow,
       backgroundPaintColor: sliderTheme.valueIndicatorColor!,
+      strokePaintColor: sliderTheme.valueIndicatorStrokeColor,
     );
   }
 }
@@ -3538,8 +3549,17 @@ class _DropSliderValueIndicatorPathPainter {
       ..lineTo(-_triangleHeight, -_triangleHeight)
       ..lineTo(_triangleHeight, -_triangleHeight)
       ..close();
+    trianglePath.addRRect(borderRect);
+
+    if (strokePaintColor != null) {
+      final Paint strokePaint = Paint()
+        ..color = strokePaintColor
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      canvas.drawPath(trianglePath, strokePaint);
+    }
+
     canvas.drawPath(trianglePath, fillPaint);
-    canvas.drawRRect(borderRect, fillPaint);
 
     // The label text is centered within the value indicator.
     final double bottomTipToUpperRectTranslateY = -_preferredHalfHeight / 2 - upperRect.height;

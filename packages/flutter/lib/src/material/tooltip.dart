@@ -106,6 +106,17 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// the child that Tooltip wraps is hovered over on web or desktop. On mobile,
 /// the tooltip is shown when the widget is long pressed.
 ///
+/// This tooltip will default to showing above the [Text] instead of below
+/// because its ambient [TooltipThemeData.preferBelow] is false.
+/// (See the use of [MaterialApp.theme].)
+/// Setting that piece of theme data is recommended to avoid having a finger or
+/// cursor hide the tooltip. For other ways to set that piece of theme data see:
+///
+/// * [Theme.data], [ThemeData.tooltipTheme]
+/// * [TooltipTheme.data]
+///
+/// or it can be set directly on each tooltip with [Tooltip.preferBelow].
+///
 /// ** See code in examples/api/lib/material/tooltip/tooltip.0.dart **
 /// {@end-tool}
 ///
@@ -113,9 +124,9 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
 /// `height` has been used to set a specific height of the Tooltip.
-/// `preferBelow` is false, the tooltip will prefer showing above [Tooltip]'s child widget.
-/// However, it may show the tooltip below if there's not enough space
-/// above the widget.
+/// `preferBelow` is true; the tooltip will prefer showing below [Tooltip]'s child widget.
+/// However, it may show the tooltip above if there's not enough space
+/// below the widget.
 /// `textStyle` has been used to set the font size of the 'message'.
 /// `showDuration` accepts a Duration to continue showing the message after the long
 /// press has been released or the mouse pointer exits the child widget.
@@ -174,6 +185,8 @@ class Tooltip extends StatefulWidget {
     this.textAlign,
     this.waitDuration,
     this.showDuration,
+    this.exitDuration,
+    this.enableTapToDismiss = true,
     this.triggerMode,
     this.enableFeedback,
     this.onTriggered,
@@ -231,9 +244,15 @@ class Tooltip extends StatefulWidget {
 
   /// Whether the tooltip defaults to being displayed below the widget.
   ///
-  /// Defaults to true. If there is insufficient space to display the tooltip in
+  /// If there is insufficient space to display the tooltip in
   /// the preferred direction, the tooltip will be displayed in the opposite
   /// direction.
+  ///
+  /// If this property is null, then [TooltipThemeData.preferBelow] is used.
+  /// If that is also null, the default value is true.
+  ///
+  /// Applying [TooltipThemeData.preferBelow]: `false` for the entire app
+  /// is recommended to avoid having a finger or cursor hide a tooltip.
   final bool? preferBelow;
 
   /// Whether the tooltip's [message] or [richMessage] should be excluded from
@@ -283,12 +302,32 @@ class Tooltip extends StatefulWidget {
 
   /// The length of time that the tooltip will be shown after a long press is
   /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
-  /// released (if triggerMode is [TooltipTriggerMode.tap]) or mouse pointer
-  /// exits the widget.
+  /// released (if triggerMode is [TooltipTriggerMode.tap]). This property
+  /// does not affect mouse pointer devices.
   ///
-  /// Defaults to 1.5 seconds for long press and tap released or 0.1 seconds
-  /// for mouse pointer exits the widget.
+  /// Defaults to 1.5 seconds for long press and tap released
+  ///
+  /// See also:
+  ///
+  ///  * [exitDuration], which allows configuring the time untill a pointer
+  /// dissapears when hovering.
   final Duration? showDuration;
+
+  /// The length of time that a pointer must have stopped hovering over a
+  /// tooltip's widget before the tooltip will be hidden.
+  ///
+  /// Defaults to 100 milliseconds.
+  ///
+  /// See also:
+  ///
+  ///  * [showDuration], which allows configuring the length of time that a
+  /// tooltip will be visible after touch events are released.
+  final Duration? exitDuration;
+
+  /// Whether the tooltip can be dismissed by tap.
+  ///
+  /// The default value is true.
+  final bool enableTapToDismiss;
 
   /// The [TooltipTriggerMode] that will show the tooltip.
   ///
@@ -365,6 +404,7 @@ class Tooltip extends StatefulWidget {
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
     properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -382,7 +422,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
+  static const Duration _defaultHoverExitDuration = Duration(milliseconds: 100);
   static const Duration _defaultWaitDuration = Duration.zero;
   static const bool _defaultExcludeFromSemantics = false;
   static const TooltipTriggerMode _defaultTriggerMode = TooltipTriggerMode.longPress;
@@ -396,7 +436,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late TooltipThemeData _tooltipTheme;
 
   Duration get _showDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration;
-  Duration get _hoverShowDuration => widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultHoverShowDuration;
+  Duration get _hoverExitDuration => widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultHoverExitDuration;
   Duration get _waitDuration => widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration;
   TooltipTriggerMode get _triggerMode => widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode;
   bool get _enableFeedback => widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
@@ -564,6 +604,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // The primary pointer is not part of a "trigger" gesture so the tooltip
   // should be dismissed.
   void _handleTapToDismiss() {
+    if (!widget.enableTapToDismiss) {
+      return ;
+    }
     _scheduleDismissTooltip(withDelay: Duration.zero);
     _activeHoveringPointerDevices.clear();
   }
@@ -643,7 +686,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
     _activeHoveringPointerDevices.remove(event.device);
     if (_activeHoveringPointerDevices.isEmpty) {
-      _scheduleDismissTooltip(withDelay: _hoverShowDuration);
+      _scheduleDismissTooltip(withDelay: _hoverExitDuration);
     }
   }
 
@@ -901,17 +944,20 @@ class _TooltipOverlay extends StatelessWidget {
         constraints: BoxConstraints(minHeight: height),
         child: DefaultTextStyle(
           style: Theme.of(context).textTheme.bodyMedium!,
-          child: Container(
-            decoration: decoration,
-            padding: padding,
-            margin: margin,
-            child: Center(
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: Text.rich(
-                richMessage,
-                style: textStyle,
-                textAlign: textAlign,
+          child: Semantics(
+            container: true,
+            child: Container(
+              decoration: decoration,
+              padding: padding,
+              margin: margin,
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: Text.rich(
+                  richMessage,
+                  style: textStyle,
+                  textAlign: textAlign,
+                ),
               ),
             ),
           ),

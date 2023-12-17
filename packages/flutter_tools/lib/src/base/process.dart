@@ -233,6 +233,52 @@ abstract class ProcessUtils {
     List<String> cli, {
     Map<String, String>? environment,
   });
+
+  /// Write [line] to [stdin] and catch any errors with [onError].
+  ///
+  /// Specifically with [Process] file descriptors, an exception that is
+  /// thrown as part of a write can be most reliably caught with a
+  /// [ZoneSpecification] error handler.
+  ///
+  /// On some platforms, the following code appears to work:
+  ///
+  /// ```dart
+  /// stdin.writeln(line);
+  /// try {
+  ///   await stdin.flush(line);
+  /// } catch (err) {
+  ///   // handle error
+  /// }
+  /// ```
+  ///
+  /// However it did not catch a [SocketException] on Linux.
+  static Future<void> writelnToStdinGuarded({
+    required IOSink stdin,
+    required String line,
+    required void Function(Object, StackTrace) onError,
+  }) async {
+    final Completer<void> completer = Completer<void>();
+
+    void writeFlushAndComplete() {
+      stdin.writeln(line);
+      stdin.flush().whenComplete(() {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      });
+    }
+
+    runZonedGuarded(
+      writeFlushAndComplete,
+      (Object error, StackTrace stackTrace) {
+        onError(error, stackTrace);
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+    );
+    return completer.future;
+  }
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
@@ -277,7 +323,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       _logger.printTrace(runResult.toString());
       if (throwOnError && runResult.exitCode != 0 &&
           (allowedFailures == null || !allowedFailures(runResult.exitCode))) {
-        runResult.throwException('Process exited abnormally:\n$runResult');
+        runResult.throwException('Process exited abnormally with exit code ${runResult.exitCode}:\n$runResult');
       }
       return runResult;
     }
@@ -341,7 +387,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         _logger.printTrace(runResult.toString());
         if (throwOnError && runResult.exitCode != 0 &&
             (allowedFailures == null || !allowedFailures(exitCode))) {
-          runResult.throwException('Process exited abnormally:\n$runResult');
+          runResult.throwException('Process exited abnormally with exit code $exitCode:\n$runResult');
         }
         return runResult;
       }
@@ -407,7 +453,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     if (failedExitCode && throwOnError) {
-      String message = 'The command failed';
+      String message = 'The command failed with exit code ${runResult.exitCode}';
       if (verboseExceptions) {
         message = 'The command failed\nStdout:\n${runResult.stdout}\n'
             'Stderr:\n${runResult.stderr}';
@@ -622,6 +668,12 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
   await shutdownHooks.runShutdownHooks(globals.logger);
 
   final Completer<void> completer = Completer<void>();
+
+  // Allow any pending analytics events to send and close the http connection
+  //
+  // By default, we will wait 250 ms before canceling any pending events, we
+  // can change the [delayDuration] in the close method if it needs to be changed
+  await globals.analytics.close();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

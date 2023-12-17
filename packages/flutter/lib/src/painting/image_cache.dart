@@ -621,7 +621,7 @@ abstract class _CachedImageBase {
       assert(handle != null);
       handle?.dispose();
       handle = null;
-    });
+    }, debugLabel: 'CachedImage.disposeHandle');
   }
 }
 

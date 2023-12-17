@@ -49,7 +49,7 @@ const double _kOverAndUnderCenterOpacity = 0.447;
 ///
 ///  * [ListWheelScrollView], the generic widget backing this picker without
 ///    the iOS design specific chrome.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/pickers/>
 class CupertinoPicker extends StatefulWidget {
   /// Creates a picker from a concrete list of children.
   ///
@@ -218,6 +218,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void didUpdateWidget(CupertinoPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrollController != null && oldWidget.scrollController == null) {
+      _controller?.dispose();
       _controller = null;
     } else if (widget.scrollController == null && oldWidget.scrollController != null) {
       assert(_controller == null);

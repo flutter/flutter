@@ -174,17 +174,12 @@ class _OptionsState extends State<Options> {
   }
 
   VisualDensity _profileToDensity(String? profile) {
-    switch (profile) {
-      case 'standard':
-        return VisualDensity.standard;
-      case 'comfortable':
-        return VisualDensity.comfortable;
-      case 'compact':
-        return VisualDensity.compact;
-      case 'custom':
-      default:
-        return widget.model.density;
-    }
+    return switch (profile) {
+      'standard'    => VisualDensity.standard,
+      'comfortable' => VisualDensity.comfortable,
+      'compact'     => VisualDensity.compact,
+      'custom' || _ => widget.model.density,
+    };
   }
 
   @override

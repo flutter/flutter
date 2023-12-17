@@ -1411,7 +1411,8 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   bool get sizedByParent => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(debugCheckHasBoundedAxis(axis, constraints));
     return constraints.biggest;
   }

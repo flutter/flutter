@@ -26,5 +26,6 @@
   "menuDismissLabel": "Maak kieslys toe",
   "lookUpButtonLabel": "Kyk op",
   "searchWebButtonLabel": "Deursoek web",
-  "shareButtonLabel": "Deel …"
+  "shareButtonLabel": "Deel …",
+  "clearButtonLabel": "Clear"
 }

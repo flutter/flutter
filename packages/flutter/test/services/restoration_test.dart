@@ -13,7 +13,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'restoration.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('$RestorationManager dispatches memory events', (WidgetTester tester) async {
+  testWidgets('$RestorationManager dispatches memory events', (WidgetTester tester) async {
     await expectLater(
       await memoryEvents(() => RestorationManager().dispose(), RestorationManager),
       areCreateAndDispose,
@@ -21,7 +21,7 @@ void main() {
   });
 
   group('RestorationManager', () {
-    testWidgetsWithLeakTracking('root bucket retrieval', (WidgetTester tester) async {
+    testWidgets('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
@@ -57,6 +57,7 @@ void main() {
       expect(rootBucket!.read<int>('value1'), 10);
       expect(rootBucket!.read<String>('value2'), 'Hello');
       final RestorationBucket child = rootBucket!.claimChild('child1', debugOwner: null);
+      addTearDown(child.dispose);
       expect(child.read<int>('another value'), 22);
 
       // Accessing the root bucket again completes synchronously with same bucket.
@@ -68,7 +69,7 @@ void main() {
       expect(synchronousBucket, same(rootBucket));
     });
 
-    testWidgetsWithLeakTracking('root bucket received from engine before retrieval', (WidgetTester tester) async {
+    testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
@@ -88,7 +89,7 @@ void main() {
       expect(callsToEngine, isEmpty);
     });
 
-    testWidgetsWithLeakTracking('root bucket received while engine retrieval is pending', (WidgetTester tester) async {
+    testWidgets('root bucket received while engine retrieval is pending', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
@@ -119,7 +120,7 @@ void main() {
       expect(rootBucket2!.contains('foo'), isFalse);
     });
 
-    testWidgetsWithLeakTracking('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
+    testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
         return _createEncodedRestorationData1();
       });
@@ -157,10 +158,11 @@ void main() {
       expect(newRoot!.read<int>('foo'), 33);
       expect(newRoot!.read<int>('value1'), null);
       final RestorationBucket newChild = newRoot!.claimChild('childFoo', debugOwner: null);
+      addTearDown(newChild.dispose);
       expect(newChild.read<String>('bar'), 'Hello');
     });
 
-    testWidgetsWithLeakTracking('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
+    testWidgets('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call)  {
@@ -204,7 +206,7 @@ void main() {
       expect(rootBucket, isNull);
     });
 
-    testWidgetsWithLeakTracking('flushData', (WidgetTester tester) async {
+    testWidgets('flushData', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
@@ -241,7 +243,7 @@ void main() {
       expect(callsToEngine, hasLength(1));
     });
 
-    testWidgetsWithLeakTracking('isReplacing', (WidgetTester tester) async {
+    testWidgets('isReplacing', (WidgetTester tester) async {
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
         return result.future;
