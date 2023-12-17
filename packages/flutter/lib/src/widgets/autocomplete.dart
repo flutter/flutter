@@ -303,19 +303,36 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
-  late TextEditingController _textEditingController;
 
-  late FocusNode _focusNode;
+  TextEditingController? _internalTextEditingController;
+  TextEditingController get _textEditingController {
+    return widget.textEditingController
+       ?? (_internalTextEditingController ??= TextEditingController()..addListener(_onChangedField));
+  }
 
-  late final Map<Type, _AutocompleteCallbackAction<Intent>> _actionMap = <Type, _AutocompleteCallbackAction<Intent>>{
-    AutocompletePreviousOptionIntent: _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(onInvoke: _highlightPreviousOption, visibilityController: _optionsViewController),
-    AutocompleteNextOptionIntent: _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(onInvoke: _highlightNextOption, visibilityController: _optionsViewController),
-    DismissIntent: _AutocompleteCallbackAction<DismissIntent>(onInvoke: _hideOptions, visibilityController: _optionsViewController),
+  FocusNode? _internalFocusNode;
+  FocusNode get _focusNode {
+    return widget.focusNode
+        ?? (_internalFocusNode ??= FocusNode()..addListener(_updateOptionsViewVisibility));
+  }
+
+  late final Map<Type, CallbackAction<Intent>> _actionMap = <Type, CallbackAction<Intent>>{
+    AutocompletePreviousOptionIntent: _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(
+      onInvoke: _highlightPreviousOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
+    AutocompleteNextOptionIntent: _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(
+      onInvoke: _highlightNextOption,
+      isEnabledCallback: () => _canShowOptionsView,
+    ),
+    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
   };
 
   Iterable<T> _options = Iterable<T>.empty();
   T? _selection;
-  String _lastFieldText = '';
+  // Set the initial value to null so when this widget gets focused for the first
+  // time it will try to run the options view builder.
+  String? _lastFieldText;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
@@ -323,13 +340,13 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
   };
 
+  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
+
   void _updateOptionsViewVisibility() {
-    if (_focusNode.hasFocus && _selection == null && _options.isNotEmpty) {
+    if (_canShowOptionsView) {
       _optionsViewController.show();
-      print('show');
     } else {
       _optionsViewController.hide();
-      print('hide: ${_focusNode.hasFocus} && $_selection && ${_options}');
     }
   }
 
@@ -379,25 +396,38 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   }
 
   void _highlightPreviousOption(AutocompletePreviousOptionIntent intent) {
+    assert(_canShowOptionsView);
+    _updateOptionsViewVisibility();
+    assert(_optionsViewController.isShowing);
     _updateHighlight(_highlightedOptionIndex.value - 1);
   }
 
   void _highlightNextOption(AutocompleteNextOptionIntent intent) {
+    assert(_canShowOptionsView);
+    _updateOptionsViewVisibility();
+    assert(_optionsViewController.isShowing);
     _updateHighlight(_highlightedOptionIndex.value + 1);
   }
 
-  void _hideOptions(DismissIntent intent) => _optionsViewController.hide();
+  Object? _hideOptions(DismissIntent intent) {
+    if (_optionsViewController.isShowing) {
+      _optionsViewController.hide();
+      return null;
+    } else {
+      return Actions.invoke(context, intent);
+    }
+  }
 
-  Widget _buildOptions(BuildContext context) {
+  Widget _buildOptionsView(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     final Alignment followerAlignment = switch (widget.optionsViewOpenDirection) {
-        OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
-        OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-      }.resolve(textDirection);
+      OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
+      OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
+    }.resolve(textDirection);
     final Alignment targetAnchor = switch (widget.optionsViewOpenDirection) {
-        OptionsViewOpenDirection.up => AlignmentDirectional.topStart,
-        OptionsViewOpenDirection.down => AlignmentDirectional.bottomStart,
-      }.resolve(textDirection);
+      OptionsViewOpenDirection.up => AlignmentDirectional.topStart,
+      OptionsViewOpenDirection.down => AlignmentDirectional.bottomStart,
+    }.resolve(textDirection);
 
     return CompositedTransformFollower(
       link: _optionsLayerLink,
@@ -415,84 +445,53 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     );
   }
 
-  // Handle a potential change in textEditingController by properly disposing of
-  // the old one and setting up the new one, if needed.
-  void _updateTextEditingController(TextEditingController? old, TextEditingController? current) {
-    if ((old == null && current == null) || old == current) {
-      return;
-    }
-    if (old == null) {
-      _textEditingController.removeListener(_onChangedField);
-      _textEditingController.dispose();
-      _textEditingController = current!;
-    } else if (current == null) {
-      _textEditingController.removeListener(_onChangedField);
-      _textEditingController = TextEditingController();
-    } else {
-      _textEditingController.removeListener(_onChangedField);
-      _textEditingController = current;
-    }
-    _textEditingController.addListener(_onChangedField);
-  }
-
-  // Handle a potential change in focusNode by properly disposing of the old one
-  // and setting up the new one, if needed.
-  void _updateFocusNode(FocusNode? old, FocusNode? current) {
-    if ((old == null && current == null) || old == current) {
-      return;
-    }
-    if (old == null) {
-      _focusNode.removeListener(_updateOptionsViewVisibility);
-      _focusNode.dispose();
-      _focusNode = current!;
-    } else if (current == null) {
-      _focusNode.removeListener(_updateOptionsViewVisibility);
-      _focusNode = FocusNode();
-    } else {
-      _focusNode.removeListener(_updateOptionsViewVisibility);
-      _focusNode = current;
-    }
-    _focusNode.addListener(_updateOptionsViewVisibility);
-  }
-
   @override
   void initState() {
     super.initState();
-    _textEditingController = widget.textEditingController ?? TextEditingController.fromValue(widget.initialValue);
-    _textEditingController.addListener(_onChangedField);
-    _focusNode = widget.focusNode ?? FocusNode();
-    _focusNode.addListener(_updateOptionsViewVisibility);
+    final TextEditingController initialController = widget.textEditingController
+                                                 ?? (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
+    initialController.addListener(_onChangedField);
+    widget.focusNode?.addListener(_updateOptionsViewVisibility);
   }
 
   @override
   void didUpdateWidget(RawAutocomplete<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateTextEditingController(
-      oldWidget.textEditingController,
-      widget.textEditingController,
-    );
-    _updateFocusNode(oldWidget.focusNode, widget.focusNode);
+    if (!identical(oldWidget.textEditingController, widget.textEditingController)) {
+      oldWidget.textEditingController?.removeListener(_onChangedField);
+      if (oldWidget.textEditingController == null) {
+        _internalTextEditingController?.dispose();
+        _internalTextEditingController = null;
+      }
+      widget.textEditingController?.addListener(_onChangedField);
+    }
+    if (!identical(oldWidget.focusNode, widget.focusNode)) {
+      oldWidget.focusNode?.removeListener(_updateOptionsViewVisibility);
+      if (oldWidget.focusNode == null) {
+        _internalFocusNode?.dispose();
+        _internalFocusNode = null;
+      }
+      widget.focusNode?.addListener(_updateOptionsViewVisibility);
+    }
   }
 
   @override
   void dispose() {
-    _textEditingController.removeListener(_onChangedField);
-    if (widget.textEditingController == null) {
-      _textEditingController.dispose();
-    }
-    _focusNode.removeListener(_updateOptionsViewVisibility);
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
+    widget.textEditingController?.removeListener(_onChangedField);
+    _internalTextEditingController?.dispose();
+    widget.focusNode?.removeListener(_updateOptionsViewVisibility);
+    _internalFocusNode?.dispose();
     _highlightedOptionIndex.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final Widget fieldView = widget.fieldViewBuilder?.call(context, _textEditingController, _focusNode, _onFieldSubmitted)
+                          ?? const SizedBox.shrink();
     return OverlayPortal.targetsRootOverlay(
       controller: _optionsViewController,
-      overlayChildBuilder: _buildOptions,
+      overlayChildBuilder: _buildOptionsView,
       child: TextFieldTapRegion(
         child: Container(
           key: _fieldKey,
@@ -502,12 +501,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
               actions: _actionMap,
               child: CompositedTransformTarget(
                 link: _optionsLayerLink,
-                child: widget.fieldViewBuilder?.call(
-                  context,
-                  _textEditingController,
-                  _focusNode,
-                  _onFieldSubmitted,
-                ) ?? const SizedBox.shrink(),
+                child: fieldView,
               ),
             ),
           ),
@@ -520,20 +514,20 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 class _AutocompleteCallbackAction<T extends Intent> extends CallbackAction<T> {
   _AutocompleteCallbackAction({
     required super.onInvoke,
-    required this.visibilityController,
+    required this.isEnabledCallback,
   });
 
   // The enabled state determines whether the action will consume the
   // key shortcut or let it continue on to the underlying text field.
   // They should only be enabled when the options are showing so shortcuts
   // can be used to navigate them.
-  final OverlayPortalController visibilityController;
+  final bool Function() isEnabledCallback;
 
   @override
-  bool isEnabled(covariant T intent) => visibilityController.isShowing;
+  bool isEnabled(covariant T intent) => isEnabledCallback();
 
   @override
-  bool consumesKey(covariant T intent) => visibilityController.isShowing;
+  bool consumesKey(covariant T intent) => isEnabled(intent);
 }
 
 /// An [Intent] to highlight the previous option in the autocomplete list.
