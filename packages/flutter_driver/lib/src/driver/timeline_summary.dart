@@ -11,6 +11,7 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'frame_request_pending_latency_summarizer.dart';
 import 'gc_summarizer.dart';
+import 'gpu_sumarizer.dart';
 import 'percentile_utils.dart';
 import 'profiling_summarizer.dart';
 import 'raster_cache_summarizer.dart';
@@ -275,6 +276,7 @@ class TimelineSummary {
     final GCSummarizer gcSummarizer = _gcSummarizer();
     final RefreshRateSummary refreshRateSummary = RefreshRateSummary(vsyncEvents: _extractNamedEvents(kUIThreadVsyncProcessEvent));
     final FrameRequestPendingLatencySummarizer frameRequestPendingLatencySummarizer = _frameRequestPendingLatencySummarizer();
+    final GpuSumarizer gpuSummarizer = _gpuSumarizer();
 
     final Map<String, dynamic> timelineSummary = <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
@@ -336,6 +338,10 @@ class TimelineSummary {
       '90hz_frame_percentage': refreshRateSummary.percentageOf90HzFrames,
       '120hz_frame_percentage': refreshRateSummary.percentageOf120HzFrames,
       'illegal_refresh_rate_frame_count': refreshRateSummary.framesWithIllegalRefreshRate.length,
+      'average_gpu_frame_time': gpuSummarizer.computeAverageGPUTime(),
+      '90th_percentile_gpu_frame_time': gpuSummarizer.computePercentileGPUTime(90.0),
+      '99th_percentile_gpu_frame_time': gpuSummarizer.computePercentileGPUTime(99.0),
+      'worst_gpu_frame_time': gpuSummarizer.computeWorstGPUTime(),
     };
 
     timelineSummary.addAll(profilingSummary);
@@ -507,4 +513,6 @@ class TimelineSummary {
   FrameRequestPendingLatencySummarizer _frameRequestPendingLatencySummarizer() => FrameRequestPendingLatencySummarizer(_extractNamedEvents(kFrameRequestPendingEvent));
 
   GCSummarizer _gcSummarizer() => GCSummarizer.fromEvents(_extractEventsWithNames(kGCRootEvents));
+
+  GpuSumarizer _gpuSumarizer() => GpuSumarizer(_extractEventsWithNames(GpuSumarizer.kGpuEvents));
 }

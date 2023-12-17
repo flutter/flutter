@@ -251,6 +251,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (registerTestTextInput) {
       _testTextInput.register();
     }
+    CustomSemanticsAction.resetForTests(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
@@ -423,6 +424,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// In the live testing environment (`flutter run`), this object shows the
   /// actual current wall-clock time.
   Clock get clock;
+
+  @override
+  SamplingClock? get debugSamplingClock => _TestSamplingClock(clock);
 
   /// Triggers a frame sequence (build/layout/paint/etc),
   /// then flushes microtasks.
@@ -1155,17 +1159,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }
     _announcements = <CapturedAccessibilityAnnouncement>[];
 
+  // ignore: deprecated_member_use
     ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
 
     // Disabling the warning because @visibleForTesting doesn't take the testing
     // framework itself into account, but we don't want it visible outside of
     // tests.
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member
+    // ignore: invalid_use_of_visible_for_testing_member, deprecated_member_use
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
@@ -2146,6 +2151,18 @@ class TestViewConfiguration extends ViewConfiguration {
 
   @override
   String toString() => 'TestViewConfiguration';
+}
+
+class _TestSamplingClock implements SamplingClock {
+  _TestSamplingClock(this._clock);
+
+  @override
+  DateTime now() => _clock.now();
+
+  @override
+  Stopwatch stopwatch() => _clock.stopwatch();
+
+  final Clock _clock;
 }
 
 const int _kPointerDecay = -2;

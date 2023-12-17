@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -26,7 +27,7 @@ import 'android_sdk.dart';
 // However, this currently requires to migrate existing integration tests to the latest supported values.
 //
 // Please see the README before changing any of these values.
-const String templateDefaultGradleVersion = '7.5';
+const String templateDefaultGradleVersion = '7.6.3';
 const String templateAndroidGradlePluginVersion = '7.3.0';
 const String templateAndroidGradlePluginVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
@@ -38,7 +39,7 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const String compileSdkVersion = '33';
+const String compileSdkVersion = '34';
 const String minSdkVersion = '19';
 const String targetSdkVersion = '33';
 const String ndkVersion = '23.1.7779620';
@@ -70,19 +71,31 @@ const String maxKnownAgpVersion = '8.3';
 // compatible Java version.
 const String oldestDocumentedJavaAgpCompatibilityVersion = '4.2';
 
+// Constant used in [_buildAndroidGradlePluginRegExp] and
+// [_settingsAndroidGradlePluginRegExp] to identify the version section.
+const String _versionGroupName = 'version';
+
+// AGP can be defined in build.gradle
 // Expected content:
 // "classpath 'com.android.tools.build:gradle:7.3.0'"
-// Parentheticals are use to group which helps with version extraction.
-// "...build:gradle:(...)" where group(1) should be the version string.
-final RegExp _androidGradlePluginRegExp =
-  RegExp(r'com\.android\.tools\.build:gradle:(\d+\.\d+\.\d+)');
+// ?<version> is used to name the version group which helps with extraction.
+final RegExp _buildAndroidGradlePluginRegExp =
+    RegExp(r'com\.android\.tools\.build:gradle:(?<version>\d+\.\d+\.\d+)');
+
+// AGP can be defined in settings.gradle.
+// Expected content:
+// "id "com.android.application" version "{{agpVersion}}""
+// ?<version> is used to name the version group which helps with extraction.
+final RegExp _settingsAndroidGradlePluginRegExp = RegExp(
+    r'^\s+id\s+"com.android.application"\s+version\s+"(?<version>\d+\.\d+\.\d+)"',
+    multiLine: true);
 
 // Expected content format (with lines above and below).
 // Version can have 2 or 3 numbers.
 // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
 // '^\s*' protects against commented out lines.
 final RegExp distributionUrlRegex =
-  RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
+    RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
 
 // Modified version of the gradle distribution url match designed to only match
 // gradle.org urls so that we can guarantee any modifications to the url
@@ -198,7 +211,7 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
     return templateDefaultGradleVersion;
   }
   final String buildFileContent = buildFile.readAsStringSync();
-  final Iterable<Match> pluginMatches = _androidGradlePluginRegExp.allMatches(buildFileContent);
+  final Iterable<Match> pluginMatches = _buildAndroidGradlePluginRegExp.allMatches(buildFileContent);
   if (pluginMatches.isEmpty) {
     logger.printTrace("$buildFile doesn't provide an AGP version, assuming Gradle version: $templateDefaultGradleVersion");
     return templateDefaultGradleVersion;
@@ -308,8 +321,9 @@ OS:           Mac OS X 13.2.1 aarch64
 /// Returns the Android Gradle Plugin (AGP) version that the current project
 /// depends on when found, null otherwise.
 ///
-/// The Android plugin version is specified in the [build.gradle] file within
-/// the project's Android directory ([androidDirectory]).
+/// The Android plugin version is specified in the [build.gradle] or
+/// [settings.gradle] file within the project's
+/// Android directory ([androidDirectory]).
 String? getAgpVersion(Directory androidDirectory, Logger logger) {
   final File buildFile = androidDirectory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
@@ -317,15 +331,34 @@ String? getAgpVersion(Directory androidDirectory, Logger logger) {
     return null;
   }
   final String buildFileContent = buildFile.readAsStringSync();
-  final Iterable<Match> pluginMatches =
-      _androidGradlePluginRegExp.allMatches(buildFileContent);
-  if (pluginMatches.isEmpty) {
-    logger.printTrace("$buildFile doesn't provide an AGP version");
+  final RegExpMatch? buildMatch =
+      _buildAndroidGradlePluginRegExp.firstMatch(buildFileContent);
+  if (buildMatch != null) {
+    final String? androidPluginVersion =
+        buildMatch.namedGroup(_versionGroupName);
+    logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');
+    return androidPluginVersion;
+  }
+  logger.printTrace(
+      "$buildFile doesn't provide an AGP version. Checking settings.");
+  final File settingsFile = androidDirectory.childFile('settings.gradle');
+  if (!settingsFile.existsSync()) {
+    logger.printTrace('$settingsFile does not exist.');
     return null;
   }
-  final String? androidPluginVersion = pluginMatches.first.group(1);
-  logger.printTrace('$buildFile provides AGP version: $androidPluginVersion');
-  return androidPluginVersion;
+  final String settingsFileContent = settingsFile.readAsStringSync();
+  final RegExpMatch? settingsMatch =
+      _settingsAndroidGradlePluginRegExp.firstMatch(settingsFileContent);
+
+  if (settingsMatch != null) {
+    final String? androidPluginVersion =
+        settingsMatch.namedGroup(_versionGroupName);
+    logger.printTrace(
+        '$settingsFile provides AGP version: $androidPluginVersion');
+    return androidPluginVersion;
+  }
+  logger.printTrace("$settingsFile doesn't provide an AGP version.");
+  return null;
 }
 
 String _formatParseWarning(String content) {
@@ -741,8 +774,13 @@ void exitWithNoSdkMessage() {
           eventError: 'android-sdk-not-found',
           flutterUsage: globals.flutterUsage)
       .send();
+  globals.analytics.send(Event.flutterBuildInfo(
+    label: 'unsupported-project',
+    buildType: 'gradle',
+    error: 'android-sdk-not-found',
+  ));
   throwToolExit('${globals.logger.terminal.warningMark} No Android SDK found. '
-      'Try setting the ANDROID_SDK_ROOT environment variable.');
+      'Try setting the ANDROID_HOME environment variable.');
 }
 
 // Data class to hold normal/defined Java <-> Gradle compatability criteria.

@@ -24,6 +24,7 @@ import '../../fake_native_assets_build_runner.dart';
 void main() {
   late FakeProcessManager processManager;
   late Environment iosEnvironment;
+  late Environment androidEnvironment;
   late Artifacts artifacts;
   late FileSystem fileSystem;
   late Logger logger;
@@ -47,7 +48,21 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
     );
+    androidEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: BuildMode.profile.cliName,
+        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android),
+        kAndroidArchs: AndroidArch.arm64_v8a.platformName,
+      },
+      inputs: <String, String>{},
+      artifacts: artifacts,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
     iosEnvironment.buildDir.createSync(recursive: true);
+    androidEnvironment.buildDir.createSync(recursive: true);
   });
 
   testWithoutContext('NativeAssets throws error if missing target platform', () async {
@@ -55,11 +70,19 @@ void main() {
     expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('NativeAssets throws error if missing ios archs', () async {
+  testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     await createPackageConfig(iosEnvironment);
 
     iosEnvironment.defines.remove(kIosArchs);
-    expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+
+    final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
+    await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
+
+    final File nativeAssetsYaml =
+        iosEnvironment.buildDir.childFile('native_assets.yaml');
+    final File depsFile = iosEnvironment.buildDir.childFile('native_assets.d');
+    expect(depsFile, exists);
+    expect(nativeAssetsYaml, exists);
   });
 
   testUsingContext('NativeAssets throws error if missing sdk root', () async {
@@ -147,6 +170,63 @@ void main() {
       );
     },
   );
+
+
+  for (final bool isAndroidLibrary in <bool>[true, false]) {
+    for (final bool hasAssets in <bool>[true, false]) {
+      final String buildType = isAndroidLibrary ? 'aar' : 'not-aar';
+      final String withOrWithout = hasAssets ? 'with' : 'without';
+      final String throwsOrDoesntThrow =
+          (isAndroidLibrary && hasAssets) ? 'throws' : 'does not throw';
+      testUsingContext(
+        'flutter build $buildType $withOrWithout native assets $throwsOrDoesntThrow',
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => processManager,
+          FeatureFlags: () => TestFeatureFlags(
+                isNativeAssetsEnabled: true,
+              ),
+        },
+        () async {
+          await createPackageConfig(androidEnvironment);
+          await fileSystem.file('libfoo.so').create();
+
+          final NativeAssetsBuildRunner buildRunner =
+              FakeNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <Package>[
+              Package('foo', androidEnvironment.buildDir.uri)
+            ],
+            buildResult:
+                FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
+              if (hasAssets)
+                native_assets_cli.Asset(
+                  id: 'package:foo/foo.dart',
+                  linkMode: native_assets_cli.LinkMode.dynamic,
+                  target: native_assets_cli.Target.androidArm64,
+                  path: native_assets_cli.AssetAbsolutePath(
+                    Uri.file('libfoo.so'),
+                  ),
+                )
+            ], dependencies: <Uri>[
+              Uri.file('src/foo.c'),
+            ]),
+          );
+          if (isAndroidLibrary) {
+            androidEnvironment.defines[kIsAndroidLibrary] = 'true';
+          }
+          if (hasAssets && isAndroidLibrary) {
+            expect(
+              NativeAssets(buildRunner: buildRunner).build(androidEnvironment),
+              throwsToolExit(),
+            );
+          } else {
+            await NativeAssets(buildRunner: buildRunner)
+                .build(androidEnvironment);
+          }
+        },
+      );
+    }
+  }
 }
 
 Future<void> createPackageConfig(Environment iosEnvironment) async {

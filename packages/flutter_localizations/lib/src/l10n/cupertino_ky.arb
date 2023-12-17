@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Издөө",
   "noSpellCheckReplacementsLabel": "Алмаштыруу үчүн сөз табылган жок",
   "menuDismissLabel": "Менюну жабуу",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Издөө",
+  "searchWebButtonLabel": "Интернеттен издөө",
+  "shareButtonLabel": "Бөлүшүү…",
+  "clearButtonLabel": "Clear"
 }

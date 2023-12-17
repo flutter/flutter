@@ -495,6 +495,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       size = constraints.constrain(child!.size);
     }
 
+    if (offset.hasPixels) {
+      if (offset.pixels > _maxScrollExtent) {
+        offset.correctBy(_maxScrollExtent - offset.pixels);
+      } else if (offset.pixels < _minScrollExtent) {
+        offset.correctBy(_minScrollExtent - offset.pixels);
+      }
+    }
+
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
   }
@@ -598,10 +606,9 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     Rect? rect,
     Axis? axis,
   }) {
-    // One dimensional viewport has only one axis, it should match if it has
-    // been provided.
-    axis ??= this.axis;
-    assert(axis == this.axis);
+    // One dimensional viewport has only one axis, override if it was
+    // provided/may be mismatched.
+    axis = this.axis;
 
     rect ??= target.paintBounds;
     if (target is! RenderBox) {

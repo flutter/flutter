@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "ရှာရန်",
   "noSpellCheckReplacementsLabel": "အစားထိုးမှုများ မတွေ့ပါ",
   "menuDismissLabel": "မီနူးကိုပယ်ပါ",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "အပေါ်ကြည့်ရန်",
+  "searchWebButtonLabel": "ဝဘ်တွင်ရှာရန်",
+  "shareButtonLabel": "မျှဝေရန်...",
+  "clearButtonLabel": "Clear"
 }

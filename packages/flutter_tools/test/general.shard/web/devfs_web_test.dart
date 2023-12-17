@@ -662,6 +662,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
@@ -680,10 +682,12 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );
     webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
@@ -775,6 +779,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
@@ -792,10 +798,12 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
     webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     final Uri uri = await webDevFS.create();
@@ -884,6 +892,8 @@ void main() {
         // if this is any other value, we will do a real ip lookup
         hostname: 'any',
         port: 0,
+        tlsCertPath: null,
+        tlsCertKeyPath: null,
         packagesFilePath: '.packages',
         urlTunneller: null,
         useSseForDebugProxy: true,
@@ -901,6 +911,7 @@ void main() {
         entrypoint: Uri.base,
         testMode: true,
         expressionCompiler: null,
+        extraHeaders: const <String, String>{},
         chromiumLauncher: null,
         nullSafetyMode: NullSafetyMode.sound,
       );
@@ -946,6 +957,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'any',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
@@ -957,6 +970,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullAssertions: true,
       nativeNullAssertions: true,
@@ -981,6 +995,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
@@ -1001,6 +1017,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
@@ -1024,6 +1041,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
@@ -1044,6 +1063,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.sound,
     );
@@ -1057,11 +1077,63 @@ void main() {
     await webDevFS.destroy();
   }));
 
+  test('Can start web server with tls connection', () => testbed.run(() async {
+    final String dataPath = globals.fs.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'test',
+      'data',
+      'asset_test',
+    );
+
+    final String dummyCertPath =
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-cert.pem');
+    final String dummyCertKeyPath =
+        globals.fs.path.join(dataPath, 'tls_cert', 'dummy-key.pem');
+
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'localhost',
+      port: 0,
+      tlsCertPath: dummyCertPath,
+      tlsCertKeyPath: dummyCertKeyPath,
+      packagesFilePath: '.packages',
+      urlTunneller: null, // ignore: avoid_redundant_argument_values
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      nullAssertions: true,
+      nativeNullAssertions: true,
+      buildInfo: BuildInfo.debug,
+      enableDwds: false,
+      enableDds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
+      chromiumLauncher: null, // ignore: avoid_redundant_argument_values
+      nullSafetyMode: NullSafetyMode.unsound,
+    );
+    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    final Uri uri = await webDevFS.create();
+
+    // Ensure the connection established is secure
+    expect(uri.scheme, 'https');
+
+    await webDevFS.destroy();
+  }, overrides: <Type, Generator>{
+    Artifacts: () => Artifacts.test(),
+  }));
+
   test('allows frame embedding', () async {
     final WebAssetServer webAssetServer = await WebAssetServer.start(
       null,
       'localhost',
       0,
+      null,
+      null,
       null,
       true,
       true,
@@ -1075,10 +1147,44 @@ void main() {
       false,
       Uri.base,
       null,
+      const <String, String>{},
       NullSafetyMode.unsound,
       testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
+    await webAssetServer.dispose();
+  });
+
+  test('passes on extra headers', () async {
+    const String extraHeaderKey = 'hurray';
+    const String extraHeaderValue = 'flutter';
+    final WebAssetServer webAssetServer = await WebAssetServer.start(
+      null,
+      'localhost',
+      0,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      const BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: false,
+      ),
+      false,
+      false,
+      Uri.base,
+      null,
+      const <String, String>{
+        extraHeaderKey: extraHeaderValue,
+      },
+      NullSafetyMode.unsound,
+      testMode: true);
+
+    expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
+
     await webAssetServer.dispose();
   });
 
@@ -1134,6 +1240,8 @@ void main() {
     final WebDevFS webDevFS = WebDevFS(
       hostname: 'localhost',
       port: 0,
+      tlsCertPath: null,
+      tlsCertKeyPath: null,
       packagesFilePath: '.packages',
       urlTunneller: null, // ignore: avoid_redundant_argument_values
       useSseForDebugProxy: true,
@@ -1147,6 +1255,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null, // ignore: avoid_redundant_argument_values
+      extraHeaders: const <String, String>{},
       chromiumLauncher: null, // ignore: avoid_redundant_argument_values
       nullSafetyMode: NullSafetyMode.unsound,
     );

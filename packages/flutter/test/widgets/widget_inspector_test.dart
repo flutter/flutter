@@ -570,6 +570,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ],
         );
       }
+
+      late final OverlayEntry entry1;
+      addTearDown(() => entry1..remove()..dispose());
+      late final OverlayEntry entry2;
+      addTearDown(() => entry2..remove()..dispose());
+      late final OverlayEntry entry3;
+      addTearDown(() => entry3..remove()..dispose());
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -578,16 +586,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             selectButtonBuilder: null,
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(
+                entry1 = OverlayEntry(
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 94.0),
                 ),
-                OverlayEntry(
+                entry2 = OverlayEntry(
                   opaque: true,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 95.0),
                 ),
-                OverlayEntry(
+                entry3 = OverlayEntry(
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 96.0, key: clickTarget),
                 ),
@@ -2044,6 +2052,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ),
         );
         final InspectorSelection selection = InspectorSelection();
+        addTearDown(selection.dispose);
         int count = 0;
         selection.addListener(() {
           count++;
@@ -4105,6 +4114,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
       final Iterable<Map<Object, Object?>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
       Map<Object, Object?> extensionChangedEvent;
+      int debugShowChangeCounter = 0;
+
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        WidgetsApp(
+          key: key,
+          builder: (BuildContext context, Widget? child) {
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      );
+
+      final ValueListenableBuilder<bool> valueListenableBuilderWidget = tester.widget(
+        find.byType(ValueListenableBuilder<bool>),
+      );
+      void debugShowWidgetInspectorOverrideCallback() {
+        debugShowChangeCounter++;
+      }
+
+      WidgetsApp.debugShowWidgetInspectorOverride = false;
+      valueListenableBuilderWidget.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
 
       service.rebuildCount = 0;
       expect(extensionChangedEvents, isEmpty);
@@ -4119,7 +4150,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
-      expect(service.rebuildCount, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4129,6 +4161,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
       expect(extensionChangedEvents.length, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4140,7 +4174,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
-      expect(service.rebuildCount, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4152,6 +4187,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isFalse);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4160,7 +4197,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         equals('false'),
       );
       expect(extensionChangedEvents.length, equals(3));
-      expect(service.rebuildCount, equals(2));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });
 
@@ -4230,26 +4268,38 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
       final int expectedChildLayerCount = getChildLayerCount(layer);
       expect(expectedChildLayerCount, equals(2));
+
+      final ui.Image image1 = await layer.toImage(
+        renderObject.semanticBounds.inflate(50.0),
+      );
+      addTearDown(image1.dispose);
+
       await expectLater(
-        layer.toImage(renderObject.semanticBounds.inflate(50.0)),
+        image1,
         matchesGoldenFile('inspector.repaint_boundary_margin.png'),
       );
 
       // Regression test for how rendering with a pixel scale other than 1.0
       // was handled.
+      final ui.Image image2 = await layer.toImage(
+        renderObject.semanticBounds.inflate(50.0),
+        pixelRatio: 0.5,
+      );
+      addTearDown(image2.dispose);
+
       await expectLater(
-        layer.toImage(
-          renderObject.semanticBounds.inflate(50.0),
-          pixelRatio: 0.5,
-        ),
+        image2,
         matchesGoldenFile('inspector.repaint_boundary_margin_small.png'),
       );
 
+      final ui.Image image3 = await layer.toImage(
+        renderObject.semanticBounds.inflate(50.0),
+        pixelRatio: 2.0,
+      );
+      addTearDown(image3.dispose);
+
       await expectLater(
-        layer.toImage(
-          renderObject.semanticBounds.inflate(50.0),
-          pixelRatio: 2.0,
-        ),
+        image3,
         matchesGoldenFile('inspector.repaint_boundary_margin_large.png'),
       );
 
@@ -4259,12 +4309,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(layerParent, isNotNull);
       expect(firstChild, isNotNull);
 
+      final ui.Image? screenshot1 = await service.screenshot(
+        repaintBoundary,
+        width: 300.0,
+        height: 300.0,
+      );
+      addTearDown(() => screenshot1?.dispose());
+
       await expectLater(
-        service.screenshot(
-          repaintBoundary,
-          width: 300.0,
-          height: 300.0,
-        ),
+        screenshot1,
         matchesGoldenFile('inspector.repaint_boundary.png'),
       );
 
@@ -4275,13 +4328,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // of the layer.
       expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
 
+      final ui.Image? screenshot2 = await service.screenshot(
+        repaintBoundary,
+        width: 500.0,
+        height: 500.0,
+        margin: 50.0,
+      );
+      addTearDown(() => screenshot2?.dispose());
+
       await expectLater(
-        service.screenshot(
-          repaintBoundary,
-          width: 500.0,
-          height: 500.0,
-          margin: 50.0,
-        ),
+        screenshot2,
         matchesGoldenFile('inspector.repaint_boundary_margin.png'),
       );
 
@@ -4295,13 +4351,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Make sure taking a screenshot didn't change the parent of the layer.
       expect(layer.parent, equals(layerParent));
 
+      final ui.Image? screenshot3 = await service.screenshot(
+        repaintBoundary,
+        width: 300.0,
+        height: 300.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot3?.dispose());
+
       await expectLater(
-        service.screenshot(
-          repaintBoundary,
-          width: 300.0,
-          height: 300.0,
-          debugPaint: true,
-        ),
+        screenshot3,
         matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
       );
       // Verify that taking a screenshot with debug paint on did not change
@@ -4319,22 +4378,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(layer.attached, isTrue);
 
       // Full size image
+      final ui.Image? screenshot4 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 100.0,
+        height: 100.0,
+      );
+      addTearDown(() => screenshot4?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-        ),
+        screenshot4,
         matchesGoldenFile('inspector.container.png'),
       );
 
+      final ui.Image? screenshot5 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 100.0,
+        height: 100.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot5?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-          debugPaint: true,
-        ),
+        screenshot5,
         matchesGoldenFile('inspector.container_debugPaint.png'),
       );
 
@@ -4348,59 +4413,73 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ..markNeedsPaint();
         expect(container.debugNeedsLayout, isTrue);
 
+        final ui.Image? screenshot6 = await service.screenshot(
+          find.byKey(outerContainerKey).evaluate().single,
+          width: 100.0,
+          height: 100.0,
+          debugPaint: true,
+        );
+        addTearDown(() => screenshot6?.dispose());
+
         await expectLater(
-          service.screenshot(
-            find.byKey(outerContainerKey).evaluate().single,
-            width: 100.0,
-            height: 100.0,
-            debugPaint: true,
-          ),
+          screenshot6,
           matchesGoldenFile('inspector.container_debugPaint.png'),
         );
         expect(container.debugNeedsLayout, isFalse);
       }
 
       // Small image
+      final ui.Image? screenshot7 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 50.0,
+        height: 100.0,
+      );
+      addTearDown(() => screenshot7?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 50.0,
-          height: 100.0,
-        ),
+        screenshot7,
         matchesGoldenFile('inspector.container_small.png'),
       );
 
+      final ui.Image? screenshot8 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 400.0,
+        height: 400.0,
+        maxPixelRatio: 3.0,
+      );
+      addTearDown(() => screenshot8?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 400.0,
-          height: 400.0,
-          maxPixelRatio: 3.0,
-        ),
+        screenshot8,
         matchesGoldenFile('inspector.container_large.png'),
       );
 
       // This screenshot will show the clip rect debug paint but no other
       // debug paint.
+      final ui.Image? screenshot9 = await service.screenshot(
+        find.byType(ClipRRect).evaluate().single,
+        width: 100.0,
+        height: 100.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot9?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byType(ClipRRect).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-          debugPaint: true,
-        ),
+        screenshot9,
         matchesGoldenFile('inspector.clipRect_debugPaint.png'),
       );
 
       final Element clipRect = find.byType(ClipRRect).evaluate().single;
 
-      final Future<ui.Image?> clipRectScreenshot = service.screenshot(
+      final ui.Image? clipRectScreenshot = await service.screenshot(
         clipRect,
         width: 100.0,
         height: 100.0,
         margin: 20.0,
         debugPaint: true,
       );
+      addTearDown(() => clipRectScreenshot?.dispose());
+
       // Add a margin so that the clip icon shows up in the screenshot.
       // This golden image is platform dependent due to the clip icon.
       await expectLater(
@@ -4428,43 +4507,53 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final ui.FrameInfo frame = await codec.getNextFrame();
         return frame.image;
       }))!;
+      addTearDown(screenshotImage.dispose);
 
       await expectLater(
         screenshotImage,
-        matchesReferenceImage((await clipRectScreenshot)!),
+        matchesReferenceImage(clipRectScreenshot!),
       );
 
       // Test with a very visible debug paint
+      final ui.Image? screenshot10 = await service.screenshot(
+        find.byKey(paddingKey).evaluate().single,
+        width: 300.0,
+        height: 300.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot10?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(paddingKey).evaluate().single,
-          width: 300.0,
-          height: 300.0,
-          debugPaint: true,
-        ),
+        screenshot10,
         matchesGoldenFile('inspector.padding_debugPaint.png'),
       );
 
       // The bounds for this box crop its rendered content.
+      final ui.Image? screenshot11 = await service.screenshot(
+        find.byKey(sizedBoxKey).evaluate().single,
+        width: 300.0,
+        height: 300.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot11?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(sizedBoxKey).evaluate().single,
-          width: 300.0,
-          height: 300.0,
-          debugPaint: true,
-        ),
+        screenshot11,
         matchesGoldenFile('inspector.sizedBox_debugPaint.png'),
       );
 
       // Verify that setting a margin includes the previously cropped content.
+      final ui.Image? screenshot12 = await service.screenshot(
+        find.byKey(sizedBoxKey).evaluate().single,
+        width: 300.0,
+        height: 300.0,
+        margin: 50.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot12?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(sizedBoxKey).evaluate().single,
-          width: 300.0,
-          height: 300.0,
-          margin: 50.0,
-          debugPaint: true,
-        ),
+        screenshot12,
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
     });
@@ -4974,26 +5063,39 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         matchesGoldenFile('inspector.composited_transform.only_offsets.png'),
       );
 
+      final ui.Image? screenshot1 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(stackWithTransformFollower).evaluate().first,
+        width: 5000.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot1?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(stackWithTransformFollower).evaluate().first,
-          width: 5000.0,
-          height: 500.0,
-        ),
+        screenshot1,
         matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png'),
       );
 
+      final ui.Image? screenshot2 = await WidgetInspectorService.instance.screenshot(
+        find.byType(Stack).evaluate().first,
+        width: 300.0,
+        height: 300.0,
+      );
+      addTearDown(() => screenshot2?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
+        screenshot2,
         matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
       );
 
+      final ui.Image? screenshot3 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(transformTargetParent).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot3?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(transformTargetParent).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot3,
         matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
       );
     });
@@ -5069,30 +5171,39 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         matchesGoldenFile('inspector.composited_transform.with_rotations.png'),
       );
 
+      final ui.Image? screenshot1 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(mainStackKey).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot1?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(mainStackKey).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot1,
         matchesGoldenFile('inspector.composited_transform.with_rotations_small.png'),
       );
 
+      final ui.Image? screenshot2 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(stackWithTransformTarget).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot2?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(stackWithTransformTarget).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot2,
         matchesGoldenFile('inspector.composited_transform.with_rotations_target.png'),
       );
 
+      final ui.Image? screenshot3 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(stackWithTransformFollower).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot3?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(stackWithTransformFollower).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot3,
         matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png'),
       );
 

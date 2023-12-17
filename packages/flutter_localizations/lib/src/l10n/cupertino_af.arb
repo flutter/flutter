@@ -24,7 +24,8 @@
   "searchTextFieldPlaceholderLabel": "Soek",
   "noSpellCheckReplacementsLabel": "Geen plaasvervangers gevind nie",
   "menuDismissLabel": "Maak kieslys toe",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Kyk op",
+  "searchWebButtonLabel": "Deursoek web",
+  "shareButtonLabel": "Deel …",
+  "clearButtonLabel": "Clear"
 }

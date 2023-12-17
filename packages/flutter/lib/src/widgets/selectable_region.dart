@@ -677,7 +677,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         _scheduledSelectionEndEdgeUpdate = false;
         _triggerSelectionEndEdgeUpdate(textGranularity: textGranularity);
-      });
+      }, debugLabel: 'SelectableRegion.endEdgeUpdate');
       return;
     }
  }
@@ -731,7 +731,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         }
         _scheduledSelectionStartEdgeUpdate = false;
         _triggerSelectionStartEdgeUpdate(textGranularity: textGranularity);
-      });
+      }, debugLabel: 'SelectableRegion.startEdgeUpdate');
       return;
     }
   }
@@ -1716,7 +1716,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         // safely updated in the same frame in this case.
         scheduleMicrotask(runScheduledTask);
       } else {
-        SchedulerBinding.instance.addPostFrameCallback(runScheduledTask);
+        SchedulerBinding.instance.addPostFrameCallback(
+          runScheduledTask,
+          debugLabel: 'SelectionContainer.runScheduledTask',
+        );
       }
     }
   }
@@ -1814,6 +1817,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     _updateHandleLayersAndOwners();
   }
 
+  Rect _getBoundingBox(Selectable selectable) {
+    Rect result = selectable.boundingBoxes.first;
+    for (int index = 1; index < selectable.boundingBoxes.length; index += 1) {
+      result = result.expandToInclude(selectable.boundingBoxes[index]);
+    }
+    return result;
+  }
+
   /// The compare function this delegate used for determining the selection
   /// order of the selectables.
   ///
@@ -1824,11 +1835,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   int _compareScreenOrder(Selectable a, Selectable b) {
     final Rect rectA = MatrixUtils.transformRect(
       a.getTransformTo(null),
-      Rect.fromLTWH(0, 0, a.size.width, a.size.height),
+      _getBoundingBox(a),
     );
     final Rect rectB = MatrixUtils.transformRect(
       b.getTransformTo(null),
-      Rect.fromLTWH(0, 0, b.size.width, b.size.height),
+      _getBoundingBox(b),
     );
     final int result = _compareVertically(rectA, rectB);
     if (result != 0) {
@@ -1843,6 +1854,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Returns positive if a is lower, negative if a is higher, 0 if their
   /// order can't be determine solely by their vertical position.
   static int _compareVertically(Rect a, Rect b) {
+    // The rectangles overlap so defer to horizontal comparison.
     if ((a.top - b.top < _kSelectableVerticalComparingThreshold && a.bottom - b.bottom > - _kSelectableVerticalComparingThreshold) ||
         (b.top - a.top < _kSelectableVerticalComparingThreshold && b.bottom - a.bottom > - _kSelectableVerticalComparingThreshold)) {
       return 0;
@@ -1860,19 +1872,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   static int _compareHorizontally(Rect a, Rect b) {
     // a encloses b.
     if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
-      // b ends before a.
-      if (a.right - b.right > precisionErrorTolerance) {
-        return 1;
-      }
       return -1;
     }
-
     // b encloses a.
     if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
-      // a ends before b.
-      if (b.right - a.right > precisionErrorTolerance) {
-        return -1;
-      }
       return 1;
     }
     if ((a.left - b.left).abs() > precisionErrorTolerance) {
@@ -2137,10 +2140,17 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     SelectionResult? lastSelectionResult;
     for (int index = 0; index < selectables.length; index += 1) {
-      final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
-      final Matrix4 transform = selectables[index].getTransformTo(null);
-      final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      if (globalRect.contains(event.globalPosition)) {
+      bool globalRectsContainsPosition = false;
+      if (selectables[index].boundingBoxes.isNotEmpty) {
+        for (final Rect rect in selectables[index].boundingBoxes) {
+          final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
+          if (globalRect.contains(event.globalPosition)) {
+            globalRectsContainsPosition = true;
+            break;
+          }
+        }
+      }
+      if (globalRectsContainsPosition) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {

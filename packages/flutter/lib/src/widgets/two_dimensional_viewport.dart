@@ -54,7 +54,7 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
 ///  * [IndexedWidgetBuilder], which is similar but not nullable.
-typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext, ChildVicinity vicinity);
+typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext context, ChildVicinity vicinity);
 
 /// A widget through which a portion of larger content can be viewed, typically
 /// in combination with a [TwoDimensionalScrollable].
@@ -924,11 +924,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     Rect? rect,
     Axis? axis,
   }) {
-    // We must know which axis we are revealing for, since RevealedOffset
-    // refers to only one of two scroll positions.
-    assert(axis != null);
+    // If an axis has not been specified, use the mainAxis.
+    axis ??= mainAxis;
 
-    final (double offset, AxisDirection axisDirection) = switch (axis!) {
+    final (double offset, AxisDirection axisDirection) = switch (axis) {
       Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
       Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection),
     };

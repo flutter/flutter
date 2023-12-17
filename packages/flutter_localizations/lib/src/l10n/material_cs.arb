@@ -57,7 +57,6 @@
   "reorderItemRight": "Přesunout doprava",
   "expandedIconTapHint": "Sbalit",
   "collapsedIconTapHint": "Rozbalit",
-  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Zbývá 1 znak",
   "remainingTextFieldCharacterCountOther": "Zbývá $remainingCount znaků",
   "refreshIndicatorSemanticLabel": "Obnovit",
@@ -149,7 +148,7 @@
   "expandedHint": "Sbaleno",
   "collapsedHint": "Rozbaleno",
   "menuDismissLabel": "Zavřít nabídku",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Vyhledat",
+  "searchWebButtonLabel": "Vyhledávat na webu",
+  "shareButtonLabel": "Sdílet…"
 }
