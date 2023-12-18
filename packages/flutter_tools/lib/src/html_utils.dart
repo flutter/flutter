@@ -62,6 +62,7 @@ class IndexHtml {
   void applySubstitutions({
     required String baseHref,
     required String? serviceWorkerVersion,
+    String? buildConfig,
   }) {
     if (_content.contains(kBaseHrefPlaceholder)) {
       _content = _content.replaceAll(kBaseHrefPlaceholder, baseHref);
@@ -80,6 +81,18 @@ class IndexHtml {
             "navigator.serviceWorker.register('flutter_service_worker.js')",
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion')",
           );
+    }
+    if (buildConfig != null) {
+      _content = _content.replaceFirst(
+            '{{flutter_build_config}}',
+'''
+_flutter.buildConfig = {
+  builds: [
+    $buildConfig,
+  ]
+}
+'''
+      );
     }
   }
 }

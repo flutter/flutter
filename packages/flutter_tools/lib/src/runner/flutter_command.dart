@@ -1272,12 +1272,11 @@ abstract class FlutterCommand extends Command<void> {
       : null;
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
-    List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
+    final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     WebRendererMode webRenderer = WebRendererMode.auto;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
       webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
-      dartDefines = updateDartDefines(dartDefines, webRenderer);
     }
 
     if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
@@ -1563,19 +1562,6 @@ abstract class FlutterCommand extends Command<void> {
 
     return jsonEncode(propertyMap);
   }
-
-  /// Updates dart-defines based on [webRenderer].
-  @visibleForTesting
-  static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
-    final Set<String> dartDefinesSet = dartDefines.toSet();
-    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
-        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
-    }
-    dartDefinesSet.addAll(webRenderer.dartDefines);
-    return dartDefinesSet.toList();
-  }
-
 
   Map<String, String> extractWebHeaders() {
     final Map<String, String> webHeaders = <String, String>{};
