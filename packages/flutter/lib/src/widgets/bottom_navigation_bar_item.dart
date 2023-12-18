@@ -24,7 +24,7 @@ class BottomNavigationBarItem {
   /// The argument [icon] should not be null and the argument [label] should not be null when used in a Material Design's [BottomNavigationBar].
   const BottomNavigationBarItem({
     required this.icon,
-    this.label,
+    required this.label,
     Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
@@ -63,7 +63,7 @@ class BottomNavigationBarItem {
   /// The text label for this [BottomNavigationBarItem].
   ///
   /// This will be used to create a [Text] widget to put in the bottom navigation bar.
-  final String? label;
+  final String label;
 
   /// The color of the background radial animation for material [BottomNavigationBar].
   ///
