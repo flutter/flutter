@@ -1156,7 +1156,7 @@ void main() {
     expect(textField.controller!.text.length, 15);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgetsWithLeakTracking('Block entering text on disabled widget', (WidgetTester tester) async {
+  testWidgets('Block entering text on disabled widget', (WidgetTester tester) async {
     const String initValue = 'init';
     final TextEditingController controller = TextEditingController(text: initValue);
 
@@ -1179,7 +1179,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
+  testWidgets('Disabled SearchBar semantics node still contains value', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1199,7 +1199,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Check SearchBar opacity when disabled', (WidgetTester tester) async {
+  testWidgets('Check SearchBar opacity when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
