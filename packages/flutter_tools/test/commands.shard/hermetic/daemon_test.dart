@@ -7,10 +7,12 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:file/memory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -349,18 +351,70 @@ void main() {
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
-      discoverer.addDevice(FakePreviewDevice());
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      discoverer.addDevice(PreviewDevice(
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        previewBinary: fs.file(r'preview_device.exe'),
+        artifacts: Artifacts.test(fileSystem: fs),
+        builderFactory: () => throw UnimplementedError('TODO implement builder factory'),
+      ));
 
-      final List<String> names = <String>[];
+      final List<Map<String, Object?>> names = <Map<String, Object?>>[];
       await daemonStreams.outputs.stream.skipWhile(_isConnectedEvent).take(2).forEach((DaemonMessage response) async {
         expect(response.data['event'], 'device.added');
         expect(response.data['params'], isMap);
 
         final Map<String, Object?> params = castStringKeyedMap(response.data['params'])!;
-        names.add(params['name']! as String);
+        names.add(params);
       });
       await daemonStreams.outputs.close();
-      expect(names, containsAll(const <String>['android device', 'preview']));
+      expect(
+        names,
+        containsAll(const <Map<String, Object?>>[
+          <String, Object?>{
+            'id': 'device',
+            'name': 'android device',
+            'platform': 'android-arm',
+            'emulator': false,
+            'category': 'mobile',
+            'platformType': 'android',
+            'ephemeral': false,
+            'emulatorId': 'device',
+            'sdk': 'Android 12',
+            'capabilities': <String, Object?>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': true,
+              'fastStart': true,
+              'flutterExit': true,
+              'hardwareRendering': true,
+              'startPaused': true,
+            },
+          },
+          <String, Object?>{
+            'id': 'preview',
+            'name': 'Preview',
+            'platform': 'windows-x64',
+            'emulator': false,
+            'category': 'desktop',
+            'platformType': 'windows',
+            'ephemeral': false,
+            'emulatorId': null,
+            'sdk': 'preview',
+            'capabilities': <String, Object?>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': false,
+              'fastStart': false,
+              'flutterExit': true,
+              'hardwareRendering': true,
+              'startPaused': true,
+            },
+          },
+        ]),
+      );
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => FakeAndroidWorkflow(),
       IOSWorkflow: () => FakeIOSWorkflow(),
@@ -968,59 +1022,6 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
 
   @override
   final bool canListDevices;
-}
-
-class FakePreviewDevice extends Fake implements PreviewDevice {
-  @override
-  final String id = 'preview-device-id';
-
-  @override
-  final String name = 'preview';
-
-  @override
-  Future<String> get emulatorId async => 'preview-device';
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
-
-  @override
-  Future<bool> get isLocalEmulator async => false;
-
-  @override
-  final Category category = Category.desktop;
-
-  @override
-  final PlatformType platformType = PlatformType.windows;
-
-  @override
-  final bool ephemeral = false;
-
-  @override
-  final bool isConnected = true;
-
-  @override
-  Future<String> get sdkNameAndVersion async => 'preview';
-
-  @override
-  bool get supportsHotReload => true;
-
-  @override
-  bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsScreenshot => true;
-
-  @override
-  bool get supportsFastStart => true;
-
-  @override
-  bool get supportsFlutterExit => true;
-
-  @override
-  Future<bool> get supportsHardwareRendering async => true;
-
-  @override
-  bool get supportsStartPaused => true;
 }
 
 // Unfortunately Device, despite not being immutable, has an `operator ==`.
