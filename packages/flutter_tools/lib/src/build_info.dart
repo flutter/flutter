@@ -841,8 +841,8 @@ String getMacOSBuildDirectory() {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory([bool isWasm = false]) {
-  return globals.fs.path.join(getBuildDirectory(), isWasm ? 'web_wasm' : 'web');
+String getWebBuildDirectory() {
+  return globals.fs.path.join(getBuildDirectory(), 'web');
 }
 
 /// Returns the Linux build output directory.

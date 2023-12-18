@@ -22,7 +22,6 @@ import '../../project.dart';
 import '../../web/compile.dart';
 import '../../web/file_generators/flutter_service_worker_js.dart';
 import '../../web/file_generators/main_dart.dart' as main_dart;
-import '../../web/file_generators/wasm_bootstrap.dart' as wasm_bootstrap;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -334,58 +333,46 @@ class WebReleaseBundle extends Target {
   final WebRendererMode webRenderer;
   final bool isWasm;
 
-  String get outputFileNameNoSuffix => 'main.dart';
-  String get outputFileName => '$outputFileNameNoSuffix${isWasm ? '.wasm' : '.js'}';
-  String get wasmJSRuntimeFileName => '$outputFileNameNoSuffix.mjs';
+  List<String> get buildFiles => <String>[
+    'main.dart.js',
+    if (isWasm) ...<String>[
+      'main.dart.wasm',
+      'main.dart.mjs',
+    ],
+  ];
 
   @override
   String get name => 'web_release_bundle';
 
   @override
   List<Target> get dependencies => <Target>[
-    if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
+    Dart2JSTarget(webRenderer),
+    if (isWasm) Dart2WasmTarget(webRenderer),
   ];
 
   @override
   List<Source> get inputs => <Source>[
-    Source.pattern('{BUILD_DIR}/$outputFileName'),
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    if (isWasm) Source.pattern('{BUILD_DIR}/$wasmJSRuntimeFileName'),
   ];
 
   @override
-  List<Source> get outputs => <Source>[
-    Source.pattern('{OUTPUT_DIR}/$outputFileName'),
-    if (isWasm) Source.pattern('{OUTPUT_DIR}/$wasmJSRuntimeFileName'),
-  ];
+  List<Source> get outputs => <Source>[];
 
   @override
   List<String> get depfiles => const <String>[
-    'dart2js.d',
     'flutter_assets.d',
     'web_resources.d',
   ];
-
-  bool shouldCopy(String name) =>
-      // Do not copy the deps file.
-      (name.contains(outputFileName) && !name.endsWith('.deps')) ||
-      (isWasm && name == wasmJSRuntimeFileName);
 
   @override
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
       final String basename = environment.fileSystem.path.basename(outputFile.path);
-      if (shouldCopy(basename)) {
+      if (buildFiles.contains(basename)) {
         outputFile.copySync(
           environment.outputDir.childFile(environment.fileSystem.path.basename(outputFile.path)).path
         );
       }
-    }
-
-    if (isWasm) {
-      // TODO(jacksongardner): Enable icon tree shaking once dart2wasm can do a two-phase compile.
-      // https://github.com/flutter/flutter/issues/117248
-      environment.defines[kIconTreeShakerFlag] = 'false';
     }
 
     createVersionFile(environment, environment.defines);
@@ -502,7 +489,6 @@ class WebBuiltInAssets extends Target {
 
   @override
   List<Source> get outputs => <Source>[
-    if (isWasm) const Source.pattern('{BUILD_DIR}/main.dart.js'),
     const Source.pattern('{BUILD_DIR}/flutter.js'),
     for (final File file in _canvasKitFiles)
       Source.pattern('{BUILD_DIR}/canvaskit/${_filePathRelativeToCanvasKitDirectory(file)}'),
@@ -514,13 +500,6 @@ class WebBuiltInAssets extends Target {
       final String relativePath = _filePathRelativeToCanvasKitDirectory(file);
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
       file.copySync(targetPath);
-    }
-
-    if (isWasm) {
-      final File bootstrapFile = environment.outputDir.childFile('main.dart.js');
-      bootstrapFile.writeAsStringSync(
-        wasm_bootstrap.generateWasmBootstrapFile(webRenderer == WebRendererMode.skwasm)
-      );
     }
 
     // Write the flutter.js file
@@ -546,7 +525,8 @@ class WebServiceWorker extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
-    if (isWasm) Dart2WasmTarget(webRenderer) else Dart2JSTarget(webRenderer),
+    Dart2JSTarget(webRenderer),
+    if (isWasm) Dart2WasmTarget(webRenderer),
     WebReleaseBundle(webRenderer, isWasm: isWasm),
     WebBuiltInAssets(fileSystem, webRenderer, isWasm: isWasm),
   ];
@@ -603,6 +583,10 @@ class WebServiceWorker extends Target {
       urlToHash,
       <String>[
         'main.dart.js',
+        if (isWasm) ...<String>[
+          'main.dart.wasm',
+          'main.dart.mjs',
+        ],
         'index.html',
         if (urlToHash.containsKey('assets/AssetManifest.bin.json'))
           'assets/AssetManifest.bin.json',
