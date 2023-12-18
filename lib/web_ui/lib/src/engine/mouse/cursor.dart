@@ -4,6 +4,8 @@
 
 import '../dom.dart';
 
+const String _kDefaultCursor = 'default';
+
 /// Controls the mouse cursor in the given [element].
 class MouseCursor {
   MouseCursor(this.element);
@@ -17,7 +19,7 @@ class MouseCursor {
   static const Map<String, String> _kindToCssValueMap = <String, String>{
     'alias': 'alias',
     'allScroll': 'all-scroll',
-    'basic': 'default',
+    'basic': _kDefaultCursor,
     'cell': 'cell',
     'click': 'pointer',
     'contextMenu': 'context-menu',
@@ -53,10 +55,18 @@ class MouseCursor {
   };
 
   static String _mapKindToCssValue(String? kind) {
-    return _kindToCssValueMap[kind] ?? 'default';
+    return _kindToCssValueMap[kind] ?? _kDefaultCursor;
   }
 
   void activateSystemCursor(String? kind) {
-    element.style.cursor = _mapKindToCssValue(kind);
+    final String cssValue = _mapKindToCssValue(kind);
+    // TODO(mdebbar): This should be set on the element, not the body. In order
+    //                to do that, we need the framework to send us the view ID.
+    //                https://github.com/flutter/flutter/issues/140226
+    if (cssValue == _kDefaultCursor) {
+      domDocument.body!.style.removeProperty('cursor');
+    } else {
+      domDocument.body!.style.cursor = cssValue;
+    }
   }
 }
