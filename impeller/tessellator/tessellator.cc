@@ -452,7 +452,7 @@ EllipticalVertexGenerator Tessellator::FilledEllipse(
     const Rect& bounds) {
   if (bounds.IsSquare()) {
     return FilledCircle(view_transform, bounds.GetCenter(),
-                        bounds.GetSize().width * 0.5f);
+                        bounds.GetWidth() * 0.5f);
   }
   auto max_radius = bounds.GetSize().MaxDimension();
   auto divisions =
@@ -472,8 +472,8 @@ EllipticalVertexGenerator Tessellator::FilledRoundRect(
     const Matrix& view_transform,
     const Rect& bounds,
     const Size& radii) {
-  if (radii.width * 2 < bounds.GetSize().width ||
-      radii.height * 2 < bounds.GetSize().height) {
+  if (radii.width * 2 < bounds.GetWidth() ||
+      radii.height * 2 < bounds.GetHeight()) {
     auto max_radius = radii.MaxDimension();
     auto divisions = ComputeQuadrantDivisions(
         view_transform.GetMaxBasisLength() * max_radius);

@@ -54,7 +54,7 @@ static std::optional<RenderTarget> WrapTextureWithRenderTarget(
       VALIDATION_LOG << "Missing clip rectangle.";
       return std::nullopt;
     }
-    root_size = ISize(clip_rect->size.width, clip_rect->size.height);
+    root_size = ISize(clip_rect->GetWidth(), clip_rect->GetHeight());
   } else {
     root_size = {static_cast<ISize::Type>(texture.width),
                  static_cast<ISize::Type>(texture.height)};
@@ -207,7 +207,7 @@ bool SurfaceMTL::ShouldPerformPartialRepaint(std::optional<IRect> damage_rect) {
   }
   // If the damage rect is 0 in at least one dimension, partial repaint isn't
   // performed as we skip right to present.
-  if (damage_rect->size.width <= 0 || damage_rect->size.height <= 0) {
+  if (damage_rect->IsEmpty()) {
     return false;
   }
   return true;
@@ -240,7 +240,7 @@ bool SurfaceMTL::Present() const {
       return false;
     }
     blit_pass->AddCopy(source_texture_, destination_texture_, std::nullopt,
-                       clip_rect_->origin);
+                       clip_rect_->GetOrigin());
     blit_pass->EncodeCommands(context->GetResourceAllocator());
     if (!blit_command_buffer->SubmitCommands()) {
       return false;
