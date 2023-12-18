@@ -4,10 +4,9 @@
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
-  'Debug Free' => :debug,
-  'Debug Paid' => :debug,
-  'Release Free' => :release,
-  'Release Paid' => :release,
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
 }
 
 def flutter_root
@@ -27,12 +26,14 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_macos_podfile_setup
 
-target 'Free App' do
-  flutter_install_all_macos_pods File.dirname(File.realpath(__FILE__))
-end
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
 
-target 'Paid App' do
   flutter_install_all_macos_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
 end
 
 post_install do |installer|
