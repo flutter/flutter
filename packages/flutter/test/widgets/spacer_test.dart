@@ -9,14 +9,22 @@ void main() {
   testWidgets('Spacer takes up space.', (WidgetTester tester) async {
     await tester.pumpWidget(const Column(
       children: <Widget>[
-        SizedBox(width: 10.0, height: 10.0),
+        Spacer.fixed(length: 10.0),
         Spacer(),
-        SizedBox(width: 10.0, height: 10.0),
+        Spacer.fixed(length: 10.0),
       ],
     ));
-    final Rect spacerRect = tester.getRect(find.byType(Spacer));
-    expect(spacerRect.size, const Size(0.0, 580.0));
-    expect(spacerRect.topLeft, const Offset(400.0, 10.0));
+    final Rect topFixedSpacerRect = tester.getRect(find.byType(Spacer).at(0));
+    expect(topFixedSpacerRect.size, const Size(0.0, 10.0));
+    expect(topFixedSpacerRect.topLeft, const Offset(400.0, 0.0));
+
+    final Rect flexibleSpacerRect = tester.getRect(find.byType(Spacer).at(1));
+    expect(flexibleSpacerRect.size, const Size(0.0, 580.0));
+    expect(flexibleSpacerRect.topLeft, const Offset(400.0, 10.0));
+
+    final Rect bottomFixedSpacerRect = tester.getRect(find.byType(Spacer).at(2));
+    expect(bottomFixedSpacerRect.size, const Size(0.0, 10.0));
+    expect(bottomFixedSpacerRect.topLeft, const Offset(400.0, 590.0));
   });
 
   testWidgets('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
@@ -27,21 +35,22 @@ void main() {
     await tester.pumpWidget(const Row(
       textDirection: TextDirection.rtl,
       children: <Widget>[
-        SizedBox(width: 10.0, height: 10.0),
+        Spacer.fixed(length: 10.0),
         spacer1,
-        SizedBox(width: 10.0, height: 10.0),
+        Spacer.fixed(length: 10.0),
         spacer2,
-        SizedBox(width: 10.0, height: 10.0),
+        Spacer.fixed(length: 10.0),
         spacer3,
-        SizedBox(width: 10.0, height: 10.0),
+        Spacer.fixed(length: 10.0),
         spacer4,
-        SizedBox(width: 10.0, height: 10.0),
+        Spacer.fixed(length: 10.0),
       ],
     ));
-    final Rect spacer1Rect = tester.getRect(find.byType(Spacer).at(0));
-    final Rect spacer2Rect = tester.getRect(find.byType(Spacer).at(1));
-    final Rect spacer3Rect = tester.getRect(find.byType(Spacer).at(2));
-    final Rect spacer4Rect = tester.getRect(find.byType(Spacer).at(3));
+
+    final Rect spacer1Rect = tester.getRect(find.byType(Spacer).at(1));
+    final Rect spacer2Rect = tester.getRect(find.byType(Spacer).at(3));
+    final Rect spacer3Rect = tester.getRect(find.byType(Spacer).at(5));
+    final Rect spacer4Rect = tester.getRect(find.byType(Spacer).at(7));
     expect(spacer1Rect.size.height, 0.0);
     expect(spacer1Rect.size.width, moreOrLessEquals(93.8, epsilon: 0.1));
     expect(spacer1Rect.left, moreOrLessEquals(696.3, epsilon: 0.1));
@@ -58,16 +67,25 @@ void main() {
       constrainedAxis: Axis.vertical,
       child: Column(
         children: <Widget>[
-          SizedBox(width: 20.0, height: 10.0),
+          Spacer.fixed(length: 10.0),
           Spacer(),
-          SizedBox(width: 10.0, height: 10.0),
+          Spacer.fixed(length: 10.0),
         ],
       ),
     ));
-    final Rect spacerRect = tester.getRect(find.byType(Spacer));
     final Rect flexRect = tester.getRect(find.byType(Column));
-    expect(spacerRect.size, const Size(0.0, 580.0));
-    expect(spacerRect.topLeft, const Offset(400.0, 10.0));
-    expect(flexRect, const Rect.fromLTWH(390.0, 0.0, 20.0, 600.0));
+    expect(flexRect, const Rect.fromLTWH(400.0, 0.0, 0.0, 600.0));
+
+    final Rect topFixedSpacerRect = tester.getRect(find.byType(Spacer).at(0));
+    expect(topFixedSpacerRect.size, const Size(0.0, 10.0));
+    expect(topFixedSpacerRect.topLeft, const Offset(400.0, 0.0));
+
+    final Rect flexibleSpacerRect = tester.getRect(find.byType(Spacer).at(1));
+    expect(flexibleSpacerRect.size, const Size(0.0, 580.0));
+    expect(flexibleSpacerRect.topLeft, const Offset(400.0, 10.0));
+
+    final Rect bottomFixedSpacerRect = tester.getRect(find.byType(Spacer).at(2));
+    expect(bottomFixedSpacerRect.size, const Size(0.0, 10.0));
+    expect(bottomFixedSpacerRect.topLeft, const Offset(400.0, 590.0));
   });
 }

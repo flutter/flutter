@@ -1140,6 +1140,94 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 }
 
+/// A space with a fixed length in the main axis of a [RenderFlex].
+///
+/// This render must be a direct child of a [RenderFlex], or else an error
+/// will be thrown in runtime.
+///
+/// See also:
+/// * [Spacer.fixed], the widget equivalent.
+final class RenderFixedLengthSpacer extends RenderBox {
+  /// Creates a render box that provides a fixed space in a render flex.
+  RenderFixedLengthSpacer({
+    required double length,
+  })  : _length = length;
+
+  /// The size of the space in the [parent]'s main axis.
+  double get length => _length;
+  double _length;
+  set length(double value) {
+    if (_length != value) {
+      _length = value;
+      markNeedsLayout();
+    }
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  double computeMinIntrinsicWidth(double height) => 0.0;
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    assert(parent is RenderFlex);
+
+    return switch ((parent! as RenderFlex).direction) {
+      Axis.horizontal => length,
+      Axis.vertical => 0.0,
+    };
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) => 0.0;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    assert(parent is RenderFlex);
+
+    return switch ((parent! as RenderFlex).direction) {
+      Axis.horizontal => 0.0,
+      Axis.vertical => length,
+    };
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(parent is RenderFlex);
+
+    if (parent case RenderFlex(:final Axis direction)) {
+      final Size size = switch (direction) {
+        Axis.horizontal => Size(length, 0.0),
+        Axis.vertical => Size(0.0, length),
+      };
+
+      return constraints.constrain(size);
+    } else {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Incorrect use of RenderFixedLengthSpacer.'),
+        ErrorDescription(
+          'RenderFixedLengthSpacer should be a direct child of a '
+              'RenderFlex.',
+        ),
+        ErrorHint(
+            'Usually, this indicates that a Spacer.fixed was used in as a '
+                'child to any widget that is not a Flexible, Column or Row.'
+        ),
+        ErrorDescription(
+          'The parent for the RenderFixedLengthSpacer was:\n$parent',
+        ),
+      ]);
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('length', length));
+  }
+}
+
 class _LayoutSizes {
   const _LayoutSizes({
     required this.mainSize,
