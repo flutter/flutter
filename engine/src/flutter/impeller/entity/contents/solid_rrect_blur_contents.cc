@@ -83,8 +83,8 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   {
     auto left = -blur_radius;
     auto top = -blur_radius;
-    auto right = positive_rect.size.width + blur_radius;
-    auto bottom = positive_rect.size.height + blur_radius;
+    auto right = positive_rect.GetWidth() + blur_radius;
+    auto bottom = positive_rect.GetHeight() + blur_radius;
 
     vtx_builder.AddVertices({
         {Point(left, top)},
@@ -111,16 +111,16 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransform() *
-                   Matrix::MakeTranslation({positive_rect.origin});
+                   Matrix::MakeTranslation(positive_rect.GetOrigin());
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
   frag_info.color = color;
   frag_info.blur_sigma = blur_sigma;
-  frag_info.rect_size = Point(positive_rect.size);
+  frag_info.rect_size = Point(positive_rect.GetSize());
   frag_info.corner_radius =
-      std::min(corner_radius_, std::min(positive_rect.size.width / 2.0f,
-                                        positive_rect.size.height / 2.0f));
+      std::min(corner_radius_, std::min(positive_rect.GetWidth() / 2.0f,
+                                        positive_rect.GetHeight() / 2.0f));
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
   if (!pass.AddCommand(std::move(cmd))) {

@@ -630,6 +630,10 @@ TEST(GeometryTest, CanConvertTTypesExplicitly) {
     ASSERT_EQ(r2.GetOrigin().y, 2u);
     ASSERT_EQ(r2.GetSize().width, 3u);
     ASSERT_EQ(r2.GetSize().height, 4u);
+    ASSERT_EQ(r2.GetX(), 1u);
+    ASSERT_EQ(r2.GetY(), 2u);
+    ASSERT_EQ(r2.GetWidth(), 3u);
+    ASSERT_EQ(r2.GetHeight(), 4u);
   }
 }
 

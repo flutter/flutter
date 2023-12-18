@@ -107,7 +107,7 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
   auto bytes_per_pixel =
       BytesPerPixelForPixelFormat(source->GetTextureDescriptor().format);
-  auto bytes_per_image = source_region->size.Area() * bytes_per_pixel;
+  auto bytes_per_image = source_region->Area() * bytes_per_pixel;
   if (destination_offset + bytes_per_image >
       destination->GetDeviceBufferDescriptor().size) {
     VALIDATION_LOG

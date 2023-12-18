@@ -22,11 +22,6 @@ template <class T>
 struct TRect {
   using Type = T;
 
-  /// DEPRECATED: Use |GetOrigin|
-  TPoint<Type> origin;
-  /// DEPRECATED: Use |GetSize|
-  TSize<Type> size;
-
   constexpr TRect() : origin({0, 0}), size({0, 0}) {}
 
   constexpr static TRect MakeLTRB(Type left,
@@ -83,60 +78,70 @@ struct TRect {
 
   template <class U>
   constexpr explicit TRect(const TRect<U>& other)
-      : origin(static_cast<TPoint<Type>>(other.origin)),
-        size(static_cast<TSize<Type>>(other.size)) {}
+      : origin(static_cast<T>(other.GetX()), static_cast<T>(other.GetY())),
+        size(static_cast<T>(other.GetWidth()),
+             static_cast<T>(other.GetHeight())) {}
 
-  constexpr TRect operator+(const TRect& r) const {
+  [[nodiscard]] constexpr TRect operator+(const TRect& r) const {
     return TRect({origin.x + r.origin.x, origin.y + r.origin.y},
                  {size.width + r.size.width, size.height + r.size.height});
   }
 
-  constexpr TRect operator-(const TRect& r) const {
+  [[nodiscard]] constexpr TRect operator-(const TRect& r) const {
     return TRect({origin.x - r.origin.x, origin.y - r.origin.y},
                  {size.width - r.size.width, size.height - r.size.height});
   }
 
-  constexpr TRect operator*(Type scale) const { return Scale(scale); }
+  [[nodiscard]] constexpr TRect operator*(Type scale) const {
+    return Scale(scale);
+  }
 
-  constexpr TRect operator*(const TRect& r) const {
+  [[nodiscard]] constexpr TRect operator*(const TRect& r) const {
     return TRect({origin.x * r.origin.x, origin.y * r.origin.y},
                  {size.width * r.size.width, size.height * r.size.height});
   }
 
-  constexpr bool operator==(const TRect& r) const {
+  [[nodiscard]] constexpr bool operator==(const TRect& r) const {
     return origin == r.origin && size == r.size;
   }
 
-  constexpr TRect Scale(Type scale) const {
+  [[nodiscard]] constexpr TRect Scale(Type scale) const {
     return TRect({origin.x * scale, origin.y * scale},
                  {size.width * scale, size.height * scale});
   }
 
-  constexpr TRect Scale(TPoint<T> scale) const {
+  [[nodiscard]] constexpr TRect Scale(Type scale_x, Type scale_y) const {
+    return TRect({origin.x * scale_x, origin.y * scale_y},
+                 {size.width * scale_x, size.height * scale_y});
+  }
+
+  [[nodiscard]] constexpr TRect Scale(TPoint<T> scale) const {
     return TRect({origin.x * scale.x, origin.y * scale.y},
                  {size.width * scale.x, size.height * scale.y});
   }
 
-  constexpr TRect Scale(TSize<T> scale) const {
+  [[nodiscard]] constexpr TRect Scale(TSize<T> scale) const {
     return Scale(TPoint<T>(scale));
   }
 
-  constexpr bool Contains(const TPoint<Type>& p) const {
+  [[nodiscard]] constexpr bool Contains(const TPoint<Type>& p) const {
     return p.x >= GetLeft() && p.x < GetRight() && p.y >= GetTop() &&
            p.y < GetBottom();
   }
 
-  constexpr bool Contains(const TRect& o) const {
+  [[nodiscard]] constexpr bool Contains(const TRect& o) const {
     return Union(o).size == size;
   }
 
   /// Returns true if either of the width or height are 0, negative, or NaN.
-  constexpr bool IsEmpty() const { return size.IsEmpty(); }
+  [[nodiscard]] constexpr bool IsEmpty() const { return size.IsEmpty(); }
 
   /// Returns true if width and height are equal and neither is NaN.
-  constexpr bool IsSquare() const { return size.IsSquare(); }
+  [[nodiscard]] constexpr bool IsSquare() const { return size.IsSquare(); }
 
-  constexpr bool IsMaximum() const { return *this == MakeMaximum(); }
+  [[nodiscard]] constexpr bool IsMaximum() const {
+    return *this == MakeMaximum();
+  }
 
   /// @brief Returns the upper left corner of the rectangle as specified
   ///        when it was constructed.
@@ -145,75 +150,106 @@ struct TRect {
   ///        methods which will return values as if the rectangle had been
   ///        "unswapped" by calling |GetPositive| on it, this method
   ///        returns the raw origin values.
-  constexpr TPoint<Type> GetOrigin() const { return origin; }
+  [[nodiscard]] constexpr TPoint<Type> GetOrigin() const { return origin; }
 
   /// @brief Returns the size of the rectangle as specified when it was
   ///        constructed and which may be negative in either width or
   ///        height.
-  constexpr TSize<Type> GetSize() const { return size; }
+  [[nodiscard]] constexpr TSize<Type> GetSize() const { return size; }
 
-  constexpr auto GetLeft() const {
+  /// @brief Returns the X coordinate of the upper left corner, equivalent
+  ///        to |GetOrigin().x|
+  [[nodiscard]] constexpr Type GetX() const { return origin.x; }
+
+  /// @brief Returns the Y coordinate of the upper left corner, equivalent
+  ///        to |GetOrigin().y|
+  [[nodiscard]] constexpr Type GetY() const { return origin.y; }
+
+  /// @brief Returns the width of the rectangle, equivalent to
+  ///        |GetSize().width|
+  [[nodiscard]] constexpr Type GetWidth() const { return size.width; }
+
+  /// @brief Returns the height of the rectangle, equivalent to
+  ///        |GetSize().height|
+  [[nodiscard]] constexpr Type GetHeight() const { return size.height; }
+
+  [[nodiscard]] constexpr auto GetLeft() const {
     if (IsMaximum()) {
       return -std::numeric_limits<Type>::infinity();
     }
     return std::min(origin.x, origin.x + size.width);
   }
 
-  constexpr auto GetTop() const {
+  [[nodiscard]] constexpr auto GetTop() const {
     if (IsMaximum()) {
       return -std::numeric_limits<Type>::infinity();
     }
     return std::min(origin.y, origin.y + size.height);
   }
 
-  constexpr auto GetRight() const {
+  [[nodiscard]] constexpr auto GetRight() const {
     if (IsMaximum()) {
       return std::numeric_limits<Type>::infinity();
     }
     return std::max(origin.x, origin.x + size.width);
   }
 
-  constexpr auto GetBottom() const {
+  [[nodiscard]] constexpr auto GetBottom() const {
     if (IsMaximum()) {
       return std::numeric_limits<Type>::infinity();
     }
     return std::max(origin.y, origin.y + size.height);
   }
 
-  constexpr TPoint<T> GetLeftTop() const { return {GetLeft(), GetTop()}; }
+  [[nodiscard]] constexpr TPoint<T> GetLeftTop() const {
+    return {GetLeft(), GetTop()};
+  }
 
-  constexpr TPoint<T> GetRightTop() const { return {GetRight(), GetTop()}; }
+  [[nodiscard]] constexpr TPoint<T> GetRightTop() const {
+    return {GetRight(), GetTop()};
+  }
 
-  constexpr TPoint<T> GetLeftBottom() const { return {GetLeft(), GetBottom()}; }
+  [[nodiscard]] constexpr TPoint<T> GetLeftBottom() const {
+    return {GetLeft(), GetBottom()};
+  }
 
-  constexpr TPoint<T> GetRightBottom() const {
+  [[nodiscard]] constexpr TPoint<T> GetRightBottom() const {
     return {GetRight(), GetBottom()};
   }
 
+  /// @brief  Get the area of the rectangle, equivalent to |GetSize().Area()|
+  [[nodiscard]] constexpr T Area() const { return size.Area(); }
+
   /// @brief  Get the center point as a |Point|.
-  constexpr Point GetCenter() const {
+  [[nodiscard]] constexpr Point GetCenter() const {
     return Point(origin.x + size.width * 0.5f, origin.y + size.height * 0.5f);
   }
 
-  constexpr std::array<T, 4> GetLTRB() const {
+  [[nodiscard]] constexpr std::array<T, 4> GetLTRB() const {
     return {GetLeft(), GetTop(), GetRight(), GetBottom()};
   }
 
+  /// @brief  Get the x, y coordinates of the origin and the width and
+  ///         height of the rectangle in an array.
+  [[nodiscard]] constexpr std::array<T, 4> GetXYWH() const {
+    return {origin.x, origin.y, size.width, size.height};
+  }
+
   /// @brief  Get a version of this rectangle that has a non-negative size.
-  constexpr TRect GetPositive() const {
+  [[nodiscard]] constexpr TRect GetPositive() const {
     auto ltrb = GetLTRB();
     return MakeLTRB(ltrb[0], ltrb[1], ltrb[2], ltrb[3]);
   }
 
-  /// @brief  Get the points that represent the 4 corners of this rectangle. The
-  ///         order is: Top left, top right, bottom left, bottom right.
-  constexpr std::array<TPoint<T>, 4> GetPoints() const {
+  /// @brief  Get the points that represent the 4 corners of this rectangle.
+  ///         The order is: Top left, top right, bottom left, bottom right.
+  [[nodiscard]] constexpr std::array<TPoint<T>, 4> GetPoints() const {
     auto [left, top, right, bottom] = GetLTRB();
     return {TPoint(left, top), TPoint(right, top), TPoint(left, bottom),
             TPoint(right, bottom)};
   }
 
-  constexpr std::array<TPoint<T>, 4> GetTransformedPoints(
+  [[nodiscard]] constexpr std::array<TPoint<T>, 4> GetTransformedPoints(
       const Matrix& transform) const {
     auto points = GetPoints();
     for (size_t i = 0; i < points.size(); i++) {
@@ -224,7 +260,7 @@ struct TRect {
 
   /// @brief  Creates a new bounding box that contains this transformed
   ///         rectangle.
-  constexpr TRect TransformBounds(const Matrix& transform) const {
+  [[nodiscard]] constexpr TRect TransformBounds(const Matrix& transform) const {
     auto points = GetTransformedPoints(transform);
     auto bounds = TRect::MakePointBounds(points.begin(), points.end());
     if (bounds.has_value()) {
@@ -240,7 +276,7 @@ struct TRect {
   ///
   ///         Empty and non-finite rectangles will return a zero-scaling
   ///         transform that maps all points to (0, 0).
-  constexpr Matrix GetNormalizingTransform() const {
+  [[nodiscard]] constexpr Matrix GetNormalizingTransform() const {
     if (!IsEmpty()) {
       Scalar sx = 1.0 / size.width;
       Scalar sy = 1.0 / size.height;
@@ -262,7 +298,7 @@ struct TRect {
     return Matrix::MakeScale({0.0f, 0.0f, 1.0f});
   }
 
-  constexpr TRect Union(const TRect& o) const {
+  [[nodiscard]] constexpr TRect Union(const TRect& o) const {
     auto this_ltrb = GetLTRB();
     auto other_ltrb = o.GetLTRB();
     return TRect::MakeLTRB(std::min(this_ltrb[0], other_ltrb[0]),  //
@@ -272,7 +308,8 @@ struct TRect {
     );
   }
 
-  constexpr std::optional<TRect<T>> Intersection(const TRect& o) const {
+  [[nodiscard]] constexpr std::optional<TRect<T>> Intersection(
+      const TRect& o) const {
     auto this_ltrb = GetLTRB();
     auto other_ltrb = o.GetLTRB();
     auto intersection =
@@ -287,13 +324,13 @@ struct TRect {
     return intersection;
   }
 
-  constexpr bool IntersectsWithRect(const TRect& o) const {
+  [[nodiscard]] constexpr bool IntersectsWithRect(const TRect& o) const {
     return Intersection(o).has_value();
   }
 
   /// @brief Returns the new boundary rectangle that would result from the
   ///        rectangle being cutout by a second rectangle.
-  constexpr std::optional<TRect<T>> Cutout(const TRect& o) const {
+  [[nodiscard]] constexpr std::optional<TRect<T>> Cutout(const TRect& o) const {
     const auto& [a_left, a_top, a_right, a_bottom] = GetLTRB();  // Source rect.
     const auto& [b_left, b_top, b_right, b_bottom] = o.GetLTRB();  // Cutout.
     if (b_left <= a_left && b_right >= a_right) {
@@ -325,14 +362,17 @@ struct TRect {
   }
 
   /// @brief  Returns a new rectangle translated by the given offset.
-  constexpr TRect<T> Shift(TPoint<T> offset) const {
+  [[nodiscard]] constexpr TRect<T> Shift(TPoint<T> offset) const {
     return TRect(origin.x + offset.x, origin.y + offset.y, size.width,
                  size.height);
   }
 
   /// @brief  Returns a rectangle with expanded edges. Negative expansion
   ///         results in shrinking.
-  constexpr TRect<T> Expand(T left, T top, T right, T bottom) const {
+  [[nodiscard]] constexpr TRect<T> Expand(T left,
+                                          T top,
+                                          T right,
+                                          T bottom) const {
     return TRect(origin.x - left,            //
                  origin.y - top,             //
                  size.width + left + right,  //
@@ -341,7 +381,7 @@ struct TRect {
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
-  constexpr TRect<T> Expand(T amount) const {
+  [[nodiscard]] constexpr TRect<T> Expand(T amount) const {
     return TRect(origin.x - amount,        //
                  origin.y - amount,        //
                  size.width + amount * 2,  //
@@ -350,7 +390,17 @@ struct TRect {
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
-  constexpr TRect<T> Expand(TPoint<T> amount) const {
+  [[nodiscard]] constexpr TRect<T> Expand(T horizontal_amount,
+                                          T vertical_amount) const {
+    return TRect(origin.x - horizontal_amount,        //
+                 origin.y - vertical_amount,          //
+                 size.width + horizontal_amount * 2,  //
+                 size.height + vertical_amount * 2);
+  }
+
+  /// @brief  Returns a rectangle with expanded edges in all directions.
+  ///         Negative expansion results in shrinking.
+  [[nodiscard]] constexpr TRect<T> Expand(TPoint<T> amount) const {
     return TRect(origin.x - amount.x,        //
                  origin.y - amount.y,        //
                  size.width + amount.x * 2,  //
@@ -359,7 +409,7 @@ struct TRect {
 
   /// @brief  Returns a rectangle with expanded edges in all directions.
   ///         Negative expansion results in shrinking.
-  constexpr TRect<T> Expand(TSize<T> amount) const {
+  [[nodiscard]] constexpr TRect<T> Expand(TSize<T> amount) const {
     return TRect(origin.x - amount.width,        //
                  origin.y - amount.height,       //
                  size.width + amount.width * 2,  //
@@ -370,45 +420,48 @@ struct TRect {
   ///         source rectangle onto this rectangle. In other words, the source
   ///         rectangle is redefined in terms of the corrdinate space of this
   ///         rectangle.
-  constexpr TRect<T> Project(TRect<T> source) const {
+  [[nodiscard]] constexpr TRect<T> Project(TRect<T> source) const {
     return source.Shift(-origin).Scale(
         TSize<T>(1.0 / static_cast<Scalar>(size.width),
                  1.0 / static_cast<Scalar>(size.height)));
   }
 
-  constexpr static TRect RoundOut(const TRect& r) {
+  [[nodiscard]] constexpr static TRect RoundOut(const TRect& r) {
     return TRect::MakeLTRB(floor(r.GetLeft()), floor(r.GetTop()),
                            ceil(r.GetRight()), ceil(r.GetBottom()));
   }
 
-  constexpr static std::optional<TRect> Union(const TRect& a,
-                                              const std::optional<TRect> b) {
+  [[nodiscard]] constexpr static std::optional<TRect> Union(
+      const TRect& a,
+      const std::optional<TRect> b) {
     return b.has_value() ? a.Union(b.value()) : a;
   }
 
-  constexpr static std::optional<TRect> Union(const std::optional<TRect> a,
-                                              const TRect& b) {
+  [[nodiscard]] constexpr static std::optional<TRect> Union(
+      const std::optional<TRect> a,
+      const TRect& b) {
     return Union(b, a);
   }
 
-  constexpr static std::optional<TRect> Union(const std::optional<TRect> a,
-                                              const std::optional<TRect> b) {
+  [[nodiscard]] constexpr static std::optional<TRect> Union(
+      const std::optional<TRect> a,
+      const std::optional<TRect> b) {
     return a.has_value() ? Union(a.value(), b) : b;
   }
 
-  constexpr static std::optional<TRect> Intersection(
+  [[nodiscard]] constexpr static std::optional<TRect> Intersection(
       const TRect& a,
       const std::optional<TRect> b) {
     return b.has_value() ? a.Intersection(b.value()) : a;
   }
 
-  constexpr static std::optional<TRect> Intersection(
+  [[nodiscard]] constexpr static std::optional<TRect> Intersection(
       const std::optional<TRect> a,
       const TRect& b) {
     return Intersection(b, a);
   }
 
-  constexpr static std::optional<TRect> Intersection(
+  [[nodiscard]] constexpr static std::optional<TRect> Intersection(
       const std::optional<TRect> a,
       const std::optional<TRect> b) {
     return a.has_value() ? Intersection(a.value(), b) : b;
@@ -420,6 +473,17 @@ struct TRect {
 
   constexpr TRect(TPoint<Type> origin, TSize<Type> size)
       : origin(origin), size(size) {}
+
+  // NOLINTBEGIN
+  // These fields should be named origin_ and size_, but will be renamed to
+  // left_/top_/right_/bottom_ during the next phase of the reworking of the
+  // TRect class and we will deal with the renaming of all the usages here
+  // and in path_builder.cc at that time
+  TPoint<Type> origin;
+  TSize<Type> size;
+  // NOLINTEND
+
+  friend class PathBuilder;
 };
 
 using Rect = TRect<Scalar>;
@@ -432,7 +496,7 @@ namespace std {
 template <class T>
 inline std::ostream& operator<<(std::ostream& out,
                                 const impeller::TRect<T>& r) {
-  out << "(" << r.origin << ", " << r.size << ")";
+  out << "(" << r.GetOrigin() << ", " << r.GetSize() << ")";
   return out;
 }
 

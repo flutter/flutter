@@ -137,9 +137,8 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
   // projection and as a source for the pass size. Note that it doesn't matter
   // which direction the space is rotated in when grabbing the pass size.
   auto pass_texture_rect = Rect::MakeSize(input_snapshot->texture->GetSize())
-                               .TransformBounds(pass_transform);
-  pass_texture_rect.origin.x -= transformed_blur_radius_length;
-  pass_texture_rect.size.width += transformed_blur_radius_length * 2;
+                               .TransformBounds(pass_transform)
+                               .Expand(transformed_blur_radius_length, 0);
 
   // UV mapping.
 
@@ -183,7 +182,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     // The blur direction is in input UV space.
     frag_info.blur_uv_offset =
         pass_transform.Invert().TransformDirection(Vector2(1, 0)).Normalize() /
-        Point(input_snapshot->GetCoverage().value().size);
+        Point(input_snapshot->GetCoverage().value().GetSize());
 
     Command cmd;
     DEBUG_COMMAND_INFO(cmd, SPrintF("Gaussian Blur Filter (Radius=%.2f)",
@@ -254,7 +253,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     scale.y = scale_curve(y_radius);
   }
 
-  Vector2 scaled_size = pass_texture_rect.size * scale;
+  Vector2 scaled_size = pass_texture_rect.GetSize() * scale;
   ISize floored_size = ISize(scaled_size.x, scaled_size.y);
 
   auto out_texture = renderer.MakeSubpass("Directional Gaussian Blur Filter",
@@ -271,13 +270,14 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
   sampler_desc.width_address_mode = SamplerAddressMode::kClampToEdge;
 
   return Entity::FromSnapshot(
-      Snapshot{.texture = out_texture,
-               .transform = texture_rotate.Invert() *
-                            Matrix::MakeTranslation(pass_texture_rect.origin) *
-                            Matrix::MakeScale((1 / scale) *
-                                              (scaled_size / floored_size)),
-               .sampler_descriptor = sampler_desc,
-               .opacity = input_snapshot->opacity},
+      Snapshot{
+          .texture = out_texture,
+          .transform =
+              texture_rotate.Invert() *
+              Matrix::MakeTranslation(pass_texture_rect.GetOrigin()) *
+              Matrix::MakeScale((1 / scale) * (scaled_size / floored_size)),
+          .sampler_descriptor = sampler_desc,
+          .opacity = input_snapshot->opacity},
       entity.GetBlendMode(), entity.GetClipDepth());
 }
 

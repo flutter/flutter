@@ -51,8 +51,9 @@ GeometryResult PointFieldGeometry::GetPositionUVBuffer(
   if (!vtx_builder.has_value()) {
     return {};
   }
-  auto uv_vtx_builder = ComputeUVGeometryCPU(
-      vtx_builder.value(), {0, 0}, texture_coverage.size, effect_transform);
+  auto uv_vtx_builder =
+      ComputeUVGeometryCPU(vtx_builder.value(), {0, 0},
+                           texture_coverage.GetSize(), effect_transform);
 
   auto& host_buffer = pass.GetTransientsBuffer();
   return {
@@ -213,7 +214,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
     frame_info.count = total;
     frame_info.effect_transform = effect_transform.value();
     frame_info.texture_origin = {0, 0};
-    frame_info.texture_size = Vector2(texture_coverage.value().size);
+    frame_info.texture_size = Vector2(texture_coverage.value().GetSize());
 
     UV::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
     UV::BindGeometryData(cmd, geometry_buffer);

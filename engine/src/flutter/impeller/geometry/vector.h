@@ -252,6 +252,9 @@ struct Vector4 {
 
   constexpr Vector4(const Point& p) : x(p.x), y(p.y) {}
 
+  constexpr Vector4(std::array<Scalar, 4> values)
+      : x(values[0]), y(values[1]), z(values[2]), w(values[3]) {}
+
   Vector4 Normalize() const {
     const Scalar inverse = 1.0f / sqrt(x * x + y * y + z * z + w * w);
     return Vector4(x * inverse, y * inverse, z * inverse, w * inverse);

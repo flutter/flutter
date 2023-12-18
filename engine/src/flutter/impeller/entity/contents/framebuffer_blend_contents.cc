@@ -58,7 +58,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   }
   Rect src_coverage = coverage.value();
 
-  auto size = src_coverage.size;
+  auto size = src_coverage.GetSize();
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
   vtx_builder.AddVertices({
       {Point(0, 0), Point(0, 0)},

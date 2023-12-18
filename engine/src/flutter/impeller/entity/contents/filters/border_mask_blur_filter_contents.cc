@@ -93,15 +93,13 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     auto& host_buffer = pass.GetTransientsBuffer();
 
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
+    auto origin = coverage.GetOrigin();
+    auto size = coverage.GetSize();
     vtx_builder.AddVertices({
-        {coverage.origin, input_uvs[0]},
-        {{coverage.origin.x + coverage.size.width, coverage.origin.y},
-         input_uvs[1]},
-        {{coverage.origin.x, coverage.origin.y + coverage.size.height},
-         input_uvs[2]},
-        {{coverage.origin.x + coverage.size.width,
-          coverage.origin.y + coverage.size.height},
-         input_uvs[3]},
+        {origin, input_uvs[0]},
+        {{origin.x + size.width, origin.y}, input_uvs[1]},
+        {{origin.x, origin.y + size.height}, input_uvs[2]},
+        {{origin.x + size.width, origin.y + size.height}, input_uvs[3]},
     });
 
     Command cmd;

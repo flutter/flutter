@@ -57,7 +57,7 @@ static size_t PairsFitInAtlasOfSize(
     const auto& pair = *it;
 
     const auto glyph_size =
-        ISize::Ceil(pair.glyph.bounds.size * pair.scaled_font.scale);
+        ISize::Ceil(pair.glyph.bounds.GetSize() * pair.scaled_font.scale);
     IPoint16 location_in_atlas;
     if (!rect_packer->addRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
@@ -95,7 +95,7 @@ static bool CanAppendToExistingAtlas(
     const FontGlyphPair& pair = extra_pairs[i];
 
     const auto glyph_size =
-        ISize::Ceil(pair.glyph.bounds.size * pair.scaled_font.scale);
+        ISize::Ceil(pair.glyph.bounds.GetSize() * pair.scaled_font.scale);
     IPoint16 location_in_atlas;
     if (!rect_packer->addRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
@@ -158,8 +158,8 @@ static void DrawGlyph(SkCanvas* canvas,
                       const Rect& location,
                       bool has_color) {
   const auto& metrics = scaled_font.font.GetMetrics();
-  const auto position = SkPoint::Make(location.origin.x / scaled_font.scale,
-                                      location.origin.y / scaled_font.scale);
+  const auto position = SkPoint::Make(location.GetX() / scaled_font.scale,
+                                      location.GetY() / scaled_font.scale);
   SkGlyphID glyph_id = glyph.index;
 
   SkFont sk_font(
