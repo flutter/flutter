@@ -2820,6 +2820,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           final String selectedText = selection.textInside(textEditingValue.text);
           if (selectedText.isNotEmpty) {
             final String? processedText = await _processTextService.processTextAction(action.id, selectedText, widget.readOnly);
+            // If an activity does not return a modified version, just hide the toolbar.
+            // Otherwise use the result to replace the selected text.
             if (processedText != null && _allowPaste) {
               _pasteText(SelectionChangedCause.toolbar, processedText);
             } else {
