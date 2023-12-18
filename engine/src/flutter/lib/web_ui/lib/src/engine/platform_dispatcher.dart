@@ -600,9 +600,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
-            // TODO(mdebbar): This needs a view ID from the framework.
-            //                https://github.com/flutter/flutter/issues/137289
-            implicitView?.mouseCursor
+            // TODO(mdebbar): Once the framework starts sending us a viewId, we
+            //                should use it to grab the correct view.
+            //                https://github.com/flutter/flutter/issues/140226
+            views.firstOrNull?.mouseCursor
                 .activateSystemCursor(arguments.tryString('kind'));
         }
         return;
