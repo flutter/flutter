@@ -156,11 +156,9 @@ void main() {
       'Semantics('
         'container: false, '
         'properties: SemanticsProperties, '
-        'identifier: null, '// ignore: missing_whitespace_between_adjacent_strings
         'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
         'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
-        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
-        'tooltip: null'// ignore: missing_whitespace_between_adjacent_strings
+        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]'// ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
 
