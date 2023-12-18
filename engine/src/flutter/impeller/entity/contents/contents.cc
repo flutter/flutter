@@ -80,13 +80,13 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
   }
 
   auto texture = renderer.MakeSubpass(
-      label, ISize::Ceil(coverage->size),
+      label, ISize::Ceil(coverage->GetSize()),
       [&contents = *this, &entity, &coverage](const ContentContext& renderer,
                                               RenderPass& pass) -> bool {
         Entity sub_entity;
         sub_entity.SetBlendMode(BlendMode::kSourceOver);
         sub_entity.SetTransform(
-            Matrix::MakeTranslation(Vector3(-coverage->origin)) *
+            Matrix::MakeTranslation(Vector3(-coverage->GetOrigin())) *
             entity.GetTransform());
         return contents.Render(renderer, sub_entity, pass);
       },
@@ -98,7 +98,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
 
   auto snapshot = Snapshot{
       .texture = texture,
-      .transform = Matrix::MakeTranslation(coverage->origin),
+      .transform = Matrix::MakeTranslation(coverage->GetOrigin()),
   };
   if (sampler_descriptor.has_value()) {
     snapshot.sampler_descriptor = sampler_descriptor.value();

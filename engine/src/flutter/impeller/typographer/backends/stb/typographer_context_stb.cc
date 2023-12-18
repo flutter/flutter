@@ -214,15 +214,14 @@ static void DrawGlyph(BitmapSTB* bitmap,
       stbtt_ScaleForPixelHeight(typeface_stb->GetFontInfo(), text_size_pixels);
   float scale_x = scale_y;
 
-  auto output =
-      bitmap->GetPixelAddress({static_cast<size_t>(location.origin.x),
-                               static_cast<size_t>(location.origin.y)});
+  auto output = bitmap->GetPixelAddress({static_cast<size_t>(location.GetX()),
+                                         static_cast<size_t>(location.GetY())});
   // For Alpha and Signed Distance field bitmaps we can use STB to draw the
   // Glyph in place
   if (!has_color || DISABLE_COLOR_FONT_SUPPORT) {
     stbtt_MakeGlyphBitmap(typeface_stb->GetFontInfo(), output,
-                          location.size.width - kPadding,
-                          location.size.height - kPadding,
+                          location.GetWidth() - kPadding,
+                          location.GetHeight() - kPadding,
                           bitmap->GetRowBytes(), scale_x, scale_y, glyph.index);
   } else {
     // But for color bitmaps we need to get the glyph pixels and then carry all

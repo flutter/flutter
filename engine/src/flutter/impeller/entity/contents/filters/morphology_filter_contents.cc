@@ -138,7 +138,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
   };
 
   auto out_texture = renderer.MakeSubpass("Directional Morphology Filter",
-                                          ISize(coverage.size), callback);
+                                          ISize(coverage.GetSize()), callback);
   if (!out_texture) {
     return std::nullopt;
   }
@@ -149,7 +149,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
 
   return Entity::FromSnapshot(
       Snapshot{.texture = out_texture,
-               .transform = Matrix::MakeTranslation(coverage.origin),
+               .transform = Matrix::MakeTranslation(coverage.GetOrigin()),
                .sampler_descriptor = sampler_desc,
                .opacity = input_snapshot->opacity},
       entity.GetBlendMode(), entity.GetClipDepth());
@@ -171,8 +171,8 @@ std::optional<Rect> DirectionalMorphologyFilterContents::GetFilterCoverage(
   auto transformed_vector =
       transform.TransformDirection(direction_ * radius_.radius).Abs();
 
-  auto origin = coverage->origin;
-  auto size = Vector2(coverage->size);
+  auto origin = coverage->GetOrigin();
+  auto size = Vector2(coverage->GetSize());
   switch (morph_type_) {
     case FilterContents::MorphType::kDilate:
       origin -= transformed_vector;

@@ -489,7 +489,7 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
       GetJoinProc(stroke_join_), GetCapProc(stroke_cap_),
       entity.GetTransform().GetMaxBasisLength());
   auto vertex_builder = ComputeUVGeometryCPU(
-      stroke_builder, {0, 0}, texture_coverage.size, effect_transform);
+      stroke_builder, {0, 0}, texture_coverage.GetSize(), effect_transform);
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,

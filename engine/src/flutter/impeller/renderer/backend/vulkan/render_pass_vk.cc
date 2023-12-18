@@ -348,9 +348,9 @@ static void SetViewportAndScissor(const Command& command,
   const auto& vp = command.viewport.value_or<Viewport>(
       {.rect = Rect::MakeSize(target_size)});
   vk::Viewport viewport = vk::Viewport()
-                              .setWidth(vp.rect.size.width)
-                              .setHeight(-vp.rect.size.height)
-                              .setY(vp.rect.size.height)
+                              .setWidth(vp.rect.GetWidth())
+                              .setHeight(-vp.rect.GetHeight())
+                              .setY(vp.rect.GetHeight())
                               .setMinDepth(0.0f)
                               .setMaxDepth(1.0f);
   cmd_buffer_cache.SetViewport(cmd_buffer, 0, 1, &viewport);
@@ -359,8 +359,8 @@ static void SetViewportAndScissor(const Command& command,
   const auto& sc = command.scissor.value_or(IRect::MakeSize(target_size));
   vk::Rect2D scissor =
       vk::Rect2D()
-          .setOffset(vk::Offset2D(sc.origin.x, sc.origin.y))
-          .setExtent(vk::Extent2D(sc.size.width, sc.size.height));
+          .setOffset(vk::Offset2D(sc.GetX(), sc.GetY()))
+          .setExtent(vk::Extent2D(sc.GetWidth(), sc.GetHeight()));
   cmd_buffer_cache.SetScissor(cmd_buffer, 0, 1, &scissor);
 }
 

@@ -416,15 +416,13 @@ TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
 
   auto test = [&tessellator](const Matrix& transform, const Rect& bounds,
                              const Size& radii) {
-    FML_DCHECK(radii.width * 2 <= bounds.GetSize().width) << radii << bounds;
-    FML_DCHECK(radii.height * 2 <= bounds.GetSize().height) << radii << bounds;
+    FML_DCHECK(radii.width * 2 <= bounds.GetWidth()) << radii << bounds;
+    FML_DCHECK(radii.height * 2 <= bounds.GetHeight()) << radii << bounds;
 
-    Scalar middle_left = bounds.GetOrigin().x + radii.width;
-    Scalar middle_top = bounds.GetOrigin().y + radii.height;
-    Scalar middle_right =
-        bounds.GetOrigin().x + bounds.GetSize().width - radii.width;
-    Scalar middle_bottom =
-        bounds.GetOrigin().y + bounds.GetSize().height - radii.height;
+    Scalar middle_left = bounds.GetX() + radii.width;
+    Scalar middle_top = bounds.GetY() + radii.height;
+    Scalar middle_right = bounds.GetX() + bounds.GetWidth() - radii.width;
+    Scalar middle_bottom = bounds.GetY() + bounds.GetHeight() - radii.height;
 
     auto generator = tessellator->FilledRoundRect(transform, bounds, radii);
     EXPECT_EQ(generator.GetTriangleType(), PrimitiveType::kTriangleStrip);

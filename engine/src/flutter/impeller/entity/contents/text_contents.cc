@@ -195,13 +195,8 @@ bool TextContents::Render(const ContentContext& renderer,
               continue;
             }
             const Rect& atlas_glyph_bounds = maybe_atlas_glyph_bounds.value();
-            vtx.atlas_glyph_bounds = Vector4(
-                atlas_glyph_bounds.origin.x, atlas_glyph_bounds.origin.y,
-                atlas_glyph_bounds.size.width, atlas_glyph_bounds.size.height);
-            vtx.glyph_bounds = Vector4(glyph_position.glyph.bounds.origin.x,
-                                       glyph_position.glyph.bounds.origin.y,
-                                       glyph_position.glyph.bounds.size.width,
-                                       glyph_position.glyph.bounds.size.height);
+            vtx.atlas_glyph_bounds = Vector4(atlas_glyph_bounds.GetXYWH());
+            vtx.glyph_bounds = Vector4(glyph_position.glyph.bounds.GetXYWH());
             vtx.glyph_position = glyph_position.position;
 
             for (const Point& point : unit_points) {

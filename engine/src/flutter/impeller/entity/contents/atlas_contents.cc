@@ -72,9 +72,9 @@ struct AtlasBlenderKey {
 
   struct Hash {
     std::size_t operator()(const AtlasBlenderKey& key) const {
-      return fml::HashCombine(key.color_key, key.rect.size.width,
-                              key.rect.size.height, key.rect.origin.x,
-                              key.rect.origin.y);
+      return fml::HashCombine(key.color_key, key.rect.GetWidth(),
+                              key.rect.GetHeight(), key.rect.GetX(),
+                              key.rect.GetY());
     }
   };
 
@@ -124,18 +124,18 @@ std::shared_ptr<SubAtlasResult> AtlasContents::GenerateSubAtlas() const {
     auto key = it->first;
     auto transforms = it->second;
 
-    auto new_rect = Rect::MakeXYWH(x_offset, y_offset, key.rect.size.width,
-                                   key.rect.size.height);
+    auto new_rect = Rect::MakeXYWH(x_offset, y_offset, key.rect.GetWidth(),
+                                   key.rect.GetHeight());
     auto sub_transform = Matrix::MakeTranslation(Vector2(x_offset, y_offset));
 
-    x_offset += std::ceil(key.rect.size.width) + 1.0;
+    x_offset += std::ceil(key.rect.GetWidth()) + 1.0;
 
     result->sub_texture_coords.push_back(key.rect);
     result->sub_colors.push_back(key.color);
     result->sub_transforms.push_back(sub_transform);
 
     x_extent = std::max(x_extent, x_offset);
-    y_extent = std::max(y_extent, std::ceil(y_offset + key.rect.size.height));
+    y_extent = std::max(y_extent, std::ceil(y_offset + key.rect.GetHeight()));
 
     for (auto transform : transforms) {
       result->result_texture_coords.push_back(new_rect);
@@ -159,7 +159,8 @@ Rect AtlasContents::ComputeBoundingBox() const {
     for (size_t i = 0; i < texture_coords_.size(); i++) {
       auto matrix = transforms_[i];
       auto sample_rect = texture_coords_[i];
-      auto bounds = Rect::MakeSize(sample_rect.size).TransformBounds(matrix);
+      auto bounds =
+          Rect::MakeSize(sample_rect.GetSize()).TransformBounds(matrix);
       bounding_box = bounds.Union(bounding_box);
     }
     bounding_box_cache_ = bounding_box;
@@ -213,8 +214,6 @@ bool AtlasContents::Render(const ContentContext& renderer,
   }
 
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
-  constexpr Scalar width[6] = {0, 1, 0, 1, 0, 1};
-  constexpr Scalar height[6] = {0, 0, 1, 0, 1, 1};
 
   if (blend_mode_ <= BlendMode::kModulate) {
     // Simple Porter-Duff blends can be accomplished without a subpass.
@@ -229,16 +228,14 @@ bool AtlasContents::Render(const ContentContext& renderer,
     for (size_t i = 0; i < texture_coords_.size(); i++) {
       auto sample_rect = texture_coords_[i];
       auto matrix = transforms_[i];
+      auto points = sample_rect.GetPoints();
       auto transformed_points =
-          Rect::MakeSize(sample_rect.size).GetTransformedPoints(matrix);
+          Rect::MakeSize(sample_rect.GetSize()).GetTransformedPoints(matrix);
       auto color = colors_[i].Premultiply();
       for (size_t j = 0; j < 6; j++) {
         VS::PerVertexData data;
         data.vertices = transformed_points[indices[j]];
-        data.texture_coords =
-            (sample_rect.origin + Point(sample_rect.size.width * width[j],
-                                        sample_rect.size.height * height[j])) /
-            texture_size;
+        data.texture_coords = points[indices[j]] / texture_size;
         data.color = color;
         vtx_builder.AppendVertex(data);
       }
@@ -387,21 +384,17 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
   vertex_builder.Reserve(texture_coords.size() * 6);
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
-  constexpr Scalar width[6] = {0, 1, 0, 1, 0, 1};
-  constexpr Scalar height[6] = {0, 0, 1, 0, 1, 1};
   for (size_t i = 0; i < texture_coords.size(); i++) {
     auto sample_rect = texture_coords[i];
     auto matrix = transforms[i];
+    auto points = sample_rect.GetPoints();
     auto transformed_points =
-        Rect::MakeSize(sample_rect.size).GetTransformedPoints(matrix);
+        Rect::MakeSize(sample_rect.GetSize()).GetTransformedPoints(matrix);
 
     for (size_t j = 0; j < 6; j++) {
       VS::PerVertexData data;
       data.position = transformed_points[indices[j]];
-      data.texture_coords =
-          (sample_rect.origin + Point(sample_rect.size.width * width[j],
-                                      sample_rect.size.height * height[j])) /
-          texture_size;
+      data.texture_coords = points[indices[j]] / texture_size;
       vertex_builder.AppendVertex(data);
     }
   }
@@ -484,7 +477,7 @@ bool AtlasColorContents::Render(const ContentContext& renderer,
     auto sample_rect = texture_coords[i];
     auto matrix = transforms[i];
     auto transformed_points =
-        Rect::MakeSize(sample_rect.size).GetTransformedPoints(matrix);
+        Rect::MakeSize(sample_rect.GetSize()).GetTransformedPoints(matrix);
 
     for (size_t j = 0; j < 6; j++) {
       VS::PerVertexData data;

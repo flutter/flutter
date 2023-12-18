@@ -102,14 +102,14 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   gl.Disable(GL_DEPTH_TEST);
   gl.Disable(GL_STENCIL_TEST);
 
-  gl.BlitFramebuffer(source_region.origin.x,     // srcX0
-                     source_region.origin.y,     // srcY0
-                     source_region.size.width,   // srcX1
-                     source_region.size.height,  // srcY1
+  gl.BlitFramebuffer(source_region.GetX(),       // srcX0
+                     source_region.GetY(),       // srcY0
+                     source_region.GetWidth(),   // srcX1
+                     source_region.GetHeight(),  // srcY1
                      destination_origin.x,       // dstX0
                      destination_origin.y,       // dstY0
-                     source_region.size.width,   // dstX1
-                     source_region.size.height,  // dstY1
+                     source_region.GetWidth(),   // dstX1
+                     source_region.GetHeight(),  // dstY1
                      GL_COLOR_BUFFER_BIT,        // mask
                      GL_NEAREST                  // filter
   );
@@ -147,8 +147,8 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
 
   DeviceBufferGLES::Cast(*destination)
       .UpdateBufferData([&gl, this](uint8_t* data, size_t length) {
-        gl.ReadPixels(source_region.origin.x, source_region.origin.y,
-                      source_region.size.width, source_region.size.height,
+        gl.ReadPixels(source_region.GetX(), source_region.GetY(),
+                      source_region.GetWidth(), source_region.GetHeight(),
                       GL_RGBA, GL_UNSIGNED_BYTE, data + destination_offset);
       });
 

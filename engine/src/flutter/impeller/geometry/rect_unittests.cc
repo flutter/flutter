@@ -11,18 +11,89 @@
 namespace impeller {
 namespace testing {
 
-TEST(RectTest, RectOriginSizeGetters) {
+TEST(RectTest, RectOriginSizeXYWHGetters) {
   {
     Rect r = Rect::MakeOriginSize({10, 20}, {50, 40});
     EXPECT_EQ(r.GetOrigin(), Point(10, 20));
     EXPECT_EQ(r.GetSize(), Size(50, 40));
+    EXPECT_EQ(r.GetX(), 10);
+    EXPECT_EQ(r.GetY(), 20);
+    EXPECT_EQ(r.GetWidth(), 50);
+    EXPECT_EQ(r.GetHeight(), 40);
+    auto expected_array = std::array<Scalar, 4>{10, 20, 50, 40};
+    EXPECT_EQ(r.GetXYWH(), expected_array);
   }
 
   {
     Rect r = Rect::MakeLTRB(10, 20, 50, 40);
     EXPECT_EQ(r.GetOrigin(), Point(10, 20));
     EXPECT_EQ(r.GetSize(), Size(40, 20));
+    EXPECT_EQ(r.GetX(), 10);
+    EXPECT_EQ(r.GetY(), 20);
+    EXPECT_EQ(r.GetWidth(), 40);
+    EXPECT_EQ(r.GetHeight(), 20);
+    auto expected_array = std::array<Scalar, 4>{10, 20, 40, 20};
+    EXPECT_EQ(r.GetXYWH(), expected_array);
   }
+}
+
+TEST(RectTest, IRectOriginSizeXYWHGetters) {
+  {
+    IRect r = IRect::MakeOriginSize({10, 20}, {50, 40});
+    EXPECT_EQ(r.GetOrigin(), IPoint(10, 20));
+    EXPECT_EQ(r.GetSize(), ISize(50, 40));
+    EXPECT_EQ(r.GetX(), 10);
+    EXPECT_EQ(r.GetY(), 20);
+    EXPECT_EQ(r.GetWidth(), 50);
+    EXPECT_EQ(r.GetHeight(), 40);
+    auto expected_array = std::array<int64_t, 4>{10, 20, 50, 40};
+    EXPECT_EQ(r.GetXYWH(), expected_array);
+  }
+
+  {
+    IRect r = IRect::MakeLTRB(10, 20, 50, 40);
+    EXPECT_EQ(r.GetOrigin(), IPoint(10, 20));
+    EXPECT_EQ(r.GetSize(), ISize(40, 20));
+    EXPECT_EQ(r.GetX(), 10);
+    EXPECT_EQ(r.GetY(), 20);
+    EXPECT_EQ(r.GetWidth(), 40);
+    EXPECT_EQ(r.GetHeight(), 20);
+    auto expected_array = std::array<int64_t, 4>{10, 20, 40, 20};
+    EXPECT_EQ(r.GetXYWH(), expected_array);
+  }
+}
+
+TEST(RectTest, RectFromRect) {
+  EXPECT_EQ(Rect(Rect::MakeXYWH(2, 3, 7, 15)),
+            Rect::MakeXYWH(2.0, 3.0, 7.0, 15.0));
+  EXPECT_EQ(Rect(Rect::MakeLTRB(2, 3, 7, 15)),
+            Rect::MakeLTRB(2.0, 3.0, 7.0, 15.0));
+}
+
+TEST(RectTest, RectFromIRect) {
+  EXPECT_EQ(Rect(IRect::MakeXYWH(2, 3, 7, 15)),
+            Rect::MakeXYWH(2.0, 3.0, 7.0, 15.0));
+  EXPECT_EQ(Rect(IRect::MakeLTRB(2, 3, 7, 15)),
+            Rect::MakeLTRB(2.0, 3.0, 7.0, 15.0));
+}
+
+TEST(RectTest, IRectFromRect) {
+  EXPECT_EQ(IRect(Rect::MakeXYWH(2, 3, 7, 15)),  //
+            IRect::MakeXYWH(2, 3, 7, 15));
+  EXPECT_EQ(IRect(Rect::MakeLTRB(2, 3, 7, 15)),  //
+            IRect::MakeLTRB(2, 3, 7, 15));
+
+  EXPECT_EQ(IRect(Rect::MakeXYWH(2.5, 3.5, 7.75, 15.75)),
+            IRect::MakeXYWH(2, 3, 7, 15));
+  EXPECT_EQ(IRect(Rect::MakeLTRB(2.5, 3.5, 7.75, 15.75)),
+            IRect::MakeLTRB(2, 3, 7, 15));
+}
+
+TEST(RectTest, IRectFromIRect) {
+  EXPECT_EQ(IRect(IRect::MakeXYWH(2, 3, 7, 15)),  //
+            IRect::MakeXYWH(2, 3, 7, 15));
+  EXPECT_EQ(IRect(IRect::MakeLTRB(2, 3, 7, 15)),  //
+            IRect::MakeLTRB(2, 3, 7, 15));
 }
 
 TEST(RectTest, RectMakeSize) {
@@ -53,6 +124,108 @@ TEST(RectTest, RectMakeSize) {
     IRect expected = IRect::MakeLTRB(0, 0, 100, 200);
     EXPECT_EQ(r, expected);
   }
+}
+
+TEST(RectTest, RectScale) {
+  auto test1 = [](Rect rect, Scalar scale) {
+    Rect expected = Rect::MakeXYWH(rect.GetX() * scale,      //
+                                   rect.GetY() * scale,      //
+                                   rect.GetWidth() * scale,  //
+                                   rect.GetHeight() * scale);
+
+    EXPECT_RECT_NEAR(rect.Scale(scale), expected)  //
+        << rect << " * " << scale;
+    EXPECT_RECT_NEAR(rect.Scale(scale, scale), expected)  //
+        << rect << " * " << scale;
+    EXPECT_RECT_NEAR(rect.Scale(Point(scale, scale)), expected)  //
+        << rect << " * " << scale;
+    EXPECT_RECT_NEAR(rect.Scale(Size(scale, scale)), expected)  //
+        << rect << " * " << scale;
+  };
+
+  auto test2 = [&test1](Rect rect, Scalar scale_x, Scalar scale_y) {
+    Rect expected = Rect::MakeXYWH(rect.GetX() * scale_x,      //
+                                   rect.GetY() * scale_y,      //
+                                   rect.GetWidth() * scale_x,  //
+                                   rect.GetHeight() * scale_y);
+
+    EXPECT_RECT_NEAR(rect.Scale(scale_x, scale_y), expected)  //
+        << rect << " * " << scale_x << ", " << scale_y;
+    EXPECT_RECT_NEAR(rect.Scale(Point(scale_x, scale_y)), expected)  //
+        << rect << " * " << scale_x << ", " << scale_y;
+    EXPECT_RECT_NEAR(rect.Scale(Size(scale_x, scale_y)), expected)  //
+        << rect << " * " << scale_x << ", " << scale_y;
+
+    test1(rect, scale_x);
+    test1(rect, scale_y);
+  };
+
+  test2(Rect::MakeLTRB(10, 15, 100, 150), 2.5, 3.5);
+  test2(Rect::MakeLTRB(10, 15, 100, 150), 3.5, 2.5);
+  test2(Rect::MakeLTRB(10, 15, -100, 150), 2.5, 3.5);
+  test2(Rect::MakeLTRB(10, 15, 100, -150), 2.5, 3.5);
+  test2(Rect::MakeLTRB(10, 15, 100, 150), -2.5, 3.5);
+  test2(Rect::MakeLTRB(10, 15, 100, 150), 2.5, -3.5);
+}
+
+TEST(RectTest, IRectScale) {
+  auto test1 = [](IRect rect, int64_t scale) {
+    IRect expected = IRect::MakeXYWH(rect.GetX() * scale,      //
+                                     rect.GetY() * scale,      //
+                                     rect.GetWidth() * scale,  //
+                                     rect.GetHeight() * scale);
+
+    EXPECT_EQ(rect.Scale(scale), expected)  //
+        << rect << " * " << scale;
+    EXPECT_EQ(rect.Scale(scale, scale), expected)  //
+        << rect << " * " << scale;
+    EXPECT_EQ(rect.Scale(IPoint(scale, scale)), expected)  //
+        << rect << " * " << scale;
+    EXPECT_EQ(rect.Scale(ISize(scale, scale)), expected)  //
+        << rect << " * " << scale;
+  };
+
+  auto test2 = [&test1](IRect rect, int64_t scale_x, int64_t scale_y) {
+    IRect expected = IRect::MakeXYWH(rect.GetX() * scale_x,      //
+                                     rect.GetY() * scale_y,      //
+                                     rect.GetWidth() * scale_x,  //
+                                     rect.GetHeight() * scale_y);
+
+    EXPECT_EQ(rect.Scale(scale_x, scale_y), expected)  //
+        << rect << " * " << scale_x << ", " << scale_y;
+    EXPECT_EQ(rect.Scale(IPoint(scale_x, scale_y)), expected)  //
+        << rect << " * " << scale_x << ", " << scale_y;
+    EXPECT_EQ(rect.Scale(ISize(scale_x, scale_y)), expected)  //
+        << rect << " * " << scale_x << ", " << scale_y;
+
+    test1(rect, scale_x);
+    test1(rect, scale_y);
+  };
+
+  test2(IRect::MakeLTRB(10, 15, 100, 150), 2, 3);
+  test2(IRect::MakeLTRB(10, 15, 100, 150), 3, 2);
+  test2(IRect::MakeLTRB(10, 15, -100, 150), 2, 3);
+  test2(IRect::MakeLTRB(10, 15, 100, -150), 2, 3);
+  test2(IRect::MakeLTRB(10, 15, 100, 150), -2, 3);
+  test2(IRect::MakeLTRB(10, 15, 100, 150), 2, -3);
+}
+
+TEST(RectTest, RectArea) {
+  EXPECT_EQ(Rect::MakeXYWH(0, 0, 100, 200).Area(), 20000);
+  EXPECT_EQ(Rect::MakeXYWH(10, 20, 100, 200).Area(), 20000);
+  EXPECT_EQ(Rect::MakeXYWH(0, 0, 200, 100).Area(), 20000);
+  EXPECT_EQ(Rect::MakeXYWH(10, 20, 200, 100).Area(), 20000);
+  EXPECT_EQ(Rect::MakeXYWH(0, 0, 100, 100).Area(), 10000);
+  EXPECT_EQ(Rect::MakeXYWH(10, 20, 100, 100).Area(), 10000);
+}
+
+TEST(RectTest, IRectArea) {
+  EXPECT_EQ(IRect::MakeXYWH(0, 0, 100, 200).Area(), 20000);
+  EXPECT_EQ(IRect::MakeXYWH(10, 20, 100, 200).Area(), 20000);
+  EXPECT_EQ(IRect::MakeXYWH(0, 0, 200, 100).Area(), 20000);
+  EXPECT_EQ(IRect::MakeXYWH(10, 20, 200, 100).Area(), 20000);
+  EXPECT_EQ(IRect::MakeXYWH(0, 0, 100, 100).Area(), 10000);
+  EXPECT_EQ(IRect::MakeXYWH(10, 20, 100, 100).Area(), 10000);
 }
 
 TEST(RectTest, RectGetNormalizingTransform) {
@@ -267,12 +440,18 @@ TEST(RectTest, GetCenter) {
   EXPECT_EQ(IRect::MakeXYWH(10, 30, 20, 19).GetCenter(), Point(20, 39.5));
 }
 
-TEST(RectTest, Expand) {
+TEST(RectTest, RectExpand) {
   auto rect = Rect::MakeLTRB(100, 100, 200, 200);
 
   // Expand(T amount)
   EXPECT_EQ(rect.Expand(10), Rect::MakeLTRB(90, 90, 210, 210));
   EXPECT_EQ(rect.Expand(-10), Rect::MakeLTRB(110, 110, 190, 190));
+
+  // Expand(amount, amount)
+  EXPECT_EQ(rect.Expand(10, 10), Rect::MakeLTRB(90, 90, 210, 210));
+  EXPECT_EQ(rect.Expand(10, -10), Rect::MakeLTRB(90, 110, 210, 190));
+  EXPECT_EQ(rect.Expand(-10, 10), Rect::MakeLTRB(110, 90, 190, 210));
+  EXPECT_EQ(rect.Expand(-10, -10), Rect::MakeLTRB(110, 110, 190, 190));
 
   // Expand(Point amount)
   EXPECT_EQ(rect.Expand(Point{10, 10}), Rect::MakeLTRB(90, 90, 210, 210));
@@ -285,6 +464,32 @@ TEST(RectTest, Expand) {
   EXPECT_EQ(rect.Expand(Size{10, -10}), Rect::MakeLTRB(90, 110, 210, 190));
   EXPECT_EQ(rect.Expand(Size{-10, 10}), Rect::MakeLTRB(110, 90, 190, 210));
   EXPECT_EQ(rect.Expand(Size{-10, -10}), Rect::MakeLTRB(110, 110, 190, 190));
+}
+
+TEST(RectTest, IRectExpand) {
+  auto rect = IRect::MakeLTRB(100, 100, 200, 200);
+
+  // Expand(T amount)
+  EXPECT_EQ(rect.Expand(10), IRect::MakeLTRB(90, 90, 210, 210));
+  EXPECT_EQ(rect.Expand(-10), IRect::MakeLTRB(110, 110, 190, 190));
+
+  // Expand(amount, amount)
+  EXPECT_EQ(rect.Expand(10, 10), IRect::MakeLTRB(90, 90, 210, 210));
+  EXPECT_EQ(rect.Expand(10, -10), IRect::MakeLTRB(90, 110, 210, 190));
+  EXPECT_EQ(rect.Expand(-10, 10), IRect::MakeLTRB(110, 90, 190, 210));
+  EXPECT_EQ(rect.Expand(-10, -10), IRect::MakeLTRB(110, 110, 190, 190));
+
+  // Expand(IPoint amount)
+  EXPECT_EQ(rect.Expand(IPoint{10, 10}), IRect::MakeLTRB(90, 90, 210, 210));
+  EXPECT_EQ(rect.Expand(IPoint{10, -10}), IRect::MakeLTRB(90, 110, 210, 190));
+  EXPECT_EQ(rect.Expand(IPoint{-10, 10}), IRect::MakeLTRB(110, 90, 190, 210));
+  EXPECT_EQ(rect.Expand(IPoint{-10, -10}), IRect::MakeLTRB(110, 110, 190, 190));
+
+  // Expand(ISize amount)
+  EXPECT_EQ(rect.Expand(ISize{10, 10}), IRect::MakeLTRB(90, 90, 210, 210));
+  EXPECT_EQ(rect.Expand(ISize{10, -10}), IRect::MakeLTRB(90, 110, 210, 190));
+  EXPECT_EQ(rect.Expand(ISize{-10, 10}), IRect::MakeLTRB(110, 90, 190, 210));
+  EXPECT_EQ(rect.Expand(ISize{-10, -10}), IRect::MakeLTRB(110, 110, 190, 190));
 }
 
 }  // namespace testing

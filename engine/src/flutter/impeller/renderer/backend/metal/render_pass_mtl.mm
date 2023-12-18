@@ -311,10 +311,10 @@ struct PassBindingsCache {
       return;
     }
     [encoder_ setViewport:MTLViewport{
-                              .originX = viewport.rect.origin.x,
-                              .originY = viewport.rect.origin.y,
-                              .width = viewport.rect.size.width,
-                              .height = viewport.rect.size.height,
+                              .originX = viewport.rect.GetX(),
+                              .originY = viewport.rect.GetY(),
+                              .width = viewport.rect.GetWidth(),
+                              .height = viewport.rect.GetHeight(),
                               .znear = viewport.depth_range.z_near,
                               .zfar = viewport.depth_range.z_far,
                           }];
@@ -327,11 +327,11 @@ struct PassBindingsCache {
     }
     [encoder_
         setScissorRect:MTLScissorRect{
-                           .x = static_cast<NSUInteger>(scissor.origin.x),
-                           .y = static_cast<NSUInteger>(scissor.origin.y),
-                           .width = static_cast<NSUInteger>(scissor.size.width),
+                           .x = static_cast<NSUInteger>(scissor.GetX()),
+                           .y = static_cast<NSUInteger>(scissor.GetY()),
+                           .width = static_cast<NSUInteger>(scissor.GetWidth()),
                            .height =
-                               static_cast<NSUInteger>(scissor.size.height),
+                               static_cast<NSUInteger>(scissor.GetHeight()),
                        }];
     scissor_ = scissor;
   }

@@ -50,8 +50,8 @@ bool RoundRectGeometry::CoversArea(const Matrix& transform,
   if (!transform.IsTranslationScaleOnly()) {
     return false;
   }
-  bool flat_on_tb = bounds_.GetSize().width > radii_.width * 2;
-  bool flat_on_lr = bounds_.GetSize().height > radii_.height * 2;
+  bool flat_on_tb = bounds_.GetWidth() > radii_.width * 2;
+  bool flat_on_lr = bounds_.GetHeight() > radii_.height * 2;
   if (!flat_on_tb && !flat_on_lr) {
     return false;
   }

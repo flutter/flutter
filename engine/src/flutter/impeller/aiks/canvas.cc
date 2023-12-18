@@ -341,7 +341,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   if (rect.IsSquare()) {
     // Circles have slightly less overhead and can do stroking
-    DrawCircle(rect.GetCenter(), rect.GetSize().width * 0.5f, paint);
+    DrawCircle(rect.GetCenter(), rect.GetWidth() * 0.5f, paint);
     return;
   }
 
@@ -471,10 +471,9 @@ void Canvas::ClipOval(const Rect& bounds, Entity::ClipOperation clip_op) {
 void Canvas::ClipRRect(const Rect& rect,
                        const Size& corner_radii,
                        Entity::ClipOperation clip_op) {
-  auto size = rect.GetSize();
   // Does the rounded rect have a flat part on the top/bottom or left/right?
-  bool flat_on_TB = corner_radii.width * 2 < size.width;
-  bool flat_on_LR = corner_radii.height * 2 < size.height;
+  bool flat_on_TB = corner_radii.width * 2 < rect.GetWidth();
+  bool flat_on_LR = corner_radii.height * 2 < rect.GetHeight();
   auto geometry = Geometry::MakeRoundRect(rect, corner_radii);
   auto& cull_rect = transform_stack_.back().cull_rect;
   if (clip_op == Entity::ClipOperation::kIntersect &&                      //

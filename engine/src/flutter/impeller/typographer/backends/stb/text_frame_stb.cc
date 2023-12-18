@@ -56,8 +56,8 @@ std::shared_ptr<TextFrame> MakeTextFrameSTB(
   std::optional<Rect> result;
   for (const auto& glyph_position : run.GetGlyphPositions()) {
     Rect glyph_rect = Rect::MakeOriginSize(
-        glyph_position.position + glyph_position.glyph.bounds.origin,
-        glyph_position.glyph.bounds.size);
+        glyph_position.position + glyph_position.glyph.bounds.GetOrigin(),
+        glyph_position.glyph.bounds.GetSize());
     result = result.has_value() ? result->Union(glyph_rect) : glyph_rect;
   }
 

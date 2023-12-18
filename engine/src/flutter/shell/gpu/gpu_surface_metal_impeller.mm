@@ -149,12 +149,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         auto surface = impeller::SurfaceMTL::MakeFromMetalLayerDrawable(
             impeller_renderer_->GetContext(), drawable, clip_rect);
 
-        if (clip_rect && (clip_rect->size.width == 0 || clip_rect->size.height == 0)) {
+        if (clip_rect && clip_rect->IsEmpty()) {
           return surface->Present();
         }
 
         impeller::IRect cull_rect = surface->coverage();
-        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.size.width, cull_rect.size.height);
+        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
         impeller::DlDispatcher impeller_dispatcher(cull_rect);
         display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
@@ -247,12 +247,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
         auto surface =
             impeller::SurfaceMTL::MakeFromTexture(renderer->GetContext(), mtl_texture, clip_rect);
 
-        if (clip_rect && (clip_rect->size.width == 0 || clip_rect->size.height == 0)) {
+        if (clip_rect && clip_rect->IsEmpty()) {
           return surface->Present();
         }
 
         impeller::IRect cull_rect = surface->coverage();
-        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.size.width, cull_rect.size.height);
+        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
         impeller::DlDispatcher impeller_dispatcher(cull_rect);
         display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();

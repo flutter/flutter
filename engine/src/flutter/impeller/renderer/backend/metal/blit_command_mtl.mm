@@ -31,9 +31,9 @@ bool BlitCopyTextureToTextureCommandMTL::Encode(
   }
 
   auto source_origin_mtl =
-      MTLOriginMake(source_region.origin.x, source_region.origin.y, 0);
+      MTLOriginMake(source_region.GetX(), source_region.GetY(), 0);
   auto source_size_mtl =
-      MTLSizeMake(source_region.size.width, source_region.size.height, 1);
+      MTLSizeMake(source_region.GetWidth(), source_region.GetHeight(), 1);
   auto destination_origin_mtl =
       MTLOriginMake(destination_origin.x, destination_origin.y, 0);
 
@@ -70,9 +70,9 @@ bool BlitCopyTextureToBufferCommandMTL::Encode(
   }
 
   auto source_origin_mtl =
-      MTLOriginMake(source_region.origin.x, source_region.origin.y, 0);
+      MTLOriginMake(source_region.GetX(), source_region.GetY(), 0);
   auto source_size_mtl =
-      MTLSizeMake(source_region.size.width, source_region.size.height, 1);
+      MTLSizeMake(source_region.GetWidth(), source_region.GetHeight(), 1);
 
   auto destination_bytes_per_pixel =
       BytesPerPixelForPixelFormat(source->GetTextureDescriptor().format);

@@ -247,11 +247,11 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     if (!coverage.has_value()) {
       return std::nullopt;
     }
-    auto scale = Vector2(coverage->size / Size(texture_->GetSize()));
+    auto scale = Vector2(coverage->GetSize() / Size(texture_->GetSize()));
 
     return Snapshot{
         .texture = texture_,
-        .transform = Matrix::MakeTranslation(coverage->origin) *
+        .transform = Matrix::MakeTranslation(coverage->GetOrigin()) *
                      Matrix::MakeScale(scale),
         .sampler_descriptor = sampler_descriptor.value_or(sampler_descriptor_),
         .opacity = GetOpacityFactor(),
