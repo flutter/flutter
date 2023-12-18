@@ -27,9 +27,6 @@ const int _vkProcessKey = 0xe5;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataWindows extends RawKeyEventData {
   /// Creates a key event data structure specific for Windows.
-  ///
-  /// The [keyCode], [scanCode], [characterCodePoint], and [modifiers], arguments
-  /// must not be null.
   const RawKeyEventDataWindows({
     this.keyCode = 0,
     this.scanCode = 0,

@@ -36,14 +36,15 @@ T _cast<T>(Object? object) {
 ///
 /// If [deltaFileTransfer] is true, the proxy will use an rsync-like algorithm that
 /// only transfers the changed part of the application package for deployment.
-class ProxiedDevices extends DeviceDiscovery {
+class ProxiedDevices extends PollingDeviceDiscovery {
   ProxiedDevices(this.connection, {
     bool deltaFileTransfer = true,
     bool enableDdsProxy = false,
     required Logger logger,
   }) : _deltaFileTransfer = deltaFileTransfer,
        _enableDdsProxy = enableDdsProxy,
-       _logger = logger;
+       _logger = logger,
+       super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -87,6 +88,9 @@ class ProxiedDevices extends DeviceDiscovery {
     }
     return filter.filterDevices(devices);
   }
+
+  @override
+  Future<List<Device>> pollingGetDevices({Duration? timeout}) => discoverDevices(timeout: timeout);
 
   @override
   List<String> get wellKnownIds => const <String>[];

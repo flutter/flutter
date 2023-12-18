@@ -283,7 +283,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// Create a new refresh control for inserting into a list of slivers.
   ///
   /// The [refreshTriggerPullDistance] and [refreshIndicatorExtent] arguments
-  /// must not be null and must be >= 0.
+  /// must be greater than or equal to 0.
   ///
   /// The [builder] argument may be null, in which case no indicator UI will be
   /// shown but the [onRefresh] will still be invoked. By default, [builder]
@@ -307,8 +307,8 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
 
   /// The amount of overscroll the scrollable must be dragged to trigger a reload.
   ///
-  /// Must not be null, must be larger than 0.0 and larger than
-  /// [refreshIndicatorExtent]. Defaults to 100px when not specified.
+  /// Must be larger than zero and larger than [refreshIndicatorExtent].
+  /// Defaults to 100 pixels when not specified.
   ///
   /// When overscrolled past this distance, [onRefresh] will be called if not
   /// null and the [builder] will build in the [RefreshIndicatorMode.armed] state.
@@ -317,9 +317,9 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// The amount of space the refresh indicator sliver will keep holding while
   /// [onRefresh]'s [Future] is still running.
   ///
-  /// Must not be null and must be positive, but can be 0.0, in which case the
-  /// sliver will start retracting back to 0.0 as soon as the refresh is started.
-  /// Defaults to 60px when not specified.
+  /// Must be a positive number, but can be zero, in which case the sliver will
+  /// start retracting back to zero as soon as the refresh is started. Defaults
+  /// to 60 pixels when not specified.
   ///
   /// Must be smaller than [refreshTriggerPullDistance], since the sliver
   /// shouldn't grow further after triggering the refresh.

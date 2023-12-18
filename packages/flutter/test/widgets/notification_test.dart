@@ -4,15 +4,16 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class MyNotification extends Notification { }
 
 void main() {
-  testWidgets('Notification basics - toString', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Notification basics - toString', (WidgetTester tester) async {
     expect(MyNotification(), hasOneLineDescription);
   });
 
-  testWidgets('Notification basics - dispatch', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Notification basics - dispatch', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
@@ -36,7 +37,7 @@ void main() {
     expect(log, <dynamic>['b', notification, 'a', notification]);
   });
 
-  testWidgets('Notification basics - cancel', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Notification basics - cancel', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
@@ -60,7 +61,7 @@ void main() {
     expect(log, <dynamic>['b', notification]);
   });
 
-  testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Notification basics - listener null return value', (WidgetTester tester) async {
     final List<Type> log = <Type>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
@@ -77,7 +78,7 @@ void main() {
     expect(log, <Type>[MyNotification]);
   });
 
-  testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Notification basics - listener null return value', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     final ScrollMetricsNotification n1 = ScrollMetricsNotification(
       metrics: FixedScrollMetrics(

@@ -30,6 +30,7 @@ abstract class MessageCodec<T> {
 }
 
 /// A command object representing the invocation of a named method.
+@pragma('vm:keep-name')
 @immutable
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the

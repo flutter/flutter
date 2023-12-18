@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
+import '../migrations/cocoapods_toolchain_directory_migration.dart';
 import '../reporting/reporting.dart';
 import '../xcode_project.dart';
 
@@ -46,6 +47,8 @@ const String outOfDatePluginsPodfileConsequence = '''
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
 const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation for instructions.';
+
+const String cocoaPodsUpdateInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#updating-cocoapods for instructions.';
 
 const String podfileIosMigrationInstructions = '''
   rm ios/Podfile''';
@@ -172,6 +175,11 @@ class CocoaPods {
       // This migrator works around a CocoaPods bug, and should be run after `pod install` is run.
       final ProjectMigration postPodMigration = ProjectMigration(<ProjectMigrator>[
         CocoaPodsScriptReadlink(xcodeProject, _xcodeProjectInterpreter, _logger),
+        CocoaPodsToolchainDirectoryMigration(
+          xcodeProject,
+          _xcodeProjectInterpreter,
+          _logger,
+        ),
       ]);
       postPodMigration.run();
 

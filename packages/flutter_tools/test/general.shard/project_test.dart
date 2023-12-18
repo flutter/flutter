@@ -733,7 +733,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -751,13 +750,15 @@ apply plugin: 'kotlin-android'
               'applinks:example2.com',
             ],
           );
-          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
+          final File outputFile = fs.file(outputFilePath);
+          final Map<String, Object?> json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
+
           expect(
-            settings.associatedDomains,
+            json['associatedDomains'],
             unorderedEquals(
               <String>[
                 'example.com',
@@ -765,8 +766,8 @@ apply plugin: 'kotlin-android'
               ],
             ),
           );
-          expect(settings.teamIdentifier, 'ABC');
-          expect(settings.bundleIdentifier, 'io.flutter.someProject.suffix');
+          expect(json['teamIdentifier'], 'ABC');
+          expect(json['bundleIdentifier'], 'io.flutter.someProject.suffix');
         });
 
         testWithMocks('can handle entitlement file in nested directory structure.', () async {
@@ -778,7 +779,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -796,13 +796,15 @@ apply plugin: 'kotlin-android'
               'applinks:example2.com',
             ],
           );
-          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
+          final File outputFile = fs.file(outputFilePath);
+          final Map<String, Object?> json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
           expect(
-            settings.associatedDomains,
+            json['associatedDomains'],
             unorderedEquals(
               <String>[
                 'example.com',
@@ -810,8 +812,8 @@ apply plugin: 'kotlin-android'
               ],
             ),
           );
-          expect(settings.teamIdentifier, 'ABC');
-          expect(settings.bundleIdentifier, 'io.flutter.someProject.suffix');
+          expect(json['teamIdentifier'], 'ABC');
+          expect(json['bundleIdentifier'], 'io.flutter.someProject.suffix');
         });
 
         testWithMocks('return empty when no entitlement', () async {
@@ -821,7 +823,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -830,13 +831,15 @@ apply plugin: 'kotlin-android'
           };
           xcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(<String>[], <String>[], <String>['Runner'], logger);
           testPlistUtils.setProperty(PlistParser.kCFBundleIdentifierKey, r'$(PRODUCT_BUNDLE_IDENTIFIER)');
-          final XcodeUniversalLinkSettings settings = await project.ios.universalLinkSettings(
+          final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
-          expect(settings.teamIdentifier, 'ABC');
-          expect(settings.bundleIdentifier, 'io.flutter.someProject');
+          final File outputFile = fs.file(outputFilePath);
+          final Map<String, Object?> json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
+          expect(json['teamIdentifier'], 'ABC');
+          expect(json['bundleIdentifier'], 'io.flutter.someProject');
+          expect(json['associatedDomains'], unorderedEquals(<String>[]));
         });
       });
 
@@ -1617,7 +1620,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId '$id'
@@ -1634,7 +1637,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 }
 ''';
 }

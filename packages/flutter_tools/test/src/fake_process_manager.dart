@@ -213,10 +213,17 @@ class FakeProcess implements io.Process {
   /// The raw byte content of stdout.
   final List<int> _stdout;
 
+  /// The list of [kill] signals this process received so far.
+  @visibleForTesting
+  List<io.ProcessSignal> get signals => _signals;
+  final List<io.ProcessSignal> _signals = <io.ProcessSignal>[];
+
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    _signals.add(signal);
+
     // Killing a fake process has no effect.
-    return false;
+    return true;
   }
 }
 
@@ -400,8 +407,9 @@ abstract class FakeProcessManager implements ProcessManager {
     if (fakeProcess == null) {
       return false;
     }
+    fakeProcess.kill(signal);
     if (fakeProcess._completer != null) {
-      fakeProcess._completer!.complete();
+      fakeProcess._completer.complete();
     }
     return true;
   }

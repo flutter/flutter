@@ -136,6 +136,10 @@ class Java {
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
   late final Version? version = (() {
+    if (!canRun()) {
+      return null;
+    }
+
     final RunResult result = _processUtils.runSync(
       <String>[binaryPath, '--version'],
       environment: environment,
@@ -143,6 +147,7 @@ class Java {
     if (result.exitCode != 0) {
       _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
         ' stdout: ${result.stdout} stderr: ${result.stderr}');
+      return null;
     }
     final String rawVersionOutput = result.stdout;
     final List<String> versionLines = rawVersionOutput.split('\n');

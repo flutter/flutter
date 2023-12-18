@@ -19,6 +19,7 @@ export 'package:flutter_goldens_client/skia_client.dart';
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
+final RegExp _kMainBranch = RegExp(r'master|main');
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
@@ -97,11 +98,11 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   });
 
   /// The directory to which golden file URIs will be resolved in [compare] and
-  /// [update], cannot be null.
+  /// [update].
   final Uri basedir;
 
   /// A client for uploading image tests and making baseline requests to the
-  /// Flutter Gold Dashboard, cannot be null.
+  /// Flutter Gold Dashboard.
   final SkiaGoldClient skiaClient;
 
   /// The file system used to perform file access.
@@ -259,7 +260,9 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
       // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
-      && !platform.environment.containsKey('GOLD_TRYJOB');
+      && !platform.environment.containsKey('GOLD_TRYJOB')
+      // Only run on main branch.
+      && _kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
 
     return luciPostSubmit;
   }
@@ -346,7 +349,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   static bool isAvailableForEnvironment(Platform platform) {
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
       && platform.environment.containsKey('GOLDCTL')
-      && platform.environment.containsKey('GOLD_TRYJOB');
+      && platform.environment.containsKey('GOLD_TRYJOB')
+      // Only run on the main branch
+      && _kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
     return luciPreSubmit;
   }
 }
@@ -378,8 +383,6 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   });
 
   /// Describes the reason for using the [FlutterSkippingFileComparator].
-  ///
-  /// Cannot be null.
   final String reason;
 
   /// Creates a new [FlutterSkippingFileComparator] that mirrors the
@@ -415,9 +418,11 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   /// If we are in a CI environment, LUCI or Cirrus, but are not using the other
   /// comparators, we skip.
   static bool isAvailableForEnvironment(Platform platform) {
-    return platform.environment.containsKey('SWARMING_TASK_ID')
+    return (platform.environment.containsKey('SWARMING_TASK_ID')
       // Some builds are still being run on Cirrus, we should skip these.
-      || platform.environment.containsKey('CIRRUS_CI');
+      || platform.environment.containsKey('CIRRUS_CI'))
+      // If we are in CI, skip on branches that are not main.
+      && !_kMainBranch.hasMatch(platform.environment['GIT_BRANCH'] ?? '');
   }
 }
 

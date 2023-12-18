@@ -5,14 +5,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import '../rendering/sliver_utils.dart';
+
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
 void main() {
-  testWidgets('SliverMainAxisGroup is laid out properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverMainAxisGroup is laid out properly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -58,11 +63,13 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
-  testWidgets('SliverMainAxisGroup is laid out properly when reversed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverMainAxisGroup is laid out properly when reversed', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -109,11 +116,13 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
-  testWidgets('SliverMainAxisGroup is laid out properly when horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverMainAxisGroup is laid out properly when horizontal', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -165,11 +174,13 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
-  testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverMainAxisGroup is laid out properly when horizontal, reversed', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       _buildSliverMainAxisGroup(
@@ -222,11 +233,13 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
-  testWidgets('Hit test works properly on various parts of SliverMainAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hit test works properly on various parts of SliverMainAxisGroup', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     String? clickedTile;
 
@@ -296,7 +309,7 @@ void main() {
     expect(clickedTile, equals('Group 1 Tile 2'));
   });
 
-  testWidgets('applyPaintTransform is implemented properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('applyPaintTransform is implemented properly', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       slivers: <Widget>[
         const SliverToBoxAdapter(child: Text('first box')),
@@ -312,8 +325,10 @@ void main() {
     expect(second.localToGlobal(Offset.zero), Offset(0, first.size.height));
   });
 
-  testWidgets('visitChildrenForSemantics visits children in the correct order', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('visitChildrenForSemantics visits children in the correct order', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: const <Widget>[
@@ -337,8 +352,10 @@ void main() {
     expect(visitedChildren[1].geometry!.scrollExtent, equals(500));
   });
 
-  testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -364,8 +381,10 @@ void main() {
   });
 
 
-  testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -393,8 +412,10 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -422,8 +443,10 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -458,8 +481,10 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverPinnedFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPinnedFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -495,8 +520,10 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -525,8 +552,10 @@ void main() {
     expect(renderHeader.geometry!.layoutExtent, equals(0.0));
   });
 
-    testWidgets('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -565,8 +594,10 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
   });
 
-  testWidgets('SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -603,6 +634,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(renderHeader.geometry!.paintExtent, equals(60.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+  });
+
+  testWidgetsWithLeakTracking('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    int counter = 0;
+    void incrementCounter() {
+      counter += 1;
+    }
+
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        slivers: <Widget>[
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 1000,
+              decoration: const BoxDecoration(color: Colors.amber),
+            ),
+          ),
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 400,
+              decoration: const BoxDecoration(color: Colors.amber)
+            ),
+          ),
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 500,
+              decoration: const BoxDecoration(color: Colors.amber)
+            ),
+          ),
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 300,
+              decoration: const BoxDecoration(color: Colors.amber)
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Can only see top sliver.
+    expect(counter, equals(1));
+
+    // Reset paint counter.
+    counter = 0;
+    controller.jumpTo(1000);
+    await tester.pumpAndSettle();
+
+    // Can only see second and third slivers.
+    expect(controller.offset, 1000);
+    expect(counter, equals(2));
   });
 }
 

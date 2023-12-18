@@ -368,6 +368,74 @@ abstract final class SystemChrome {
   ///
   /// ## Limitations
   ///
+  /// ### Android
+  ///
+  /// Android screens may choose to [letterbox](https://developer.android.com/guide/practices/enhanced-letterboxing)
+  /// applications that lock orientation, particularly on larger screens. When
+  /// letterboxing occurs on Android, the [MediaQueryData.size] reports the
+  /// letterboxed size, not the full screen size. Applications that make
+  /// decisions about whether to lock orientation based on the screen size
+  /// must use the `display` property of the current [FlutterView].
+  ///
+  /// ```dart
+  /// // A widget that locks the screen to portrait if it is less than 600
+  /// // logical pixels wide.
+  /// class MyApp extends StatefulWidget {
+  ///   const MyApp({ super.key });
+  ///
+  ///   @override
+  ///   State<MyApp> createState() => _MyAppState();
+  /// }
+  ///
+  /// class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  ///   ui.FlutterView? _view;
+  ///   static const double kOrientationLockBreakpoint = 600;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeDependencies() {
+  ///     super.didChangeDependencies();
+  ///     _view = View.maybeOf(context);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     _view = null;
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   @override
+  ///   void didChangeMetrics() {
+  ///     final ui.Display? display = _view?.display;
+  ///     if (display == null) {
+  ///       return;
+  ///     }
+  ///     if (display.size.width / display.devicePixelRatio < kOrientationLockBreakpoint) {
+  ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+  ///         DeviceOrientation.portraitUp,
+  ///       ]);
+  ///     } else {
+  ///       SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
+  ///     }
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return const MaterialApp(
+  ///       home: Placeholder(),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ### iOS
+  ///
   /// This setting will only be respected on iPad if multitasking is disabled.
   ///
   /// You can decide to opt out of multitasking on iPad, then

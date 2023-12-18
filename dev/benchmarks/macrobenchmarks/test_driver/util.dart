@@ -23,7 +23,11 @@ Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) as
   expect(scrollable, isNotNull);
   final SerializableFinder button = find.byValueKey(routeName);
   expect(button, isNotNull);
-  await driver.scrollUntilVisible(scrollable, button, dyScroll: -100.0);
+  // -320 comes from the logical pixels for a full screen scroll for the
+  // smallest reference device, iPhone 4, whose physical screen dimensions are
+  // 960px × 640px.
+  const double dyScroll = -320.0;
+  await driver.scrollUntilVisible(scrollable, button, dyScroll: dyScroll);
   await driver.tap(button);
 
   await body(driver);

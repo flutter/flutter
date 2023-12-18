@@ -136,10 +136,14 @@
   "bottomSheetLabel": "Blad onderaan",
   "scrimOnTapHint": "$modalRouteContentName sluiten",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "dubbeltik om samen te vouwen",
+  "expansionTileCollapsedHint": "dubbeltik om uit te vouwen",
+  "expansionTileExpandedTapHint": "Samenvouwen",
+  "expansionTileCollapsedTapHint": "Uitvouwen voor meer informatie",
+  "expandedHint": "Samengevouwen",
+  "collapsedHint": "Uitgevouwen",
+  "menuDismissLabel": "Menu sluiten",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

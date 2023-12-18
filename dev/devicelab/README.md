@@ -19,6 +19,7 @@ for information on using the dashboards.
 * [Adding tests to continuous
   integration](#adding-tests-to-continuous-integration)
 * [Adding tests to presubmit](#adding-tests-to-presubmit)
+* [Migrating to build and test model](#migrating-to-build-and-test-model)
 
 ## How the DeviceLab runs tests
 
@@ -90,10 +91,12 @@ flags to `bin/run.dart`:
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart --task=[some_task] \
   --local-engine-src-path=[path_to_local]/engine/src \
-  --local-engine=[local_engine_architecture]
+  --local-engine=[local_engine_architecture] \
+  --local-engine-host=[local_engine_host_architecture]
 ```
 
-An example of a local engine architecture is `android_debug_unopt_x86`.
+An example of a local engine architecture is `android_debug_unopt_x86` and
+an example of a local engine host architecture is `host_debug_unopt`.
 
 ### Running an A/B test for engine changes
 
@@ -110,13 +113,16 @@ Example:
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart --ab=10 \
   --local-engine=host_debug_unopt \
+  --local-engine-host=host_debug_unopt \
   -t bin/tasks/web_benchmarks_canvaskit.dart
 ```
 
 The `--ab=10` tells the runner to run an A/B test 10 times.
 
 `--local-engine=host_debug_unopt` tells the A/B test to use the
-`host_debug_unopt` engine build. `--local-engine` is required for A/B test.
+`host_debug_unopt` engine build. `--local-engine-host=host_debug_unopt` uses
+the same engine build to run the `frontend_server` (in this example).
+`--local-engine` is required for A/B test.
 
 `--ab-result-file=filename` can be used to provide an alternate location to
 output the JSON results file (defaults to `ABresults#.json`). A single `#`
@@ -226,3 +232,33 @@ target for each operating system.
 
 Flutter's DeviceLab has a limited capacity in presubmit. File an infra ticket
 to investigate feasibility of adding a test to presubmit.
+
+## Migrating to build and test model
+
+To better utilize limited DeviceLab testbed resources and speed up commit validation
+time, it is now supported to separate building artifacts (.apk/.app) from testing them.
+The artifact will be built on a host only bot, a VM or physical bot without a device,
+and the test will run based on the artifact against a testbed with a device.
+
+Steps:
+
+1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/master/dev/devicelab/lib/tasks/build_test_task.dart)
+   - Override function `getBuildArgs`
+   - Override function `getTestArgs`
+   - Override function `parseTaskResult`
+   - Override function `getApplicationBinaryPath`
+2. Update the `bin/tasks/{TEST}.dart` to point to the new task class
+3. Validate the task locally
+   - build only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args build --task-args application-binary-path={PATH_TO_ARTIFACT}`
+   - test only: `dart bin/test_runner.dart test -t {NAME_OR_PATH_OF_TEST} --task-args test --task-args application-binary-path={PATH_TO_ARTIFACT}`
+4. Add tasks to continuous integration
+   - Mirror a target with platform `Linux_build_test` or `Mac_build_test`
+   - The only difference from regular targets is the artifact property: if omitted, it will use the `task_name`.
+5. Once validated in CI, enable the target in `PROD` by removing `bringup: true` and deleting the old target entry without build+test model.
+
+Take gallery tasks for example:
+
+1. Linux android
+   - Separating PR: https://github.com/flutter/flutter/pull/103550
+   - Switching PR: https://github.com/flutter/flutter/pull/110533
+2. Mac iOS: https://github.com/flutter/flutter/pull/111164

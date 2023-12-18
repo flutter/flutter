@@ -331,8 +331,6 @@ class ComparisonResult {
   });
 
   /// Indicates whether or not a pixel comparison test has failed.
-  ///
-  /// This value cannot be null.
   final bool passed;
 
   /// Error message used to describe the cause of the pixel comparison failure.

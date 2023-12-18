@@ -150,7 +150,7 @@ const Set<String> _iconsMirroredWhenRTL = <String>{
   'navigate_next',
   'next_week',
   'note',
-  'open_in_new',
+  'open_in',
   'playlist_add',
   'queue_music',
   'redo',
@@ -513,12 +513,14 @@ class Icon {
 
   String get usage => 'Icon($className.$flutterId),';
 
-  String get mirroredInRTL => _iconsMirroredWhenRTL.contains(shortId)
-      ? ', matchTextDirection: true'
-      : '';
+  bool get isMirroredInRTL {
+    // Remove common suffixes (e.g. "_new" or "_alt") from the shortId.
+    final String normalizedShortId = shortId.replaceAll(RegExp(r'_(new|alt|off|on)$'), '');
+    return _iconsMirroredWhenRTL.any((String shortIdMirroredWhenRTL) => normalizedShortId == shortIdMirroredWhenRTL);
+  }
 
   String get declaration =>
-      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: '$fontFamily'$mirroredInRTL);";
+      "static const IconData $flutterId = IconData(0x$hexCodepoint, fontFamily: '$fontFamily'${isMirroredInRTL ? ', matchTextDirection: true' : ''});";
 
   String get fullDeclaration => '''
 

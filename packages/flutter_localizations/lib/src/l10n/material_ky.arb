@@ -135,10 +135,14 @@
   "bottomSheetLabel": "Ылдыйкы экран",
   "scrimOnTapHint": "$modalRouteContentName жабуу",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "жыйыштыруу үчүн эки жолу таптаңыз",
+  "expansionTileCollapsedHint": "жайып көрсөтүү үчүн эки жолу таптаңыз",
+  "expansionTileExpandedTapHint": "Жыйыштыруу",
+  "expansionTileCollapsedTapHint": "Толук маалымат алуу үчүн жайып көрүңүз",
+  "expandedHint": "Жыйыштырылды",
+  "collapsedHint": "Жайылып көрсөтүлдү",
+  "menuDismissLabel": "Менюну жабуу",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

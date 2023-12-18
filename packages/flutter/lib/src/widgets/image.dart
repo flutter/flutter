@@ -309,6 +309,16 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// using the HTML renderer, the web engine delegates image decoding of network
 /// images to the Web, which does not support custom decode sizes.
 ///
+/// ## Custom image providers
+///
+/// {@tool dartpad}
+/// In this example, a variant of [NetworkImage] is created that passes all the
+/// [ImageConfiguration] information (locale, platform, size, etc) to the server
+/// using query arguments in the image URL.
+///
+/// ** See code in examples/api/lib/painting/image_provider/image_provider.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
@@ -324,9 +334,6 @@ class Image extends StatefulWidget {
   ///
   /// To show an image from the network or from an asset bundle, consider using
   /// [Image.network] and [Image.asset] respectively.
-  ///
-  /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
-  /// must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -362,8 +369,6 @@ class Image extends StatefulWidget {
   });
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
-  ///
-  /// The [src], [scale], and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -418,8 +423,6 @@ class Image extends StatefulWidget {
        assert(cacheHeight == null || cacheHeight > 0);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
-  ///
-  /// The [file], [scale], and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -515,8 +518,6 @@ class Image extends StatefulWidget {
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended
   /// to reduce the memory usage of [ImageCache].
-  ///
-  /// The [name] and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -652,8 +653,6 @@ class Image extends StatefulWidget {
   /// The `scale` argument specifies the linear scale factor for drawing this
   /// image at its intended size and applies to both the width and the height.
   /// {@macro flutter.painting.imageInfo.scale}
-  ///
-  /// The `bytes`, `scale`, and [repeat] arguments must not be null.
   ///
   /// This only accepts compressed image formats (e.g. PNG). Uncompressed
   /// formats like rawRgba (the default format of [dart:ui.Image.toByteData])
@@ -819,7 +818,7 @@ class Image extends StatefulWidget {
   /// {@end-tool}
   final ImageErrorWidgetBuilder? errorBuilder;
 
-  /// If non-null, require the image to have this width.
+  /// If non-null, require the image to have this width (in logical pixels).
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
@@ -831,7 +830,7 @@ class Image extends StatefulWidget {
   /// and height if the exact image dimensions are not known in advance.
   final double? width;
 
-  /// If non-null, require the image to have this height.
+  /// If non-null, require the image to have this height (in logical pixels).
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.

@@ -5,9 +5,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('OverflowBox control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverflowBox control test', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Align(
       alignment: Alignment.bottomRight,
@@ -30,7 +31,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
-  testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
@@ -50,7 +51,7 @@ void main() {
     ]);
   });
 
-  testWidgets('SizedOverflowBox alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedOverflowBox alignment', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
@@ -73,7 +74,7 @@ void main() {
     );
   });
 
-  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,

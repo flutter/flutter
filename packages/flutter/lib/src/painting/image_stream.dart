@@ -20,8 +20,6 @@ import 'package:flutter/scheduler.dart';
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
-  /// Both the [image] and the [scale] must not be null.
-  ///
   /// The [debugLabel] may be used to identify the source of this image.
   const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
 
@@ -159,8 +157,6 @@ class ImageInfo {
 @immutable
 class ImageStreamListener {
   /// Creates a new [ImageStreamListener].
-  ///
-  /// The [onImage] parameter must not be null.
   const ImageStreamListener(
     this.onImage, {
     this.onChunk,
@@ -468,6 +464,7 @@ class ImageStreamCompleterHandle {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
+  final List<ImageErrorListener> _ephemeralErrorListeners = <ImageErrorListener>[];
   ImageInfo? _currentImage;
   FlutterErrorDetails? _currentError;
 
@@ -489,6 +486,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// and similarly, by overriding [removeListener], checking if [hasListeners]
   /// is false after calling `super.removeListener()`, and if so, stopping that
   /// same work.
+  ///
+  /// The ephemeral error listeners (added through [addEphemeralErrorListener])
+  /// will not be taken into consideration in this property.
   @protected
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
@@ -515,6 +515,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// this listener's [ImageStreamListener.onImage] will fire multiple times.
   ///
   /// {@macro flutter.painting.imageStream.addListener}
+  ///
+  /// See also:
+  ///
+  ///  * [addEphemeralErrorListener], which adds an error listener that is
+  ///    automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
     _hadAtLeastOneListener = true;
@@ -545,6 +550,58 @@ abstract class ImageStreamCompleter with Diagnosticable {
           );
         }
       }
+    }
+  }
+
+  /// Adds an error listener callback that is called when the first error is reported.
+  ///
+  /// The callback will be removed automatically after the first successful
+  /// image load or the first error - that is why it is called "ephemeral".
+  ///
+  /// If a concrete image is already available, the listener will be discarded
+  /// synchronously. If an error has been already reported, the listener
+  /// will be notified synchronously.
+  ///
+  /// The presence of a listener will affect neither the lifecycle of this object
+  /// nor what [hasListeners] reports.
+  ///
+  /// It is different from [addListener] in a few points: Firstly, this one only
+  /// listens to errors, while [addListener] listens to all kinds of events.
+  /// Secondly, this listener will be automatically removed according to the
+  /// rules mentioned above, while [addListener] will need manual removal.
+  /// Thirdly, this listener will not affect how this object is disposed, while
+  /// any non-removed listener added via [addListener] will forbid this object
+  /// from disposal.
+  ///
+  /// When you want to know full information and full control, use [addListener].
+  /// When you only want to get notified for an error ephemerally, use this function.
+  ///
+  /// See also:
+  ///
+  ///  * [addListener], which adds a full-featured listener and needs manual
+  ///    removal.
+  void addEphemeralErrorListener(ImageErrorListener listener) {
+    _checkDisposed();
+    if (_currentError != null) {
+      // immediately fire the listener, and no need to add to _ephemeralErrorListeners
+      try {
+        listener(_currentError!.exception, _currentError!.stack);
+      } catch (newException, newStack) {
+        if (newException != _currentError!.exception) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: newException,
+              library: 'image resource service',
+              context: ErrorDescription('by a synchronously-called image error listener'),
+              stack: newStack,
+            ),
+          );
+        }
+      }
+    } else if (_currentImage == null) {
+      // add to _ephemeralErrorListeners to wait for the error,
+      // only if no image has been loaded
+      _ephemeralErrorListeners.add(listener);
     }
   }
 
@@ -595,6 +652,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
       return;
     }
 
+    _ephemeralErrorListeners.clear();
     _currentImage?.dispose();
     _currentImage = null;
     _disposed = true;
@@ -639,6 +697,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _checkDisposed();
     _currentImage?.dispose();
     _currentImage = image;
+
+    _ephemeralErrorListeners.clear();
 
     if (_listeners.isEmpty) {
       return;
@@ -707,10 +767,14 @@ abstract class ImageStreamCompleter with Diagnosticable {
     );
 
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = _listeners
-        .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
-        .whereType<ImageErrorListener>()
-        .toList();
+    final List<ImageErrorListener> localErrorListeners = <ImageErrorListener>[
+      ..._listeners
+          .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
+          .whereType<ImageErrorListener>(),
+      ..._ephemeralErrorListeners,
+    ];
+
+    _ephemeralErrorListeners.clear();
 
     bool handled = false;
     for (final ImageErrorListener errorListener in localErrorListeners) {
@@ -763,6 +827,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
       'listeners',
       _listeners,
       ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
+    ));
+    description.add(ObjectFlagProperty<List<ImageErrorListener>>(
+      'ephemeralErrorListeners',
+      _ephemeralErrorListeners,
+      ifPresent: '${_ephemeralErrorListeners.length} ephemeralErrorListener${_ephemeralErrorListeners.length == 1 ? "" : "s" }',
     ));
     description.add(FlagProperty('disposed', value: _disposed, ifTrue: '<disposed>'));
   }

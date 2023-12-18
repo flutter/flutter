@@ -5,8 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/recording_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 final BoxDecoration kBoxDecorationA = BoxDecoration(border: nonconst(null));
 final BoxDecoration kBoxDecorationB = BoxDecoration(border: nonconst(null));
@@ -77,7 +76,7 @@ class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMi
 }
 
 void main() {
-  testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderObjectWidget smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationA));
     SingleChildRenderObjectElement element =
         tester.element(find.byElementType(SingleChildRenderObjectElement));
@@ -96,7 +95,7 @@ void main() {
     expect(renderObject.position, equals(DecorationPosition.background));
   });
 
-  testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
 
     void checkFullTree() {
       final SingleChildRenderObjectElement element =
@@ -180,7 +179,7 @@ void main() {
     childBareTree();
   });
 
-  testWidgets('Detached render tree is intact', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Detached render tree is intact', (WidgetTester tester) async {
 
     await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
@@ -222,7 +221,7 @@ void main() {
     expect(grandChild.child, isNull);
   });
 
-  testWidgets('Can watch inherited widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can watch inherited widgets', (WidgetTester tester) async {
     final Key boxKey = UniqueKey();
     final TestOrientedBox box = TestOrientedBox(key: boxKey);
 
@@ -244,7 +243,7 @@ void main() {
     expect(decoration.color, equals(const Color(0xFF0000FF)));
   });
 
-  testWidgets('RenderObject not visiting children provides helpful error message', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RenderObject not visiting children provides helpful error message', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestNonVisitingWidget(
         child: Container(color: const Color(0xFFED1D7F)),

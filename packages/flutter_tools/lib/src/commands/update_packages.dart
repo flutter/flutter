@@ -34,10 +34,12 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'video_player': '2.2.11',
   // Keep pinned to latest until 1.0.0.
   'material_color_utilities': '0.5.0',
-  // https://github.com/flutter/flutter/issues/111304
-  'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
+  // https://github.com/flutter/flutter/issues/135716
+  'leak_tracker': '9.0.7',
+  // https://github.com/flutter/flutter/issues/135716
+  'leak_tracker_flutter_testing': '1.0.5',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1753,7 +1755,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
     output.writeln('dependencies:');
@@ -1785,7 +1787,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
   return directory;

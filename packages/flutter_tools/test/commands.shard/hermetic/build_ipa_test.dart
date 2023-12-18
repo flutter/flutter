@@ -63,7 +63,8 @@ class FakePlistUtils extends Fake implements PlistParser {
 
   @override
   T? getValueFromFile<T>(String plistFilePath, String key) {
-    return fileContents[plistFilePath]![key] as T?;
+    final Map<String, Object>? plistFile = fileContents[plistFilePath];
+    return plistFile == null ? null : plistFile[key] as T?;
   }
 }
 
@@ -168,6 +169,7 @@ void main() {
   FakeCommand exportArchiveCommand({
     String exportOptionsPlist =  '/ExportOptions.plist',
     File? cachePlist,
+    bool deleteExportOptionsPlist = false,
   }) {
     return FakeCommand(
       command: <String>[
@@ -188,6 +190,9 @@ void main() {
         // Save it somewhere else so test expectations can be run on it.
         if (cachePlist != null) {
           cachePlist.writeAsStringSync(fileSystem.file(_exportOptionsPlist).readAsStringSync());
+        }
+        if (deleteExportOptionsPlist) {
+          fileSystem.file(_exportOptionsPlist).deleteSync();
         }
       }
     );
@@ -382,6 +387,37 @@ void main() {
     expect(testLogger.statusText, contains('Building App Store IPA'));
     expect(testLogger.errorText, contains('Encountered error while creating the IPA:'));
     expect(testLogger.errorText, contains('error: exportArchive: "Runner.app" requires a provisioning profile.'));
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ipa build ignores deletion failure if generatedExportPlist does not exist', () async {
+    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(),
+      exportArchiveCommand(
+        exportOptionsPlist: _exportOptionsPlist,
+        cachePlist: cachedExportOptionsPlist,
+        deleteExportOptionsPlist: true,
+      ),
+    ]);
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'ipa', '--no-pub']
+    );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -954,6 +990,8 @@ void main() {
     plistUtils.fileContents[plistPath] = <String,String>{
       'CFBundleIdentifier': 'io.flutter.someProject',
       'CFBundleDisplayName': 'Awesome Gallery',
+      // Will not use CFBundleName since CFBundleDisplayName is present.
+      'CFBundleName': 'Awesome Gallery 2',
       'MinimumOSVersion': '11.0',
       'CFBundleVersion': '666',
       'CFBundleShortVersionString': '12.34.56',
@@ -991,6 +1029,62 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     PlistParser: () => plistUtils,
   });
+
+  testUsingContext(
+      'Validate basic Xcode settings with CFBundleDisplayName fallback to CFBundleName', () async {
+    const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+    fakeProcessManager.addCommands(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.file(plistPath).createSync(recursive: true);
+      }),
+      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+    ]);
+
+    createMinimalMockProjectFiles();
+
+    plistUtils.fileContents[plistPath] = <String,String>{
+      'CFBundleIdentifier': 'io.flutter.someProject',
+      // Will use CFBundleName since CFBundleDisplayName is absent.
+      'CFBundleName': 'Awesome Gallery',
+      'MinimumOSVersion': '11.0',
+      'CFBundleVersion': '666',
+      'CFBundleShortVersionString': '12.34.56',
+    };
+
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    await createTestCommandRunner(command).run(
+        <String>['build', 'ipa', '--no-pub']);
+
+    expect(
+        testLogger.statusText,
+        contains(
+            '[✓] App Settings Validation\n'
+            '    • Version Number: 12.34.56\n'
+            '    • Build Number: 666\n'
+            '    • Display Name: Awesome Gallery\n'
+            '    • Deployment Target: 11.0\n'
+            '    • Bundle Identifier: io.flutter.someProject\n'
+        )
+    );
+    expect(
+        testLogger.statusText,
+        contains('To update the settings, please refer to https://docs.flutter.dev/deployment/ios')
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    PlistParser: () => plistUtils,
+  });
+
 
   testUsingContext(
       'Validate basic Xcode settings with default bundle identifier prefix', () async {

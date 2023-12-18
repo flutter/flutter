@@ -12,8 +12,8 @@ library;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -55,6 +55,18 @@ void main() {
     assert(order == 2);
     expect(binding.testTextInput.isRegistered, isFalse);
     order += 1;
+  });
+
+  testWidgets('timeStamp should be accurate to microsecond precision', (WidgetTester tester) async {
+    final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+    await tester.pumpWidget(const CircularProgressIndicator());
+
+    final Duration timeStampBefore = widgetsBinding.currentSystemFrameTimeStamp;
+    await tester.pump(const Duration(microseconds: 12345));
+    final Duration timeStampAfter = widgetsBinding.currentSystemFrameTimeStamp;
+
+    expect(timeStampAfter - timeStampBefore, const Duration(microseconds: 12345));
   });
 
   group('elapseBlocking', () {

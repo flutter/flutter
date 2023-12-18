@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('Typography is defined for all target platforms', () {
@@ -89,7 +90,7 @@ void main() {
     }
   });
 
-  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,

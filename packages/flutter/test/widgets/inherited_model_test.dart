@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // A simple "flat" InheritedModel: the data model is just 3 integer
 // valued fields: a, b, c.
@@ -73,7 +74,7 @@ class _ShowABCFieldState extends State<ShowABCField> {
 }
 
 void main() {
-  testWidgets('InheritedModel basics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InheritedModel basics', (WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;
@@ -189,7 +190,7 @@ void main() {
     expect(find.text('a: 2 b: 2 c: 3'), findsOneWidget);
   });
 
-  testWidgets('Looking up an non existent InheritedModel ancestor returns null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Looking up an non existent InheritedModel ancestor returns null', (WidgetTester tester) async {
     ABCModel? inheritedModel;
 
     await tester.pumpWidget(
@@ -205,7 +206,7 @@ void main() {
     expect(inheritedModel, null);
   });
 
-  testWidgets('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;
@@ -323,7 +324,7 @@ void main() {
     expect(find.text('a: 102 b: 102 c: null'), findsOneWidget);
   });
 
-  testWidgets('InheritedModel inner models supported aspect change', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InheritedModel inner models supported aspect change', (WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;

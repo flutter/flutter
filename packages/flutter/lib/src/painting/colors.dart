@@ -86,8 +86,8 @@ Color _colorFromHue(
 class HSVColor {
   /// Creates a color.
   ///
-  /// All the arguments must not be null and be in their respective ranges. See
-  /// the fields for each parameter for a description of their ranges.
+  /// All the arguments must be in their respective ranges. See the fields for
+  /// each parameter for a description of their ranges.
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
     : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
@@ -254,8 +254,8 @@ class HSVColor {
 class HSLColor {
   /// Creates a color.
   ///
-  /// All the arguments must not be null and be in their respective ranges. See
-  /// the fields for each parameter for a description of their ranges.
+  /// All the arguments must be in their respective ranges. See the fields for
+  /// each parameter for a description of their ranges.
   const HSLColor.fromAHSL(this.alpha, this.hue, this.saturation, this.lightness)
     : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
@@ -499,8 +499,6 @@ class ColorSwatch<T> extends Color {
 /// [DiagnosticsProperty] that has an [Color] as value.
 class ColorProperty extends DiagnosticsProperty<Color> {
   /// Create a diagnostics property for [Color].
-  ///
-  /// The [showName], [style], and [level] arguments must not be null.
   ColorProperty(
     String super.name,
     super.value, {

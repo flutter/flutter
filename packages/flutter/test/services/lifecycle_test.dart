@@ -6,9 +6,10 @@ import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
     expect(ServicesBinding.instance.lifecycleState, isNull);
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.resetLifecycleState();
@@ -20,7 +21,7 @@ void main() {
     // even though no lifecycle event was fired from the platform.
     expect(binding.lifecycleState.toString(), equals('AppLifecycleState.paused'));
   });
-  testWidgets('Handles all of the allowed states of AppLifecycleState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Handles all of the allowed states of AppLifecycleState', (WidgetTester tester) async {
     final TestWidgetsFlutterBinding binding = tester.binding;
     for (final AppLifecycleState state in AppLifecycleState.values) {
       binding.resetLifecycleState();

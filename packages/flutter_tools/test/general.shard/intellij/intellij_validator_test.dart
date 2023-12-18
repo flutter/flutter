@@ -5,12 +5,14 @@
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/intellij/intellij_validator.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -305,7 +307,9 @@ void main() {
       processManager: processManager,
       plistParser: FakePlistParser(<String, String>{
         PlistParser.kCFBundleShortVersionStringKey: '2020.10',
+        PlistParser.kCFBundleIdentifierKey: 'com.jetbrains.intellij',
       }),
+      logger: BufferLogger.test(),
     ).whereType<IntelliJValidatorOnMac>();
     expect(validators.length, 2);
 
@@ -371,6 +375,115 @@ void main() {
 
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
   });
+
+  testWithoutContext('IntelliJValidatorOnMac.installed() handles FileSystemExceptions)', () async {
+    const FileSystemException exception = FileSystemException('cannot list');
+    final FileSystem fileSystem = _ThrowingFileSystem(exception);
+
+    final FakeProcessManager processManager = FakeProcessManager.empty();
+
+    final Iterable<DoctorValidator> validators = IntelliJValidatorOnMac.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macPlatform),
+      userMessages: UserMessages(),
+      plistParser: FakePlistParser(<String, String>{
+        'JetBrainsToolboxApp': '/path/to/JetBrainsToolboxApp',
+        'CFBundleIdentifier': 'com.jetbrains.toolbox.linkapp',
+      }),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+
+    expect(validators.length, 1);
+    final DoctorValidator validator = validators.first;
+    expect(validator, isA<ValidatorWithResult>());
+    expect(validator.title, 'Cannot determine if IntelliJ is installed');
+  });
+
+  testWithoutContext('Remove JetBrains Toolbox', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final List<String> installPaths = <String>[
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Ultimate.app'),
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Community Edition.app')
+    ];
+
+    for (final String installPath in installPaths) {
+      fileSystem.directory(installPath).createSync(recursive: true);
+    }
+
+    final FakeProcessManager processManager =
+    FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+      ], stdout: 'skip'),
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+      ], stdout: 'skip')
+    ]);
+
+    final Iterable<DoctorValidator> installed = IntelliJValidatorOnMac.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macPlatform),
+      userMessages: UserMessages(),
+      plistParser: FakePlistParser(<String, String>{
+        'JetBrainsToolboxApp': '/path/to/JetBrainsToolboxApp',
+        'CFBundleIdentifier': 'com.jetbrains.toolbox.linkapp',
+      }),
+      processManager: processManager,
+      logger: BufferLogger.test(),
+    );
+
+    expect(installed.length, 0);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('Does not crash when installation is missing its CFBundleIdentifier property', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final String ultimatePath = fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Ultimate.app');
+    final String communityEditionPath = fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Community Edition.app');
+    final List<String> installPaths = <String>[
+      ultimatePath,
+      communityEditionPath
+    ];
+
+    for (final String installPath in installPaths) {
+      fileSystem.directory(installPath).createSync(recursive: true);
+    }
+
+    final FakeProcessManager processManager =
+    FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: const <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+      ], stdout: communityEditionPath),
+      FakeCommand(command: const <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+      ], stdout: ultimatePath)
+    ]);
+
+    final Iterable<DoctorValidator> installed = IntelliJValidatorOnMac.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macPlatform),
+      userMessages: UserMessages(),
+      plistParser: FakePlistParser(<String, String>{
+        'JetBrainsToolboxApp': '/path/to/JetBrainsToolboxApp',
+      }),
+      processManager: processManager,
+      logger: logger,
+    );
+
+    expect(installed.length, 2);
+    expect(logger.traceText, contains('installation at $ultimatePath has a null CFBundleIdentifierKey'));
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
@@ -416,7 +529,6 @@ void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem,
   fileSystem.file(pluginJarPath)
     ..createSync(recursive: true)
     ..writeAsBytesSync(ZipEncoder().encode(flutterPlugins)!);
-
 }
 
 /// A helper to create a Intellij Dart plugin jar.
@@ -453,4 +565,31 @@ void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
   fileSystem.file(pluginJarPath)
     ..createSync(recursive: true)
     ..writeAsBytesSync(ZipEncoder().encode(dartPlugins)!);
+}
+
+// TODO(fujino): this should use the MemoryFileSystem and a
+// FileExceptionHandler, blocked by https://github.com/google/file.dart/issues/227.
+class _ThrowingFileSystem extends Fake implements FileSystem {
+  _ThrowingFileSystem(this._exception);
+
+  final Exception _exception;
+  final MemoryFileSystem memfs = MemoryFileSystem.test();
+
+  @override
+  Context get path => memfs.path;
+
+  @override
+  Directory directory(dynamic _) => _ThrowingDirectory(_exception);
+}
+
+class _ThrowingDirectory extends Fake implements Directory {
+  _ThrowingDirectory(this._exception);
+
+  final Exception _exception;
+
+  @override
+  bool existsSync() => true;
+
+  @override
+  List<FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) => throw _exception;
 }

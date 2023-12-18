@@ -8,11 +8,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/rendering.dart';
 
+import 'color_scheme.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'theme.dart';
 
 const double _kToolbarHeight = 44.0;
 const double _kToolbarContentDistance = 8.0;
@@ -650,13 +652,34 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
 
   final Widget child;
 
+  // These colors were taken from a screenshot of a Pixel 6 emulator running
+  // Android API level 34.
+  static const Color _defaultColorLight = Color(0xffffffff);
+  static const Color _defaultColorDark = Color(0xff424242);
+
+  static Color _getColor(ColorScheme colorScheme) {
+    final bool isDefaultSurface = switch (colorScheme.brightness) {
+      Brightness.light => identical(ThemeData().colorScheme.surface, colorScheme.surface),
+      Brightness.dark => identical(ThemeData.dark().colorScheme.surface, colorScheme.surface),
+    };
+    if (!isDefaultSurface) {
+      return colorScheme.surface;
+    }
+    return switch (colorScheme.brightness) {
+      Brightness.light => _defaultColorLight,
+      Brightness.dark => _defaultColorDark,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Material(
       // This value was eyeballed to match the native text selection menu on
-      // a Pixel 2 running Android 10.
-      borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+      // a Pixel 6 emulator running Android API level 34.
+      borderRadius: const BorderRadius.all(Radius.circular(_kToolbarHeight / 2)),
       clipBehavior: Clip.antiAlias,
+      color: _getColor(theme.colorScheme),
       elevation: 1.0,
       type: MaterialType.card,
       child: child,

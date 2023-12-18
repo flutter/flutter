@@ -5,8 +5,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 class TestState extends StatefulWidget {
@@ -30,7 +30,7 @@ class _TestStateState extends State<TestState> {
 }
 
 void main() {
-  testWidgets('Visibility', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Visibility', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<String> log = <String>[];
 
@@ -440,7 +440,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Visibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Visibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Visibility(
         maintainSize: true,
@@ -456,7 +456,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
   });
 
-  testWidgets('SliverVisibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverVisibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -486,7 +486,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
   });
 
-  testWidgets('Visibility.of returns correct value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Visibility.of returns correct value', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -519,7 +519,7 @@ void main() {
     expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('Visibility.of works when multiple Visibility widgets are in hierarchy', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Visibility.of works when multiple Visibility widgets are in hierarchy', (WidgetTester tester) async {
     bool didChangeDependencies = false;
     void handleDidChangeDependencies() {
       didChangeDependencies = true;

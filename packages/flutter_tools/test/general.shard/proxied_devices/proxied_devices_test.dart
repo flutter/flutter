@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
@@ -362,6 +363,39 @@ void main() {
       expect(fakeFilter.devices!.length, 2);
       expect(fakeFilter.devices![0].id, fakeDevice['id']);
       expect(fakeFilter.devices![1].id, fakeDevice2['id']);
+    });
+
+    testWithoutContext('publishes the devices on deviceNotifier after startPolling', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      proxiedDevices.startPolling();
+
+      final ItemListNotifier<Device>? deviceNotifier = proxiedDevices.deviceNotifier;
+      expect(deviceNotifier, isNotNull);
+
+      final List<Device> devicesAdded = <Device>[];
+      deviceNotifier!.onAdded.listen((Device device) {
+        devicesAdded.add(device);
+      });
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.discoverDevices');
+
+      serverDaemonConnection.sendResponse(message.data['id']!, <Map<String, Object?>>[
+        fakeDevice,
+        fakeDevice2,
+      ]);
+
+      await pumpEventQueue();
+
+      expect(devicesAdded.length, 2);
+      expect(devicesAdded[0].id, fakeDevice['id']);
+      expect(devicesAdded[1].id, fakeDevice2['id']);
     });
   });
 

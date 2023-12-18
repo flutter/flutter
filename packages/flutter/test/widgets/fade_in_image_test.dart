@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../painting/image_test_utils.dart';
@@ -58,7 +59,7 @@ class LoadTestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     throw UnimplementedError();
   }
 }
@@ -90,14 +91,26 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
   }
 }
 
-Future<void> main() async {
+void main() {
   // These must run outside test zone to complete
-  final ui.Image targetImage = await createTestImage();
-  final ui.Image placeholderImage = await createTestImage();
-  final ui.Image replacementImage = await createTestImage();
+  late final ui.Image targetImage;
+  late final ui.Image placeholderImage;
+  late final ui.Image replacementImage;
+
+  setUpAll(() async {
+    targetImage = await createTestImage();
+    placeholderImage = await createTestImage();
+    replacementImage = await createTestImage();
+  });
+
+  tearDownAll(() {
+    targetImage.dispose();
+    placeholderImage.dispose();
+    replacementImage.dispose();
+  });
 
   group('FadeInImage', () {
-    testWidgets('animates an uncached image', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('animates an uncached image', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -147,7 +160,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, 1);
     });
 
-    testWidgets("FadeInImage's image obeys gapless playback", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("FadeInImage's image obeys gapless playback", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
       final TestImageProvider secondImageProvider = TestImageProvider(replacementImage);
@@ -188,7 +201,7 @@ Future<void> main() async {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/111011
-    testWidgets("FadeInImage's image obeys gapless playback when first image is cached but second isn't",
+    testWidgetsWithLeakTracking("FadeInImage's image obeys gapless playback when first image is cached but second isn't",
             (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
@@ -225,7 +238,7 @@ Future<void> main() async {
       expect(parts.target.opacity, 1);
     });
 
-    testWidgets("FadeInImage's placeholder obeys gapless playback", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("FadeInImage's placeholder obeys gapless playback", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider secondPlaceholderProvider = TestImageProvider(replacementImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
@@ -261,7 +274,7 @@ Future<void> main() async {
       expect(parts.placeholder!.opacity, 1);
     });
 
-    testWidgets('shows a cached image immediately when skipFadeOnSynchronousLoad=true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('shows a cached image immediately when skipFadeOnSynchronousLoad=true', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
       imageProvider.resolve(ImageConfiguration.empty);
@@ -277,7 +290,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).target.opacity, 1);
     });
 
-    testWidgets('handles updating the placeholder image', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('handles updating the placeholder image', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider secondPlaceholderProvider = TestImageProvider(replacementImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
@@ -309,7 +322,7 @@ Future<void> main() async {
       expect(findFadeInImage(tester).state, same(state));
     });
 
-    testWidgets('does not keep the placeholder in the tree if it is invisible', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not keep the placeholder in the tree if it is invisible', (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -331,7 +344,7 @@ Future<void> main() async {
       expect(find.byType(Image), findsOneWidget);
     });
 
-    testWidgets("doesn't interrupt in-progress animation when animation values are updated", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("doesn't interrupt in-progress animation when animation values are updated", (WidgetTester tester) async {
       final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
       final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -434,7 +447,7 @@ Future<void> main() async {
     });
 
     group('semantics', () {
-      testWidgets('only one Semantics node appears within FadeInImage', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('only one Semantics node appears within FadeInImage', (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
         final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -446,7 +459,7 @@ Future<void> main() async {
         expect(find.byType(Semantics), findsOneWidget);
       });
 
-      testWidgets('is excluded if excludeFromSemantics is true', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('is excluded if excludeFromSemantics is true', (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
         final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -462,7 +475,7 @@ Future<void> main() async {
       group('label', () {
         const String imageSemanticText = 'Test image semantic label';
 
-        testWidgets('defaults to image label if placeholder label is unspecified', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('defaults to image label if placeholder label is unspecified', (WidgetTester tester) async {
           Semantics semanticsWidget() => tester.widget(find.byType(Semantics));
 
           final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
@@ -489,7 +502,7 @@ Future<void> main() async {
           expect(semanticsWidget().properties.label, imageSemanticText);
         });
 
-        testWidgets('is empty without any specified semantics labels', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('is empty without any specified semantics labels', (WidgetTester tester) async {
           Semantics semanticsWidget() => tester.widget(find.byType(Semantics));
 
           final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
@@ -515,7 +528,7 @@ Future<void> main() async {
     });
 
     group("placeholder's BoxFit", () {
-      testWidgets("should be the image's BoxFit when not set", (WidgetTester tester) async {
+      testWidgetsWithLeakTracking("should be the image's BoxFit when not set", (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
         final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -529,7 +542,7 @@ Future<void> main() async {
         expect(findFadeInImage(tester).placeholder!.fit, equals(BoxFit.cover));
       });
 
-      testWidgets('should be the given value when set', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should be the given value when set', (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
         final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -546,7 +559,7 @@ Future<void> main() async {
     });
 
     group("placeholder's FilterQuality", () {
-      testWidgets("should be the image's FilterQuality when not set", (WidgetTester tester) async {
+      testWidgetsWithLeakTracking("should be the image's FilterQuality when not set", (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
         final TestImageProvider imageProvider = TestImageProvider(targetImage);
 
@@ -560,7 +573,7 @@ Future<void> main() async {
         expect(findFadeInImage(tester).placeholder!.filterQuality, equals(FilterQuality.medium));
       });
 
-      testWidgets('should be the given value when set', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should be the given value when set', (WidgetTester tester) async {
         final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
         final TestImageProvider imageProvider = TestImageProvider(targetImage);
 

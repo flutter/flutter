@@ -378,79 +378,79 @@ class ListTileTheme extends InheritedTheme {
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.dense] property instead.
-  bool? get dense => _data != null ? _data!.dense : _dense;
+  bool? get dense => _data != null ? _data.dense : _dense;
 
   /// Overrides the default value of [ListTile.shape].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.shape] property instead.
-  ShapeBorder? get shape => _data != null ? _data!.shape : _shape;
+  ShapeBorder? get shape => _data != null ? _data.shape : _shape;
 
   /// Overrides the default value of [ListTile.style].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.style] property instead.
-  ListTileStyle? get style => _data != null ? _data!.style : _style;
+  ListTileStyle? get style => _data != null ? _data.style : _style;
 
   /// Overrides the default value of [ListTile.selectedColor].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.selectedColor] property instead.
-  Color? get selectedColor => _data != null ? _data!.selectedColor : _selectedColor;
+  Color? get selectedColor => _data != null ? _data.selectedColor : _selectedColor;
 
   /// Overrides the default value of [ListTile.iconColor].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.iconColor] property instead.
-  Color? get iconColor => _data != null ? _data!.iconColor : _iconColor;
+  Color? get iconColor => _data != null ? _data.iconColor : _iconColor;
 
   /// Overrides the default value of [ListTile.textColor].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.textColor] property instead.
-  Color? get textColor => _data != null ? _data!.textColor : _textColor;
+  Color? get textColor => _data != null ? _data.textColor : _textColor;
 
   /// Overrides the default value of [ListTile.contentPadding].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.contentPadding] property instead.
-  EdgeInsetsGeometry? get contentPadding => _data != null ? _data!.contentPadding : _contentPadding;
+  EdgeInsetsGeometry? get contentPadding => _data != null ? _data.contentPadding : _contentPadding;
 
   /// Overrides the default value of [ListTile.tileColor].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.tileColor] property instead.
-  Color? get tileColor => _data != null ? _data!.tileColor : _tileColor;
+  Color? get tileColor => _data != null ? _data.tileColor : _tileColor;
 
   /// Overrides the default value of [ListTile.selectedTileColor].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.selectedTileColor] property instead.
-  Color? get selectedTileColor => _data != null ? _data!.selectedTileColor : _selectedTileColor;
+  Color? get selectedTileColor => _data != null ? _data.selectedTileColor : _selectedTileColor;
 
   /// Overrides the default value of [ListTile.horizontalTitleGap].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.horizontalTitleGap] property instead.
-  double? get horizontalTitleGap => _data != null ? _data!.horizontalTitleGap : _horizontalTitleGap;
+  double? get horizontalTitleGap => _data != null ? _data.horizontalTitleGap : _horizontalTitleGap;
 
   /// Overrides the default value of [ListTile.minVerticalPadding].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.minVerticalPadding] property instead.
-  double? get minVerticalPadding => _data != null ? _data!.minVerticalPadding : _minVerticalPadding;
+  double? get minVerticalPadding => _data != null ? _data.minVerticalPadding : _minVerticalPadding;
 
   /// Overrides the default value of [ListTile.minLeadingWidth].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.minLeadingWidth] property instead.
-  double? get minLeadingWidth => _data != null ? _data!.minLeadingWidth : _minLeadingWidth;
+  double? get minLeadingWidth => _data != null ? _data.minLeadingWidth : _minLeadingWidth;
 
   /// Overrides the default value of [ListTile.enableFeedback].
   ///
   /// This property is obsolete: please use the [data]
   /// [ListTileThemeData.enableFeedback] property instead.
-  bool? get enableFeedback => _data != null ? _data!.enableFeedback : _enableFeedback;
+  bool? get enableFeedback => _data != null ? _data.enableFeedback : _enableFeedback;
 
   /// The [data] property of the closest instance of this class that
   /// encloses the given context.
@@ -470,8 +470,6 @@ class ListTileTheme extends InheritedTheme {
 
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s, and merges in the current list tile theme, if any.
-  ///
-  /// The [child] argument must not be null.
   static Widget merge({
     Key? key,
     bool? dense,

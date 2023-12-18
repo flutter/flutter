@@ -26,7 +26,7 @@ void initTimelineTests() {
     }
     _vmService = await vmServiceConnectUri('ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws');
     await _vmService.setVMTimelineFlags(<String>['Dart']);
-    isolateId = developer.Service.getIsolateID(isolate.Isolate.current)!;
+    isolateId = developer.Service.getIsolateId(isolate.Isolate.current)!;
   });
 }
 

@@ -171,6 +171,32 @@ class Context {
     exitApp(-1);
   }
 
+  /// Copies all files from [source] to [destination].
+  ///
+  /// Does not copy `.DS_Store`.
+  ///
+  /// If [delete], delete extraneous files from [destination].
+  void runRsync(
+    String source,
+    String destination, {
+    List<String> extraArgs = const <String>[],
+    bool delete = false,
+  }) {
+    runSync(
+      'rsync',
+      <String>[
+        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
+        '-av',
+        if (delete) '--delete',
+        '--filter',
+        '- .DS_Store',
+        ...extraArgs,
+        source,
+        destination,
+      ],
+    );
+  }
+
   // Adds the App.framework as an embedded binary and the flutter_assets as
   // resources.
   void embedFlutterFrameworks() {
@@ -185,32 +211,45 @@ class Context {
         xcodeFrameworksDir,
       ]
     );
-    runSync(
-      'rsync',
-      <String>[
-        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store',
-        '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
-        xcodeFrameworksDir,
-      ],
+    runRsync(
+      delete: true,
+      '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
+      xcodeFrameworksDir,
     );
 
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type specific build.
-    runSync(
-      'rsync',
-      <String>[
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store',
-        '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
-        '$xcodeFrameworksDir/',
-      ],
+    runRsync(
+      delete: true,
+      '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
+      '$xcodeFrameworksDir/',
     );
+
+    // Copy the native assets. These do not have to be codesigned here because,
+    // they are already codesigned in buildNativeAssetsMacOS.
+    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
+    String projectPath = '$sourceRoot/..';
+    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
+      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
+    }
+    final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
+    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/ios/';
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+    if (Directory(nativeAssetsPath).existsSync()) {
+      if (verbose) {
+        print('♦ Copying native assets from $nativeAssetsPath.');
+      }
+      runRsync(
+        extraArgs: <String>[
+          '--filter',
+          '- native_assets.yaml',
+        ],
+        nativeAssetsPath,
+        xcodeFrameworksDir,
+      );
+    } else if (verbose) {
+      print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
+    }
 
     addVmServiceBonjourService();
   }
@@ -345,6 +384,10 @@ class Context {
       flutterArgs.add('--local-engine=${environment['LOCAL_ENGINE']}');
     }
 
+    if (environment['LOCAL_ENGINE_HOST'] != null && environment['LOCAL_ENGINE_HOST']!.isNotEmpty) {
+      flutterArgs.add('--local-engine-host=${environment['LOCAL_ENGINE_HOST']}');
+    }
+
     flutterArgs.addAll(<String>[
       'assemble',
       '--no-version-check',
@@ -359,6 +402,7 @@ class Context {
       '-dTrackWidgetCreation=${environment['TRACK_WIDGET_CREATION'] ?? ''}',
       '-dDartObfuscation=${environment['DART_OBFUSCATION'] ?? ''}',
       '-dAction=${environment['ACTION'] ?? ''}',
+      '-dFrontendServerStarterPath=${environment['FRONTEND_SERVER_STARTER_PATH'] ?? ''}',
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',

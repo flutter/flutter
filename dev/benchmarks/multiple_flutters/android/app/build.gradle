@@ -14,7 +14,7 @@ android {
     }
 
     namespace "dev.flutter.multipleflutters"
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -28,7 +28,7 @@ android {
     defaultConfig {
         applicationId "dev.flutter.multipleflutters"
         minSdkVersion 24
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
 

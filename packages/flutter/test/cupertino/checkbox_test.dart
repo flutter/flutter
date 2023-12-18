@@ -7,8 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('CupertinoCheckbox semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoCheckbox semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -156,7 +156,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Can wrap CupertinoCheckbox with Semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can wrap CupertinoCheckbox with Semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -184,7 +184,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CupertinoCheckbox tristate: true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoCheckbox tristate: true', (WidgetTester tester) async {
     bool? checkBoxValue;
 
     await tester.pumpWidget(
@@ -228,7 +228,7 @@ void main() {
     expect(checkBoxValue, null);
   });
 
-  testWidgets('has semantics for tristate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has semantics for tristate', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       CupertinoApp(
@@ -295,7 +295,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('has semantic events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool? checkboxValue = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
@@ -335,7 +335,7 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool enabled = true}) {
@@ -372,7 +372,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checkbox respects shape and side', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder =
         RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
 

@@ -17,6 +17,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_decoration.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
@@ -27,6 +28,26 @@ import 'theme.dart';
 ///
 /// Data is read lazily from a [DataTableSource]. The widget is presented
 /// as a [Card].
+///
+/// If the [key] is a [PageStorageKey], the [initialFirstRowIndex] is persisted
+/// to [PageStorage].
+///
+/// {@tool dartpad}
+///
+/// This sample shows how to display a [DataTable] with three columns: name,
+/// age, and role. The columns are defined by three [DataColumn] objects. The
+/// table contains three rows of data for three example users, the data for
+/// which is defined by three [DataRow] objects.
+///
+/// ** See code in examples/api/lib/material/paginated_data_table/paginated_data_table.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+///
+/// This example shows how paginated data tables can supported sorted data.
+///
+/// ** See code in examples/api/lib/material/paginated_data_table/paginated_data_table.1.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -50,15 +71,11 @@ class PaginatedDataTable extends StatefulWidget {
   /// order is ascending, this should be true (the default), otherwise it should
   /// be false.
   ///
-  /// The [source] must not be null. The [source] should be a long-lived
-  /// [DataTableSource]. The same source should be provided each time a
-  /// particular [PaginatedDataTable] widget is created; avoid creating a new
-  /// [DataTableSource] with each new instance of the [PaginatedDataTable]
-  /// widget unless the data table really is to now show entirely different
-  /// data from a new source.
-  ///
-  /// The [rowsPerPage] and [availableRowsPerPage] must not be null (they
-  /// both have defaults, though, so don't have to be specified).
+  /// The [source] should be a long-lived [DataTableSource]. The same source
+  /// should be provided each time a particular [PaginatedDataTable] widget is
+  /// created; avoid creating a new [DataTableSource] with each new instance of
+  /// the [PaginatedDataTable] widget unless the data table really is to now
+  /// show entirely different data from a new source.
   ///
   /// Themed by [DataTableTheme]. [DataTableThemeData.decoration] is ignored.
   /// To modify the border or background color of the [PaginatedDataTable], use
@@ -94,14 +111,15 @@ class PaginatedDataTable extends StatefulWidget {
     this.checkboxHorizontalMargin,
     this.controller,
     this.primary,
+    this.headingRowColor,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
-       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight ?? kMinInteractiveDimension,
-       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight ?? kMinInteractiveDimension,
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
        assert(rowsPerPage > 0),
        assert(() {
          if (onRowsPerPageChanged != null) {
@@ -139,13 +157,15 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// The current primary sort key's column.
   ///
-  /// See [DataTable.sortColumnIndex].
+  /// See [DataTable.sortColumnIndex] for details.
+  ///
+  /// The direction of the sort is specified using [sortAscending].
   final int? sortColumnIndex;
 
   /// Whether the column mentioned in [sortColumnIndex], if any, is sorted
   /// in ascending order.
   ///
-  /// See [DataTable.sortAscending].
+  /// See [DataTable.sortAscending] for details.
   final bool sortAscending;
 
   /// Invoked when the user selects or unselects every row, using the
@@ -168,13 +188,13 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// This value is optional and defaults to [kMinInteractiveDimension] if not
   /// specified.
-  final double dataRowMinHeight;
+  final double? dataRowMinHeight;
 
   /// The maximum height of each row (excluding the row that contains column headings).
   ///
-  /// This value is optional and defaults to kMinInteractiveDimension if not
+  /// This value is optional and defaults to [kMinInteractiveDimension] if not
   /// specified.
-  final double dataRowMaxHeight;
+  final double? dataRowMaxHeight;
 
   /// The height of the heading row.
   ///
@@ -240,7 +260,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// and no affordance will be provided to change the value.
   final ValueChanged<int?>? onRowsPerPageChanged;
 
-  /// The data source which provides data to show in each row. Must be non-null.
+  /// The data source which provides data to show in each row.
   ///
   /// This object should generally have a lifetime longer than the
   /// [PaginatedDataTable] widget itself; it should be reused each time the
@@ -265,6 +285,9 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.widgets.scroll_view.primary}
   final bool? primary;
+
+   /// {@macro flutter.material.dataTable.headingRowColor}
+  final MaterialStateProperty<Color?>? headingRowColor;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -294,8 +317,25 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     if (oldWidget.source != widget.source) {
       oldWidget.source.removeListener(_handleDataSourceChanged);
       widget.source.addListener(_handleDataSourceChanged);
-      _handleDataSourceChanged();
+      _updateCaches();
     }
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    // This function is called during hot reload.
+    //
+    // Normally, if the data source changes, it would notify its listeners and
+    // thus trigger _handleDataSourceChanged(), which clears the row cache and
+    // causes the widget to rebuild.
+    //
+    // During a hot reload, though, a data source can change in ways that will
+    // invalidate the row cache (e.g. adding or removing columns) without ever
+    // triggering a notification, leaving the PaginatedDataTable in an invalid
+    // state. This method handles this case by clearing the cache any time the
+    // widget is involved in a hot reload.
+    _updateCaches();
   }
 
   @override
@@ -305,12 +345,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   void _handleDataSourceChanged() {
-    setState(() {
-      _rowCount = widget.source.rowCount;
-      _rowCountApproximate = widget.source.isRowCountApproximate;
-      _selectedRowCount = widget.source.selectedRowCount;
-      _rows.clear();
-    });
+    setState(_updateCaches);
+  }
+
+  void _updateCaches() {
+    _rowCount = widget.source.rowCount;
+    _rowCountApproximate = widget.source.isRowCountApproximate;
+    _selectedRowCount = widget.source.selectedRowCount;
+    _rows.clear();
   }
 
   /// Ensures that the given row is visible.
@@ -456,7 +498,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Text(
         localizations.pageRowsInfoTitle(
           _firstRowIndex + 1,
-          _firstRowIndex + widget.rowsPerPage,
+          math.min(_firstRowIndex + widget.rowsPerPage, _rowCount),
           _rowCount,
           _rowCountApproximate,
         ),
@@ -554,6 +596,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     showCheckboxColumn: widget.showCheckboxColumn,
                     showBottomBorder: true,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
+                    headingRowColor: widget.headingRowColor,
                   ),
                 ),
               ),

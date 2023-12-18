@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "탭 $tabCount개 중 $tabIndex번째",
   "modalBarrierDismissLabel": "닫기",
   "searchTextFieldPlaceholderLabel": "검색",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "수정사항 없음",
+  "menuDismissLabel": "메뉴 닫기",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

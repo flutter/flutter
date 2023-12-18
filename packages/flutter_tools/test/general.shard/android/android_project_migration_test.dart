@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
+import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -40,6 +41,79 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.1-all.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
+
+String sampleModuleGradleBuildFile(String minSdkVersionString) {
+  return r'''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+android {
+    namespace "com.example.asset_sample"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.example.asset_sample"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        ''' + minSdkVersionString + r'''
+
+        targetSdkVersion flutter.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {}
+''';
+}
 
 final Version androidStudioDolphin = Version(2021, 3, 1);
 
@@ -257,14 +331,128 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.traceText, contains(optOutFlagEnabled));
       });
     });
+
+    group('migrate min sdk versions less than 19 to flutter.minSdkVersion '
+        'when in a FlutterProject that is an app', ()
+    {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger bufferLogger;
+      late FakeAndroidProject project;
+      late MinSdkVersionMigration migration;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem.test();
+        memoryFileSystem.currentDirectory.childDirectory('android').createSync();
+        bufferLogger = BufferLogger.test();
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android'),
+        );
+        project.appGradleFile.parent.createSync(recursive: true);
+        migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+      });
+
+      testWithoutContext('do nothing when files missing', () {
+        migration.migrate();
+        expect(bufferLogger.traceText, contains(appGradleNotFoundWarning));
+      });
+
+      testWithoutContext('replace when api 16', () {
+        const String minSdkVersion16 = 'minSdkVersion 16';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion16));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
+      });
+
+      testWithoutContext('replace when api 17', () {
+        const String minSdkVersion17 = 'minSdkVersion 17';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion17));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
+      });
+
+      testWithoutContext('replace when api 18', () {
+        const String minSdkVersion18 = 'minSdkVersion 18';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion18));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
+      });
+
+      testWithoutContext('do nothing when >=api 19', () {
+        const String minSdkVersion19 = 'minSdkVersion 19';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion19));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion19));
+      });
+
+      testWithoutContext('do nothing when already using '
+          'flutter.minSdkVersion', () {
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(replacementMinSdkText));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
+      });
+
+      testWithoutContext('avoid rewriting comments', () {
+        const String code = '// minSdkVersion 16  // old default\n'
+            '        minSdkVersion 23  // new version';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(code));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(code));
+      });
+
+      testWithoutContext('do nothing when project is a module', () {
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android'),
+          module: true,
+        );
+        migration = MinSdkVersionMigration(
+            project,
+            bufferLogger
+        );
+        const String minSdkVersion16 = 'minSdkVersion 16';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion16));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion16));
+      });
+
+      testWithoutContext('do nothing when minSdkVersion is set '
+          'to a constant', () {
+        const String minSdkVersionConstant = 'minSdkVersion kMinSdkversion';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersionConstant));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersionConstant));
+      });
+
+      testWithoutContext('do nothing when minSdkVersion is set '
+          'using = syntax', () {
+        const String equalsSyntaxMinSdkVersion16 = 'minSdkVersion = 16';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion16));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion16));
+      });
+    });
   });
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
-  FakeAndroidProject({required Directory root}) : hostAppGradleRoot = root;
+  FakeAndroidProject({required Directory root, this.module, this.plugin}) : hostAppGradleRoot = root;
 
   @override
   Directory hostAppGradleRoot;
+
+  final bool? module;
+  final bool? plugin;
+
+  @override
+  bool get isPlugin => plugin ?? false;
+
+  @override
+  bool get isModule => module ?? false;
+
+  @override
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
