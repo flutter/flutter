@@ -815,13 +815,12 @@ void testMain() {
   );
 
   test(
-    'converts scroll delta to physical pixels (Firefox)',
+    'converts scroll delta to physical pixels (macOs)',
     () {
       final _ButtonedEventMixin context = _PointerEventContext();
 
       const double dpi = 2.5;
       debugOperatingSystemOverride = OperatingSystem.macOs;
-      debugBrowserEngineOverride = BrowserEngine.firefox;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpi);
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
@@ -854,52 +853,6 @@ void testMain() {
       expect(packets[0].data[0].scrollDeltaY, equals(10.0 * dpi));
 
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
-      debugOperatingSystemOverride = null;
-      debugBrowserEngineOverride = null;
-    },
-  );
-
-  test(
-    'scroll delta are already in physical pixels (Chrome)',
-    () {
-      final _ButtonedEventMixin context = _PointerEventContext();
-
-      const double dpi = 2.5;
-      debugOperatingSystemOverride = OperatingSystem.macOs;
-      debugBrowserEngineOverride = BrowserEngine.blink;
-      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpi);
-
-      final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
-      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
-        packets.add(packet);
-      };
-
-      rootElement.dispatchEvent(context.wheel(
-        buttons: 0,
-        clientX: 10,
-        clientY: 10,
-        deltaX: 10,
-        deltaY: 10,
-      ));
-
-      expect(packets, hasLength(1));
-
-
-      // An add will be synthesized.
-      expect(packets[0].data, hasLength(2));
-      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
-      // Scroll deltas should NOT be multiplied by `dpi`.
-      expect(packets[0].data[0].scrollDeltaX, equals(10.0));
-      expect(packets[0].data[0].scrollDeltaY, equals(10.0));
-
-      expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
-      expect(packets[0].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
-      // Scroll deltas should NOT be multiplied by `dpi`.
-      expect(packets[0].data[0].scrollDeltaX, equals(10.0));
-      expect(packets[0].data[0].scrollDeltaY, equals(10.0));
-
-      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
-      debugOperatingSystemOverride = null;
       debugBrowserEngineOverride = null;
     },
   );
