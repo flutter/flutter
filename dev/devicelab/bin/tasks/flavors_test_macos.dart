@@ -17,22 +17,27 @@ Future<void> main() async {
     final TaskResult installTestsResult = await inDirectory(
       '${flutterDirectory.path}/dev/integration_tests/flavors',
       () async {
-        final StringBuffer stderr = StringBuffer();
-
-        await evalFlutter(
+        await flutter(
           'install',
+          options: <String>['--flavor', 'paid', '-d', 'macos'],
+        );
+        await flutter(
+          'install',
+          options: <String>['--flavor', 'paid', '--uninstall-only', '-d', 'macos'],
+        );
+        final StringBuffer stderr = StringBuffer();
+        await evalFlutter(
+          'build',
           canFail: true,
           stderr: stderr,
-          options: <String>[
-            '--d', 'macos',
-            '--flavor', 'free'
-          ],
+          options: <String>['macos', '--flavor', 'bogus'],
         );
 
         final String stderrString = stderr.toString();
-        if (!stderrString.contains('Host and target are the same. Nothing to install.')) {
+        print(stderrString);
+        if (!stderrString.contains('The Xcode project defines schemes:')) {
           print(stderrString);
-          return TaskResult.failure('Installing a macOS app on macOS should no-op');
+          return TaskResult.failure('Should not succeed with bogus flavor');
         }
 
         return TaskResult.success(null);
