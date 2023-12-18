@@ -1146,6 +1146,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 /// will be thrown in runtime.
 ///
 /// See also:
+///
 /// * [Spacer.fixed], the widget equivalent.
 final class RenderFixedLengthSpacer extends RenderBox {
   /// Creates a render box that provides a fixed space in a render flex.
@@ -1194,10 +1195,11 @@ final class RenderFixedLengthSpacer extends RenderBox {
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    assert(parent is RenderFlex);
+    assert(this.parent is RenderFlex);
+    final RenderObject? parent = this.parent;
 
-    if (parent case RenderFlex(:final Axis direction)) {
-      final Size size = switch (direction) {
+    if (parent is RenderFlex) {
+      final Size size = switch (parent.direction) {
         Axis.horizontal => Size(length, 0.0),
         Axis.vertical => Size(0.0, length),
       };

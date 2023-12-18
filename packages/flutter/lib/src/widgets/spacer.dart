@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../rendering.dart';
+import 'package:flutter/rendering.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 
@@ -11,14 +12,15 @@ import 'framework.dart';
 ///
 /// The [Spacer] widget will take space in a dynamic or fixed way, depending
 /// on which constructor is used:
-/// * The default unnamed constructor [Spacer] will take up any available
-/// space, so setting the [Flex.mainAxisAlignment] on a flex container that
-/// contains a [Spacer] to [MainAxisAlignment.spaceAround],
-/// [MainAxisAlignment.spaceBetween], or [MainAxisAlignment.spaceEvenly] will
-/// not have any visible effect: the [Spacer] has taken up all of the
-/// additional space, therefore there is none left to redistribute.
-/// * The [Spacer.fixed] constructor will take an absolute amount of space in
-/// the main axis.
+///
+///  * The default unnamed constructor [Spacer] will take up any available
+///    space, so setting the [Flex.mainAxisAlignment] on a flex container that
+///    contains a [Spacer] to [MainAxisAlignment.spaceAround],
+///    [MainAxisAlignment.spaceBetween], or [MainAxisAlignment.spaceEvenly]
+///    will not have any visible effect: the [Spacer] has taken up all of the
+///    additional space, therefore there is none left to redistribute.
+///  * The [Spacer.fixed] constructor will take an absolute amount of space in
+///    the main axis.
 ///
 /// {@tool snippet}
 ///
@@ -52,7 +54,7 @@ class Spacer extends StatelessWidget {
   const Spacer({super.key, int this.flex = 1})
       : length = null, assert(flex > 0);
 
-  /// Creates a space with fixed length to insert into a [Flexible] widget.
+  /// Creates a space with fixed length to insert into a [Flex] widget.
   ///
   /// The [length] parameter must be equal or greater than zero.
   const Spacer.fixed({super.key, double this.length = 0.0}) : flex = null, assert(length >= 0.0);
