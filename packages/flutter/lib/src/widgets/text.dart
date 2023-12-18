@@ -338,18 +338,50 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// This example shows how to display text using the [Text] widget with the
 /// [overflow] set to [TextOverflow.ellipsis].
 ///
-/// ![If the text is shorter than the available space, it is displayed in full without an ellipsis.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text.png)
-///
 /// ![If the text overflows, the Text widget displays an ellipsis to trim the overflowing text](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_ellipsis.png)
 ///
 /// ```dart
-/// Text(
-///   'Hello, $_name! How are you?',
-///   textAlign: TextAlign.center,
-///   overflow: TextOverflow.ellipsis,
-///   style: const TextStyle(fontWeight: FontWeight.bold),
-/// )
+/// Container(
+///   width: 100,
+///   decoration: BoxDecoration(border: Border.all()),
+///   child: Text(overflow: TextOverflow.ellipsis, 'Hello $_name, how are you?'))
 /// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// Setting [maxLines] to `1` is not equivalent to disabling soft wrapping with
+/// [softWrap]. This is apparent when using [TextOverflow.fade] as the following
+/// examples show.
+///
+/// ![If a second line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_max_lines.png)
+///
+/// ```dart
+/// Text(
+///   overflow: TextOverflow.fade,
+///   maxLines: 1,
+///   'Hello $_name, how are you?')
+/// ```
+///
+/// Here soft wrapping is enabled and the [Text] widget tries to wrap the words
+/// "how are you?" to a second line. This is prevented by the [maxLines] value
+/// of `1`. The result is that a second line overflows and the fade appears in a
+/// horizontal direction at the bottom.
+///
+/// ![If a single line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_soft_wrap.png)
+///
+/// ```dart
+/// Text(
+///   overflow: TextOverflow.fade,
+///   softWrap: false,
+///   'Hello $_name, how are you?')
+/// ```
+///
+/// Here soft wrapping is disabled with `softWrap: false` and the [Text] widget
+/// attempts to display its text in a single unbroken line. The result is that
+/// the single line overflows and the fade appears in a vertical direction at
+/// the right.
+///
 /// {@end-tool}
 ///
 /// Using the [Text.rich] constructor, the [Text] widget can
