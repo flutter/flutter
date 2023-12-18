@@ -17092,7 +17092,7 @@ void main() {
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgetsWithLeakTracking('Text processing actions are added to the toolbar', (WidgetTester tester) async {
+  testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
     const String initialText = 'I love Flutter';
     final TextEditingController controller = _textEditingController(text: initialText);
     final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
@@ -17132,7 +17132,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Text processing actions are not added to the toolbar for obscured text',
     (WidgetTester tester) async {
       const String initialText = 'I love Flutter';
@@ -17174,7 +17174,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Text processing actions are not added to the toolbar if selection is collapsed (Android only)',
     (WidgetTester tester) async {
       const String initialText = 'I love Flutter';
@@ -17208,7 +17208,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Invoke a text processing action that does not return a value (Android only)',
     (WidgetTester tester) async {
       const String initialText = 'I love Flutter';
@@ -17257,7 +17257,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Invoking a text processing action that returns a value replaces the selection (Android only)',
     (WidgetTester tester) async {
       const String initialText = 'I love Flutter';
@@ -17306,7 +17306,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Invoking a text processing action that returns a value does not replace the selection of a readOnly text field (Android only)',
     (WidgetTester tester) async {
       const String initialText = 'I love Flutter';

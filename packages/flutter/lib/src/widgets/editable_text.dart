@@ -2808,8 +2808,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
-
-    if (widget.obscureText || textEditingValue.selection.isCollapsed) {
+    final TextSelection selection = textEditingValue.selection;
+    if (widget.obscureText || !selection.isValid || selection.isCollapsed) {
       return buttonItems;
     }
 
@@ -2817,7 +2817,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       buttonItems.add(ContextMenuButtonItem(
         label: action.label,
         onPressed: () async {
-          final String selectedText = textEditingValue.selection.textInside(textEditingValue.text);
+          final String selectedText = selection.textInside(textEditingValue.text);
           if (selectedText.isNotEmpty) {
             final String? processedText = await _processTextService.processTextAction(action.id, selectedText, widget.readOnly);
             if (processedText != null && _allowPaste) {
