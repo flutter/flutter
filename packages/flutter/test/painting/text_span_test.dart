@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('TextSpan equals', () {
@@ -328,7 +327,7 @@ void main() {
     expect(indexInTree(const TextSpan(text: 'foobar')), null);
   });
 
-  testWidgetsWithLeakTracking('handles mouse cursor', (WidgetTester tester) async {
+  testWidgets('handles mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -365,7 +364,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('handles onEnter and onExit', (WidgetTester tester) async {
+  testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
     final List<PointerEvent> logEvents = <PointerEvent>[];
     await tester.pumpWidget(
       Directionality(
@@ -410,7 +409,7 @@ void main() {
     expect(logEvents[1], isA<PointerExitEvent>());
   });
 
-  testWidgetsWithLeakTracking('TextSpan can compute StringAttributes', (WidgetTester tester) async {
+  testWidgets('TextSpan can compute StringAttributes', (WidgetTester tester) async {
     const TextSpan span = TextSpan(
       text: 'aaaaa',
       spellOut: true,
