@@ -323,7 +323,7 @@ targets:
 
   - name: Linux mac_android_aot_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -353,7 +353,7 @@ targets:
 
   - name: Mac mac_host_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
@@ -379,7 +379,7 @@ targets:
 
   - name: Mac mac_ios_engine
     recipe: engine_v2/engine_v2
-    timeout: 120
+    timeout: 240
     properties:
       add_recipes_cq: "true"
       release_build: "true"
