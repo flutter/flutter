@@ -611,6 +611,8 @@ class FlutterTesterOptions():
 
     if self.enable_impeller:
       command_args += ['--enable-impeller']
+    else:
+      command_args += ['--no-enable-impeller']
 
     if self.multithreaded:
       command_args.insert(0, '--force-multithreading')
