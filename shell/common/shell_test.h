@@ -29,38 +29,6 @@
 namespace flutter {
 namespace testing {
 
-// The signature of ViewContent::builder.
-using LayerTreeBuilder =
-    std::function<void(std::shared_ptr<ContainerLayer> root)>;
-struct ViewContent;
-// Defines the content to be rendered to all views of a frame in PumpOneFrame.
-using FrameContent = std::map<int64_t, ViewContent>;
-// Defines the content to be rendered to a view in PumpOneFrame.
-struct ViewContent {
-  flutter::ViewportMetrics viewport_metrics;
-  // Given the root layer, this callback builds the layer tree to be rasterized
-  // in PumpOneFrame.
-  LayerTreeBuilder builder;
-
-  // Build a frame with no views. This is useful when PumpOneFrame is used just
-  // to schedule the frame while the frame content is defined by other means.
-  static FrameContent NoViews();
-
-  // Build a frame with a single implicit view with the specific size and no
-  // content.
-  static FrameContent DummyView(double width = 1, double height = 1);
-
-  // Build a frame with a single implicit view with the specific viewport
-  // metrics and no content.
-  static FrameContent DummyView(flutter::ViewportMetrics viewport_metrics);
-
-  // Build a frame with a single implicit view with the specific size and
-  // content.
-  static FrameContent ImplicitView(double width,
-                                   double height,
-                                   LayerTreeBuilder builder);
-};
-
 class ShellTest : public FixtureTest {
  public:
   struct Config {
@@ -102,14 +70,24 @@ class ShellTest : public FixtureTest {
   static void RestartEngine(Shell* shell, RunConfiguration configuration);
 
   /// Issue as many VSYNC as needed to flush the UI tasks so far, and reset
-  /// the content of `will_draw_new_frame` to true if it's not nullptr.
-  static void VSyncFlush(Shell* shell, bool* will_draw_new_frame = nullptr);
+  /// the `will_draw_new_frame` to true.
+  static void VSyncFlush(Shell* shell, bool& will_draw_new_frame);
+
+  /// Given the root layer, this callback builds the layer tree to be rasterized
+  /// in PumpOneFrame.
+  using LayerTreeBuilder =
+      std::function<void(std::shared_ptr<ContainerLayer> root)>;
 
   static void SetViewportMetrics(Shell* shell, double width, double height);
   static void NotifyIdle(Shell* shell, fml::TimeDelta deadline);
 
-  static void PumpOneFrame(Shell* shell);
-  static void PumpOneFrame(Shell* shell, FrameContent frame_content);
+  static void PumpOneFrame(Shell* shell,
+                           double width = 1,
+                           double height = 1,
+                           LayerTreeBuilder = {});
+  static void PumpOneFrame(Shell* shell,
+                           const flutter::ViewportMetrics& viewport_metrics,
+                           LayerTreeBuilder = {});
   static void DispatchFakePointerData(Shell* shell);
   static void DispatchPointerData(Shell* shell,
                                   std::unique_ptr<PointerDataPacket> packet);
