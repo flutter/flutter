@@ -9,6 +9,8 @@ import 'package:ui/src/engine/skwasm/skwasm_stub.dart'
     if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart';
 
+import '../common/rendering.dart';
+
 Picture drawPicture(void Function(Canvas) drawCommands) {
   final PictureRecorder recorder = PictureRecorder();
   final Canvas canvas = Canvas(recorder);
@@ -21,7 +23,7 @@ Future<void> drawPictureUsingCurrentRenderer(Picture picture) async {
   final SceneBuilder sb = SceneBuilder();
   sb.pushOffset(0, 0);
   sb.addPicture(Offset.zero, picture);
-  await renderer.renderScene(sb.build(), implicitView);
+  await renderScene(sb.build());
 }
 
 /// Convenience getter for the implicit view.
