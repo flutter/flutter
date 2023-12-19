@@ -444,8 +444,9 @@ class DaemonDomain extends Domain {
       if (featureFlags.areCustomDevicesEnabled) {
         result.add('custom');
       }
+      // TODO check for plugins
       if (featureFlags.isPreviewDeviceEnabled && supportedPlatforms.contains(SupportedPlatform.windows)) {
-        result.add('preview');
+        result.add('windowsPreview');
       }
       return <String, Object>{
         'platforms': result,
