@@ -706,7 +706,7 @@ class CommonSemanticsFinders {
 final class CommonTextRangeFinders {
   const CommonTextRangeFinders._();
 
-  /// Finds all non-overlapping occurrances of the given `substring` in the
+  /// Finds all non-overlapping occurrences of the given `substring` in the
   /// static text widgets and returns the [TextRange]s.
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
@@ -714,12 +714,12 @@ final class CommonTextRangeFinders {
   /// [Route]s.
   ///
   /// If the `descendentOf` argument is non-null, this method only searches in
-  /// the descendents of that parameter for the given substring.
+  /// the descendants of that parameter for the given substring.
   ///
   /// This finder uses the [Pattern.allMatches] method to match the substring in
   /// the text. After finding a matching substring in the text, the method
   /// continues the search from the end of the match, thus skipping overlapping
-  /// occurrances of the substring.
+  /// occurrences of the substring.
   FinderBase<TextRangeContext> ofSubstring(String substring, { bool skipOffstage = true, FinderBase<Element>? descendentOf }) {
     final _TextContainingWidgetFinder textWidgetFinder = _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage, findRichText: true);
     final Finder elementFinder = descendentOf == null
@@ -1090,7 +1090,7 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
 
   Iterable<TextRangeContext> _flatMap(Element from) {
     final RenderObject? renderObject = from.renderObject;
-    // This is currenly only exposed on text matchers. Only consider RenderBoxes.
+    // This is currently only exposed on text matchers. Only consider RenderBoxes.
     if (renderObject is! RenderBox) {
       return const Iterable<TextRangeContext>.empty();
     }
