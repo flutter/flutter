@@ -1,15 +1,37 @@
 # iOS Unit Tests
 
-These are the unit tests for iOS engine.  They can be executed locally and are
+These are the unit tests for iOS engine. They can be executed locally and are
 also run in LUCI builds.
 
-## Running Tests
+## Running Tests from command line
 
-To build and run the iOS tests, run the following script from the src directory:
+To build and run the iOS tests, use the `run_tests` script from the `src` directory.
 
 ```sh
 flutter/testing/run_tests.py --type=objc
 ```
+
+And if you're on Apple Silicon:
+
+```sh
+./flutter/testing/run_tests.py \
+  --type=objc \
+  --ios-variant ios_debug_sim_unopt_arm64
+```
+
+The `.xcresult` is automatically removed after testing ends. To change this:
+
+```sh
+export FLUTTER_TEST_OUTPUTS_DIR=~/Desktop
+```
+
+To learn more:
+
+```
+flutter/testing/run_tests.py --help
+```
+
+## Running Tests from Xcode
 
 After the `ios_test_flutter` target is built you can also run the tests inside
 of Xcode with `testing/ios/IosUnitTests/IosUnitTests.xcodeproj`.
