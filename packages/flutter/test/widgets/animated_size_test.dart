@@ -87,6 +87,61 @@ void main() {
       expect(box.size.height, equals(100.0));
     });
 
+    testWidgets('calls onEnd when animation is completed', (WidgetTester tester) async {
+      int callCount = 0;
+      void handleEnd() {
+        callCount++;
+      }
+
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            onEnd: handleEnd,
+            duration: const Duration(milliseconds: 200),
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      expect(callCount, equals(0));
+
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            onEnd: handleEnd,
+            duration: const Duration(milliseconds: 200),
+            child: const SizedBox(
+              width: 200.0,
+              height: 200.0,
+            ),
+          ),
+        ),
+      );
+
+      expect(callCount, equals(0));
+      await tester.pumpAndSettle();
+      expect(callCount, equals(1));
+
+      await tester.pumpWidget(
+        Center(
+          child: AnimatedSize(
+            onEnd: handleEnd,
+            duration: const Duration(milliseconds: 200),
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(callCount, equals(2));
+    });
+
     testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
