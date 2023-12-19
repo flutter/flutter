@@ -214,11 +214,16 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
+    this.globalPosition = Offset.zero,
+    Offset? localPosition,
   }) : assert(
          primaryVelocity == null
            || (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0)
            || (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
        );
+      localPosition = localPosition ?? globalPosition;
+
+
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///

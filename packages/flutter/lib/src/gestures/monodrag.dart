@@ -276,6 +276,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   _DragState _state = _DragState.ready;
   late OffsetPair _initialPosition;
   late OffsetPair _pendingDragOffset;
+  late OffsetPair _finalPosition;
   Duration? _lastPendingEventTimestamp;
 
   /// When asserts are enabled, returns the last tracked pending event timestamp
@@ -418,6 +419,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final Offset localDelta = (event is PointerMoveEvent) ? event.localDelta : (event as PointerPanZoomUpdateEvent).localPanDelta;
       final Offset position = (event is PointerMoveEvent) ? event.position : (event.position + (event as PointerPanZoomUpdateEvent).pan);
       final Offset localPosition = (event is PointerMoveEvent) ? event.localPosition : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
+      _finalPosition = OffsetPair(local: localPosition, global: position);
       if (_state == _DragState.accepted) {
         _checkUpdate(
           sourceTimeStamp: event.timeStamp,
@@ -600,7 +602,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         ? () => '$estimate; fling at ${details!.velocity}.'
         : () => '$estimate; judged to not be a fling.';
     }
-    details ??= DragEndDetails(primaryVelocity: 0.0);
+    details ??= DragEndDetails(
+      primaryVelocity: 0.0,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
+    );
 
     invokeCallback<void>('onEnd', () => onEnd!(details!), debugReport: debugReport);
   }
