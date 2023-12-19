@@ -223,8 +223,6 @@ class DragEndDetails {
        ),
       localPosition = localPosition ?? globalPosition;
 
-
-
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
   /// Defaults to zero if not specified in the constructor.
