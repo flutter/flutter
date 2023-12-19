@@ -10,6 +10,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common/rendering.dart';
 import '../common/test_initialization.dart';
 import 'utils.dart';
 
@@ -36,7 +37,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_centered_circle.png', region: region);
     });
 
@@ -60,7 +61,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_rotated_rounded_square.png', region: region);
     });
 
@@ -75,7 +76,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_circle_clip_rect.png', region: region);
     });
 
@@ -93,7 +94,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_circle_clip_rrect.png', region: region);
     });
 
@@ -109,7 +110,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_rectangle_clip_circular_path.png', region: region);
     });
 
@@ -137,7 +138,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_opacity_circles_on_square.png', region: region);
     });
 
@@ -177,7 +178,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_shader_mask.png', region: region);
     }, skip: isFirefox && isHtml); // https://github.com/flutter/flutter/issues/86623
 
@@ -209,7 +210,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_backdrop_filter.png', region: region);
     });
 
@@ -228,7 +229,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_image_filter.png', region: region);
     });
 
@@ -250,7 +251,7 @@ Future<void> testMain() async {
         );
       }));
 
-      await renderer.renderScene(sceneBuilder.build(), implicitView);
+      await renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_color_filter.png', region: region);
     });
   });
