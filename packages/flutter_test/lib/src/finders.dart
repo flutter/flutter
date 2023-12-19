@@ -721,9 +721,10 @@ final class CommonTextRangeFinders {
   /// continues the search from the end of the match, thus skipping overlapping
   /// occurrances of the substring.
   FinderBase<TextRangeContext> ofSubstring(String substring, { bool skipOffstage = true, FinderBase<Element>? descendentOf }) {
+    final _TextContainingWidgetFinder textWidgetFinder = _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage, findRichText: true);
     final Finder elementFinder = descendentOf == null
-      ? _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage)
-      : _DescendantWidgetFinder(descendentOf, _TextContainingWidgetFinder(substring, skipOffstage: skipOffstage), matchRoot: true, skipOffstage: skipOffstage);
+      ? textWidgetFinder
+      : _DescendantWidgetFinder(descendentOf, textWidgetFinder, matchRoot: true, skipOffstage: skipOffstage);
     return _StaticTextRangeFinder(elementFinder, substring);
   }
 }
@@ -1110,7 +1111,7 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
     }
     visitor(renderObject);
     Iterable<TextRangeContext> searchInParagraph(RenderParagraph paragraph) {
-      final String text = paragraph.text.toPlainText();
+      final String text = paragraph.text.toPlainText(includeSemanticsLabels: false);
       return pattern.allMatches(text)
         .map((Match match) => TextRangeContext._(view, paragraph, TextRange(start: match.start, end: match.end)));
     }
