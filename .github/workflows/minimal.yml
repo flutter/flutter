@@ -37,7 +37,7 @@ jobs:
           path: flutter
           commit-message: blah
           committer: GitHub <noreply@github.com>
-          token: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN }}
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           labels: |
             cp: review
           title: '[github actions] testing purposes'
