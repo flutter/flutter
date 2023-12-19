@@ -125,7 +125,7 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
-  testWidgets("DragEndDetails returns the last known position", (WidgetTester tester) async {
+  testWidgets('DragEndDetails returns the last known position', (WidgetTester tester) async {
     Offset updateOffset = const Offset(10, 10);
     Offset? endOffset;
 
