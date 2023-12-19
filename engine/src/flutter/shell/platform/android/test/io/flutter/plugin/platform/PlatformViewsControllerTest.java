@@ -356,8 +356,8 @@ public class PlatformViewsControllerTest {
             frameWorkTouch,
             false // usingVirtualDisplays
             );
-    assertEquals(resolvedEvent.getAction(), frameWorkTouch.action);
-    assertNotEquals(resolvedEvent.getAction(), original.getAction());
+    assertEquals(resolvedEvent.getAction(), original.getAction());
+    assertNotEquals(resolvedEvent.getAction(), frameWorkTouch.action);
   }
 
   @Ignore
