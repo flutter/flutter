@@ -839,19 +839,18 @@ class _RenderDropdownMenuBody extends RenderBox
       maxHeight: computeMaxIntrinsicHeight(constraints.maxHeight),
     );
     while (child != null) {
+      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
+      child.layout(innerConstraints, parentUsesSize: true);
+      maxHeight ??= child.size.height;
+
       if (child == firstChild) {
-        child.layout(innerConstraints, parentUsesSize: true);
-        maxHeight ??= child.size.height;
-        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
-        assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
         continue;
       }
-      child.layout(innerConstraints, parentUsesSize: true);
-      final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
+
       childParentData.offset = Offset.zero;
       maxWidth = math.max(maxWidth, child.size.width);
-      maxHeight ??= child.size.height;
+
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
