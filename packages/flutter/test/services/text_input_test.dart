@@ -883,16 +883,20 @@ void main() {
       const TextInputConfiguration noneConfig = TextInputConfiguration(inputType: TextInputType.none);
 
       // Test for https://github.com/flutter/flutter/issues/125875.
-      // When there's a custom text input control installed, the platform text
-      // input control receives TextInputType.none and forceMultiline flag.
-      // forceMultiline flag is set to true when the input type is multiline.
-      // forceMultiline flag is set to false when the input type is not multiline.
-      final Map<String, dynamic> noneForceMultilineFalseJson = noneConfig.toJson();
-      final Map<String, dynamic> noneInputType = noneForceMultilineFalseJson['inputType'] as Map<String, dynamic>;
-      noneInputType['forceMultiline'] = false;
-      final Map<String, dynamic> noneForceMultilineTrueJson = noneConfig.toJson();
-      final Map<String, dynamic> noneInputType1 = noneForceMultilineTrueJson['inputType'] as Map<String, dynamic>;
-      noneInputType1['forceMultiline'] = true;
+      // When there's a custom text input control installed on Web, the platform text
+      // input control receives TextInputType.none and isMultiline flag.
+      // isMultiline flag is set to true when the input type is multiline.
+      // isMultiline flag is set to false when the input type is not multiline.
+      final Map<String, dynamic> noneIsMultilineFalseJson = noneConfig.toJson();
+      final Map<String, dynamic> noneInputType = noneIsMultilineFalseJson['inputType'] as Map<String, dynamic>;
+      if (kIsWeb) {
+        noneInputType['isMultiline'] = false;
+      }
+      final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
+      final Map<String, dynamic> noneInputType1 = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      if (kIsWeb) {
+        noneInputType1['isMultiline'] = true;
+      }
 
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       final TextInputConnection connection = TextInput.attach(client, textConfig);
@@ -902,8 +906,8 @@ void main() {
       expect(control.inputType, TextInputType.text);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         // When there's a custom text input control installed, the platform text
-        // input control receives TextInputType.none with forceMultiline flag
-        MethodCall('TextInput.setClient', <dynamic>[1, noneForceMultilineFalseJson]),
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineFalseJson]),
       ]);
 
       connection.show();
@@ -919,10 +923,10 @@ void main() {
       expect(fakeTextChannel.outgoingCalls.length, 3);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         // When there's a custom text input control installed, the platform text
-        // input control receives TextInputType.none with forceMultiline flag
-        MethodCall('TextInput.setClient', <dynamic>[1, noneForceMultilineFalseJson]),
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineFalseJson]),
         const MethodCall('TextInput.show'),
-        MethodCall('TextInput.updateConfig', noneForceMultilineFalseJson),
+        MethodCall('TextInput.updateConfig', noneIsMultilineFalseJson),
       ]);
 
       connection.updateConfig(multilineConfig);
@@ -933,11 +937,11 @@ void main() {
 
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         // When there's a custom text input control installed, the platform text
-        // input control receives TextInputType.none with forceMultiline flag
-        MethodCall('TextInput.setClient', <dynamic>[1, noneForceMultilineFalseJson]),
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineFalseJson]),
         const MethodCall('TextInput.show'),
-        MethodCall('TextInput.updateConfig', noneForceMultilineFalseJson),
-        MethodCall('TextInput.updateConfig', noneForceMultilineTrueJson),
+        MethodCall('TextInput.updateConfig', noneIsMultilineFalseJson),
+        MethodCall('TextInput.updateConfig', noneIsMultilineTrueJson),
       ]);
 
       connection.setComposingRect(Rect.zero);
@@ -1000,7 +1004,7 @@ void main() {
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.hide');
     });
 
-    test('the platform input control receives forceMultiline true on attach', () async {
+    test('the platform input control receives isMultiline true on attach', () async {
       final FakeTextInputControl control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
@@ -1009,12 +1013,12 @@ void main() {
 
       // Test for https://github.com/flutter/flutter/issues/125875.
       // When there's a custom text input control installed, the platform text
-      // input control receives TextInputType.none and forceMultiline flag.
-      // forceMultiline flag is set to true when the input type is multiline.
-      // forceMultiline flag is set to false when the input type is not multiline.
-      final Map<String, dynamic> noneForceMultilineTrueJson = noneConfig.toJson();
-      final Map<String, dynamic> noneInputType = noneForceMultilineTrueJson['inputType'] as Map<String, dynamic>;
-      noneInputType['forceMultiline'] = true;
+      // input control receives TextInputType.none and isMultiline flag.
+      // isMultiline flag is set to true when the input type is multiline.
+      // isMultiline flag is set to false when the input type is not multiline.
+      final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
+      final Map<String, dynamic> noneInputType = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      noneInputType['isMultiline'] = true;
 
       final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
       TextInput.attach(client, multilineConfig);
@@ -1024,10 +1028,10 @@ void main() {
       expect(control.inputType, TextInputType.multiline);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         // When there's a custom text input control installed, the platform text
-        // input control receives TextInputType.none with forceMultiline flag
-        MethodCall('TextInput.setClient', <dynamic>[1, noneForceMultilineTrueJson]),
+        // input control receives TextInputType.none with isMultiline flag
+        MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineTrueJson]),
       ]);
-    });
+    }, testOn: 'browser');
 
     test('notifies changes to the attached client', () async {
       final FakeTextInputControl control = FakeTextInputControl();
