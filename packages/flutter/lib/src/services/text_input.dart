@@ -2226,7 +2226,13 @@ class _PlatformTextInputControl with TextInputControl {
   Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
-      json['inputType'] = TextInputType.none.toJson();
+      final Map<String, dynamic> none = TextInputType.none.toJson();
+      /// See: https://github.com/flutter/flutter/issues/125875
+      /// On Web engine, use forceMultiline to create <input> or <textarea> element
+      /// when customizing [TextInputControl].
+      /// We send forceMultiline to the engine only when customizing [TextInputControl].
+      none['forceMultiline'] = configuration.inputType == TextInputType.multiline;
+      json['inputType'] = none;
     }
     return json;
   }
