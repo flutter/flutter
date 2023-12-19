@@ -1144,6 +1144,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.useRootNavigator = false,
     this.popUpAnimationStyle,
+    this.routeSettings,
   }) : assert(
          !(child != null && icon != null),
          'You can only pass [child] or [icon], not both.',
@@ -1332,6 +1333,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If this is null, then the default animation will be used.
   final AnimationStyle? popUpAnimationStyle;
 
+  /// Optional route settings for the menu.
+  ///
+  /// See [RouteSettings] for details.
+  final RouteSettings? routeSettings;
+
   @override
   PopupMenuButtonState<T> createState() => PopupMenuButtonState<T>();
 }
@@ -1390,6 +1396,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         clipBehavior: widget.clipBehavior,
         useRootNavigator: widget.useRootNavigator,
         popUpAnimationStyle: widget.popUpAnimationStyle,
+        routeSettings: widget.routeSettings,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
