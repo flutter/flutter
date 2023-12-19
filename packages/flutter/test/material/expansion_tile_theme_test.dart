@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -71,7 +70,7 @@ void main() {
     expect(theme.expansionAnimationStyle, null);
   });
 
-  testWidgetsWithLeakTracking('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
@@ -83,7 +82,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     ExpansionTileThemeData(
       backgroundColor: const Color(0xff000000),
@@ -123,7 +122,7 @@ void main() {
     ]));
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
+  testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -215,7 +214,7 @@ void main() {
     expect(shapeDecoration.shape, collapsedShape);
   });
 
-  testWidgetsWithLeakTracking('ExpansionTileTheme - expanded', (WidgetTester tester) async {
+  testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -309,7 +308,7 @@ void main() {
     expect(childRect.bottom, paddingRect.bottom - 20);
   });
 
-  testWidgetsWithLeakTracking('Override ExpansionTile animation using ExpansionTileThemeData.AnimationStyle', (WidgetTester tester) async {
+  testWidgets('Override ExpansionTile animation using ExpansionTileThemeData.AnimationStyle', (WidgetTester tester) async {
     const Key expansionTileKey = Key('expansionTileKey');
 
     Widget buildExpansionTile({ AnimationStyle? animationStyle }) {

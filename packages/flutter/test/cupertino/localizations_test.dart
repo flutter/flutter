@@ -4,10 +4,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('English translations exist for all CupertinoLocalization properties', (WidgetTester tester) async {
+  testWidgets('English translations exist for all CupertinoLocalization properties', (WidgetTester tester) async {
     const CupertinoLocalizations localizations = DefaultCupertinoLocalizations();
 
     expect(localizations.datePickerYear(2018), isNotNull);
@@ -38,7 +37,7 @@ void main() {
     expect(localizations.clearButtonLabel, isNotNull);
   });
 
-  testWidgetsWithLeakTracking('CupertinoLocalizations.of throws', (WidgetTester tester) async {
+  testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
