@@ -220,7 +220,7 @@ class DragEndDetails {
          primaryVelocity == null
            || (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0)
            || (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
-       );
+       ),
       localPosition = localPosition ?? globalPosition;
 
 
@@ -241,6 +241,23 @@ class DragEndDetails {
   ///
   /// Defaults to null if not specified in the constructor.
   final double? primaryVelocity;
+
+  /// The global position the pointer is located at when the drag
+  /// gesture has been completed.
+  ///
+  /// Defaults to the origin if not specified in the constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [localPosition], which is the [globalPosition] transformed to the
+  ///    coordinate space of the event receiver.
+  final Offset globalPosition;
+
+  /// The local position in the coordinate system of the event receiver when
+  /// the drag gesture has been completed.
+  ///
+  /// Defaults to [globalPosition] if not specified in the constructor.
+  final Offset localPosition;
 
   @override
   String toString() => '${objectRuntimeType(this, 'DragEndDetails')}($velocity)';

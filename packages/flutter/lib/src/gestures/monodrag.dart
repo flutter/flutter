@@ -666,6 +666,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
     return DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(0, dy)),
       primaryVelocity: dy,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
     );
   }
 
@@ -721,6 +723,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     return DragEndDetails(
       velocity: Velocity(pixelsPerSecond: Offset(dx, 0)),
       primaryVelocity: dx,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
     );
   }
 
@@ -771,7 +775,11 @@ class PanGestureRecognizer extends DragGestureRecognizer {
     }
     final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
         .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-    return DragEndDetails(velocity: velocity);
+    return DragEndDetails(
+      velocity: velocity,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
+    );
   }
 
   @override
