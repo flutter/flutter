@@ -146,6 +146,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->timestamp, 123000000.0f);
@@ -169,6 +170,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->timestamp, 123000000.0f);
@@ -208,6 +210,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kKeyCodeEject | kIosPlane);
@@ -230,6 +233,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kKeyCodeEject | kIosPlane);
@@ -265,6 +269,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalAltRight);
@@ -281,6 +286,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyW);
@@ -298,6 +304,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalAltRight);
@@ -318,6 +325,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyW);
@@ -335,6 +343,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -364,6 +373,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -384,6 +394,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->physical, 0ull);
   XCTAssertEqual(event->logical, 0ull);
   XCTAssertEqual(event->synthesized, false);
@@ -400,6 +411,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -434,6 +446,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->physical, 0ull);
   XCTAssertEqual(event->logical, 0ull);
   XCTAssertEqual(event->synthesized, false);
@@ -466,6 +479,7 @@ typedef void (^ResponseCallback)(bool handled);
   XCTAssertEqual([events count], 1u);
 
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->timestamp, 123000000.0f);
@@ -483,6 +497,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -499,6 +514,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalShiftRight);
@@ -515,6 +531,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -557,6 +574,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalNumpad1);
@@ -574,6 +592,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyUndefined);
@@ -591,6 +610,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalF1);
@@ -608,6 +628,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -625,6 +646,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalShiftLeft);
@@ -644,6 +666,7 @@ typedef void (^ResponseCallback)(bool handled);
   // Because the OS no longer provides the 0x20000 (kModifierFlagShiftAny), we
   // have to simulate a keyup.
   event = [events firstObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalShiftLeft);
@@ -652,6 +675,7 @@ typedef void (^ResponseCallback)(bool handled);
   XCTAssertEqual(event->synthesized, true);
 
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalNumpad1);
@@ -669,6 +693,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalF1);
@@ -686,6 +711,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyUndefined);
@@ -702,6 +728,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -719,6 +746,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->physical, 0ull);
   XCTAssertEqual(event->logical, 0ull);
   XCTAssertEqual(event->synthesized, false);
@@ -746,6 +774,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalShiftLeft);
@@ -762,6 +791,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalShiftRight);
@@ -778,6 +808,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalShiftLeft);
@@ -794,6 +825,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalShiftRight);
@@ -829,6 +861,7 @@ typedef void (^ResponseCallback)(bool handled);
   XCTAssertEqual([events count], 3u);
 
   event = events[0].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalCapsLock);
@@ -838,6 +871,7 @@ typedef void (^ResponseCallback)(bool handled);
   XCTAssertFalse([events[0] hasCallback]);
 
   event = events[1].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalCapsLock);
@@ -847,6 +881,7 @@ typedef void (^ResponseCallback)(bool handled);
   XCTAssertFalse([events[1] hasCallback]);
 
   event = events[2].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -866,6 +901,7 @@ typedef void (^ResponseCallback)(bool handled);
                 callback:keyEventCallback];
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
@@ -882,6 +918,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events firstObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalCapsLock);
@@ -902,6 +939,7 @@ typedef void (^ResponseCallback)(bool handled);
 
   XCTAssertEqual([events count], 1u);
   event = [events firstObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeUp);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalCapsLock);
@@ -920,6 +958,7 @@ typedef void (^ResponseCallback)(bool handled);
   // consistent, and should be off.
   XCTAssertEqual([events count], 1u);
   event = [events lastObject].data;
+  XCTAssertNotEqual(event, nullptr);
   XCTAssertEqual(event->type, kFlutterKeyEventTypeDown);
   XCTAssertEqual(event->device_type, kFlutterKeyEventDeviceTypeKeyboard);
   XCTAssertEqual(event->physical, kPhysicalKeyA);
