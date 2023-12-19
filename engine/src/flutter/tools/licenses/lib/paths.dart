@@ -141,6 +141,8 @@ final Set<String> skippedPaths = <String>{
   r'third_party/dart/third_party/d3', // Siva says "that is the charting library used by the binary size tool"
   r'third_party/dart/third_party/d8', // testing tool for dart2js
   r'third_party/dart/third_party/devtools', // not linked in
+  r'third_party/dart/third_party/fallback_root_certificates/certdata.pem',
+  r'third_party/dart/third_party/fallback_root_certificates/certdata.txt',
   r'third_party/dart/third_party/firefox_jsshell', // testing tool for dart2js
   r'third_party/dart/third_party/pkg',
   r'third_party/dart/third_party/pkg_tested',
@@ -184,8 +186,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/perfetto/src/traced', // contains nothing that ends up in the binary executable
   r'third_party/perfetto/src/tracing', // contains nothing that ends up in the binary executable
   r'third_party/protobuf', // build-time dependency only
-  r'third_party/root_certificates/certdata.pem',
-  r'third_party/root_certificates/certdata.txt',
   r'third_party/vulkan-deps/glslang/LICENSE', // excluded to make sure we don't accidentally apply it as a default license
   r'third_party/vulkan-deps/glslang/src/LICENSE.txt', // redundant with licenses inside files
   r'third_party/vulkan-deps/glslang/src/glslang/OSDependent/Web', // we only use glslang in impellerc, not in web apps
