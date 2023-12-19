@@ -211,7 +211,7 @@ function shared::execute() {
   esac
 
   # Test if running as superuser – but don't warn if running within Docker or CI.
-  if [[ "$EUID" == "0" && ! -f /.dockerenv && ! -f /run/.containerenv && "$CI" != "true" && "$BOT" != "true" && "$CONTINUOUS_INTEGRATION" != "true" ]]; then
+  if [[ "$EUID" == "0" && ! -f /.dockerenv && ! -f /run/.containerenv && "$CI" != "true" && "$BOT" != "true" && "$CONTINUOUS_INTEGRATION" != "true" && ! -n $KUBERNETES_SERVICE_HOST ]]; then
     >&2 echo "   Woah! You appear to be trying to run flutter as root."
     >&2 echo "   We strongly recommend running the flutter tool without superuser privileges."
     >&2 echo "  /"
