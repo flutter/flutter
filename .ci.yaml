@@ -3273,6 +3273,7 @@ targets:
 
   - name: Mac framework_tests_libraries_leak_tracking
     recipe: flutter/flutter_drone
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 60
     properties:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
@@ -3329,6 +3330,7 @@ targets:
 
   - name: Mac framework_tests_misc_leak_tracking
     recipe: flutter/flutter_drone
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 60
     properties:
       dependencies: >-
@@ -3385,6 +3387,7 @@ targets:
 
   - name: Mac framework_tests_widgets_leak_tracking
     recipe: flutter/flutter_drone
+    bringup: true # New target: https://github.com/flutter/flutter/issues/140414
     timeout: 60
     properties:
       cpu: x86 # https://github.com/flutter/flutter/issues/119880
