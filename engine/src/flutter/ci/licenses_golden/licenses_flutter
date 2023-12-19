@@ -9271,6 +9271,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/Platfor
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/SurfaceProducerPlatformViewRenderTarget.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/SurfaceTexturePlatformViewRenderTarget.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/VirtualDisplayController.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/text/ProcessTextPlugin.java

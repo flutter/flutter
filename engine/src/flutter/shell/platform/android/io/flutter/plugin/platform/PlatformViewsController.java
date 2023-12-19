@@ -149,7 +149,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Whether software rendering is used.
   private boolean usesSoftwareRendering = false;
 
-  private static boolean enableHardwareBufferRenderingTarget = true;
+  private static boolean enableImageRenderTarget = true;
+
+  private static boolean enableSurfaceProducerRenderTarget = true;
 
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
@@ -975,7 +977,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static PlatformViewRenderTarget makePlatformViewRenderTarget(
       TextureRegistry textureRegistry) {
-    if (enableHardwareBufferRenderingTarget && Build.VERSION.SDK_INT >= 33) {
+    if (enableSurfaceProducerRenderTarget && Build.VERSION.SDK_INT >= 33) {
+      final TextureRegistry.SurfaceProducer textureEntry = textureRegistry.createSurfaceProducer();
+      Log.i(TAG, "PlatformView is using SurfaceProducer backend");
+      return new SurfaceProducerPlatformViewRenderTarget(textureEntry);
+    }
+    if (enableImageRenderTarget && Build.VERSION.SDK_INT >= 33) {
       final TextureRegistry.ImageTextureEntry textureEntry = textureRegistry.createImageTexture();
       Log.i(TAG, "PlatformView is using ImageReader backend");
       return new ImageReaderPlatformViewRenderTarget(textureEntry);

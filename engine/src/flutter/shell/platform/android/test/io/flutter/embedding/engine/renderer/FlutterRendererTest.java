@@ -451,7 +451,7 @@ public class FlutterRendererTest {
   }
 
   @Test
-  public void ImageRawSurfaceTextureProducesImageOfCorrectSize() {
+  public void ImageReaderSurfaceProducerProducesImageOfCorrectSize() {
     FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         flutterRenderer.new ImageReaderSurfaceProducer(0);
@@ -501,5 +501,35 @@ public class FlutterRendererTest {
     assertNull(texture.acquireLatestImage());
 
     texture.release();
+  }
+
+  @Test
+  public void ImageReaderSurfaceProducerSkipsFramesWhenResizeInflight() {
+    FlutterRenderer flutterRenderer = new FlutterRenderer(fakeFlutterJNI);
+    FlutterRenderer.ImageReaderSurfaceProducer texture =
+        flutterRenderer.new ImageReaderSurfaceProducer(0);
+    texture.disableFenceForTest();
+
+    // Returns a null image when one hasn't been produced.
+    assertNull(texture.acquireLatestImage());
+
+    // Give the texture an initial size.
+    texture.setSize(1, 1);
+
+    // Render a frame.
+    Surface surface = texture.getSurface();
+    assertNotNull(surface);
+    Canvas canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+
+    // Resize.
+    texture.setSize(4, 4);
+
+    // Let callbacks run.
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // We should not get a new frame because the produced frame was for the previous size.
+    assertNull(texture.acquireLatestImage());
   }
 }
