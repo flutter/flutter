@@ -525,7 +525,7 @@ final List<RegExp> csReferencesByType = <RegExp>[
   ),
 
   // MPL
-  // root_certificates
+  // fallback_root_certificates
   RegExp(
     r'/\* This Source Code Form is subject to the terms of the Mozilla Public *\n'
     r'^( \*)( )License, v\. 2\.0\. +If a copy of the MPL was not distributed with this *\n'
