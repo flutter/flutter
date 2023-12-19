@@ -482,7 +482,7 @@ Future<void> _runAndroidPreviewIntegrationToolTests() async {
   final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'android_preview_integration.shard'))
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .toList();
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
   await _runDartTest(
     _toolsPath,
