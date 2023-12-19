@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_widgets.dart';
 
@@ -27,7 +26,7 @@ class TestCustomPainter extends CustomPainter {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Do we paint when coming back from a navigation', (WidgetTester tester) async {
+  testWidgets('Do we paint when coming back from a navigation', (WidgetTester tester) async {
     final List<String> log = <String>[];
     log.add('0');
     await tester.pumpWidget(

@@ -12,6 +12,7 @@ import '_background_isolate_binary_messenger_io.dart'
 
 import 'binary_messenger.dart';
 import 'binding.dart';
+import 'debug.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
@@ -32,6 +33,17 @@ export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 /// The statistics include the total bytes transmitted and the average number of
 /// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
+bool get shouldProfilePlatformChannels => kProfilePlatformChannels || (!kReleaseMode && debugProfilePlatformChannels);
+
+/// Controls whether platform channel usage can be debugged in release mode.
+///
+/// See also:
+///
+/// * [shouldProfilePlatformChannels], which checks both
+///   [kProfilePlatformChannels] and [debugProfilePlatformChannels] for the
+///   current run mode.
+/// * [debugProfilePlatformChannels], which determines whether platform
+///   channel usage can be debugged in non-release mode.
 const bool kProfilePlatformChannels = false;
 
 bool _profilePlatformChannelsIsRunning = false;
@@ -190,7 +202,7 @@ class BasicMessageChannel<T> {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return kProfilePlatformChannels
+    return shouldProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -279,7 +291,7 @@ class MethodChannel {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return kProfilePlatformChannels
+    return shouldProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -310,7 +322,7 @@ class MethodChannel {
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
-      kProfilePlatformChannels ?
+      shouldProfilePlatformChannels ?
         await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
         await binaryMessenger.send(name, input);
     if (result == null) {

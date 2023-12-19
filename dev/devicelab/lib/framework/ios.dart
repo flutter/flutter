@@ -50,14 +50,12 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
 /// Creates and boots a new simulator, passes the new simulator's identifier to
 /// `testFunction`.
 ///
-/// Remember to call removeIOSimulator in the test teardown.
+/// Remember to call removeIOSSimulator in the test teardown.
 Future<void> testWithNewIOSSimulator(
   String deviceName,
   SimulatorFunction testFunction, {
   String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
 }) async {
-  // Xcode 11.4 simctl create makes the runtime argument optional, and defaults to latest.
-  // TODO(jmagman): Remove runtime parsing when devicelab upgrades to Xcode 11.4 https://github.com/flutter/flutter/issues/54889
   final String availableRuntimes = await eval(
     'xcrun',
     <String>[
@@ -68,11 +66,48 @@ Future<void> testWithNewIOSSimulator(
     workingDirectory: flutterDirectory.path,
   );
 
+  final String runtimesForSelectedXcode = await eval(
+    'xcrun',
+    <String>[
+      'simctl',
+      'runtime',
+      'match',
+      'list',
+      '--json',
+    ],
+    workingDirectory: flutterDirectory.path,
+  );
+
+  // Get the preferred runtime build for the selected Xcode version. Preferred
+  // means the runtime was either bundled with Xcode, exactly matched your SDK
+  // version, or it's indicated a better match for your SDK.
+  final Map<String, Object?> decodeResult = json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
+  final String? iosKey = decodeResult.keys
+      .where((String key) => key.contains('iphoneos'))
+      .firstOrNull;
+  final Object? iosDetails = decodeResult[iosKey];
+  String? runtimeBuildForSelectedXcode;
+  if (iosDetails != null && iosDetails is Map<String, Object?>) {
+    final Object? preferredBuild = iosDetails['preferredBuild'];
+    if (preferredBuild is String) {
+      runtimeBuildForSelectedXcode = preferredBuild;
+    }
+  }
+
   String? iOSSimRuntime;
 
   final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
 
+  // [availableRuntimes] may include runtime versions greater than the selected
+  // Xcode's greatest supported version. Use [runtimeBuildForSelectedXcode] when
+  // possible to pick which runtime to use.
+  // For example, iOS 17 (released with Xcode 15) may be available even if the
+  // selected Xcode version is 14.
   for (final String runtime in LineSplitter.split(availableRuntimes)) {
+    if (runtimeBuildForSelectedXcode != null &&
+        !runtime.contains(runtimeBuildForSelectedXcode)) {
+      continue;
+    }
     // These seem to be in order, so allow matching multiple lines so it grabs
     // the last (hopefully latest) one.
     final RegExpMatch? iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
@@ -82,7 +117,11 @@ Future<void> testWithNewIOSSimulator(
     }
   }
   if (iOSSimRuntime == null) {
-    throw 'No iOS simulator runtime found. Available runtimes:\n$availableRuntimes';
+    if (runtimeBuildForSelectedXcode != null) {
+      throw 'iOS simulator runtime $runtimeBuildForSelectedXcode not found. Available runtimes:\n$availableRuntimes';
+    } else {
+      throw 'No iOS simulator runtime found. Available runtimes:\n$availableRuntimes';
+    }
   }
 
   final String deviceId = await eval(
@@ -110,7 +149,7 @@ Future<void> testWithNewIOSSimulator(
 }
 
 /// Shuts down and deletes simulator with deviceId.
-Future<void> removeIOSimulator(String? deviceId) async {
+Future<void> removeIOSSimulator(String? deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',

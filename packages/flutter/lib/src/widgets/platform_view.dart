@@ -419,30 +419,6 @@ class HtmlElementView extends StatelessWidget {
   ///
   /// [onElementCreated] is called when the DOM element is created. It can be
   /// used by the app to customize the element by adding attributes and styles.
-  ///
-  /// ```dart
-  /// import 'package:flutter/widgets.dart';
-  /// import 'package:web/web.dart' as web;
-  ///
-  /// // ...
-  ///
-  /// class MyWidget extends StatelessWidget {
-  ///   const MyWidget({super.key});
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return HtmlElementView.fromTagName(
-  ///       tagName: 'div',
-  ///       onElementCreated: (Object element) {
-  ///         element as web.HTMLElement;
-  ///         element.style
-  ///             ..backgroundColor = 'blue'
-  ///             ..border = '1px solid red';
-  ///       },
-  ///     );
-  ///   }
-  /// }
-  /// ```
   factory HtmlElementView.fromTagName({
     Key? key,
     required String tagName,
@@ -1301,7 +1277,7 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
     // A call to `localToGlobal` requires waiting for a frame to render first.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       onLayout(size, localToGlobal(Offset.zero));
-    });
+    }, debugLabel: 'PlatformViewPlaceholderBox.onLayout');
   }
 }
 
@@ -1333,6 +1309,6 @@ extension on PlatformViewController {
   void disposePostFrame() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       dispose();
-    });
+    }, debugLabel: 'PlatformViewController.dispose');
   }
 }

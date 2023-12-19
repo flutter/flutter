@@ -475,11 +475,15 @@ void main() {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     final Offset center = tester.getCenter(find.text('Child 1'));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pump();
     await tester.pumpAndSettle();
 
     expect(getChildOpacityByName('Child 1'), 1);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
@@ -1253,6 +1257,7 @@ void main() {
       1: Text('Child 2'),
     };
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(

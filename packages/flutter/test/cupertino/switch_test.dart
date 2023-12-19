@@ -1095,6 +1095,7 @@ void main() {
 
   testWidgets('CupertinoSwitch is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;
     const Color focusColor = Color(0xffff0000);
@@ -1176,6 +1177,7 @@ void main() {
 
   testWidgets('CupertinoSwitch.onFocusChange callback', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    addTearDown(focusNode.dispose);
     bool focused = false;
     await tester.pumpWidget(
       Directionality(

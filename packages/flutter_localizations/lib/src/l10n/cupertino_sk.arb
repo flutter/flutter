@@ -28,13 +28,14 @@
   "cutButtonLabel": "Vystrihnúť",
   "copyButtonLabel": "Kopírovať",
   "pasteButtonLabel": "Prilepiť",
-  "selectAllButtonLabel": "Vybrať všetko",
+  "selectAllButtonLabel": "Označiť všetko",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Odmietnuť",
   "searchTextFieldPlaceholderLabel": "Hľadať",
   "noSpellCheckReplacementsLabel": "Nenašli sa žiadne náhrady",
   "menuDismissLabel": "Zavrieť ponuku",
-  "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share..."
+  "lookUpButtonLabel": "Pohľad nahor",
+  "searchWebButtonLabel": "Hľadať na webe",
+  "shareButtonLabel": "Zdieľať…",
+  "clearButtonLabel": "Clear"
 }

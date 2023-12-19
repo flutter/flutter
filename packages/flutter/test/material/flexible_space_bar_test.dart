@@ -10,11 +10,10 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -57,7 +56,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
     const double minExtent = 100.0;
     const double initExtent = 200.0;
     const double maxExtent = 300.0;
@@ -133,7 +132,7 @@ void main() {
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80451
     await tester.pumpWidget(
       MaterialApp(
@@ -168,7 +167,7 @@ void main() {
     expect(backgroundOpacity.opacity, 1.0);
   });
 
-  testWidgetsWithLeakTracking('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(
@@ -434,7 +433,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/14227
-  testWidgetsWithLeakTracking('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     late double width;
@@ -481,7 +480,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -550,7 +549,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar scaled title', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar scaled title', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     await tester.pumpWidget(
@@ -610,7 +609,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -673,7 +672,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform, useMaterial3: false),
@@ -723,7 +722,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform, useMaterial3: false),
@@ -791,7 +790,7 @@ void main() {
     expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SubCategoryScreenView(),
     ));
@@ -823,7 +822,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132030.
-  testWidgetsWithLeakTracking('FlexibleSpaceBarSettings.hasLeading provides a gap between leading and title', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBarSettings.hasLeading provides a gap between leading and title', (WidgetTester tester) async {
     final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
       currentExtent: 200.0,
       hasLeading: true,
@@ -863,7 +862,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132030.
-  testWidgetsWithLeakTracking('Long centered FlexibleSpaceBar.title respects leading widget', (WidgetTester tester) async {
+  testWidgets('Long centered FlexibleSpaceBar.title respects leading widget', (WidgetTester tester) async {
     // Test start position of a long title when the leading widget is
     // shown by default and the long title is centered.
     await tester.pumpWidget(
@@ -909,6 +908,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byType(Text)).dx, 72.0);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/135698.
+  testWidgets('_FlexibleSpaceHeaderOpacity with near zero opacity avoids compositing', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: const SliverAppBar(
+                    pinned: true,
+                    expandedHeight: 200.0,
+                    collapsedHeight: 56.0,
+                    flexibleSpace: FlexibleSpaceBar(background: SizedBox()),
+                  ),
+                ),
+              ];
+            },
+            body: const SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Placeholder(fallbackHeight: 300.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag the scroll view to the top to collapse the sliver app bar.
+    // Ensure collapsed height - current extent is near zero for the
+    // FlexibleSpaceBar to avoid compositing.
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -(200.0 - 56.08787892026129)));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.mobile());
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

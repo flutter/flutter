@@ -1631,6 +1631,14 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   final RestorableBool minuteHasError = RestorableBool(false);
 
   @override
+  void dispose() {
+    _selectedTime.dispose();
+    hourHasError.dispose();
+    minuteHasError.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -1989,6 +1997,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    controllerHasBeenSet.dispose();
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -2096,7 +2112,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 }
 
 /// Signature for when the time picker entry mode is changed.
-typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
+typedef EntryModeChangeCallback = void Function(TimePickerEntryMode mode);
 
 /// A Material Design time picker designed to appear inside a popup dialog.
 ///

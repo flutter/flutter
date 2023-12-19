@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore: deprecated_member_use
 import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import 'debug.dart';
 
+// ignore: deprecated_member_use
 export 'dart:ui' show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 /// The glue between the semantics layer and the Flutter engine.
@@ -191,7 +193,17 @@ mixin SemanticsBinding on BindingBase {
 ///
 /// To obtain a [SemanticsHandle], call [SemanticsBinding.ensureSemantics].
 class SemanticsHandle {
-  SemanticsHandle._(this._onDispose);
+  SemanticsHandle._(this._onDispose) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/semantics.dart',
+        className: '$SemanticsHandle',
+        object: this,
+      );
+    }
+  }
 
   final VoidCallback _onDispose;
 
@@ -201,6 +213,12 @@ class SemanticsHandle {
   /// framework will stop generating semantics information.
   @mustCallSuper
   void dispose() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
+
     _onDispose();
   }
 }

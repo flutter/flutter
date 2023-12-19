@@ -356,15 +356,6 @@ void main() {
 
       expect(cache.storageBaseUrl, contains('flutter_archives_v2'));
     });
-
-    test('bin/internal/engine.realm is empty', () async {
-      final FileSystem fileSystem = globals.fs;
-      final String realmFilePath = fileSystem.path.join(
-        getFlutterRoot(), 'bin', 'internal', 'engine.realm');
-      final String realm = fileSystem.file(realmFilePath).readAsStringSync().trim();
-      expect(realm, isEmpty,
-        reason: 'The checked-in engine.realm file must be empty.');
-    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {
@@ -1298,7 +1289,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool reinitialized = false;
 
   @override
-  void reinitialize() {
+  void reinitialize({FileSystem? fileSystem}) {
     reinitialized = true;
   }
 }

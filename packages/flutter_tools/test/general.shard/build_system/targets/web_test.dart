@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_js.dart' as flutter_js;
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 
 import '../../../src/common.dart';
@@ -36,14 +35,7 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
   '--packages=.dart_tool/package_config.json',
   '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-  '--multi-root-scheme',
-  'org-dartlang-sdk',
-  '--multi-root',
-  'HostArtifact.flutterWebSdk',
-  '--multi-root',
-  _kDartSdkRoot,
-  '--libraries-spec',
-  'HostArtifact.flutterWebLibrariesJson',
+  '--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
 ];
 
 const List<String> _kWasmOptLinuxArgrs = <String> [
@@ -57,10 +49,6 @@ const List<String> _kWasmOptLinuxArgrs = <String> [
   '-O3',
   '--type-merging',
 ];
-
-/// The result of calling `.parent` on a Memory directory pointing to
-/// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
-const String _kDartSdkRoot = '.';
 
 void main() {
   late Testbed testbed;
@@ -81,6 +69,8 @@ void main() {
         ..writeAsStringSync('foo:foo/lib/\n');
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.empty();
+      globals.fs.file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
+        .createSync(recursive: true);
 
       environment = Environment.test(
         globals.fs.currentDirectory,
@@ -202,7 +192,7 @@ void main() {
     expect(environment.outputDir.childFile('main.dart.js')
       .existsSync(), true);
     expect(environment.outputDir.childDirectory('assets')
-      .childFile('AssetManifest.json').existsSync(), true);
+      .childFile('AssetManifest.bin.json').existsSync(), true);
 
     // Update to arbitrary resource file triggers rebuild.
     webResources.childFile('foo.txt').writeAsStringSync('B');
@@ -1031,14 +1021,22 @@ void main() {
     environment.outputDir
       .childFile('index.html')
       .createSync(recursive: true);
+    environment.outputDir
+      .childFile('assets/index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('A');
     await WebServiceWorker(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
 
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
-    // Contains file hash for both `/` and index.html.
+    // Contains the same file hash for both `/` and the root index.html file.
+    const String rootIndexHash = 'd41d8cd98f00b204e9800998ecf8427e';
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('"/": "d41d8cd98f00b204e9800998ecf8427e"'));
+      contains('"/": "$rootIndexHash"'));
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('"index.html": "d41d8cd98f00b204e9800998ecf8427e"'));
+      contains('"index.html": "$rootIndexHash"'));
+    // Make sure `assets/index.html` has a different hash than `index.html`.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"assets/index.html": "7fc56270e7a70fa81a5935b72eacbe29"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
   }));
 
@@ -1057,41 +1055,6 @@ void main() {
     // Expected twice, once for RESOURCES and once for CORE.
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
       contains('"main.dart.js"'));
-  }));
-
-  test('flutter.js sanity checks', () => testbed.run(() {
-    final String fileGeneratorsPath = environment.artifacts
-        .getArtifactPath(Artifact.flutterToolsFileGenerators);
-    final String flutterJsContents =
-        flutter_js.generateFlutterJsFile(fileGeneratorsPath);
-    expect(flutterJsContents, contains('"use strict";'));
-    expect(flutterJsContents, contains('main.dart.js'));
-    expect(flutterJsContents, contains('if (!("serviceWorker" in navigator))'));
-    expect(flutterJsContents, contains(r'/\.js$/,'));
-    expect(flutterJsContents, contains('flutter_service_worker.js?v='));
-    expect(flutterJsContents, contains('document.createElement("script")'));
-    expect(flutterJsContents, contains('"application/javascript"'));
-    expect(flutterJsContents, contains('const baseUri = '));
-    expect(flutterJsContents, contains('document.querySelector("base")'));
-    expect(flutterJsContents, contains('.getAttribute("href")'));
-  }));
-
-  test('flutter.js is not dynamically generated', () => testbed.run(() async {
-    globals.fs.file('bin/cache/flutter_web_sdk/canvaskit/foo')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('OL');
-
-    await WebBuiltInAssets(globals.fs, WebRendererMode.auto, isWasm: false).build(environment);
-
-    // No caching of source maps.
-    final String fileGeneratorsPath = environment.artifacts
-        .getArtifactPath(Artifact.flutterToolsFileGenerators);
-    final String flutterJsContents =
-        flutter_js.generateFlutterJsFile(fileGeneratorsPath);
-    expect(
-      environment.outputDir.childFile('flutter.js').readAsStringSync(),
-      equals(flutterJsContents),
-    );
   }));
 
   test('wasm build copies and generates specific files', () => testbed.run(() async {

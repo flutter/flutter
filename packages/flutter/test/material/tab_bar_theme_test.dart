@@ -36,6 +36,12 @@ Widget buildTabBar({
   bool isScrollable = false,
   bool useMaterial3 = false,
 }) {
+  final TabController controller = TabController(
+    length: tabs.length,
+    vsync: const TestVSync(),
+  );
+  addTearDown(controller.dispose);
+
   if (secondaryTabBar) {
     return MaterialApp(
       theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
@@ -45,7 +51,7 @@ Widget buildTabBar({
           child: TabBar.secondary(
             tabs: tabs,
             isScrollable: isScrollable,
-            controller: TabController(length: tabs.length, vsync: const TestVSync()),
+            controller: controller,
           ),
         ),
       ),
@@ -59,7 +65,7 @@ Widget buildTabBar({
         child: TabBar(
           tabs: tabs,
           isScrollable: isScrollable,
-          controller: TabController(length: tabs.length, vsync: const TestVSync()),
+          controller: controller,
         ),
       ),
     ),
@@ -301,6 +307,11 @@ void main() {
       labelStyle: themeLabelStyle,
       unselectedLabelStyle: themeUnselectedLabelStyle,
     );
+    final TabController controller = TabController(
+      length: _tabs.length,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -308,7 +319,7 @@ void main() {
         home: Scaffold(
           body: TabBar(
             tabs: _tabs,
-            controller: TabController(length: _tabs.length, vsync: const TestVSync()),
+            controller: controller,
             labelStyle: labelStyle,
             unselectedLabelStyle: unselectedLabelStyle,
           ),
@@ -341,6 +352,12 @@ void main() {
 
     const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: themeLabelPadding);
 
+    final TabController controller = TabController(
+      length: _sizedTabs.length,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: false),
@@ -350,7 +367,7 @@ void main() {
             child: TabBar(
               tabs: _sizedTabs,
               isScrollable: true,
-              controller: TabController(length: _sizedTabs.length, vsync: const TestVSync()),
+              controller: controller,
               labelPadding: labelPadding,
             ),
           ),
@@ -396,6 +413,12 @@ void main() {
 
     const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: themeLabelPadding);
 
+    final TabController controller = TabController(
+      length: _sizedTabs.length,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: true),
@@ -405,7 +428,7 @@ void main() {
             child: TabBar(
               tabs: _sizedTabs,
               isScrollable: true,
-              controller: TabController(length: _sizedTabs.length, vsync: const TestVSync()),
+              controller: controller,
               labelPadding: labelPadding,
             ),
           ),
@@ -584,6 +607,7 @@ void main() {
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -639,6 +663,7 @@ void main() {
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -683,6 +708,12 @@ void main() {
     const Color dividerColor = Color(0xff00ff00);
     const double dividerHeight = 10.0;
 
+    final TabController controller = TabController(
+      length: 3,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -695,7 +726,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
-              controller: TabController(length: 3, vsync: const TestVSync()),
+              controller: controller,
               tabs: const <Widget>[
                 Tab(text: 'Tab 1'),
                 Tab(text: 'Tab 2'),
@@ -716,6 +747,12 @@ void main() {
     const Color dividerColor = Color(0xff0000ff);
     const double dividerHeight = 8.0;
 
+    final TabController controller = TabController(
+      length: 3,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -730,7 +767,7 @@ void main() {
             bottom: TabBar(
               dividerColor: dividerColor,
               dividerHeight: dividerHeight,
-              controller: TabController(length: 3, vsync: const TestVSync()),
+              controller: controller,
               tabs: const <Widget>[
                 Tab(text: 'Tab 1'),
                 Tab(text: 'Tab 2'),
@@ -748,6 +785,12 @@ void main() {
   });
 
   testWidgets('TabBar respects TabBarTheme.tabAlignment', (WidgetTester tester) async {
+    final TabController controller1 = TabController(
+      length: 2,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller1.dispose);
+
     // Test non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
@@ -758,7 +801,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
-              controller: TabController(length: 2, vsync: const TestVSync()),
+              controller: controller1,
               tabs: const <Widget>[
                 Tab(text: 'Tab 1'),
                 Tab(text: 'Tab 3'),
@@ -778,6 +821,12 @@ void main() {
     double tabTwoRight = (availableWidth / 2) + tabTwoRect.width + kTabLabelPadding.right;
     expect(tabTwoRect.right, equals(tabTwoRight));
 
+    final TabController controller2 = TabController(
+      length: 2,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller2.dispose);
+
     // Test scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
@@ -789,7 +838,7 @@ void main() {
           appBar: AppBar(
             bottom: TabBar(
               isScrollable: true,
-              controller: TabController(length: 2, vsync: const TestVSync()),
+              controller: controller2,
               tabs: const <Widget>[
                 Tab(text: 'Tab 1'),
                 Tab(text: 'Tab 3'),
@@ -811,6 +860,12 @@ void main() {
   });
 
   testWidgets('TabBar.tabAlignment overrides TabBarTheme.tabAlignment', (WidgetTester tester) async {
+    final TabController controller1 = TabController(
+      length: 2,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller1.dispose);
+
     /// Test non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
@@ -822,7 +877,7 @@ void main() {
           appBar: AppBar(
             bottom: TabBar(
               tabAlignment: TabAlignment.center,
-              controller: TabController(length: 2, vsync: const TestVSync()),
+              controller: controller1,
               tabs: const <Widget>[
                 Tab(text: 'Tab 1'),
                 Tab(text: 'Tab 3'),
@@ -842,6 +897,12 @@ void main() {
     double tabTwoRight = (availableWidth / 2) + tabTwoRect.width + kTabLabelPadding.right;
     expect(tabTwoRect.right, equals(tabTwoRight));
 
+    final TabController controller2 = TabController(
+      length: 2,
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller2.dispose);
+
     /// Test scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
@@ -854,7 +915,7 @@ void main() {
             bottom: TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
-              controller: TabController(length: 2, vsync: const TestVSync()),
+              controller: controller2,
               tabs: const <Widget>[
                 Tab(text: 'Tab 1'),
                 Tab(text: 'Tab 3'),
@@ -1008,7 +1069,7 @@ void main() {
         );
       }
 
-      // Test tab bar with [TabBar.labeStyle] & [TabBar.unselectedLabelStyle].
+      // Test tab bar with [TabBar.labelStyle] & [TabBar.unselectedLabelStyle].
       await tester.pumpWidget(buildTabBar());
 
       IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
@@ -1156,6 +1217,7 @@ void main() {
         vsync: const TestVSync(),
         length: tabs.length,
       );
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1206,6 +1268,7 @@ void main() {
         vsync: const TestVSync(),
         length: tabs.length,
       );
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1242,6 +1305,12 @@ void main() {
     });
 
     testWidgets('TabBar respects TabBarTheme.tabAlignment', (WidgetTester tester) async {
+      final TabController controller = TabController(
+        length: 2,
+        vsync: const TestVSync(),
+      );
+      addTearDown(controller.dispose);
+
       // Test non-scrollable tab bar.
       await tester.pumpWidget(
         MaterialApp(
@@ -1252,7 +1321,7 @@ void main() {
           home: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
-                controller: TabController(length: 2, vsync: const TestVSync()),
+                controller: controller,
                 tabs: const <Widget>[
                   Tab(text: 'Tab 1'),
                   Tab(text: 'Tab 3'),
@@ -1273,6 +1342,12 @@ void main() {
     });
 
     testWidgets('TabBar.tabAlignment overrides TabBarTheme.tabAlignment', (WidgetTester tester) async {
+      final TabController controller = TabController(
+        length: 2,
+        vsync: const TestVSync(),
+      );
+      addTearDown(controller.dispose);
+
       // Test non-scrollable tab bar.
       await tester.pumpWidget(
         MaterialApp(
@@ -1284,7 +1359,7 @@ void main() {
             appBar: AppBar(
               bottom: TabBar(
                 tabAlignment: TabAlignment.center,
-                controller: TabController(length: 2, vsync: const TestVSync()),
+                controller: controller,
                 tabs: const <Widget>[
                   Tab(text: 'Tab 1'),
                   Tab(text: 'Tab 3'),
@@ -1314,6 +1389,7 @@ void main() {
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    addTearDown(controller.dispose);
 
     const Color tabBarThemeIndicatorColor = Color(0xffff0000);
 
@@ -1356,6 +1432,7 @@ void main() {
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    addTearDown(controller.dispose);
 
     const Color themeIndicatorColor = Color(0xffff0000);
     const Color tabBarThemeIndicatorColor = Color(0xffffff00);

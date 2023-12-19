@@ -900,8 +900,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   late TapGestureRecognizer _tap;
   bool _active = false;
   late RangeValues _newValues;
-  late Offset _startThumbCenter;
-  late Offset _endThumbCenter;
+  Offset _startThumbCenter = Offset.zero;
+  Offset _endThumbCenter = Offset.zero;
   Rect? overlayStartRect;
   Rect? overlayEndRect;
 
@@ -1193,6 +1193,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
 
   @override
   void dispose() {
+    _drag.dispose();
+    _tap.dispose();
     _startLabelPainter.dispose();
     _endLabelPainter.dispose();
     super.dispose();

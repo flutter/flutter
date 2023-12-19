@@ -230,9 +230,9 @@ install(DIRECTORY "${NATIVE_ASSETS_DIR}"
         expect(testLogger.statusText, isEmpty);
       });
 
-      // TODO(dacoharkes): Add test for Windows when adding Windows support. https://github.com/flutter/flutter/issues/129757
-      testWithoutContext('is migrated to copy native assets', () {
-        managedCmakeFile.writeAsStringSync(r'''
+      for (final String os in <String>['linux', 'windows']) {
+        testWithoutContext('is migrated to copy native assets', () {
+          managedCmakeFile.writeAsStringSync(r'''
 foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
   install(FILES "${bundled_library}"
     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
@@ -249,38 +249,40 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 ''');
 
-        final CmakeNativeAssetsMigration cmakeProjectMigration = CmakeNativeAssetsMigration(
-          mockCmakeProject,
-          'linux',
-          testLogger,
-        );
-        cmakeProjectMigration.migrate();
+          final CmakeNativeAssetsMigration cmakeProjectMigration = CmakeNativeAssetsMigration(
+            mockCmakeProject,
+            os,
+            testLogger,
+          );
+          cmakeProjectMigration.migrate();
 
-        expect(managedCmakeFile.readAsStringSync(), r'''
-foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
-  install(FILES "${bundled_library}"
-    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+          expect(managedCmakeFile.readAsStringSync(), '''
+foreach(bundled_library \${PLUGIN_BUNDLED_LIBRARIES})
+  install(FILES "\${bundled_library}"
+    DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"
     COMPONENT Runtime)
 endforeach(bundled_library)
 
 # Copy the native assets provided by the build.dart from all packages.
-set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
-install(DIRECTORY "${NATIVE_ASSETS_DIR}"
-   DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-   COMPONENT Runtime)
+set(NATIVE_ASSETS_DIR "\${PROJECT_BUILD_DIR}native_assets/$os/")
+install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
+  DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
 
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.
 set(FLUTTER_ASSET_DIR_NAME "flutter_assets")
 install(CODE "
-  file(REMOVE_RECURSE \"${INSTALL_BUNDLE_DATA_DIR}/${FLUTTER_ASSET_DIR_NAME}\")
+  file(REMOVE_RECURSE \\"\${INSTALL_BUNDLE_DATA_DIR}/\${FLUTTER_ASSET_DIR_NAME}\\")
   " COMPONENT Runtime)
-install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
-  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
+install(DIRECTORY "\${PROJECT_BUILD_DIR}/\${FLUTTER_ASSET_DIR_NAME}"
+  DESTINATION "\${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 ''');
 
-        expect(testLogger.statusText, contains('CMake missing install() NATIVE_ASSETS_DIR command, updating.'));
-      });
+          expect(testLogger.statusText,
+              contains('CMake missing install() NATIVE_ASSETS_DIR command, updating.'));
+        });
+      }
     });
   });
 }

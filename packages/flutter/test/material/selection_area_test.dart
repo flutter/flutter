@@ -8,7 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
@@ -18,7 +17,7 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('SelectionArea uses correct selection controls', (WidgetTester tester) async {
+  testWidgets('SelectionArea uses correct selection controls', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SelectionArea(
         child: Text('abc'),
@@ -40,7 +39,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123378
     await tester.pumpWidget(
       const MaterialApp(
@@ -71,7 +70,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/111370
-  testWidgetsWithLeakTracking('Handle is correctly transformed when the text is inside of a FittedBox ',(WidgetTester tester) async {
+  testWidgets('Handle is correctly transformed when the text is inside of a FittedBox ',(WidgetTester tester) async {
       final Key textKey = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -90,7 +89,7 @@ void main() {
         ),
       );
 
-      final TestGesture longpress = await tester.startGesture(const Offset(10, 10));
+      final TestGesture longpress = await tester.startGesture(tester.getCenter(find.byType(Text)));
       addTearDown(longpress.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await longpress.up();
@@ -128,7 +127,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
-  testWidgetsWithLeakTracking('builds the default context menu by default', (WidgetTester tester) async {
+  testWidgets('builds the default context menu by default', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -151,6 +150,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
@@ -158,7 +159,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('builds a custom context menu if provided', (WidgetTester tester) async {
+  testWidgets('builds a custom context menu if provided', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -189,6 +190,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
@@ -197,7 +200,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
     SelectedContent? content;
 
     await tester.pumpWidget(MaterialApp(
@@ -220,8 +223,14 @@ void main() {
 
     // Backwards selection.
     await gesture.down(textOffsetToPosition(paragraph, 3));
-    await tester.pumpAndSettle();
-    expect(content, isNull);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+
+    await gesture.down(textOffsetToPosition(paragraph, 3));
+    await tester.pump();
     await gesture.moveTo(textOffsetToPosition(paragraph, 0));
     await gesture.up();
     await tester.pump();
@@ -229,7 +238,7 @@ void main() {
     expect(content!.plainText, 'How');
   });
 
-  testWidgetsWithLeakTracking('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -262,6 +271,7 @@ void main() {
     await gesture.up();
     final List<TextBox> boxes = paragraph2.getBoxesForSelection(paragraph2.selections[0]);
     expect(boxes.length, 1);
+    await tester.pumpAndSettle();
     // There is a selection now.
     // We check the presence of the copy button to make sure the selection toolbar
     // is showing.

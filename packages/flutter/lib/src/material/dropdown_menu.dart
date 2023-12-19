@@ -21,9 +21,16 @@ import 'text_field.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+/// A callback function that returns the index of the item that matches the
+/// current contents of a text field.
+///
+/// If a match doesn't exist then null must be returned.
+///
+/// Used by [DropdownMenu.searchCallback].
+typedef SearchCallback<T> = int? Function(List<DropdownMenuEntry<T>> entries, String query);
 
 // Navigation shortcuts to move the selected menu items up or down.
-Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
+final Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent> {
   LogicalKeySet(LogicalKeyboardKey.arrowUp): const _ArrowUpIntent(),
   LogicalKeySet(LogicalKeyboardKey.arrowDown): const _ArrowDownIntent(),
 };
@@ -150,6 +157,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.onSelected,
     this.requestFocusOnTap,
     this.expandedInsets,
+    this.searchCallback,
     required this.dropdownMenuEntries,
   });
 
@@ -303,6 +311,34 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Defaults to null.
   final EdgeInsets? expandedInsets;
 
+  /// When  [DropdownMenu.enableSearch] is true, this callback is used to compute
+  /// the index of the search result to be highlighted.
+  ///
+  /// {@tool snippet}
+  ///
+  /// In this example the `searchCallback` returns the index of the search result
+  /// that exactly matches the query.
+  ///
+  /// ```dart
+  /// DropdownMenu<Text>(
+  ///   searchCallback: (List<DropdownMenuEntry<Text>> entries, String query) {
+  ///     if (query.isEmpty) {
+  ///       return null;
+  ///     }
+  ///     final int index = entries.indexWhere((DropdownMenuEntry<Text> entry) => entry.label == query);
+  ///
+  ///     return index != -1 ? index : null;
+  ///   },
+  ///   dropdownMenuEntries: const <DropdownMenuEntry<Text>>[],
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to null. If this is null and [DropdownMenu.enableSearch] is true,
+  /// the default function will return the index of the first matching result
+  /// which contains the contents of the text input field.
+  final SearchCallback<T>? searchCallback;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -312,18 +348,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _leadingKey = GlobalKey();
   late List<GlobalKey> buttonItemKeys;
   final MenuController _controller = MenuController();
-  late final TextEditingController _textEditingController;
   late bool _enableFilter;
   late List<DropdownMenuEntry<T>> filteredEntries;
   List<Widget>? _initialMenu;
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
+  TextEditingController? _localTextEditingController;
+  TextEditingController get _textEditingController {
+    return widget.controller ?? (_localTextEditingController ??= TextEditingController());
+  }
 
   @override
   void initState() {
     super.initState();
-    _textEditingController = widget.controller ?? TextEditingController();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
@@ -331,16 +369,30 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
     if (index != -1) {
-      _textEditingController.text = filteredEntries[index].label;
-      _textEditingController.selection =
-          TextSelection.collapsed(offset: _textEditingController.text.length);
+      _textEditingController.value = TextEditingValue(
+        text: filteredEntries[index].label,
+        selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+      );
     }
     refreshLeadingPadding();
   }
 
   @override
+  void dispose() {
+    _localTextEditingController?.dispose();
+    _localTextEditingController = null;
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      if (widget.controller != null) {
+        _localTextEditingController?.dispose();
+        _localTextEditingController = null;
+      }
+    }
     if (oldWidget.enableSearch != widget.enableSearch) {
       if (!widget.enableSearch) {
         currentHighlight = null;
@@ -358,9 +410,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.initialSelection != widget.initialSelection) {
       final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
       if (index != -1) {
-        _textEditingController.text = filteredEntries[index].label;
-        _textEditingController.selection =
-            TextSelection.collapsed(offset: _textEditingController.text.length);
+        _textEditingController.value = TextEditingValue(
+          text: filteredEntries[index].label,
+          selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+        );
       }
     }
   }
@@ -387,7 +440,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
-    });
+    }, debugLabel: 'DropdownMenu.refreshLeadingPadding');
   }
 
   void scrollToHighlight() {
@@ -396,7 +449,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       if (highlightContext != null) {
         Scrollable.ensureVisible(highlightContext);
       }
-    });
+    }, debugLabel: 'DropdownMenu.scrollToHighlight');
   }
 
   double? getWidth(GlobalKey key) {
@@ -427,7 +480,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   List<Widget> _buildButtons(
     List<DropdownMenuEntry<T>> filteredEntries,
-    TextEditingController textEditingController,
     TextDirection textDirection,
     { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
@@ -483,9 +535,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         trailingIcon: entry.trailingIcon,
         onPressed: entry.enabled
           ? () {
-              textEditingController.text = entry.label;
-              textEditingController.selection =
-                TextSelection.collapsed(offset: textEditingController.text.length);
+              _textEditingController.value = TextEditingValue(
+                text: entry.label,
+                selection: TextSelection.collapsed(offset: entry.label.length),
+              );
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
             }
@@ -499,37 +552,43 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleUpKeyInvoke(_) => setState(() {
-    if (!_menuHasEnabledItem || !_controller.isOpen) {
-      return;
-    }
-    _enableFilter = false;
-    currentHighlight ??= 0;
-    currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
-    while (!filteredEntries[currentHighlight!].enabled) {
+  void handleUpKeyInvoke(_) {
+    setState(() {
+      if (!_menuHasEnabledItem || !_controller.isOpen) {
+        return;
+      }
+      _enableFilter = false;
+      currentHighlight ??= 0;
       currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
-    }
-    final String currentLabel = filteredEntries[currentHighlight!].label;
-    _textEditingController.text = currentLabel;
-    _textEditingController.selection =
-      TextSelection.collapsed(offset: _textEditingController.text.length);
-  });
+      while (!filteredEntries[currentHighlight!].enabled) {
+        currentHighlight = (currentHighlight! - 1) % filteredEntries.length;
+      }
+      final String currentLabel = filteredEntries[currentHighlight!].label;
+      _textEditingController.value = TextEditingValue(
+        text: currentLabel,
+        selection: TextSelection.collapsed(offset: currentLabel.length),
+      );
+    });
+  }
 
-  void handleDownKeyInvoke(_) => setState(() {
-    if (!_menuHasEnabledItem || !_controller.isOpen) {
-      return;
-    }
-    _enableFilter = false;
-    currentHighlight ??= -1;
-    currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
-    while (!filteredEntries[currentHighlight!].enabled) {
+  void handleDownKeyInvoke(_) {
+    setState(() {
+      if (!_menuHasEnabledItem || !_controller.isOpen) {
+        return;
+      }
+      _enableFilter = false;
+      currentHighlight ??= -1;
       currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
-    }
-    final String currentLabel = filteredEntries[currentHighlight!].label;
-    _textEditingController.text = currentLabel;
-    _textEditingController.selection =
-      TextSelection.collapsed(offset: _textEditingController.text.length);
-  });
+      while (!filteredEntries[currentHighlight!].enabled) {
+        currentHighlight = (currentHighlight! + 1) % filteredEntries.length;
+      }
+      final String currentLabel = filteredEntries[currentHighlight!].label;
+      _textEditingController.value = TextEditingValue(
+        text: currentLabel,
+        selection: TextSelection.collapsed(offset: currentLabel.length),
+      );
+    });
+  }
 
   void handlePressed(MenuController controller) {
     if (controller.isOpen) {
@@ -545,17 +604,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   @override
-  void dispose() {
-    if (widget.controller == null) {
-      _textEditingController.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, _textEditingController, textDirection, enableScrollToHighlight: false);
+    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, textDirection, enableScrollToHighlight: false);
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
@@ -564,13 +615,17 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     }
 
     if (widget.enableSearch) {
-      currentHighlight = search(filteredEntries, _textEditingController);
+      if (widget.searchCallback != null) {
+        currentHighlight = widget.searchCallback!.call(filteredEntries, _textEditingController.text);
+      } else {
+        currentHighlight = search(filteredEntries, _textEditingController);
+      }
       if (currentHighlight != null) {
         scrollToHighlight();
       }
     }
 
-    final List<Widget> menu = _buildButtons(filteredEntries, _textEditingController, textDirection, focusedIndex: currentHighlight);
+    final List<Widget> menu = _buildButtons(filteredEntries, textDirection, focusedIndex: currentHighlight);
 
     final TextStyle? effectiveTextStyle = widget.textStyle ?? theme.textStyle ?? defaults.textStyle;
 
@@ -630,9 +685,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               if (currentHighlight != null) {
                 final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
                 if (entry.enabled) {
-                  _textEditingController.text = entry.label;
-                  _textEditingController.selection =
-                      TextSelection.collapsed(offset: _textEditingController.text.length);
+                  _textEditingController.value = TextEditingValue(
+                    text: entry.label,
+                    selection: TextSelection.collapsed(offset: entry.label.length),
+                  );
                   widget.onSelected?.call(entry.value);
                 }
               } else {
