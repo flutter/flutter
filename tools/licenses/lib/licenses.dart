@@ -1295,8 +1295,8 @@ class MozillaLicense extends License {
 
   @override
   Assignment assignLicenses(String target, LicenseSource source) {
-    if (source.libraryName != 'root_certificates') {
-      throw 'Only root_certificates is allowed to use the MPL.';
+    if (source.libraryName != 'fallback_root_certificates') {
+      throw 'Only fallack_root_certificates is allowed to use the MPL.';
     }
     return Assignment(this, target, source);
   }
