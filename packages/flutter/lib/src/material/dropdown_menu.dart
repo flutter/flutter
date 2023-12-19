@@ -881,19 +881,17 @@ class _RenderDropdownMenuBody extends RenderBox
     );
 
     while (child != null) {
-      if (child == firstChild) {
-        final Size childSize = child.getDryLayout(innerConstraints);
-        maxHeight ??= childSize.height;
-        final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-        continue;
-      }
       final Size childSize = child.getDryLayout(innerConstraints);
       final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
-      childParentData.offset = Offset.zero;
-      maxWidth = math.max(maxWidth, childSize.width);
-      maxHeight ??= childSize.height;
+
+      if (child == firstChild) {
+        maxHeight ??= childSize.height;
+      } else {
+        childParentData.offset = Offset.zero;
+        maxWidth = math.max(maxWidth, childSize.width);
+        maxHeight ??= childSize.height;
+      }
+
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
