@@ -40,7 +40,7 @@ void main() {
 
     Object? exception;
     try {
-      await future.whenComplete(() { // ignore: void_checks, https://github.com/dart-lang/linter/issues/1675
+      await future.whenComplete(() {
         throw ArgumentError();
       });
       // Unreached.
