@@ -3909,6 +3909,52 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClipped) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
+  std::shared_ptr<Texture> boston = CreateTextureForFixture("boston.jpg");
+
+  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+    const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+    const Entity::TileMode tile_modes[] = {
+        Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
+        Entity::TileMode::kMirror, Entity::TileMode::kDecal};
+
+    static float rotation = 0;
+    static int selected_tile_mode = 3;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
+      ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                   sizeof(tile_mode_names) / sizeof(char*));
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    Rect bounds =
+        Rect::MakeXYWH(0, 0, boston->GetSize().width, boston->GetSize().height);
+    Vector2 image_center = Vector2(bounds.GetSize() / 2);
+    Paint paint = {.image_filter =
+                       ImageFilter::MakeBlur(Sigma(20.0), Sigma(20.0),
+                                             FilterContents::BlurStyle::kNormal,
+                                             tile_modes[selected_tile_mode])};
+    auto [handle_a, handle_b] = IMPELLER_PLAYGROUND_LINE(
+        Point(362, 309), Point(662, 459), 20, Color::Red(), Color::Red());
+    Vector2 center = Vector2(1024, 768) / 2;
+    canvas.Scale(GetContentScale());
+    canvas.ClipRect(
+        Rect::MakeLTRB(handle_a.x, handle_a.y, handle_b.x, handle_b.y));
+    canvas.Translate({center.x, center.y, 0});
+    canvas.Scale({0.6, 0.6, 1});
+    canvas.Rotate(Degrees(rotation));
+
+    canvas.DrawImageRect(std::make_shared<Image>(boston), /*source=*/bounds,
+                         /*dest=*/bounds.Shift(-image_center), paint);
+    return canvas.EndRecordingAsPicture();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, SubpassWithClearColorOptimization) {
   Canvas canvas;
 
