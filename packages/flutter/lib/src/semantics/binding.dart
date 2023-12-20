@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: deprecated_member_use
 import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/services.dart';
 
 import 'debug.dart';
 
-// ignore: deprecated_member_use
 export 'dart:ui' show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
 
 /// The glue between the semantics layer and the Flutter engine.

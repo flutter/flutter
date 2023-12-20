@@ -490,7 +490,6 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isFalse);
-    // ignore: avoid_dynamic_calls
     final CurvedAnimation position = (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
     expect(position.value, lessThan(0.5));
     await tester.pump();
