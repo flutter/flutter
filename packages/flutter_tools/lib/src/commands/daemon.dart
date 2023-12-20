@@ -416,40 +416,127 @@ class DaemonDomain extends Domain {
   /// is correct.
   Future<Map<String, Object>> getSupportedPlatforms(Map<String, Object?> args) async {
     final String? projectRoot = _getStringArg(args, 'projectRoot', required: true);
-    final List<String> result = <String>[];
+    final List<String> platforms = <String>[];
+    final Map<String, Object> platformTypesMap = <String, Object>{};
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
       final Set<SupportedPlatform> supportedPlatforms = flutterProject.getSupportedPlatforms().toSet();
-      if (featureFlags.isLinuxEnabled && supportedPlatforms.contains(SupportedPlatform.linux)) {
-        result.add('linux');
+
+      void handlePlatformType(
+        PlatformType platform,
+      ) {
+        bool isSupported = true;
+        bool canBeEnabledWithCreate = true;
+        final List<String> reasons = <String>[];
+        switch (platform) {
+          case PlatformType.linux:
+            if (!featureFlags.isLinuxEnabled) {
+              isSupported = false;
+              reasons.add('the Linux feature is not enabled ("flutter config --enable-linux-desktop")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.linux)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have a Linux platform directory');
+            }
+          case PlatformType.macos:
+            if (!featureFlags.isMacOSEnabled) {
+              isSupported = false;
+              reasons.add('the macOS feature is not enabled ("flutter config --enable-macos-desktop")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.macos)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have a macOS platform directory');
+            }
+          case PlatformType.windows:
+            if (!featureFlags.isWindowsEnabled) {
+              isSupported = false;
+              reasons.add('the Windows feature is not enabled ("flutter config --enable-windows-desktop")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have a Windows platform directory');
+            }
+          case PlatformType.ios:
+            if (!featureFlags.isIOSEnabled) {
+              isSupported = false;
+              reasons.add('the iOS feature is not enabled ("flutter config --enable-ios")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.ios)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have an iOS platform directory');
+            }
+          case PlatformType.android:
+            if (!featureFlags.isAndroidEnabled) {
+              isSupported = false;
+              reasons.add('the Android feature is not enabled ("flutter config --enable-android")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.android)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have an Android platform directory');
+            }
+          case PlatformType.web:
+            if (!featureFlags.isWebEnabled) {
+              isSupported = false;
+              reasons.add('the Web feature is not enabled ("flutter config --enable-web")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.web)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have a Web platform directory');
+            }
+          case PlatformType.fuchsia:
+            if (!featureFlags.isFuchsiaEnabled) {
+              isSupported = false;
+              reasons.add('the Fuchsia feature is not enabled ("flutter config --enable-fuchsia")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have a Fuchsia platform directory');
+            }
+          case PlatformType.custom:
+            if (!featureFlags.areCustomDevicesEnabled) {
+              isSupported = false;
+              reasons.add('the custom-devices feature is not enabled ("flutter config --enable-custom-devices")');
+              canBeEnabledWithCreate = false;
+            }
+          case PlatformType.windowsPreview:
+            // TODO check for plugins for preview
+            if (!featureFlags.isPreviewDeviceEnabled) {
+              isSupported = false;
+              reasons.add('the flutter-preview feature is not enabled ("flutter config --enable-flutter-preview")');
+              canBeEnabledWithCreate = false;
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
+              isSupported = false;
+              reasons.add('the current Flutter project does not have a Windows platform directory');
+            }
+        }
+
+        if (isSupported) {
+          platforms.add(platform.name);
+          platformTypesMap[platform.name] = const <String, Object>{
+            'isSupported': true,
+          };
+        } else {
+          platformTypesMap[platform.name] = <String, Object>{
+            'isSupported': false,
+            'reason': reasons.join(' and '),
+            'canBeEnabledWithCreate': canBeEnabledWithCreate,
+          };
+        }
       }
-      if (featureFlags.isMacOSEnabled && supportedPlatforms.contains(SupportedPlatform.macos)) {
-        result.add('macos');
-      }
-      if (featureFlags.isWindowsEnabled && supportedPlatforms.contains(SupportedPlatform.windows)) {
-        result.add('windows');
-      }
-      if (featureFlags.isIOSEnabled && supportedPlatforms.contains(SupportedPlatform.ios)) {
-        result.add('ios');
-      }
-      if (featureFlags.isAndroidEnabled && supportedPlatforms.contains(SupportedPlatform.android)) {
-        result.add('android');
-      }
-      if (featureFlags.isWebEnabled && supportedPlatforms.contains(SupportedPlatform.web)) {
-        result.add('web');
-      }
-      if (featureFlags.isFuchsiaEnabled && supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
-        result.add('fuchsia');
-      }
-      if (featureFlags.areCustomDevicesEnabled) {
-        result.add('custom');
-      }
-      // TODO check for plugins
-      if (featureFlags.isPreviewDeviceEnabled && supportedPlatforms.contains(SupportedPlatform.windows)) {
-        result.add('windowsPreview');
-      }
+
+      PlatformType.values.forEach(handlePlatformType);
+
       return <String, Object>{
-        'platforms': result,
+        'platforms': platforms,
+        'platformTypes': platformTypesMap,
       };
     } on Exception catch (err, stackTrace) {
       sendEvent('log', <String, Object?>{
@@ -459,11 +546,12 @@ class DaemonDomain extends Domain {
       });
       // On any sort of failure, fall back to Android and iOS for backwards
       // compatibility.
-      return const <String, Object>{
-        'platforms': <String>[
+      return <String, Object>{
+        'platforms': const <String>[
           'android',
           'ios',
         ],
+        // TODO figure out platformTypesMap
       };
     }
   }

@@ -125,7 +125,47 @@ void main() {
 
       expect(response.data['id'], 0);
       expect(response.data['result'], isNotEmpty);
-      expect((response.data['result']! as Map<String, Object?>)['platforms'], const <String>{'macos', 'preview'});
+      expect(
+        response.data['result']! as Map<String, Object?>,
+        const <String, Object?>{
+          'platforms': <String>['macos', 'windows', 'windowsPreview'],
+          'platformTypes': <String, Object>{
+            'web': <String, Object>{
+              'isSupported': false,
+              'reason': 'the Web feature is not enabled ("flutter config --enable-web")',
+              'canBeEnabledWithCreate': false,
+            },
+            'android': <String, Object>{
+              'isSupported': false,
+              'reason': 'the Android feature is not enabled ("flutter config --enable-android")',
+              'canBeEnabledWithCreate': false,
+            },
+            'ios': <String, Object>{
+              'isSupported': false,
+              'reason': 'the iOS feature is not enabled ("flutter config --enable-ios")',
+              'canBeEnabledWithCreate': false,
+            },
+            'linux': <String, Object>{
+              'isSupported': false,
+              'reason': 'the Linux feature is not enabled ("flutter config --enable-linux-desktop")',
+              'canBeEnabledWithCreate': false,
+            },
+            'macos': <String, Object>{'isSupported': true},
+            'windows': <String, Object>{'isSupported': true},
+            'fuchsia': <String, Object>{
+              'isSupported': false,
+              'reason': 'the Fuchsia feature is not enabled ("flutter config --enable-fuchsia") and the current Flutter project does not have a Fuchsia platform directory',
+              'canBeEnabledWithCreate': false,
+            },
+            'custom': <String, Object>{
+              'isSupported': false,
+              'reason': 'the custom-devices feature is not enabled ("flutter config --enable-custom-devices")',
+              'canBeEnabledWithCreate': false,
+            },
+            'windowsPreview': <String, Object>{'isSupported': true},
+          },
+        },
+      );
     }, overrides: <Type, Generator>{
       // Disable Android/iOS and enable macOS to make sure result is consistent and defaults are tested off.
       FeatureFlags: () => TestFeatureFlags(
@@ -133,6 +173,7 @@ void main() {
         isIOSEnabled: false,
         isMacOSEnabled: true,
         isPreviewDeviceEnabled: true,
+        isWindowsEnabled: true,
       ),
     });
 
@@ -399,7 +440,7 @@ void main() {
             'platform': 'windows-x64',
             'emulator': false,
             'category': 'desktop',
-            'platformType': 'windows',
+            'platformType': 'windowsPreview',
             'ephemeral': false,
             'emulatorId': null,
             'sdk': 'preview',
