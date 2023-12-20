@@ -1308,8 +1308,21 @@ void pointer_data_packet() {
     (PointerDataPacket packet) {
     signalNativeCount(packet.data.length);
 
-    for (final pointerData in packet.data) {
+    for (final PointerData pointerData in packet.data) {
       signalNativeMessage(pointerData.toString());
+    }
+  };
+
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+void pointer_data_packet_view_id() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
+    assert(packet.data.length == 1);
+
+    for (final PointerData pointerData in packet.data) {
+      signalNativeMessage('ViewID: ${pointerData.viewId}');
     }
   };
 

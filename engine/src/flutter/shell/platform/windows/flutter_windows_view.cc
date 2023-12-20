@@ -6,6 +6,7 @@
 
 #include <chrono>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
@@ -547,6 +548,10 @@ void FlutterWindowsView::SendPointerEventWithData(
   event.device_kind = state->device_kind;
   event.device = state->pointer_id;
   event.buttons = state->buttons;
+  // TODO(dkwingsmt): Use the correct view ID for pointer events once the
+  // Windows embedder supports multiple views.
+  // https://github.com/flutter/flutter/issues/138179
+  event.view_id = flutter::kFlutterImplicitViewId;
 
   // Set metadata that's always the same regardless of the event.
   event.struct_size = sizeof(event);

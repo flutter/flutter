@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 
+#include "flutter/common/constants.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/common/path_utils.h"
@@ -391,6 +392,9 @@ static void SendPointerEventWithData(GLFWwindow* window,
   event.y *= pixels_per_coordinate;
   event.scroll_delta_x *= pixels_per_coordinate;
   event.scroll_delta_y *= pixels_per_coordinate;
+  // The GLFW embedder doesn't support multiple views. We assume all pointer
+  // events come from the only view, the implicit view.
+  event.view_id = flutter::kFlutterImplicitViewId;
 
   FlutterEngineSendPointerEvent(controller->engine->flutter_engine, &event, 1);
 
