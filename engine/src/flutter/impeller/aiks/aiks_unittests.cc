@@ -3976,6 +3976,5 @@ TEST_P(AiksTest, SubpassWithClearColorOptimization) {
   // will be filled with NaNs and may produce a magenta texture on macOS or iOS.
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
-
 }  // namespace testing
 }  // namespace impeller
