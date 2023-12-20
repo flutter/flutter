@@ -807,7 +807,7 @@ void main() {
       expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
       expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
       expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(logger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+      expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
@@ -1357,7 +1357,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
       expect(logger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
       expect(logger.errorText, isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')));
-      expect(logger.warningText, isNot(contains("The iOS deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 8.0, but the range of supported deployment target versions is 9.0 to 14.0.99.")));
+      expect(logger.warningText, isNot(contains('but the range of supported deployment target versions is')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       Logger: () => logger,
