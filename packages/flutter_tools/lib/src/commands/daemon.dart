@@ -535,6 +535,8 @@ class DaemonDomain extends Domain {
       PlatformType.values.forEach(handlePlatformType);
 
       return <String, Object>{
+        // TODO(fujino): delete the "platforms" entry once all daemon clients
+        // have adopted "platformTypes"
         'platforms': platforms,
         'platformTypes': platformTypesMap,
       };
