@@ -553,7 +553,7 @@ class RecordingCanvas {
       return;
     }
     final RecordingCanvas pictureRecording = enginePicture.recordingCanvas!;
-    if (pictureRecording._didDraw == true) {
+    if (pictureRecording._didDraw) {
       _didDraw = true;
     }
     renderStrategy.merge(pictureRecording.renderStrategy);

@@ -32,7 +32,7 @@ final class Fixture {
       errSink: errBuffer,
       processManager: processManager,
       engine: engine,
-    ), errBuffer, outBuffer);
+    ), errBuffer);
   }
 
   /// Simulates running the tool with the given [options].
@@ -49,20 +49,16 @@ final class Fixture {
       outSink: outBuffer,
       errSink: errBuffer,
       processManager: processManager,
-    ), errBuffer, outBuffer);
+    ), errBuffer);
   }
 
   Fixture._(
     this.tool,
     this.errBuffer,
-    this.outBuffer,
   );
 
   /// The `clang-tidy` tool.
   final ClangTidy tool;
-
-  /// Captured `stdout` from the tool.
-  final StringBuffer outBuffer;
 
   /// Captured `stderr` from the tool.
   final StringBuffer errBuffer;

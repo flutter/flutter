@@ -1506,18 +1506,18 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
   /// see: https://bugs.chromium.org/p/chromium/issues/detail?id=119216#c11.
   void preventDefaultForMouseEvents() {
     subscriptions.add(
-        DomSubscription(activeDomElement, 'mousedown', (_) {
-      _.preventDefault();
+        DomSubscription(activeDomElement, 'mousedown', (DomEvent event) {
+      event.preventDefault();
     }));
 
     subscriptions.add(
-        DomSubscription(activeDomElement, 'mouseup', (_) {
-      _.preventDefault();
+        DomSubscription(activeDomElement, 'mouseup', (DomEvent event) {
+      event.preventDefault();
     }));
 
     subscriptions.add(
-        DomSubscription(activeDomElement, 'mousemove', (_) {
-      _.preventDefault();
+        DomSubscription(activeDomElement, 'mousemove', (DomEvent event) {
+      event.preventDefault();
     }));
   }
 }

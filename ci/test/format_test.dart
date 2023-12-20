@@ -6,43 +6,34 @@ import 'dart:io' as io;
 
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
-import 'package:process_runner/process_runner.dart';
 
 import '../bin/format.dart' as target;
 
 final io.File script = io.File.fromUri(io.Platform.script).absolute;
 final io.Directory repoDir = script.parent.parent.parent;
-final ProcessPool pool = ProcessPool(
-  numWorkers: 1,
-  processRunner: ProcessRunner(defaultWorkingDirectory: repoDir),
-);
 
 class FileContentPair {
-  FileContentPair(this.original, this.formatted, this.fileExtension);
+  FileContentPair(this.original, this.formatted);
 
   final String original;
   final String formatted;
-  final String fileExtension;
 }
 
 final FileContentPair ccContentPair = FileContentPair(
-    'int main(){return 0;}\n', 'int main() {\n  return 0;\n}\n', '.cc');
+    'int main(){return 0;}\n', 'int main() {\n  return 0;\n}\n');
 final FileContentPair hContentPair =
-    FileContentPair('int\nmain\n()\n;\n', 'int main();\n', '.h');
+    FileContentPair('int\nmain\n()\n;\n', 'int main();\n');
 final FileContentPair gnContentPair = FileContentPair(
-    'test\n(){testvar=true}\n', 'test() {\n  testvar = true\n}\n', '.gn');
+    'test\n(){testvar=true}\n', 'test() {\n  testvar = true\n}\n');
 final FileContentPair javaContentPair = FileContentPair(
     'class Test{public static void main(String args[]){System.out.println("Test");}}\n',
-    'class Test {\n  public static void main(String args[]) {\n    System.out.println("Test");\n  }\n}\n',
-    '.java');
+    'class Test {\n  public static void main(String args[]) {\n    System.out.println("Test");\n  }\n}\n');
 final FileContentPair pythonContentPair = FileContentPair(
     "if __name__=='__main__':\n  sys.exit(\nMain(sys.argv)\n)\n",
-    "if __name__ == '__main__':\n  sys.exit(Main(sys.argv))\n",
-    '.py');
+    "if __name__ == '__main__':\n  sys.exit(Main(sys.argv))\n");
 final FileContentPair whitespaceContentPair = FileContentPair(
     'int main() {\n  return 0;       \n}\n',
-    'int main() {\n  return 0;\n}\n',
-    '.c');
+    'int main() {\n  return 0;\n}\n');
 
 class TestFileFixture {
   TestFileFixture(this.type) {
@@ -106,31 +97,26 @@ class TestFileFixture {
             path.extension(file.path) == '.cc'
                 ? ccContentPair.formatted
                 : hContentPair.formatted,
-            path.extension(file.path),
           );
         case target.FormatCheck.gn:
           return FileContentPair(
             content,
             gnContentPair.formatted,
-            path.extension(file.path),
           );
         case target.FormatCheck.java:
           return FileContentPair(
             content,
             javaContentPair.formatted,
-            path.extension(file.path),
           );
         case target.FormatCheck.python:
           return FileContentPair(
             content,
             pythonContentPair.formatted,
-            path.extension(file.path),
           );
         case target.FormatCheck.whitespace:
           return FileContentPair(
             content,
             whitespaceContentPair.formatted,
-            path.extension(file.path),
           );
       }
     });
