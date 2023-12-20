@@ -731,12 +731,15 @@ void testMain() {
         await renderScene(sb.build());
       }
 
-      final DomNode skPathDefs = sceneHost.querySelector('#sk_path_defs')!;
-
-      expect(skPathDefs.childNodes, hasLength(0));
-
       await renderTestScene();
-      expect(skPathDefs.childNodes, hasLength(1));
+
+      final DomElement? skPathDefs = sceneHost.querySelector('#sk_path_defs');
+      expect(
+        skPathDefs,
+        isNotNull,
+        reason: 'Should have created SVG paths after rendering the scene',
+      );
+      expect(skPathDefs!.childNodes, hasLength(1));
 
       await renderTestScene();
       expect(skPathDefs.childNodes, hasLength(1));

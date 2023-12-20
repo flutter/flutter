@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
+import '../engine.dart' show DimensionsProvider, registerHotRestartListener;
 import 'browser_detection.dart';
 import 'display.dart';
 import 'dom.dart';
@@ -59,7 +59,8 @@ base class EngineFlutterView implements ui.FlutterView {
     // by the public `EngineFlutterView` constructor).
     DomElement? hostElement,
   )   : embeddingStrategy = EmbeddingStrategy.create(hostElement: hostElement),
-        dimensionsProvider = DimensionsProvider.create(hostElement: hostElement) {
+        dimensionsProvider =
+            DimensionsProvider.create(hostElement: hostElement) {
     // The embeddingStrategy will take care of cleaning up the rootElement on
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
@@ -71,7 +72,8 @@ base class EngineFlutterView implements ui.FlutterView {
   static EngineFlutterWindow implicit(
     EnginePlatformDispatcher platformDispatcher,
     DomElement? hostElement,
-  ) => EngineFlutterWindow._(platformDispatcher, hostElement);
+  ) =>
+      EngineFlutterWindow._(platformDispatcher, hostElement);
 
   @override
   final int viewId;
@@ -101,8 +103,6 @@ base class EngineFlutterView implements ui.FlutterView {
     dimensionsProvider.close();
     pointerBinding.dispose();
     dom.rootElement.remove();
-    // TODO(harryterkelsen): What should we do about this in multi-view?
-    renderer.clearFragmentProgramCache();
     semantics.reset();
   }
 
@@ -115,7 +115,8 @@ base class EngineFlutterView implements ui.FlutterView {
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) {
-    assert(!isDisposed, 'Trying to update semantics on a disposed EngineFlutterView.');
+    assert(!isDisposed,
+        'Trying to update semantics on a disposed EngineFlutterView.');
     semantics.updateSemantics(update);
   }
 
@@ -128,7 +129,8 @@ base class EngineFlutterView implements ui.FlutterView {
 
   late final ContextMenu contextMenu = ContextMenu(dom.rootElement);
 
-  late final DomManager dom = DomManager(viewId: viewId, devicePixelRatio: devicePixelRatio);
+  late final DomManager dom =
+      DomManager(viewId: viewId, devicePixelRatio: devicePixelRatio);
 
   late final PlatformViewMessageHandler platformViewMessageHandler =
       PlatformViewMessageHandler(platformViewsContainer: dom.platformViewsHost);
@@ -137,9 +139,11 @@ base class EngineFlutterView implements ui.FlutterView {
 
   // TODO(goderbauer): Provide API to configure constraints. See also TODO in "render".
   @override
-  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
+  ViewConstraints get physicalConstraints =>
+      ViewConstraints.tight(physicalSize);
 
-  late final EngineSemanticsOwner semantics = EngineSemanticsOwner(dom.semanticsHost);
+  late final EngineSemanticsOwner semantics =
+      EngineSemanticsOwner(dom.semanticsHost);
 
   @override
   ui.Size get physicalSize {
@@ -188,7 +192,8 @@ base class EngineFlutterView implements ui.FlutterView {
   ui.GestureSettings get gestureSettings => _viewConfiguration.gestureSettings;
 
   @override
-  List<ui.DisplayFeature> get displayFeatures => _viewConfiguration.displayFeatures;
+  List<ui.DisplayFeature> get displayFeatures =>
+      _viewConfiguration.displayFeatures;
 
   @override
   EngineFlutterDisplay get display => EngineFlutterDisplay.instance;
@@ -244,11 +249,14 @@ base class EngineFlutterView implements ui.FlutterView {
     // Return false if the previous dimensions are not set.
     if (_physicalSize != null) {
       // First confirm both height and width are effected.
-      if (_physicalSize!.height != newPhysicalSize.height && _physicalSize!.width != newPhysicalSize.width) {
+      if (_physicalSize!.height != newPhysicalSize.height &&
+          _physicalSize!.width != newPhysicalSize.width) {
         // If prior to rotation height is bigger than width it should be the
         // opposite after the rotation and vice versa.
-        if ((_physicalSize!.height > _physicalSize!.width && newPhysicalSize.height < newPhysicalSize.width) ||
-            (_physicalSize!.width > _physicalSize!.height && newPhysicalSize.width < newPhysicalSize.height)) {
+        if ((_physicalSize!.height > _physicalSize!.width &&
+                newPhysicalSize.height < newPhysicalSize.width) ||
+            (_physicalSize!.width > _physicalSize!.height &&
+                newPhysicalSize.width < newPhysicalSize.height)) {
           // Rotation detected
           return true;
         }
@@ -273,7 +281,8 @@ final class _EngineFlutterViewImpl extends EngineFlutterView {
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
-final class EngineFlutterWindow extends EngineFlutterView implements ui.SingletonFlutterWindow {
+final class EngineFlutterWindow extends EngineFlutterView
+    implements ui.SingletonFlutterWindow {
   EngineFlutterWindow._(
     EnginePlatformDispatcher platformDispatcher,
     DomElement? hostElement,
@@ -320,7 +329,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   double get textScaleFactor => platformDispatcher.textScaleFactor;
 
   @override
-  bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
+  bool get nativeSpellCheckServiceDefined =>
+      platformDispatcher.nativeSpellCheckServiceDefined;
 
   @override
   bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
@@ -329,7 +339,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
 
   @override
-  ui.VoidCallback? get onTextScaleFactorChanged => platformDispatcher.onTextScaleFactorChanged;
+  ui.VoidCallback? get onTextScaleFactorChanged =>
+      platformDispatcher.onTextScaleFactorChanged;
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
     platformDispatcher.onTextScaleFactorChanged = callback;
@@ -339,7 +350,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   ui.Brightness get platformBrightness => platformDispatcher.platformBrightness;
 
   @override
-  ui.VoidCallback? get onPlatformBrightnessChanged => platformDispatcher.onPlatformBrightnessChanged;
+  ui.VoidCallback? get onPlatformBrightnessChanged =>
+      platformDispatcher.onPlatformBrightnessChanged;
   @override
   set onPlatformBrightnessChanged(ui.VoidCallback? callback) {
     platformDispatcher.onPlatformBrightnessChanged = callback;
@@ -349,7 +361,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   String? get systemFontFamily => platformDispatcher.systemFontFamily;
 
   @override
-  ui.VoidCallback? get onSystemFontFamilyChanged => platformDispatcher.onSystemFontFamilyChanged;
+  ui.VoidCallback? get onSystemFontFamilyChanged =>
+      platformDispatcher.onSystemFontFamilyChanged;
   @override
   set onSystemFontFamilyChanged(ui.VoidCallback? callback) {
     platformDispatcher.onSystemFontFamilyChanged = callback;
@@ -377,7 +390,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   }
 
   @override
-  ui.PointerDataPacketCallback? get onPointerDataPacket => platformDispatcher.onPointerDataPacket;
+  ui.PointerDataPacketCallback? get onPointerDataPacket =>
+      platformDispatcher.onPointerDataPacket;
   @override
   set onPointerDataPacket(ui.PointerDataPacketCallback? callback) {
     platformDispatcher.onPointerDataPacket = callback;
@@ -400,7 +414,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   bool get semanticsEnabled => platformDispatcher.semanticsEnabled;
 
   @override
-  ui.VoidCallback? get onSemanticsEnabledChanged => platformDispatcher.onSemanticsEnabledChanged;
+  ui.VoidCallback? get onSemanticsEnabledChanged =>
+      platformDispatcher.onSemanticsEnabledChanged;
   @override
   set onSemanticsEnabledChanged(ui.VoidCallback? callback) {
     platformDispatcher.onSemanticsEnabledChanged = callback;
@@ -415,7 +430,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   set onFrameDataChanged(ui.VoidCallback? callback) {}
 
   @override
-  ui.AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
+  ui.AccessibilityFeatures get accessibilityFeatures =>
+      platformDispatcher.accessibilityFeatures;
 
   @override
   ui.VoidCallback? get onAccessibilityFeaturesChanged =>
@@ -435,14 +451,16 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   }
 
   @override
-  ui.PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
+  ui.PlatformMessageCallback? get onPlatformMessage =>
+      platformDispatcher.onPlatformMessage;
   @override
   set onPlatformMessage(ui.PlatformMessageCallback? callback) {
     platformDispatcher.onPlatformMessage = callback;
   }
 
   @override
-  void setIsolateDebugName(String name) => ui.PlatformDispatcher.instance.setIsolateDebugName(name);
+  void setIsolateDebugName(String name) =>
+      ui.PlatformDispatcher.instance.setIsolateDebugName(name);
 
   /// Handles the browser history integration to allow users to use the back
   /// button, etc.
@@ -548,7 +566,8 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   Future<bool> handleNavigationMessage(ByteData? data) async {
     return _waitInTheLine(() async {
       final MethodCall decoded = const JSONMethodCodec().decodeMethodCall(data);
-      final Map<String, dynamic>? arguments = decoded.arguments as Map<String, dynamic>?;
+      final Map<String, dynamic>? arguments =
+          decoded.arguments as Map<String, dynamic>?;
       switch (decoded.method) {
         case 'selectMultiEntryHistory':
           await _useMultiEntryBrowserHistory();
@@ -572,7 +591,9 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
             path = Uri.decodeComponent(
               Uri(
                 path: uri.path.isEmpty ? '/' : uri.path,
-                queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+                queryParameters: uri.queryParametersAll.isEmpty
+                    ? null
+                    : uri.queryParametersAll,
                 fragment: uri.fragment.isEmpty ? null : uri.fragment,
               ).toString(),
             );
@@ -648,6 +669,7 @@ EngineFlutterWindow get window {
   );
   return _window!;
 }
+
 EngineFlutterWindow? _window;
 
 /// Initializes the [window] (aka the implicit view), if it's not already
@@ -693,10 +715,10 @@ class ViewConstraints implements ui.ViewConstraints {
   });
 
   ViewConstraints.tight(ui.Size size)
-    : minWidth = size.width,
-      maxWidth = size.width,
-      minHeight = size.height,
-      maxHeight = size.height;
+      : minWidth = size.width,
+        maxWidth = size.width,
+        minHeight = size.height,
+        maxHeight = size.height;
 
   @override
   final double minWidth;
@@ -709,15 +731,17 @@ class ViewConstraints implements ui.ViewConstraints {
 
   @override
   bool isSatisfiedBy(ui.Size size) {
-    return (minWidth <= size.width) && (size.width <= maxWidth) &&
-           (minHeight <= size.height) && (size.height <= maxHeight);
+    return (minWidth <= size.width) &&
+        (size.width <= maxWidth) &&
+        (minHeight <= size.height) &&
+        (size.height <= maxHeight);
   }
 
   @override
   bool get isTight => minWidth >= maxWidth && minHeight >= maxHeight;
 
   @override
-  ViewConstraints operator/(double factor) {
+  ViewConstraints operator /(double factor) {
     return ViewConstraints(
       minWidth: minWidth / factor,
       maxWidth: maxWidth / factor,
@@ -734,11 +758,11 @@ class ViewConstraints implements ui.ViewConstraints {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ViewConstraints
-        && other.minWidth == minWidth
-        && other.maxWidth == maxWidth
-        && other.minHeight == minHeight
-        && other.maxHeight == maxHeight;
+    return other is ViewConstraints &&
+        other.minWidth == minWidth &&
+        other.maxWidth == maxWidth &&
+        other.minHeight == minHeight &&
+        other.maxHeight == maxHeight;
   }
 
   @override
@@ -749,8 +773,10 @@ class ViewConstraints implements ui.ViewConstraints {
     if (minWidth == double.infinity && minHeight == double.infinity) {
       return 'ViewConstraints(biggest)';
     }
-    if (minWidth == 0 && maxWidth == double.infinity &&
-        minHeight == 0 && maxHeight == double.infinity) {
+    if (minWidth == 0 &&
+        maxWidth == double.infinity &&
+        minHeight == 0 &&
+        maxHeight == double.infinity) {
       return 'ViewConstraints(unconstrained)';
     }
     String describe(double min, double max, String dim) {
@@ -759,6 +785,7 @@ class ViewConstraints implements ui.ViewConstraints {
       }
       return '${min.toStringAsFixed(1)}<=$dim<=${max.toStringAsFixed(1)}';
     }
+
     final String width = describe(minWidth, maxWidth, 'w');
     final String height = describe(minHeight, maxHeight, 'h');
     return 'ViewConstraints($width, $height)';

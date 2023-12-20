@@ -440,8 +440,7 @@ class HtmlViewEmbedder {
           sceneHost.insertBefore(platformViewRoot, elementToInsertBefore);
           final RenderCanvas? overlay = _overlays[viewId];
           if (overlay != null) {
-            sceneHost.insertBefore(
-                overlay.htmlElement, elementToInsertBefore);
+            sceneHost.insertBefore(overlay.htmlElement, elementToInsertBefore);
           }
         } else {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
@@ -651,6 +650,8 @@ class HtmlViewEmbedder {
       }
     }
     _svgClipDefs.clear();
+    _svgPathDefs?.remove();
+    _svgPathDefs = null;
   }
 
   static void removeElement(DomElement element) {
