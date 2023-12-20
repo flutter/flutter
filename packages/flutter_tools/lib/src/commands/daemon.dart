@@ -535,8 +535,7 @@ class DaemonDomain extends Domain {
       PlatformType.values.forEach(handlePlatformType);
 
       return <String, Object>{
-        // TODO(fujino): delete the "platforms" entry once all daemon clients
-        // have adopted "platformTypes"
+        // TODO(fujino): delete this key https://github.com/flutter/flutter/issues/140473
         'platforms': platforms,
         'platformTypes': platformTypesMap,
       };
