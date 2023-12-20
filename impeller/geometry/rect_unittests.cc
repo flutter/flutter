@@ -492,5 +492,12 @@ TEST(RectTest, IRectExpand) {
   EXPECT_EQ(rect.Expand(ISize{-10, -10}), IRect::MakeLTRB(110, 110, 190, 190));
 }
 
+TEST(RectTest, ContainsFloatingPoint) {
+  auto rect1 =
+      Rect::MakeXYWH(472.599945f, 440.999969f, 1102.80005f, 654.000061f);
+  auto rect2 = Rect::MakeXYWH(724.f, 618.f, 600.f, 300.f);
+  EXPECT_TRUE(rect1.Contains(rect2));
+}
+
 }  // namespace testing
 }  // namespace impeller
