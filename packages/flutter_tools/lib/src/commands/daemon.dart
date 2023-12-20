@@ -506,7 +506,7 @@ class DaemonDomain extends Domain {
               canBeEnabledWithCreate = false;
             }
           case PlatformType.windowsPreview:
-            // TODO check for plugins for preview
+            // TODO(fujino): detect if there any plugins with native code
             if (!featureFlags.isPreviewDeviceEnabled) {
               isSupported = false;
               reasons.add('the flutter-preview feature is not enabled ("flutter config --enable-flutter-preview")');
@@ -548,12 +548,15 @@ class DaemonDomain extends Domain {
       });
       // On any sort of failure, fall back to Android and iOS for backwards
       // compatibility.
-      return <String, Object>{
-        'platforms': const <String>[
+      return const <String, Object>{
+        'platforms': <String>[
           'android',
           'ios',
         ],
-        // TODO figure out platformTypesMap
+        'platformTypes': <String, Object>{
+          'android': <String, Object>{'isSupported': true},
+          'ios': <String, Object>{'isSupported': true},
+        },
       };
     }
   }
