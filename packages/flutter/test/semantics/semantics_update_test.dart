@@ -156,11 +156,9 @@ void main() {
       'Semantics('
         'container: false, '
         'properties: SemanticsProperties, '
-        'identifier: null, '// ignore: missing_whitespace_between_adjacent_strings
         'attributedLabel: "label" [SpellOutStringAttribute(TextRange(start: 0, end: 5))], '
         'attributedValue: "value" [LocaleStringAttribute(TextRange(start: 0, end: 5), en-MX)], '
-        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))], '
-        'tooltip: null'// ignore: missing_whitespace_between_adjacent_strings
+        'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]'// ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
 
@@ -171,16 +169,13 @@ void main() {
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
-  // ignore: deprecated_member_use
-  ui.SemanticsUpdateBuilderNew createSemanticsUpdateBuilder() {
+  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
     return SemanticsUpdateBuilderSpy();
   }
 }
 
-// ignore: deprecated_member_use
-class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilderNew {
-  // ignore: deprecated_member_use
-  final SemanticsUpdateBuilderNew _builder = ui.SemanticsUpdateBuilderNew();
+class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
+  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
 
   static Map<int, SemanticsNodeUpdateObservation> observations = <int, SemanticsNodeUpdateObservation>{};
 

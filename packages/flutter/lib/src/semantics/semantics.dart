@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 // ignore: deprecated_member_use
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilderNew, StringAttribute, TextDirection;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag, SemanticsUpdate, SemanticsUpdateBuilder, StringAttribute, TextDirection;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -1656,7 +1656,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    properties.add(StringProperty('identifier', identifier));
+    properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
     properties.add(StringProperty('value', value, defaultValue: null));
@@ -1667,7 +1667,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(AttributedStringProperty('attributedDecreasedValue', attributedDecreasedValue, defaultValue: null));
     properties.add(StringProperty('hint', hint, defaultValue: null));
     properties.add(AttributedStringProperty('attributedHint', attributedHint, defaultValue: null));
-    properties.add(StringProperty('tooltip', tooltip));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsHintOverrides>('hintOverrides', hintOverrides, defaultValue: null));
@@ -2750,8 +2750,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   static final Int32List _kEmptyCustomSemanticsActionsList = Int32List(0);
   static final Float64List _kIdentityTransform = _initIdentityTransform();
 
-  // ignore: deprecated_member_use
-  void _addToUpdate(SemanticsUpdateBuilderNew builder, Set<int> customSemanticsActionIdsUpdate) {
+  void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
     final Int32List childrenInTraversalOrder;
@@ -3444,8 +3443,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    // ignore: deprecated_member_use
-    final SemanticsUpdateBuilderNew builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
+    final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
     for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
