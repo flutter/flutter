@@ -9,8 +9,8 @@ class NativePluginLoader {
 
     // This string must match _kFlutterPluginsHasNativeBuildKey defined in
     // packages/flutter_tools/lib/src/flutter_plugins.dart.
-    static final String nativeBuildKey = 'native_build'
-    static final String flutterPluginsDependenciesFile = '.flutter-plugins-dependencies'
+    static final String nativeBuildKey = "native_build"
+    static final String flutterPluginsDependenciesFile = ".flutter-plugins-dependencies"
 
     /**
      * Gets the list of plugins that support the Android platform.
@@ -31,16 +31,16 @@ class NativePluginLoader {
             return nativePlugins
         }
 
-        assert meta.plugins instanceof Map<String, Object>
+        assert(meta.plugins instanceof Map<String, Object>)
         def androidPlugins = meta.plugins.android
-        assert androidPlugins instanceof List<Map>
+        assert(androidPlugins instanceof List<Map>)
         // Includes the Flutter plugins that support the Android platform.
         androidPlugins.each { Map<String, Object> androidPlugin ->
             // The property types can be found in _filterPluginsByPlatform defined in
             // packages/flutter_tools/lib/src/flutter_plugins.dart.
-            assert androidPlugin.name instanceof String
-            assert androidPlugin.path instanceof String
-            assert androidPlugin.dependencies instanceof List<String>
+            assert(androidPlugin.name instanceof String)
+            assert(androidPlugin.path instanceof String)
+            assert(androidPlugin.dependencies instanceof List<String>)
             // Skip plugins that have no native build (such as a Dart-only implementation
             // of a federated plugin).
             def needsBuild = androidPlugin.containsKey(nativeBuildKey) ? androidPlugin[nativeBuildKey] : true
@@ -106,7 +106,7 @@ class NativePluginLoader {
         File pluginsDependencyFile = new File(flutterSourceDirectory, flutterPluginsDependenciesFile)
         if (pluginsDependencyFile.exists()) {
             def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
-            assert object instanceof Map<String, Object>
+            assert(object instanceof Map<String, Object>)
             parsedFlutterPluginsDependencies = object
             return object
         }
