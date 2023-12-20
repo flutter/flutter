@@ -403,8 +403,6 @@ void main() {
       expect(paragraph.didExceedMaxLines, true);
     });
 
-    // If [maxLins] is null, this only return true when [ellipsis] not the
-    // empty String and there was a line that overflowed the maxWidth.
     test('limited by ellipsis', () {
       final RenderParagraph paragraph = createRenderParagraph(overflow: TextOverflow.ellipsis);
       layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
