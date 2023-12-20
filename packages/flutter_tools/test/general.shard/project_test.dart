@@ -1591,7 +1591,6 @@ void addGradleWrapperFile(Directory directory, String gradleVersion) {
       .childDirectory(gradle_utils.gradleWrapperDirectoryName)
       .childFile(gradle_utils.gradleWrapperPropertiesFilename)
     ..createSync(recursive: true)
-    // ignore: unnecessary_string_escapes
     ..writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists

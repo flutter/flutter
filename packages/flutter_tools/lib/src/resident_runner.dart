@@ -229,7 +229,6 @@ class FlutterDevice {
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
-  // ignore: cancel_subscriptions
   StreamSubscription<String>? _loggingSubscription;
   bool? _isListeningForVmServiceUri;
 
