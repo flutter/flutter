@@ -549,7 +549,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (pluginProject == null ||
             !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
             return
-            }
+        }
         assert(dependencyObject.dependencies instanceof List)
         dependencyObject.dependencies.each { pluginDependencyName ->
             assert(pluginDependencyName instanceof String)
