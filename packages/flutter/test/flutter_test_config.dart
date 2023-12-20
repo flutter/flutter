@@ -20,7 +20,7 @@ import '_goldens_io.dart'
 ///
 /// To enable leak tracking for an individual test file, add the line to the test `main`:
 /// `LeakTesting.settings = LeakTesting.settings.withTrackedAll()`.
-const bool _kLeakTracking = bool.fromEnvironment('flutter_test_config.leak_tracking');
+const bool _kLeakTracking = bool.fromEnvironment('LEAK_TRACKING');
 
 /// Test configuration for each test library in this directory.
 ///
