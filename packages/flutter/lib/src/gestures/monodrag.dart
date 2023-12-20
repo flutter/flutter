@@ -352,6 +352,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (_state == _DragState.ready) {
       _state = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
+      _finalPosition = _initialPosition;
       _pendingDragOffset = OffsetPair.zero;
       _globalDistanceMoved = 0.0;
       _lastPendingEventTimestamp = event.timeStamp;
