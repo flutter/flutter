@@ -570,7 +570,7 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
-    'condition': 'host_os == "win" and download_dart_sdk and not release_candidate'
+    'condition': 'host_os == "win" and download_dart_sdk'
   },
 
   # esbuild download
