@@ -280,7 +280,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.dependencies {
                 implementation("androidx.multidex:multidex:2.0.1")
             }
-            }
+        }
         // Use Kotlin DSL to handle baseApplicationName logic due to Groovy dynamic dispatch bug.
         project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "kotlin", "flutter.gradle.kts")
 
@@ -560,7 +560,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (dependencyProject == null ||
                 !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
                 return
-                }
+            }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
             pluginProject.afterEvaluate {
                 pluginProject.dependencies {
