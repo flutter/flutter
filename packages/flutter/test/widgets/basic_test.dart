@@ -15,12 +15,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
-    testWidgets('properties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('properties', (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
 
       await tester.pumpWidget(
@@ -110,7 +111,7 @@ void main() {
   });
 
   group('PhysicalShape', () {
-    testWidgets('properties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('properties', (WidgetTester tester) async {
       await tester.pumpWidget(
         const PhysicalShape(
           clipper: ShapeBorderClipper(shape: CircleBorder()),
@@ -126,7 +127,7 @@ void main() {
       expect(renderObject.elevation, 2.0);
     });
 
-    testWidgets('hit test', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('hit test', (WidgetTester tester) async {
       await tester.pumpWidget(
         PhysicalShape(
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
@@ -156,7 +157,7 @@ void main() {
   });
 
   group('FractionalTranslation', () {
-    testWidgets('hit test - entirely inside the bounding box', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('hit test - entirely inside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
       bool pointerDown = false;
 
@@ -185,7 +186,7 @@ void main() {
       expect(pointerDown, isTrue);
     });
 
-    testWidgets('hit test - partially inside the bounding box', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('hit test - partially inside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
       bool pointerDown = false;
 
@@ -214,7 +215,7 @@ void main() {
       expect(pointerDown, isTrue);
     });
 
-    testWidgets('hit test - completely outside the bounding box', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('hit test - completely outside the bounding box', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
       bool pointerDown = false;
 
@@ -243,7 +244,7 @@ void main() {
       expect(pointerDown, isTrue);
     });
 
-    testWidgets('semantics bounds are updated', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('semantics bounds are updated', (WidgetTester tester) async {
       final GlobalKey fractionalTranslationKey = GlobalKey();
       final GlobalKey textKey = GlobalKey();
       Offset offset = const Offset(0.4, 0.4);
@@ -307,7 +308,7 @@ void main() {
   });
 
   group('Semantics', () {
-    testWidgets('Semantics can set attributed Text', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Semantics can set attributed Text', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -358,7 +359,7 @@ void main() {
       expect(attributedHint.attributes[0].range, const TextRange(start:1, end: 2));
     });
 
-    testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Semantics can merge attributed strings', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -413,7 +414,7 @@ void main() {
       expect(attributedHint.attributes[1].range, const TextRange(start:6, end: 7));
     });
 
-    testWidgets('Semantics can merge attributed strings with non attributed string', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Semantics can merge attributed strings with non attributed string', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -453,7 +454,7 @@ void main() {
   });
 
   group('Row', () {
-    testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('multiple baseline aligned children', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
       // The point size of the font must be a multiple of 4 until
@@ -507,7 +508,7 @@ void main() {
       expect(tester.getTopLeft(find.byKey(key2)).dy, aboveBaseline1 - aboveBaseline2);
     });
 
-    testWidgets('baseline aligned children account for a larger, no-baseline child size', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('baseline aligned children account for a larger, no-baseline child size', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/58898
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
@@ -575,7 +576,7 @@ void main() {
     );
   });
 
-  testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
     final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
@@ -584,7 +585,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('UnconstrainedBox warns only when clipBehavior is Clip.none', (WidgetTester tester) async {
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       // Clear any render objects that were there before so that we can see more
       // than one error. Otherwise, it just throws the first one and skips the
@@ -660,7 +661,7 @@ void main() {
       mockCanvas = mockContext.canvas;
     });
 
-    testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ColoredBox - no size, no child', (WidgetTester tester) async {
       await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
@@ -681,7 +682,7 @@ void main() {
       expect(mockContext.offsets, isEmpty);
     });
 
-    testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ColoredBox - no size, child', (WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
       await tester.pumpWidget(const Flex(
@@ -705,7 +706,7 @@ void main() {
       expect(mockContext.offsets.single, Offset.zero);
     });
 
-    testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ColoredBox - size, no child', (WidgetTester tester) async {
       await tester.pumpWidget(const ColoredBox(color: colorToPaint));
       expect(find.byType(ColoredBox), findsOneWidget);
       final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
@@ -718,7 +719,7 @@ void main() {
       expect(mockContext.offsets, isEmpty);
     });
 
-    testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ColoredBox - size, child', (WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
       await tester.pumpWidget(const ColoredBox(color: colorToPaint, child: child));
@@ -734,7 +735,7 @@ void main() {
       expect(mockContext.offsets.single, Offset.zero);
     });
 
-    testWidgets('ColoredBox - debugFillProperties', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ColoredBox - debugFillProperties', (WidgetTester tester) async {
       const ColoredBox box = ColoredBox(color: colorToPaint);
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       box.debugFillProperties(properties);
@@ -742,7 +743,7 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
-  testWidgets('Inconsequential golden test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Inconsequential golden test', (WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
@@ -758,7 +759,7 @@ void main() {
     );
   });
 
-  testWidgets('IgnorePointer ignores pointers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IgnorePointer ignores pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget target({required bool ignoring}) => Align(
       alignment: Alignment.topLeft,
@@ -836,7 +837,7 @@ void main() {
   });
 
   group('IgnorePointer semantics', () {
-    testWidgets('does not change semantics when not ignoring', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not change semantics when not ignoring', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -863,7 +864,7 @@ void main() {
       );
     });
 
-    testWidgets('can toggle the ignoring.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('can toggle the ignoring.', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
       final UniqueKey key3 = UniqueKey();
@@ -982,7 +983,7 @@ void main() {
       );
     });
 
-    testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
@@ -1001,7 +1002,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores user interactions', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ignores user interactions', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -1028,7 +1029,7 @@ void main() {
     });
   });
 
-  testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget target({required bool absorbing}) => Align(
       alignment: Alignment.topLeft,
@@ -1105,7 +1106,7 @@ void main() {
     logs.clear();
   });
 
-  testWidgets('Wrap implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Wrap implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Wrap(
       spacing: 8.0, // gap between adjacent Text widget
@@ -1134,6 +1135,62 @@ void main() {
       contains('textDirection: ltr'),
       contains('verticalDirection: up'),
     ]));
+  });
+
+  testWidgetsWithLeakTracking('Row and IgnoreBaseline (control -- with baseline)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          Text(
+            'a',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'), // places baseline at y=96
+          ),
+          Text(
+            'b',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest'), // 24 above baseline, 8 below baseline
+          ),
+        ],
+      ),
+    );
+
+    final Offset aPos = tester.getTopLeft(find.text('a'));
+    final Offset bPos = tester.getTopLeft(find.text('b'));
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 96.0 - 24.0);
+  });
+
+  testWidgetsWithLeakTracking('Row and IgnoreBaseline (with ignored baseline)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          IgnoreBaseline(
+            child: Text(
+              'a',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'), // places baseline at y=96
+            ),
+          ),
+          Text(
+            'b',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest'), // 24 above baseline, 8 below baseline
+          ),
+        ],
+      ),
+    );
+
+    final Offset aPos = tester.getTopLeft(find.text('a'));
+    final Offset bPos = tester.getTopLeft(find.text('b'));
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 0.0);
   });
 }
 

@@ -116,7 +116,7 @@ class CupertinoTextThemeData with Diagnosticable {
   /// Create a [CupertinoTextThemeData].
   ///
   /// The [primaryColor] is used to derive TextStyle defaults of other attributes
-  /// such as [navActionTextStyle] and [actionTextStyle], it must not be null when
+  /// such as [navActionTextStyle] and [actionTextStyle]. It must not be null when
   /// either [navActionTextStyle] or [actionTextStyle] is null. Defaults to
   /// [CupertinoColors.systemBlue].
   ///

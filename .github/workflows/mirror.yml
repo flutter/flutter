@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Mirror action step
         id: mirror
-        uses: google/mirror-branch-action@c6b07e441a7ffc5ae15860c1d0a8107a3a151db8
+        uses: google/mirror-branch-action@30c52ee21f5d3bd7fb28b95501c11aae7f17eebb
         with:
           github-token: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN }}
           source: 'master'

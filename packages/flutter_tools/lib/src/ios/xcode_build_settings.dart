@@ -182,11 +182,14 @@ Future<List<String>> _xcodeBuildSettingsLines({
 
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
   if (localEngineInfo != null) {
-    final String engineOutPath = localEngineInfo.engineOutPath;
+    final String engineOutPath = localEngineInfo.targetOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 
-    final String localEngineName = localEngineInfo.localEngineName;
+    final String localEngineName = localEngineInfo.localTargetName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
+
+    final String localEngineHostName = localEngineInfo.localHostName;
+    xcodeBuildSettings.add('LOCAL_ENGINE_HOST=$localEngineHostName');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.

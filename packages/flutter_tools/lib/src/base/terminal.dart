@@ -76,7 +76,13 @@ abstract class Terminal {
   factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
+  ///
+  /// Check [isCliAnimationEnabled] as well before using `\r` or ANSI sequences
+  /// to perform animations.
   bool get supportsColor;
+
+  /// Whether to show animations on this terminal.
+  bool get isCliAnimationEnabled;
 
   /// Whether the current terminal can display emoji.
   bool get supportsEmoji;
@@ -152,6 +158,7 @@ class AnsiTerminal implements Terminal {
     required io.Stdio stdio,
     required Platform platform,
     DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
+    this.isCliAnimationEnabled = true,
   })
     : _stdio = stdio,
       _platform = platform,
@@ -198,6 +205,9 @@ class AnsiTerminal implements Terminal {
 
   @override
   bool get supportsColor => _platform.stdoutSupportsAnsi;
+
+  @override
+  final bool isCliAnimationEnabled;
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
@@ -275,14 +285,14 @@ class AnsiTerminal implements Terminal {
   }
 
   @override
-  String clearScreen() => supportsColor ? clear : '\n\n';
+  String clearScreen() => supportsColor && isCliAnimationEnabled ? clear : '\n\n';
 
   /// Returns ANSI codes to clear [numberOfLines] lines starting with the line
   /// the cursor is on.
   ///
   /// If the terminal does not support ANSI codes, returns an empty string.
   String clearLines(int numberOfLines) {
-    if (!supportsColor) {
+    if (!supportsColor || !isCliAnimationEnabled) {
       return '';
     }
     return cursorBeginningOfLineCode +
@@ -304,13 +314,19 @@ class AnsiTerminal implements Terminal {
       return;
     }
     final io.Stdin stdin = _stdio.stdin as io.Stdin;
-    // The order of setting lineMode and echoMode is important on Windows.
-    if (value) {
-      stdin.echoMode = false;
-      stdin.lineMode = false;
-    } else {
-      stdin.lineMode = true;
-      stdin.echoMode = true;
+
+    try {
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
+      }
+    } on io.StdinException {
+      // If the pipe to STDIN has been closed it's probably because the
+      // terminal has been closed, and there is nothing actionable to do here.
     }
   }
 
@@ -401,6 +417,9 @@ class _TestTerminal implements Terminal {
 
   @override
   final bool supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => supportsColor;
 
   @override
   final bool supportsEmoji;

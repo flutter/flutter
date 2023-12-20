@@ -289,7 +289,7 @@ class NestedScrollView extends StatefulWidget {
   /// outer scrollable over the inner when scrolling back.
   ///
   /// This is useful for an outer scrollable containing a [SliverAppBar] that
-  /// is expected to float. This cannot be null.
+  /// is expected to float.
   final bool floatHeaderSlivers;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -441,6 +441,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
   void dispose() {
     _coordinator!.dispose();
     _coordinator = null;
+    _absorberHandle.dispose();
     super.dispose();
   }
 
@@ -1620,6 +1621,13 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 ///    [SliverOverlapAbsorber] to align its children, and which shows sample
 ///    usage for this class.
 class SliverOverlapAbsorberHandle extends ChangeNotifier {
+  /// Creates a [SliverOverlapAbsorberHandle].
+  SliverOverlapAbsorberHandle() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   // Incremented when a RenderSliverOverlapAbsorber takes ownership of this
   // object, decremented when it releases it. This allows us to find cases where
   // the same handle is being passed to two render objects.
@@ -1698,8 +1706,6 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
 class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   /// Creates a sliver that absorbs overlap and reports it to a
   /// [SliverOverlapAbsorberHandle].
-  ///
-  /// The [handle] must not be null.
   const SliverOverlapAbsorber({
     super.key,
     required this.handle,
@@ -1741,8 +1747,6 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
 class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
   /// Create a sliver that absorbs overlap and reports it to a
   /// [SliverOverlapAbsorberHandle].
-  ///
-  /// The [handle] must not be null.
   ///
   /// The [sliver] must be a [RenderSliver].
   RenderSliverOverlapAbsorber({
@@ -1849,8 +1853,6 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
 class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   /// Creates a sliver that is as tall as the value of the given [handle]'s
   /// layout extent.
-  ///
-  /// The [handle] must not be null.
   const SliverOverlapInjector({
     super.key,
     required this.handle,
@@ -1891,8 +1893,6 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
 /// during a particular frame.
 class RenderSliverOverlapInjector extends RenderSliver {
   /// Creates a sliver that is as tall as the value of the given [handle]'s extent.
-  ///
-  /// The [handle] must not be null.
   RenderSliverOverlapInjector({
     required SliverOverlapAbsorberHandle handle,
   }) : _handle = handle;
@@ -2013,8 +2013,6 @@ class RenderSliverOverlapInjector extends RenderSliver {
 /// the viewport needs to recompute its layout (e.g. when it is scrolled).
 class NestedScrollViewViewport extends Viewport {
   /// Creates a variant of [Viewport] that has a [SliverOverlapAbsorberHandle].
-  ///
-  /// The [handle] must not be null.
   NestedScrollViewViewport({
     super.key,
     super.axisDirection,
@@ -2073,8 +2071,6 @@ class NestedScrollViewViewport extends Viewport {
 class RenderNestedScrollViewViewport extends RenderViewport {
   /// Create a variant of [RenderViewport] that has a
   /// [SliverOverlapAbsorberHandle].
-  ///
-  /// The [handle] must not be null.
   RenderNestedScrollViewViewport({
     super.axisDirection,
     required super.crossAxisDirection,

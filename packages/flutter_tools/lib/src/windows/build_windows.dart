@@ -18,6 +18,8 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import '../migrations/cmake_native_assets_migration.dart';
+import 'migrations/build_architecture_migration.dart';
 import 'migrations/show_window_migration.dart';
 import 'migrations/version_migration.dart';
 import 'visual_studio.dart';
@@ -52,10 +54,18 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'to learn about adding Windows support to a project.');
   }
 
+  // TODO(pbo-linaro): Add support for windows-arm64 platform, https://github.com/flutter/flutter/issues/129807
+  const TargetPlatform targetPlatform = TargetPlatform.windows_x64;
+  final Directory buildDirectory = globals.fs.directory(
+    getWindowsBuildDirectory(targetPlatform)
+  );
+
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
+    CmakeNativeAssetsMigration(windowsProject, 'windows', globals.logger),
     VersionMigration(windowsProject, globals.logger),
     ShowWindowMigration(windowsProject, globals.logger),
+    BuildArchitectureMigration(windowsProject, buildDirectory, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -79,7 +89,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 
   final String buildModeName = buildInfo.mode.cliName;
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
   );
@@ -89,6 +98,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       generator: cmakeGenerator,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
+      targetPlatform: targetPlatform,
     );
     if (visualStudio.displayVersion == '17.1.0') {
       _fixBrokenCmakeGeneration(buildDirectory);
@@ -124,7 +134,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path.join(getWindowsBuildDirectory(), 'runner', 'Release'),
+        globals.fs.path.join(
+          buildDirectory.path,
+          'runner',
+          'Release'
+        ),
       ),
       precompilerTrace: precompilerTrace,
       type: 'windows',
@@ -153,11 +167,18 @@ Future<void> _runCmakeGeneration({
   required String generator,
   required Directory buildDir,
   required Directory sourceDir,
+  required TargetPlatform targetPlatform,
 }) async {
+  if (targetPlatform != TargetPlatform.windows_x64) {
+    throwToolExit('Windows build supports only x64 target architecture');
+  }
+
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
   int result;
+  const String arch = 'x64';
+  const String flutterTargetPlatform = 'windows-x64';
   try {
     result = await globals.processUtils.stream(
       <String>[
@@ -168,6 +189,9 @@ Future<void> _runCmakeGeneration({
         buildDir.path,
         '-G',
         generator,
+        '-A',
+        arch,
+        '-DFLUTTER_TARGET_PLATFORM=$flutterTargetPlatform',
       ],
       trace: true,
     );
@@ -190,7 +214,16 @@ Future<void> _runBuild(
 
   // MSBuild sends all output to stdout, including build errors. This surfaces
   // known error patterns.
-  final RegExp errorMatcher = RegExp(r':\s*(?:warning|(?:fatal )?error).*?:');
+  final RegExp errorMatcher = RegExp(
+    <String>[
+      // Known error messages
+      r'(:\s*(?:warning|(?:fatal )?error).*?:)',
+      r'Error detected in pubspec\.yaml:',
+
+      // Known secondary error lines for pubspec.yaml
+      r'No file or variants found for asset:',
+    ].join('|'),
+  );
 
   int result;
   try {
@@ -238,11 +271,13 @@ void _writeGeneratedFlutterConfig(
   };
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
   if (localEngineInfo != null) {
-    final String engineOutPath = localEngineInfo.engineOutPath;
-    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environment['LOCAL_ENGINE'] = localEngineInfo.localEngineName;
+    final String targetOutPath = localEngineInfo.targetOutPath;
+    // Get the engine source root $ENGINE/src/out/foo_bar_baz -> $ENGINE/src
+    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(targetOutPath));
+    environment['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
+    environment['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment, globals.logger);
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

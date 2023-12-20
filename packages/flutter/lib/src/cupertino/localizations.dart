@@ -57,7 +57,6 @@ enum DatePickerDateOrder {
 ///
 ///  * [DefaultCupertinoLocalizations], the default, English-only, implementation
 ///    of this interface.
-// TODO(xster): Supply non-english strings.
 abstract class CupertinoLocalizations {
   /// Year that is shown in [CupertinoDatePicker] spinner corresponding to the
   /// given year index.
@@ -76,8 +75,24 @@ abstract class CupertinoLocalizations {
   ///
   ///  - US English: January
   ///  - Korean: 1월
+  ///  - Russian: января
   // The global version uses date symbols data from the intl package.
   String datePickerMonth(int monthIndex);
+
+  /// Month that is shown in [CupertinoDatePicker] spinner corresponding to
+  /// the given month index in [CupertinoDatePickerMode.monthYear] mode.
+  ///
+  /// This is distinct from [datePickerMonth] because in some languages, like Russian,
+  /// the name of a month takes a different form depending
+  /// on whether it is preceded by a day or whether it stands alone.
+  ///
+  /// Examples: datePickerMonth(1) in:
+  ///
+  ///  - US English: January
+  ///  - Korean: 1월
+  ///  - Russian: Январь
+  // The global version uses date symbols data from the intl package.
+  String datePickerStandaloneMonth(int monthIndex);
 
   /// Day of month that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given day index.
@@ -245,6 +260,18 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// The term used for looking up a selection.
+  // The global version uses the translated string from the arb file.
+  String get lookUpButtonLabel;
+
+  /// The term used for launching a web search on a selection.
+  // The global version uses the translated string from the arb file.
+  String get searchWebButtonLabel;
+
+  /// The term used for launching a web search on a selection.
+  // The global version uses the translated string from the arb file.
+  String get shareButtonLabel;
+
   /// The default placeholder used in [CupertinoSearchTextField].
   // The global version uses the translated string from the arb file.
   String get searchTextFieldPlaceholderLabel;
@@ -255,6 +282,10 @@ abstract class CupertinoLocalizations {
   /// A modal barrier can for example be found behind an alert or popup to block
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
+
+  /// Label read out by accessibility tools (VoiceOver) for a context menu to
+  /// indicate that a tap outside dismisses the context menu.
+  String get menuDismissLabel;
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -350,6 +381,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
+
+  @override
+  String datePickerStandaloneMonth(int monthIndex) => _months[monthIndex - 1];
 
   @override
   String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
@@ -452,10 +486,22 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get selectAllButtonLabel => 'Select All';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get searchTextFieldPlaceholderLabel => 'Search';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.

@@ -145,16 +145,20 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addFlag('enable-software-rendering',
         negatable: false,
-        help: 'Enable rendering using the Skia software backend. '
+        help: '(deprecated) Enable rendering using the Skia software backend. '
             'This is useful when testing Flutter on emulators. By default, '
             'Flutter will attempt to either use OpenGL or Vulkan and fall back '
-            'to software when neither is available.',
+            'to software when neither is available. This option is not supported '
+            'when using the Impeller rendering engine.',
+        hide: !verboseHelp,
       )
       ..addFlag('skia-deterministic-rendering',
         negatable: false,
-        help: 'When combined with "--enable-software-rendering", this should provide completely '
+        help: '(deprecated) When combined with "--enable-software-rendering", this should provide completely '
             'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
-            '(e.g. when comparing screenshots).',
+            '(e.g. when comparing screenshots). This option is not supported '
+            'when using the Impeller rendering engine.',
+        hide: !verboseHelp,
       )
       ..addMultiOption('dart-entrypoint-args',
         abbr: 'a',
@@ -311,6 +315,7 @@ class RunCommand extends RunCommandBase {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
+    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
 
@@ -680,19 +685,6 @@ class RunCommand extends RunCommandBase {
       if (hotMode) {
         if (!device.supportsHotReload) {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with "--no-hot".');
-        }
-      }
-      if (await device.isLocalEmulator && await device.supportsHardwareRendering) {
-        if (boolArg('enable-software-rendering')) {
-          globals.printStatus(
-            'Using software rendering with device ${device.name}. You may get better performance '
-            'with hardware mode by configuring hardware rendering for your device.'
-           );
-        } else {
-          globals.printStatus(
-            'Using hardware rendering with device ${device.name}. If you notice graphics artifacts, '
-            'consider enabling software rendering with "--enable-software-rendering".'
-          );
         }
       }
     }

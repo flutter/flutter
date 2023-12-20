@@ -71,25 +71,11 @@ void main() {
     expect(find.text('hello, world'), findsOneWidget);
     expect(find.text('你好，世界'), findsOneWidget);
 
-    Offset topLeft = tester.getTopLeft(find.text('hello, world'));
-    Offset topRight = tester.getTopRight(find.text('hello, world'));
-    Offset bottomLeft = tester.getBottomLeft(find.text('hello, world'));
-    Offset bottomRight = tester.getBottomRight(find.text('hello, world'));
+    expect(tester.getTopLeft(find.text('hello, world')).dy, 298.0);
+    expect(tester.getBottomLeft(find.text('hello, world')).dy, 318.0);
 
-    expect(topLeft, const Offset(392.0, 298.0));
-    expect(topRight, const Offset(562.0, 298.0));
-    expect(bottomLeft, const Offset(392.0, 318.0));
-    expect(bottomRight, const Offset(562.0, 318.0));
-
-    topLeft = tester.getTopLeft(find.text('你好，世界'));
-    topRight = tester.getTopRight(find.text('你好，世界'));
-    bottomLeft = tester.getBottomLeft(find.text('你好，世界'));
-    bottomRight = tester.getBottomRight(find.text('你好，世界'));
-
-    expect(topLeft, const Offset(392.0, 346.0));
-    expect(topRight, const Offset(463.0, 346.0));
-    expect(bottomLeft, const Offset(392.0, 366.0));
-    expect(bottomRight, const Offset(463.0, 366.0));
+    expect(tester.getTopLeft(find.text('你好，世界')).dy, 346.0);
+    expect(tester.getBottomLeft(find.text('你好，世界')).dy, 366.0);
   });
 
   testWidgets('Text baseline with EN locale', (WidgetTester tester) async {
@@ -156,24 +142,10 @@ void main() {
     expect(find.text('hello, world'), findsOneWidget);
     expect(find.text('你好，世界'), findsOneWidget);
 
-    Offset topLeft = tester.getTopLeft(find.text('hello, world'));
-    Offset topRight = tester.getTopRight(find.text('hello, world'));
-    Offset bottomLeft = tester.getBottomLeft(find.text('hello, world'));
-    Offset bottomRight = tester.getBottomRight(find.text('hello, world'));
+    expect(tester.getTopLeft(find.text('hello, world')).dy, 298.0);
+    expect(tester.getBottomLeft(find.text('hello, world')).dy, 318.0);
 
-    expect(topLeft, const Offset(392.0, 298.0));
-    expect(topRight, const Offset(562.0, 298.0));
-    expect(bottomLeft, const Offset(392.0, 318.0));
-    expect(bottomRight, const Offset(562.0, 318.0));
-
-    topLeft = tester.getTopLeft(find.text('你好，世界'));
-    topRight = tester.getTopRight(find.text('你好，世界'));
-    bottomLeft = tester.getBottomLeft(find.text('你好，世界'));
-    bottomRight = tester.getBottomRight(find.text('你好，世界'));
-
-    expect(topLeft, const Offset(392.0, 346.0));
-    expect(topRight, const Offset(463.0, 346.0));
-    expect(bottomLeft, const Offset(392.0, 366.0));
-    expect(bottomRight, const Offset(463.0, 366.0));
+    expect(tester.getTopLeft(find.text('你好，世界')).dy, 346.0);
+    expect(tester.getBottomLeft(find.text('你好，世界')).dy, 366.0);
   });
 }

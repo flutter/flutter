@@ -12,6 +12,9 @@ class _AsyncScope {
   final Zone zone;
 }
 
+// Examples can assume:
+// late WidgetTester tester;
+
 /// Utility class for all the async APIs in the `flutter_test` library.
 ///
 /// This class provides checking for asynchronous APIs, allowing the library to

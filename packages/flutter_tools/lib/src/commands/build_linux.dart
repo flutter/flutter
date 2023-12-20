@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -83,18 +85,20 @@ class BuildLinuxCommand extends BuildSubCommand {
           'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.');
     }
     displayNullSafetyMode(buildInfo);
+    final Logger logger = globals.logger;
     await buildLinux(
       flutterProject.linux,
       buildInfo,
       target: targetFile,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: globals.fs,
-        logger: globals.logger,
+        logger: logger,
         flutterUsage: globals.flutterUsage,
       ),
       needCrossBuild: needCrossBuild,
       targetPlatform: targetPlatform,
       targetSysroot: stringArg('target-sysroot')!,
+      logger: logger,
     );
     return FlutterCommandResult.success();
   }

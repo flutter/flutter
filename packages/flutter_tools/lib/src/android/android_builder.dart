@@ -43,14 +43,8 @@ abstract class AndroidBuilder {
   /// Returns a list of available build variant from the Android project.
   Future<List<String>> getBuildVariants({required FlutterProject project});
 
-  /// Returns the application id for the given build variant.
-  Future<String> getApplicationIdForVariant(
-    String buildVariant, {
-    required FlutterProject project,
-  });
-
-  /// Returns a list of app link domains for the given build variant.
-  Future<List<String>> getAppLinkDomainsForVariant(
+  /// Outputs app link related project settings into a json file.
+  Future<void> outputsAppLinkSettings(
     String buildVariant, {
     required FlutterProject project,
   });

@@ -12,8 +12,6 @@ export 'dart:ui' show TextAffinity, TextPosition;
 @immutable
 class TextSelection extends TextRange {
   /// Creates a text selection.
-  ///
-  /// The [baseOffset] and [extentOffset] arguments must not be null.
   const TextSelection({
     required this.baseOffset,
     required this.extentOffset,
@@ -29,8 +27,6 @@ class TextSelection extends TextRange {
   /// A collapsed selection starts and ends at the same offset, which means it
   /// contains zero characters but instead serves as an insertion point in the
   /// text.
-  ///
-  /// The [offset] argument must not be null.
   const TextSelection.collapsed({
     required int offset,
     this.affinity = TextAffinity.downstream,

@@ -8,11 +8,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'gesture_utils.dart';
 
 void main() {
-  testWidgets('Events bubble up the tree', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Events bubble up the tree', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -46,7 +47,7 @@ void main() {
     ]));
   });
 
-  testWidgets('Detects hover events from touch devices', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Detects hover events from touch devices', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -74,7 +75,7 @@ void main() {
   });
 
   group('transformed events', () {
-    testWidgets('simple offset for touch/signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('simple offset for touch/signal', (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -145,7 +146,7 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('scaled for touch/signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('scaled for touch/signal', (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -222,7 +223,7 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('scaled and offset for touch/signal', (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -300,7 +301,7 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('rotated for touch/signal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('rotated for touch/signal', (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -378,9 +379,12 @@ void main() {
     });
   });
 
-  testWidgets("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderPointerListener().debugFillProperties(builder);
+    final RenderPointerListener renderListener = RenderPointerListener();
+    addTearDown(renderListener.dispose);
+
+    renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -396,9 +400,13 @@ void main() {
     ]);
   });
 
-  testWidgets("RenderPointerListener's debugFillProperties when full", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("RenderPointerListener's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    RenderPointerListener(
+
+    final RenderErrorBox renderErrorBox = RenderErrorBox();
+    addTearDown(() => renderErrorBox.dispose());
+
+    final RenderPointerListener renderListener = RenderPointerListener(
       onPointerDown: (PointerDownEvent event) {},
       onPointerUp: (PointerUpEvent event) {},
       onPointerMove: (PointerMoveEvent event) {},
@@ -406,8 +414,11 @@ void main() {
       onPointerCancel: (PointerCancelEvent event) {},
       onPointerSignal: (PointerSignalEvent event) {},
       behavior: HitTestBehavior.opaque,
-      child: RenderErrorBox(),
-    ).debugFillProperties(builder);
+      child: renderErrorBox,
+    );
+    addTearDown(renderListener.dispose);
+
+    renderListener.debugFillProperties(builder);
 
     final List<String> description = builder.properties
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))

@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter, TestClipPaintingContext;
 
 void main() {
@@ -1286,7 +1286,7 @@ void main() {
       expect(controller.selectedItem, 10);
     });
 
-    testWidgets('controller hot swappable', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('controller hot swappable', (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1303,14 +1303,16 @@ void main() {
       await tester.drag(find.byType(ListWheelScrollView), const Offset(0.0, -500.0));
       await tester.pump();
 
-      final FixedExtentScrollController newController =
+      final FixedExtentScrollController controller1 =
           FixedExtentScrollController(initialItem: 30);
+      addTearDown(controller1.dispose);
 
+      // Attaching first controller.
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: ListWheelScrollView(
-            controller: newController,
+            controller: controller1,
             itemExtent: 100.0,
             children: List<Widget>.generate(100, (int index) {
               return const Placeholder();
@@ -1321,13 +1323,41 @@ void main() {
 
       // initialItem doesn't do anything since the scroll position was already
       // created.
-      expect(newController.selectedItem, 5);
+      expect(controller1.selectedItem, 5);
 
-      newController.jumpToItem(50);
-      expect(newController.selectedItem, 50);
-      expect(newController.position.pixels, 5000.0);
+      controller1.jumpToItem(50);
+      expect(controller1.selectedItem, 50);
+      expect(controller1.position.pixels, 5000.0);
 
-      // Now remove the controller
+      final FixedExtentScrollController controller2 =
+          FixedExtentScrollController(initialItem: 33);
+      addTearDown(controller2.dispose);
+
+      // Attaching the second controller.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller2,
+            itemExtent: 100.0,
+            children: List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      // First controller is now detached.
+      expect(controller1.hasClients, isFalse);
+      // initialItem doesn't do anything since the scroll position was already
+      // created.
+      expect(controller2.selectedItem, 50);
+
+      controller2.jumpToItem(40);
+      expect(controller2.selectedItem, 40);
+      expect(controller2.position.pixels, 4000.0);
+
+      // Now, use the internal controller.
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1340,9 +1370,59 @@ void main() {
         ),
       );
 
-      // Internally, that same controller is still attached and still at the
-      // same place.
-      expect(newController.selectedItem, 50);
+      // Both controllers are now detached.
+      expect(controller1.hasClients, isFalse);
+      expect(controller2.hasClients, isFalse);
+    });
+
+    testWidgetsWithLeakTracking('controller can be reused', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+          FixedExtentScrollController(initialItem: 3);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            children: List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      // selectedItem is equal to the initialItem.
+      expect(controller.selectedItem, 3);
+      expect(controller.position.pixels, 300.0);
+
+      controller.jumpToItem(10);
+      expect(controller.selectedItem, 10);
+      expect(controller.position.pixels, 1000.0);
+
+      await tester.pumpWidget(const Center());
+
+      // Controller is now detached.
+      expect(controller.hasClients, isFalse);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            children: List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      // Controller is now attached again.
+      expect(controller.hasClients, isTrue);
+      expect(controller.selectedItem, 3);
+      expect(controller.position.pixels, 300.0);
     });
   });
 
@@ -1516,6 +1596,37 @@ void main() {
     revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 500.0);
     expect(revealed.rect, const Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
+  });
+
+  testWidgets('will not assert on getOffsetToReveal Axis', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 500.0,
+            width: 300.0,
+            child: ListWheelScrollView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              itemExtent: 100.0,
+              children: List<Widget>.generate(10, (int i) {
+                return Center(
+                  child: SizedBox(
+                    height: 50.0,
+                    width: 50.0,
+                    child: Text('Item $i'),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderListWheelViewport viewport = tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
+    final RenderObject target = tester.renderObject(find.text('Item 5'));
+    viewport.getOffsetToReveal(target, 0.0, axis: Axis.horizontal);
   });
 
   testWidgets('ListWheelScrollView showOnScreen', (WidgetTester tester) async {

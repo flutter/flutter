@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/error_handling_io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -20,6 +21,7 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -378,7 +380,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleShortVersionStringKey);
     xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleVersionKey);
-    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleDisplayNameKey);
+    xcodeProjectSettingsMap['Display Name'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleDisplayNameKey)
+      ?? globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleNameKey);
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleIdentifierKey);
 
@@ -485,7 +488,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         ],
       );
     } finally {
-      generatedExportPlist?.deleteSync();
+      if (generatedExportPlist != null) {
+        ErrorHandlingFileSystem.deleteIfExists(generatedExportPlist);
+      }
       status?.stop();
     }
 
@@ -722,6 +727,21 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     if (result.output != null) {
       globals.printStatus('Built ${result.output}.');
+
+      // When an app is successfully built, record to analytics whether Impeller
+      // is enabled or disabled.
+      final BuildableIOSApp app = await buildableIOSApp;
+      final String plistPath = app.project.infoPlist.path;
+      final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+        plistPath, PlistParser.kFLTEnableImpellerKey,
+      );
+      BuildEvent(
+        impellerEnabled == false
+          ? 'plist-impeller-disabled'
+          : 'plist-impeller-enabled',
+        type: 'ios',
+        flutterUsage: globals.flutterUsage,
+      ).send();
 
       return FlutterCommandResult.success();
     }

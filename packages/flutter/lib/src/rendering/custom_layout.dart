@@ -303,8 +303,6 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
        RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   /// Creates a render object that customizes the layout of multiple children.
-  ///
-  /// The [delegate] argument must not be null.
   RenderCustomMultiChildLayoutBox({
     List<RenderBox>? children,
     required MultiChildLayoutDelegate delegate,

@@ -136,10 +136,14 @@
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "ปิด $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "แตะสองครั้งเพื่อยุบ",
+  "expansionTileCollapsedHint": "แตะสองครั้งเพื่อขยาย",
+  "expansionTileExpandedTapHint": "ยุบ",
+  "expansionTileCollapsedTapHint": "ขยายเพื่อดูรายละเอียดเพิ่มเติม",
+  "expandedHint": "ยุบ",
+  "collapsedHint": "ขยาย",
+  "menuDismissLabel": "ปิดเมนู",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

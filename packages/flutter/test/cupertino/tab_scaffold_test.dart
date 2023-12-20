@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
+import '../widgets/navigator_utils.dart';
 
 late List<int> selectedTabs;
 
@@ -1106,10 +1107,10 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems, isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
   });
 
   testWidgets('state restoration', (WidgetTester tester) async {
@@ -1214,6 +1215,133 @@ void main() {
     expect(find.text('Content 1'), findsNothing);
     expect(find.text('Content 2'), findsNothing);
     expect(find.text('Content 3'), findsNothing);
+  });
+
+  group('Android Predictive Back', () {
+    bool? lastFrameworkHandlesBack;
+    setUp(() async {
+      lastFrameworkHandlesBack = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+          if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
+            expect(methodCall.arguments, isA<bool>());
+            lastFrameworkHandlesBack = methodCall.arguments as bool;
+          }
+          return;
+        });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            'flutter/lifecycle',
+            const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+            (ByteData? data) {},
+          );
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    testWidgets('System back navigation inside of tabs', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: 200),
+            ),
+            child: CupertinoTabScaffold(
+              tabBar: _buildTabBar(),
+              tabBuilder: (BuildContext context, int index) {
+                return CupertinoTabView(
+                  builder: (BuildContext context) {
+                    return CupertinoPageScaffold(
+                      navigationBar: CupertinoNavigationBar(
+                        middle: Text('Page 1 of tab ${index + 1}'),
+                      ),
+                      child: Center(
+                        child: CupertinoButton(
+                          child: const Text('Next page'),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              CupertinoPageRoute<void>(
+                                builder: (BuildContext context) {
+                                  return CupertinoPageScaffold(
+                                    navigationBar: CupertinoNavigationBar(
+                                      middle: Text('Page 2 of tab ${index + 1}'),
+                                    ),
+                                    child: Center(
+                                      child: CupertinoButton(
+                                        child: const Text('Back'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Page 1 of tab 1'), findsOneWidget);
+      expect(find.text('Page 2 of tab 1'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Next page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsNothing);
+      expect(find.text('Page 2 of tab 1'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsOneWidget);
+      expect(find.text('Page 2 of tab 1'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Next page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsNothing);
+      expect(find.text('Page 2 of tab 1'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await tester.tap(find.text('Tab 2'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 2'), findsOneWidget);
+      expect(find.text('Page 2 of tab 2'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Tab 1'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsNothing);
+      expect(find.text('Page 2 of tab 1'), findsOneWidget);
+      expect(lastFrameworkHandlesBack, isTrue);
+
+      await simulateSystemBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 1'), findsOneWidget);
+      expect(find.text('Page 2 of tab 1'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+
+      await tester.tap(find.text('Tab 2'));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 1 of tab 2'), findsOneWidget);
+      expect(find.text('Page 2 of tab 2'), findsNothing);
+      expect(lastFrameworkHandlesBack, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.
+    );
   });
 }
 

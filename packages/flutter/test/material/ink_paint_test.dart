@@ -5,11 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('The Ink widget expands when no dimensions are set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The Ink widget expands when no dimensions are set', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: Ink(),
@@ -19,7 +18,7 @@ void main() {
     expect(tester.getSize(find.byType(Ink)), const Size(800.0, 600.0));
   });
 
-  testWidgets('The Ink widget fits the specified size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The Ink widget fits the specified size', (WidgetTester tester) async {
     const double height = 150.0;
     const double width = 200.0;
     await tester.pumpWidget(
@@ -37,7 +36,7 @@ void main() {
     expect(tester.getSize(find.byType(Ink)), const Size(width, height));
   });
 
-  testWidgets('The Ink widget expands on a unspecified dimension', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The Ink widget expands on a unspecified dimension', (WidgetTester tester) async {
     const double height = 150.0;
     await tester.pumpWidget(
       Material(
@@ -53,7 +52,7 @@ void main() {
     expect(tester.getSize(find.byType(Ink)), const Size(800, height));
   });
 
-  testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget renders an ink splash', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -102,7 +101,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -188,7 +187,7 @@ void main() {
     expect(box, ripplePattern(inkWellCenter - tapDownOffset, 105.0, 0));
   });
 
-  testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does the Ink widget render anything', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -271,12 +270,13 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    addTearDown(focusNode.dispose);
     Future<void> buildTest(Intent intent) async {
       return tester.pumpWidget(
         Shortcuts(
@@ -371,7 +371,7 @@ void main() {
     expect(box, ripplePattern(105.0, 0));
   });
 
-  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(
       Directionality(
@@ -404,7 +404,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
 
@@ -454,9 +454,13 @@ void main() {
     }));
   });
 
-  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController();
     controller.show();
+
+    late OverlayEntry overlayEntry;
+    addTearDown(() => overlayEntry..remove()..dispose());
+
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -466,7 +470,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: Overlay(
                 initialEntries: <OverlayEntry>[
-                  OverlayEntry(
+                  overlayEntry = OverlayEntry(
                     builder: (BuildContext context) {
                       return Center(
                         child: SizedBox.square(
@@ -514,7 +518,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
     const Color splashColor = Color(0xff00ff00);
 
     Widget buildWidget({InteractiveInkFeatureFactory? splashFactory}) {
@@ -569,7 +573,7 @@ void main() {
     );
   });
 
-  testWidgets('Ink with isVisible=false does not paint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Ink with isVisible=false does not paint', (WidgetTester tester) async {
     const Color testColor = Color(0xffff1234);
     Widget inkWidget({required bool isVisible}) {
       return Material(

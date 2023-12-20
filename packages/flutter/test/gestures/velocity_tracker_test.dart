@@ -144,4 +144,22 @@ void main() {
       }
     }
   });
+
+  test('Assume zero velocity when there are no recent samples', () async {
+    final IOSScrollViewFlingVelocityTracker tracker = IOSScrollViewFlingVelocityTracker(PointerDeviceKind.touch);
+    Offset position = Offset.zero;
+    Duration time = Duration.zero;
+    const Offset positionDelta = Offset(0, -1);
+    const Duration durationDelta = Duration(seconds: 1);
+
+    for (int i = 0; i < 10; i+=1) {
+      position += positionDelta;
+      time += durationDelta;
+      tracker.addPosition(time, position);
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
+    expect(tracker.getVelocity().pixelsPerSecond, Offset.zero);
+  });
 }

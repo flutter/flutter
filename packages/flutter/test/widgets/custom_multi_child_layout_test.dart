@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
   late BoxConstraints getSizeConstraints;
@@ -163,7 +164,7 @@ class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
 }
 
 void main() {
-  testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Control test for CustomMultiChildLayout', (WidgetTester tester) async {
     final TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
@@ -181,7 +182,7 @@ void main() {
     expect(delegate.performLayoutIsChild, false);
   });
 
-  testWidgets('Test MultiChildDelegate shouldRelayout method', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Test MultiChildDelegate shouldRelayout method', (WidgetTester tester) async {
     TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
@@ -204,7 +205,7 @@ void main() {
     expect(delegate.performLayoutSize, isNotNull);
   });
 
-  testWidgets('Nested CustomMultiChildLayouts', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Nested CustomMultiChildLayouts', (WidgetTester tester) async {
     final TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
     await tester.pumpWidget(Center(
       child: CustomMultiChildLayout(
@@ -227,7 +228,7 @@ void main() {
 
   });
 
-  testWidgets('Loose constraints', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Loose constraints', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(Center(
       child: CustomMultiChildLayout(
@@ -251,8 +252,9 @@ void main() {
     expect(box.size.height, equals(250.0));
   });
 
-  testWidgets('Can use listener for relayout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can use listener for relayout', (WidgetTester tester) async {
     final ValueNotifier<Size> size = ValueNotifier<Size>(const Size(100.0, 200.0));
+    addTearDown(size.dispose);
 
     await tester.pumpWidget(
       Center(
@@ -302,7 +304,7 @@ void main() {
       expect((errors.first.exception as FlutterError).toStringDeep(), equalsIgnoringHashCodes(message));
     }
 
-    testWidgets('layoutChild on non existent child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('layoutChild on non existent child', (WidgetTester tester) async {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: ZeroAndOneIdLayoutDelegate(),
@@ -314,7 +316,7 @@ void main() {
       );
     });
 
-    testWidgets('layoutChild more than once', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('layoutChild more than once', (WidgetTester tester) async {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: DuplicateLayoutDelegate(),
@@ -326,7 +328,7 @@ void main() {
       );
     });
 
-    testWidgets('layoutChild on invalid size constraint', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('layoutChild on invalid size constraint', (WidgetTester tester) async {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: InvalidConstraintsChildLayoutDelegate(),
@@ -345,7 +347,7 @@ void main() {
       );
     });
 
-    testWidgets('positionChild on non existent child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positionChild on non existent child', (WidgetTester tester) async {
       await expectFlutterErrorMessage(
         tester: tester,
         delegate: NonExistentPositionDelegate(),
@@ -357,7 +359,7 @@ void main() {
       );
     });
 
-    testWidgets("_callPerformLayout on child that doesn't have id", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("_callPerformLayout on child that doesn't have id", (WidgetTester tester) async {
       await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
@@ -373,8 +375,9 @@ void main() {
           '   The following child has no ID: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT:\n'
           '     creator: ConstrainedBox ← Container ← LayoutWithMissingId ←\n'
           '       CustomMultiChildLayout ← Center ← MediaQuery ←\n'
-          '       _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
-          '       TestFlutterView#00000] ← [root]\n'
+          '       _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
+          '       _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+          '       [root]\n'
           '     parentData: offset=Offset(0.0, 0.0); id=null\n'
           '     constraints: MISSING\n'
           '     size: MISSING\n'
@@ -382,7 +385,7 @@ void main() {
       );
     });
 
-    testWidgets('performLayout did not layout a child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('performLayout did not layout a child', (WidgetTester tester) async {
       await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(
@@ -404,7 +407,7 @@ void main() {
       );
     });
 
-    testWidgets('performLayout did not layout multiple child', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('performLayout did not layout multiple child', (WidgetTester tester) async {
       await expectFlutterErrorMessage(
         widget: Center(
           child: CustomMultiChildLayout(

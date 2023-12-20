@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart' show DiagnosticLevel, FlutterError;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 class SillyBorder extends BoxBorder {
   const SillyBorder();
 
