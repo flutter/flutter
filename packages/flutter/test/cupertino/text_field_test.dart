@@ -8390,13 +8390,10 @@ void main() {
     final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.clipBehavior, Clip.none);
 
-    // TODO(harryterkelsen): see https://github.com/flutter/flutter/issues/137669
-    if (!kIsWeb || !isCanvasKit) {
-      await expectLater(
-        find.byKey(const ValueKey<int>(1)),
-        matchesGoldenFile('overflow_clipbehavior_none.cupertino.0.png'),
-      );
-    }
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('overflow_clipbehavior_none.cupertino.0.png'),
+    );
   });
 
   testWidgets('can shift + tap to select with a keyboard (Apple platforms)', (WidgetTester tester) async {
