@@ -8,8 +8,6 @@ import 'package:ui/src/engine.dart';
 
 import 'common.dart';
 
-const MethodCodec codec = StandardMethodCodec();
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }

@@ -1501,7 +1501,7 @@ class Paint {
       }
       semicolon = '; ';
     }
-    if (isAntiAlias != true) {
+    if (!isAntiAlias) {
       result.write('${semicolon}antialias off');
       semicolon = '; ';
     }
@@ -6864,9 +6864,7 @@ base class _NativeImageDescriptor extends NativeFieldWrapperClass1 implements Im
       targetHeight = height;
     } else if (targetWidth == null && targetHeight != null) {
       targetWidth = (targetHeight * (width / height)).round();
-      targetHeight = targetHeight;
     } else if (targetHeight == null && targetWidth != null) {
-      targetWidth = targetWidth;
       targetHeight = targetWidth ~/ (width / height);
     }
     assert(targetWidth != null);

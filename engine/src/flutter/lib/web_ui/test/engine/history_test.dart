@@ -27,7 +27,6 @@ Map<String, dynamic> _tagStateWithSerialCount(dynamic state, int serialCount) {
   };
 }
 
-const Map<String, bool> originState = <String, bool>{'origin': true};
 const Map<String, bool> flutterState = <String, bool>{'flutter': true};
 
 const MethodCodec codec = JSONMethodCodec();

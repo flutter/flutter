@@ -17,8 +17,6 @@ class Foo {
   double getDouble() => 1.0;
 }
 
-const Foo foo = Foo();
-
 void main() {
   test('PluginUtilities Callback Handles', () {
     // Top level callback.

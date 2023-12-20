@@ -4,3 +4,7 @@ analyzer:
   exclude:
     # fixtures/ depends on dart:ui and raises false positives.
     - fixtures/**
+
+linter:
+  rules:
+    unreachable_from_main: false # lint not compatible with how dart:ui is structured

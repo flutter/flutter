@@ -13,8 +13,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import '../common/matchers.dart';
 import 'history_test.dart';
 
-const MethodCodec codec = JSONMethodCodec();
-
 Map<String, dynamic> _tagStateWithSerialCount(dynamic state, int serialCount) {
   return <String, dynamic> {
     'serialCount': serialCount,

@@ -27,13 +27,6 @@ const List<double> grayscaleColorMatrix = <double>[
   0,      0,      0,      1, 0,
 ];
 
-const List<double> identityColorMatrix = <double>[
-  1, 0, 0, 0, 0,
-  0, 1, 0, 0, 0,
-  0, 0, 1, 0, 0,
-  0, 0, 0, 1, 0,
-];
-
 const List<double> constValueColorMatrix = <double>[
   0, 0, 0, 0, 2,
   0, 0, 0, 0, 2,

@@ -20,8 +20,6 @@ class FormattingException implements Exception {
   final String message;
   final ProcessResult? result;
 
-  int get exitCode => result?.exitCode ?? -1;
-
   @override
   String toString() {
     final StringBuffer output = StringBuffer(runtimeType.toString());
@@ -109,7 +107,6 @@ abstract class FormatChecker {
     ProcessManager processManager = const LocalProcessManager(),
     required this.baseGitRef,
     required this.repoDir,
-    required this.srcDir,
     this.allFiles = false,
     this.messageCallback,
   }) : _processRunner = ProcessRunner(
@@ -142,7 +139,6 @@ abstract class FormatChecker {
           processManager: processManager,
           baseGitRef: baseGitRef,
           repoDir: repoDir,
-          srcDir: srcDir,
           allFiles: allFiles,
           messageCallback: messageCallback,
         );
@@ -160,7 +156,6 @@ abstract class FormatChecker {
           processManager: processManager,
           baseGitRef: baseGitRef,
           repoDir: repoDir,
-          srcDir: srcDir,
           allFiles: allFiles,
           messageCallback: messageCallback,
         );
@@ -169,7 +164,6 @@ abstract class FormatChecker {
           processManager: processManager,
           baseGitRef: baseGitRef,
           repoDir: repoDir,
-          srcDir: srcDir,
           allFiles: allFiles,
           messageCallback: messageCallback,
         );
@@ -177,7 +171,6 @@ abstract class FormatChecker {
   }
 
   final ProcessRunner _processRunner;
-  final Directory srcDir;
   final Directory repoDir;
   final bool allFiles;
   MessageCallback? messageCallback;
@@ -302,9 +295,7 @@ class ClangFormatChecker extends FormatChecker {
     required Directory srcDir,
     super.allFiles,
     super.messageCallback,
-  }) : super(
-          srcDir: srcDir,
-        ) {
+  }) {
     /*late*/ String clangOs;
     if (Platform.isLinux) {
       clangOs = 'linux-x64';
@@ -462,9 +453,7 @@ class JavaFormatChecker extends FormatChecker {
     required Directory srcDir,
     super.allFiles,
     super.messageCallback,
-  }) : super(
-          srcDir: srcDir,
-        ) {
+  }) {
     googleJavaFormatJar = File(
       path.absolute(
         path.join(
@@ -619,7 +608,6 @@ class GnFormatChecker extends FormatChecker {
     super.processManager,
     required super.baseGitRef,
     required Directory repoDir,
-    required super.srcDir,
     super.allFiles,
     super.messageCallback,
   }) : super(
@@ -750,7 +738,6 @@ class PythonFormatChecker extends FormatChecker {
     super.processManager,
     required super.baseGitRef,
     required Directory repoDir,
-    required super.srcDir,
     super.allFiles,
     super.messageCallback,
   }) : super(
@@ -845,7 +832,6 @@ class WhitespaceFormatChecker extends FormatChecker {
     super.processManager,
     required super.baseGitRef,
     required super.repoDir,
-    required super.srcDir,
     super.allFiles,
     super.messageCallback,
   });

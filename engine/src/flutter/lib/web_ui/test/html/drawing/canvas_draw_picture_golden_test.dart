@@ -136,8 +136,6 @@ Picture _drawGreenRectIntoPicture() {
   return recorder.endRecording();
 }
 
-typedef PaintCallback = void Function(RecordingCanvas canvas);
-
 const String _base64Encoded20x20TestImage =
     'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAACXBIWXMAAC4jAAAuIwF4pT92AAAA'
     'B3RJTUUH5AMFFBksg4i3gQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAAj'

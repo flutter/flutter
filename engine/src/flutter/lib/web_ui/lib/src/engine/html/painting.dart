@@ -203,7 +203,7 @@ class SurfacePaint implements ui.Paint {
       }
       semicolon = '; ';
     }
-    if (isAntiAlias != true) {
+    if (!isAntiAlias) {
       result.write('${semicolon}antialias off');
       semicolon = '; ';
     }

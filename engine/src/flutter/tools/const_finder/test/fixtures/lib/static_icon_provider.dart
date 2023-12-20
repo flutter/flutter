@@ -19,7 +19,7 @@ Target helper(Target Function(String, int, Target?) tearOff) {
 class Targets {
   static const Target used1 = Target('used1', 1, null);
   static const Target used2 = Target('used2', 2, null);
-  static const Target unused1 = Target('unused1', 1, null);
+  static const Target unused1 = Target('unused1', 1, null); // ignore: unreachable_from_main
 }
 
 // const_finder explicitly does not retain constants appearing within a class

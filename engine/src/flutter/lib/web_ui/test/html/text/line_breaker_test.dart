@@ -452,7 +452,6 @@ void testMain() {
   }, skip: domIntl.v8BreakIterator == null);
 }
 
-typedef CreateLineBreakFragmenter = LineBreakFragmenter Function(String text);
 typedef GroupBody = void Function({required bool isV8});
 
 void groupForEachFragmenter(GroupBody callback) {

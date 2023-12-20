@@ -113,9 +113,7 @@ CkImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
     }
     if (targetWidth == null && targetHeight != null) {
       targetWidth = (targetHeight * (image.width() / image.height())).round();
-      targetHeight = targetHeight;
     } else if (targetHeight == null && targetWidth != null) {
-      targetWidth = targetWidth;
       targetHeight = targetWidth ~/ (image.width() / image.height());
     }
 

@@ -12,7 +12,6 @@ import 'package:ui/src/engine.dart';
 import '../../common/test_initialization.dart';
 
 EngineSemantics semantics() => EngineSemantics.instance;
-EngineSemanticsOwner owner() => EnginePlatformDispatcher.instance.implicitView!.semantics;
 
 void main() {
   internalBootstrapBrowserTest(() {

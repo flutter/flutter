@@ -230,13 +230,4 @@ class ArcSample {
         clockwise: clockwise);
     return path;
   }
-
-  // Returns bounds of start/end point of arc.
-  Rect getBounds() {
-    final Offset startP =
-        Offset(75 - distance + offset.dx, 75 - distance + offset.dy);
-    final Offset endP =
-        Offset(75.0 + distance + offset.dx, 75.0 + distance + offset.dy);
-    return Rect.fromLTRB(startP.dx, startP.dy, endP.dx, endP.dy);
-  }
 }

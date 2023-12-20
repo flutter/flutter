@@ -199,17 +199,14 @@ final class Fixture {
         verbose: verbose,
       ),
       logSink: logSink,
-      processManager: processManager,
     );
   }
 
   const Fixture._({
     required this.gitRepo,
     required this.logSink,
-    required this.processManager,
   });
 
   final GitRepo gitRepo;
   final StringBuffer logSink;
-  final FakeProcessManager processManager;
 }
