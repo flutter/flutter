@@ -14,7 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -94,7 +93,7 @@ Color getBackgroundColor(WidgetTester tester, int childIndex) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Tap changes toggle state', (WidgetTester tester) async {
+  testWidgets('Tap changes toggle state', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -128,7 +127,7 @@ void main() {
     expect(sharedValue, 1);
   });
 
-  testWidgetsWithLeakTracking('Need at least 2 children', (WidgetTester tester) async {
+  testWidgets('Need at least 2 children', (WidgetTester tester) async {
     await expectLater(
       () => tester.pumpWidget(
         boilerplate(
@@ -162,7 +161,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Padding works', (WidgetTester tester) async {
+  testWidgets('Padding works', (WidgetTester tester) async {
     const Key key = Key('Container');
 
     final Map<int, Widget> children = <int, Widget>{};
@@ -249,7 +248,7 @@ void main() {
     await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
   });
 
-  testWidgetsWithLeakTracking('Value attribute must be the key of one of the children widgets', (WidgetTester tester) async {
+  testWidgets('Value attribute must be the key of one of the children widgets', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -272,7 +271,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Widgets have correct default text/icon styles, change correctly on selection', (WidgetTester tester) async {
+  testWidgets('Widgets have correct default text/icon styles, change correctly on selection', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
@@ -315,7 +314,7 @@ void main() {
     expect(iconTheme.data.color, isSameColorAs(CupertinoColors.white));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Segmented controls respects themes',
     (WidgetTester tester) async {
       final Map<int, Widget> children = <int, Widget>{};
@@ -361,7 +360,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('SegmentedControl is correct when user provides custom colors', (WidgetTester tester) async {
+  testWidgets('SegmentedControl is correct when user provides custom colors', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Icon(IconData(1));
@@ -422,7 +421,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Widgets are centered within segments', (WidgetTester tester) async {
+  testWidgets('Widgets are centered within segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -449,7 +448,7 @@ void main() {
     expect(tester.getCenter(find.text('Child 2')), const Offset(142.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('Tap calls onValueChanged', (WidgetTester tester) async {
+  testWidgets('Tap calls onValueChanged', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -478,7 +477,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgetsWithLeakTracking('State does not change if onValueChanged does not call setState()', (WidgetTester tester) async {
+  testWidgets('State does not change if onValueChanged does not call setState()', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -509,7 +508,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Background color of child should change on selection, '
     'and should not change when tapped again',
     (WidgetTester tester) async {
@@ -529,7 +528,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '
         'a Container or Placeholder widget)',
     (WidgetTester tester) async {
@@ -562,7 +561,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Passed in value is child initially selected', (WidgetTester tester) async {
+  testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     expect(getSelectedIndex(tester), 0);
@@ -571,7 +570,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
   });
 
-  testWidgetsWithLeakTracking('Null input for value results in no child initially selected', (WidgetTester tester) async {
+  testWidgets('Null input for value results in no child initially selected', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -602,7 +601,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
   });
 
-  testWidgetsWithLeakTracking('Long press changes background color of not-selected child', (WidgetTester tester) async {
+  testWidgets('Long press changes background color of not-selected child', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
@@ -620,7 +619,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Long press does not change background color of currently-selected child', (WidgetTester tester) async {
+  testWidgets('Long press does not change background color of currently-selected child', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
@@ -638,7 +637,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
+  testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = Container(
       constraints: const BoxConstraints.tightFor(height: 100.0),
@@ -669,7 +668,7 @@ void main() {
     expect(buttonBox.size.height, 400.0);
   });
 
-  testWidgetsWithLeakTracking('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
+  testWidgets('Width of each segmented control segment is determined by widest widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = Container(
       constraints: const BoxConstraints.tightFor(width: 50.0),
@@ -708,7 +707,7 @@ void main() {
     expect(childWidth, getSurroundingRect(tester, child: 2).width);
   });
 
-  testWidgetsWithLeakTracking('Width is finite in unbounded space', (WidgetTester tester) async {
+  testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -736,7 +735,7 @@ void main() {
     expect(segmentedControl.size.width.isFinite, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Directionality test - RTL should reverse order of widgets', (WidgetTester tester) async {
+  testWidgets('Directionality test - RTL should reverse order of widgets', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -756,7 +755,7 @@ void main() {
     expect(tester.getTopRight(find.text('Child 1')).dx > tester.getTopRight(find.text('Child 2')).dx, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
+  testWidgets('Correct initial selection and toggling behavior - RTL', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -799,7 +798,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
   });
 
-  testWidgetsWithLeakTracking('Segmented control semantics', (WidgetTester tester) async {
+  testWidgets('Segmented control semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final Map<int, Widget> children = <int, Widget>{};
@@ -902,7 +901,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
+  testWidgets('Non-centered taps work on smaller widgets', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -944,7 +943,7 @@ void main() {
     expect(sharedValue, 0);
   });
 
-  testWidgetsWithLeakTracking('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
+  testWidgets('Hit-tests report accurate local position in segments', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     late TapDownDetails tapDownDetails;
     children[0] = GestureDetector(
@@ -984,7 +983,7 @@ void main() {
     expect(tapDownDetails.globalPosition, segment0GlobalOffset + const Offset(7, 11));
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Segment still hittable with a child that has no hitbox',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/57326.
@@ -1023,7 +1022,7 @@ void main() {
     },
   );
 
-  testWidgetsWithLeakTracking('Animation is correct when the selected segment changes', (WidgetTester tester) async {
+  testWidgets('Animation is correct when the selected segment changes', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     await tester.tap(find.text('Child 2'));
@@ -1053,7 +1052,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
   });
 
-  testWidgetsWithLeakTracking('Animation is correct when widget is rebuilt', (WidgetTester tester) async {
+  testWidgets('Animation is correct when widget is rebuilt', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('Child 1');
     children[1] = const Text('Child 2');
@@ -1205,7 +1204,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
   });
 
-  testWidgetsWithLeakTracking('Multiple segments are pressed', (WidgetTester tester) async {
+  testWidgets('Multiple segments are pressed', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -1252,7 +1251,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
+  testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -1314,7 +1313,7 @@ void main() {
     expect(getBackgroundColor(tester, 2), CupertinoColors.activeBlue);
   });
 
-  testWidgetsWithLeakTracking('Segment is selected while it is transitioning to unselected state', (WidgetTester tester) async {
+  testWidgets('Segment is selected while it is transitioning to unselected state', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
     await tester.tap(find.text('Child 2'));
@@ -1342,7 +1341,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
   });
 
-  testWidgetsWithLeakTracking('Add segment while animation is running', (WidgetTester tester) async {
+  testWidgets('Add segment while animation is running', (WidgetTester tester) async {
     Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -1390,7 +1389,7 @@ void main() {
     expect(getBackgroundColor(tester, 3), isSameColorAs(CupertinoColors.white));
   });
 
-  testWidgetsWithLeakTracking('Remove segment while animation is running', (WidgetTester tester) async {
+  testWidgets('Remove segment while animation is running', (WidgetTester tester) async {
     Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -1435,7 +1434,7 @@ void main() {
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
   });
 
-  testWidgetsWithLeakTracking('Remove currently animating segment', (WidgetTester tester) async {
+  testWidgets('Remove currently animating segment', (WidgetTester tester) async {
     Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -1487,7 +1486,7 @@ void main() {
   });
 
   // Regression test: https://github.com/flutter/flutter/issues/43414.
-  testWidgetsWithLeakTracking("Quick double tap doesn't break the internal state", (WidgetTester tester) async {
+  testWidgets("Quick double tap doesn't break the internal state", (WidgetTester tester) async {
     const Map<int, Widget> children = <int, Widget>{
       0: Text('A'),
       1: Text('B'),
@@ -1527,7 +1526,7 @@ void main() {
     expect(sharedValue, 2);
   });
 
-  testWidgetsWithLeakTracking('Golden Test Placeholder Widget', (WidgetTester tester) async {
+  testWidgets('Golden Test Placeholder Widget', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = Container();
     children[1] = const Placeholder();
@@ -1561,7 +1560,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Golden Test Pressed State', (WidgetTester tester) async {
+  testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');
@@ -1603,7 +1602,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Hovering over Cupertino segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino segmented control updates cursor to clickable on Web', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
     children[0] = const Text('A');
     children[1] = const Text('B');

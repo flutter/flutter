@@ -5,10 +5,9 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('awaiting animation controllers - using direct future', (WidgetTester tester) async {
+  testWidgets('awaiting animation controllers - using direct future', (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -60,7 +59,7 @@ void main() {
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });
 
-  testWidgetsWithLeakTracking('awaiting animation controllers - using orCancel', (WidgetTester tester) async {
+  testWidgets('awaiting animation controllers - using orCancel', (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -112,7 +111,7 @@ void main() {
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });
 
-  testWidgetsWithLeakTracking('awaiting animation controllers and failing', (WidgetTester tester) async {
+  testWidgets('awaiting animation controllers and failing', (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -140,7 +139,7 @@ void main() {
     expect(log, <String>['start', 'caught', 'end']);
   });
 
-  testWidgetsWithLeakTracking('creating orCancel future later', (WidgetTester tester) async {
+  testWidgets('creating orCancel future later', (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -154,7 +153,7 @@ void main() {
     expect(true, isTrue); // should reach here
   });
 
-  testWidgetsWithLeakTracking('creating orCancel future later', (WidgetTester tester) async {
+  testWidgets('creating orCancel future later', (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -172,7 +171,7 @@ void main() {
     expect(ok, isTrue); // should reach here
   });
 
-  testWidgetsWithLeakTracking('TickerFuture is a Future', (WidgetTester tester) async {
+  testWidgets('TickerFuture is a Future', (WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),

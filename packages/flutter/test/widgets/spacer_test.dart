@@ -4,10 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Spacer takes up space.', (WidgetTester tester) async {
+  testWidgets('Spacer takes up space.', (WidgetTester tester) async {
     await tester.pumpWidget(const Column(
       children: <Widget>[
         SizedBox(width: 10.0, height: 10.0),
@@ -20,7 +19,7 @@ void main() {
     expect(spacerRect.topLeft, const Offset(400.0, 10.0));
   });
 
-  testWidgetsWithLeakTracking('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
+  testWidgets('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
     const Spacer spacer1 = Spacer();
     const Spacer spacer2 = Spacer();
     const Spacer spacer3 = Spacer(flex: 2);
@@ -54,7 +53,7 @@ void main() {
     expect(spacer4Rect.left, moreOrLessEquals(10.0, epsilon: 0.1));
   });
 
-  testWidgetsWithLeakTracking('Spacer takes up space.', (WidgetTester tester) async {
+  testWidgets('Spacer takes up space.', (WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox(
       constrainedAxis: Axis.vertical,
       child: Column(

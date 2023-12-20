@@ -4,11 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/96024
-  testWidgetsWithLeakTracking('CustomScrollView.center update test 1', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center update test 1', (WidgetTester tester) async {
     final Key centerKey = UniqueKey();
     late StateSetter setState;
     bool hasKey = false;
@@ -50,7 +49,7 @@ void main() {
     // Pass without throw.
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView.center update test 2', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center update test 2', (WidgetTester tester) async {
     const List<Widget> slivers1 = <Widget>[
       SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
       SliverToBoxAdapter(key: Key('b'), child: SizedBox(height: 100.0)),
@@ -82,7 +81,7 @@ void main() {
     // Pass without throw.
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView.center', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
@@ -104,7 +103,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView.center', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
@@ -136,7 +135,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('CustomScrollView.anchor', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.anchor', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(

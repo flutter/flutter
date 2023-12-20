@@ -18,7 +18,7 @@ void main() {
     binding.addRenderView(view);
     expect(binding.renderViews, contains(view));
     expect(view.configuration.devicePixelRatio, flutterView.devicePixelRatio);
-    expect(view.configuration.constraints, ViewConstraints.tight(flutterView.physicalSize) / flutterView.devicePixelRatio);
+    expect(view.configuration.size, flutterView.physicalSize / flutterView.devicePixelRatio);
 
     binding.removeRenderView(view);
     expect(binding.renderViews, isEmpty);
@@ -51,17 +51,13 @@ void main() {
     final RenderView view = RenderView(view: flutterView);
     binding.addRenderView(view);
     expect(view.configuration.devicePixelRatio, 2.5);
-    expect(view.configuration.constraints.isTight, isTrue);
-    expect(view.configuration.constraints.minWidth, 160.0);
-    expect(view.configuration.constraints.minHeight, 240.0);
+    expect(view.configuration.size, const Size(160.0, 240.0));
 
     flutterView.devicePixelRatio = 3.0;
     flutterView.physicalSize = const Size(300, 300);
     binding.handleMetricsChanged();
     expect(view.configuration.devicePixelRatio, 3.0);
-    expect(view.configuration.constraints.isTight, isTrue);
-    expect(view.configuration.constraints.minWidth, 100.0);
-    expect(view.configuration.constraints.minHeight, 100.0);
+    expect(view.configuration.size, const Size(100.0, 100.0));
 
     binding.removeRenderView(view);
   });
@@ -186,8 +182,6 @@ class FakeFlutterView extends Fake implements FlutterView  {
   double devicePixelRatio;
   @override
   Size physicalSize;
-  @override
-  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
   @override
   ViewPadding padding;
 
