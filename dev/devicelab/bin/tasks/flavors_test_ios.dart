@@ -71,6 +71,11 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
       'argued --flavor value should not be bundled.');
   }
 
+  if (!assetManifest.containsKey('assets/paid/paid.txt')) {
+    return TaskResult.failure('Assets declared with a flavor not equal to the '
+      'argued --flavor value should be bundled.');
+  }
+
   await flutter(
     'install',
     options: <String>['--flavor', 'paid', '--uninstall-only'],
