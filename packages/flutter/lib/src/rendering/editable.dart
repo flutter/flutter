@@ -1941,8 +1941,16 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     final Offset effectivePosition = position - _paintOffset;
-    final InlineSpan? textSpan = _textPainter.text;
-    switch (textSpan?.getSpanForPosition(_textPainter.getPositionForOffset(effectivePosition))) {
+    final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(effectivePosition);
+    // The hit-test can't fall through the horizontal gaps between visually
+    // adjacent characters on the same line, even with a large letter-spacing or
+    // text justification, as graphemeClusterLayoutBounds.width is the advance
+    // width to the next character, so there's no gap between their
+    // graphemeClusterLayoutBounds rects.
+    final InlineSpan? spanHit = glyph != null && glyph.graphemeClusterLayoutBounds.contains(effectivePosition)
+      ? _textPainter.text!.getSpanForPosition(TextPosition(offset: glyph.graphemeClusterCodeUnitRange.start))
+      : null;
+    switch (spanHit) {
       case final HitTestTarget span:
         result.add(HitTestEntry(span));
         return true;
