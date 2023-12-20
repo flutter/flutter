@@ -2666,6 +2666,48 @@ TEST_F(EmbedderTest, CanSendPointer) {
   message_latch.Wait();
 }
 
+/// Send a pointer event to Dart and wait until the Dart code echos with the
+/// view ID.
+TEST_F(EmbedderTest, CanSendPointerWithViewId) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("pointer_data_packet_view_id");
+
+  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+  context.AddNativeCallback(
+      "SignalNativeMessage",
+      CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
+        auto message = tonic::DartConverter<std::string>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        ASSERT_EQ("ViewID: 2", message);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(FlutterPointerEvent);
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.x = 123;
+  pointer_event.y = 456;
+  pointer_event.timestamp = static_cast<size_t>(1234567890);
+  pointer_event.view_id = 2;
+
+  FlutterEngineResult result =
+      FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
+  ASSERT_EQ(result, kSuccess);
+
+  message_latch.Wait();
+}
+
 TEST_F(EmbedderTest, RegisterChannelListener) {
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 

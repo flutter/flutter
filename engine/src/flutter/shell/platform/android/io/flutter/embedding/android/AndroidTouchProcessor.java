@@ -80,8 +80,9 @@ public class AndroidTouchProcessor {
     int UNKNOWN = 4;
   }
 
-  // Must match the unpacking code in hooks.dart.
-  private static final int POINTER_DATA_FIELD_COUNT = 35;
+  // This value must match kPointerDataFieldCount in pointer_data.cc. (The
+  // pointer_data.cc also lists other locations that must be kept consistent.)
+  private static final int POINTER_DATA_FIELD_COUNT = 36;
   @VisibleForTesting static final int BYTES_PER_FIELD = 8;
 
   // Default if context is null, chosen to ensure reasonable speed scrolling.
@@ -91,6 +92,9 @@ public class AndroidTouchProcessor {
   // This value must match the value in framework's platform_view.dart.
   // This flag indicates whether the original Android pointer events were batched together.
   private static final int POINTER_DATA_FLAG_BATCHED = 1;
+
+  // The view ID for the only view in a single-view Flutter app.
+  private static final int IMPLICIT_VIEW_ID = 0;
 
   @NonNull private final FlutterRenderer renderer;
   @NonNull private final MotionEventTracker motionEventTracker;
@@ -133,6 +137,8 @@ public class AndroidTouchProcessor {
    */
   public boolean onTouchEvent(@NonNull MotionEvent event, @NonNull Matrix transformMatrix) {
     int pointerCount = event.getPointerCount();
+
+    // The following packing code must match the struct in pointer_data.h.
 
     // Prepare a data packet of the appropriate size and order.
     ByteBuffer packet =
@@ -253,6 +259,10 @@ public class AndroidTouchProcessor {
     if (pointerChange == -1) {
       return;
     }
+    // TODO(dkwingsmt): Use the correct source view ID once Android supports
+    // multiple views.
+    // https://github.com/flutter/flutter/issues/134405
+    final int viewId = IMPLICIT_VIEW_ID;
     final int pointerId = event.getPointerId(pointerIndex);
 
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
@@ -411,6 +421,7 @@ public class AndroidTouchProcessor {
     packet.putDouble(0.0); // pan_delta_y
     packet.putDouble(1.0); // scale
     packet.putDouble(0.0); // rotation
+    packet.putLong(viewId); // view_id
 
     if (isTrackpadPan && (panZoomType == PointerChange.PAN_ZOOM_END)) {
       ongoingPans.remove(pointerId);

@@ -102,7 +102,7 @@ extern const intptr_t kPlatformStrongDillSize;
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
 
-static constexpr int64_t kFlutterImplicitViewId = 0;
+static constexpr FlutterViewId kFlutterImplicitViewId = 0;
 
 // A message channel to send platform-independent FlutterKeyData to the
 // framework.
@@ -2326,6 +2326,8 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     pointer_data.pan_delta_y = 0.0;
     pointer_data.scale = SAFE_ACCESS(current, scale, 0.0);
     pointer_data.rotation = SAFE_ACCESS(current, rotation, 0.0);
+    pointer_data.view_id =
+        SAFE_ACCESS(current, view_id, kFlutterImplicitViewId);
     packet->SetPointerData(i, pointer_data);
     current = reinterpret_cast<const FlutterPointerEvent*>(
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);

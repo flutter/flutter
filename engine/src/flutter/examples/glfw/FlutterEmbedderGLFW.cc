@@ -13,6 +13,7 @@
 static double g_pixelRatio = 1.0;
 static const size_t kInitialWindowWidth = 800;
 static const size_t kInitialWindowHeight = 600;
+static constexpr FlutterViewId kImplicitViewId = 0;
 
 static_assert(FLUTTER_ENGINE_VERSION == 1,
               "This Flutter Embedder was authored against the stable Flutter "
@@ -33,6 +34,9 @@ void GLFWcursorPositionCallbackAtPhase(GLFWwindow* window,
       std::chrono::duration_cast<std::chrono::microseconds>(
           std::chrono::high_resolution_clock::now().time_since_epoch())
           .count();
+  // This example only supports a single window, therefore we assume the pointer
+  // event occurred in the only view, the implicit view.
+  event.view_id = kImplicitViewId;
   FlutterEngineSendPointerEvent(
       reinterpret_cast<FlutterEngine>(glfwGetWindowUserPointer(window)), &event,
       1);
