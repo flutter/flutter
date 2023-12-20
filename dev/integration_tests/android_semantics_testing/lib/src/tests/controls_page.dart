@@ -67,9 +67,7 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
               ),
               const Checkbox(
                 key: checkbox2Key,
-                value: false,
-                // TODO(scheglov): Requires linter fix, https://github.com/dart-lang/sdk/issues/49596.
-                // ignore: avoid_redundant_argument_values
+                value: false,                
                 onChanged: null,
               ),
             ],
