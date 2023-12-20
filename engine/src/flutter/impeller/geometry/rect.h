@@ -130,7 +130,8 @@ struct TRect {
   }
 
   [[nodiscard]] constexpr bool Contains(const TRect& o) const {
-    return Union(o).size == size;
+    return o.GetLeft() >= GetLeft() && o.GetTop() >= GetTop() &&
+           o.GetRight() <= GetRight() && o.GetBottom() <= GetBottom();
   }
 
   /// Returns true if either of the width or height are 0, negative, or NaN.
