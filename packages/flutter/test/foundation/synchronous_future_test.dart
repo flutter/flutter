@@ -40,7 +40,7 @@ void main() {
 
     Object? exception;
     try {
-      await future.whenComplete(() { 
+      await future.whenComplete(() {
         throw ArgumentError();
       });
       // Unreached.

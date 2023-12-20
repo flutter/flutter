@@ -67,7 +67,7 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
               ),
               const Checkbox(
                 key: checkbox2Key,
-                value: false,                
+                value: false,
                 onChanged: null,
               ),
             ],

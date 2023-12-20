@@ -6,6 +6,10 @@ import 'dart:async';
 
 import 'system_channels.dart';
 
+// Examples can assume:
+// // so that we can import the fake "split_component.dart" in an example below:
+// // ignore_for_file: uri_does_not_exist
+
 /// Manages the installation and loading of deferred components.
 ///
 /// Deferred components allow Flutter applications to download precompiled AOT
