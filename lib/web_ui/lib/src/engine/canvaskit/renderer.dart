@@ -85,6 +85,7 @@ class CanvasKitRenderer implements Renderer {
           viewManager.onViewDisposed.listen(_onViewDisposed);
       _instance = this;
     }();
+    registerHotRestartListener(dispose);
     return _initialized;
   }
 
@@ -451,6 +452,7 @@ class CanvasKitRenderer implements Renderer {
       rasterizer.dispose();
     }
     _rasterizers.clear();
+    clearFragmentProgramCache();
   }
 
   @override
