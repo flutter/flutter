@@ -1851,12 +1851,14 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    // TODO(chunhtai): https://github.com/flutter/flutter/issues/134253
-    _pageController?.dispose();
-    _pageController = PageController(
-      initialPage: _currentIndex!,
-      viewportFraction: widget.viewportFraction,
-    );
+    if (_pageController == null) {
+      _pageController = PageController(
+        initialPage: _currentIndex!,
+        viewportFraction: widget.viewportFraction,
+      );
+    } else {
+      _pageController!.jumpToPage(_currentIndex!);
+    }
   }
 
   @override
