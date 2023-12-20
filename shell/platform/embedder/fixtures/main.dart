@@ -167,6 +167,7 @@ Future<void> a11y_main() async {
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
       tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
       additionalActions: Int32List(0),
     )
     ..updateNode(
@@ -199,6 +200,7 @@ Future<void> a11y_main() async {
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
       tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
       additionalActions: Int32List(0),
       childrenInHitTestOrder: Int32List(0),
       childrenInTraversalOrder: Int32List(0),
@@ -235,6 +237,7 @@ Future<void> a11y_main() async {
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
       tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
       additionalActions: Int32List(0),
     )
     ..updateNode(
@@ -268,6 +271,7 @@ Future<void> a11y_main() async {
       decreasedValue: '',
       decreasedValueAttributes: <StringAttribute>[],
       tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
       childrenInHitTestOrder: Int32List(0),
       childrenInTraversalOrder: Int32List(0),
     )
@@ -364,6 +368,7 @@ Future<void> a11y_string_attributes() async {
       decreasedValue: '41',
       decreasedValueAttributes: <StringAttribute>[],
       tooltip: 'tooltip',
+      textDirection: TextDirection.ltr,
       additionalActions: Int32List(0),
     );
 

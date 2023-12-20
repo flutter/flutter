@@ -173,6 +173,8 @@ void sendSemanticsUpdate() {
     ),
   ];
 
+  String tooltip = "tooltip";
+
   final Float64List transform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
@@ -224,6 +226,7 @@ void sendSemanticsUpdate() {
     decreasedValueAttributes: decreasedValueAttributes,
     hint: hint,
     hintAttributes: hintAttributes,
+    tooltip: tooltip,
     textDirection: TextDirection.ltr,
     transform: transform,
     childrenInTraversalOrder: childrenInTraversalOrder,
