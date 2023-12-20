@@ -1064,7 +1064,6 @@ targets:
       - .ci.yaml
 
   - name: Linux android_preview_tool_integration_tests
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
