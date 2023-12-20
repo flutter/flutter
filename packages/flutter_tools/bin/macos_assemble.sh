@@ -118,6 +118,7 @@ BuildApp() {
     "-dDarwinArchs=${ARCHS}"
     "-dTargetFile=${target_path}"
     "-dBuildMode=${build_mode}"
+    "-dFlavor=${FLAVOR}"
     "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"
     "-dDartObfuscation=${DART_OBFUSCATION}"
     "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
