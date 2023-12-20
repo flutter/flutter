@@ -1683,7 +1683,6 @@ targets:
 
   - name: Linux_pixel_7pro android_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: true
     timeout: 60
     dimensions:
@@ -1702,7 +1701,6 @@ targets:
 
   - name: Linux_pixel_7pro android_obfuscate_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1844,7 +1842,6 @@ targets:
 
   - name: Linux_pixel_7pro basic_material_app_android__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -1854,7 +1851,6 @@ targets:
 
   - name: Linux_pixel_7pro channels_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2082,7 +2078,6 @@ targets:
 
   - name: Linux_pixel_7pro drive_perf_debug_warning
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2092,7 +2087,6 @@ targets:
 
   - name: Linux_pixel_7pro embedded_android_views_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2102,7 +2096,6 @@ targets:
 
   - name: Linux_pixel_7pro external_ui_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2139,7 +2132,6 @@ targets:
 
   - name: Linux_pixel_7pro flavors_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2203,7 +2195,6 @@ targets:
 
   - name: Linux_pixel_7pro flutter_gallery_android__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2213,7 +2204,6 @@ targets:
 
   - name: Linux_pixel_7pro flutter_gallery_v2_chrome_run_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2250,7 +2240,6 @@ targets:
 
   - name: Linux_pixel_7pro frame_policy_delay_test_android
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2362,7 +2351,6 @@ targets:
 
   - name: Linux_pixel_7pro integration_ui_driver
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2372,7 +2360,6 @@ targets:
 
   - name: Linux_pixel_7pro integration_ui_keyboard_resize
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2382,7 +2369,6 @@ targets:
 
   - name: Linux_pixel_7pro integration_ui_textfield
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2401,7 +2387,6 @@ targets:
 
   - name: Linux_pixel_7pro linux_chrome_dev_mode
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2648,7 +2633,6 @@ targets:
 
   - name: Linux_pixel_7pro platform_channel_sample_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2658,7 +2642,6 @@ targets:
 
   - name: Linux_pixel_7pro platform_interaction_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2715,7 +2698,6 @@ targets:
 
   - name: Linux_pixel_7pro routing_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2725,7 +2707,6 @@ targets:
 
   - name: Linux_pixel_7pro service_extensions_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2865,7 +2846,6 @@ targets:
 
   - name: Linux_pixel_7pro android_choreographer_do_frame_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
