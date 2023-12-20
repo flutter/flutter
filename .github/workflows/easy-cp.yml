@@ -60,7 +60,7 @@ jobs:
           base: ${{ env.RELEASE_BRANCH }}
           branch: cp-${{ env.CHANNEL }}-${{ env.COMMIT_SHA }}
           path: flutter
-          token: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN}}
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           labels: |
             cp: review
           title: '[${{ env.CHANNEL }}-cherrypick] cherrypicks commit ${{ env.COMMIT_SHA }} from PR ${{ github.event.pull_request.title }}'
