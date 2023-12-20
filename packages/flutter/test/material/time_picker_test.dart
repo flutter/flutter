@@ -616,7 +616,7 @@ void main() {
         final RenderObject render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect((render as dynamic).orientation, Orientation.landscape); 
+        expect((render as dynamic).orientation, Orientation.landscape);
       });
 
       testWidgets('builder parameter', (WidgetTester tester) async {
