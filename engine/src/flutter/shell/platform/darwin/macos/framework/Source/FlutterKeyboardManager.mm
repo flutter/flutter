@@ -123,18 +123,24 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
         [FlutterMethodChannel methodChannelWithName:@"flutter/keyboard"
                                     binaryMessenger:[_viewDelegate getBinaryMessenger]
                                               codec:[FlutterStandardMethodCodec sharedInstance]];
+
     [keyboardChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [self handleKeyboardMethodCall:call result:result];
     }];
+
     _primaryResponders = [[NSMutableArray alloc] init];
+
+    __weak __typeof__(self) weakSelf = self;
     [self addPrimaryResponder:[[FlutterEmbedderKeyResponder alloc]
                                   initWithSendEvent:^(const FlutterKeyEvent& event,
                                                       FlutterKeyEventCallback callback,
                                                       void* userData) {
-                                    [_viewDelegate sendKeyEvent:event
-                                                       callback:callback
-                                                       userData:userData];
+                                    __strong __typeof__(weakSelf) strongSelf = weakSelf;
+                                    [strongSelf.viewDelegate sendKeyEvent:event
+                                                                 callback:callback
+                                                                 userData:userData];
                                   }]];
+
     [self
         addPrimaryResponder:[[FlutterChannelKeyResponder alloc]
                                 initWithChannel:[FlutterBasicMessageChannel
@@ -143,6 +149,7 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
                                                                                getBinaryMessenger]
                                                                      codec:[FlutterJSONMessageCodec
                                                                                sharedInstance]]]];
+
     _pendingEvents = [[NSMutableArray alloc] init];
     _layoutMap = [NSMutableDictionary<NSNumber*, NSNumber*> dictionary];
     [self buildLayout];
@@ -150,7 +157,6 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
       responder.layoutMap = _layoutMap;
     }
 
-    __weak __typeof__(self) weakSelf = self;
     [_viewDelegate subscribeToKeyboardLayoutChange:^() {
       [weakSelf buildLayout];
     }];
