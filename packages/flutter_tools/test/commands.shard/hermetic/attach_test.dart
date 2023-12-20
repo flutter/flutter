@@ -162,6 +162,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -225,6 +226,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
       });
@@ -294,6 +296,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
       });
@@ -363,6 +366,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -433,6 +437,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -507,6 +512,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -581,6 +587,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: NoOpAnalytics(),
         ),
       });
 
@@ -1392,9 +1399,6 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice({required this.id});
 
@@ -1466,9 +1470,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get ephemeral => true;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     DevicePortForwarder? portForwarder,

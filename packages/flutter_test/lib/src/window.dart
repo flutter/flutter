@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 /// features are enabled, consider the [FakeAccessibilityFeatures.allOn]
 /// constant.
 @immutable
-// ignore: avoid_implementing_value_types
 class FakeAccessibilityFeatures implements AccessibilityFeatures {
   /// Creates a test instance of [AccessibilityFeatures].
   ///
@@ -874,7 +873,8 @@ class TestFlutterView implements FlutterView {
   }
 
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
+    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
     _view.render(scene);
   }
 
@@ -1635,7 +1635,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  void render(Scene scene) {
+  void render(Scene scene, {Size? size}) {
+    // TODO(goderbauer): Wire through size after https://github.com/flutter/engine/pull/48090 rolled in.
     _view.render(scene);
   }
 

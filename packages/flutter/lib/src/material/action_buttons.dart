@@ -153,7 +153,7 @@ class BackButtonIcon extends StatelessWidget {
             return Icons.arrow_back;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            return Icons.arrow_back_ios;
+            return Icons.arrow_back_ios_new_rounded;
         }
       },
       getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {

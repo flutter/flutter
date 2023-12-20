@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Inside extends StatefulWidget {
   const Inside({ super.key });
@@ -66,7 +65,7 @@ class OutsideState extends State<Outside> {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('setState() smoke test', (WidgetTester tester) async {
+  testWidgets('setState() smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(const Outside());
     final Offset location = tester.getCenter(find.text('INSIDE'));
     final TestGesture gesture = await tester.startGesture(location);

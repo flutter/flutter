@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
@@ -532,6 +533,7 @@ abstract class IosAssetBundle extends Target {
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
       ],
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -640,6 +642,11 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
           label: buildSuccess ? 'success' : 'fail',
           flutterUsage: environment.usage,
         ).send();
+        environment.analytics.send(Event.appleUsageEvent(
+          workflow: 'assemble',
+          parameter: 'ios-archive',
+          result: buildSuccess ? 'success' : 'fail',
+        ));
       }
     }
   }

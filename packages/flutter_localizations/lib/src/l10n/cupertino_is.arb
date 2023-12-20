@@ -26,5 +26,6 @@
   "menuDismissLabel": "Loka valmynd",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Leita á vefnum",
-  "shareButtonLabel": "Deila..."
+  "shareButtonLabel": "Deila...",
+  "clearButtonLabel": "Clear"
 }
