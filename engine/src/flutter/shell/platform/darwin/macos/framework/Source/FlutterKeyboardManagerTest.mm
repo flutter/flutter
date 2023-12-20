@@ -426,9 +426,11 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (bool)keyboardChannelGetPressedState;
 - (bool)racingConditionBetweenKeyAndText;
 - (bool)correctLogicalKeyForLayouts;
+- (bool)shouldNotHoldStrongReferenceToViewDelegate;
 @end
 
 namespace flutter::testing {
+
 TEST(FlutterKeyboardManagerUnittests, SinglePrimaryResponder) {
   ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] singlePrimaryResponder]);
 }
@@ -459,6 +461,11 @@ TEST(FlutterKeyboardManagerUnittests, RacingConditionBetweenKeyAndText) {
 
 TEST(FlutterKeyboardManagerUnittests, CorrectLogicalKeyForLayouts) {
   ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] correctLogicalKeyForLayouts]);
+}
+
+TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToViewDelegate) {
+  ASSERT_TRUE(
+      [[FlutterKeyboardManagerUnittestsObjC alloc] shouldNotHoldStrongReferenceToViewDelegate]);
 }
 
 }  // namespace flutter::testing
@@ -807,6 +814,32 @@ TEST(FlutterKeyboardManagerUnittests, CorrectLogicalKeyForLayouts) {
   VERIFY_DOWN(kLogicalDigit2, "២");
 
   return TRUE;
+}
+
+- (bool)shouldNotHoldStrongReferenceToViewDelegate {
+  __strong FlutterKeyboardManager* strongKeyboardManager;
+  __weak id weakViewDelegate;
+
+  @autoreleasepool {
+    id binaryMessengerMock = OCMStrictProtocolMock(@protocol(FlutterBinaryMessenger));
+    OCMStub([binaryMessengerMock setMessageHandlerOnChannel:[OCMArg any]
+                                       binaryMessageHandler:[OCMArg any]]);
+
+    id viewDelegateMock = OCMStrictProtocolMock(@protocol(FlutterKeyboardViewDelegate));
+    OCMStub([viewDelegateMock getBinaryMessenger]).andReturn(binaryMessengerMock);
+    OCMStub([viewDelegateMock subscribeToKeyboardLayoutChange:[OCMArg any]]);
+
+    LayoutClue layoutClue;
+    OCMStub([viewDelegateMock lookUpLayoutForKeyCode:0 shift:NO])
+        .ignoringNonObjectArgs()
+        .andReturn(layoutClue);
+    FlutterKeyboardManager* keyboardManager =
+        [[FlutterKeyboardManager alloc] initWithViewDelegate:viewDelegateMock];
+    strongKeyboardManager = keyboardManager;
+    weakViewDelegate = viewDelegateMock;
+  }
+
+  return weakViewDelegate == nil;
 }
 
 @end
