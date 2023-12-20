@@ -6,7 +6,7 @@ changelog:
   categories:
     - title: Impeller
       labels:
-        - impeller
+        - "e: impeller"
     - title: Android
       labels:
         - platform-android
@@ -20,3 +20,6 @@ changelog:
       labels:
         - platform-windows
         - platform-macos
+    - title: Other Changes
+      labels:
+        - "*"
