@@ -34,20 +34,14 @@ Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = 
 }
 
 int? getHighlightedIndex(WidgetTester tester) {
-  // Using dynamic to access private class in test.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as dynamic).highlightedIndex as int?;
 }
 
 Color getThumbColor(WidgetTester tester) {
-  // Using dynamic to access private class in test.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as dynamic).thumbColor as Color;
 }
 
 double currentThumbScale(WidgetTester tester) {
-  // Using dynamic to access private class in test.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as dynamic).thumbScale as double;
 }
 

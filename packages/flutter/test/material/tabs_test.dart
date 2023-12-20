@@ -6482,7 +6482,6 @@ void main() {
 
     // Test painter's divider color.
     final CustomPaint paint = tester.widget<CustomPaint>(find.byType(CustomPaint).last);
-    // ignore: avoid_dynamic_calls
     expect((paint.painter as dynamic).dividerColor, dividerColor);
   });
 
