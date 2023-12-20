@@ -118,7 +118,6 @@ BuildApp() {
     "-dDarwinArchs=${ARCHS}"
     "-dTargetFile=${target_path}"
     "-dBuildMode=${build_mode}"
-    "-dFlavor=${FLAVOR}"
     "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"
     "-dDartObfuscation=${DART_OBFUSCATION}"
     "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
@@ -132,6 +131,10 @@ BuildApp() {
     "--build-outputs=${build_outputs_path}"
     "--output=${BUILT_PRODUCTS_DIR}"
   )
+
+  if [[ -n "$FLAVOR" ]]; then
+    flutter_args+=("-dFlavor=${FLAVOR}")
+  fi
   if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
     flutter_args+=("--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}")
   fi
