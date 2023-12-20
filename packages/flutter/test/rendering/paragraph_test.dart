@@ -376,7 +376,10 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
   group('Get correct didExceedMaxLines', () {
-    RenderParagraph createRenderParagraph({int? maxLines, TextOverflow overflow = TextOverflow.clip}) {
+    RenderParagraph createRenderParagraph({
+      int? maxLines,
+      TextOverflow overflow = TextOverflow.clip,
+    }) {
       return RenderParagraph(
         const TextSpan(
           text: 'Here is a long text, maybe exceed maxlines',
