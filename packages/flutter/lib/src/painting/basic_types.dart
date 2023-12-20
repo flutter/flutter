@@ -16,7 +16,6 @@ export 'dart:ui' show
   FontStyle,
   FontVariation,
   FontWeight,
-  GlyphInfo,
   ImageShader,
   Locale,
   MaskFilter,
