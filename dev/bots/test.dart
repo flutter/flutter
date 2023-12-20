@@ -161,7 +161,6 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     // These tests are broken and need to be fixed.
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
     'test/painting/decoration_test.dart',
-    'test/rendering/layers_test.dart',
     'test/painting/text_style_test.dart',
     'test/material/text_field_test.dart',
     'test/widgets/app_overrides_test.dart',
