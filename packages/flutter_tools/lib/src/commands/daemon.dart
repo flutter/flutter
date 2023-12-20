@@ -526,7 +526,7 @@ class DaemonDomain extends Domain {
         } else {
           platformTypesMap[platform.name] = <String, Object>{
             'isSupported': false,
-            'reason': reasons.join(' and '),
+            'reason': reasons,
             'canBeEnabledWithCreate': canBeEnabledWithCreate,
           };
         }

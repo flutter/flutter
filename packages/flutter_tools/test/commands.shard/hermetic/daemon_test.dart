@@ -132,34 +132,37 @@ void main() {
           'platformTypes': <String, Object>{
             'web': <String, Object>{
               'isSupported': false,
-              'reason': 'the Web feature is not enabled ("flutter config --enable-web")',
+              'reason': <String>['the Web feature is not enabled ("flutter config --enable-web")'],
               'canBeEnabledWithCreate': false,
             },
             'android': <String, Object>{
               'isSupported': false,
-              'reason': 'the Android feature is not enabled ("flutter config --enable-android")',
+              'reason': <String>['the Android feature is not enabled ("flutter config --enable-android")'],
               'canBeEnabledWithCreate': false,
             },
             'ios': <String, Object>{
               'isSupported': false,
-              'reason': 'the iOS feature is not enabled ("flutter config --enable-ios")',
+              'reason': <String>['the iOS feature is not enabled ("flutter config --enable-ios")'],
               'canBeEnabledWithCreate': false,
             },
             'linux': <String, Object>{
               'isSupported': false,
-              'reason': 'the Linux feature is not enabled ("flutter config --enable-linux-desktop")',
+              'reason': <String>['the Linux feature is not enabled ("flutter config --enable-linux-desktop")'],
               'canBeEnabledWithCreate': false,
             },
             'macos': <String, Object>{'isSupported': true},
             'windows': <String, Object>{'isSupported': true},
             'fuchsia': <String, Object>{
               'isSupported': false,
-              'reason': 'the Fuchsia feature is not enabled ("flutter config --enable-fuchsia") and the current Flutter project does not have a Fuchsia platform directory',
+              'reason': <String>[
+                'the Fuchsia feature is not enabled ("flutter config --enable-fuchsia")',
+                'the current Flutter project does not have a Fuchsia platform directory',
+              ],
               'canBeEnabledWithCreate': false,
             },
             'custom': <String, Object>{
               'isSupported': false,
-              'reason': 'the custom-devices feature is not enabled ("flutter config --enable-custom-devices")',
+              'reason': <String>['the custom-devices feature is not enabled ("flutter config --enable-custom-devices")'],
               'canBeEnabledWithCreate': false,
             },
             'windowsPreview': <String, Object>{'isSupported': true},
