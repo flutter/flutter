@@ -3137,14 +3137,3 @@ Future<void> createPlatformView(int id, String viewType) {
   );
   return completer.future;
 }
-
-/// Disposes of the platform view with the given [id].
-Future<void> disposePlatformView(int id) {
-  final Completer<void> completer = Completer<void>();
-  ui.PlatformDispatcher.instance.sendPlatformMessage(
-    'flutter/platform_views',
-    codec.encodeMethodCall(MethodCall('dispose', id)),
-    (dynamic _) => completer.complete(),
-  );
-  return completer.future;
-}

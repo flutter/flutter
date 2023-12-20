@@ -54,20 +54,18 @@ void testMain() {
 
     test('moveto/lineto convexity', () {
       final List<LineTestCase> testCases = <LineTestCase>[
-        LineTestCase('', SPathConvexityType.kConvex, SPathDirection.kUnknown),
+        LineTestCase('', SPathConvexityType.kConvex),
         LineTestCase(
-            '0 0', SPathConvexityType.kConvex, SPathDirection.kUnknown),
+            '0 0', SPathConvexityType.kConvex),
         LineTestCase(
-            '0 0 10 10', SPathConvexityType.kConvex, SPathDirection.kUnknown),
-        LineTestCase('0 0 10 10 20 20 0 0 10 10', SPathConvexityType.kConcave,
-            SPathDirection.kUnknown),
+            '0 0 10 10', SPathConvexityType.kConvex),
+        LineTestCase('0 0 10 10 20 20 0 0 10 10', SPathConvexityType.kConcave),
         LineTestCase(
-            '0 0 10 10 10 20', SPathConvexityType.kConvex, SPathDirection.kCW),
+            '0 0 10 10 10 20', SPathConvexityType.kConvex),
         LineTestCase(
-            '0 0 10 10 10 0', SPathConvexityType.kConvex, SPathDirection.kCCW),
-        LineTestCase('0 0 10 10 10 0 0 10', SPathConvexityType.kConcave, null),
-        LineTestCase('0 0 10 0 0 10 -10 -10', SPathConvexityType.kConcave,
-            SPathDirection.kCW),
+            '0 0 10 10 10 0', SPathConvexityType.kConvex),
+        LineTestCase('0 0 10 10 10 0 0 10', SPathConvexityType.kConcave),
+        LineTestCase('0 0 10 0 0 10 -10 -10', SPathConvexityType.kConcave),
       ];
 
       for (final LineTestCase testCase in testCases) {
@@ -418,10 +416,9 @@ void testMain() {
 }
 
 class LineTestCase {
-  LineTestCase(this.pathContent, this.convexity, this.direction);
+  LineTestCase(this.pathContent, this.convexity);
   final String pathContent;
   final int convexity;
-  final int? direction;
 }
 
 /// Parses a string of the format "mx my lx1 ly1 lx2 ly2..." into a path

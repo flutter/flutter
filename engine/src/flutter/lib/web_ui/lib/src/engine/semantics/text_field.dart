@@ -152,8 +152,6 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
       {OnChangeCallback? onChange, OnActionCallback? onAction}) {
     isEnabled = true;
     inputConfiguration = inputConfig;
-    onChange = onChange;
-    onAction = onAction;
     applyConfiguration(inputConfig);
   }
 

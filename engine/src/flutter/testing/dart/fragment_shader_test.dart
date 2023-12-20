@@ -530,8 +530,3 @@ Image _createBlueGreenImageSync() {
     picture.dispose();
   }
 }
-
-// Ignore invalid utf8 since file is not actually text.
-String readAsStringLossy(File file) {
-  return convert.utf8.decode(file.readAsBytesSync(), allowMalformed: true);
-}

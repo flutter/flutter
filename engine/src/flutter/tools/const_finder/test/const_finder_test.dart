@@ -45,7 +45,6 @@ void expectInstances(dynamic value, dynamic expected, Compiler compiler) {
 // This test is assuming the `dart` used to invoke the tests is compatible
 // with the version of package:kernel in //third-party/dart/pkg/kernel
 final String dart = Platform.resolvedExecutable;
-final String bat = Platform.isWindows ? '.bat' : '';
 
 void _checkRecursion(String dillPath, Compiler compiler) {
   stdout.writeln('Checking recursive calls.');

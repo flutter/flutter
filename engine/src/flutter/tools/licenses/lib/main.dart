@@ -608,24 +608,6 @@ class _RepositoryIcuLicenseFile extends _RepositorySingleLicenseFile {
   }
 }
 
-Iterable<List<int>> splitIntList(List<int> data, int boundary) sync* {
-  int index = 0;
-  List<int> getOne() {
-    final int start = index;
-    int end = index;
-    while ((end < data.length) && (data[end] != boundary)) {
-      end += 1;
-    }
-    end += 1;
-    index = end;
-    return data.sublist(start, end).toList();
-  }
-
-  while (index < data.length) {
-    yield getOne();
-  }
-}
-
 class _RepositoryCxxStlDualLicenseFile extends _RepositoryLicenseFile {
   _RepositoryCxxStlDualLicenseFile(super.parent, super.io)
     : _licenses = _parseLicenses(io);
