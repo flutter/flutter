@@ -239,4 +239,7 @@ class Scrollable extends PrimaryRoleManager {
       _gestureModeListener = null;
     }
   }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }

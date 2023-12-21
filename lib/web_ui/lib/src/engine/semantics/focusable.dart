@@ -34,6 +34,24 @@ class Focusable extends RoleManager {
 
   final AccessibilityFocusManager _focusManager;
 
+  /// Requests focus as a result of a route (e.g. dialog) deciding that the node
+  /// managed by this class should be focused by default when nothing requests
+  /// focus explicitly.
+  ///
+  /// This method of taking focus is different from the regular method of using
+  /// the [SemanticsObject.hasFocus] flag, as in this case the framework did not
+  /// explicitly request focus. Instead, the DOM element is being focus directly
+  /// programmatically, simulating the screen reader choosing a default element
+  /// to focus on.
+  ///
+  /// Returns `true` if the role manager took the focus. Returns `false` if
+  /// this role manager did not take the focus. The return value can be used to
+  /// decide whether to stop searching for a node that should take focus.
+  bool focusAsRouteDefault() {
+    owner.element.focus();
+    return true;
+  }
+
   @override
   void update() {
     if (semanticsObject.isFocusable) {
@@ -83,6 +101,14 @@ class AccessibilityFocusManager {
   final EngineSemanticsOwner _owner;
 
   _FocusTarget? _target;
+
+  // The last focus value set by this focus manager, used to prevent requesting
+  // focus on the same element repeatedly. Requesting focus on DOM elements is
+  // not an idempotent operation. If the element is already focused and focus is
+  // requested the browser will scroll to that element. However, scrolling is
+  // not this class' concern and so this class should avoid doing anything that
+  // would affect scrolling.
+  bool? _lastSetValue;
 
   /// Whether this focus manager is managing a focusable target.
   bool get isManaging => _target != null;
@@ -136,6 +162,7 @@ class AccessibilityFocusManager {
   void stopManaging() {
     final _FocusTarget? target = _target;
     _target = null;
+    _lastSetValue = null;
 
     if (target == null) {
       /// Nothing is being managed. Just return.
@@ -144,11 +171,6 @@ class AccessibilityFocusManager {
 
     target.element.removeEventListener('focus', target.domFocusListener);
     target.element.removeEventListener('blur', target.domBlurListener);
-
-    // Blur the element after removing listeners. If this method is being called
-    // it indicates that the framework already knows that this node should not
-    // have focus, and there's no need to notify it.
-    target.element.blur();
   }
 
   void _setFocusFromDom(bool acquireFocus) {
@@ -174,6 +196,10 @@ class AccessibilityFocusManager {
     final _FocusTarget? target = _target;
 
     if (target == null) {
+      // If this branch is being executed, there's a bug somewhere already, but
+      // it doesn't hurt to clean up old values anyway.
+      _lastSetValue = null;
+
       // Nothing is being managed right now.
       assert(() {
         printWarning(
@@ -182,6 +208,32 @@ class AccessibilityFocusManager {
         );
         return true;
       }());
+      return;
+    }
+
+    if (value == _lastSetValue) {
+      // The focus is being changed to a value that's already been requested in
+      // the past. Do nothing.
+      return;
+    }
+    _lastSetValue = value;
+
+    if (value) {
+      _owner.willRequestFocus();
+    } else {
+      // Do not blur elements. Instead let the element be blurred by requesting
+      // focus elsewhere. Blurring elements is a very error-prone thing to do,
+      // as it is subject to non-local effects. Let's say the framework decides
+      // that a semantics node is currently not focused. That would lead to
+      // changeFocus(false) to be called. However, what if this node is inside
+      // a dialog, and nothing else in the dialog is focused. The Flutter
+      // framework expects that the screen reader will focus on the first (in
+      // traversal order) focusable element inside the dialog and send a
+      // didGainAccessibilityFocus action. Screen readers on the web do not do
+      // that, and so the web engine has to implement this behavior directly. So
+      // the dialog will look for a focusable element and request focus on it,
+      // but now there may be a race between this method unsetting the focus and
+      // the dialog requesting focus on the same element.
       return;
     }
 
@@ -197,11 +249,7 @@ class AccessibilityFocusManager {
         return;
       }
 
-      if (value) {
-        target.element.focus();
-      } else {
-        target.element.blur();
-      }
+      target.element.focus();
     });
   }
 }

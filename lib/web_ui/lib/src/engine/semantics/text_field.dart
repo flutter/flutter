@@ -224,6 +224,16 @@ class TextField extends PrimaryRoleManager {
     return editableElement!;
   }
 
+  @override
+  bool focusAsRouteDefault() {
+    final DomHTMLElement? editableElement = this.editableElement;
+    if (editableElement == null) {
+      return false;
+    }
+    editableElement.focus();
+    return true;
+  }
+
   /// Timer that times when to set the location of the input text.
   ///
   /// This is only used for iOS. In iOS, virtual keyboard shifts the screen.
