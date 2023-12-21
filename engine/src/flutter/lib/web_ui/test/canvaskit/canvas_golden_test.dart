@@ -11,8 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'package:web_engine_tester/golden_tester.dart';
-
 import 'common.dart';
 
 void main() {
@@ -147,16 +145,14 @@ void testMain() {
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, picture);
       final LayerScene scene = builder.build();
-      CanvasKitRenderer.instance.renderScene(scene, implicitView);
+      await renderScene(scene);
 
       // Now draw an empty layer tree and confirm that the red rectangle is
       // no longer drawn.
       final LayerSceneBuilder emptySceneBuilder = LayerSceneBuilder();
       emptySceneBuilder.pushOffset(0, 0);
       final LayerScene emptyScene = emptySceneBuilder.build();
-      CanvasKitRenderer.instance.renderScene(emptyScene, implicitView);
-
-      await matchGoldenFile('canvaskit_empty_scene.png',
+      await matchSceneGolden('canvaskit_empty_scene.png', emptyScene,
           region: const ui.Rect.fromLTRB(0, 0, 100, 100));
     });
 
@@ -211,9 +207,8 @@ void testMain() {
       sb.pop();
 
       // The below line should not throw an error.
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
-
-      await matchGoldenFile('cross_overlay_resources.png', region: const ui.Rect.fromLTRB(0, 0, 100, 100));
+      await matchSceneGolden('cross_overlay_resources.png', sb.build(),
+          region: const ui.Rect.fromLTRB(0, 0, 100, 100));
     });
   });
 }

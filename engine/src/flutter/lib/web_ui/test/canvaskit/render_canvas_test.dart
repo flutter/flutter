@@ -21,13 +21,13 @@ void testMain() {
     });
 
     Future<DomImageBitmap> newBitmap(int width, int height) async {
-      return (await createImageBitmap(
+      return createImageBitmap(
           createBlankDomImageData(width, height) as JSAny, (
         x: 0,
         y: 0,
         width: width,
         height: height,
-      )).toDart)! as DomImageBitmap;
+      ));
     }
 
     // Regression test for https://github.com/flutter/flutter/issues/75286
