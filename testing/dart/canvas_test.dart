@@ -557,6 +557,95 @@ void main() async {
     expect(tabToTofuComparison, isFalse);
   });
 
+  test('drawRect, drawOval, and clipRect render with unsorted rectangles', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    canvas.drawColor(const Color(0xFFE0E0E0), BlendMode.src);
+
+    void draw(Rect rect, double x, double y, Color color) {
+      final Paint paint = Paint()
+        ..color = color
+        ..strokeWidth = 5.0;
+
+      final Rect tallThin = Rect.fromLTRB(
+        min(rect.left, rect.right) - 10,
+        rect.top,
+        min(rect.left, rect.right) - 10,
+        rect.bottom,
+      );
+      final Rect wideThin = Rect.fromLTRB(
+        rect.left,
+        min(rect.top, rect.bottom) - 10,
+        rect.right,
+        min(rect.top, rect.bottom) - 10,
+      );
+
+      canvas.save();
+      canvas.translate(x, y);
+
+      paint.style = PaintingStyle.fill;
+      canvas.drawRect(rect, paint);
+      canvas.drawRect(tallThin, paint);
+      canvas.drawRect(wideThin, paint);
+
+      canvas.save();
+      canvas.translate(0, 100);
+      paint.style = PaintingStyle.stroke;
+      canvas.drawRect(rect, paint);
+      canvas.drawRect(tallThin, paint);
+      canvas.drawRect(wideThin, paint);
+      canvas.restore();
+
+      canvas.save();
+      canvas.translate(100, 0);
+      paint.style = PaintingStyle.fill;
+      canvas.drawOval(rect, paint);
+      canvas.drawOval(tallThin, paint);
+      canvas.drawOval(wideThin, paint);
+      canvas.restore();
+
+      canvas.save();
+      canvas.translate(100, 100);
+      paint.style = PaintingStyle.stroke;
+      canvas.drawOval(rect, paint);
+      canvas.drawOval(tallThin, paint);
+      canvas.drawOval(wideThin, paint);
+      canvas.restore();
+
+      canvas.save();
+      canvas.translate(50, 50);
+
+      canvas.save();
+      canvas.clipRect(rect);
+      canvas.drawPaint(paint);
+      canvas.restore();
+
+      canvas.save();
+      canvas.clipRect(tallThin);
+      canvas.drawPaint(paint);
+      canvas.restore();
+
+      canvas.save();
+      canvas.clipRect(wideThin);
+      canvas.drawPaint(paint);
+      canvas.restore();
+
+      canvas.restore();
+
+      canvas.restore();
+    }
+
+    draw(const Rect.fromLTRB(10, 10, 40, 40), 50, 50, const Color(0xFF2196F3));
+    draw(const Rect.fromLTRB(40, 10, 10, 40), 250, 50, const Color(0xFF4CAF50));
+    draw(const Rect.fromLTRB(10, 40, 40, 10), 50, 250, const Color(0xFF9C27B0));
+    draw(const Rect.fromLTRB(40, 40, 10, 10), 250, 250, const Color(0xFFFF9800));
+
+    final Picture picture = recorder.endRecording();
+    final Image image = await picture.toImage(450, 450);
+    await comparer.addGoldenImage(image, 'render_unordered_rects.png');
+  });
+
   Matcher closeToTransform(Float64List expected) => (dynamic v) {
     Expect.type<Float64List>(v);
     final Float64List value = v as Float64List;
@@ -676,83 +765,82 @@ void main() async {
     Expect.fail('$value is too close to $expected');
   };
 
-  test('Canvas.clipRect(doAA=true) affects canvas.getClipBounds', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-    const Rect clipExpandedBounds = Rect.fromLTRB(10, 11, 21, 26);
-    canvas.clipRect(clipBounds);
+  test('Canvas.clipRect affects canvas.getClipBounds', () async {
+    void testRect(Rect clipRect, bool doAA) {
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.clipRect(clipRect, doAntiAlias: doAA);
 
-    // Save initial return values for testing restored values
-    final Rect initialLocalBounds = canvas.getLocalClipBounds();
-    final Rect initialDestinationBounds = canvas.getDestinationClipBounds();
-    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
-    expect(initialDestinationBounds, closeToRect(clipExpandedBounds));
+      final Rect clipSortedBounds = Rect.fromLTRB(
+        min(clipRect.left, clipRect.right),
+        min(clipRect.top, clipRect.bottom),
+        max(clipRect.left, clipRect.right),
+        max(clipRect.top, clipRect.bottom),
+      );
+      Rect clipExpandedBounds;
+      if (doAA) {
+        clipExpandedBounds = Rect.fromLTRB(
+          clipSortedBounds.left.floorToDouble(),
+          clipSortedBounds.top.floorToDouble(),
+          clipSortedBounds.right.ceilToDouble(),
+          clipSortedBounds.bottom.ceilToDouble(),
+        );
+      } else {
+        clipExpandedBounds = clipSortedBounds;
+      }
 
-    canvas.save();
-    canvas.clipRect(const Rect.fromLTRB(0, 0, 15, 15));
-    // Both clip bounds have changed
-    expect(canvas.getLocalClipBounds(), notCloseToRect(clipExpandedBounds));
-    expect(canvas.getDestinationClipBounds(), notCloseToRect(clipExpandedBounds));
-    // Previous return values have not changed
-    expect(initialLocalBounds, closeToRect(clipExpandedBounds));
-    expect(initialDestinationBounds, closeToRect(clipExpandedBounds));
-    canvas.restore();
+      // Save initial return values for testing restored values
+      final Rect initialLocalBounds = canvas.getLocalClipBounds();
+      final Rect initialDestinationBounds = canvas.getDestinationClipBounds();
+      expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+      expect(initialDestinationBounds, closeToRect(clipExpandedBounds));
 
-    // save/restore returned the values to their original values
-    expect(canvas.getLocalClipBounds(), initialLocalBounds);
-    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+      canvas.save();
+      canvas.clipRect(const Rect.fromLTRB(0, 0, 15, 15));
+      // Both clip bounds have changed
+      expect(canvas.getLocalClipBounds(), notCloseToRect(clipExpandedBounds));
+      expect(canvas.getDestinationClipBounds(), notCloseToRect(clipExpandedBounds));
+      // Previous return values have not changed
+      expect(initialLocalBounds, closeToRect(clipExpandedBounds));
+      expect(initialDestinationBounds, closeToRect(clipExpandedBounds));
+      canvas.restore();
 
-    canvas.save();
-    canvas.scale(2, 2);
-    const Rect scaledExpandedBounds = Rect.fromLTRB(5, 5.5, 10.5, 13);
-    expect(canvas.getLocalClipBounds(), closeToRect(scaledExpandedBounds));
-    // Destination bounds are unaffected by transform
-    expect(canvas.getDestinationClipBounds(), closeToRect(clipExpandedBounds));
-    canvas.restore();
+      // save/restore returned the values to their original values
+      expect(canvas.getLocalClipBounds(), initialLocalBounds);
+      expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
 
-    // save/restore returned the values to their original values
-    expect(canvas.getLocalClipBounds(), initialLocalBounds);
-    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
-  });
+      canvas.save();
+      canvas.scale(2, 2);
+      final Rect scaledExpandedBounds = Rect.fromLTRB(
+        clipExpandedBounds.left / 2.0,
+        clipExpandedBounds.top / 2.0,
+        clipExpandedBounds.right / 2.0,
+        clipExpandedBounds.bottom / 2.0,
+      );
+      expect(canvas.getLocalClipBounds(), closeToRect(scaledExpandedBounds));
+      // Destination bounds are unaffected by transform
+      expect(canvas.getDestinationClipBounds(), closeToRect(clipExpandedBounds));
+      canvas.restore();
 
-  test('Canvas.clipRect(doAA=false) affects canvas.getClipBounds', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    const Rect clipBounds = Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-    canvas.clipRect(clipBounds, doAntiAlias: false);
+      // save/restore returned the values to their original values
+      expect(canvas.getLocalClipBounds(), initialLocalBounds);
+      expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+    }
 
-    // Save initial return values for testing restored values
-    final Rect initialLocalBounds = canvas.getLocalClipBounds();
-    final Rect initialDestinationBounds = canvas.getDestinationClipBounds();
-    expect(initialLocalBounds, closeToRect(clipBounds));
-    expect(initialDestinationBounds, closeToRect(clipBounds));
+    testRect(const Rect.fromLTRB(10.2, 11.3, 20.4, 25.7), false);
+    testRect(const Rect.fromLTRB(10.2, 11.3, 20.4, 25.7), true);
 
-    canvas.save();
-    canvas.clipRect(const Rect.fromLTRB(0, 0, 15, 15));
-    // Both clip bounds have changed
-    expect(canvas.getLocalClipBounds(), notCloseToRect(clipBounds));
-    expect(canvas.getDestinationClipBounds(), notCloseToRect(clipBounds));
-    // Previous return values have not changed
-    expect(initialLocalBounds, closeToRect(clipBounds));
-    expect(initialDestinationBounds, closeToRect(clipBounds));
-    canvas.restore();
+    // LR swapped
+    testRect(const Rect.fromLTRB(20.4, 11.3, 10.2, 25.7), false);
+    testRect(const Rect.fromLTRB(20.4, 11.3, 10.2, 25.7), true);
 
-    // save/restore returned the values to their original values
-    expect(canvas.getLocalClipBounds(), initialLocalBounds);
-    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+    // TB swapped
+    testRect(const Rect.fromLTRB(10.2, 25.7, 20.4, 11.3), false);
+    testRect(const Rect.fromLTRB(10.2, 25.7, 20.4, 11.3), true);
 
-    canvas.save();
-    canvas.scale(2, 2);
-    const Rect scaledClipBounds = Rect.fromLTRB(5.1, 5.65, 10.2, 12.85);
-    expect(canvas.getLocalClipBounds(), closeToRect(scaledClipBounds));
-    // Destination bounds are unaffected by transform
-    expect(canvas.getDestinationClipBounds(), closeToRect(clipBounds));
-    canvas.restore();
-
-    // save/restore returned the values to their original values
-    expect(canvas.getLocalClipBounds(), initialLocalBounds);
-    expect(canvas.getDestinationClipBounds(), initialDestinationBounds);
+    // LR and TB swapped
+    testRect(const Rect.fromLTRB(20.4, 25.7, 10.2, 11.3), false);
+    testRect(const Rect.fromLTRB(20.4, 25.7, 10.2, 11.3), true);
   });
 
   test('Canvas.clipRect with matrix affects canvas.getClipBounds', () async {

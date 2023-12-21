@@ -5774,6 +5774,18 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @Native<Void Function(Pointer<Void>)>(symbol: 'Canvas::save', isLeaf: true)
   external void save();
 
+  static Rect _sorted(Rect rect) {
+    if (rect.isEmpty) {
+      rect = Rect.fromLTRB(
+        math.min(rect.left, rect.right),
+        math.min(rect.top, rect.bottom),
+        math.max(rect.left, rect.right),
+        math.max(rect.top, rect.bottom),
+      );
+    }
+    return rect;
+  }
+
   @override
   void saveLayer(Rect? bounds, Paint paint) {
     if (bounds == null) {
@@ -5844,6 +5856,10 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void clipRect(Rect rect, { ClipOp clipOp = ClipOp.intersect, bool doAntiAlias = true }) {
     assert(_rectIsValid(rect));
+    rect = _sorted(rect);
+    // Even if rect is still empty - which implies it has a zero dimension -
+    // we still need to perform the clipRect operation as it will effectively
+    // nullify any further rendering until the next restore call.
     _clipRect(rect.left, rect.top, rect.right, rect.bottom, clipOp.index, doAntiAlias);
   }
 
@@ -5916,7 +5932,10 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void drawRect(Rect rect, Paint paint) {
     assert(_rectIsValid(rect));
-    _drawRect(rect.left, rect.top, rect.right, rect.bottom, paint._objects, paint._data);
+    rect = _sorted(rect);
+    if (paint.style != PaintingStyle.fill || !rect.isEmpty) {
+      _drawRect(rect.left, rect.top, rect.right, rect.bottom, paint._objects, paint._data);
+    }
   }
 
   @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle, Handle)>(symbol: 'Canvas::drawRect')
@@ -5944,7 +5963,10 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void drawOval(Rect rect, Paint paint) {
     assert(_rectIsValid(rect));
-    _drawOval(rect.left, rect.top, rect.right, rect.bottom, paint._objects, paint._data);
+    rect = _sorted(rect);
+    if (paint.style != PaintingStyle.fill || !rect.isEmpty) {
+      _drawOval(rect.left, rect.top, rect.right, rect.bottom, paint._objects, paint._data);
+    }
   }
 
   @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle, Handle)>(symbol: 'Canvas::drawOval')
