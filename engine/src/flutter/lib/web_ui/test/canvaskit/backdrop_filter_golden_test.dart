@@ -7,8 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'package:web_engine_tester/golden_tester.dart';
-
 import 'common.dart';
 
 void main() {
@@ -49,8 +47,8 @@ void testMain() {
       builder.pushOffset(0, 0);
       builder.addPicture(ui.Offset.zero, checkerboard);
       builder.pushBackdropFilter(ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10));
-      CanvasKitRenderer.instance.renderScene(builder.build(), implicitView);
-      await matchGoldenFile('canvaskit_backdropfilter_blur_edges.png',
+      await matchSceneGolden(
+          'canvaskit_backdropfilter_blur_edges.png', builder.build(),
           region: region);
     });
     test('ImageFilter with ColorFilter as child', () async {
@@ -62,9 +60,7 @@ void testMain() {
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(region);
       final ui.ColorFilter colorFilter = ui.ColorFilter.mode(
-        const ui.Color(0XFF00FF00).withOpacity(0.55),
-        ui.BlendMode.darken
-      );
+          const ui.Color(0XFF00FF00).withOpacity(0.55), ui.BlendMode.darken);
 
       // using a colorFilter as an imageFilter for backDrop filter
       builder.pushBackdropFilter(colorFilter);
@@ -75,7 +71,10 @@ void testMain() {
       );
       final CkPicture redCircle1 = recorder.endRecording();
       builder.addPicture(ui.Offset.zero, redCircle1);
-      await matchSceneGolden('canvaskit_red_circle_green_backdrop_colorFilter.png', builder.build(), region: region);
+      await matchSceneGolden(
+          'canvaskit_red_circle_green_backdrop_colorFilter.png',
+          builder.build(),
+          region: region);
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);

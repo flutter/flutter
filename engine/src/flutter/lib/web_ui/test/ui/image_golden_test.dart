@@ -318,7 +318,7 @@ Future<void> testMain() async {
       image.src = url;
       await completer.future;
 
-      final DomImageBitmap bitmap = (await createImageBitmap(image as JSObject).toDart)! as DomImageBitmap;
+      final DomImageBitmap bitmap = await createImageBitmap(image as JSObject);
 
       expect(bitmap.width.toDartInt, 150);
       expect(bitmap.height.toDartInt, 150);

@@ -11,7 +11,10 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common/rendering.dart';
 import '../common/test_initialization.dart';
+
+export '../common/rendering.dart' show renderScene;
 
 const MethodCodec codec = StandardMethodCodec();
 
@@ -44,13 +47,10 @@ CkPicture paintPicture(
 
 Future<void> matchSceneGolden(
   String goldenFile,
-  LayerScene scene, {
+  ui.Scene scene, {
   required ui.Rect region,
 }) async {
-  // TODO(harryterkelsen): Enforce the render rule. Render can only be called in
-  // the scope of `onBeginFrame` or `onDrawFrame`,
-  // https://github.com/flutter/flutter/issues/137073.
-  CanvasKitRenderer.instance.renderScene(scene, implicitView);
+  await renderScene(scene);
   await matchGoldenFile(goldenFile, region: region);
 }
 
@@ -63,7 +63,7 @@ Future<void> matchPictureGolden(String goldenFile, CkPicture picture,
   final LayerSceneBuilder sb = LayerSceneBuilder();
   sb.pushOffset(0, 0);
   sb.addPicture(ui.Offset.zero, picture);
-  CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+  await renderScene(sb.build());
   await matchGoldenFile(goldenFile, region: region);
 }
 
