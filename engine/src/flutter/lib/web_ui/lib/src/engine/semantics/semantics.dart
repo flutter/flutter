@@ -519,9 +519,13 @@ abstract class PrimaryRoleManager {
 
   void removeEventListener(String type, DomEventListener? listener, [bool? useCapture]) => element.removeEventListener(type, listener, useCapture);
 
+  /// Convenience getter for the [Focusable] role manager, if any.
+  Focusable? get focusable => _focusable;
+  Focusable? _focusable;
+
   /// Adds generic focus management features.
   void addFocusManagement() {
-    addSecondaryRole(Focusable(semanticsObject, this));
+    addSecondaryRole(_focusable = Focusable(semanticsObject, this));
   }
 
   /// Adds generic live region features.
@@ -594,6 +598,22 @@ abstract class PrimaryRoleManager {
     removeAttribute('role');
     _isDisposed = true;
   }
+
+  /// Transfers the accessibility focus to the [element] managed by this role
+  /// manager as a result of this node taking focus by default.
+  ///
+  /// For example, when a dialog pops up it is expected that one of its child
+  /// nodes takes accessibility focus.
+  ///
+  /// Transferring accessibility focus is different from transferring input
+  /// focus. Not all elements that can take accessibility focus can also take
+  /// input focus. For example, a plain text node cannot take input focus, but
+  /// it can take accessibility focus.
+  ///
+  /// Returns `true` if the role manager took the focus. Returns `false` if
+  /// this role manager did not take the focus. The return value can be used to
+  /// decide whether to stop searching for a node that should take focus.
+  bool focusAsRouteDefault();
 }
 
 /// A role used when a more specific role couldn't be assigned to the node.
@@ -638,6 +658,38 @@ final class GenericRole extends PrimaryRoleManager {
     } else {
       setAriaRole('text');
     }
+  }
+
+  @override
+  bool focusAsRouteDefault() {
+    // Case 1: current node has input focus. Let the input focus system decide
+    // default focusability.
+    if (semanticsObject.isFocusable) {
+      final Focusable? focusable = this.focusable;
+      if (focusable != null) {
+        return focusable.focusAsRouteDefault();
+      }
+    }
+
+    // Case 2: current node is not focusable, but just a container of other
+    // nodes or lacks a label. Do not focus on it and let the search continue.
+    if (semanticsObject.hasChildren || !semanticsObject.hasLabel) {
+      return false;
+    }
+
+    // Case 3: current node is visual/informational. Move just the
+    // accessibility focus.
+
+    // Plain text nodes should not be focusable via keyboard or mouse. They are
+    // only focusable for the purposes of focusing the screen reader. To achieve
+    // this the -1 value is used.
+    //
+    // See also:
+    //
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex
+    element.tabIndex = -1;
+    element.focus();
+    return true;
   }
 }
 
@@ -1719,14 +1771,62 @@ class SemanticsObject {
     }
   }
 
-  /// Recursively visits the tree rooted at `this` node in depth-first fashion.
+  /// Recursively visits the tree rooted at `this` node in depth-first fashion
+  /// in the order nodes were rendered into the DOM.
+  ///
+  /// Useful for debugging only.
   ///
   /// Calls the [callback] for `this` node, then for all of its descendants.
-  void visitDepthFirst(void Function(SemanticsObject) callback) {
+  ///
+  /// Unlike [visitDepthFirstInTraversalOrder] this method can traverse
+  /// partially updated, incomplete, or inconsistent tree.
+  void _debugVisitRenderedSemanticNodesDepthFirst(void Function(SemanticsObject) callback) {
     callback(this);
     _currentChildrenInRenderOrder?.forEach((SemanticsObject child) {
-      child.visitDepthFirst(callback);
+      child._debugVisitRenderedSemanticNodesDepthFirst(callback);
     });
+  }
+
+  /// Recursively visits the tree rooted at `this` node in depth-first fashion
+  /// in traversal order.
+  ///
+  /// Calls the [callback] for `this` node, then for all of its descendants. If
+  /// the callback returns true, continues visiting descendants. Otherwise,
+  /// stops immediately after visiting the node that caused the callback to
+  /// return false.
+  void visitDepthFirstInTraversalOrder(bool Function(SemanticsObject) callback) {
+    _visitDepthFirstInTraversalOrder(callback);
+  }
+
+  bool _visitDepthFirstInTraversalOrder(bool Function(SemanticsObject) callback) {
+    final bool shouldContinueVisiting = callback(this);
+
+    if (!shouldContinueVisiting) {
+      return false;
+    }
+
+    final Int32List? childrenInTraversalOrder = _childrenInTraversalOrder;
+
+    if (childrenInTraversalOrder == null) {
+      return true;
+    }
+
+    for (final int childId in childrenInTraversalOrder) {
+      final SemanticsObject? child = owner._semanticsTree[childId];
+
+      assert(
+        child != null,
+        'visitDepthFirstInTraversalOrder must only be called after the node '
+        'tree has been established. However, child #$childId does not have its '
+        'SemanticsNode created at the time this method was called.',
+      );
+
+      if (!child!._visitDepthFirstInTraversalOrder(callback)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   @override
@@ -2170,7 +2270,7 @@ class EngineSemanticsOwner {
       // A detached node may or may not have some of its descendants reattached
       // elsewhere. Walk the descendant tree and find all descendants that were
       // reattached to a parent. Those descendants need to be removed.
-      detachmentRoot.visitDepthFirst((SemanticsObject node) {
+      detachmentRoot.visitDepthFirstInTraversalOrder((SemanticsObject node) {
         final SemanticsObject? parent = _attachments[node.id];
         if (parent == null) {
           // Was not reparented and is removed permanently from the tree.
@@ -2179,8 +2279,8 @@ class EngineSemanticsOwner {
           assert(node._parent == parent);
           assert(node.element.parentNode == parent._childContainerElement);
         }
+        return true;
       });
-
     }
 
     for (final SemanticsObject removal in removals) {
@@ -2202,6 +2302,7 @@ class EngineSemanticsOwner {
     } finally {
       _phase = SemanticsUpdatePhase.idle;
     }
+    _hasNodeRequestingFocus = false;
   }
 
   /// Returns the entire semantics tree for testing.
@@ -2235,7 +2336,7 @@ class EngineSemanticsOwner {
 
     final SemanticsObject? root = _semanticsTree[0];
     if (root != null) {
-      root.visitDepthFirst((SemanticsObject child) {
+      root._debugVisitRenderedSemanticNodesDepthFirst((SemanticsObject child) {
         liveIds[child.id] = child._childrenInTraversalOrder?.toList() ?? const <int>[];
       });
     }
@@ -2378,6 +2479,27 @@ AFTER: $description
     _detachments.clear();
     _phase = SemanticsUpdatePhase.idle;
     _oneTimePostUpdateCallbacks.clear();
+  }
+
+  /// True, if any semantics node requested focus explicitly during the latest
+  /// semantics update.
+  ///
+  /// The default value is `false`, and it is reset back to `false` after the
+  /// semantics update at the end of [updateSemantics].
+  ///
+  /// Since focus can only be taken by no more than one element, the engine
+  /// should not request focus for multiple elements. This flag helps resolve
+  /// that.
+  bool get hasNodeRequestingFocus => _hasNodeRequestingFocus;
+  bool _hasNodeRequestingFocus = false;
+
+  /// Declares that a semantics node will explicitly request focus.
+  ///
+  /// This prevents others, [Dialog] in particular, from requesting autofocus,
+  /// as focus can only be taken by one element. Explicit focus has higher
+  /// precedence than autofocus.
+  void willRequestFocus() {
+    _hasNodeRequestingFocus = true;
   }
 }
 

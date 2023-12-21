@@ -59,6 +59,12 @@ class Incrementable extends PrimaryRoleManager {
     _focusManager.manage(semanticsObject.id, _element);
   }
 
+  @override
+  bool focusAsRouteDefault() {
+    _element.focus();
+    return true;
+  }
+
   /// The HTML element used to render semantics to the browser.
   final DomHTMLInputElement _element = createDomHTMLInputElement();
 

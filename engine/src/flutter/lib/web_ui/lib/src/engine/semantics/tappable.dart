@@ -12,6 +12,9 @@ class Button extends PrimaryRoleManager {
   }
 
   @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
+
+  @override
   void update() {
     super.update();
 

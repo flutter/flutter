@@ -23,6 +23,9 @@ class ImageRoleManager extends PrimaryRoleManager {
     addTappable();
   }
 
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
+
   /// The element with role="img" and aria-label could block access to all
   /// children elements, therefore create an auxiliary element and  describe the
   /// image in that if the semantic object have child nodes.
