@@ -9,6 +9,7 @@
 #include "impeller/compiler/types.h"
 
 #include "impeller/compiler/utilities.h"
+#include "impeller/runtime_stage/runtime_stage.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 #include "third_party/json/include/nlohmann/json.hpp"
 
@@ -122,14 +123,35 @@ static std::unique_ptr<fb::ShaderT> GenerateShaderFB(
     return nullptr;
   }
 
-  auto stage_data = reflector->GetRuntimeStageData();
+  auto stage_data = reflector->GetRuntimeStageShaderData();
   if (!stage_data) {
     std::cerr << "Runtime stage information was nil for bundled shader \""
               << shader_name << "\"." << std::endl;
     return nullptr;
   }
-
-  result->shader = stage_data->CreateFlatbuffer();
+  RuntimeStageData stages;
+  switch (options.target_platform) {
+    case TargetPlatform::kUnknown:
+    case TargetPlatform::kMetalDesktop:
+    case TargetPlatform::kMetalIOS:
+    case TargetPlatform::kOpenGLES:
+    case TargetPlatform::kOpenGLDesktop:
+    case TargetPlatform::kVulkan:
+    case TargetPlatform::kSkSL:
+      std::cerr << "Invalid target platform "
+                << TargetPlatformToString(options.target_platform);
+      return nullptr;
+    case TargetPlatform::kRuntimeStageMetal:
+      stages.AddShader(RuntimeStageBackend::kMetal, stage_data);
+      break;
+    case TargetPlatform::kRuntimeStageGLES:
+      stages.AddShader(RuntimeStageBackend::kOpenGLES, stage_data);
+      break;
+    case TargetPlatform::kRuntimeStageVulkan:
+      stages.AddShader(RuntimeStageBackend::kVulkan, stage_data);
+      break;
+  }
+  result->shader = stages.CreateFlatbuffer();
   if (!result->shader) {
     std::cerr << "Failed to create flatbuffer for bundled shader \""
               << shader_name << "\"." << std::endl;

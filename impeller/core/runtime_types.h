@@ -11,6 +11,13 @@
 
 namespace impeller {
 
+enum class RuntimeStageBackend {
+  kSkSL,
+  kMetal,
+  kOpenGLES,
+  kVulkan,
+};
+
 enum RuntimeUniformType {
   kBoolean,
   kSignedByte,

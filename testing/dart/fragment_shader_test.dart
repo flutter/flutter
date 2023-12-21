@@ -30,10 +30,13 @@ void main() async {
     expect(rawData is Map<String, Object?>, true);
 
     final Map<String, Object?> data = rawData! as Map<String, Object?>;
-    expect(data['sksl'] is String, true);
-    expect(data['uniforms'] is List<Object?>, true);
+    expect(data.keys.toList(), <String>['sksl']);
+    expect(data['sksl'] is Map<String, Object?>, true);
 
-    final Object? rawUniformData = (data['uniforms']! as List<Object?>)[0];
+    final Map<String, Object?> skslData = data['sksl']! as Map<String, Object?>;
+    expect(skslData['uniforms'] is List<Object?>, true);
+
+    final Object? rawUniformData = (skslData['uniforms']! as List<Object?>)[0];
 
     expect(rawUniformData is Map<String, Object?>, true);
 
@@ -41,6 +44,11 @@ void main() async {
 
     expect(uniformData['location'] is int, true);
   });
+
+  if (impellerEnabled) {
+    // https://github.com/flutter/flutter/issues/122823
+    return;
+  }
 
   test('FragmentShader setSampler throws with out-of-bounds index', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset(

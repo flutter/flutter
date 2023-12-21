@@ -10,13 +10,6 @@ enum Stage:byte {
   kCompute,
 }
 
-enum TargetPlatform:byte {
-  kMetal,
-  kOpenGLES,
-  kSkSL,
-  kVulkan,
-}
-
 // The subset of impeller::ShaderType that may be used for uniform bindings.
 enum UniformDataType:uint32 {
   kBoolean,
@@ -75,10 +68,15 @@ table StageInput {
 
 table RuntimeStage {
   stage: Stage;
-  target_platform: TargetPlatform;
   entrypoint: string;
   inputs: [StageInput];
   uniforms: [UniformDescription];
   shader: [ubyte];
-  sksl: [ubyte];
+}
+
+table RuntimeStages {
+  sksl: RuntimeStage;
+  metal: RuntimeStage;
+  opengles: RuntimeStage;
+  vulkan: RuntimeStage;
 }

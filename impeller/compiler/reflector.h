@@ -72,7 +72,7 @@ class Reflector {
 
   std::shared_ptr<fml::Mapping> GetReflectionCC() const;
 
-  std::shared_ptr<RuntimeStageData> GetRuntimeStageData() const;
+  std::shared_ptr<RuntimeStageData::Shader> GetRuntimeStageShaderData() const;
 
  private:
   struct StructDefinition {
@@ -100,7 +100,7 @@ class Reflector {
   std::unique_ptr<const nlohmann::json> template_arguments_;
   std::shared_ptr<fml::Mapping> reflection_header_;
   std::shared_ptr<fml::Mapping> reflection_cc_;
-  std::shared_ptr<RuntimeStageData> runtime_stage_data_;
+  std::shared_ptr<RuntimeStageData::Shader> runtime_stage_shader_;
   bool is_valid_ = false;
 
   std::optional<nlohmann::json> GenerateTemplateArguments() const;
@@ -109,7 +109,7 @@ class Reflector {
 
   std::shared_ptr<fml::Mapping> GenerateReflectionCC() const;
 
-  std::shared_ptr<RuntimeStageData> GenerateRuntimeStageData() const;
+  std::shared_ptr<RuntimeStageData::Shader> GenerateRuntimeStageData() const;
 
   std::shared_ptr<fml::Mapping> InflateTemplate(std::string_view tmpl) const;
 

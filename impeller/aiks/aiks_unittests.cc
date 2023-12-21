@@ -2947,8 +2947,10 @@ TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
     GTEST_SKIP_("This backend doesn't support runtime effects.");
   }
 
-  auto runtime_stage =
+  auto runtime_stages =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  auto runtime_stage = runtime_stages[RuntimeStageBackend::kMetal];
+  ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
   struct FragUniforms {
@@ -2980,7 +2982,9 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
     GTEST_SKIP_("This backend doesn't support runtime effects.");
   }
 
-  auto runtime_stage = OpenAssetAsRuntimeStage("gradient.frag.iplr");
+  auto runtime_stages = OpenAssetAsRuntimeStage("gradient.frag.iplr");
+  auto runtime_stage = runtime_stages[RuntimeStageBackend::kMetal];
+  ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
   struct FragUniforms {

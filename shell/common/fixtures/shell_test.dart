@@ -9,6 +9,11 @@ import 'dart:ui';
 
 void main() {}
 
+@pragma('vm:entry-point')
+void mainNotifyNative() {
+  notifyNative();
+}
+
 @pragma('vm:external-name', 'NativeReportTimingsCallback')
 external void nativeReportTimingsCallback(List<int> timings);
 @pragma('vm:external-name', 'NativeOnBeginFrame')
