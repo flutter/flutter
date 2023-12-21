@@ -179,6 +179,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   virtual void OnWindowResized() override;
 
   // |FlutterWindowBindingHandler|
+  virtual bool OnBitmapSurfaceCleared() override;
+
+  // |FlutterWindowBindingHandler|
   virtual bool OnBitmapSurfaceUpdated(const void* allocation,
                                       size_t row_bytes,
                                       size_t height) override;
