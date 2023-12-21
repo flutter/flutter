@@ -764,7 +764,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.dividerHeight,
     this.labelColor,
     this.labelStyle,
-    this.labelPadding,
+    this.labelPadding = EdgeInsets.zero,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
     this.dragStartBehavior = DragStartBehavior.start,
