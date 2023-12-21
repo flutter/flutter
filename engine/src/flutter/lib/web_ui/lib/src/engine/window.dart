@@ -17,7 +17,6 @@ import 'mouse/context_menu.dart';
 import 'mouse/cursor.dart';
 import 'navigation/history.dart';
 import 'platform_dispatcher.dart';
-import 'platform_views/message_handler.dart';
 import 'pointer_binding.dart';
 import 'semantics.dart';
 import 'services.dart';
@@ -131,9 +130,6 @@ base class EngineFlutterView implements ui.FlutterView {
 
   late final DomManager dom =
       DomManager(viewId: viewId, devicePixelRatio: devicePixelRatio);
-
-  late final PlatformViewMessageHandler platformViewMessageHandler =
-      PlatformViewMessageHandler(platformViewsContainer: dom.platformViewsHost);
 
   late final PointerBinding pointerBinding;
 
