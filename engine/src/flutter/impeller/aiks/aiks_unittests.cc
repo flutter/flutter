@@ -1819,6 +1819,96 @@ TEST_P(AiksTest, FilledRoundRectsRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, FilledRoundRectPathsRenderCorrectly) {
+  Canvas canvas;
+  canvas.Scale(GetContentScale());
+  Paint paint;
+  const int color_count = 3;
+  Color colors[color_count] = {
+      Color::Blue(),
+      Color::Green(),
+      Color::Crimson(),
+  };
+
+  paint.color = Color::White();
+  canvas.DrawPaint(paint);
+
+  auto draw_rrect_as_path = [&canvas](const Rect& rect, const Size& radii,
+                                      const Paint& paint) {
+    PathBuilder builder = PathBuilder();
+    builder.AddRoundedRect(rect, radii);
+    canvas.DrawPath(builder.TakePath(), paint);
+  };
+
+  int c_index = 0;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      paint.color = colors[(c_index++) % color_count];
+      draw_rrect_as_path(Rect::MakeXYWH(i * 100 + 10, j * 100 + 20, 80, 80),
+                         Size(i * 5 + 10, j * 5 + 10), paint);
+    }
+  }
+  paint.color = colors[(c_index++) % color_count];
+  draw_rrect_as_path(Rect::MakeXYWH(10, 420, 380, 80), Size(40, 40), paint);
+  paint.color = colors[(c_index++) % color_count];
+  draw_rrect_as_path(Rect::MakeXYWH(410, 20, 80, 380), Size(40, 40), paint);
+
+  std::vector<Color> gradient_colors = {
+      Color{0x1f / 255.0, 0.0, 0x5c / 255.0, 1.0},
+      Color{0x5b / 255.0, 0.0, 0x60 / 255.0, 1.0},
+      Color{0x87 / 255.0, 0x01 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xac / 255.0, 0x25 / 255.0, 0x53 / 255.0, 1.0},
+      Color{0xe1 / 255.0, 0x6b / 255.0, 0x5c / 255.0, 1.0},
+      Color{0xf3 / 255.0, 0x90 / 255.0, 0x60 / 255.0, 1.0},
+      Color{0xff / 255.0, 0xb5 / 255.0, 0x6b / 250.0, 1.0}};
+  std::vector<Scalar> stops = {
+      0.0,
+      (1.0 / 6.0) * 1,
+      (1.0 / 6.0) * 2,
+      (1.0 / 6.0) * 3,
+      (1.0 / 6.0) * 4,
+      (1.0 / 6.0) * 5,
+      1.0,
+  };
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  paint.color = Color::White().WithAlpha(0.1);
+  paint.color_source = ColorSource::MakeRadialGradient(
+      {550, 550}, 75, gradient_colors, stops, Entity::TileMode::kMirror, {});
+  for (int i = 1; i <= 10; i++) {
+    int j = 11 - i;
+    draw_rrect_as_path(Rect::MakeLTRB(550 - i * 20, 550 - j * 20,  //
+                                      550 + i * 20, 550 + j * 20),
+                       Size(i * 10, j * 10), paint);
+  }
+  paint.color = Color::White().WithAlpha(0.5);
+  paint.color_source = ColorSource::MakeRadialGradient(
+      {200, 650}, 75, std::move(gradient_colors), std::move(stops),
+      Entity::TileMode::kMirror, {});
+  draw_rrect_as_path(Rect::MakeLTRB(100, 610, 300, 690), Size(40, 40), paint);
+  draw_rrect_as_path(Rect::MakeLTRB(160, 550, 240, 750), Size(40, 40), paint);
+
+  paint.color = Color::White().WithAlpha(0.1);
+  paint.color_source = ColorSource::MakeImage(
+      texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {},
+      Matrix::MakeTranslation({520, 20}));
+  for (int i = 1; i <= 10; i++) {
+    int j = 11 - i;
+    draw_rrect_as_path(Rect::MakeLTRB(720 - i * 20, 220 - j * 20,  //
+                                      720 + i * 20, 220 + j * 20),
+                       Size(i * 10, j * 10), paint);
+  }
+  paint.color = Color::White().WithAlpha(0.5);
+  paint.color_source = ColorSource::MakeImage(
+      texture, Entity::TileMode::kRepeat, Entity::TileMode::kRepeat, {},
+      Matrix::MakeTranslation({800, 300}));
+  draw_rrect_as_path(Rect::MakeLTRB(800, 410, 1000, 490), Size(40, 40), paint);
+  draw_rrect_as_path(Rect::MakeLTRB(860, 350, 940, 550), Size(40, 40), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
   auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
     Canvas canvas;
