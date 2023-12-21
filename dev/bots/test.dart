@@ -59,6 +59,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
@@ -1768,14 +1769,17 @@ Future<List<String>> binariesWithoutEntitlements(String flutterRoot) async {
 /// to the cache or expected binaries removed. In either case, this class'
 /// [binariesWithEntitlements] or [binariesWithoutEntitlements] lists should
 /// be updated accordingly.
-Future<void> verifyExist(String flutterRoot) async {
+Future<void> verifyExist(
+  String flutterRoot,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
+}) async {
   final Set<String> foundFiles = <String>{};
   final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
 
-  print('zzzz ${await binariesWithEntitlements(flutterRoot)}');
+
 
   for (final String binaryPath
-      in await findBinaryPaths(cacheDirectory)) {
+      in await findBinaryPaths(cacheDirectory, processManager: processManager)) {
     if ((await binariesWithEntitlements(flutterRoot)).contains(binaryPath)) {
       foundFiles.add(binaryPath);
     } else if ((await binariesWithoutEntitlements(flutterRoot)).contains(binaryPath)) {
@@ -1806,14 +1810,17 @@ Future<void> verifyExist(String flutterRoot) async {
 }
 
 /// Verify code signatures and entitlements of all binaries in the cache.
-Future<void> verifySignatures(String flutterRoot) async {
+Future<void> verifySignatures(
+  String flutterRoot,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()}
+) async {
   final List<String> unsignedBinaries = <String>[];
   final List<String> wrongEntitlementBinaries = <String>[];
   final List<String> unexpectedBinaries = <String>[];
   final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
-  const ProcessManager processManager = LocalProcessManager();
+
   for (final String binaryPath
-      in await findBinaryPaths(cacheDirectory)) {
+      in await findBinaryPaths(cacheDirectory, processManager: processManager)) {
     bool verifySignature = false;
     bool verifyEntitlements = false;
     if ((await binariesWithEntitlements(flutterRoot)).contains(binaryPath)) {
@@ -1847,7 +1854,7 @@ Future<void> verifySignatures(String flutterRoot) async {
     }
     if (verifyEntitlements) {
       print('Verifying entitlements of $binaryPath');
-      if (!(await hasExpectedEntitlements(binaryPath))) {
+      if (!(await hasExpectedEntitlements(binaryPath, flutterRoot, processManager: processManager))) {
         wrongEntitlementBinaries.add(binaryPath);
       }
     }
@@ -1887,14 +1894,11 @@ Future<void> verifySignatures(String flutterRoot) async {
   print('Verified that binaries are codesigned and have expected entitlements.');
 }
 
-List<String>? _allBinaryPaths;
-
 /// Find every binary file in the given [rootDirectory].
-Future<List<String>> findBinaryPaths(String rootDirectory) async {
-  if (_allBinaryPaths != null) {
-    return _allBinaryPaths!;
-  }
-  const ProcessManager processManager = LocalProcessManager();
+Future<List<String>> findBinaryPaths(
+  String rootDirectory,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
+}) async {
   final List<String> allBinaryPaths = <String>[];
   final io.ProcessResult result = await processManager.run(
     <String>[
@@ -1910,18 +1914,19 @@ Future<List<String>> findBinaryPaths(String rootDirectory) async {
       .toList();
 
   await Future.forEach(allFiles, (String filePath) async {
-    if (await isBinary(filePath)) {
+    if (await isBinary(filePath, processManager: processManager)) {
       allBinaryPaths.add(filePath);
-      print(filePath);
+      print('Found: $filePath\n');
     }
   });
-  _allBinaryPaths = allBinaryPaths;
-  return _allBinaryPaths!;
+  return allBinaryPaths;
 }
 
 /// Check mime-type of file at [filePath] to determine if it is binary.
-Future<bool> isBinary(String filePath) async {
-  const ProcessManager processManager = LocalProcessManager();
+Future<bool> isBinary(
+  String filePath,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()}
+) async {
   final io.ProcessResult result = await processManager.run(
     <String>[
       'file',
@@ -1934,8 +1939,11 @@ Future<bool> isBinary(String filePath) async {
 }
 
 /// Check if the binary has the expected entitlements.
-Future<bool> hasExpectedEntitlements(String binaryPath) async {
-  const ProcessManager processManager = LocalProcessManager();
+Future<bool> hasExpectedEntitlements(
+  String binaryPath,
+  String flutterRoot,
+  {@visibleForTesting ProcessManager processManager = const LocalProcessManager()}
+) async {
   final io.ProcessResult entitlementResult = await processManager.run(
     <String>[
       'codesign',
