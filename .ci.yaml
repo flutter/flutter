@@ -3164,8 +3164,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
-          {"dependency": "gems", "version": "v3.3.14"}
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
