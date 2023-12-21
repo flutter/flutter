@@ -21,9 +21,8 @@ Future<void> runFrameTimingsTest() async {
     sceneBuilder
       ..pushOffset(0, 0)
       ..pop();
-    ui.PlatformDispatcher.instance.render(sceneBuilder.build()).then((_) {
-      frameDone.complete();
-    });
+    ui.PlatformDispatcher.instance.render(sceneBuilder.build());
+    frameDone.complete();
   };
 
   // Frame 1.

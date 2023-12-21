@@ -11,7 +11,6 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'fake_asset_manager.dart';
-import 'rendering.dart';
 
 void setUpUnitTests({
   bool emulateTesterEnvironment = true,
@@ -45,8 +44,6 @@ void setUpUnitTests({
           const ui.Size(800 * devicePixelRatio, 600 * devicePixelRatio);
       engine.scheduleFrameCallback = () {};
     }
-
-    setUpRenderingForTests();
   });
 
   tearDownAll(() async {

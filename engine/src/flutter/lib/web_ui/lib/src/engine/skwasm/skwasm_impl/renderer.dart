@@ -349,7 +349,6 @@ class SkwasmRenderer implements Renderer {
   FutureOr<void> initialize() {
     surface = SkwasmSurface();
     sceneView = EngineSceneView(SkwasmPictureRenderer(surface));
-    registerHotRestartListener(clearFragmentProgramCache);
   }
 
   @override
