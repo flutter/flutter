@@ -604,6 +604,10 @@ extension DomElementExtension on DomElement {
   external DomElement? _querySelector(JSString selectors);
   DomElement? querySelector(String selectors) => _querySelector(selectors.toJS);
 
+  @JS('matches')
+  external JSBoolean _matches(JSString selectors);
+  bool matches(String selectors) => _matches(selectors.toJS).toDart;
+
   @JS('querySelectorAll')
   external _DomList _querySelectorAll(JSString selectors);
   Iterable<DomElement> querySelectorAll(String selectors) =>
