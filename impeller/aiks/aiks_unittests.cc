@@ -3768,7 +3768,7 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
   Canvas canvas;
 
   Paint paint = {
-      .color = Color::White(),
+      .color = Color::Blue(),
       .mask_blur_descriptor =
           Paint::MaskBlurDescriptor{
               .style = FilterContents::BlurStyle::kNormal,
