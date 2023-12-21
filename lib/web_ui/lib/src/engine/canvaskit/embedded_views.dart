@@ -364,7 +364,7 @@ class HtmlViewEmbedder {
     sceneHost.append(_svgPathDefs!);
   }
 
-  Future<void> submitFrame() async {
+  void submitFrame() {
     final ViewListDiffResult? diffResult =
         (_activeCompositionOrder.isEmpty || _compositionOrder.isEmpty)
             ? null
@@ -388,7 +388,7 @@ class HtmlViewEmbedder {
             _context.pictureRecorders[pictureRecorderIndex].endRecording());
         pictureRecorderIndex++;
       }
-      await rasterizer.rasterizeToCanvas(overlay, pictures);
+      rasterizer.rasterizeToCanvas(overlay, pictures);
     }
     for (final CkPictureRecorder recorder
         in _context.pictureRecordersCreatedDuringPreroll) {
@@ -443,7 +443,8 @@ class HtmlViewEmbedder {
           sceneHost.insertBefore(platformViewRoot, elementToInsertBefore);
           final RenderCanvas? overlay = _overlays[viewId];
           if (overlay != null) {
-            sceneHost.insertBefore(overlay.htmlElement, elementToInsertBefore);
+            sceneHost.insertBefore(
+                overlay.htmlElement, elementToInsertBefore);
           }
         } else {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
@@ -653,8 +654,6 @@ class HtmlViewEmbedder {
       }
     }
     _svgClipDefs.clear();
-    _svgPathDefs?.remove();
-    _svgPathDefs = null;
   }
 
   static void removeElement(DomElement element) {

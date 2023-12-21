@@ -31,7 +31,6 @@ class HtmlRenderer implements Renderer {
       // to make the unpacking happen while we are waiting for network requests.
       lineLookup;
     });
-    registerHotRestartListener(clearFragmentProgramCache);
 
     _instance = this;
   }
@@ -324,7 +323,7 @@ class HtmlRenderer implements Renderer {
     CanvasParagraphBuilder(style as EngineParagraphStyle);
 
   @override
-  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) async {
+  void renderScene(ui.Scene scene, ui.FlutterView view) {
     final EngineFlutterView implicitView = EnginePlatformDispatcher.instance.implicitView!;
     implicitView.dom.setScene((scene as SurfaceScene).webOnlyRootElement!);
     frameTimingsOnRasterFinish();

@@ -15,7 +15,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../common/matchers.dart';
-import '../../common/rendering.dart';
 import '../../common/test_initialization.dart';
 
 void main() {
@@ -25,7 +24,6 @@ void main() {
 void testMain() {
   setUpAll(() async {
     await bootstrapAndRunApp();
-    setUpRenderingForTests();
   });
 
   group('SceneBuilder', () {
@@ -479,7 +477,7 @@ void testMain() {
     // Pump an empty scene to reset it, otherwise the first frame will attempt
     // to diff left-overs from a previous test, which results in unpredictable
     // DOM mutations.
-    await renderScene(SurfaceSceneBuilder().build());
+    ui.PlatformDispatcher.instance.render(SurfaceSceneBuilder().build());
 
     // Renders a `string` by breaking it up into individual characters and
     // rendering each character into its own layer.
