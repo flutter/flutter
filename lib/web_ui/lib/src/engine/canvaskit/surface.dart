@@ -115,22 +115,18 @@ class Surface {
     _surface!.flush();
 
     if (browserSupportsCreateImageBitmap) {
-      DomImageBitmap bitmap;
+      JSObject bitmapSource;
       if (Surface.offscreenCanvasSupported) {
-        bitmap = (await createImageBitmap(_offscreenCanvas! as JSObject, (
-          x: 0,
-          y: _pixelHeight - frameSize.height.toInt(),
-          width: frameSize.width.toInt(),
-          height: frameSize.height.toInt(),
-        )).toDart)! as DomImageBitmap;
+        bitmapSource = _offscreenCanvas! as JSObject;
       } else {
-        bitmap = (await createImageBitmap(_canvasElement! as JSObject, (
-          x: 0,
-          y: _pixelHeight - frameSize.height.toInt(),
-          width: frameSize.width.toInt(),
-          height: frameSize.height.toInt()
-        )).toDart)! as DomImageBitmap;
+        bitmapSource = _canvasElement! as JSObject;
       }
+      final DomImageBitmap bitmap = await createImageBitmap(bitmapSource, (
+        x: 0,
+        y: _pixelHeight - frameSize.height.toInt(),
+        width: frameSize.width.toInt(),
+        height: frameSize.height.toInt(),
+      ));
       canvas.render(bitmap);
     } else {
       // If the browser doesn't support `createImageBitmap` (e.g. Safari 14)

@@ -41,7 +41,7 @@ void testMain() {
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       // The platform view is now split in two parts. The contents live
       // as a child of the glassPane, and the slot lives in the glassPane
@@ -77,7 +77,7 @@ void testMain() {
       sb.pushClipRRect(
           ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       expect(
         sceneHost.querySelectorAll('#sk_path_defs').single,
@@ -122,7 +122,7 @@ void testMain() {
       sb.pushTransform(scaleMatrix.toFloat64());
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       // Transformations happen on the slot element.
       final DomElement slotHost =
@@ -148,7 +148,7 @@ void testMain() {
 
       final LayerSceneBuilder sb = LayerSceneBuilder();
       sb.addPlatformView(0, offset: const ui.Offset(3, 4), width: 5, height: 6);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       final DomElement slotHost =
           sceneHost.querySelector('flt-platform-view-slot')!;
@@ -194,7 +194,7 @@ void testMain() {
       sb.pushOffset(6, 6);
       sb.addPlatformView(0, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       // Transformations happen on the slot element.
       DomElement slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
@@ -214,7 +214,7 @@ void testMain() {
       sb.pushClipRect(ui.Rect.largest);
       sb.pushOffset(9, 9);
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       // Transformations happen on the slot element.
       slotHost = sceneHost.querySelector('flt-platform-view-slot')!;
@@ -244,7 +244,7 @@ void testMain() {
       sb.pushOffset(2, 2);
       sb.pushOffset(3, 3);
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       // Transformations happen on the slot element.
       final DomElement slotHost =
@@ -273,7 +273,7 @@ void testMain() {
       sb.pushClipRect(ui.Rect.largest);
       sb.pushOffset(9, 9);
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       // Transformations happen on the slot element.
       final DomElement slotHost =
@@ -308,20 +308,20 @@ void testMain() {
         platformViewIds.add(i);
       }
 
-      void renderTestScene({required int viewCount}) {
+      Future<void> renderTestScene({required int viewCount}) async {
         final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
         for (int i = 0; i < viewCount; i++) {
           sb.addPicture(ui.Offset.zero, testPicture);
           sb.addPlatformView(i, width: 10, height: 10);
         }
-        CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+        await renderScene(sb.build());
       }
 
       // Frame 1:
       //   Render: up to cache size platform views.
       //   Expect: main canvas plus platform view overlays.
-      renderTestScene(viewCount: 8);
+      await renderTestScene(viewCount: 8);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -344,15 +344,13 @@ void testMain() {
       // Frame 2:
       //   Render: zero platform views.
       //   Expect: main canvas, no overlays.
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene(viewCount: 0);
+      await renderTestScene(viewCount: 0);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay]);
 
       // Frame 3:
       //   Render: less than cache size platform views.
       //   Expect: overlays reused.
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene(viewCount: 6);
+      await renderTestScene(viewCount: 6);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -372,8 +370,7 @@ void testMain() {
       // Frame 4:
       //   Render: more platform views than max overlay count.
       //   Expect: main canvas, backup overlay, maximum overlays.
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene(viewCount: 16);
+      await renderTestScene(viewCount: 16);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -404,8 +401,7 @@ void testMain() {
       // Frame 5:
       //   Render: zero platform views.
       //   Expect: main canvas, no overlays.
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene(viewCount: 0);
+      await renderTestScene(viewCount: 0);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay]);
 
       // Frame 6:
@@ -426,7 +422,7 @@ void testMain() {
       }
 
       try {
-        renderTestScene(viewCount: platformViewIds.length);
+        await renderTestScene(viewCount: platformViewIds.length);
         fail('Expected to throw');
       } on AssertionError catch (error) {
         expect(
@@ -439,7 +435,7 @@ void testMain() {
       //   Render: a platform view after error.
       //   Expect: success. Just checking the system is not left in a corrupted state.
       await createPlatformView(0, 'test-platform-view');
-      renderTestScene(viewCount: 0);
+      await renderTestScene(viewCount: 0);
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay]);
 
       for (int i = 0; i < 16; i++) {
@@ -464,20 +460,20 @@ void testMain() {
         platformViewIds.add(i);
       }
 
-      void renderTestScene(List<int> views) {
+      Future<void> renderTestScene(List<int> views) async {
         final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
         for (final int view in views) {
           sb.addPicture(ui.Offset.zero, testPicture);
           sb.addPlatformView(view, width: 10, height: 10);
         }
-        CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+        await renderScene(sb.build());
       }
 
       // Frame 1:
       //   Render: Views 1-10
       //   Expect: main canvas plus platform view overlays; empty cache.
-      renderTestScene(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      await renderTestScene(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -502,8 +498,7 @@ void testMain() {
       // Frame 2:
       //   Render: Views 2-11
       //   Expect: main canvas plus platform view overlays; empty cache.
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene(<int>[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+      await renderTestScene(<int>[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -528,8 +523,7 @@ void testMain() {
       // Frame 3:
       //   Render: Views 3-12
       //   Expect: main canvas plus platform view overlays; empty cache.
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene(<int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      await renderTestScene(<int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -554,8 +548,7 @@ void testMain() {
       // Frame 4:
       //   Render: Views 3-12 again (same as last frame)
       //   Expect: main canvas plus platform view overlays; empty cache.
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene(<int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      await renderTestScene(<int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -580,7 +573,6 @@ void testMain() {
       for (int i = 0; i < 20; i++) {
         await disposePlatformView(i);
       }
-
     });
 
     test('embeds and disposes of a platform view', () async {
@@ -593,7 +585,7 @@ void testMain() {
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -606,7 +598,7 @@ void testMain() {
 
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
 
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
@@ -642,7 +634,7 @@ void testMain() {
 
       implicitView.debugPhysicalSizeOverride = const ui.Size(100, 100);
       implicitView.debugForceResize();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -651,7 +643,7 @@ void testMain() {
 
       implicitView.debugPhysicalSizeOverride = const ui.Size(200, 200);
       implicitView.debugForceResize();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -675,7 +667,7 @@ void testMain() {
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(0, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -689,7 +681,7 @@ void testMain() {
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
       sb.addPlatformView(1, width: 10, height: 10);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -705,7 +697,7 @@ void testMain() {
       // the platform view.
       sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
       ]);
@@ -730,28 +722,26 @@ void testMain() {
       );
       await createPlatformView(0, 'test-platform-view');
 
-      void renderTestScene() {
+      Future<void> renderTestScene() async {
         final LayerSceneBuilder sb = LayerSceneBuilder();
         sb.pushOffset(0, 0);
         sb.pushClipRRect(
             ui.RRect.fromLTRBR(0, 0, 10, 10, const ui.Radius.circular(3)));
         sb.addPlatformView(0, width: 10, height: 10);
-        CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+        await renderScene(sb.build());
       }
 
       final DomNode skPathDefs = sceneHost.querySelector('#sk_path_defs')!;
 
       expect(skPathDefs.childNodes, hasLength(0));
 
-      renderTestScene();
+      await renderTestScene();
       expect(skPathDefs.childNodes, hasLength(1));
 
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene();
+      await renderTestScene();
       expect(skPathDefs.childNodes, hasLength(1));
 
-      await Future<void>.delayed(Duration.zero);
-      renderTestScene();
+      await renderTestScene();
       expect(skPathDefs.childNodes, hasLength(1));
 
       await disposePlatformView(0);
@@ -771,7 +761,7 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       sb.pop();
       // The below line should not throw an error.
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
       ]);
@@ -805,7 +795,7 @@ void testMain() {
       sb.pushOffset(0, 0);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -816,7 +806,7 @@ void testMain() {
       sb.addPlatformView(0, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -830,7 +820,7 @@ void testMain() {
       sb.addPlatformView(1, width: 10, height: 10);
       sb.addPlatformView(2, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -849,7 +839,7 @@ void testMain() {
       sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(3, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -868,7 +858,7 @@ void testMain() {
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -889,7 +879,7 @@ void testMain() {
       sb.addPlatformView(4, width: 10, height: 10);
       sb.addPlatformView(5, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -912,7 +902,7 @@ void testMain() {
       sb.addPlatformView(5, width: 10, height: 10);
       sb.addPlatformView(6, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -934,7 +924,7 @@ void testMain() {
       sb.addPlatformView(5, width: 10, height: 10);
       sb.addPlatformView(6, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -953,7 +943,7 @@ void testMain() {
       sb.addPlatformView(3, width: 10, height: 10);
       sb.addPlatformView(4, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,
@@ -970,7 +960,7 @@ void testMain() {
       sb.addPlatformView(2, width: 10, height: 10);
       sb.addPlatformView(1, width: 10, height: 10);
       sb.pop();
-      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await renderScene(sb.build());
       _expectSceneMatches(<_EmbeddedViewMarker>[
         _overlay,
         _platformView,

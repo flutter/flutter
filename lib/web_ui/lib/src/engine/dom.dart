@@ -210,14 +210,16 @@ external JSPromise<JSAny?> _createImageBitmap2(
   JSNumber width,
   JSNumber height,
 );
-JSPromise<JSAny?> createImageBitmap(JSAny source,
+Future<DomImageBitmap> createImageBitmap(JSAny source,
     [({int x, int y, int width, int height})? bounds]) {
+  JSPromise<JSAny?> jsPromise;
   if (bounds != null) {
-    return _createImageBitmap2(source, bounds.x.toJS, bounds.y.toJS,
+    jsPromise = _createImageBitmap2(source, bounds.x.toJS, bounds.y.toJS,
         bounds.width.toJS, bounds.height.toJS);
   } else {
-    return _createImageBitmap1(source);
+    jsPromise = _createImageBitmap1(source);
   }
+  return js_util.promiseToFuture<DomImageBitmap>(jsPromise);
 }
 
 @JS()
