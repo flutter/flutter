@@ -17,6 +17,7 @@ late final String _test5TrackingOnWithDisposalStackTrace;
 late final String _test6TrackingOnNoLeaks;
 late final String _test7TrackingOnNoLeaks;
 late final String _test8TrackingOnNotDisposed;
+late final String _test9TrackingOnAsyncPump;
 
 void main() {
   LeakTesting.collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
@@ -89,6 +90,15 @@ void main() {
     expect(LeakTracking.phase.name, _test8TrackingOnNotDisposed);
     expect(LeakTracking.phase.ignoreLeaks, false);
     LeakTrackedClass();
+  });
+
+  testWidgets(_test9TrackingOnAsyncPump = 'test9, tracking-on, async pump', (WidgetTester tester) async {
+    expect(LeakTracking.isStarted, true);
+    expect(LeakTracking.phase.name, _test8TrackingOnNotDisposed);
+    expect(LeakTracking.phase.ignoreLeaks, false);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(StatelessLeakingWidget());
+    });
   });
 }
 
