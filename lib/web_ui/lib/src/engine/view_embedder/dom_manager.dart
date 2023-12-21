@@ -6,6 +6,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../configuration.dart';
 import '../dom.dart';
+import '../platform_views/content_manager.dart';
 import '../safe_browser_api.dart';
 import '../semantics/semantics.dart';
 import 'style_manager.dart';
@@ -203,6 +204,33 @@ class DomManager {
       _lastSceneElement = sceneElement;
       sceneHost.append(sceneElement);
     }
+  }
+
+  /// Injects a platform view with [platformViewId] into [platformViewsHost].
+  ///
+  /// If the platform view is already injected, this method does *nothing*.
+  ///
+  /// The `platformViewsHost` can only be different if `platformViewId` is moving
+  /// from one [FlutterView] to another. In that case, the browser will move the
+  /// slot contents from the old `platformViewsHost` to the new one, but that
+  /// will cause the platformView to reset its state (an iframe will re-render,
+  /// text selections will be lost, video playback interrupted, etc...)
+  ///
+  /// Try not to move platform views across views!
+  void injectPlatformView(int platformViewId) {
+    // For now, we don't need anything fancier. If needed, this can be converted
+    // to a PlatformViewStrategy class for each web-renderer backend?
+    final DomElement? pv = PlatformViewManager.instance.getSlottedContent(platformViewId);
+    if (pv == null) {
+      domWindow.console.debug('Failed to inject Platform View Id: $platformViewId. '
+        'Render seems to be happening before a `flutter/platform_views:create` platform message!');
+      return;
+    }
+    // If pv is already a descendant of platformViewsHost -> noop
+    if (pv.parent == platformViewsHost) {
+      return;
+    }
+    platformViewsHost.append(pv);
   }
 }
 

@@ -38,8 +38,7 @@ class PlatformViewManager {
 
   /// The shared instance of PlatformViewManager shared across the engine to handle
   /// rendering of PlatformViews into the web app.
-  // TODO(dit): How to make this overridable from tests?
-  static final PlatformViewManager instance = PlatformViewManager();
+  static PlatformViewManager instance = PlatformViewManager();
 
   // The factory functions, indexed by the viewType
   final Map<String, Function> _factories = <String, Function>{};
@@ -63,6 +62,20 @@ class PlatformViewManager {
   /// rendered.
   bool knowsViewId(int viewId) {
     return _contents.containsKey(viewId);
+  }
+
+  /// Returns the cached contents of [viewId], to be injected into the DOM.
+  ///
+  /// This is only used by the active `Renderer` object when a platform view needs
+  /// to be injected in the DOM, through `FlutterView.DomManager.injectPlatformView`.
+  ///
+  /// This may return null, if [renderContent] was not called before this. The
+  /// framework seems to allow/need this for some tests, so it is allowed here
+  /// as well.
+  ///
+  /// App programmers should not access this directly, and instead use [getViewById].
+  DomElement? getSlottedContent(int viewId) {
+    return _contents[viewId];
   }
 
   /// Returns the HTML element created by a registered factory for [viewId].
@@ -104,9 +117,8 @@ class PlatformViewManager {
 
   /// Creates the HTML markup for the `contents` of a Platform View.
   ///
-  /// The result of this call is cached in the `_contents` Map. This is only
-  /// cached so it can be disposed of later by [clearPlatformView]. _Note that
-  /// there's no `getContents` function in this class._
+  /// The result of this call is cached in the `_contents` Map, so the active
+  /// renderer can inject it as needed.
   ///
   /// The resulting DOM for the `contents` of a Platform View looks like this:
   ///
