@@ -123,8 +123,26 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
   ShaderLibrary::ShaderMap shader_map;
 
   for (const auto* bundled_shader : *bundle->shaders()) {
-    const impeller::fb::RuntimeStage* runtime_stage = bundled_shader->shader();
-    impeller::RuntimeStage stage(runtime_stage);
+    auto* runtime_stages = bundled_shader->shader();
+
+    const impeller::fb::RuntimeStage* runtime_stage = nullptr;
+    auto backend = UIDartState::Current()->GetRuntimeStageBackend();
+    switch (backend) {
+      case impeller::RuntimeStageBackend::kSkSL:
+        FML_LOG(ERROR) << "Cannot target SkSL";
+        return nullptr;
+      case impeller::RuntimeStageBackend::kMetal:
+        runtime_stage = runtime_stages->metal();
+        break;
+      case impeller::RuntimeStageBackend::kOpenGLES:
+        runtime_stage = runtime_stages->opengles();
+        break;
+      case impeller::RuntimeStageBackend::kVulkan:
+        runtime_stage = runtime_stages->vulkan();
+        break;
+    }
+
+    impeller::RuntimeStage stage(runtime_stage, payload);
 
     std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor = nullptr;
     if (stage.GetShaderStage() == impeller::RuntimeShaderStage::kVertex) {

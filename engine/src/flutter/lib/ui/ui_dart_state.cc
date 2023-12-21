@@ -40,7 +40,8 @@ UIDartState::Context::Context(
     std::string advisory_script_entrypoint,
     std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-    bool enable_impeller)
+    bool enable_impeller,
+    impeller::RuntimeStageBackend runtime_stage_backend)
     : task_runners(task_runners),
       snapshot_delegate(std::move(snapshot_delegate)),
       io_manager(std::move(io_manager)),
@@ -51,7 +52,8 @@ UIDartState::Context::Context(
       advisory_script_entrypoint(std::move(advisory_script_entrypoint)),
       volatile_path_tracker(std::move(volatile_path_tracker)),
       concurrent_task_runner(std::move(concurrent_task_runner)),
-      enable_impeller(enable_impeller) {}
+      enable_impeller(enable_impeller),
+      runtime_stage_backend(runtime_stage_backend) {}
 
 UIDartState::UIDartState(
     TaskObserverAdd add_callback,
@@ -83,6 +85,10 @@ const std::string& UIDartState::GetAdvisoryScriptURI() const {
 
 bool UIDartState::IsImpellerEnabled() const {
   return context_.enable_impeller;
+}
+
+impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
+  return context_.runtime_stage_backend;
 }
 
 void UIDartState::DidSetIsolate() {

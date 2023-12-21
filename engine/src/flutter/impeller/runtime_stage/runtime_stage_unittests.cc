@@ -24,18 +24,19 @@ using RuntimeStageTest = RuntimeStagePlayground;
 INSTANTIATE_PLAYGROUND_SUITE(RuntimeStageTest);
 
 TEST(RuntimeStageTest, CanReadValidBlob) {
-  auto fixture =
+  const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
-  RuntimeStage stage(std::move(fixture));
-  ASSERT_TRUE(stage.IsValid());
-  ASSERT_EQ(stage.GetShaderStage(), RuntimeShaderStage::kFragment);
+  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
+  auto stage = stages[RuntimeStageBackend::kMetal];
+  ASSERT_TRUE(stage->IsValid());
+  ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
 }
 
 TEST(RuntimeStageTest, CanRejectInvalidBlob) {
   ScopedValidationDisable disable_validation;
-  auto fixture =
+  const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   auto junk_allocation = std::make_shared<Allocation>();
@@ -43,20 +44,23 @@ TEST(RuntimeStageTest, CanRejectInvalidBlob) {
   // Not meant to be secure. Just reject obviously bad blobs using magic
   // numbers.
   ::memset(junk_allocation->GetBuffer(), 127, junk_allocation->GetLength());
-  RuntimeStage stage(CreateMappingFromAllocation(junk_allocation));
-  ASSERT_FALSE(stage.IsValid());
+  auto stages = RuntimeStage::DecodeRuntimeStages(
+      CreateMappingFromAllocation(junk_allocation));
+  ASSERT_FALSE(stages[RuntimeStageBackend::kMetal]);
 }
 
 TEST(RuntimeStageTest, CanReadUniforms) {
-  auto fixture =
+  const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
-  RuntimeStage stage(std::move(fixture));
-  ASSERT_TRUE(stage.IsValid());
-  ASSERT_EQ(stage.GetUniforms().size(), 17u);
+  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
+  auto stage = stages[RuntimeStageBackend::kMetal];
+
+  ASSERT_TRUE(stage->IsValid());
+  ASSERT_EQ(stage->GetUniforms().size(), 17u);
   {
-    auto uni = stage.GetUniform("u_color");
+    auto uni = stage->GetUniform("u_color");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 4u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -64,7 +68,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_alpha");
+    auto uni = stage->GetUniform("u_alpha");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 1u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -72,7 +76,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_sparkle_color");
+    auto uni = stage->GetUniform("u_sparkle_color");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 4u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -80,7 +84,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_sparkle_alpha");
+    auto uni = stage->GetUniform("u_sparkle_alpha");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 1u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -88,7 +92,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_blur");
+    auto uni = stage->GetUniform("u_blur");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 1u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -96,7 +100,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_radius_scale");
+    auto uni = stage->GetUniform("u_radius_scale");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 1u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -104,7 +108,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_max_radius");
+    auto uni = stage->GetUniform("u_max_radius");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 1u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -112,7 +116,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_resolution_scale");
+    auto uni = stage->GetUniform("u_resolution_scale");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -120,7 +124,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_noise_scale");
+    auto uni = stage->GetUniform("u_noise_scale");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -128,7 +132,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_noise_phase");
+    auto uni = stage->GetUniform("u_noise_phase");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 1u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -137,7 +141,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
   }
 
   {
-    auto uni = stage.GetUniform("u_circle1");
+    auto uni = stage->GetUniform("u_circle1");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -145,7 +149,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_circle2");
+    auto uni = stage->GetUniform("u_circle2");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -153,7 +157,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_circle3");
+    auto uni = stage->GetUniform("u_circle3");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -161,7 +165,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_rotation1");
+    auto uni = stage->GetUniform("u_rotation1");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -169,7 +173,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_rotation2");
+    auto uni = stage->GetUniform("u_rotation2");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -177,7 +181,7 @@ TEST(RuntimeStageTest, CanReadUniforms) {
     ASSERT_EQ(uni->type, RuntimeUniformType::kFloat);
   }
   {
-    auto uni = stage.GetUniform("u_rotation3");
+    auto uni = stage->GetUniform("u_rotation3");
     ASSERT_NE(uni, nullptr);
     ASSERT_EQ(uni->dimensions.rows, 2u);
     ASSERT_EQ(uni->dimensions.cols, 1u);
@@ -190,35 +194,36 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
   if (GetParam() != PlaygroundBackend::kMetal) {
     GTEST_SKIP_("Skipped: https://github.com/flutter/flutter/issues/105538");
   }
-  auto fixture =
+  const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
-  RuntimeStage stage(std::move(fixture));
-  ASSERT_TRUE(stage.IsValid());
+  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
+  auto stage = stages[RuntimeStageBackend::kMetal];
+  ASSERT_TRUE(stage->IsValid());
   std::promise<bool> registration;
   auto future = registration.get_future();
   auto library = GetContext()->GetShaderLibrary();
   library->RegisterFunction(
-      stage.GetEntrypoint(),                  //
-      ToShaderStage(stage.GetShaderStage()),  //
-      stage.GetCodeMapping(),                 //
+      stage->GetEntrypoint(),                  //
+      ToShaderStage(stage->GetShaderStage()),  //
+      stage->GetCodeMapping(),                 //
       fml::MakeCopyable([reg = std::move(registration)](bool result) mutable {
         reg.set_value(result);
       }));
   ASSERT_TRUE(future.get());
   {
     auto function =
-        library->GetFunction(stage.GetEntrypoint(), ShaderStage::kFragment);
+        library->GetFunction(stage->GetEntrypoint(), ShaderStage::kFragment);
     ASSERT_NE(function, nullptr);
   }
 
   // Check if unregistering works.
 
-  library->UnregisterFunction(stage.GetEntrypoint(), ShaderStage::kFragment);
+  library->UnregisterFunction(stage->GetEntrypoint(), ShaderStage::kFragment);
   {
     auto function =
-        library->GetFunction(stage.GetEntrypoint(), ShaderStage::kFragment);
+        library->GetFunction(stage->GetEntrypoint(), ShaderStage::kFragment);
     ASSERT_EQ(function, nullptr);
   }
 }
@@ -227,7 +232,10 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   if (GetParam() != PlaygroundBackend::kMetal) {
     GTEST_SKIP_("Skipped: https://github.com/flutter/flutter/issues/105538");
   }
-  auto stage = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  auto stages = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  auto stage = stages[RuntimeStageBackend::kMetal];
+
+  ASSERT_TRUE(stage);
   ASSERT_NE(stage, nullptr);
   ASSERT_TRUE(RegisterStage(*stage));
   auto library = GetContext()->GetShaderLibrary();

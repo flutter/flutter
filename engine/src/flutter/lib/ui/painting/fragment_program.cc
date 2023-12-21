@@ -15,6 +15,7 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 
+#include "impeller/core/runtime_types.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -25,6 +26,20 @@
 namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, FragmentProgram);
+
+static std::string RuntimeStageBackendToString(
+    impeller::RuntimeStageBackend backend) {
+  switch (backend) {
+    case impeller::RuntimeStageBackend::kSkSL:
+      return "SkSL";
+    case impeller::RuntimeStageBackend::kMetal:
+      return "Metal";
+    case impeller::RuntimeStageBackend::kOpenGLES:
+      return "OpenGLES";
+    case impeller::RuntimeStageBackend::kVulkan:
+      return "Vulkan";
+  }
+}
 
 std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   FML_TRACE_EVENT("flutter", "FragmentProgram::initFromAsset", "asset",
@@ -38,15 +53,34 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
     return std::string("Asset '") + asset_name + std::string("' not found");
   }
 
-  auto runtime_stage = impeller::RuntimeStage(std::move(data));
-  if (!runtime_stage.IsValid()) {
+  auto runtime_stages =
+      impeller::RuntimeStage::DecodeRuntimeStages(std::move(data));
+
+  if (runtime_stages.empty()) {
     return std::string("Asset '") + asset_name +
-           std::string("' does not contain valid shader data.");
+           std::string("' does not contain any shader data.");
+  }
+
+  auto backend = UIDartState::Current()->GetRuntimeStageBackend();
+  auto runtime_stage = runtime_stages[backend];
+  if (!runtime_stage) {
+    std::ostringstream stream;
+    stream << "Asset '" << asset_name
+           << "' does not contain appropriate runtime stage data for current "
+              "backend ("
+           << RuntimeStageBackendToString(backend) << ")." << std::endl
+           << "Found stages: ";
+    for (const auto& kvp : runtime_stages) {
+      if (kvp.second) {
+        stream << RuntimeStageBackendToString(kvp.first) << " ";
+      }
+    }
+    return stream.str();
   }
 
   int sampled_image_count = 0;
   size_t other_uniforms_bytes = 0;
-  for (const auto& uniform_description : runtime_stage.GetUniforms()) {
+  for (const auto& uniform_description : runtime_stage->GetUniforms()) {
     if (uniform_description.type ==
         impeller::RuntimeUniformType::kSampledImage) {
       sampled_image_count++;
@@ -56,10 +90,9 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   }
 
   if (UIDartState::Current()->IsImpellerEnabled()) {
-    runtime_effect_ = DlRuntimeEffect::MakeImpeller(
-        std::make_unique<impeller::RuntimeStage>(std::move(runtime_stage)));
+    runtime_effect_ = DlRuntimeEffect::MakeImpeller(std::move(runtime_stage));
   } else {
-    const auto& code_mapping = runtime_stage.GetSkSLMapping();
+    const auto& code_mapping = runtime_stage->GetCodeMapping();
     auto code_size = code_mapping->GetSize();
     const char* sksl =
         reinterpret_cast<const char*>(code_mapping->GetMapping());

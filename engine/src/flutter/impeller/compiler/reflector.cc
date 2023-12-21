@@ -127,8 +127,8 @@ Reflector::Reflector(Options options,
     return;
   }
 
-  runtime_stage_data_ = GenerateRuntimeStageData();
-  if (!runtime_stage_data_) {
+  runtime_stage_shader_ = GenerateRuntimeStageData();
+  if (!runtime_stage_shader_) {
     return;
   }
 
@@ -162,8 +162,9 @@ std::shared_ptr<fml::Mapping> Reflector::GetReflectionCC() const {
   return reflection_cc_;
 }
 
-std::shared_ptr<RuntimeStageData> Reflector::GetRuntimeStageData() const {
-  return runtime_stage_data_;
+std::shared_ptr<RuntimeStageData::Shader> Reflector::GetRuntimeStageShaderData()
+    const {
+  return runtime_stage_shader_;
 }
 
 std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
@@ -317,18 +318,17 @@ std::shared_ptr<fml::Mapping> Reflector::GenerateReflectionCC() const {
   return InflateTemplate(kReflectionCCTemplate);
 }
 
-std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
+std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
+    const {
   const auto& entrypoints = compiler_->get_entry_points_and_stages();
   if (entrypoints.size() != 1u) {
     VALIDATION_LOG << "Single entrypoint not found.";
     return nullptr;
   }
-  auto data = std::make_shared<RuntimeStageData>(
-      options_.entry_point_name,            //
-      entrypoints.front().execution_model,  //
-      options_.target_platform              //
-  );
-  data->SetShaderData(shader_data_);
+  auto data = std::make_unique<RuntimeStageData::Shader>();
+  data->entrypoint = options_.entry_point_name;
+  data->stage = entrypoints.front().execution_model;
+  data->shader = shader_data_;
 
   // Sort the IR so that the uniforms are in declaration order.
   std::vector<spirv_cross::ID> uniforms =
@@ -346,7 +346,7 @@ std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
     uniform_description.columns = spir_type.columns;
     uniform_description.bit_width = spir_type.width;
     uniform_description.array_elements = GetArrayElements(spir_type);
-    data->AddUniformDescription(std::move(uniform_description));
+    data->uniforms.emplace_back(std::move(uniform_description));
   }
 
   // We only need to worry about storing vertex attributes.
@@ -373,7 +373,7 @@ std::shared_ptr<RuntimeStageData> Reflector::GenerateRuntimeStageData() const {
       input_description.vec_size = type.vecsize;
       input_description.columns = type.columns;
       input_description.offset = offset.value_or(0u);
-      data->AddInputDescription(std::move(input_description));
+      data->inputs.emplace_back(std::move(input_description));
     }
   }
 

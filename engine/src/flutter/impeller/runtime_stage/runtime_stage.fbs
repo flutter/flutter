@@ -6,5 +6,5 @@ include "runtime_stage_types.fbs";
 
 namespace impeller.fb;
 
-root_type RuntimeStage;
+root_type RuntimeStages;
 file_identifier "IPLR";

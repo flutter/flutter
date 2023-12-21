@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/types.h"
+#include "impeller/core/runtime_types.h"
 #include "runtime_stage_types_flatbuffers.h"
 #include "spirv_parser.hpp"
 
@@ -42,34 +43,34 @@ struct InputDescription {
 
 class RuntimeStageData {
  public:
-  RuntimeStageData(std::string entrypoint,
-                   spv::ExecutionModel stage,
-                   TargetPlatform target_platform);
+  struct Shader {
+    Shader() = default;
+
+    std::string entrypoint;
+    spv::ExecutionModel stage;
+    std::vector<UniformDescription> uniforms;
+    std::vector<InputDescription> inputs;
+    std::shared_ptr<fml::Mapping> shader;
+
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+  };
+
+  RuntimeStageData();
 
   ~RuntimeStageData();
 
-  void AddUniformDescription(UniformDescription uniform);
+  void AddShader(RuntimeStageBackend backend,
+                 const std::shared_ptr<Shader>& data);
 
-  void AddInputDescription(InputDescription input);
-
-  void SetShaderData(std::shared_ptr<fml::Mapping> shader);
-
-  void SetSkSLData(std::shared_ptr<fml::Mapping> sksl);
-
-  std::unique_ptr<fb::RuntimeStageT> CreateFlatbuffer() const;
-
-  std::shared_ptr<fml::Mapping> CreateMapping() const;
+  std::unique_ptr<fb::RuntimeStagesT> CreateFlatbuffer() const;
 
   std::shared_ptr<fml::Mapping> CreateJsonMapping() const;
 
+  std::shared_ptr<fml::Mapping> CreateMapping() const;
+
  private:
-  const std::string entrypoint_;
-  const spv::ExecutionModel stage_;
-  const TargetPlatform target_platform_;
-  std::vector<UniformDescription> uniforms_;
-  std::vector<InputDescription> inputs_;
-  std::shared_ptr<fml::Mapping> shader_;
-  std::shared_ptr<fml::Mapping> sksl_;
+  std::map<RuntimeStageBackend, std::shared_ptr<Shader>> data_;
 
   RuntimeStageData(const RuntimeStageData&) = delete;
 

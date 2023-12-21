@@ -10,6 +10,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/compiler.h"
+#include "impeller/compiler/runtime_stage_data.h"
 #include "impeller/compiler/shader_bundle.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
@@ -19,9 +20,9 @@
 namespace impeller {
 namespace compiler {
 
-/// Run the shader compiler to geneate SkSL.
+/// Run the shader compiler to geneate SkSL reflection data.
 /// If there is an error, prints error text and returns `nullptr`.
-static std::shared_ptr<fml::Mapping> CompileSkSL(
+static std::shared_ptr<RuntimeStageData::Shader> CompileSkSL(
     std::shared_ptr<fml::Mapping> source_file_mapping,
     SourceOptions& options,
     Reflector::Options& reflector_options) {
@@ -38,7 +39,7 @@ static std::shared_ptr<fml::Mapping> CompileSkSL(
     std::cerr << sksl_compiler.GetErrorMessages() << std::endl;
     return nullptr;
   }
-  return sksl_compiler.GetSLShaderSource();
+  return sksl_compiler.GetReflector()->GetRuntimeStageShaderData();
 }
 
 /// Outputs artifacts for a single compiler invocation and option configuration.
@@ -52,11 +53,11 @@ static bool OutputArtifacts(Compiler& compiler,
   /// 1. Invoke the compiler to generate SkSL if needed.
   ///
 
-  std::shared_ptr<fml::Mapping> sksl_mapping;
+  std::shared_ptr<RuntimeStageData::Shader> sksl_shader;
   if (switches.iplr && TargetPlatformBundlesSkSL(switches.target_platform)) {
-    sksl_mapping =
+    sksl_shader =
         CompileSkSL(std::move(source_file_mapping), options, reflector_options);
-    if (!sksl_mapping) {
+    if (!sksl_shader) {
       return false;
     }
   }
@@ -74,17 +75,42 @@ static bool OutputArtifacts(Compiler& compiler,
       std::cerr << "Could not create reflector." << std::endl;
       return false;
     }
-    auto stage_data = reflector->GetRuntimeStageData();
+    auto stage_data = reflector->GetRuntimeStageShaderData();
     if (!stage_data) {
       std::cerr << "Runtime stage information was nil." << std::endl;
       return false;
     }
-    if (sksl_mapping) {
-      stage_data->SetSkSLData(std::move(sksl_mapping));
+    RuntimeStageData stages;
+    if (sksl_shader) {
+      stages.AddShader(RuntimeStageBackend::kSkSL, sksl_shader);
     }
-    auto stage_data_mapping = options.json_format
-                                  ? stage_data->CreateJsonMapping()
-                                  : stage_data->CreateMapping();
+    switch (switches.target_platform) {
+      case TargetPlatform::kUnknown:
+      case TargetPlatform::kMetalDesktop:
+      case TargetPlatform::kMetalIOS:
+      case TargetPlatform::kOpenGLES:
+      case TargetPlatform::kOpenGLDesktop:
+      case TargetPlatform::kVulkan:
+        std::cerr << "TargetPlatform "
+                  << TargetPlatformToString(switches.target_platform)
+                  << " not supported for IPLR.";
+        return false;
+      case TargetPlatform::kRuntimeStageMetal:
+        stages.AddShader(RuntimeStageBackend::kMetal, stage_data);
+        break;
+      case TargetPlatform::kRuntimeStageGLES:
+        stages.AddShader(RuntimeStageBackend::kOpenGLES, stage_data);
+        break;
+      case TargetPlatform::kRuntimeStageVulkan:
+        stages.AddShader(RuntimeStageBackend::kVulkan, stage_data);
+        break;
+      case TargetPlatform::kSkSL:
+        // Already handled above.
+        break;
+    }
+
+    auto stage_data_mapping = options.json_format ? stages.CreateJsonMapping()
+                                                  : stages.CreateMapping();
     if (!stage_data_mapping) {
       std::cerr << "Runtime stage data could not be created." << std::endl;
       return false;

@@ -8,7 +8,7 @@ namespace impeller.fb;
 
 table Shader {
   name: string;
-  shader: RuntimeStage;
+  shader: RuntimeStages;
 }
 
 table ShaderBundle {

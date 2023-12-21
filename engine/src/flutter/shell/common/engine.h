@@ -399,7 +399,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          fml::RefPtr<SkiaUnrefQueue> unref_queue,
          fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
          std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
-         const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch);
+         const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+         impeller::RuntimeStageBackend runtime_stage_type =
+             impeller::RuntimeStageBackend::kSkSL);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a Engine that shares as many resources as

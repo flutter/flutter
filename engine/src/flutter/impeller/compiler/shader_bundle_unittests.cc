@@ -156,14 +156,14 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   /// Verify vertex shader.
   ///
 
-  EXPECT_STREQ(vertex->shader->entrypoint.c_str(),
+  EXPECT_TRUE(vertex->shader->metal);
+  EXPECT_STREQ(vertex->shader->metal->entrypoint.c_str(),
                "flutter_gpu_unlit_vertex_main");
-  EXPECT_EQ(vertex->shader->stage, fb::Stage::kVertex);
-  EXPECT_EQ(vertex->shader->target_platform, fb::TargetPlatform::kMetal);
+  EXPECT_EQ(vertex->shader->metal->stage, fb::Stage::kVertex);
 
   // Inputs.
-  ASSERT_EQ(vertex->shader->inputs.size(), 1u);
-  const auto& v_in_position = vertex->shader->inputs[0];
+  ASSERT_EQ(vertex->shader->metal->inputs.size(), 1u);
+  const auto& v_in_position = vertex->shader->metal->inputs[0];
   EXPECT_STREQ(v_in_position->name.c_str(), "position");
   EXPECT_EQ(v_in_position->location, 0u);
   EXPECT_EQ(v_in_position->set, 0u);
@@ -175,8 +175,8 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   EXPECT_EQ(v_in_position->offset, 0u);
 
   // Uniforms.
-  ASSERT_EQ(vertex->shader->uniforms.size(), 2u);
-  const auto* v_mvp = FindByName(vertex->shader->uniforms, "mvp");
+  ASSERT_EQ(vertex->shader->metal->uniforms.size(), 2u);
+  const auto* v_mvp = FindByName(vertex->shader->metal->uniforms, "mvp");
   ASSERT_NE(v_mvp, nullptr);
   EXPECT_EQ(v_mvp->location, 0u);
   EXPECT_EQ(v_mvp->type, fb::UniformDataType::kFloat);
@@ -184,7 +184,7 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   EXPECT_EQ(v_mvp->rows, 4u);
   EXPECT_EQ(v_mvp->columns, 4u);
   EXPECT_EQ(v_mvp->array_elements, 0u);
-  const auto* v_color = FindByName(vertex->shader->uniforms, "color");
+  const auto* v_color = FindByName(vertex->shader->metal->uniforms, "color");
   ASSERT_NE(v_color, nullptr);
   EXPECT_EQ(v_color->location, 1u);
   EXPECT_EQ(v_color->type, fb::UniformDataType::kFloat);
@@ -197,16 +197,16 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   /// Verify fragment shader.
   ///
 
-  EXPECT_STREQ(fragment->shader->entrypoint.c_str(),
+  EXPECT_TRUE(fragment->shader->metal);
+  EXPECT_STREQ(fragment->shader->metal->entrypoint.c_str(),
                "flutter_gpu_unlit_fragment_main");
-  EXPECT_EQ(fragment->shader->stage, fb::Stage::kFragment);
-  EXPECT_EQ(fragment->shader->target_platform, fb::TargetPlatform::kMetal);
+  EXPECT_EQ(fragment->shader->metal->stage, fb::Stage::kFragment);
 
   // Inputs (not recorded for fragment shaders).
-  ASSERT_EQ(fragment->shader->inputs.size(), 0u);
+  ASSERT_EQ(fragment->shader->metal->inputs.size(), 0u);
 
   // Uniforms.
-  ASSERT_EQ(fragment->shader->inputs.size(), 0u);
+  ASSERT_EQ(fragment->shader->metal->inputs.size(), 0u);
 }
 
 }  // namespace testing

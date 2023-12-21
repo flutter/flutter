@@ -46,17 +46,14 @@ std::unique_ptr<fml::Mapping> PlaygroundTest::OpenAssetAsMapping(
   return flutter::testing::OpenFixtureAsMapping(asset_name);
 }
 
-std::shared_ptr<RuntimeStage> PlaygroundTest::OpenAssetAsRuntimeStage(
+RuntimeStage::Map PlaygroundTest::OpenAssetAsRuntimeStage(
     const char* asset_name) const {
-  auto fixture = flutter::testing::OpenFixtureAsMapping(asset_name);
+  const std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping(asset_name);
   if (!fixture || fixture->GetSize() == 0) {
-    return nullptr;
+    return {};
   }
-  auto stage = std::make_unique<RuntimeStage>(std::move(fixture));
-  if (!stage->IsValid()) {
-    return nullptr;
-  }
-  return stage;
+  return RuntimeStage::DecodeRuntimeStages(fixture);
 }
 
 static std::string FormatWindowTitle(const std::string& test_name) {
