@@ -416,7 +416,7 @@ class DaemonDomain extends Domain {
   /// is correct.
   Future<Map<String, Object>> getSupportedPlatforms(Map<String, Object?> args) async {
     final String? projectRoot = _getStringArg(args, 'projectRoot', required: true);
-    final List<String> platforms = <String>[];
+    final List<String> platformTypes = <String>[];
     final Map<String, Object> platformTypesMap = <String, Object>{};
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
@@ -425,109 +425,148 @@ class DaemonDomain extends Domain {
       void handlePlatformType(
         PlatformType platform,
       ) {
-        bool isSupported = true;
-        bool canBeEnabledWithCreate = true;
-        final List<String> reasons = <String>[];
+        final List<Map<String, Object>> reasons = <Map<String, Object>>[];
         switch (platform) {
           case PlatformType.linux:
             if (!featureFlags.isLinuxEnabled) {
-              isSupported = false;
-              reasons.add('the Linux feature is not enabled ("flutter config --enable-linux-desktop")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the Linux feature is not enabled',
+                'fixText': 'Run "flutter config --enable-linux-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.linux)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have a Linux platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the Linux platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=linux ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
           case PlatformType.macos:
             if (!featureFlags.isMacOSEnabled) {
-              isSupported = false;
-              reasons.add('the macOS feature is not enabled ("flutter config --enable-macos-desktop")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the macOS feature is not enabled',
+                'fixText': 'Run "flutter config --enable-macos-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.macos)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have a macOS platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the macOS platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=macos ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
           case PlatformType.windows:
             if (!featureFlags.isWindowsEnabled) {
-              isSupported = false;
-              reasons.add('the Windows feature is not enabled ("flutter config --enable-windows-desktop")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows feature is not enabled',
+                'fixText': 'Run "flutter config --enable-windows-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have a Windows platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=windows ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
           case PlatformType.ios:
             if (!featureFlags.isIOSEnabled) {
-              isSupported = false;
-              reasons.add('the iOS feature is not enabled ("flutter config --enable-ios")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the iOS feature is not enabled',
+                'fixText': 'Run "flutter config --enable-ios"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.ios)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have an iOS platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the iOS platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=ios ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
           case PlatformType.android:
             if (!featureFlags.isAndroidEnabled) {
-              isSupported = false;
-              reasons.add('the Android feature is not enabled ("flutter config --enable-android")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the Android feature is not enabled',
+                'fixText': 'Run "flutter config --enable-android"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.android)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have an Android platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the Android platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=android ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
           case PlatformType.web:
             if (!featureFlags.isWebEnabled) {
-              isSupported = false;
-              reasons.add('the Web feature is not enabled ("flutter config --enable-web")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the Web feature is not enabled',
+                'fixText': 'Run "flutter config --enable-web"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.web)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have a Web platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the Web platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=web ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
           case PlatformType.fuchsia:
             if (!featureFlags.isFuchsiaEnabled) {
-              isSupported = false;
-              reasons.add('the Fuchsia feature is not enabled ("flutter config --enable-fuchsia")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the Fuchsia feature is not enabled',
+                'fixText': 'Run "flutter config --enable-fuchsia"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have a Fuchsia platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the Fuchsia platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=fuchsia ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
           case PlatformType.custom:
             if (!featureFlags.areCustomDevicesEnabled) {
-              isSupported = false;
-              reasons.add('the custom-devices feature is not enabled ("flutter config --enable-custom-devices")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the custom devices feature is not enabled',
+                'fixText': 'Run "flutter config --enable-custom-devices"',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
           case PlatformType.windowsPreview:
             // TODO(fujino): detect if there any plugins with native code
             if (!featureFlags.isPreviewDeviceEnabled) {
-              isSupported = false;
-              reasons.add('the flutter-preview feature is not enabled ("flutter config --enable-flutter-preview")');
-              canBeEnabledWithCreate = false;
+              reasons.add(<String, Object>{
+                'reasonText': 'the Preview Device feature is not enabled',
+                'fixText': 'Run "flutter config --enable-flutter-preview',
+                'fixCode': _ReasonCode.config.name,
+              });
             }
             if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
-              isSupported = false;
-              reasons.add('the current Flutter project does not have a Windows platform directory');
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=windows ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
             }
         }
 
-        if (isSupported) {
-          platforms.add(platform.name);
+        if (reasons.isEmpty) {
+          platformTypes.add(platform.name);
           platformTypesMap[platform.name] = const <String, Object>{
             'isSupported': true,
           };
         } else {
           platformTypesMap[platform.name] = <String, Object>{
             'isSupported': false,
-            'reason': reasons,
-            'canBeEnabledWithCreate': canBeEnabledWithCreate,
+            'reasons': reasons,
           };
         }
       }
@@ -536,7 +575,7 @@ class DaemonDomain extends Domain {
 
       return <String, Object>{
         // TODO(fujino): delete this key https://github.com/flutter/flutter/issues/140473
-        'platforms': platforms,
+        'platforms': platformTypes,
         'platformTypes': platformTypesMap,
       };
     } on Exception catch (err, stackTrace) {
@@ -564,6 +603,14 @@ class DaemonDomain extends Domain {
   Future<void> setNotifyVerbose(Map<String, Object?> args) async {
     daemon.notifyingLogger?.notifyVerbose = _getBoolArg(args, 'verbose') ?? true;
   }
+}
+
+/// The reason a [PlatformType] is not currently supported.
+///
+/// The [name] of this value will be sent as a response to daemon client.
+enum _ReasonCode {
+  create,
+  config,
 }
 
 typedef RunOrAttach = Future<void> Function({

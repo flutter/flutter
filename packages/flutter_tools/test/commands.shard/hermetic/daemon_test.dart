@@ -127,45 +127,77 @@ void main() {
       expect(response.data['result'], isNotEmpty);
       expect(
         response.data['result']! as Map<String, Object?>,
-        const <String, Object?>{
+        const <String, Object>{
           'platforms': <String>['macos', 'windows', 'windowsPreview'],
-          'platformTypes': <String, Object>{
+          'platformTypes': <String, Map<String, Object>>{
             'web': <String, Object>{
               'isSupported': false,
-              'reason': <String>['the Web feature is not enabled ("flutter config --enable-web")'],
-              'canBeEnabledWithCreate': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Web feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-web"',
+                  'fixCode': 'config',
+                },
+              ],
             },
             'android': <String, Object>{
               'isSupported': false,
-              'reason': <String>['the Android feature is not enabled ("flutter config --enable-android")'],
-              'canBeEnabledWithCreate': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Android feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-android"',
+                  'fixCode': 'config',
+                },
+              ],
             },
             'ios': <String, Object>{
               'isSupported': false,
-              'reason': <String>['the iOS feature is not enabled ("flutter config --enable-ios")'],
-              'canBeEnabledWithCreate': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the iOS feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-ios"',
+                  'fixCode': 'config',
+                },
+              ],
             },
             'linux': <String, Object>{
               'isSupported': false,
-              'reason': <String>['the Linux feature is not enabled ("flutter config --enable-linux-desktop")'],
-              'canBeEnabledWithCreate': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Linux feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-linux-desktop"',
+                  'fixCode': 'config',
+                },
+              ],
             },
-            'macos': <String, Object>{'isSupported': true},
-            'windows': <String, Object>{'isSupported': true},
+            'macos': <String, bool>{'isSupported': true},
+            'windows': <String, bool>{'isSupported': true},
             'fuchsia': <String, Object>{
               'isSupported': false,
-              'reason': <String>[
-                'the Fuchsia feature is not enabled ("flutter config --enable-fuchsia")',
-                'the current Flutter project does not have a Fuchsia platform directory',
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the Fuchsia feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-fuchsia"',
+                  'fixCode': 'config',
+                },
+                <String, String>{
+                  'reasonText': 'the Fuchsia platform is not enabled for this project',
+                  'fixText': 'Run "flutter create --platforms=fuchsia ." in your application directory',
+                  'fixCode': 'create',
+                },
               ],
-              'canBeEnabledWithCreate': false,
             },
             'custom': <String, Object>{
               'isSupported': false,
-              'reason': <String>['the custom-devices feature is not enabled ("flutter config --enable-custom-devices")'],
-              'canBeEnabledWithCreate': false,
+              'reasons': <Map<String, String>>[
+                <String, String>{
+                  'reasonText': 'the custom devices feature is not enabled',
+                  'fixText': 'Run "flutter config --enable-custom-devices"',
+                  'fixCode': 'config',
+                },
+              ],
             },
-            'windowsPreview': <String, Object>{'isSupported': true},
+            'windowsPreview': <String, bool>{'isSupported': true},
           },
         },
       );
