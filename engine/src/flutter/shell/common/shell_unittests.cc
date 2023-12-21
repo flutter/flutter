@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <strstream>
+#include "impeller/core/runtime_types.h"
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
@@ -4563,6 +4564,96 @@ TEST_F(ShellTest, ShellFlushesPlatformStatesByMain) {
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell), task_runners);
 }
+
+TEST_F(ShellTest, RuntimeStageBackendDefaultsToSkSLWithoutImpeller) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = false;
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      "io.flutter.test." + GetCurrentTestName() + ".",
+      ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
+          ThreadHost::Type::kIo | ThreadHost::Type::kUi));
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell);
+
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&latch](auto args) {
+                      auto backend =
+                          UIDartState::Current()->GetRuntimeStageBackend();
+                      EXPECT_EQ(backend, impeller::RuntimeStageBackend::kSkSL);
+                      latch.Signal();
+                    }));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("mainNotifyNative");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+}
+
+// TODO(dnfield): Enable GL and Vulkan after
+// https://github.com/flutter/flutter/issues/140419
+#if SHELL_ENABLE_METAL
+TEST_F(ShellTest, RuntimeStageBackendWithImpeller) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      "io.flutter.test." + GetCurrentTestName() + ".",
+      ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
+          ThreadHost::Type::kIo | ThreadHost::Type::kUi));
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell);
+
+  fml::AutoResetWaitableEvent latch;
+
+  impeller::Context::BackendType impeller_backend;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [platform_view = shell->GetPlatformView(), &latch, &impeller_backend]() {
+        auto impeller_context = platform_view->GetImpellerContext();
+        EXPECT_TRUE(impeller_context);
+        impeller_backend = impeller_context->GetBackendType();
+        latch.Signal();
+      });
+  latch.Wait();
+
+  AddNativeCallback(
+      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
+        auto backend = UIDartState::Current()->GetRuntimeStageBackend();
+        switch (impeller_backend) {
+          case impeller::Context::BackendType::kMetal:
+            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kMetal);
+            break;
+          case impeller::Context::BackendType::kOpenGLES:
+            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kOpenGLES);
+            break;
+          case impeller::Context::BackendType::kVulkan:
+            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kVulkan);
+            break;
+        }
+        latch.Signal();
+      }));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("mainNotifyNative");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+}
+#endif  // SHELL_ENABLE_METAL
 
 }  // namespace testing
 }  // namespace flutter

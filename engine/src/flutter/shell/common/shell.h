@@ -40,6 +40,7 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/resource_cache_limit_calculator.h"
 #include "flutter/shell/common/shell_io_manager.h"
+#include "impeller/runtime_stage/runtime_stage.h"
 
 namespace flutter {
 
@@ -129,7 +130,8 @@ class Shell final : public PlatformView::Delegate,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
-      const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)>
+      const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+      impeller::RuntimeStageBackend runtime_stage_type)>
       EngineCreateCallback;
 
   //----------------------------------------------------------------------------

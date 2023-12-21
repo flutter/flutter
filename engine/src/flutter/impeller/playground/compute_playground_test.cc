@@ -41,19 +41,6 @@ std::unique_ptr<fml::Mapping> ComputePlaygroundTest::OpenAssetAsMapping(
   return flutter::testing::OpenFixtureAsMapping(asset_name);
 }
 
-std::shared_ptr<RuntimeStage> ComputePlaygroundTest::OpenAssetAsRuntimeStage(
-    const char* asset_name) const {
-  auto fixture = flutter::testing::OpenFixtureAsMapping(asset_name);
-  if (!fixture || fixture->GetSize() == 0) {
-    return nullptr;
-  }
-  auto stage = std::make_unique<RuntimeStage>(std::move(fixture));
-  if (!stage->IsValid()) {
-    return nullptr;
-  }
-  return stage;
-}
-
 static std::string FormatWindowTitle(const std::string& test_name) {
   std::stringstream stream;
   stream << "Impeller Playground for '" << test_name << "' (Press ESC to quit)";
