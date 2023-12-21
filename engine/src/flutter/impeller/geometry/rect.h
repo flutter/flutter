@@ -483,8 +483,6 @@ struct TRect {
   TPoint<Type> origin;
   TSize<Type> size;
   // NOLINTEND
-
-  friend class PathBuilder;
 };
 
 using Rect = TRect<Scalar>;
