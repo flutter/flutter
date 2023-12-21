@@ -65,12 +65,15 @@ support for customizing or creating entirely new visual components.
 
 ### Fast results
 
-Flutter is fast. It's powered by the same hardware-accelerated 2D graphics
-library that underpins Chrome and Android: [Skia]. We architected Flutter to
+Flutter is fast. It's powered by hardware-accelerated 2D graphics
+libraries like [Skia] (that underpins Chrome and Android) and
+[Impeller]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
+
 Flutter code is powered by the world-class [Dart platform], which enables
-compilation to 32-bit and 64-bit ARM machine code for iOS and Android, as well
-as JavaScript for the web and Intel x64 for desktop devices.
+compilation to 32-bit and 64-bit ARM machine code for iOS and Android,
+JavaScript and WebAssembly for the web, as well as Intel x64 and ARM
+for desktop devices.
 
 <p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
 
@@ -118,3 +121,4 @@ Information on how to get started can be found in our
 [Windows FFI]: https://docs.flutter.dev/development/platform-integration/windows/building#integrating-with-windows
 [platform channels]: https://docs.flutter.dev/development/platform-integration/platform-channels
 [interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel
+[Impeller]: https://docs.flutter.dev/perf/impeller
