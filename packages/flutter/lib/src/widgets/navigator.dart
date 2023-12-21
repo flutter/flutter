@@ -3170,7 +3170,7 @@ class _RouteEntry extends RouteTransitionRecord {
     return true;
   }
 
-  void handleComplete(NavigatorState navigator) {
+  void handleComplete() {
     route.didComplete(pendingResult);
     pendingResult = null;
     assert(route._popCompleter.isCompleted); // implies didComplete was called
@@ -4356,7 +4356,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // Will exit this state when animation completes.
           break;
         case _RouteLifecycle.complete:
-          entry.handleComplete(this);
+          entry.handleComplete();
           assert(entry.currentState == _RouteLifecycle.remove);
           continue;
         case _RouteLifecycle.remove:
