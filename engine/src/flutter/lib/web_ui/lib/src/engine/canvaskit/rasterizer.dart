@@ -30,7 +30,7 @@ class Rasterizer {
 
   /// Creates a new frame from this rasterizer's surface, draws the given
   /// [LayerTree] into it, and then submits the frame.
-  Future<void> draw(LayerTree layerTree) async {
+  void draw(LayerTree layerTree) {
     final ui.Size frameSize = view.physicalSize;
     if (frameSize.isEmpty) {
       // Available drawing area is empty. Skip drawing.
@@ -49,10 +49,10 @@ class Rasterizer {
     compositorFrame.raster(layerTree, ignoreRasterCache: true);
 
     sceneHost.prepend(renderCanvasFactory.baseCanvas.htmlElement);
-    await rasterizeToCanvas(renderCanvasFactory.baseCanvas,
+    rasterizeToCanvas(renderCanvasFactory.baseCanvas,
         <CkPicture>[pictureRecorder.endRecording()]);
 
-    await viewEmbedder.submitFrame();
+    viewEmbedder.submitFrame();
   }
 
   /// Disposes of this rasterizer.

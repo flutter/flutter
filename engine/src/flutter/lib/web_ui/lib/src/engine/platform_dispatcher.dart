@@ -213,10 +213,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }
   }
 
-  /// A set of views which have rendered in the current `onBeginFrame` or
-  /// `onDrawFrame` scope.
-  Set<ui.FlutterView>? _viewsRenderedInCurrentFrame;
-
   /// A callback invoked when any window begins a frame.
   ///
   /// A callback that is invoked to notify the application that it is an
@@ -239,9 +235,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnBeginFrame(Duration duration) {
-    _viewsRenderedInCurrentFrame = <ui.FlutterView>{};
     invoke1<Duration>(_onBeginFrame, _onBeginFrameZone, duration);
-    _viewsRenderedInCurrentFrame = null;
   }
 
   /// A callback that is invoked for each frame after [onBeginFrame] has
@@ -262,9 +256,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnDrawFrame() {
-    _viewsRenderedInCurrentFrame = <ui.FlutterView>{};
     invoke(_onDrawFrame, _onDrawFrameZone);
-    _viewsRenderedInCurrentFrame = null;
   }
 
   /// A callback that is invoked when pointer data is available.
@@ -761,23 +753,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
   @override
-  Future<void> render(ui.Scene scene, [ui.FlutterView? view]) async {
+  void render(ui.Scene scene, [ui.FlutterView? view]) {
     assert(view != null || implicitView != null,
         'Calling render without a FlutterView');
     if (view == null && implicitView == null) {
       // If there is no view to render into, then this is a no-op.
       return;
     }
-    final ui.FlutterView viewToRender = view ?? implicitView!;
-
-    // Only render in an `onDrawFrame` or `onBeginFrame` scope. This is checked
-    // by checking if the `_viewsRenderedInCurrentFrame` is non-null and this
-    // view hasn't been rendered already in this scope.
-    final bool shouldRender =
-        _viewsRenderedInCurrentFrame?.add(viewToRender) ?? false;
-    if (shouldRender) {
-      await renderer.renderScene(scene, viewToRender);
-    }
+    renderer.renderScene(scene, view ?? implicitView!);
   }
 
   /// Additional accessibility features that may be enabled by the platform.
@@ -1292,8 +1275,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   String get defaultRouteName {
     // TODO(mdebbar): What should we do in multi-view mode?
     //                https://github.com/flutter/flutter/issues/139174
-    return _defaultRouteName ??=
-        implicitView?.browserHistory.currentPath ?? '/';
+    return _defaultRouteName ??= implicitView?.browserHistory.currentPath ?? '/';
   }
 
   /// Lazily initialized when the `defaultRouteName` getter is invoked.

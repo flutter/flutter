@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/matchers.dart';
 import 'common.dart';
@@ -636,9 +637,11 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         canvas.drawImage(snapshot, ui.Offset.zero, CkPaint());
         sb.addPicture(ui.Offset.zero, recorder.endRecording());
 
-        await matchSceneGolden(
-            'canvaskit_read_back_decoded_image_$mode.png', sb.build(),
-            region: const ui.Rect.fromLTRB(0, 0, 150, 150));
+        CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+        await matchGoldenFile(
+          'canvaskit_read_back_decoded_image_$mode.png',
+          region: const ui.Rect.fromLTRB(0, 0, 150, 150),
+        );
       }
 
       image.dispose();
@@ -684,10 +687,11 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         canvas.drawParagraph(makeSimpleText('2'), const ui.Offset(2, 2));
         sb.addPicture(ui.Offset.zero, recorder.endRecording());
       }
-
-      await matchSceneGolden(
-          'canvaskit_cross_gl_context_image_$mode.png', sb.build(),
-          region: const ui.Rect.fromLTRB(0, 0, 100, 100));
+      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await matchGoldenFile(
+        'canvaskit_cross_gl_context_image_$mode.png',
+        region: const ui.Rect.fromLTRB(0, 0, 100, 100),
+      );
 
       await disposePlatformView(0);
     });
@@ -727,10 +731,11 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         canvas.restore();
         sb.addPicture(ui.Offset.zero, recorder.endRecording());
       }
-
-      await matchSceneGolden(
-          'canvaskit_picture_texture_toimage.png', sb.build(),
-          region: const ui.Rect.fromLTRB(0, 0, 128, 128));
+      CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+      await matchGoldenFile(
+        'canvaskit_picture_texture_toimage.png',
+        region: const ui.Rect.fromLTRB(0, 0, 128, 128),
+      );
       mandrill.dispose();
       codec.dispose();
     });
@@ -769,9 +774,11 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
         canvas.drawImage(snapshot, ui.Offset.zero, CkPaint());
         sb.addPicture(ui.Offset.zero, recorder.endRecording());
 
-        await matchSceneGolden(
-            'canvaskit_read_back_decoded_image_$mode.png', sb.build(),
-            region: const ui.Rect.fromLTRB(0, 0, 150, 150));
+        CanvasKitRenderer.instance.renderScene(sb.build(), implicitView);
+        await matchGoldenFile(
+          'canvaskit_read_back_decoded_image_$mode.png',
+          region: const ui.Rect.fromLTRB(0, 0, 150, 150),
+        );
       }
 
       image.dispose();

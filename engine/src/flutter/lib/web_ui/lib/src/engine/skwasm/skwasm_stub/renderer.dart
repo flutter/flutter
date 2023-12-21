@@ -150,7 +150,7 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  Future<void> renderScene(ui.Scene scene, ui.FlutterView view) {
+  void renderScene(ui.Scene scene, ui.FlutterView view) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 

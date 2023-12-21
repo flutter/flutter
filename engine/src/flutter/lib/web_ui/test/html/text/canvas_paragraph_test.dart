@@ -7,7 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../common/rendering.dart';
 import '../../common/test_initialization.dart';
 import '../paragraph/helper.dart';
 
@@ -792,7 +791,7 @@ Future<void> testMain() async {
     expect(paragraph.height, 10);
   });
 
-  test('Render after dispose', () async {
+  test('Render after dispose', () {
     final ui.Paragraph paragraph = plain(ahemStyle, 'abc');
     paragraph.layout(const ui.ParagraphConstraints(width: 30.8));
 
@@ -807,7 +806,7 @@ Future<void> testMain() async {
     builder.addPicture(ui.Offset.zero, picture);
     final ui.Scene scene = builder.build();
 
-    await renderScene(scene);
+    ui.PlatformDispatcher.instance.render(scene);
 
     picture.dispose();
     scene.dispose();
