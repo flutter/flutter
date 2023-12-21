@@ -238,6 +238,9 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
 
   EGLSurface surface = EGL_NO_SURFACE;
 
+  // Disable ANGLE's automatic surface resizing and provide an explicit size.
+  // The surface will need to be destroyed and re-created if the HWND is
+  // resized.
   const EGLint surfaceAttributes[] = {
       EGL_FIXED_SIZE_ANGLE, EGL_TRUE, EGL_WIDTH, width,
       EGL_HEIGHT,           height,   EGL_NONE};
@@ -267,6 +270,9 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
     surface_width_ = width;
     surface_height_ = height;
 
+    // TODO: Destroying the surface and re-creating it is expensive.
+    // Ideally this would use ANGLE's automatic surface sizing instead.
+    // See: https://github.com/flutter/flutter/issues/79427
     ClearContext();
     DestroySurface();
     if (!CreateSurface(render_target, width, height)) {
@@ -285,9 +291,10 @@ void AngleSurfaceManager::GetSurfaceDimensions(EGLint* width, EGLint* height) {
     return;
   }
 
-  // Can't use eglQuerySurface here; Because we're not using
-  // EGL_FIXED_SIZE_ANGLE flag anymore, Angle may resize the surface before
-  // Flutter asks it to, which breaks resize redraw synchronization
+  // This avoids eglQuerySurface as ideally surfaces would be automatically
+  // sized by ANGLE to avoid expensive surface destroy & re-create. With
+  // automatic sizing, ANGLE could resize the surface before Flutter asks it to,
+  // which would break resize redraw synchronization.
   *width = surface_width_;
   *height = surface_height_;
 }
