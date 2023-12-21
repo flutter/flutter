@@ -72,4 +72,4 @@ jobs:
           FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) for more info."
           gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
         env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERMIRRORINGBOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
