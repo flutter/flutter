@@ -21,6 +21,7 @@ const List<int> _kFailPngBytes = <int>[
 ];
 
 void main() {
+  final List<String> log = <String>[];
   final MemoryFileSystem fs = MemoryFileSystem();
   final Directory basedir = fs.directory('flutter/test/library/')
     ..createSync(recursive: true);
@@ -34,6 +35,7 @@ void main() {
       environment: <String, String>{'FLUTTER_ROOT': '/flutter'},
       operatingSystem: 'macos'
     ),
+    log: log.add,
   );
 
   test('Local passes non-existent baseline for new test, null expectation', () async {
@@ -44,6 +46,12 @@ void main() {
       ),
       isTrue,
     );
+    expect(log, <String>[
+      // ignore: no_adjacent_strings_in_list
+      'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1.png. '
+      'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
+      'Validate image output found at flutter/test/library/'
+    ]);
   });
 
   test('Local passes non-existent baseline for new test, empty expectation', () async {
@@ -54,6 +62,16 @@ void main() {
       ),
       isTrue,
     );
+    expect(log, <String>[
+      // ignore: no_adjacent_strings_in_list
+      'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.1.png. '
+      'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
+      'Validate image output found at flutter/test/library/',
+      // ignore: no_adjacent_strings_in_list
+      'No expectations provided by Skia Gold for test: library.flutter.new_golden_test.2.png. '
+      'This may be a new test. If this is an unexpected result, check https://flutter-gold.skia.org.\n'
+      'Validate image output found at flutter/test/library/',
+    ]);
   });
 }
 
