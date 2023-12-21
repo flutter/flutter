@@ -102,4 +102,7 @@ class Checkable extends PrimaryRoleManager {
     removeAttribute('aria-disabled');
     removeAttribute('disabled');
   }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }

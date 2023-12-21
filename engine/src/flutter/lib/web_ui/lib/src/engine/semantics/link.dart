@@ -18,4 +18,7 @@ class Link extends PrimaryRoleManager {
     element.style.display = 'block';
     return element;
   }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }

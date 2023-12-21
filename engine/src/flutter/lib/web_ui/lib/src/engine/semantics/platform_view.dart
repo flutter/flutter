@@ -38,4 +38,13 @@ class PlatformViewRoleManager extends PrimaryRoleManager {
       removeAttribute('aria-owns');
     }
   }
+
+  @override
+  bool focusAsRouteDefault() {
+    // It's unclear how it's possible to auto-focus on something inside a
+    // platform view without knowing what's in it. If the framework adds API for
+    // focusing on platform view internals, this method will be able to do more,
+    // but for now there's nothing to focus on.
+    return false;
+  }
 }
