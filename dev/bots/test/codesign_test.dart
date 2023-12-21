@@ -166,7 +166,6 @@ void main() async {
            ':-',
            fileToCheck,
          ],
-         exitCode: 0,
        );
        commandList.add(codesignCmd);
        final ProcessManager processManager = FakeProcessManager.list(commandList);
