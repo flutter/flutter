@@ -77,7 +77,7 @@ The schema for each element in `reasons` is:
 - fixCode (String) - stringified version of the `_ReasonCode` enum. To be used
 by daemon clients who intend to auto-fix.
 
-The possible platform types are the `PlatformType` enumeration in the ../lib/src/device.dart library.
+The possible platform types are the `PlatformType` enumeration in the lib/src/device.dart library.
 
 #### Events
 
