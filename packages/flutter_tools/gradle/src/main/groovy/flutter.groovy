@@ -64,7 +64,7 @@ class FlutterExtension {
      * Specifies the relative directory to the Flutter project directory.
      * In an app project, this is ../.. since the app's build.gradle is under android/app.
      */
-    String source = '../..'
+    String source = "../.."
 
     /** Allows to override the target file. Otherwise, the target is lib/main.dart. */
     String target
@@ -423,7 +423,7 @@ class FlutterPlugin implements Plugin<Project> {
      * just using the `plugins.android` list.
      */
     private configureLegacyPluginEachProjects(Project project) {
-        File settingsGradle = new File(project.projectDir.parentFile, 'settings.gradle')
+        File settingsGradle = new File(project.projectDir.parentFile, "settings.gradle")
         try {
             if (!settingsGradle.text.contains("'.flutter-plugins'")) {
                 return
@@ -454,7 +454,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given path contains an `android/build.gradle` file.
      */
     private static Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+        File editableAndroidProject = new File(path, "android" + File.separator + "build.gradle")
         return editableAndroidProject.exists()
     }
 
@@ -1260,7 +1260,7 @@ class FlutterPlugin implements Plugin<Project> {
             return
         }
         // Flutter host module project (Add-to-app).
-        String hostAppProjectName = project.rootProject.hasProperty("flutter.hostAppProjectName") ? project.rootProject.property('flutter.hostAppProjectName') : "app"
+        String hostAppProjectName = project.rootProject.hasProperty("flutter.hostAppProjectName") ? project.rootProject.property("flutter.hostAppProjectName") : "app"
         Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
         assert(appProject != null) : "Project :${hostAppProjectName} doesn't exist. To customize the host app project name, set `flutter.hostAppProjectName=<project-name>` in gradle.properties."
         // Wait for the host app project configuration.
