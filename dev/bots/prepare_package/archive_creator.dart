@@ -137,8 +137,8 @@ class ArchiveCreator {
   final HttpReader httpReader;
 
   final Map<String, String> _version = <String, String>{};
-  late String _flutter;
-  late String _dart;
+  final String _flutter;
+  final String _dart;
 
   late final Future<String> _dartArch = (() async {
     // Parse 'arch' out of a string like '... "os_arch"\n'.
@@ -169,7 +169,7 @@ class ArchiveCreator {
   /// Returns the version for this release as obtained from the git tags, and
   /// the dart version as obtained from `flutter --version`.
   Future<Map<String, String>> initializeRepo() async {
-    await _checkoutFlutter();
+    //await _checkoutFlutter();
     if (_version.isEmpty) {
       _version.addAll(await _getVersion());
     }
@@ -183,8 +183,9 @@ class ArchiveCreator {
       outputDir.absolute.path,
       await _archiveName,
     ));
-    await _installMinGitIfNeeded();
-    await _populateCaches();
+    //await _installMinGitIfNeeded();
+    //await _populateCaches();
+    //await _buildPreviewDevice();
     await _validate();
     await _archiveFiles(outputFile);
     return outputFile;
@@ -235,6 +236,7 @@ class ArchiveCreator {
     String gitVersion;
     if (strict) {
       try {
+        await _runGit(<String>['fetch', '--tags']);
         gitVersion = await _runGit(<String>['describe', '--tags', '--exact-match', revision]);
       } on PreparePackageException catch (exception) {
         throw PreparePackageException(
@@ -265,7 +267,7 @@ class ArchiveCreator {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
-    await _runGit(<String>['clone', '-b', branch.name, gobMirror], workingDirectory: tempDir);
+    await _runGit(<String>['clone', '-b', branch == Branch.beta ? 'upload-preview-artifact' : branch.name, gobMirror], workingDirectory: tempDir);
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
@@ -388,7 +390,7 @@ class ArchiveCreator {
   /// is configured for the user to begin working.
   Future<void> _populateCaches() async {
     await _runFlutter(<String>['doctor']);
-    await _runFlutter(<String>['update-packages']);
+    await _runFlutter(<String>['update-packages', '--verbose']);
     await _runFlutter(<String>['precache']);
     await _runFlutter(<String>['ide-config']);
 
@@ -439,6 +441,19 @@ class ArchiveCreator {
     }
   }
 
+  Future<void> _buildPreviewDevice() async {
+    if (!platform.isWindows) {
+      // The preview device is currently only supported on Windows
+      return;
+    }
+    const List<Branch> kSupportedBranches = <Branch>[Branch.beta];
+    if (!kSupportedBranches.contains(branch)) {
+      return;
+    }
+
+    await _runFlutter(const <String>['build', '_preview', '--verbose']);
+  }
+
   /// Write the archive to the given output file.
   Future<void> _archiveFiles(File outputFile) async {
     if (outputFile.path.toLowerCase().endsWith('.zip')) {
@@ -476,7 +491,7 @@ class ArchiveCreator {
     List<String> commandLine;
     if (platform.isWindows) {
       commandLine = <String>[
-        '7za',
+        '7z',
         'x',
         archive.absolute.path,
       ];
@@ -499,7 +514,7 @@ class ArchiveCreator {
         workingDirectory: fs.directory(source.absolute.path),
       );
       commandLine = <String>[
-        '7za',
+        '7z',
         'a',
         '-tzip',
         '-mx=9',

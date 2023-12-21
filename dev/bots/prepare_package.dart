@@ -129,7 +129,7 @@ Future<void> main(List<String> rawArguments) async {
     strict: publish && !dryRun,
   );
   int exitCode = 0;
-  late String message;
+  String? message;
   try {
     final Map<String, String> version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
@@ -146,18 +146,20 @@ Future<void> main(List<String> rawArguments) async {
     if (parsedArguments['publish'] as bool) {
       await publisher.publishArchive(parsedArguments['force'] as bool);
     }
-  } on PreparePackageException catch (e) {
+  } on PreparePackageException catch (e, st) {
     exitCode = e.exitCode;
     message = e.message;
-  } catch (e) {
+    print(st);
+  } catch (e, st) {
     exitCode = -1;
     message = e.toString();
+    print(st);
   } finally {
     if (removeTempDir) {
       tempDir.deleteSync(recursive: true);
     }
     if (exitCode != 0) {
-      errorExit(message, exitCode: exitCode);
+      errorExit(message!, exitCode: exitCode);
     }
     exit(0);
   }

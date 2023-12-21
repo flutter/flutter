@@ -85,9 +85,7 @@ class ProcessRunner {
       );
       if (subprocessOutput) {
         process.stderr.listen(
-          (List<int> event) {
-            stderr.add(event);
-          },
+          stderr.add,
           onDone: () async => stderrComplete.complete(),
         );
       } else {
