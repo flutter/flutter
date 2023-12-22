@@ -477,7 +477,7 @@ class ViewCollection extends _MultiChildComponentWidget {
   /// Creates a [ViewCollection] widget.
   ///
   /// The provided list of [views] must contain at least one widget.
-  const ViewCollection({super.key, required super.views}) : assert(views.length > 0);
+  const ViewCollection({super.key, required super.views});
 
   /// The [View] descendants of this widget.
   ///
