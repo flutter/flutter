@@ -163,7 +163,6 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     'test/painting/decoration_test.dart',
     'test/painting/text_style_test.dart',
     'test/material/text_field_test.dart',
-    'test/widgets/app_overrides_test.dart',
     'test/widgets/performance_overlay_test.dart',
     'test/widgets/html_element_view_test.dart',
     'test/cupertino/scaffold_test.dart',
