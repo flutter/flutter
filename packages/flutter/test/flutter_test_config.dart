@@ -38,6 +38,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   LeakTesting.settings = LeakTesting
     .settings
+    .withTrackedAll()
     // TODO(polina-c): clean up leaks and stop ignoring them.
     // https://github.com/flutter/flutter/issues/137311
     .withIgnored(
@@ -50,7 +51,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // Leak tracking is off by default.
   // To enable it, follow doc for [_kLeakTracking].
   if (_kLeakTracking) {
-    LeakTesting.settings = LeakTesting.settings.withTrackedAll();
+    LeakTesting.enable();
   }
 
   // Enable golden file testing using Skia Gold.
