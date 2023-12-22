@@ -1031,7 +1031,7 @@ void main() {
         // input control receives TextInputType.none with isMultiline flag
         MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineTrueJson]),
       ]);
-    }, testOn: 'browser');
+    }, skip: !kIsWeb);
 
     test('notifies changes to the attached client', () async {
       final FakeTextInputControl control = FakeTextInputControl();
