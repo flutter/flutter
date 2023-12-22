@@ -21,7 +21,7 @@ late final String _test9TrackingOnAsyncPump;
 
 void main() {
   LeakTesting.collectedLeaksReporter = (Leaks leaks) => verifyLeaks(leaks);
-  LeakTesting.settings = LeakTesting.settings.copyWith(ignore: false);
+  LeakTesting.settings = LeakTesting.settings.withTrackedAll().withIgnored(createdByTestHelpers: true);
 
   // It is important that the test file starts with group, to test that leaks are collected for all tests after group too.
   group('Group', () {
@@ -92,9 +92,9 @@ void main() {
     LeakTrackedClass();
   });
 
-  testWidgets(_test9TrackingOnAsyncPump = 'test9, tracking-on, async pump', (WidgetTester tester) async {
+  testWidgets(_test9TrackingOnAsyncPump = 'test9, tracking-on, async pump are not test helpers', (WidgetTester tester) async {
     expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, _test8TrackingOnNotDisposed);
+    expect(LeakTracking.phase.name, _test9TrackingOnAsyncPump);
     expect(LeakTracking.phase.ignoreLeaks, false);
     await tester.runAsync(() async {
       await tester.pumpWidget(StatelessLeakingWidget());
@@ -121,6 +121,7 @@ void verifyLeaks(Leaks leaks) {
     expect(e.message, isNot(contains(_test6TrackingOnNoLeaks)));
     expect(e.message, isNot(contains(_test7TrackingOnNoLeaks)));
     expect(e.message, contains('test: $_test8TrackingOnNotDisposed'));
+    expect(e.message, contains('test: $_test9TrackingOnAsyncPump'));
   }
 
   _verifyLeaks(
@@ -157,7 +158,20 @@ void verifyLeaks(Leaks leaks) {
     leaks,
     _test8TrackingOnNotDisposed,
     notDisposed: 1,
-    expectedContextKeys: <LeakType, List<String>>{},
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>[],
+      LeakType.notDisposed: <String>[],
+    },
+  );
+  _verifyLeaks(
+    leaks,
+    _test9TrackingOnAsyncPump,
+    notDisposed: 1,
+    notGCed: 1,
+    expectedContextKeys: <LeakType, List<String>>{
+      LeakType.notGCed: <String>[],
+      LeakType.notDisposed: <String>[],
+    },
   );
 }
 
