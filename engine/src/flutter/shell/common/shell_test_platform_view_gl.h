@@ -9,6 +9,7 @@
 #include "flutter/shell/common/shell_test_platform_view.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/testing/test_gl_surface.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 
 namespace flutter {
 namespace testing {
@@ -29,7 +30,14 @@ class ShellTestPlatformViewGL : public ShellTestPlatformView,
   // |ShellTestPlatformView|
   virtual void SimulateVSync() override;
 
+  // |PlatformView|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const {
+    return impeller_context_;
+  }
+
  private:
+  std::shared_ptr<impeller::ContextGLES> impeller_context_;
+
   TestGLSurface gl_surface_;
 
   CreateVsyncWaiter create_vsync_waiter_;

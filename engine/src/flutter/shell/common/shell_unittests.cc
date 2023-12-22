@@ -4597,9 +4597,7 @@ TEST_F(ShellTest, RuntimeStageBackendDefaultsToSkSLWithoutImpeller) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-// TODO(dnfield): Enable GL and Vulkan after
-// https://github.com/flutter/flutter/issues/140419
-#if SHELL_ENABLE_METAL
+#if IMPELLER_SUPPORTS_RENDERING
 TEST_F(ShellTest, RuntimeStageBackendWithImpeller) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
@@ -4653,7 +4651,7 @@ TEST_F(ShellTest, RuntimeStageBackendWithImpeller) {
 
   DestroyShell(std::move(shell), task_runners);
 }
-#endif  // SHELL_ENABLE_METAL
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 }  // namespace testing
 }  // namespace flutter
