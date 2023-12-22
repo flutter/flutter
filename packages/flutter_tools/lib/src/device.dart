@@ -45,34 +45,20 @@ enum Category {
 
 /// The platform sub-folder that a device type supports.
 enum PlatformType {
-  web._('web'),
-  android._('android'),
-  ios._('ios'),
-  linux._('linux'),
-  macos._('macos'),
-  windows._('windows'),
-  fuchsia._('fuchsia'),
-  custom._('custom');
-
-  const PlatformType._(this.value);
-
-  final String value;
+  web,
+  android,
+  ios,
+  linux,
+  macos,
+  windows,
+  fuchsia,
+  custom,
+  windowsPreview;
 
   @override
-  String toString() => value;
+  String toString() => name;
 
-  static PlatformType? fromString(String platformType) {
-    return const <String, PlatformType>{
-      'web': web,
-      'android': android,
-      'ios': ios,
-      'linux': linux,
-      'macos': macos,
-      'windows': windows,
-      'fuchsia': fuchsia,
-      'custom': custom,
-    }[platformType];
-  }
+  static PlatformType? fromString(String platformType) => values.asNameMap()[platformType];
 }
 
 /// A discovery mechanism for flutter-supported development devices.
