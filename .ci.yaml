@@ -3714,26 +3714,24 @@ targets:
   - name: Mac_x64 verify_binaries_codesigned
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      validation: verify_binaries_codesigned
-      validation_name: Verify x64 binaries codesigned
+      shard: verify_binaries_codesigned
 
   - name: Mac_arm64 verify_binaries_codesigned
     enabled_branches:
       - flutter-\d+\.\d+-candidate\.\d+
-    recipe: flutter/flutter
+    recipe: flutter/flutter_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      validation: verify_binaries_codesigned
-      validation_name: Verify arm64 binaries codesigned
+      shard: verify_binaries_codesigned
 
   - name: Mac web_tool_tests
     recipe: flutter/flutter_drone
