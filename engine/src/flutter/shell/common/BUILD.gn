@@ -262,6 +262,10 @@ if (enable_unittests) {
       "//flutter/third_party/rapidjson",
     ]
 
+    if (impeller_supports_rendering) {
+      deps += [ "//flutter/impeller" ]
+    }
+
     public_configs = [
       ":shell_test_fixture_sources_config",
       ":shell_unittests_gpu_configuration_config",
