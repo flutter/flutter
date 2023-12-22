@@ -1031,7 +1031,7 @@ void main() {
         // input control receives TextInputType.none with isMultiline flag
         MethodCall('TextInput.setClient', <dynamic>[1, noneIsMultilineTrueJson]),
       ]);
-    }, skip: !kIsWeb);
+    }, skip: !kIsWeb ? 'Only on the web, the `isMultiline` is used to determine whether to create an <input> or <textarea> element when registering a custom text input control.' : false);
 
     test('notifies changes to the attached client', () async {
       final FakeTextInputControl control = FakeTextInputControl();
